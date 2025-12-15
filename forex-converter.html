@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Forex Converter Pro | AlphaVault AI</title>
+    <title>Forex Converter Pro - Wall Street Edition | AlphaVault AI</title>
     
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     <script src='https://code.highcharts.com/highcharts.js'></script>
@@ -138,7 +138,7 @@
                             <span>Forex Converter</span>
                         </a>
                         <a href='ipo-intelligence.html' class='nav-link'>
-                            <i class='fas fa-exchange-alt'></i>
+                            <i class='fas fa-rocket'></i>
                             <span>IPO Intelligence</span>
                         </a>
                         <a href='insider-flow-tracker.html' class='nav-link'>
@@ -188,7 +188,6 @@
                     </div>
                 </div>
 
-                <!-- ✨ NOUVELLE SECTION NEWS -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="News & Analysis">
                         <i class="fas fa-newspaper"></i>
@@ -260,7 +259,7 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class='page-title'>
-                        <i class="fas fa-exchange-alt"></i> Forex Converter Pro
+                        <i class="fas fa-exchange-alt"></i> Forex Converter Pro - Wall Street Edition
                     </h1>
                 </div>
             </header>
@@ -376,7 +375,7 @@
                         </h2>
                         
                         <div class='tech-analysis-controls'>
-                            <select id='technicalPairSelector' onchange='forexConverter.updateTechnicalCharts()'>
+                            <select id='technicalPairSelector' onchange='forexConverter.updateTechnicalCharts(); forexConverter.updateAdvancedCharts();'>
                                 <option value='USD'>EUR/USD</option>
                                 <option value='GBP'>EUR/GBP</option>
                                 <option value='JPY'>EUR/JPY</option>
@@ -387,7 +386,7 @@
                                 <option value='CNY'>EUR/CNY</option>
                             </select>
                             
-                            <select id='technicalTimeframeSelector' onchange='forexConverter.updateTechnicalCharts()'>
+                            <select id='technicalTimeframeSelector' onchange='forexConverter.updateTechnicalCharts(); forexConverter.updateAdvancedCharts();'>
                                 <option value='1D'>1 Day</option>
                                 <option value='1W'>1 Week</option>
                                 <option value='1M' selected>1 Month</option>
@@ -435,11 +434,78 @@
                     <!-- Moving Averages Chart -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
-                            <i class='fas fa-layer-group'></i> Moving Averages (SMA 50, 100, 200 & EMA 20, 50)
+                            <i class='fas fa-layer-group'></i> Moving Averages (SMA 20, 50, 100, 200 & EMA 20, 50)
                             <span class='chart-subtitle'>Trend identification and support/resistance levels</span>
                         </h3>
                         <div class='chart-wrapper'>
                             <div id='movingAveragesChart' class='chart' style='height: 450px;'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     ✨ WALL STREET INSTITUTIONAL INDICATORS
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2rem;'>
+                        <i class='fas fa-university'></i> Wall Street Institutional Indicators
+                        <span style='display: block; font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px; -webkit-text-fill-color: initial; background: none;'>
+                            Professional-Grade Technical Analysis Tools
+                        </span>
+                    </h2>
+
+                    <!-- Fibonacci Retracements -->
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-ruler-combined'></i> Fibonacci Retracements & Extensions
+                            <span class='chart-subtitle'>Golden Ratio Support/Resistance Levels (23.6%, 38.2%, 50%, 61.8%, 78.6%, 100%, 161.8%, 261.8%)</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='fibonacciChart' class='chart' style='height: 500px;'></div>
+                        </div>
+                    </div>
+
+                    <!-- Ichimoku Cloud -->
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-cloud'></i> Ichimoku Cloud (Japanese Trading System)
+                            <span class='chart-subtitle'>All-in-One Indicator: Trend Direction, Support/Resistance, Momentum & Volatility</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='ichimokuChart' class='chart' style='height: 500px;'></div>
+                        </div>
+                    </div>
+
+                    <!-- Pivot Points -->
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-crosshairs'></i> Pivot Points (Standard, Fibonacci, Camarilla)
+                            <span class='chart-subtitle'>Market Maker Support/Resistance Levels for Intraday Trading</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='pivotPointsChart' class='chart' style='height: 500px;'></div>
+                        </div>
+                    </div>
+
+                    <!-- ADX + DMI -->
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-bolt'></i> ADX & Directional Movement Index
+                            <span class='chart-subtitle'>Trend Strength Indicator (+DI vs -DI for Direction, ADX for Strength)</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='adxChart' class='chart' style='height: 400px;'></div>
+                        </div>
+                    </div>
+
+                    <!-- Stochastic Oscillator -->
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-wave-square'></i> Stochastic Oscillator (14, 3, 3)
+                            <span class='chart-subtitle'>Momentum Indicator: %K (Fast) vs %D (Slow) - Overbought/Oversold Detection</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='stochasticChart' class='chart' style='height: 400px;'></div>
                         </div>
                     </div>
                 </div>
@@ -537,7 +603,7 @@
 
                 <footer>
                     <p>
-                        <i class='fas fa-info-circle'></i> Forex Converter Pro - Real-time ECB Exchange Rates with AI Analysis
+                        <i class='fas fa-info-circle'></i> Forex Converter Pro - Wall Street Edition - Real-time ECB Rates + Institutional Indicators
                     </p>
                 </footer>
             </div>
@@ -593,6 +659,7 @@
                     <li><strong>Volatility Assessment:</strong> Measures market risk (Low/Medium/High)</li>
                     <li><strong>Sentiment Analysis:</strong> Aggregates news sentiment from major sources</li>
                     <li><strong>Currency Strength:</strong> Compares relative strength across major currencies</li>
+                    <li><strong>Institutional Indicators:</strong> Fibonacci, Ichimoku, Pivot Points, ADX, Stochastic</li>
                 </ul>
                 
                 <p><strong>Confidence Score:</strong></p>
@@ -710,6 +777,15 @@
                     <li><strong>SMA 200:</strong> Long-term trend</li>
                     <li><strong>Golden Cross:</strong> SMA 50 crosses above SMA 200 (bullish)</li>
                     <li><strong>Death Cross:</strong> SMA 50 crosses below SMA 200 (bearish)</li>
+                </ul>
+
+                <h4><i class='fas fa-university'></i> Wall Street Institutional Indicators</h4>
+                <ul>
+                    <li><strong>Fibonacci:</strong> Golden ratio support/resistance levels</li>
+                    <li><strong>Ichimoku Cloud:</strong> All-in-one Japanese trading system</li>
+                    <li><strong>Pivot Points:</strong> Market maker S/R levels (Standard, Fibonacci, Camarilla)</li>
+                    <li><strong>ADX + DMI:</strong> Trend strength and direction indicator</li>
+                    <li><strong>Stochastic:</strong> Momentum oscillator for overbought/oversold</li>
                 </ul>
             </div>
         </div>

@@ -1,8 +1,9 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - FOREX CONVERTER PRO
+ * ALPHAVAULT AI - FOREX CONVERTER PRO - WALL STREET EDITION
  * ====================================================================
  * Convertisseur 38+ devises avec IA, analyses techniques avancées
+ * + Indicateurs institutionnels (Fibonacci, Ichimoku, Pivots, ADX, Stochastic)
  */
 
 // ========================================
@@ -29,12 +30,12 @@ class ForexConverter {
         this.historicalData = {};
         this.currentTimeRange = '5Y';
         this.currentTechnicalPair = 'USD';
-        this.currentTechnicalTimeframe = '1M';
+        this.currentTechnicalTimeframe = '6M';
         this.charts = {};
     }
 
     async init() {
-        console.log('💱 Initializing Forex Converter Pro...');
+        console.log('💱 Initializing Forex Converter Pro - Wall Street Edition...');
         
         try {
             await this.loadExchangeRates();
@@ -72,6 +73,9 @@ class ForexConverter {
 
         // Load technical analysis charts
         await this.updateTechnicalCharts();
+        
+        // ✨ NOUVEAUX GRAPHIQUES INSTITUTIONNELS
+        await this.updateAdvancedCharts();
     }
 
     /**
@@ -894,6 +898,735 @@ class ForexConverter {
                 verticalAlign: 'bottom'
             }
         });
+    }
+
+    /**
+     * ========================================
+     * ✨ ADVANCED INSTITUTIONAL CHARTS
+     * ========================================
+     */
+    async updateAdvancedCharts() {
+        this.currentTechnicalPair = document.getElementById('technicalPairSelector')?.value || 'USD';
+        this.currentTechnicalTimeframe = document.getElementById('technicalTimeframeSelector')?.value || '1M';
+
+        console.log(`🏦 Loading Wall Street level indicators for EUR/${this.currentTechnicalPair}...`);
+
+        await Promise.all([
+            this.loadFibonacciChart(),
+            this.loadIchimokuChart(),
+            this.loadPivotPointsChart(),
+            this.loadADXChart(),
+            this.loadStochasticChart()
+        ]);
+    }
+
+    /**
+     * ========================================
+     * 1. FIBONACCI RETRACEMENTS & EXTENSIONS
+     * ========================================
+     */
+    async loadFibonacciChart() {
+        const container = document.getElementById('fibonacciChart');
+        if (!container) return;
+
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const fibLevels = this.calculateFibonacciLevels(data);
+
+        Highcharts.chart('fibonacciChart', {
+            chart: {
+                backgroundColor: 'transparent',
+                zoomType: 'xy'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Fibonacci Retracements & Extensions`,
+                style: { color: 'var(--text-primary)', fontWeight: '700' }
+            },
+            subtitle: {
+                text: 'Key Support/Resistance Levels Based on Golden Ratio',
+                style: { color: 'var(--text-secondary)', fontSize: '13px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Exchange Rate', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                plotLines: [
+                    {
+                        value: fibLevels.level_0,
+                        color: '#6b7280',
+                        width: 2,
+                        dashStyle: 'Solid',
+                        label: { text: '0% (Low)', style: { color: '#6b7280', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_236,
+                        color: '#10b981',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: '23.6%', style: { color: '#10b981', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_382,
+                        color: '#3b82f6',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: '38.2%', style: { color: '#3b82f6', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_50,
+                        color: '#f59e0b',
+                        width: 3,
+                        dashStyle: 'Dash',
+                        label: { text: '50.0% (Key)', style: { color: '#f59e0b', fontWeight: '800' } }
+                    },
+                    {
+                        value: fibLevels.level_618,
+                        color: '#8b5cf6',
+                        width: 3,
+                        dashStyle: 'Dash',
+                        label: { text: '61.8% (Golden)', style: { color: '#8b5cf6', fontWeight: '800' } }
+                    },
+                    {
+                        value: fibLevels.level_786,
+                        color: '#ec4899',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: '78.6%', style: { color: '#ec4899', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_100,
+                        color: '#ef4444',
+                        width: 2,
+                        dashStyle: 'Solid',
+                        label: { text: '100% (High)', style: { color: '#ef4444', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_1618,
+                        color: '#dc2626',
+                        width: 2,
+                        dashStyle: 'Dot',
+                        label: { text: '161.8% Ext', style: { color: '#dc2626', fontWeight: '700' } }
+                    },
+                    {
+                        value: fibLevels.level_2618,
+                        color: '#991b1b',
+                        width: 2,
+                        dashStyle: 'Dot',
+                        label: { text: '261.8% Ext', style: { color: '#991b1b', fontWeight: '700' } }
+                    }
+                ]
+            },
+            tooltip: {
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d',
+                shared: true
+            },
+            series: [{
+                name: 'Price',
+                data: data,
+                color: '#1e293b',
+                lineWidth: 3,
+                marker: { enabled: false }
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    calculateFibonacciLevels(data) {
+        const prices = data.map(d => d[1]);
+        const high = Math.max(...prices);
+        const low = Math.min(...prices);
+        const diff = high - low;
+
+        return {
+            level_0: low,
+            level_236: low + diff * 0.236,
+            level_382: low + diff * 0.382,
+            level_50: low + diff * 0.5,
+            level_618: low + diff * 0.618,
+            level_786: low + diff * 0.786,
+            level_100: high,
+            level_1618: high + diff * 0.618,  // Extension
+            level_2618: high + diff * 1.618   // Extension
+        };
+    }
+
+    /**
+     * ========================================
+     * 2. ICHIMOKU CLOUD
+     * ========================================
+     */
+    async loadIchimokuChart() {
+        const container = document.getElementById('ichimokuChart');
+        if (!container) return;
+
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const ichimoku = this.calculateIchimoku(data);
+
+        Highcharts.chart('ichimokuChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Ichimoku Cloud (Japanese Trading System)`,
+                style: { color: 'var(--text-primary)', fontWeight: '700' }
+            },
+            subtitle: {
+                text: 'All-in-One Indicator: Trend, Support/Resistance, Momentum',
+                style: { color: 'var(--text-secondary)', fontSize: '13px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Exchange Rate', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)'
+            },
+            tooltip: {
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d',
+                shared: true
+            },
+            series: [
+                {
+                    name: 'Price',
+                    data: data,
+                    color: '#1e293b',
+                    lineWidth: 3,
+                    zIndex: 5
+                },
+                {
+                    name: 'Tenkan-sen (Conversion)',
+                    data: ichimoku.tenkan,
+                    color: '#ef4444',
+                    lineWidth: 2,
+                    dashStyle: 'ShortDash',
+                    zIndex: 4
+                },
+                {
+                    name: 'Kijun-sen (Base)',
+                    data: ichimoku.kijun,
+                    color: '#3b82f6',
+                    lineWidth: 2,
+                    dashStyle: 'ShortDash',
+                    zIndex: 4
+                },
+                {
+                    name: 'Senkou Span A',
+                    data: ichimoku.senkouA,
+                    color: '#10b981',
+                    lineWidth: 1,
+                    zIndex: 2
+                },
+                {
+                    name: 'Senkou Span B',
+                    data: ichimoku.senkouB,
+                    color: '#ef4444',
+                    lineWidth: 1,
+                    zIndex: 2
+                },
+                {
+                    name: 'Cloud (Kumo)',
+                    data: ichimoku.cloud,
+                    type: 'arearange',
+                    color: '#10b981',
+                    fillOpacity: 0.2,
+                    lineWidth: 0,
+                    zIndex: 1
+                },
+                {
+                    name: 'Chikou Span (Lagging)',
+                    data: ichimoku.chikou,
+                    color: '#8b5cf6',
+                    lineWidth: 2,
+                    dashStyle: 'Dot',
+                    zIndex: 3
+                }
+            ],
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: { color: 'var(--text-secondary)' }
+            }
+        });
+    }
+
+    calculateIchimoku(data) {
+        const tenkanPeriod = 9;
+        const kijunPeriod = 26;
+        const senkouBPeriod = 52;
+        const displacement = 26;
+
+        const tenkan = [];
+        const kijun = [];
+        const senkouA = [];
+        const senkouB = [];
+        const chikou = [];
+        const cloud = [];
+
+        for (let i = 0; i < data.length; i++) {
+            // Tenkan-sen (Conversion Line): (9-period high + 9-period low) / 2
+            if (i >= tenkanPeriod - 1) {
+                const slice = data.slice(i - tenkanPeriod + 1, i + 1);
+                const high = Math.max(...slice.map(d => d[1]));
+                const low = Math.min(...slice.map(d => d[1]));
+                tenkan.push([data[i][0], (high + low) / 2]);
+            }
+
+            // Kijun-sen (Base Line): (26-period high + 26-period low) / 2
+            if (i >= kijunPeriod - 1) {
+                const slice = data.slice(i - kijunPeriod + 1, i + 1);
+                const high = Math.max(...slice.map(d => d[1]));
+                const low = Math.min(...slice.map(d => d[1]));
+                kijun.push([data[i][0], (high + low) / 2]);
+            }
+
+            // Senkou Span B: (52-period high + 52-period low) / 2, plotted 26 periods ahead
+            if (i >= senkouBPeriod - 1) {
+                const slice = data.slice(i - senkouBPeriod + 1, i + 1);
+                const high = Math.max(...slice.map(d => d[1]));
+                const low = Math.min(...slice.map(d => d[1]));
+                const futureDate = data[Math.min(i + displacement, data.length - 1)][0];
+                senkouB.push([futureDate, (high + low) / 2]);
+            }
+
+            // Chikou Span: Current close plotted 26 periods in the past
+            if (i >= displacement) {
+                chikou.push([data[i - displacement][0], data[i][1]]);
+            }
+        }
+
+        // Senkou Span A: (Tenkan-sen + Kijun-sen) / 2, plotted 26 periods ahead
+        const minLength = Math.min(tenkan.length, kijun.length);
+        for (let i = 0; i < minLength; i++) {
+            const futureIndex = Math.min(i + displacement, data.length - 1);
+            const futureDate = data[futureIndex][0];
+            const value = (tenkan[i][1] + kijun[i][1]) / 2;
+            senkouA.push([futureDate, value]);
+        }
+
+        // Cloud (Kumo): Area between Senkou Span A and B
+        const cloudLength = Math.min(senkouA.length, senkouB.length);
+        for (let i = 0; i < cloudLength; i++) {
+            cloud.push([senkouA[i][0], senkouB[i][1], senkouA[i][1]]);
+        }
+
+        return { tenkan, kijun, senkouA, senkouB, chikou, cloud };
+    }
+
+    /**
+     * ========================================
+     * 3. PIVOT POINTS (Multi-Methods)
+     * ========================================
+     */
+    async loadPivotPointsChart() {
+        const container = document.getElementById('pivotPointsChart');
+        if (!container) return;
+
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const pivots = this.calculatePivotPoints(data);
+
+        Highcharts.chart('pivotPointsChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Pivot Points (Standard, Fibonacci, Camarilla)`,
+                style: { color: 'var(--text-primary)', fontWeight: '700' }
+            },
+            subtitle: {
+                text: 'Professional Support/Resistance Levels Used by Market Makers',
+                style: { color: 'var(--text-secondary)', fontSize: '13px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Exchange Rate', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                plotLines: [
+                    // Standard Pivots
+                    { value: pivots.standard.r3, color: '#dc2626', width: 1, dashStyle: 'Dot', label: { text: 'R3', style: { color: '#dc2626' } } },
+                    { value: pivots.standard.r2, color: '#ef4444', width: 1, dashStyle: 'Dash', label: { text: 'R2', style: { color: '#ef4444' } } },
+                    { value: pivots.standard.r1, color: '#f87171', width: 2, dashStyle: 'Dash', label: { text: 'R1', style: { color: '#f87171', fontWeight: '700' } } },
+                    { value: pivots.standard.pp, color: '#8b5cf6', width: 3, dashStyle: 'Solid', label: { text: 'PP (Pivot)', style: { color: '#8b5cf6', fontWeight: '800' } } },
+                    { value: pivots.standard.s1, color: '#34d399', width: 2, dashStyle: 'Dash', label: { text: 'S1', style: { color: '#34d399', fontWeight: '700' } } },
+                    { value: pivots.standard.s2, color: '#10b981', width: 1, dashStyle: 'Dash', label: { text: 'S2', style: { color: '#10b981' } } },
+                    { value: pivots.standard.s3, color: '#059669', width: 1, dashStyle: 'Dot', label: { text: 'S3', style: { color: '#059669' } } }
+                ]
+            },
+            tooltip: {
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d',
+                shared: true,
+                formatter: function() {
+                    let s = '<b>' + Highcharts.dateFormat('%Y-%m-%d', this.x) + '</b><br/>';
+                    s += 'Price: <b>' + this.points[0].y.toFixed(4) + '</b><br/><br/>';
+                    s += '<b>Standard Pivots:</b><br/>';
+                    s += 'R3: ' + pivots.standard.r3.toFixed(4) + '<br/>';
+                    s += 'R2: ' + pivots.standard.r2.toFixed(4) + '<br/>';
+                    s += 'R1: ' + pivots.standard.r1.toFixed(4) + '<br/>';
+                    s += 'PP: ' + pivots.standard.pp.toFixed(4) + '<br/>';
+                    s += 'S1: ' + pivots.standard.s1.toFixed(4) + '<br/>';
+                    s += 'S2: ' + pivots.standard.s2.toFixed(4) + '<br/>';
+                    s += 'S3: ' + pivots.standard.s3.toFixed(4) + '<br/><br/>';
+                    s += '<b>Fibonacci Pivots:</b><br/>';
+                    s += 'R2: ' + pivots.fibonacci.r2.toFixed(4) + '<br/>';
+                    s += 'R1: ' + pivots.fibonacci.r1.toFixed(4) + '<br/>';
+                    s += 'S1: ' + pivots.fibonacci.s1.toFixed(4) + '<br/>';
+                    s += 'S2: ' + pivots.fibonacci.s2.toFixed(4) + '<br/><br/>';
+                    s += '<b>Camarilla Pivots:</b><br/>';
+                    s += 'R4: ' + pivots.camarilla.r4.toFixed(4) + '<br/>';
+                    s += 'R3: ' + pivots.camarilla.r3.toFixed(4) + '<br/>';
+                    s += 'S3: ' + pivots.camarilla.s3.toFixed(4) + '<br/>';
+                    s += 'S4: ' + pivots.camarilla.s4.toFixed(4);
+                    return s;
+                }
+            },
+            series: [{
+                name: 'Price',
+                data: data,
+                color: '#1e293b',
+                lineWidth: 3
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    calculatePivotPoints(data) {
+        // Use last complete period (yesterday)
+        const lastBar = data[data.length - 1];
+        const high = Math.max(...data.slice(-20).map(d => d[1]));
+        const low = Math.min(...data.slice(-20).map(d => d[1]));
+        const close = lastBar[1];
+
+        // STANDARD PIVOT POINTS
+        const pp = (high + low + close) / 3;
+        const standard = {
+            pp: pp,
+            r1: 2 * pp - low,
+            r2: pp + (high - low),
+            r3: high + 2 * (pp - low),
+            s1: 2 * pp - high,
+            s2: pp - (high - low),
+            s3: low - 2 * (high - pp)
+        };
+
+        // FIBONACCI PIVOT POINTS
+        const fibonacci = {
+            pp: pp,
+            r1: pp + 0.382 * (high - low),
+            r2: pp + 0.618 * (high - low),
+            r3: pp + 1.000 * (high - low),
+            s1: pp - 0.382 * (high - low),
+            s2: pp - 0.618 * (high - low),
+            s3: pp - 1.000 * (high - low)
+        };
+
+        // CAMARILLA PIVOT POINTS
+        const camarilla = {
+            pp: pp,
+            r1: close + 1.1 * (high - low) / 12,
+            r2: close + 1.1 * (high - low) / 6,
+            r3: close + 1.1 * (high - low) / 4,
+            r4: close + 1.1 * (high - low) / 2,
+            s1: close - 1.1 * (high - low) / 12,
+            s2: close - 1.1 * (high - low) / 6,
+            s3: close - 1.1 * (high - low) / 4,
+            s4: close - 1.1 * (high - low) / 2
+        };
+
+        return { standard, fibonacci, camarilla };
+    }
+
+    /**
+     * ========================================
+     * 4. ADX + DMI (Trend Strength)
+     * ========================================
+     */
+    async loadADXChart() {
+        const container = document.getElementById('adxChart');
+        if (!container) return;
+
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const adxData = this.calculateADX(data, 14);
+
+        Highcharts.chart('adxChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - ADX & Directional Movement Index`,
+                style: { color: 'var(--text-primary)', fontWeight: '700' }
+            },
+            subtitle: {
+                text: 'Measures Trend Strength (ADX) and Direction (+DI vs -DI)',
+                style: { color: 'var(--text-secondary)', fontSize: '13px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'ADX Value', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                min: 0,
+                max: 100,
+                plotLines: [
+                    {
+                        value: 25,
+                        color: '#f59e0b',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: 'Strong Trend (>25)', style: { color: '#f59e0b', fontWeight: '700' } }
+                    },
+                    {
+                        value: 50,
+                        color: '#ef4444',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: 'Very Strong (>50)', style: { color: '#ef4444', fontWeight: '700' } }
+                    }
+                ]
+            },
+            tooltip: {
+                valueDecimals: 2,
+                xDateFormat: '%Y-%m-%d',
+                shared: true
+            },
+            series: [
+                {
+                    name: 'ADX (Trend Strength)',
+                    data: adxData.adx,
+                    color: '#8b5cf6',
+                    lineWidth: 3,
+                    type: 'area',
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, 'rgba(139, 92, 246, 0.4)'],
+                            [1, 'rgba(139, 92, 246, 0.05)']
+                        ]
+                    }
+                },
+                {
+                    name: '+DI (Bullish Pressure)',
+                    data: adxData.plusDI,
+                    color: '#10b981',
+                    lineWidth: 2
+                },
+                {
+                    name: '-DI (Bearish Pressure)',
+                    data: adxData.minusDI,
+                    color: '#ef4444',
+                    lineWidth: 2
+                }
+            ],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-secondary)' } }
+        });
+    }
+
+    calculateADX(data, period = 14) {
+        const plusDM = [];
+        const minusDM = [];
+        const tr = [];
+        
+        // Calculate directional movements and true range
+        for (let i = 1; i < data.length; i++) {
+            const high = data[i][1];
+            const low = data[i][1] * 0.999; // Mock high/low
+            const prevHigh = data[i-1][1];
+            const prevLow = data[i-1][1] * 0.999;
+            const prevClose = data[i-1][1];
+            
+            const upMove = high - prevHigh;
+            const downMove = prevLow - low;
+            
+            plusDM.push(upMove > downMove && upMove > 0 ? upMove : 0);
+            minusDM.push(downMove > upMove && downMove > 0 ? downMove : 0);
+            
+            const trueRange = Math.max(
+                high - low,
+                Math.abs(high - prevClose),
+                Math.abs(low - prevClose)
+            );
+            tr.push(trueRange);
+        }
+        
+        // Smooth with EMA
+        const smoothPlusDM = this.smoothArray(plusDM, period);
+        const smoothMinusDM = this.smoothArray(minusDM, period);
+        const smoothTR = this.smoothArray(tr, period);
+        
+        const plusDI = [];
+        const minusDI = [];
+        const dx = [];
+        
+        for (let i = 0; i < smoothTR.length; i++) {
+            const pdi = (smoothPlusDM[i] / smoothTR[i]) * 100;
+            const mdi = (smoothMinusDM[i] / smoothTR[i]) * 100;
+            
+            plusDI.push([data[i + period][0], pdi]);
+            minusDI.push([data[i + period][0], mdi]);
+            
+            const dxValue = (Math.abs(pdi - mdi) / (pdi + mdi)) * 100;
+            dx.push(dxValue);
+        }
+        
+        // Smooth DX to get ADX
+        const adxValues = this.smoothArray(dx, period);
+        const adx = adxValues.map((val, i) => {
+            const index = i + period * 2;
+            if (index < data.length) {
+                return [data[index][0], val];
+            }
+            return null;
+        }).filter(v => v !== null);
+        
+        return { adx, plusDI, minusDI };
+    }
+
+    smoothArray(arr, period) {
+        const result = [];
+        let sum = 0;
+        
+        // First average
+        for (let i = 0; i < period && i < arr.length; i++) {
+            sum += arr[i];
+        }
+        result.push(sum / period);
+        
+        // Subsequent smoothed values
+        for (let i = period; i < arr.length; i++) {
+            const smoothed = (result[result.length - 1] * (period - 1) + arr[i]) / period;
+            result.push(smoothed);
+        }
+        
+        return result;
+    }
+
+    /**
+     * ========================================
+     * 5. STOCHASTIC OSCILLATOR
+     * ========================================
+     */
+    async loadStochasticChart() {
+        const container = document.getElementById('stochasticChart');
+        if (!container) return;
+
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const stochastic = this.calculateStochastic(data, 14, 3, 3);
+
+        Highcharts.chart('stochasticChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Stochastic Oscillator (14, 3, 3)`,
+                style: { color: 'var(--text-primary)', fontWeight: '700' }
+            },
+            subtitle: {
+                text: 'Momentum Indicator Comparing Close to Price Range',
+                style: { color: 'var(--text-secondary)', fontSize: '13px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Stochastic %', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                min: 0,
+                max: 100,
+                plotLines: [
+                    {
+                        value: 80,
+                        color: '#ef4444',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: 'Overbought (80)', style: { color: '#ef4444', fontWeight: '700' } }
+                    },
+                    {
+                        value: 20,
+                        color: '#10b981',
+                        width: 2,
+                        dashStyle: 'Dash',
+                        label: { text: 'Oversold (20)', style: { color: '#10b981', fontWeight: '700' } }
+                    },
+                    {
+                        value: 50,
+                        color: '#6b7280',
+                        width: 1,
+                        dashStyle: 'Dot'
+                    }
+                ]
+            },
+            tooltip: {
+                valueDecimals: 2,
+                xDateFormat: '%Y-%m-%d',
+                shared: true
+            },
+            series: [
+                {
+                    name: '%K (Fast)',
+                    data: stochastic.k,
+                    color: '#3b82f6',
+                    lineWidth: 2
+                },
+                {
+                    name: '%D (Slow)',
+                    data: stochastic.d,
+                    color: '#f59e0b',
+                    lineWidth: 2,
+                    dashStyle: 'ShortDash'
+                }
+            ],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-secondary)' } }
+        });
+    }
+
+    calculateStochastic(data, kPeriod = 14, kSmooth = 3, dPeriod = 3) {
+        const rawK = [];
+        
+        // Calculate %K
+        for (let i = kPeriod - 1; i < data.length; i++) {
+            const slice = data.slice(i - kPeriod + 1, i + 1);
+            const high = Math.max(...slice.map(d => d[1]));
+            const low = Math.min(...slice.map(d => d[1]));
+            const close = data[i][1];
+            
+            const k = ((close - low) / (high - low)) * 100;
+            rawK.push([data[i][0], k]);
+        }
+        
+        // Smooth %K
+        const k = [];
+        for (let i = kSmooth - 1; i < rawK.length; i++) {
+            const slice = rawK.slice(i - kSmooth + 1, i + 1);
+            const avg = slice.reduce((sum, val) => sum + val[1], 0) / kSmooth;
+            k.push([rawK[i][0], avg]);
+        }
+        
+        // Calculate %D (SMA of %K)
+        const d = [];
+        for (let i = dPeriod - 1; i < k.length; i++) {
+            const slice = k.slice(i - dPeriod + 1, i + 1);
+            const avg = slice.reduce((sum, val) => sum + val[1], 0) / dPeriod;
+            d.push([k[i][0], avg]);
+        }
+        
+        return { k, d };
     }
 
     /**

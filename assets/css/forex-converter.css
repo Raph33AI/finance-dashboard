@@ -3,6 +3,7 @@
  * ALPHAVAULT AI - FOREX CONVERTER PRO - STYLES COMPLETS
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
+ * + Wall Street Institutional Indicators Styles
  */
 
 /* ========================================
@@ -18,11 +19,17 @@
     --forex-warning: #f59e0b;
     --forex-info: #3b82f6;
     
+    /* ✨ NOUVEAU: Wall Street Colors */
+    --forex-gold: #fbbf24;
+    --forex-platinum: #e5e7eb;
+    --forex-institutional: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #4c1d95 100%);
+    
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
     --glass-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
     
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --border-radius: 16px;
     --border-radius-lg: 24px;
 }
@@ -742,7 +749,7 @@ body.dark-mode {
     transform: translateY(-2px);
 }
 
-/* ✨ NOUVEAU: Individual Technical Chart Sections */
+/* ✨ TECHNICAL CHART SECTIONS */
 .technical-chart-section {
     background: var(--forex-gradient-soft);
     backdrop-filter: blur(20px) saturate(180%);
@@ -777,7 +784,7 @@ body.dark-mode {
     opacity: 1;
 }
 
-/* ✨ NOUVEAU: Technical Chart Titles */
+/* ✨ TECHNICAL CHART TITLES */
 .technical-chart-title {
     font-size: 1.2rem;
     font-weight: 800;
@@ -800,7 +807,7 @@ body.dark-mode {
     font-size: 1.3rem;
 }
 
-/* ✨ NOUVEAU: Chart Subtitles */
+/* ✨ CHART SUBTITLES */
 .chart-subtitle {
     display: block;
     font-size: 0.85rem;
@@ -810,6 +817,239 @@ body.dark-mode {
     font-style: italic;
     background: none;
     -webkit-text-fill-color: var(--text-secondary);
+}
+
+/* ========================================
+   ✨ WALL STREET INSTITUTIONAL INDICATORS
+   ======================================== */
+
+/* Premium Section with Institutional Gradient */
+.section .section-title[style*="background: linear-gradient(135deg, #667eea"] {
+    font-size: 2rem;
+    padding: 20px 0;
+    margin-bottom: 32px;
+    position: relative;
+    display: block;
+}
+
+.section .section-title span[style*="display: block"] {
+    font-size: 0.9rem;
+    color: var(--text-secondary) !important;
+    margin-top: 8px;
+    -webkit-text-fill-color: var(--text-secondary) !important;
+    background: none !important;
+    font-weight: 600;
+}
+
+/* ✨ Institutional Badge */
+.institutional-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--forex-institutional);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(30, 58, 138, 0.3);
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 4px 16px rgba(30, 58, 138, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(30, 58, 138, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
+        transform: scale(1.05);
+    }
+}
+
+/* ✨ Premium Chart Wrapper for Institutional Indicators */
+.technical-chart-section .chart-wrapper {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      var(--forex-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode .technical-chart-section .chart-wrapper {
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      var(--forex-gradient);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(100, 116, 139, 0.3);
+}
+
+.technical-chart-section .chart-wrapper:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 64px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* ✨ Fibonacci Specific Styles */
+#fibonacciChart .technical-chart-title,
+#ichimokuChart .technical-chart-title,
+#pivotPointsChart .technical-chart-title,
+#adxChart .technical-chart-title,
+#stochasticChart .technical-chart-title {
+    position: relative;
+    padding-left: 48px;
+}
+
+#fibonacciChart .technical-chart-title::before,
+#ichimokuChart .technical-chart-title::before,
+#pivotPointsChart .technical-chart-title::before,
+#adxChart .technical-chart-title::before,
+#stochasticChart .technical-chart-title::before {
+    content: '⭐';
+    position: absolute;
+    left: 0;
+    font-size: 2rem;
+    animation: star-rotate 4s linear infinite;
+}
+
+@keyframes star-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ✨ Premium Tooltip for Institutional Indicators */
+.institutional-tooltip {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background: var(--forex-institutional);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: help;
+    transition: var(--transition-bounce);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+}
+
+.institutional-tooltip:hover {
+    transform: scale(1.2) rotate(15deg);
+    box-shadow: 0 8px 24px rgba(30, 58, 138, 0.6);
+}
+
+/* ✨ Professional Chart Legend */
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+body.dark-mode .chart-legend {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 24px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* ✨ Animated Loading Placeholder for Charts */
+.chart-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.chart-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--glass-border);
+    border-top-color: var(--forex-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.chart-loading-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ✨ Chart Overlay Badges (for highlighting key levels) */
+.chart-badge {
+    position: absolute;
+    padding: 6px 12px;
+    background: var(--forex-gradient);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    z-index: 100;
+    animation: badge-float 3s ease-in-out infinite;
+}
+
+@keyframes badge-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.chart-badge-fibonacci {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.chart-badge-pivot {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.chart-badge-ichimoku {
+    background: linear-gradient(135deg, #10b981, #059669);
 }
 
 .technical-indicators-grid {
@@ -1440,447 +1680,6 @@ body.dark-mode {
 }
 
 /* ========================================
-   CALCULATORS
-   ======================================== */
-.calculator-form {
-    background: var(--forex-gradient-soft);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    padding: 24px;
-    margin-bottom: 24px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    border: 2px solid var(--glass-border);
-    border-radius: 10px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    color: var(--text-primary);
-    transition: var(--transition-smooth);
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: var(--forex-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-/* Fee Results */
-.fee-results,
-.pl-results,
-.travel-results {
-    margin-top: 24px;
-}
-
-.fee-results h3 {
-    font-size: 1.3rem;
-    font-weight: 800;
-    background: var(--forex-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 20px;
-}
-
-.fee-comparison-grid {
-    display: grid;
-    gap: 16px;
-}
-
-.fee-result-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    transition: var(--transition-smooth);
-    position: relative;
-}
-
-.fee-result-card.best-rate {
-    border-color: var(--forex-success);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
-}
-
-.best-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.fee-result-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.platform-logo {
-    font-size: 2rem;
-}
-
-.fee-result-header h4 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.fee-result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--glass-border);
-    font-size: 0.95rem;
-}
-
-.fee-result-row:last-child {
-    border-bottom: none;
-}
-
-.fee-result-row.total {
-    padding-top: 16px;
-    border-top: 2px solid var(--glass-border);
-    font-size: 1.1rem;
-}
-
-/* P&L Results */
-.pl-result {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 3px solid;
-    border-radius: var(--border-radius);
-    padding: 32px;
-    text-align: center;
-}
-
-.pl-result.profit {
-    border-color: var(--forex-success);
-    background: rgba(16, 185, 129, 0.05);
-}
-
-.pl-result.loss {
-    border-color: var(--forex-danger);
-    background: rgba(239, 68, 68, 0.05);
-}
-
-.pl-result-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.pl-result-header i {
-    font-size: 2.5rem;
-}
-
-.pl-result.profit .pl-result-header i {
-    color: var(--forex-success);
-}
-
-.pl-result.loss .pl-result-header i {
-    color: var(--forex-danger);
-}
-
-.pl-result-header h3 {
-    font-size: 1.8rem;
-    font-weight: 900;
-    margin: 0;
-}
-
-.pl-result.profit .pl-result-header h3 {
-    color: var(--forex-success);
-}
-
-.pl-result.loss .pl-result-header h3 {
-    color: var(--forex-danger);
-}
-
-.pl-result-amount {
-    font-size: 3.5rem;
-    font-weight: 900;
-    margin-bottom: 8px;
-}
-
-.pl-result.profit .pl-result-amount {
-    color: var(--forex-success);
-}
-
-.pl-result.loss .pl-result-amount {
-    color: var(--forex-danger);
-}
-
-.pl-result-percent {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 24px;
-}
-
-.pl-result.profit .pl-result-percent {
-    color: var(--forex-success);
-}
-
-.pl-result.loss .pl-result-percent {
-    color: var(--forex-danger);
-}
-
-.pl-details {
-    background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: left;
-    margin-top: 24px;
-}
-
-.pl-detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--glass-border);
-    font-size: 0.95rem;
-}
-
-.pl-detail-row:last-child {
-    border-bottom: none;
-}
-
-/* Travel Budget Results */
-.travel-budget-result {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    padding: 32px;
-}
-
-.travel-budget-result h3 {
-    font-size: 1.8rem;
-    font-weight: 900;
-    background: var(--forex-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0 0 24px 0;
-    text-align: center;
-}
-
-.budget-breakdown {
-    margin-bottom: 24px;
-}
-
-.budget-breakdown h4 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 16px 0;
-}
-
-.budget-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.budget-item:last-child {
-    border-bottom: none;
-}
-
-.budget-item.total {
-    padding-top: 16px;
-    border-top: 2px solid var(--glass-border);
-    font-size: 1.1rem;
-}
-
-.budget-item i {
-    font-size: 1.3rem;
-    color: var(--forex-primary);
-    width: 24px;
-    text-align: center;
-}
-
-.budget-item span {
-    flex: 1;
-    color: var(--text-secondary);
-}
-
-.budget-item strong {
-    color: var(--text-primary);
-    font-weight: 800;
-}
-
-.budget-summary {
-    background: var(--forex-gradient-soft);
-    border: 2px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.summary-item:last-child {
-    border-bottom: none;
-}
-
-.summary-item.highlight {
-    padding-top: 16px;
-    border-top: 2px solid var(--glass-border);
-    font-size: 1.2rem;
-}
-
-.summary-item.highlight strong {
-    background: var(--forex-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 900;
-}
-
-.budget-tip {
-    background: rgba(59, 130, 246, 0.1);
-    border-left: 4px solid var(--forex-primary);
-    padding: 16px;
-    border-radius: 8px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.budget-tip i {
-    font-size: 1.3rem;
-    color: var(--forex-primary);
-    margin-top: 2px;
-}
-
-.budget-tip p {
-    margin: 0;
-    line-height: 1.6;
-}
-
-/* ========================================
-   GLOSSARY
-   ======================================== */
-.glossary-search {
-    position: relative;
-    margin-bottom: 24px;
-}
-
-.glossary-search input {
-    width: 100%;
-    padding: 14px 48px 14px 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    border: 2px solid var(--glass-border);
-    border-radius: 12px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    color: var(--text-primary);
-    transition: var(--transition-smooth);
-}
-
-.glossary-search input:focus {
-    outline: none;
-    border-color: var(--forex-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.glossary-search i {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-}
-
-.glossary-content {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.glossary-item {
-    background: var(--forex-gradient-soft);
-    border: 2px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    transition: var(--transition-smooth);
-}
-
-.glossary-item:hover {
-    border-color: var(--forex-primary);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-}
-
-.glossary-term {
-    font-size: 1.1rem;
-    font-weight: 800;
-    background: var(--forex-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0 0 8px 0;
-}
-
-.glossary-definition {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* ========================================
    RESPONSIVE
    ======================================== */
 @media (max-width: 1024px) {
@@ -1937,6 +1736,11 @@ body.dark-mode {
     
     .technical-chart-title {
         font-size: 1rem;
+        padding-left: 0;
+    }
+    
+    .technical-chart-title::before {
+        display: none;
     }
     
     .chart-subtitle {
@@ -1969,20 +1773,12 @@ body.dark-mode {
         padding: 20px;
     }
     
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
     .pair-rate {
         font-size: 1.8rem;
     }
     
     .rate-value {
         font-size: 1.6rem;
-    }
-    
-    .pl-result-amount {
-        font-size: 2.5rem;
     }
 }
 
@@ -2016,25 +1812,21 @@ body.dark-mode {
 /* ========================================
    SCROLLBAR STYLING
    ======================================== */
-.modal-content::-webkit-scrollbar,
-.glossary-content::-webkit-scrollbar {
+.modal-content::-webkit-scrollbar {
     width: 8px;
 }
 
-.modal-content::-webkit-scrollbar-track,
-.glossary-content::-webkit-scrollbar-track {
+.modal-content::-webkit-scrollbar-track {
     background: rgba(100, 116, 139, 0.1);
     border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb,
-.glossary-content::-webkit-scrollbar-thumb {
+.modal-content::-webkit-scrollbar-thumb {
     background: var(--forex-gradient);
     border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover,
-.glossary-content::-webkit-scrollbar-thumb:hover {
+.modal-content::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #5a67d8, #6b46c1);
 }
 
@@ -2051,7 +1843,6 @@ body.dark-mode {
     }
 }
 
-/* Focus visible for keyboard navigation */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
