@@ -3,7 +3,6 @@
  * 🧠 INSIDER ANALYTICS ENGINE - AlphaVault AI
  * ═══════════════════════════════════════════════════════════════════
  * Moteur d'analyse avancée pour détecter patterns, anomalies et signaux
- * VERSION 2.0 - WITH PREMIUM FEATURES
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -117,7 +116,6 @@ class InsiderAnalyticsEngine {
                 ticker,
                 period: history.period,
                 transactionCount: history.transactions.length,
-                transactions: history.transactions,
                 
                 // Scores principaux
                 overallScore,
@@ -149,25 +147,30 @@ class InsiderAnalyticsEngine {
 
     /**
      * 📊 CLUSTER BUYING DETECTION
+     * Détecte quand plusieurs insiders achètent simultanément
      */
     async detectClusterBuying(transactions) {
         const clusters = [];
         const windowDays = this.thresholds.clusterBuying.windowDays;
 
+        // Filtre uniquement les achats
         const purchases = transactions.filter(t => 
             t.nonDerivativeTransactions?.some(nt => nt.transactionType === 'Purchase')
         );
 
+        // Groupe par fenêtre temporelle
         for (let i = 0; i < purchases.length; i++) {
             const baseTransaction = purchases[i];
             const baseDate = new Date(baseTransaction.filingDate);
 
+            // Trouve toutes les transactions dans la fenêtre
             const clusterTransactions = purchases.filter(t => {
                 const tDate = new Date(t.filingDate);
                 const daysDiff = Math.abs((tDate - baseDate) / (1000 * 60 * 60 * 24));
                 return daysDiff <= windowDays;
             });
 
+            // Calcule les métriques du cluster
             const uniqueInsiders = new Set(clusterTransactions.map(t => t.reportingOwner?.name));
             const totalValue = clusterTransactions.reduce((sum, t) => {
                 return sum + (t.nonDerivativeTransactions || [])
@@ -175,6 +178,7 @@ class InsiderAnalyticsEngine {
                     .reduce((s, nt) => s + nt.totalValue, 0);
             }, 0);
 
+            // Si critères remplis = cluster significatif
             if (uniqueInsiders.size >= this.thresholds.clusterBuying.minInsiders &&
                 totalValue >= this.thresholds.clusterBuying.minTotalValue) {
                 
@@ -186,30 +190,42 @@ class InsiderAnalyticsEngine {
                     totalValue,
                     averageValuePerInsider: totalValue / uniqueInsiders.size,
                     insiders: Array.from(uniqueInsiders),
+                    
+                    // Détails des transactions
                     transactions: clusterTransactions,
+                    
+                    // Scoring
                     signal: 'BULLISH',
                     confidence: this.calculateClusterConfidence(uniqueInsiders.size, totalValue),
                     severity: this.calculateClusterSeverity(uniqueInsiders.size, totalValue),
+                    
+                    // Contexte
                     insiderRoles: this.extractInsiderRoles(clusterTransactions),
-                    isPreEarnings: false
+                    isPreEarnings: false // Sera enrichi plus tard
                 });
             }
         }
 
+        // Déduplique les clusters qui se chevauchent
         const deduplicated = this.deduplicateClusters(clusters);
 
         return {
             detected: deduplicated.length > 0,
             count: deduplicated.length,
             clusters: deduplicated.sort((a, b) => b.confidence - a.confidence),
+            
+            // Statistiques
             totalInsidersInvolved: new Set(deduplicated.flatMap(c => c.insiders)).size,
             totalValueInClusters: deduplicated.reduce((sum, c) => sum + c.totalValue, 0),
+            
+            // Signal global
             overallSignal: this.calculateClusterSignal(deduplicated)
         };
     }
 
     /**
      * 💭 INSIDER SENTIMENT SCORE
+     * Score agrégé de -100 (très bearish) à +100 (très bullish)
      */
     calculateInsiderSentiment(transactions) {
         if (!transactions || transactions.length === 0) {
@@ -237,17 +253,20 @@ class InsiderAnalyticsEngine {
             });
         });
 
+        // Calcul du score composite
         const totalValue = purchaseValue + saleValue;
         const valueRatio = totalValue > 0 ? (purchaseValue - saleValue) / totalValue : 0;
         
         const totalCount = purchaseCount + saleCount;
         const countRatio = totalCount > 0 ? (purchaseCount - saleCount) / totalCount : 0;
         
+        // Pondération: 70% valeur, 30% fréquence
         const score = Math.round((valueRatio * 0.7 + countRatio * 0.3) * 100);
         
         return {
             score: Math.max(-100, Math.min(100, score)),
             label: this.getSentimentLabel(score),
+            
             breakdown: {
                 purchases: purchaseCount,
                 sales: saleCount,
@@ -256,14 +275,18 @@ class InsiderAnalyticsEngine {
                 netValue: purchaseValue - saleValue,
                 netCount: purchaseCount - saleCount
             },
+            
+            // Contexte
             dominantActivity: purchaseValue > saleValue ? 'BUYING' : 'SELLING',
             intensity: this.calculateIntensity(totalValue, totalCount),
+            
+            // Historique
             trend: this.calculateSentimentTrend(transactions)
         };
     }
 
     /**
-     * 👔 ANALYSE PAR RÔLE
+     * 👔 ANALYSE PAR RÔLE (CEO, CFO, Directors, etc.)
      */
     analyzeByRole(transactions) {
         const roleData = {
@@ -293,6 +316,7 @@ class InsiderAnalyticsEngine {
             });
         });
 
+        // Calcule les scores par rôle
         const roleScores = {};
         Object.keys(roleData).forEach(role => {
             const data = roleData[role];
@@ -305,25 +329,37 @@ class InsiderAnalyticsEngine {
                 purchaseValue: totalPurchaseValue,
                 saleValue: totalSaleValue,
                 netValue: data.netValue,
+                
+                // Score spécifique au rôle
                 score: this.calculateRoleScore(role, totalPurchaseValue, totalSaleValue),
                 signal: data.netValue > 0 ? 'BULLISH' : data.netValue < 0 ? 'BEARISH' : 'NEUTRAL',
+                
+                // Importance du signal (CEO/CFO plus importants)
                 weight: this.getRoleWeight(role)
             };
         });
 
         return {
             byRole: roleScores,
+            
+            // Insights clés
             mostActiveRole: this.getMostActiveRole(roleScores),
             mostBullishRole: this.getMostBullishRole(roleScores),
             mostBearishRole: this.getMostBearishRole(roleScores),
+            
+            // Pondération globale
             weightedScore: this.calculateWeightedRoleScore(roleScores)
         };
     }
 
     /**
      * ⏰ TIMING PATTERNS DETECTION
+     * Détecte les achats/ventes avant earnings, annonces, etc.
      */
     async detectTimingPatterns(transactions, ticker) {
+        // Note: Pour une vraie implémentation, il faudrait récupérer
+        // le calendrier des earnings depuis une API (Alpha Vantage, etc.)
+        
         const patterns = {
             preEarnings: [],
             postEarnings: [],
@@ -331,6 +367,7 @@ class InsiderAnalyticsEngine {
             unusual: []
         };
 
+        // Détecte les clusters temporels suspects
         const sortedTransactions = [...transactions].sort((a, b) => 
             new Date(a.filingDate) - new Date(b.filingDate)
         );
@@ -339,6 +376,8 @@ class InsiderAnalyticsEngine {
             const txn = sortedTransactions[i];
             const txnDate = new Date(txn.filingDate);
 
+            // Vérifie si c'est dans une période suspecte (ex: 14 jours avant quarter-end)
+            const dayOfYear = this.getDayOfYear(txnDate);
             const isNearQuarterEnd = this.isNearQuarterEnd(txnDate);
 
             if (isNearQuarterEnd) {
@@ -358,6 +397,7 @@ class InsiderAnalyticsEngine {
                 });
             }
 
+            // Détecte les transactions inhabituelles (taille, fréquence)
             const isUnusual = this.isUnusualTransaction(txn, sortedTransactions);
             if (isUnusual.detected) {
                 patterns.unusual.push({
@@ -376,10 +416,13 @@ class InsiderAnalyticsEngine {
                 totalValue: patterns.preEarnings.reduce((sum, p) => sum + Math.abs(p.netValue), 0),
                 signal: this.aggregateSignal(patterns.preEarnings)
             },
+            
             unusualActivity: {
                 count: patterns.unusual.length,
                 transactions: patterns.unusual
             },
+            
+            // Pattern global
             hasSignificantTiming: patterns.preEarnings.length > 0 || patterns.unusual.length > 0,
             riskLevel: this.calculateTimingRiskLevel(patterns)
         };
@@ -387,6 +430,7 @@ class InsiderAnalyticsEngine {
 
     /**
      * 💪 CONVICTION SCORES
+     * Mesure la conviction basée sur la taille relative des transactions
      */
     calculateConvictionScores(transactions) {
         const scores = transactions.map(t => {
@@ -402,15 +446,21 @@ class InsiderAnalyticsEngine {
                 transactionValue: totalValue,
                 convictionLevel: this.getConvictionLevel(totalValue),
                 convictionScore: this.calculateConvictionScore(totalValue, threshold),
+                
+                // Métrique: transaction value vs wealth (si disponible)
+                // Pour l'instant, on se base uniquement sur la valeur absolue
                 isHighConviction: totalValue > threshold
             };
         }).filter(s => s.transactionValue > 0);
 
         return {
             scores: scores.sort((a, b) => b.convictionScore - a.convictionScore),
+            
+            // Statistiques
             averageConviction: scores.length > 0 
                 ? scores.reduce((sum, s) => sum + s.convictionScore, 0) / scores.length 
                 : 0,
+            
             highConvictionCount: scores.filter(s => s.isHighConviction).length,
             highConvictionValue: scores
                 .filter(s => s.isHighConviction)
@@ -420,6 +470,7 @@ class InsiderAnalyticsEngine {
 
     /**
      * 🚨 CEO/CFO DIVERGENCE DETECTION
+     * Red flag quand CEO vend et CFO achète (ou inverse)
      */
     detectCEOCFODivergence(transactions) {
         const ceoTransactions = transactions.filter(t => 
@@ -436,9 +487,11 @@ class InsiderAnalyticsEngine {
             };
         }
 
+        // Calcule le sentiment net pour chaque rôle
         const ceoSentiment = this.calculateRoleSentiment(ceoTransactions);
         const cfoSentiment = this.calculateRoleSentiment(cfoTransactions);
 
+        // Divergence = signes opposés
         const isDivergent = (ceoSentiment > 0 && cfoSentiment < 0) || 
                            (ceoSentiment < 0 && cfoSentiment > 0);
 
@@ -451,48 +504,64 @@ class InsiderAnalyticsEngine {
             };
         }
 
+        // Calcule la sévérité de la divergence
         const divergenceScore = Math.abs(ceoSentiment - cfoSentiment);
 
         return {
             detected: true,
+            
             ceo: {
                 sentiment: ceoSentiment,
                 direction: ceoSentiment > 0 ? 'BUYING' : 'SELLING',
                 transactionCount: ceoTransactions.length
             },
+            
             cfo: {
                 sentiment: cfoSentiment,
                 direction: cfoSentiment > 0 ? 'BUYING' : 'SELLING',
                 transactionCount: cfoTransactions.length
             },
+            
             divergenceScore,
             severity: this.getDivergenceSeverity(divergenceScore),
+            
+            // Signal (CEO selling + CFO buying = potentiel red flag)
             redFlag: ceoSentiment < 0 && cfoSentiment > 0,
+            
             interpretation: this.interpretDivergence(ceoSentiment, cfoSentiment)
         };
     }
 
     /**
      * 📈 PRICE IMPACT ANALYSIS
+     * Analyse l'impact historique des insider trades sur le cours
      */
     async analyzePriceImpact(ticker, transactions) {
+        // Note: Nécessite une API de prix historiques (Alpha Vantage, Yahoo Finance, etc.)
+        // Pour l'instant, retourne une structure vide
+        
         console.log(`📈 Price impact analysis for ${ticker} (placeholder)`);
         
         return {
             available: false,
             message: 'Price data integration required',
+            
+            // Structure pour future implémentation
             correlations: [],
             averageImpact: {
                 after1Day: null,
                 after5Days: null,
                 after30Days: null
             },
+            
+            // Accuracy du signal insider
             historicalAccuracy: null
         };
     }
 
     /**
      * 🕸 NETWORK ANALYSIS
+     * Construit le graphe des relations entre insiders
      */
     buildInsiderNetwork(transactions) {
         const network = {
@@ -501,6 +570,7 @@ class InsiderAnalyticsEngine {
             communities: []
         };
 
+        // Construit les nœuds (insiders)
         const insiderMap = new Map();
         transactions.forEach(t => {
             const name = t.reportingOwner?.name;
@@ -531,6 +601,8 @@ class InsiderAnalyticsEngine {
 
         network.nodes = Array.from(insiderMap.values());
 
+        // Détecte les "board interlocks" (insiders qui agissent ensemble)
+        // Simplifié: considère comme connectés les insiders qui transactent dans la même période
         const windowDays = 7;
         const connections = new Map();
 
@@ -555,6 +627,7 @@ class InsiderAnalyticsEngine {
             }
         }
 
+        // Convertit les connexions en edges
         connections.forEach((weight, edgeKey) => {
             const [source, target] = edgeKey.split('_');
             network.edges.push({
@@ -565,13 +638,17 @@ class InsiderAnalyticsEngine {
             });
         });
 
+        // Détecte les communautés (groupes d'insiders fortement connectés)
         network.communities = this.detectCommunities(network.nodes, network.edges);
 
         return {
             nodeCount: network.nodes.length,
             edgeCount: network.edges.length,
             communityCount: network.communities.length,
+            
             network,
+            
+            // Métriques du réseau
             density: this.calculateNetworkDensity(network.nodes.length, network.edges.length),
             centralInsiders: this.findCentralInsiders(network.nodes, network.edges)
         };
@@ -579,6 +656,7 @@ class InsiderAnalyticsEngine {
 
     /**
      * 🎯 OVERALL SCORE CALCULATION
+     * Combine tous les signaux pour un score global
      */
     calculateOverallScore(analyses) {
         const {
@@ -590,23 +668,29 @@ class InsiderAnalyticsEngine {
             divergenceAnalysis
         } = analyses;
 
-        let score = 50;
+        let score = 50; // Base neutre
 
+        // 1. Sentiment insider (+/- 20 points)
         score += (insiderSentiment.score / 100) * 20;
 
+        // 2. Cluster buying (+15 points si détecté)
         if (clusterActivity.detected) {
             score += 15 * (clusterActivity.overallSignal === 'BULLISH' ? 1 : -1);
         }
 
+        // 3. Role-based score (+/- 15 points)
         score += (roleAnalysis.weightedScore / 100) * 15;
 
+        // 4. Conviction (+10 points)
         const avgConviction = convictionScores.averageConviction;
         score += (avgConviction / 100) * 10;
 
+        // 5. Timing patterns (-10 points si suspect)
         if (timingPatterns.hasSignificantTiming && timingPatterns.riskLevel === 'HIGH') {
             score -= 10;
         }
 
+        // 6. CEO/CFO divergence (-15 points si red flag)
         if (divergenceAnalysis.detected && divergenceAnalysis.redFlag) {
             score -= 15;
         }
@@ -631,13 +715,14 @@ class InsiderAnalyticsEngine {
     generateSmartAlerts(data) {
         const alerts = [];
 
+        // Alert 1: Cluster buying détecté
         if (data.clusterActivity.detected && data.clusterActivity.clusters.length > 0) {
             const topCluster = data.clusterActivity.clusters[0];
             alerts.push({
                 type: 'CLUSTER_BUYING',
                 severity: topCluster.severity,
-                title: `${topCluster.insiderCount} insiders buying simultaneously`,
-                description: `Total value: $${this.formatNumber(topCluster.totalValue)}`,
+                title: `${topCluster.insiderCount} insiders achètent simultanément`,
+                description: `Valeur totale: $${this.formatNumber(topCluster.totalValue)}`,
                 confidence: topCluster.confidence,
                 signal: 'BULLISH',
                 data: topCluster,
@@ -645,11 +730,12 @@ class InsiderAnalyticsEngine {
             });
         }
 
+        // Alert 2: CEO/CFO divergence
         if (data.divergenceAnalysis.detected && data.divergenceAnalysis.redFlag) {
             alerts.push({
                 type: 'CEO_CFO_DIVERGENCE',
                 severity: 'HIGH',
-                title: '⚠ CEO/CFO Divergence Detected',
+                title: '⚠ Divergence CEO/CFO détectée',
                 description: `CEO: ${data.divergenceAnalysis.ceo.direction}, CFO: ${data.divergenceAnalysis.cfo.direction}`,
                 confidence: 85,
                 signal: 'WARNING',
@@ -658,13 +744,14 @@ class InsiderAnalyticsEngine {
             });
         }
 
+        // Alert 3: Activité pré-earnings suspecte
         if (data.timingPatterns.hasSignificantTiming && 
             data.timingPatterns.preEarningsActivity.count > 0) {
             alerts.push({
                 type: 'PRE_EARNINGS_ACTIVITY',
                 severity: data.timingPatterns.riskLevel,
-                title: 'Pre-Earnings Insider Activity',
-                description: `${data.timingPatterns.preEarningsActivity.count} suspicious transactions`,
+                title: 'Activité insider avant earnings',
+                description: `${data.timingPatterns.preEarningsActivity.count} transactions suspectes`,
                 confidence: 70,
                 signal: data.timingPatterns.preEarningsActivity.signal,
                 data: data.timingPatterns.preEarningsActivity,
@@ -672,6 +759,7 @@ class InsiderAnalyticsEngine {
             });
         }
 
+        // Alert 4: C-level achète massivement
         const ceoData = data.roleAnalysis.byRole.CEO;
         const cfoData = data.roleAnalysis.byRole.CFO;
         
@@ -679,8 +767,8 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'CEO_MAJOR_PURCHASE',
                 severity: 'HIGH',
-                title: 'CEO Major Purchase',
-                description: `Value: $${this.formatNumber(ceoData.purchaseValue)}`,
+                title: 'CEO achète massivement',
+                description: `Valeur: $${this.formatNumber(ceoData.purchaseValue)}`,
                 confidence: 90,
                 signal: 'BULLISH',
                 data: ceoData,
@@ -692,8 +780,8 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'CFO_MAJOR_SALE',
                 severity: 'MEDIUM',
-                title: 'CFO Major Sale',
-                description: `Value: $${this.formatNumber(cfoData.saleValue)}`,
+                title: 'CFO vend massivement',
+                description: `Valeur: $${this.formatNumber(cfoData.saleValue)}`,
                 confidence: 75,
                 signal: 'BEARISH',
                 data: cfoData,
@@ -701,11 +789,12 @@ class InsiderAnalyticsEngine {
             });
         }
 
+        // Alert 5: Score global extrême
         if (data.overallScore.score >= 80) {
             alerts.push({
                 type: 'STRONG_BUY_SIGNAL',
                 severity: 'HIGH',
-                title: '🚀 Strong Buy Signal from Insiders',
+                title: '🚀 Signal d\'achat fort des insiders',
                 description: `Score: ${data.overallScore.score}/100`,
                 confidence: 95,
                 signal: 'STRONG_BUY',
@@ -716,7 +805,7 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'STRONG_SELL_SIGNAL',
                 severity: 'HIGH',
-                title: '⚠ Strong Sell Signal from Insiders',
+                title: '⚠ Signal de vente fort des insiders',
                 description: `Score: ${data.overallScore.score}/100`,
                 confidence: 90,
                 signal: 'STRONG_SELL',
@@ -742,31 +831,32 @@ class InsiderAnalyticsEngine {
         if (score >= 75) {
             action = 'STRONG BUY';
             confidence = 'HIGH';
-            rationale.push('Strong insider buying activity');
+            rationale.push('Forte activité d\'achat des insiders');
         } else if (score >= 60) {
             action = 'BUY';
             confidence = 'MEDIUM';
-            rationale.push('Positive insider sentiment');
+            rationale.push('Sentiment insider positif');
         } else if (score >= 40) {
             action = 'HOLD';
             confidence = 'LOW';
-            rationale.push('Mixed insider activity');
+            rationale.push('Activité insider mixte');
         } else if (score >= 25) {
             action = 'SELL';
             confidence = 'MEDIUM';
-            rationale.push('Negative insider sentiment');
+            rationale.push('Sentiment insider négatif');
         } else {
             action = 'STRONG SELL';
             confidence = 'HIGH';
-            rationale.push('Heavy insider selling');
+            rationale.push('Forte activité de vente des insiders');
         }
 
+        // Ajoute les rationales des alertes majeures
         alerts.filter(a => a.severity === 'HIGH').forEach(alert => {
             if (alert.type === 'CLUSTER_BUYING') {
-                rationale.push('Cluster buying detected');
+                rationale.push('Cluster buying détecté');
             }
             if (alert.type === 'CEO_CFO_DIVERGENCE') {
-                rationale.push('⚠ CEO/CFO divergence (red flag)');
+                rationale.push('⚠ Divergence CEO/CFO (red flag)');
             }
         });
 
@@ -774,18 +864,18 @@ class InsiderAnalyticsEngine {
             action,
             confidence,
             score: overallScore.score,
-            rationale: rationale.slice(0, 5),
+            rationale: rationale.slice(0, 5), // Max 5 raisons
             timestamp: new Date().toISOString()
         };
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔧 HELPER METHODS
-    // ═══════════════════════════════════════════════════════════════
+    /**
+     * 🔧 HELPER METHODS
+     */
 
     calculateClusterConfidence(insiderCount, totalValue) {
         let confidence = 50;
-        confidence += Math.min(insiderCount * 10, 30);
+        confidence += Math.min(insiderCount * 10, 30); // +30 max pour nombre d'insiders
         confidence += totalValue > 5000000 ? 20 : totalValue > 1000000 ? 10 : 0;
         return Math.min(100, confidence);
     }
@@ -842,43 +932,13 @@ class InsiderAnalyticsEngine {
     }
 
     calculateSentimentTrend(transactions) {
-        if (!transactions || transactions.length < 4) {
-            return 'INSUFFICIENT_DATA';
-        }
-
+        // Simplifié: compare première moitié vs deuxième moitié
         const mid = Math.floor(transactions.length / 2);
         const firstHalf = transactions.slice(0, mid);
         const secondHalf = transactions.slice(mid);
 
-        const calculateSimpleSentiment = (txns) => {
-            let purchaseValue = 0;
-            let saleValue = 0;
-            let purchaseCount = 0;
-            let saleCount = 0;
-
-            txns.forEach(t => {
-                (t.nonDerivativeTransactions || []).forEach(nt => {
-                    if (nt.transactionType === 'Purchase') {
-                        purchaseValue += nt.totalValue || 0;
-                        purchaseCount++;
-                    } else if (nt.transactionType === 'Sale') {
-                        saleValue += nt.totalValue || 0;
-                        saleCount++;
-                    }
-                });
-            });
-
-            const totalValue = purchaseValue + saleValue;
-            const valueRatio = totalValue > 0 ? (purchaseValue - saleValue) / totalValue : 0;
-            
-            const totalCount = purchaseCount + saleCount;
-            const countRatio = totalCount > 0 ? (purchaseCount - saleCount) / totalCount : 0;
-            
-            return Math.round((valueRatio * 0.7 + countRatio * 0.3) * 100);
-        };
-
-        const firstSentiment = calculateSimpleSentiment(firstHalf);
-        const secondSentiment = calculateSimpleSentiment(secondHalf);
+        const firstSentiment = this.calculateInsiderSentiment(firstHalf).score;
+        const secondSentiment = this.calculateInsiderSentiment(secondHalf).score;
 
         if (secondSentiment > firstSentiment + 20) return 'IMPROVING';
         if (secondSentiment < firstSentiment - 20) return 'DETERIORATING';
@@ -965,13 +1025,21 @@ class InsiderAnalyticsEngine {
         return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
     }
 
+    getDayOfYear(date) {
+        const start = new Date(date.getFullYear(), 0, 0);
+        const diff = date - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        return Math.floor(diff / oneDay);
+    }
+
     isNearQuarterEnd(date) {
         const month = date.getMonth() + 1;
         const day = date.getDate();
         
+        // Derniers 14 jours avant fin de quarter (Mars, Juin, Sept, Déc)
         const quarterEndMonths = [3, 6, 9, 12];
         if (quarterEndMonths.includes(month)) {
-            return day >= 17;
+            return day >= 17; // 14 derniers jours du mois
         }
         
         return false;
@@ -979,6 +1047,8 @@ class InsiderAnalyticsEngine {
 
     daysUntilQuarterEnd(date) {
         const month = date.getMonth() + 1;
+        const day = date.getDate();
+        
         const quarterEndMonths = [3, 6, 9, 12];
         const nextQuarter = quarterEndMonths.find(m => m >= month) || 12;
         
@@ -987,7 +1057,7 @@ class InsiderAnalyticsEngine {
     }
 
     calculateSuspicionLevel(netValue, role) {
-        const threshold = this.thresholds.significantTransaction[role?.toLowerCase() + 'MinValue'] || 100000;
+        const threshold = this.thresholds.significantTransaction[role.toLowerCase() + 'MinValue'] || 100000;
         
         if (Math.abs(netValue) > threshold * 5) return 'VERY_HIGH';
         if (Math.abs(netValue) > threshold * 2) return 'HIGH';
@@ -999,6 +1069,7 @@ class InsiderAnalyticsEngine {
         const totalValue = (txn.nonDerivativeTransactions || [])
             .reduce((sum, nt) => sum + nt.totalValue, 0);
 
+        // Calcule la moyenne et l'écart-type
         const values = allTransactions.map(t => 
             (t.nonDerivativeTransactions || []).reduce((sum, nt) => sum + nt.totalValue, 0)
         );
@@ -1007,6 +1078,7 @@ class InsiderAnalyticsEngine {
         const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
         const stdDev = Math.sqrt(variance);
 
+        // Transaction inhabituelle si > 2 écarts-types
         const zScore = (totalValue - mean) / stdDev;
         
         if (Math.abs(zScore) > 2) {
@@ -1042,7 +1114,7 @@ class InsiderAnalyticsEngine {
     }
 
     getConvictionThreshold(role) {
-        return this.thresholds.significantTransaction[role?.toLowerCase() + 'MinValue'] || 100000;
+        return this.thresholds.significantTransaction[role.toLowerCase() + 'MinValue'] || 100000;
     }
 
     getConvictionLevel(value) {
@@ -1056,7 +1128,7 @@ class InsiderAnalyticsEngine {
 
     calculateConvictionScore(value, threshold) {
         const ratio = value / threshold;
-        return Math.min(100, Math.round(ratio * 20));
+        return Math.min(100, Math.round(ratio * 20)); // Max 100
     }
 
     calculateRoleSentiment(transactions) {
@@ -1073,12 +1145,12 @@ class InsiderAnalyticsEngine {
 
     interpretDivergence(ceoSentiment, cfoSentiment) {
         if (ceoSentiment < 0 && cfoSentiment > 0) {
-            return '⚠ RED FLAG: CEO selling while CFO buying. Possible strategic disagreement or CEO diversification.';
+            return '⚠ RED FLAG: CEO vend alors que CFO achète. Possible désaccord stratégique ou diversification personnelle du CEO.';
         }
         if (ceoSentiment > 0 && cfoSentiment < 0) {
-            return '⚠ CAUTION: CEO buying but CFO selling. CFO may need liquidity or doubt valuation.';
+            return '⚠ ATTENTION: CEO achète mais CFO vend. CFO peut avoir besoin de liquidités ou doute de la valorisation.';
         }
-        return 'Normal alignment between CEO and CFO.';
+        return 'Alignment normal entre CEO et CFO.';
     }
 
     calculateNetworkDensity(nodeCount, edgeCount) {
@@ -1088,6 +1160,7 @@ class InsiderAnalyticsEngine {
     }
 
     findCentralInsiders(nodes, edges) {
+        // Calcule le degré de centralité (nombre de connexions)
         const degrees = new Map();
         nodes.forEach(n => degrees.set(n.id, 0));
         
@@ -1103,6 +1176,8 @@ class InsiderAnalyticsEngine {
     }
 
     detectCommunities(nodes, edges) {
+        // Algorithme simplifié de détection de communautés
+        // Pour une vraie implémentation, utiliser Louvain ou autre algorithme avancé
         return [{
             id: 1,
             members: nodes.map(n => n.id),
@@ -1111,11 +1186,11 @@ class InsiderAnalyticsEngine {
     }
 
     getScoreLabel(score) {
-        if (score >= 80) return 'VERY POSITIVE';
-        if (score >= 60) return 'POSITIVE';
-        if (score >= 40) return 'NEUTRAL';
-        if (score >= 20) return 'NEGATIVE';
-        return 'VERY NEGATIVE';
+        if (score >= 80) return 'TRÈS POSITIF';
+        if (score >= 60) return 'POSITIF';
+        if (score >= 40) return 'NEUTRE';
+        if (score >= 20) return 'NÉGATIF';
+        return 'TRÈS NÉGATIF';
     }
 
     assessDataQuality(transactions) {
@@ -1138,3044 +1213,3 @@ class InsiderAnalyticsEngine {
 
 // Export global
 window.InsiderAnalyticsEngine = InsiderAnalyticsEngine;
-
-console.log('✅ InsiderAnalyticsEngine v2.0 loaded successfully!');
-console.log('🚀 Premium features: Cluster Detection, Sentiment Analysis, Pattern Recognition, Network Analysis');
-
-
-
-// /**
-//  * ═══════════════════════════════════════════════════════════════════
-//  * 🧠 ADVANCED INSIDER ANALYTICS ENGINE - AlphaVault AI
-//  * ═══════════════════════════════════════════════════════════════════
-//  * ✅ VERSION AVEC DONNÉES RÉELLES SEC (logique du 1er code)
-//  * ✅ MODALS D'EXPLICATION INTÉGRÉES
-//  * ═══════════════════════════════════════════════════════════════════
-//  */
-
-// class AdvancedInsiderAnalyticsEngine {
-//     constructor() {
-//         // ✅ UTILISE SECForm4Client (comme dans le 1er code)
-//         this.form4Client = new SECForm4Client();
-        
-//         this.globalCache = {
-//             allTransactions: [],
-//             companiesData: new Map(),
-//             lastUpdate: null,
-//             isLoading: false
-//         };
-        
-//         this.thresholds = {
-//             clusterBuying: {
-//                 minInsiders: 3,
-//                 windowDays: 7,
-//                 minTotalValue: 500000
-//             },
-//             significantTransaction: {
-//                 ceoMinValue: 1000000,
-//                 cfoMinValue: 500000,
-//                 directorMinValue: 250000,
-//                 officerMinValue: 100000
-//             },
-//             preEarnings: {
-//                 daysBeforeEarnings: 30,
-//                 suspiciousWindowDays: 14
-//             },
-//             conviction: {
-//                 veryHigh: 5000000,
-//                 high: 1000000,
-//                 medium: 100000,
-//                 low: 10000
-//             }
-//         };
-
-//         this.weights = {
-//             transactionValue: 0.30,
-//             insiderRole: 0.25,
-//             timing: 0.20,
-//             frequency: 0.15,
-//             historical: 0.10
-//         };
-//     }
-
-//     /**
-//      * ✅ SOLUTION FINALE : Liste de tickers majeurs (fonctionne à 100%)
-//      */
-//     async loadAllCompanies(options = {}) {
-//         const {
-//             maxFilings = 2000,
-//             forceRefresh = false,
-//             months = 3
-//         } = options;
-
-//         console.log(`🌐 Loading insider data for major companies (last ${months} months)...`);
-
-//         if (this.globalCache.isLoading) {
-//             console.log('⏳ Already loading, waiting for completion...');
-//             return this.waitForLoadingComplete();
-//         }
-
-//         if (!forceRefresh && this.globalCache.allTransactions.length > 0) {
-//             const cacheAge = Date.now() - this.globalCache.lastUpdate;
-//             if (cacheAge < 3600000) {
-//                 console.log(`✅ Using cached data (${this.globalCache.allTransactions.length} transactions)`);
-//                 return this.globalCache;
-//             }
-//         }
-
-//         this.globalCache.isLoading = true;
-
-//         try {
-//             // ✅ LISTE DES 60 ENTREPRISES LES PLUS SUIVIES (MISE À JOUR 2025)
-//             const majorTickers = [
-//                 // Magnificent 7 + Top Tech
-//                 'NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN', 
-//                 'AVGO', 'ORCL', 'CSCO', 'AMD', 'INTC', 'CRM', 'ADBE', 
-//                 'NFLX', 'QCOM', 'TXN', 'AMAT', 'MU', 'PLTR', 'SNOW',
-                
-//                 // Finance & Banking
-//                 'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'SCHW', 
-//                 'AXP', 'V', 'MA', 'PYPL', 'SQ',
-                
-//                 // Healthcare & Pharma
-//                 'JNJ', 'LLY', 'UNH', 'ABBV', 'MRK', 'PFE', 'TMO', 'ABT',
-//                 'AMGN', 'GILD', 'CVS',
-                
-//                 // Consumer & Retail
-//                 'WMT', 'HD', 'NKE', 'COST', 'PG', 'KO', 'PEP', 'MCD', 
-//                 'SBUX', 'TGT', 'LOW',
-                
-//                 // Energy & Industrial
-//                 'XOM', 'CVX', 'COP', 'SLB', 'CAT', 'BA', 'GE', 'UPS'
-//             ];
-
-//             console.log(`📊 Loading insider data for ${majorTickers.length} major companies...`);
-
-//             const allTransactions = [];
-//             let successCount = 0;
-//             let errorCount = 0;
-//             const startTime = Date.now();
-            
-//             for (let i = 0; i < majorTickers.length; i++) {
-//                 const ticker = majorTickers[i];
-                
-//                 try {
-//                     const progress = `[${i + 1}/${majorTickers.length}]`;
-//                     console.log(`📥 ${progress} Loading ${ticker}...`);
-                    
-//                     const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
-                    
-//                     if (history && history.transactions && history.transactions.length > 0) {
-//                         const convertedTransactions = this.convertToDisplayFormat(history.transactions, ticker);
-//                         allTransactions.push(...convertedTransactions);
-//                         successCount++;
-                        
-//                         console.log(`✅ ${ticker}: ${convertedTransactions.length} transactions (Total: ${allTransactions.length})`);
-//                     } else {
-//                         console.log(`⚠ ${ticker}: No transactions found`);
-//                         errorCount++;
-//                     }
-                    
-//                     // Pause progressive pour ne pas surcharger l'API
-//                     const delay = i < 10 ? 200 : i < 30 ? 300 : 400;
-//                     await new Promise(resolve => setTimeout(resolve, delay));
-                    
-//                 } catch (error) {
-//                     errorCount++;
-//                     console.warn(`❌ ${ticker}: ${error.message}`);
-                    
-//                     // Si trop d'erreurs consécutives, augmente le délai
-//                     if (errorCount > 3) {
-//                         await new Promise(resolve => setTimeout(resolve, 1000));
-//                     }
-//                 }
-//             }
-
-//             const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-//             console.log(`✅ Total transactions loaded: ${allTransactions.length}`);
-//             console.log(`📊 Success: ${successCount}/${majorTickers.length} companies`);
-//             console.log(`⏱ Elapsed time: ${elapsed}s`);
-
-//             if (allTransactions.length === 0) {
-//                 console.warn('⚠ No transactions loaded - using fallback data');
-//                 const transactions = this.generateIntelligentFallback(100);
-//                 this.globalCache.allTransactions = transactions;
-//                 this.organizeByCompany(transactions);
-//                 this.globalCache.lastUpdate = Date.now();
-//                 this.globalCache.isLoading = false;
-//                 return this.globalCache;
-//             }
-
-//             // Trie par date (plus récent d'abord)
-//             allTransactions.sort((a, b) => b.date - a.date);
-
-//             this.organizeByCompany(allTransactions);
-//             this.globalCache.allTransactions = allTransactions;
-//             this.globalCache.lastUpdate = Date.now();
-//             this.globalCache.isLoading = false;
-
-//             console.log(`🎉 Successfully loaded ${this.globalCache.companiesData.size} companies with ${allTransactions.length} REAL transactions`);
-
-//             return this.globalCache;
-
-//         } catch (error) {
-//             console.error('❌ Critical error loading companies:', error);
-//             this.globalCache.isLoading = false;
-            
-//             console.warn('⚠ Falling back to intelligent mock data...');
-//             const transactions = this.generateIntelligentFallback(100);
-//             this.globalCache.allTransactions = transactions;
-//             this.organizeByCompany(transactions);
-//             this.globalCache.lastUpdate = Date.now();
-            
-//             return this.globalCache;
-//         }
-//     }
-
-//     /**
-//      * 🔄 Convertit CIK en Tickers (via Worker ou mapping)
-//      */
-//     async convertCIKsToTickers(ciks) {
-//         const tickers = [];
-        
-//         for (const cik of ciks) {
-//             try {
-//                 // Appel au Worker pour convertir CIK -> Ticker
-//                 const response = await fetch(`https://sec-edgar-api.raphnardone.workers.dev/api/sec/cik-to-ticker?cik=${cik}`);
-//                 if (response.ok) {
-//                     const data = await response.json();
-//                     if (data.ticker) {
-//                         tickers.push(data.ticker);
-//                     }
-//                 }
-//             } catch (error) {
-//                 console.warn(`⚠ CIK ${cik}: cannot convert to ticker`);
-//             }
-            
-//             await new Promise(resolve => setTimeout(resolve, 100));
-//         }
-        
-//         return tickers;
-//     }
-
-//     /**
-//      * 🔄 Méthode de secours avec liste de tickers
-//      */
-//     async loadWithTickerList(months) {
-//         const majorTickers = [
-//             'NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'BAC', 'WMT'
-//         ];
-        
-//         const allTransactions = [];
-        
-//         for (const ticker of majorTickers) {
-//             try {
-//                 const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
-//                 if (history?.transactions?.length > 0) {
-//                     const converted = this.convertToDisplayFormat(history.transactions, ticker);
-//                     allTransactions.push(...converted);
-//                 }
-//                 await new Promise(resolve => setTimeout(resolve, 300));
-//             } catch (error) {
-//                 console.warn(`⚠ ${ticker}:`, error.message);
-//             }
-//         }
-        
-//         this.organizeByCompany(allTransactions);
-//         this.globalCache.allTransactions = allTransactions;
-//         this.globalCache.lastUpdate = Date.now();
-//         this.globalCache.isLoading = false;
-        
-//         return this.globalCache;
-//     }
-
-//     /**
-//      * ✅ EXTRACTION AMÉLIORÉE DES TICKERS UNIQUES (avec multi-stratégies)
-//      */
-//     extractUniqueTickersImproved(rawFilings) {
-//         const tickers = new Set();
-        
-//         rawFilings.forEach((filing, index) => {
-//             // Stratégie 1 : Extraction depuis summary/title
-//             let symbol = this.extractSymbolFromFiling(filing);
-            
-//             // Stratégie 2 : Extraction depuis companyName
-//             if (!symbol && filing.companyName) {
-//                 symbol = this.extractSymbolFromCompanyName(filing.companyName);
-//             }
-            
-//             // Stratégie 3 : Extraction depuis le lien (URL peut contenir le CIK)
-//             if (!symbol && filing.link) {
-//                 symbol = this.extractSymbolFromUrl(filing.link);
-//             }
-            
-//             // Stratégie 4 : Utiliser le CIK comme fallback
-//             if (!symbol && filing.cik) {
-//                 // On va chercher le ticker via le CIK plus tard
-//                 symbol = `CIK_${filing.cik}`;
-//             }
-            
-//             // Validation et ajout
-//             if (symbol && symbol.length >= 1 && symbol.length <= 10) {
-//                 tickers.add(symbol);
-//             }
-            
-//             // Debug pour les 5 premiers filings
-//             if (index < 5) {
-//                 console.log(`🔍 Filing ${index + 1}:`, {
-//                     summary: filing.summary?.substring(0, 100),
-//                     title: filing.title?.substring(0, 100),
-//                     companyName: filing.companyName,
-//                     link: filing.link,
-//                     cik: filing.cik,
-//                     extractedSymbol: symbol
-//                 });
-//             }
-//         });
-        
-//         // Filtre les CIK_xxxxx pour ne garder que les vrais tickers
-//         const realTickers = Array.from(tickers).filter(t => !t.startsWith('CIK_'));
-        
-//         return realTickers.sort();
-//     }
-
-//     /**
-//      * 🔍 EXTRACTION DEPUIS LE NOM DE LA COMPAGNIE
-//      */
-//     extractSymbolFromCompanyName(companyName) {
-//         // Pattern : "NVIDIA CORP" -> "NVDA" (on va chercher dans une map ou via API)
-//         // Pour l'instant, on extrait les initiales si le nom est court
-        
-//         const cleanName = companyName.replace(/\b(Inc|Corp|Ltd|LLC|Co|Corporation|Company)\b/gi, '').trim();
-        
-//         // Si le nom nettoyé fait moins de 6 caractères et est en majuscules, c'est probablement le ticker
-//         if (cleanName.length <= 5 && cleanName.match(/^[A-Z]+$/)) {
-//             return cleanName;
-//         }
-        
-//         // Sinon, on cherche un pattern "NAME (TICKER)"
-//         const tickerMatch = companyName.match(/\(([A-Z]{1,5})\)/);
-//         if (tickerMatch) {
-//             return tickerMatch[1];
-//         }
-        
-//         return null;
-//     }
-
-//     /**
-//      * 🔗 EXTRACTION DEPUIS L'URL
-//      */
-//     extractSymbolFromUrl(url) {
-//         // Pattern typique : https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810
-//         const cikMatch = url.match(/CIK=(\d+)/i);
-//         if (cikMatch) {
-//             return `CIK_${cikMatch[1]}`;
-//         }
-//         return null;
-//     }
-
-//     /**
-//      * 🔍 EXTRACTION DU SYMBOLE DEPUIS UN FILING (méthode originale améliorée)
-//      */
-//     extractSymbolFromFiling(filing) {
-//         // Essaie d'extraire depuis summary ou title
-//         const text = (filing.summary || filing.title || '').toUpperCase();
-        
-//         // Pattern 1 : Ticker entre parenthèses (NVDA)
-//         const patterns = [
-//             /\(([A-Z]{1,5})\)/,
-//             /\bTicker:\s*([A-Z]{1,5})\b/i,
-//             /\bSymbol:\s*([A-Z]{1,5})\b/i,
-//             /\b([A-Z]{2,5})\s+\-\s+Form\s+4/i  // Pattern SEC typique
-//         ];
-        
-//         for (const pattern of patterns) {
-//             const match = text.match(pattern);
-//             if (match && match[1] && this.isValidTicker(match[1])) {
-//                 return match[1];
-//             }
-//         }
-        
-//         // Pattern 2 : Nom de compagnie suivi de Inc/Corp
-//         const companyName = filing.companyName || filing.title || '';
-//         const nameMatch = companyName.match(/([A-Z]{2,5})\s+(Inc|Corp|Ltd|LLC)/i);
-//         if (nameMatch && nameMatch[1].length <= 5 && this.isValidTicker(nameMatch[1])) {
-//             return nameMatch[1].toUpperCase();
-//         }
-        
-//         return null;
-//     }
-
-//     /**
-//      * ✅ VALIDATION DE TICKER (filtre les mots communs qui ne sont pas des tickers)
-//      */
-//     isValidTicker(symbol) {
-//         const blacklist = ['FORM', 'THE', 'INC', 'CORP', 'LLC', 'LTD', 'CO', 'AND', 'FOR'];
-//         return !blacklist.includes(symbol.toUpperCase());
-//     }
-
-//     /**
-//      * ✅ EXTRACTION DES TICKERS UNIQUES DEPUIS LES FILINGS BRUTS
-//      */
-//     extractUniqueTickers(rawFilings) {
-//         const tickers = new Set();
-        
-//         rawFilings.forEach(filing => {
-//             const symbol = this.extractSymbolFromFiling(filing);
-//             if (symbol && symbol.length >= 1 && symbol.length <= 5) {
-//                 tickers.add(symbol);
-//             }
-//         });
-        
-//         return Array.from(tickers).sort();
-//     }
-
-//     /**
-//      * ✅ CONVERSION DES TRANSACTIONS (FORMAT 1ER CODE → FORMAT 2ÈME CODE)
-//      */
-//     convertToDisplayFormat(transactions, ticker) {
-//         const converted = [];
-        
-//         transactions.forEach((txn, index) => {
-//             // ✅ EXTRAIT LES VRAIES DONNÉES (pas de random !)
-//             const reportingOwner = txn.reportingOwner || {};
-//             const nonDerivativeTxns = txn.nonDerivativeTransactions || [];
-            
-//             nonDerivativeTxns.forEach((nt, ntIndex) => {
-//                 const shares = parseInt(nt.shares) || 0;
-//                 const pricePerShare = parseFloat(nt.pricePerShare) || 0;
-//                 const totalValue = nt.totalValue || (shares * pricePerShare);
-                
-//                 const position = reportingOwner.classification || 'Officer';
-//                 const insiderName = reportingOwner.name || 'Unknown Insider';
-                
-//                 const netWorth = this.estimateNetWorth(position);
-//                 const convictionScore = this.calculateConvictionScore(totalValue, netWorth);
-                
-//                 // ✅ EXTRAIT LE TYPE DE TRANSACTION (P = Purchase, S = Sale, etc.)
-//                 let txnType = 'P';
-//                 if (nt.transactionType === 'Sale' || nt.transactionCode === 'S') {
-//                     txnType = 'S';
-//                 } else if (nt.transactionCode === 'M') {
-//                     txnType = 'M';
-//                 }
-                
-//                 // ✅ CALCUL DES IMPACTS (basé sur les vraies données si disponibles)
-//                 const daysToEarnings = Math.floor(Math.random() * 90) + 1; // TODO: intégrer API earnings
-//                 const impactMultiplier = txnType === 'P' ? 1 : -1;
-//                 const priceImpact7d = (Math.random() * 10 + 2) * impactMultiplier;
-//                 const priceImpact30d = (Math.random() * 20 + 5) * impactMultiplier;
-//                 const priceImpact90d = (Math.random() * 30 + 10) * impactMultiplier;
-                
-//                 converted.push({
-//                     id: `TXN-REAL-${ticker}-${index}-${ntIndex}-${Date.now()}`,
-//                     date: new Date(txn.filingDate || Date.now()),
-//                     company: {
-//                         symbol: ticker,
-//                         name: txn.issuerName || ticker,
-//                         cik: txn.issuerCik || '0000000000',
-//                         sector: this.classifySector(txn.issuerName || ticker)
-//                     },
-//                     insider: {
-//                         name: insiderName,
-//                         position: position,
-//                         netWorth: netWorth
-//                     },
-//                     type: txnType,
-//                     shares: shares,
-//                     pricePerShare: pricePerShare,
-//                     transactionValue: totalValue,
-//                     convictionScore: convictionScore,
-//                     daysToEarnings: daysToEarnings,
-//                     priceImpact7d: priceImpact7d,
-//                     priceImpact30d: priceImpact30d,
-//                     priceImpact90d: priceImpact90d,
-//                     formUrl: txn.formUrl || `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${txn.issuerCik}`,
-//                     filingType: 'Form 4',
-//                     accessionNumber: txn.accessionNumber,
-//                     isRealData: true
-//                 });
-//             });
-//         });
-        
-//         return converted.sort((a, b) => b.date - a.date);
-//     }
-
-//     organizeByCompany(transactions) {
-//         this.globalCache.companiesData.clear();
-
-//         transactions.forEach(txn => {
-//             const symbol = txn.company.symbol;
-
-//             if (!this.globalCache.companiesData.has(symbol)) {
-//                 this.globalCache.companiesData.set(symbol, {
-//                     symbol: symbol,
-//                     name: txn.company.name,
-//                     cik: txn.company.cik,
-//                     sector: txn.company.sector,
-//                     transactions: [],
-//                     analysis: null
-//                 });
-//             }
-
-//             this.globalCache.companiesData.get(symbol).transactions.push(txn);
-//         });
-
-//         console.log(`🗂 Organized ${transactions.length} transactions across ${this.globalCache.companiesData.size} companies`);
-//     }
-
-//     async waitForLoadingComplete() {
-//         return new Promise((resolve) => {
-//             const checkInterval = setInterval(() => {
-//                 if (!this.globalCache.isLoading) {
-//                     clearInterval(checkInterval);
-//                     resolve(this.globalCache);
-//                 }
-//             }, 500);
-//         });
-//     }
-
-//     /**
-//      * 🔍 HELPER : EXTRACTION DU SYMBOLE DEPUIS UN FILING
-//      */
-//     extractSymbolFromFiling(filing) {
-//         const text = (filing.summary || filing.title || '').toUpperCase();
-        
-//         const patterns = [
-//             /\(([A-Z]{1,5})\)/,
-//             /\bTicker:\s*([A-Z]{1,5})\b/i,
-//             /\bSymbol:\s*([A-Z]{1,5})\b/i
-//         ];
-        
-//         for (const pattern of patterns) {
-//             const match = text.match(pattern);
-//             if (match && match[1]) {
-//                 return match[1];
-//             }
-//         }
-        
-//         const companyName = filing.companyName || filing.title || '';
-//         const nameMatch = companyName.match(/([A-Z]{2,5})\s+(Inc|Corp|Ltd|LLC)/i);
-//         if (nameMatch && nameMatch[1].length <= 5) {
-//             return nameMatch[1].toUpperCase();
-//         }
-        
-//         if (filing.cik) {
-//             return `CIK${filing.cik.slice(-4)}`;
-//         }
-        
-//         return null;
-//     }
-
-//     classifySector(companyName) {
-//         const name = companyName.toLowerCase();
-        
-//         if (name.match(/tech|software|ai|cloud|data|cyber|semiconductor/)) return 'Technology';
-//         if (name.match(/bio|pharma|health|medical|therapeutics/)) return 'Healthcare';
-//         if (name.match(/finance|capital|bank|insurance|credit|investment/)) return 'Financial Services';
-//         if (name.match(/energy|oil|gas|solar|renewable|electric/)) return 'Energy';
-//         if (name.match(/retail|consumer|ecommerce|shopping/)) return 'Consumer';
-//         if (name.match(/real estate|reit|property/)) return 'Real Estate';
-//         if (name.match(/industrial|manufacturing|materials|construction/)) return 'Industrials';
-//         if (name.match(/auto|vehicle|transport|logistics/)) return 'Automotive';
-//         if (name.match(/telecom|communication|wireless/)) return 'Telecommunications';
-        
-//         return 'Other';
-//     }
-
-//     estimateNetWorth(position) {
-//         const netWorthRanges = {
-//             'CEO': [50000000, 500000000],
-//             'CFO': [20000000, 200000000],
-//             'Director': [10000000, 100000000],
-//             'President': [30000000, 300000000],
-//             'VP': [5000000, 50000000],
-//             'CTO': [15000000, 150000000],
-//             'COO': [20000000, 200000000],
-//             'Officer': [3000000, 30000000]
-//         };
-        
-//         const range = netWorthRanges[position] || [5000000, 50000000];
-//         return Math.random() * (range[1] - range[0]) + range[0];
-//     }
-
-//     calculateConvictionScore(transactionValue, netWorth) {
-//         const percentage = (transactionValue / netWorth) * 100;
-        
-//         if (percentage > 5) return { score: 95, level: 'high' };
-//         if (percentage > 2) return { score: 85, level: 'high' };
-//         if (percentage > 1) return { score: 70, level: 'medium' };
-//         if (percentage > 0.5) return { score: 55, level: 'medium' };
-//         return { score: 30, level: 'low' };
-//     }
-
-//     /**
-//      * 📊 FALLBACK INTELLIGENT (utilisé uniquement en cas d'erreur)
-//      */
-//     generateIntelligentFallback(maxTransactions) {
-//         console.log('🔄 Generating intelligent fallback data...');
-        
-//         const transactions = [];
-//         const now = new Date();
-        
-//         const companies = [
-//             { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Technology', cik: '0001045810' },
-//             { symbol: 'TSLA', name: 'Tesla Inc', sector: 'Automotive', cik: '0001318605' },
-//             { symbol: 'AAPL', name: 'Apple Inc', sector: 'Technology', cik: '0000320193' },
-//             { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'Technology', cik: '0000789019' },
-//             { symbol: 'GOOGL', name: 'Alphabet Inc', sector: 'Technology', cik: '0001652044' },
-//             { symbol: 'META', name: 'Meta Platforms Inc', sector: 'Technology', cik: '0001326801' },
-//             { symbol: 'AMZN', name: 'Amazon.com Inc', sector: 'E-commerce', cik: '0001018724' },
-//             { symbol: 'JPM', name: 'JPMorgan Chase & Co', sector: 'Financial Services', cik: '0000019617' },
-//             { symbol: 'V', name: 'Visa Inc', sector: 'Financial Services', cik: '0001403161' },
-//             { symbol: 'WMT', name: 'Walmart Inc', sector: 'Consumer', cik: '0000104169' }
-//         ];
-
-//         const positions = ['CEO', 'CFO', 'Director', 'VP', 'President', 'CTO', 'COO'];
-//         const insiderNames = [
-//             'John Anderson', 'Sarah Chen', 'Michael Roberts', 'Emily Davis',
-//             'David Martinez', 'Jennifer Wilson', 'Robert Johnson', 'Maria Garcia'
-//         ];
-
-//         for (let i = 0; i < maxTransactions; i++) {
-//             const company = companies[Math.floor(Math.random() * companies.length)];
-//             const daysAgo = Math.floor(Math.random() * 90);
-//             const transactionDate = new Date(now);
-//             transactionDate.setDate(transactionDate.getDate() - daysAgo);
-            
-//             const rand = Math.random();
-//             let type;
-//             if (rand < 0.55) type = 'P';
-//             else if (rand < 0.90) type = 'S';
-//             else type = 'M';
-            
-//             const shares = Math.floor(Math.random() * 19000) + 1000;
-//             const pricePerShare = Math.random() * 150 + 50;
-//             const transactionValue = shares * pricePerShare;
-//             const position = positions[Math.floor(Math.random() * positions.length)];
-//             const netWorth = this.estimateNetWorth(position);
-//             const convictionScore = this.calculateConvictionScore(transactionValue, netWorth);
-//             const daysToEarnings = Math.floor(Math.random() * 90) + 1;
-            
-//             const impactMultiplier = type === 'P' ? 1 : -1;
-//             const priceImpact7d = (Math.random() * 10 + 2) * impactMultiplier;
-//             const priceImpact30d = (Math.random() * 20 + 5) * impactMultiplier;
-//             const priceImpact90d = (Math.random() * 30 + 10) * impactMultiplier;
-
-//             transactions.push({
-//                 id: `TXN-FALLBACK-${i}-${Date.now()}`,
-//                 date: transactionDate,
-//                 company: company,
-//                 insider: {
-//                     name: insiderNames[Math.floor(Math.random() * insiderNames.length)],
-//                     position: position,
-//                     netWorth: netWorth
-//                 },
-//                 type: type,
-//                 shares: shares,
-//                 pricePerShare: pricePerShare,
-//                 transactionValue: transactionValue,
-//                 convictionScore: convictionScore,
-//                 daysToEarnings: daysToEarnings,
-//                 priceImpact7d: priceImpact7d,
-//                 priceImpact30d: priceImpact30d,
-//                 priceImpact90d: priceImpact90d,
-//                 formUrl: `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${company.cik}`,
-//                 filingType: 'Form 4',
-//                 isRealData: false
-//             });
-//         }
-
-//         transactions.sort((a, b) => b.date - a.date);
-//         return transactions;
-//     }
-
-//     formatDate(date) {
-//         return new Date(date).toLocaleDateString('en-US', {
-//             year: 'numeric',
-//             month: 'short',
-//             day: 'numeric'
-//         });
-//     }
-
-//     formatNumber(num) {
-//         if (num >= 1000000000) {
-//             return (num / 1000000000).toFixed(2) + 'B';
-//         }
-//         if (num >= 1000000) {
-//             return (num / 1000000).toFixed(2) + 'M';
-//         } else if (num >= 1000) {
-//             return (num / 1000).toFixed(2) + 'K';
-//         }
-//         return num.toFixed(0);
-//     }
-
-//     }
-
-// window.AdvancedInsiderAnalyticsEngine = AdvancedInsiderAnalyticsEngine;
-
-// /**
-//  * ═══════════════════════════════════════════════════════════════════
-//  * 💼 ADVANCED INSIDER FLOW TRACKER - INTERFACE
-//  * ═══════════════════════════════════════════════════════════════════
-//  */
-
-// class AdvancedInsiderFlowTracker {
-//     constructor() {
-//         this.engine = new AdvancedInsiderAnalyticsEngine();
-//         this.allCompaniesData = null;
-//         this.currentCompany = 'all';
-//         this.currentPeriod = 30;
-//         this.currentTransactionType = 'all';
-//         this.filteredData = [];
-
-//         this.currentPage = 1;
-//         this.itemsPerPage = 15;
-        
-//         this.alertConfig = {
-//             clusterBuying: true,
-//             highValue: true,
-//             divergence: true,
-//             preEarnings: true,
-//             unusualVolume: true,
-//             highValueThreshold: 1000000
-//         };
-        
-//         this.init();
-//     }
-
-//     async init() {
-//         console.log('🚀 Initializing Advanced Insider Flow Tracker...');
-        
-//         if (document.readyState === 'loading') {
-//             await new Promise(resolve => {
-//                 document.addEventListener('DOMContentLoaded', resolve);
-//             });
-//         }
-        
-//         this.setupEventListeners();
-//         console.log('✅ Tracker initialized');
-//     }
-
-//     setupEventListeners() {
-//         const refreshBtn = document.getElementById('refreshData');
-//         if (refreshBtn) {
-//             refreshBtn.addEventListener('click', () => this.loadAllData(true));
-//         }
-
-//         const alertsBtn = document.getElementById('configureAlerts');
-//         if (alertsBtn) {
-//             alertsBtn.addEventListener('click', () => this.openModal('alertsConfigModal'));
-//         }
-
-//         const companyFilter = document.getElementById('companyFilter');
-//         if (companyFilter) {
-//             companyFilter.addEventListener('change', (e) => {
-//                 this.currentCompany = e.target.value;
-//                 this.applyFilters();
-//             });
-//         }
-
-//         const periodFilter = document.getElementById('periodFilter');
-//         if (periodFilter) {
-//             periodFilter.addEventListener('change', (e) => {
-//                 this.currentPeriod = parseInt(e.target.value);
-//                 this.applyFilters();
-//             });
-//         }
-
-//         document.querySelectorAll('.modal-close').forEach(btn => {
-//             btn.addEventListener('click', (e) => {
-//                 e.preventDefault();
-//                 e.stopPropagation();
-//                 this.closeAllModals();
-//             });
-//         });
-
-//         document.querySelectorAll('.modal').forEach(modal => {
-//             modal.addEventListener('click', (e) => {
-//                 if (e.target === modal) {
-//                     this.closeAllModals();
-//                 }
-//             });
-//         });
-
-//         console.log('✅ Event listeners configured');
-//     }
-
-//     async loadAllData(forceRefresh = false) {
-//         console.log('📥 Loading all insider data...');
-        
-//         try {
-//             this.showLoading();
-            
-//             this.allCompaniesData = await this.engine.loadAllCompanies({
-//                 maxFilings: 2000,
-//                 forceRefresh: forceRefresh,
-//                 months: 3
-//             });
-            
-//             console.log(`✅ Loaded ${this.allCompaniesData.companiesData.size} companies`);
-//             console.log(`📊 Total transactions: ${this.allCompaniesData.allTransactions.length}`);
-            
-//             this.applyFilters();
-//             this.checkSmartAlerts();
-//             this.generateAlphyRecommendation();
-            
-//         } catch (error) {
-//             console.error('❌ Error loading data:', error);
-//             this.hideLoading();
-//         }
-//     }
-
-//     applyFilters() {
-//         if (!this.allCompaniesData) {
-//             console.warn('⚠ No data loaded yet');
-//             return;
-//         }
-
-//         this.currentPage = 1;
-
-//         let transactions = this.allCompaniesData.allTransactions;
-
-//         if (this.currentCompany !== 'all') {
-//             transactions = transactions.filter(t => t.company.symbol === this.currentCompany);
-//         }
-
-//         const now = new Date();
-//         transactions = transactions.filter(t => {
-//             const daysDiff = Math.floor((now - t.date) / (1000 * 60 * 60 * 24));
-//             return daysDiff <= this.currentPeriod;
-//         });
-
-//         if (this.currentTransactionType !== 'all') {
-//             if (this.currentTransactionType === 'buy') {
-//                 transactions = transactions.filter(t => t.type === 'P');
-//             } else if (this.currentTransactionType === 'sell') {
-//                 transactions = transactions.filter(t => t.type === 'S');
-//             } else if (this.currentTransactionType === 'option') {
-//                 transactions = transactions.filter(t => t.type === 'M');
-//             }
-//         }
-
-//         this.filteredData = transactions;
-//         console.log(`🔍 Filtered to ${this.filteredData.length} transactions`);
-
-//         this.renderDashboard();
-//     }
-
-//     renderDashboard() {
-//         try {
-//             this.renderOverviewCards();
-//             this.renderSentimentGauge();
-//             this.renderSentimentTrend();
-//             this.renderPatternCards();
-//             this.renderTransactionsTable();
-//             this.renderConvictionScoreChart();
-//             this.renderTransactionSizeChart();
-//             this.renderTimingEarningsChart();
-//             this.renderTimingAnnouncementsChart();
-//             this.renderCorrelationChart();
-//             this.renderBacktestingStats();
-//             this.renderNetworkChart();
-//             this.renderComparisonChart();
-//             this.renderDivergenceAlertsChart();
-//             this.renderComparisonTable();
-//             this.renderActivityHeatmap();
-//             this.populateCompanyFilter();
-            
-//             this.hideLoading();
-//             console.log('✅ Dashboard rendered successfully');
-//         } catch (error) {
-//             console.error('❌ Error rendering dashboard:', error);
-//             this.hideLoading();
-//         }
-//     }
-
-//     renderOverviewCards() {
-//         const container = document.getElementById('overviewCards');
-//         if (!container) return;
-
-//         const totalTransactions = this.filteredData.length;
-//         const purchases = this.filteredData.filter(t => t.type === 'P').length;
-//         const sales = this.filteredData.filter(t => t.type === 'S').length;
-//         const totalValue = this.filteredData.reduce((sum, t) => sum + (t.transactionValue || 0), 0);
-//         const avgConviction = totalTransactions > 0 
-//             ? this.filteredData.reduce((sum, t) => sum + (t.convictionScore?.score || 0), 0) / totalTransactions 
-//             : 0;
-
-//         const purchaseChange = totalTransactions > 0 
-//             ? ((purchases - sales) / totalTransactions * 100).toFixed(1) 
-//             : 0;
-
-//         container.innerHTML = `
-//             <div class='insider-overview-card'>
-//                 <div class='card-icon-wrapper' style='background: linear-gradient(135deg, #667eea, #764ba2);'>
-//                     <i class='fas fa-exchange-alt'></i>
-//                 </div>
-//                 <div style='flex: 1;'>
-//                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-//                         <p class='card-label'>Total Transactions</p>
-//                         <button class='info-icon-btn' onclick='insiderApp.showInfoModal("totalTransactions")' title='Learn more'>
-//                             <i class='fas fa-info-circle'></i>
-//                         </button>
-//                     </div>
-//                     <p class='card-value-large'>${totalTransactions}</p>
-//                     <p class='card-trend ${purchaseChange >= 0 ? 'positive' : 'negative'}'>
-//                         <i class='fas fa-arrow-${purchaseChange >= 0 ? 'up' : 'down'}'></i>
-//                         ${Math.abs(purchaseChange)}% net buying
-//                     </p>
-//                 </div>
-//             </div>
-
-//             <div class='insider-overview-card'>
-//                 <div class='card-icon-wrapper' style='background: linear-gradient(135deg, #10b981, #059669);'>
-//                     <i class='fas fa-arrow-up'></i>
-//                 </div>
-//                 <div style='flex: 1;'>
-//                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-//                         <p class='card-label'>Insider Purchases</p>
-//                         <button class='info-icon-btn' onclick='insiderApp.showInfoModal("insiderPurchases")' title='Learn more'>
-//                             <i class='fas fa-info-circle'></i>
-//                         </button>
-//                     </div>
-//                     <p class='card-value-large'>${purchases}</p>
-//                     <p class='card-trend positive'>
-//                         <i class='fas fa-arrow-up'></i>
-//                         ${totalTransactions > 0 ? ((purchases / totalTransactions) * 100).toFixed(0) : 0}% of total
-//                     </p>
-//                 </div>
-//             </div>
-
-//             <div class='insider-overview-card'>
-//                 <div class='card-icon-wrapper' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>
-//                     <i class='fas fa-arrow-down'></i>
-//                 </div>
-//                 <div style='flex: 1;'>
-//                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-//                         <p class='card-label'>Insider Sales</p>
-//                         <button class='info-icon-btn' onclick='insiderApp.showInfoModal("insiderSales")' title='Learn more'>
-//                             <i class='fas fa-info-circle'></i>
-//                         </button>
-//                     </div>
-//                     <p class='card-value-large'>${sales}</p>
-//                     <p class='card-trend ${sales < purchases ? 'positive' : 'negative'}'>
-//                         <i class='fas fa-arrow-${sales < purchases ? 'down' : 'up'}'></i>
-//                         ${totalTransactions > 0 ? ((sales / totalTransactions) * 100).toFixed(0) : 0}% of total
-//                     </p>
-//                 </div>
-//             </div>
-
-//             <div class='insider-overview-card'>
-//                 <div class='card-icon-wrapper' style='background: linear-gradient(135deg, #3b82f6, #2563eb);'>
-//                     <i class='fas fa-dollar-sign'></i>
-//                 </div>
-//                 <div style='flex: 1;'>
-//                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-//                         <p class='card-label'>Total Transaction Value</p>
-//                         <button class='info-icon-btn' onclick='insiderApp.showInfoModal("transactionValue")' title='Learn more'>
-//                             <i class='fas fa-info-circle'></i>
-//                         </button>
-//                     </div>
-//                     <p class='card-value-large'>$${(totalValue / 1000000).toFixed(1)}M</p>
-//                     <p class='card-trend positive'>
-//                         <i class='fas fa-chart-line'></i>
-//                         Last ${this.currentPeriod} days
-//                     </p>
-//                 </div>
-//             </div>
-
-//             <div class='insider-overview-card'>
-//                 <div class='card-icon-wrapper' style='background: linear-gradient(135deg, #f59e0b, #d97706);'>
-//                     <i class='fas fa-star'></i>
-//                 </div>
-//                 <div style='flex: 1;'>
-//                     <div style='display: flex; justify-content: space-between; align-items: center;'>
-//                         <p class='card-label'>Avg Conviction Score</p>
-//                         <button class='info-icon-btn' onclick='insiderApp.showInfoModal("convictionScore")' title='Learn more'>
-//                             <i class='fas fa-info-circle'></i>
-//                         </button>
-//                     </div>
-//                     <p class='card-value-large'>${avgConviction.toFixed(0)}/100</p>
-//                     <p class='card-trend ${avgConviction >= 60 ? 'positive' : 'negative'}'>
-//                         <i class='fas fa-${avgConviction >= 60 ? 'fire' : 'snowflake'}'></i>
-//                         ${avgConviction >= 60 ? 'High' : 'Moderate'}
-//                     </p>
-//                 </div>
-//             </div>
-//         `;
-//     }
-
-//     renderSentimentGauge() {
-//         const chartEl = document.getElementById('sentimentGaugeChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const purchases = this.filteredData.filter(t => t.type === 'P').length;
-//         const sales = this.filteredData.filter(t => t.type === 'S').length;
-//         const total = purchases + sales;
-        
-//         const sentimentScore = total > 0 ? ((purchases - sales) / total * 100) : 0;
-//         const gaugeValue = 50 + sentimentScore / 2;
-
-//         Highcharts.chart('sentimentGaugeChart', {
-//             chart: {
-//                 type: 'gauge',
-//                 backgroundColor: 'transparent',
-//                 height: '350px'
-//             },
-//             title: { text: null },
-//             pane: {
-//                 startAngle: -90,
-//                 endAngle: 90,
-//                 background: null,
-//                 center: ['50%', '75%'],
-//                 size: '110%'
-//             },
-//             yAxis: {
-//                 min: 0,
-//                 max: 100,
-//                 tickPixelInterval: 25,
-//                 tickPosition: 'inside',
-//                 tickColor: Highcharts.defaultOptions.chart.backgroundColor || '#FFFFFF',
-//                 tickLength: 20,
-//                 tickWidth: 2,
-//                 minorTickInterval: null,
-//                 labels: {
-//                     distance: 20,
-//                     style: { fontSize: '14px' }
-//                 },
-//                 plotBands: [{
-//                     from: 0,
-//                     to: 35,
-//                     color: '#ef4444',
-//                     thickness: 20
-//                 }, {
-//                     from: 35,
-//                     to: 65,
-//                     color: '#f59e0b',
-//                     thickness: 20
-//                 }, {
-//                     from: 65,
-//                     to: 100,
-//                     color: '#10b981',
-//                     thickness: 20
-//                 }]
-//             },
-//             series: [{
-//                 name: 'Sentiment',
-//                 data: [gaugeValue],
-//                 dataLabels: {
-//                     format: '{y:.0f}',
-//                     borderWidth: 0,
-//                     color: (Highcharts.defaultOptions.title.style && Highcharts.defaultOptions.title.style.color) || '#333333',
-//                     style: {
-//                         fontSize: '32px',
-//                         fontWeight: 'bold'
-//                     }
-//                 },
-//                 dial: {
-//                     radius: '80%',
-//                     backgroundColor: '#667eea',
-//                     baseWidth: 12,
-//                     baseLength: '0%',
-//                     rearLength: '0%'
-//                 },
-//                 pivot: {
-//                     backgroundColor: '#667eea',
-//                     radius: 6
-//                 }
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: false }
-//         });
-
-//         const signalEl = document.getElementById('sentimentSignal');
-//         const interpretationEl = document.getElementById('sentimentInterpretation');
-
-//         if (signalEl && interpretationEl) {
-//             if (gaugeValue >= 65) {
-//                 signalEl.textContent = 'Bullish';
-//                 signalEl.style.color = '#10b981';
-//                 interpretationEl.textContent = 'Strong buying activity from insiders suggests positive sentiment.';
-//             } else if (gaugeValue >= 35) {
-//                 signalEl.textContent = 'Neutral';
-//                 signalEl.style.color = '#f59e0b';
-//                 interpretationEl.textContent = 'Mixed signals from insiders. Buy and sell activities are balanced.';
-//             } else {
-//                 signalEl.textContent = 'Bearish';
-//                 signalEl.style.color = '#ef4444';
-//                 interpretationEl.textContent = 'Elevated selling activity from insiders indicates caution.';
-//             }
-//         }
-//     }
-
-//     renderSentimentTrend() {
-//         const chartEl = document.getElementById('sentimentTrendChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const dailyData = [];
-//         for (let i = 29; i >= 0; i--) {
-//             const date = new Date();
-//             date.setDate(date.getDate() - i);
-            
-//             const sentiment = 50 + Math.sin(i / 5) * 20 + (Math.random() - 0.5) * 10;
-
-//             dailyData.push({
-//                 x: date.getTime(),
-//                 y: Math.max(0, Math.min(100, sentiment))
-//             });
-//         }
-
-//         Highcharts.chart('sentimentTrendChart', {
-//             chart: {
-//                 type: 'area',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 type: 'datetime',
-//                 title: { text: null }
-//             },
-//             yAxis: {
-//                 title: { text: 'Sentiment Score' },
-//                 min: 0,
-//                 max: 100,
-//                 plotLines: [{
-//                     value: 50,
-//                     color: '#6b7280',
-//                     dashStyle: 'Dash',
-//                     width: 2,
-//                     label: {
-//                         text: 'Neutral',
-//                         align: 'right'
-//                     }
-//                 }]
-//             },
-//             series: [{
-//                 name: 'Insider Sentiment',
-//                 data: dailyData,
-//                 color: '#667eea',
-//                 fillColor: {
-//                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-//                     stops: [
-//                         [0, 'rgba(102, 126, 234, 0.4)'],
-//                         [1, 'rgba(102, 126, 234, 0.0)']
-//                     ]
-//                 },
-//                 marker: {
-//                     enabled: false,
-//                     states: {
-//                         hover: { enabled: true }
-//                     }
-//                 }
-//             }],
-//             legend: { enabled: false },
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderPatternCards() {
-//         const clusterCompanies = this.detectClusterBuying();
-//         const clusterEl = document.getElementById('clusterCount');
-//         if (clusterEl) {
-//             clusterEl.textContent = `${clusterCompanies.length} companies`;
-//         }
-
-//         const preEarnings = this.filteredData.filter(txn => txn.daysToEarnings <= 30);
-//         const preEarningsEl = document.getElementById('preEarningsCount');
-//         if (preEarningsEl) {
-//             preEarningsEl.textContent = `${preEarnings.length} transactions`;
-//         }
-
-//         const divergences = this.detectDivergence();
-//         const divergenceEl = document.getElementById('divergenceCount');
-//         if (divergenceEl) {
-//             divergenceEl.textContent = `${divergences.length} companies`;
-//         }
-
-//         const avgDailyTxns = this.allCompaniesData.allTransactions.length / 90;
-//         const last7DaysTxns = this.allCompaniesData.allTransactions.filter(txn => this.isRecent(txn.date, 7)).length;
-//         const dailyAvgLast7 = last7DaysTxns / 7;
-//         const unusualVolume = dailyAvgLast7 > avgDailyTxns * 3 ? last7DaysTxns : 0;
-//         const volumeEl = document.getElementById('unusualVolumeCount');
-//         if (volumeEl) {
-//             volumeEl.textContent = `${unusualVolume} transactions`;
-//         }
-//     }
-
-//     detectClusterBuying() {
-//         const companies = {};
-//         const last7Days = this.filteredData.filter(txn => this.isRecent(txn.date, 7) && txn.type === 'P');
-
-//         last7Days.forEach(txn => {
-//             if (!companies[txn.company.symbol]) {
-//                 companies[txn.company.symbol] = { count: 0 };
-//             }
-//             companies[txn.company.symbol].count++;
-//         });
-
-//         return Object.keys(companies).filter(symbol => companies[symbol].count >= 3);
-//     }
-
-//     detectDivergence() {
-//         return [];
-//     }
-
-//     isRecent(date, days) {
-//         const now = new Date();
-//         const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-//         return daysDiff <= days;
-//     }
-
-//     renderTransactionsTable() {
-//         const tbody = document.querySelector('#transactionsTable tbody');
-        
-//         if (!tbody) return;
-
-//         if (this.filteredData.length === 0) {
-//             tbody.innerHTML = `
-//                 <tr>
-//                     <td colspan="9" class='text-center' style='padding: 40px;'>
-//                         <i class='fas fa-inbox' style='font-size: 3rem; color: var(--text-tertiary); margin-bottom: 16px;'></i>
-//                         <p style='color: var(--text-secondary);'>No transactions found for the selected filters</p>
-//                     </td>
-//                 </tr>
-//             `;
-//             return;
-//         }
-
-//         const totalItems = this.filteredData.length;
-//         const totalPages = Math.ceil(totalItems / this.itemsPerPage);
-//         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-//         const endIndex = Math.min(startIndex + this.itemsPerPage, totalItems);
-//         const currentPageData = this.filteredData.slice(startIndex, endIndex);
-
-//         const tableWrapper = document.querySelector('.insider-table-wrapper');
-//         if (tableWrapper) {
-//             let statsEl = document.getElementById('tableStatsInfo');
-//             if (!statsEl) {
-//                 statsEl = document.createElement('div');
-//                 statsEl.id = 'tableStatsInfo';
-//                 statsEl.style.cssText = 'padding: 12px 16px; color: var(--text-secondary); font-size: 0.9rem;';
-//                 tableWrapper.insertBefore(statsEl, tableWrapper.firstChild);
-//             }
-//             statsEl.innerHTML = `Showing <strong>${startIndex + 1}-${endIndex}</strong> of <strong>${totalItems}</strong> transactions`;
-//         }
-
-//         const rows = currentPageData.map(txn => {
-//             const typeClass = txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option';
-//             const typeIcon = txn.type === 'P' ? 'fa-arrow-up' : txn.type === 'S' ? 'fa-arrow-down' : 'fa-certificate';
-//             const typeText = txn.type === 'P' ? 'Purchase' : txn.type === 'S' ? 'Sale' : 'Option';
-
-//             const convictionScore = txn.convictionScore?.score || 0;
-//             const convictionClass = convictionScore >= 70 ? '' : convictionScore >= 50 ? 'medium' : 'low';
-
-//             return `
-//                 <tr>
-//                     <td>${this.engine.formatDate(txn.date)}</td>
-//                     <td>
-//                         <strong>${txn.company.symbol}</strong><br>
-//                         <small style='color: var(--text-tertiary);'>${txn.company.name}</small>
-//                     </td>
-//                     <td>${txn.insider.name}</td>
-//                     <td><span class='ipo-sector-badge'>${txn.insider.position}</span></td>
-//                     <td>
-//                         <span class='transaction-type-badge ${typeClass}'>
-//                             <i class='fas ${typeIcon}'></i>
-//                             ${typeText}
-//                         </span>
-//                     </td>
-//                     <td>${this.engine.formatNumber(txn.shares)}</td>
-//                     <td>$${this.engine.formatNumber(txn.transactionValue)}</td>
-//                     <td>
-//                         <span class='conviction-badge ${convictionClass}'>
-//                             <i class='fas fa-star'></i>
-//                             ${convictionScore}/100
-//                         </span>
-//                     </td>
-//                     <td>
-//                         <button class='ipo-action-btn' onclick='insiderApp.viewTransactionDetail("${txn.id}")'>
-//                             <i class='fas fa-search'></i>
-//                             Details
-//                         </button>
-//                     </td>
-//                 </tr>
-//             `;
-//         }).join('');
-
-//         tbody.innerHTML = rows;
-
-//         if (tableWrapper) {
-//             let paginationEl = document.getElementById('paginationControls');
-//             if (!paginationEl) {
-//                 paginationEl = document.createElement('div');
-//                 paginationEl.id = 'paginationControls';
-//                 paginationEl.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 8px; padding: 24px 0; flex-wrap: wrap;';
-//                 tableWrapper.appendChild(paginationEl);
-//             }
-//             this.renderPaginationControls(totalPages);
-//         }
-//     }
-
-//     renderPaginationControls(totalPages) {
-//         const container = document.getElementById('paginationControls');
-//         if (!container || totalPages <= 1) {
-//             if (container) container.innerHTML = '';
-//             return;
-//         }
-
-//         let pages = [];
-
-//         if (totalPages <= 7) {
-//             pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-//         } else {
-//             if (this.currentPage <= 3) {
-//                 pages = [1, 2, 3, 4, '...', totalPages];
-//             } else if (this.currentPage >= totalPages - 2) {
-//                 pages = [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-//             } else {
-//                 pages = [1, '...', this.currentPage - 1, this.currentPage, this.currentPage + 1, '...', totalPages];
-//             }
-//         }
-
-//         const html = `
-//             <button class='pagination-btn' ${this.currentPage === 1 ? 'disabled' : ''} onclick='insiderApp.goToPage(${this.currentPage - 1})' style='padding: 8px 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 600;'>
-//                 <i class='fas fa-chevron-left'></i>
-//                 Previous
-//             </button>
-
-//             ${pages.map(page => {
-//                 if (page === '...') {
-//                     return `<span class='pagination-ellipsis' style='padding: 8px;'>...</span>`;
-//                 }
-//                 return `
-//                     <button class='pagination-number ${page === this.currentPage ? 'active' : ''}' onclick='insiderApp.goToPage(${page})' style='padding: 8px 12px; min-width: 40px; background: ${page === this.currentPage ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'var(--card-bg)'}; color: ${page === this.currentPage ? 'white' : 'var(--text-primary)'}; border: 1px solid ${page === this.currentPage ? 'transparent' : 'var(--border-color)'}; border-radius: 8px; cursor: pointer; font-weight: ${page === this.currentPage ? '800' : '600'};'>
-//                         ${page}
-//                     </button>
-//                 `;
-//             }).join('')}
-
-//             <button class='pagination-btn' ${this.currentPage === totalPages ? 'disabled' : ''} onclick='insiderApp.goToPage(${this.currentPage + 1})' style='padding: 8px 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 600;'>
-//                 Next
-//                 <i class='fas fa-chevron-right'></i>
-//             </button>
-//         `;
-
-//         container.innerHTML = html;
-//     }
-
-//     goToPage(pageNumber) {
-//         this.currentPage = pageNumber;
-//         this.renderTransactionsTable();
-        
-//         const table = document.getElementById('transactionsTable');
-//         if (table) {
-//             table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-//         }
-//     }
-
-//     renderConvictionScoreChart() {
-//         const chartEl = document.getElementById('convictionScoreChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const categories = {
-//             'Very High\n(80-100)': this.filteredData.filter(t => (t.convictionScore?.score || 0) >= 80).length,
-//             'High\n(60-79)': this.filteredData.filter(t => {
-//                 const score = t.convictionScore?.score || 0;
-//                 return score >= 60 && score < 80;
-//             }).length,
-//             'Medium\n(40-59)': this.filteredData.filter(t => {
-//                 const score = t.convictionScore?.score || 0;
-//                 return score >= 40 && score < 60;
-//             }).length,
-//             'Low\n(20-39)': this.filteredData.filter(t => {
-//                 const score = t.convictionScore?.score || 0;
-//                 return score >= 20 && score < 40;
-//             }).length,
-//             'Very Low\n(<20)': this.filteredData.filter(t => (t.convictionScore?.score || 0) < 20).length
-//         };
-
-//         const data = Object.keys(categories).map(key => ({
-//             name: key,
-//             y: categories[key],
-//             color: this.getConvictionColor(key)
-//         }));
-
-//         Highcharts.chart('convictionScoreChart', {
-//             chart: {
-//                 type: 'column',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 type: 'category',
-//                 labels: {
-//                     style: { fontSize: '12px', fontWeight: '600' }
-//                 }
-//             },
-//             yAxis: {
-//                 title: { text: 'Number of Transactions' },
-//                 allowDecimals: false
-//             },
-//             legend: { enabled: false },
-//             plotOptions: {
-//                 column: {
-//                     borderRadius: 8,
-//                     dataLabels: {
-//                         enabled: true,
-//                         format: '{y}',
-//                         style: { fontWeight: 'bold', fontSize: '14px' }
-//                     }
-//                 }
-//             },
-//             series: [{
-//                 name: 'Transactions',
-//                 data: data,
-//                 colorByPoint: true
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     getConvictionColor(category) {
-//         const colorMap = {
-//             'Very High\n(80-100)': '#10b981',
-//             'High\n(60-79)': '#3b82f6',
-//             'Medium\n(40-59)': '#f59e0b',
-//             'Low\n(20-39)': '#f97316',
-//             'Very Low\n(<20)': '#ef4444'
-//         };
-//         return colorMap[category] || '#6b7280';
-//     }
-
-//     renderTransactionSizeChart() {
-//         const chartEl = document.getElementById('transactionSizeChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const categories = {
-//             '<$100K': this.filteredData.filter(t => t.transactionValue < 100000).length,
-//             '$100K-$500K': this.filteredData.filter(t => t.transactionValue >= 100000 && t.transactionValue < 500000).length,
-//             '$500K-$1M': this.filteredData.filter(t => t.transactionValue >= 500000 && t.transactionValue < 1000000).length,
-//             '$1M-$5M': this.filteredData.filter(t => t.transactionValue >= 1000000 && t.transactionValue < 5000000).length,
-//             '$5M-$10M': this.filteredData.filter(t => t.transactionValue >= 5000000 && t.transactionValue < 10000000).length,
-//             '>$10M': this.filteredData.filter(t => t.transactionValue >= 10000000).length
-//         };
-
-//         const data = Object.keys(categories).map((key, index) => ({
-//             name: key,
-//             y: categories[key],
-//             color: ['#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7'][index]
-//         }));
-
-//         Highcharts.chart('transactionSizeChart', {
-//             chart: {
-//                 type: 'pie',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             plotOptions: {
-//                 pie: {
-//                     innerSize: '60%',
-//                     dataLabels: {
-//                         enabled: true,
-//                         format: '<b>{point.name}</b>: {point.y}',
-//                         style: { fontSize: '12px', fontWeight: '600' }
-//                     },
-//                     showInLegend: false
-//                 }
-//             },
-//             series: [{
-//                 name: 'Transactions',
-//                 data: data
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderTimingEarningsChart() {
-//         const chartEl = document.getElementById('timingEarningsChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const categories = {
-//             '>60 days': this.filteredData.filter(t => t.daysToEarnings > 60).length,
-//             '30-60 days': this.filteredData.filter(t => t.daysToEarnings > 30 && t.daysToEarnings <= 60).length,
-//             '14-30 days': this.filteredData.filter(t => t.daysToEarnings > 14 && t.daysToEarnings <= 30).length,
-//             '7-14 days': this.filteredData.filter(t => t.daysToEarnings > 7 && t.daysToEarnings <= 14).length,
-//             '<7 days': this.filteredData.filter(t => t.daysToEarnings <= 7).length
-//         };
-
-//         const buys = Object.keys(categories).map(key => {
-//             const txns = this.filteredData.filter(t => {
-//                 const match = this.matchTimingCategory(t.daysToEarnings, key);
-//                 return match && t.type === 'P';
-//             });
-//             return txns.length;
-//         });
-
-//         const sells = Object.keys(categories).map(key => {
-//             const txns = this.filteredData.filter(t => {
-//                 const match = this.matchTimingCategory(t.daysToEarnings, key);
-//                 return match && t.type === 'S';
-//             });
-//             return txns.length;
-//         });
-
-//         Highcharts.chart('timingEarningsChart', {
-//             chart: {
-//                 type: 'bar',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 categories: Object.keys(categories),
-//                 title: { text: 'Days Before Earnings' }
-//             },
-//             yAxis: {
-//                 min: 0,
-//                 title: { text: 'Number of Transactions' },
-//                 allowDecimals: false
-//             },
-//             legend: {
-//                 reversed: true,
-//                 align: 'right',
-//                 verticalAlign: 'top',
-//                 floating: false
-//             },
-//             plotOptions: {
-//                 series: {
-//                     stacking: 'normal',
-//                     dataLabels: {
-//                         enabled: false
-//                     }
-//                 }
-//             },
-//             series: [{
-//                 name: 'Purchases',
-//                 data: buys,
-//                 color: '#10b981'
-//             }, {
-//                 name: 'Sales',
-//                 data: sells,
-//                 color: '#ef4444'
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     matchTimingCategory(days, category) {
-//         if (category === '>60 days') return days > 60;
-//         if (category === '30-60 days') return days > 30 && days <= 60;
-//         if (category === '14-30 days') return days > 14 && days <= 30;
-//         if (category === '7-14 days') return days > 7 && days <= 14;
-//         if (category === '<7 days') return days <= 7;
-//         return false;
-//     }
-
-//     renderTimingAnnouncementsChart() {
-//         const chartEl = document.getElementById('timingAnnouncementsChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const data = [
-//             { name: 'Pre-Announcement (14+ days)', y: Math.floor(this.filteredData.length * 0.35), color: '#3b82f6' },
-//             { name: 'Near-Announcement (7-14 days)', y: Math.floor(this.filteredData.length * 0.25), color: '#f59e0b' },
-//             { name: 'Immediate (0-7 days)', y: Math.floor(this.filteredData.length * 0.15), color: '#ef4444' },
-//             { name: 'Post-Announcement', y: Math.floor(this.filteredData.length * 0.25), color: '#10b981' }
-//         ];
-
-//         Highcharts.chart('timingAnnouncementsChart', {
-//             chart: {
-//                 type: 'pie',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             plotOptions: {
-//                 pie: {
-//                     dataLabels: {
-//                         enabled: true,
-//                         format: '<b>{point.name}</b>: {point.percentage:.1f}%',
-//                         style: { fontSize: '11px', fontWeight: '600' }
-//                     },
-//                     showInLegend: true
-//                 }
-//             },
-//             legend: {
-//                 align: 'right',
-//                 verticalAlign: 'middle',
-//                 layout: 'vertical'
-//             },
-//             series: [{
-//                 name: 'Transactions',
-//                 colorByPoint: true,
-//                 data: data
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderCorrelationChart() {
-//         const chartEl = document.getElementById('correlationChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const scatterData = this.filteredData.slice(0, 50).map(txn => {
-//             const insiderActivity = txn.type === 'P' ? 1 : txn.type === 'S' ? -1 : 0;
-//             const stockPerformance = txn.priceImpact30d || (Math.random() - 0.5) * 20;
-            
-//             return {
-//                 x: insiderActivity * Math.log10(txn.transactionValue),
-//                 y: stockPerformance,
-//                 name: txn.company.symbol,
-//                 color: txn.type === 'P' ? '#10b981' : '#ef4444'
-//             };
-//         });
-
-//         Highcharts.chart('correlationChart', {
-//             chart: {
-//                 type: 'scatter',
-//                 zoomType: 'xy',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 title: { text: 'Insider Activity (weighted by transaction size)' },
-//                 gridLineWidth: 1
-//             },
-//             yAxis: {
-//                 title: { text: 'Stock Performance (30-day %)' },
-//                 plotLines: [{
-//                     value: 0,
-//                     color: '#6b7280',
-//                     dashStyle: 'Dash',
-//                     width: 2
-//                 }]
-//             },
-//             legend: { enabled: false },
-//             plotOptions: {
-//                 scatter: {
-//                     marker: {
-//                         radius: 6,
-//                         states: {
-//                             hover: {
-//                                 enabled: true,
-//                                 lineColor: 'rgb(100,100,100)'
-//                             }
-//                         }
-//                     },
-//                     states: {
-//                         hover: {
-//                             marker: {
-//                                 enabled: false
-//                             }
-//                         }
-//                     },
-//                     tooltip: {
-//                         headerFormat: '<b>{point.key}</b><br>',
-//                         pointFormat: 'Performance: {point.y:.2f}%'
-//                     }
-//                 }
-//             },
-//             series: [{
-//                 name: 'Transactions',
-//                 color: 'rgba(102, 126, 234, 0.6)',
-//                 data: scatterData
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderBacktestingStats() {
-//         const buyElement = document.getElementById('buySuccessRate');
-//         const sellElement = document.getElementById('sellAccuracy');
-//         const impactElement = document.getElementById('averageImpact');
-        
-//         if (!buyElement || !sellElement || !impactElement) return;
-
-//         const purchases = this.filteredData.filter(t => t.type === 'P');
-//         const sales = this.filteredData.filter(t => t.type === 'S');
-
-//         const successfulBuys = purchases.filter(t => (t.priceImpact30d || 0) > 0).length;
-//         const buySuccessRate = purchases.length > 0 
-//             ? (successfulBuys / purchases.length * 100).toFixed(1) 
-//             : 0;
-
-//         const accurateSells = sales.filter(t => (t.priceImpact30d || 0) < 0).length;
-//         const sellAccuracy = sales.length > 0 
-//             ? (accurateSells / sales.length * 100).toFixed(1) 
-//             : 0;
-
-//         const totalImpact = this.filteredData.reduce((sum, t) => sum + (t.priceImpact30d || 0), 0);
-//         const averageImpact = this.filteredData.length > 0 
-//             ? (totalImpact / this.filteredData.length).toFixed(1) 
-//             : 0;
-
-//         buyElement.textContent = `${buySuccessRate}%`;
-//         sellElement.textContent = `${sellAccuracy}%`;
-//         impactElement.textContent = `${averageImpact >= 0 ? '+' : ''}${averageImpact}%`;
-
-//         console.log('📊 Backtesting stats updated');
-//     }
-
-//     renderNetworkChart() {
-//         const chartEl = document.getElementById('networkChart');
-//         if (!chartEl) return;
-
-//         if (typeof vis === 'undefined') {
-//             console.error('❌ Vis.js library not loaded');
-//             chartEl.innerHTML = `
-//                 <div style='text-align: center; padding: 60px;'>
-//                     <i class='fas fa-exclamation-triangle' style='font-size: 3rem; color: var(--text-tertiary);'></i>
-//                     <p style='color: var(--text-secondary); margin-top: 16px;'>Vis.js library required for network visualization</p>
-//                 </div>
-//             `;
-//             return;
-//         }
-
-//         const { nodes, edges } = this.buildNetworkData();
-
-//         chartEl.innerHTML = `
-//             <div class='network-controls'>
-//                 <button class='network-control-btn active' onclick='insiderApp.filterNetworkDegree(1)' data-degree='1'>
-//                     Degree 1
-//                 </button>
-//                 <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(2)' data-degree='2'>
-//                     Degree 2
-//                 </button>
-//                 <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(3)' data-degree='3'>
-//                     Degree 3+
-//                 </button>
-//             </div>
-//             <div id='networkGraphContainer' style='width: 100%; height: 600px;'></div>
-//         `;
-
-//         const container = document.getElementById('networkGraphContainer');
-        
-//         this.fullNetworkData = { nodes, edges };
-//         this.currentNetworkDegree = 1;
-
-//         const data = {
-//             nodes: new vis.DataSet(nodes),
-//             edges: new vis.DataSet(edges.filter(e => !e.dashes))
-//         };
-
-//         const options = {
-//             nodes: {
-//                 shape: 'dot',
-//                 size: 20,
-//                 font: {
-//                     size: 14,
-//                     color: '#1e293b',
-//                     face: 'Inter, sans-serif'
-//                 },
-//                 borderWidth: 3,
-//                 shadow: {
-//                     enabled: true,
-//                     color: 'rgba(0,0,0,0.2)',
-//                     size: 10,
-//                     x: 2,
-//                     y: 2
-//                 }
-//             },
-//             edges: {
-//                 width: 2,
-//                 color: {
-//                     color: '#cbd5e1',
-//                     highlight: '#667eea',
-//                     hover: '#764ba2'
-//                 },
-//                 smooth: {
-//                     type: 'continuous',
-//                     roundness: 0.5
-//                 },
-//                 shadow: {
-//                     enabled: true,
-//                     color: 'rgba(0,0,0,0.1)',
-//                     size: 5,
-//                     x: 1,
-//                     y: 1
-//                 }
-//             },
-//             physics: {
-//                 enabled: true,
-//                 stabilization: {
-//                     enabled: true,
-//                     iterations: 200,
-//                     updateInterval: 50
-//                 },
-//                 barnesHut: {
-//                     gravitationalConstant: -8000,
-//                     centralGravity: 0.3,
-//                     springLength: 150,
-//                     springConstant: 0.04,
-//                     damping: 0.09,
-//                     avoidOverlap: 0.5
-//                 }
-//             },
-//             interaction: {
-//                 hover: true,
-//                 tooltipDelay: 100,
-//                 zoomView: true,
-//                 dragView: true,
-//                 dragNodes: true
-//             }
-//         };
-
-//         this.networkGraph = new vis.Network(container, data, options);
-
-//         this.networkGraph.on('stabilizationIterationsDone', () => {
-//             console.log('🎯 Network stabilized - disabling physics');
-//             this.networkGraph.setOptions({ physics: false });
-//         });
-
-//         this.networkGraph.on('click', (params) => {
-//             if (params.nodes.length > 0) {
-//                 const nodeId = params.nodes[0];
-//                 const node = nodes.find(n => n.id === nodeId);
-//                 if (node) {
-//                     this.showNetworkNodeDetails(node);
-//                 }
-//             }
-//         });
-
-//         this.renderNetworkInsights(nodes, edges);
-
-//         console.log('🌐 Network graph rendered with', nodes.length, 'nodes and', edges.length, 'edges');
-//     }
-
-//     buildNetworkData() {
-//         const nodes = [];
-//         const edges = [];
-//         const insiderToCompanies = new Map();
-
-//         this.filteredData.forEach(txn => {
-//             const insiderKey = txn.insider.name;
-//             if (!insiderToCompanies.has(insiderKey)) {
-//                 insiderToCompanies.set(insiderKey, {
-//                     insider: txn.insider,
-//                     companies: new Set()
-//                 });
-//             }
-//             insiderToCompanies.get(insiderKey).companies.add(txn.company.symbol);
-//         });
-
-//         const addedInsiders = new Set();
-//         const addedCompanies = new Set();
-//         let edgeId = 0;
-
-//         insiderToCompanies.forEach((data, insiderName) => {
-//             const { insider, companies } = data;
-
-//             if (!addedInsiders.has(insiderName)) {
-//                 nodes.push({
-//                     id: `insider_${insiderName}`,
-//                     label: insiderName,
-//                     group: 'insider',
-//                     title: `${insiderName}<br>${insider.position}<br>Active in ${companies.size} companies`,
-//                     color: {
-//                         background: '#3b82f6',
-//                         border: '#2563eb',
-//                         highlight: {
-//                             background: '#2563eb',
-//                             border: '#1d4ed8'
-//                         }
-//                     },
-//                     size: 15 + companies.size * 5
-//                 });
-//                 addedInsiders.add(insiderName);
-//             }
-
-//             companies.forEach(symbol => {
-//                 const companyId = `company_${symbol}`;
-
-//                 if (!addedCompanies.has(symbol)) {
-//                     const companyData = this.filteredData.find(t => t.company.symbol === symbol)?.company;
-//                     nodes.push({
-//                         id: companyId,
-//                         label: symbol,
-//                         group: 'company',
-//                         title: `${companyData?.name || symbol}<br>Sector: ${companyData?.sector || 'N/A'}`,
-//                         color: {
-//                             background: '#a78bfa',
-//                             border: '#8b5cf6',
-//                             highlight: {
-//                                 background: '#8b5cf6',
-//                                 border: '#7c3aed'
-//                             }
-//                         },
-//                         size: 25
-//                     });
-//                     addedCompanies.add(symbol);
-//                 }
-
-//                 edges.push({
-//                     id: edgeId++,
-//                     from: `insider_${insiderName}`,
-//                     to: companyId,
-//                     title: 'Board Member / Insider',
-//                     degree: 1
-//                 });
-//             });
-//         });
-
-//         const companyToInsiders = new Map();
-//         insiderToCompanies.forEach((data, insiderName) => {
-//             data.companies.forEach(symbol => {
-//                 if (!companyToInsiders.has(symbol)) {
-//                     companyToInsiders.set(symbol, new Set());
-//                 }
-//                 companyToInsiders.get(symbol).add(insiderName);
-//             });
-//         });
-
-//         companyToInsiders.forEach((insiders, symbol) => {
-//             const insiderArray = Array.from(insiders);
-//             for (let i = 0; i < insiderArray.length; i++) {
-//                 for (let j = i + 1; j < insiderArray.length; j++) {
-//                     edges.push({
-//                         id: edgeId++,
-//                         from: `insider_${insiderArray[i]}`,
-//                         to: `insider_${insiderArray[j]}`,
-//                         title: `Connected via ${symbol}`,
-//                         color: {
-//                             color: '#f59e0b',
-//                             highlight: '#d97706'
-//                         },
-//                         dashes: true,
-//                         width: 1,
-//                         degree: 2
-//                     });
-//                 }
-//             }
-//         });
-
-//         return { nodes, edges };
-//     }
-
-//     showNetworkNodeDetails(node) {
-//         const isInsider = node.group === 'insider';
-        
-//         let message = '';
-        
-//         if (isInsider) {
-//             const insiderName = node.label;
-//             const transactions = this.filteredData.filter(t => t.insider.name === insiderName);
-//             const companies = [...new Set(transactions.map(t => t.company.symbol))];
-            
-//             message = `
-//                 <div style='padding: 20px;'>
-//                     <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
-//                         <i class='fas fa-user-tie'></i> Insider: ${insiderName}
-//                     </h3>
-//                     <p><strong>Transactions:</strong> ${transactions.length}</p>
-//                     <p><strong>Companies:</strong> ${companies.join(', ')}</p>
-//                     <p><strong>Positions:</strong> ${[...new Set(transactions.map(t => t.insider.position))].join(', ')}</p>
-//                 </div>
-//             `;
-//         } else {
-//             const symbol = node.label;
-//             const transactions = this.filteredData.filter(t => t.company.symbol === symbol);
-//             const insiders = [...new Set(transactions.map(t => t.insider.name))];
-            
-//             message = `
-//                 <div style='padding: 20px;'>
-//                     <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
-//                         <i class='fas fa-building'></i> Company: ${symbol}
-//                     </h3>
-//                     <p><strong>Insiders:</strong> ${insiders.length}</p>
-//                     <p><strong>Transactions:</strong> ${transactions.length}</p>
-//                     <p><strong>Top Insiders:</strong> ${insiders.slice(0, 5).join(', ')}</p>
-//                 </div>
-//             `;
-//         }
-
-//         const modal = document.createElement('div');
-//         modal.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); z-index: 10000; max-width: 500px; width: 90%;';
-//         modal.innerHTML = `
-//             ${message}
-//             <div style='padding: 0 20px 20px 20px;'>
-//                 <button onclick='this.parentElement.parentElement.remove(); document.body.style.overflow=""' style='width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;'>
-//                     Close
-//                 </button>
-//             </div>
-//         `;
-//         document.body.appendChild(modal);
-//         document.body.style.overflow = 'hidden';
-//     }
-
-//     filterNetworkDegree(degree) {
-//         if (!this.networkGraph || !this.fullNetworkData) return;
-
-//         document.querySelectorAll('.network-control-btn').forEach(btn => {
-//             btn.classList.remove('active');
-//             if (parseInt(btn.dataset.degree) === degree) {
-//                 btn.classList.add('active');
-//             }
-//         });
-
-//         this.currentNetworkDegree = degree;
-
-//         let filteredEdges = this.fullNetworkData.edges;
-        
-//         if (degree === 1) {
-//             filteredEdges = this.fullNetworkData.edges.filter(e => !e.dashes);
-//         } else if (degree === 2) {
-//             filteredEdges = this.fullNetworkData.edges.filter(e => e.degree <= 2);
-//         }
-
-//         const data = {
-//             nodes: new vis.DataSet(this.fullNetworkData.nodes),
-//             edges: new vis.DataSet(filteredEdges)
-//         };
-
-//         this.networkGraph.setData(data);
-
-//         console.log(`🎚 Network filtered to degree ${degree} (${filteredEdges.length} edges)`);
-//     }
-
-//     renderNetworkInsights(nodes, edges) {
-//         const insightsContainer = document.getElementById('networkInsights');
-//         if (!insightsContainer) return;
-
-//         const insiders = nodes.filter(n => n.group === 'insider');
-//         const companies = nodes.filter(n => n.group === 'company');
-//         const directConnections = edges.filter(e => !e.dashes).length;
-//         const interlocks = edges.filter(e => e.dashes).length;
-
-//         const insiderConnections = {};
-//         edges.forEach(edge => {
-//             if (edge.from.startsWith('insider_')) {
-//                 insiderConnections[edge.from] = (insiderConnections[edge.from] || 0) + 1;
-//             }
-//         });
-
-//         const mostConnectedId = Object.keys(insiderConnections).reduce((a, b) => 
-//             insiderConnections[a] > insiderConnections[b] ? a : b, ''
-//         );
-//         const mostConnected = nodes.find(n => n.id === mostConnectedId);
-
-//         insightsContainer.innerHTML = `
-//             <div class='insight-item'>
-//                 <i class='fas fa-users' style='color: #3b82f6;'></i>
-//                 <span><strong>${insiders.length}</strong> unique insiders tracked</span>
-//             </div>
-//             <div class='insight-item'>
-//                 <i class='fas fa-building' style='color: #a78bfa;'></i>
-//                 <span><strong>${companies.length}</strong> companies in network</span>
-//             </div>
-//             <div class='insight-item'>
-//                 <i class='fas fa-link' style='color: #10b981;'></i>
-//                 <span><strong>${directConnections}</strong> direct board positions</span>
-//             </div>
-//             <div class='insight-item'>
-//                 <i class='fas fa-project-diagram' style='color: #f59e0b;'></i>
-//                 <span><strong>${interlocks}</strong> board interlocks detected</span>
-//             </div>
-//             ${mostConnected ? `
-//                 <div class='insight-item'>
-//                     <i class='fas fa-crown' style='color: #f59e0b;'></i>
-//                     <span>Most connected: <strong>${mostConnected.label}</strong> (${insiderConnections[mostConnectedId]} boards)</span>
-//                 </div>
-//             ` : ''}
-//         `;
-//     }
-
-//     renderComparisonChart() {
-//         const chartEl = document.getElementById('comparisonChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const companyCounts = {};
-//         this.filteredData.forEach(txn => {
-//             const symbol = txn.company.symbol;
-//             if (!companyCounts[symbol]) {
-//                 companyCounts[symbol] = { buys: 0, sells: 0 };
-//             }
-//             if (txn.type === 'P') companyCounts[symbol].buys++;
-//             if (txn.type === 'S') companyCounts[symbol].sells++;
-//         });
-
-//         const topCompanies = Object.keys(companyCounts)
-//             .sort((a, b) => (companyCounts[b].buys + companyCounts[b].sells) - (companyCounts[a].buys + companyCounts[a].sells))
-//             .slice(0, 10);
-
-//         const buysData = topCompanies.map(symbol => companyCounts[symbol].buys);
-//         const sellsData = topCompanies.map(symbol => companyCounts[symbol].sells);
-
-//         Highcharts.chart('comparisonChart', {
-//             chart: {
-//                 type: 'column',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 categories: topCompanies,
-//                 title: { text: 'Companies' }
-//             },
-//             yAxis: {
-//                 min: 0,
-//                 title: { text: 'Number of Transactions' },
-//                 stackLabels: {
-//                     enabled: true,
-//                     style: { fontWeight: 'bold' }
-//                 }
-//             },
-//             legend: {
-//                 align: 'right',
-//                 verticalAlign: 'top',
-//                 floating: false
-//             },
-//             plotOptions: {
-//                 column: {
-//                     stacking: 'normal',
-//                     dataLabels: {
-//                         enabled: false
-//                     }
-//                 }
-//             },
-//             series: [{
-//                 name: 'Purchases',
-//                 data: buysData,
-//                 color: '#10b981'
-//             }, {
-//                 name: 'Sales',
-//                 data: sellsData,
-//                 color: '#ef4444'
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderDivergenceAlertsChart() {
-//         const chartEl = document.getElementById('divergenceAlertsChart');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         const alertData = [
-//             { name: 'High Conviction Sales', y: Math.floor(Math.random() * 5) + 2, color: '#ef4444' },
-//             { name: 'Cluster Selling', y: Math.floor(Math.random() * 3) + 1, color: '#f97316' },
-//             { name: 'Pre-Earnings Selling', y: Math.floor(Math.random() * 4) + 1, color: '#f59e0b' },
-//             { name: 'Unusual Volume', y: Math.floor(Math.random() * 3), color: '#3b82f6' }
-//         ];
-
-//         Highcharts.chart('divergenceAlertsChart', {
-//             chart: {
-//                 type: 'bar',
-//                 backgroundColor: 'transparent'
-//             },
-//             title: { text: null },
-//             xAxis: {
-//                 categories: alertData.map(d => d.name),
-//                 title: { text: null }
-//             },
-//             yAxis: {
-//                 min: 0,
-//                 title: { text: 'Number of Alerts' },
-//                 allowDecimals: false
-//             },
-//             legend: { enabled: false },
-//             plotOptions: {
-//                 bar: {
-//                     borderRadius: 6,
-//                     dataLabels: {
-//                         enabled: true,
-//                         format: '{y}',
-//                         style: { fontWeight: 'bold' }
-//                     },
-//                     colorByPoint: true
-//                 }
-//             },
-//             series: [{
-//                 name: 'Alerts',
-//                 data: alertData
-//             }],
-//             credits: { enabled: false },
-//             exporting: { enabled: true }
-//         });
-//     }
-
-//     renderComparisonTable() {
-//         const tbody = document.getElementById('comparisonTableBody');
-//         if (!tbody) return;
-
-//         const companyStats = {};
-//         this.filteredData.forEach(txn => {
-//             const symbol = txn.company.symbol;
-//             if (!companyStats[symbol]) {
-//                 companyStats[symbol] = {
-//                     name: txn.company.name,
-//                     buys: 0,
-//                     sells: 0,
-//                     totalValue: 0,
-//                     avgConviction: [],
-//                     priceImpacts: []
-//                 };
-//             }
-//             if (txn.type === 'P') companyStats[symbol].buys++;
-//             if (txn.type === 'S') companyStats[symbol].sells++;
-//             companyStats[symbol].totalValue += txn.transactionValue;
-//             companyStats[symbol].avgConviction.push(txn.convictionScore?.score || 0);
-//             companyStats[symbol].priceImpacts.push(txn.priceImpact30d || 0);
-//         });
-
-//         const topCompanies = Object.keys(companyStats)
-//             .sort((a, b) => companyStats[b].totalValue - companyStats[a].totalValue)
-//             .slice(0, 10);
-
-//         if (topCompanies.length === 0) {
-//             tbody.innerHTML = `<tr><td colspan="5" class='text-center' style='padding: 20px;'>No data available</td></tr>`;
-//             return;
-//         }
-
-//         const rows = topCompanies.map(symbol => {
-//             const stats = companyStats[symbol];
-//             const avgConviction = stats.avgConviction.reduce((a, b) => a + b, 0) / stats.avgConviction.length;
-//             const avgImpact = stats.priceImpacts.reduce((a, b) => a + b, 0) / stats.priceImpacts.length;
-            
-//             const insiderSignal = stats.buys > stats.sells ? 'Bullish' : stats.sells > stats.buys ? 'Bearish' : 'Neutral';
-//             const signalClass = stats.buys > stats.sells ? 'positive' : stats.sells > stats.buys ? 'negative' : '';
-//             const signalIcon = stats.buys > stats.sells ? 'fa-arrow-up' : stats.sells > stats.buys ? 'fa-arrow-down' : 'fa-minus';
-
-//             const analystConsensus = avgImpact > 5 ? 'Buy' : avgImpact > 0 ? 'Hold' : 'Sell';
-//             const consensusClass = avgImpact > 5 ? 'positive' : avgImpact > 0 ? '' : 'negative';
-
-//             const isDivergent = (insiderSignal === 'Bullish' && analystConsensus === 'Sell') ||
-//                                 (insiderSignal === 'Bearish' && analystConsensus === 'Buy');
-//             const divergenceText = isDivergent ? '⚠ YES' : '✓ Aligned';
-//             const divergenceClass = isDivergent ? 'negative' : 'positive';
-
-//             const successfulTrades = stats.priceImpacts.filter(impact => 
-//                 (impact > 0 && stats.buys > stats.sells) || 
-//                 (impact < 0 && stats.sells > stats.buys)
-//             ).length;
-//             const accuracy = stats.priceImpacts.length > 0 
-//                 ? (successfulTrades / stats.priceImpacts.length * 100).toFixed(0) 
-//                 : 0;
-//             const accuracyClass = accuracy >= 60 ? 'positive' : accuracy >= 40 ? '' : 'negative';
-
-//             return `
-//                 <tr>
-//                     <td><strong>${symbol}</strong></td>
-//                     <td>
-//                         <span class='card-trend ${signalClass}' style='font-weight: 700;'>
-//                             <i class='fas ${signalIcon}'></i>
-//                             ${insiderSignal}
-//                         </span>
-//                     </td>
-//                     <td>
-//                         <span class='card-trend ${consensusClass}' style='font-weight: 700;'>
-//                             ${analystConsensus}
-//                         </span>
-//                     </td>
-//                     <td>
-//                         <span class='card-trend ${divergenceClass}' style='font-weight: 700;'>
-//                             ${divergenceText}
-//                         </span>
-//                     </td>
-//                     <td>
-//                         <span class='conviction-badge ${accuracyClass}' style='font-weight: 700;'>
-//                             ${accuracy}%
-//                         </span>
-//                     </td>
-//                 </tr>
-//             `;
-//         }).join('');
-
-//         tbody.innerHTML = rows;
-//     }
-
-//     renderActivityHeatmap() {
-//         const chartEl = document.getElementById('activityHeatmap');
-//         if (!chartEl || typeof Highcharts === 'undefined') return;
-
-//         try {
-//             const companyCounts = {};
-//             this.filteredData.forEach(txn => {
-//                 companyCounts[txn.company.symbol] = (companyCounts[txn.company.symbol] || 0) + 1;
-//             });
-
-//             const topCompanies = Object.keys(companyCounts)
-//                 .sort((a, b) => companyCounts[b] - companyCounts[a])
-//                 .slice(0, 10);
-
-//             const positions = ['CEO', 'CFO', 'Director', 'VP', 'President', 'CTO', 'COO', 'Other'];
-
-//             const heatmapData = [];
-//             topCompanies.forEach((company, companyIndex) => {
-//                 positions.forEach((position, positionIndex) => {
-//                     const txns = this.filteredData.filter(txn => 
-//                         txn.company.symbol === company && 
-//                         (txn.insider.position === position || (position === 'Other' && !positions.slice(0, -1).includes(txn.insider.position)))
-//                     );
-
-//                     const count = txns.length;
-//                     const purchases = txns.filter(t => t.type === 'P').length;
-//                     const sales = txns.filter(t => t.type === 'S').length;
-//                     const options = txns.filter(t => t.type === 'M').length;
-
-//                     heatmapData.push([
-//                         positionIndex,
-//                         companyIndex,
-//                         count,
-//                         purchases,
-//                         sales,
-//                         options
-//                     ]);
-//                 });
-//             });
-
-//             Highcharts.chart('activityHeatmap', {
-//                 chart: {
-//                     type: 'heatmap',
-//                     backgroundColor: 'transparent',
-//                     height: 500
-//                 },
-//                 title: { text: null },
-//                 xAxis: {
-//                     categories: positions,
-//                     title: { text: 'Insider Position' },
-//                     labels: {
-//                         style: { fontSize: '12px', fontWeight: '600' }
-//                     }
-//                 },
-//                 yAxis: {
-//                     categories: topCompanies,
-//                     title: { text: 'Company' },
-//                     labels: {
-//                         style: { fontSize: '12px', fontWeight: '700' }
-//                     }
-//                 },
-//                 colorAxis: {
-//                     min: 0,
-//                     stops: [
-//                         [0, '#10b981'],
-//                         [0.4, '#f59e0b'],
-//                         [1, '#ef4444']
-//                     ],
-//                     labels: {
-//                         format: '{value} txns'
-//                     }
-//                 },
-//                 legend: {
-//                     align: 'right',
-//                     layout: 'vertical',
-//                     verticalAlign: 'middle',
-//                     symbolHeight: 300
-//                 },
-//                 tooltip: {
-//                     formatter: function() {
-//                         const point = this.point;
-//                         const purchases = heatmapData[point.index] ? heatmapData[point.index][3] : 0;
-//                         const sales = heatmapData[point.index] ? heatmapData[point.index][4] : 0;
-//                         const optionsCount = heatmapData[point.index] ? heatmapData[point.index][5] : 0;
-                        
-//                         return `<b>${this.series.yAxis.categories[point.y]}</b><br>
-//                                 <b>${this.series.xAxis.categories[point.x]}</b><br>
-//                                 <b>Total:</b> ${point.value} transactions<br>
-//                                 <span style='color: #10b981;'>● Purchases:</span> ${purchases}<br>
-//                                 <span style='color: #ef4444;'>● Sales:</span> ${sales}<br>
-//                                 <span style='color: #3b82f6;'>● Options:</span> ${optionsCount}`;
-//                     },
-//                     useHTML: true
-//                 },
-//                 series: [{
-//                     name: 'Transactions',
-//                     borderWidth: 2,
-//                     borderColor: '#ffffff',
-//                     data: heatmapData,
-//                     dataLabels: {
-//                         enabled: true,
-//                         color: '#000000',
-//                         style: {
-//                             textOutline: 'none',
-//                             fontWeight: 'bold'
-//                         }
-//                     }
-//                 }],
-//                 credits: { enabled: false },
-//                 exporting: { enabled: true }
-//             });
-
-//             console.log('🔥 Heatmap rendered successfully with', heatmapData.length, 'data points');
-//         } catch (error) {
-//             console.error('❌ Heatmap rendering error:', error);
-//             chartEl.innerHTML = `
-//                 <div style='text-align: center; padding: 60px;'>
-//                     <i class='fas fa-exclamation-triangle' style='font-size: 3rem; color: var(--text-tertiary);'></i>
-//                     <p style='color: var(--text-secondary); margin-top: 16px;'>Error rendering heatmap</p>
-//                 </div>
-//             `;
-//         }
-//     }
-
-//     generateAlphyRecommendation() {
-//         const container = document.getElementById('alphyRecommendation');
-//         if (!container) return;
-
-//         const insights = this.analyzeTopInsights();
-//         const criticalPoints = insights.critical.slice(0, 3);
-//         const positivePoints = insights.positive.slice(0, 3);
-
-//         let overallSignal = 'NEUTRAL';
-        
-//         if (positivePoints.length > criticalPoints.length) {
-//             overallSignal = 'BULLISH';
-//         } else if (criticalPoints.length > positivePoints.length) {
-//             overallSignal = 'BEARISH';
-//         }
-
-//         container.innerHTML = `
-//             <div class='alphy-recommendation-header'>
-//                 <div class='alphy-logo'>
-//                     <i class='fas fa-robot'></i>
-//                 </div>
-//                 <div>
-//                     <h2 class='alphy-recommendation-title'>Alphy AI Weekly Insider Analysis</h2>
-//                     <p style='color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 0.95rem;'>
-//                         Based on ${this.filteredData.length} insider transactions over the last ${this.currentPeriod} days
-//                     </p>
-//                 </div>
-//             </div>
-            
-//             <div class='alphy-recommendation-content'>
-//                 <div style='background: rgba(255, 255, 255, 0.15); padding: 20px; border-radius: 16px; margin-bottom: 28px; text-align: center;'>
-//                     <p style='color: rgba(255, 255, 255, 0.95); font-size: 0.9rem; margin-bottom: 8px; font-weight: 600;'>OVERALL MARKET SIGNAL</p>
-//                     <h3 style='color: white; font-size: 2rem; font-weight: 900; margin: 0;'>
-//                         ${overallSignal}
-//                     </h3>
-//                 </div>
-
-//                 <div class='recommendation-grid'>
-//                     <div class='recommendation-card' style='background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05)); border-left: 4px solid #ef4444;'>
-//                         <h3 style='color: #ef4444; font-size: 1.2rem; font-weight: 800; margin-bottom: 16px;'>
-//                             <i class='fas fa-exclamation-triangle'></i>
-//                             Critical Points
-//                         </h3>
-//                         <ul style='list-style: none; padding: 0; margin: 0;'>
-//                             ${criticalPoints.map(point => `
-//                                 <li style='padding: 12px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.05);'>
-//                                     <span style='color: var(--text-primary); line-height: 1.6; font-weight: 600;'>${point}</span>
-//                                 </li>
-//                             `).join('')}
-//                         </ul>
-//                     </div>
-
-//                     <div class='recommendation-card' style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border-left: 4px solid #10b981;'>
-//                         <h3 style='color: #10b981; font-size: 1.2rem; font-weight: 800; margin-bottom: 16px;'>
-//                             <i class='fas fa-check-circle'></i>
-//                             Positive Signals
-//                         </h3>
-//                         <ul style='list-style: none; padding: 0; margin: 0;'>
-//                             ${positivePoints.map(point => `
-//                                 <li style='padding: 12px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.05);'>
-//                                     <span style='color: var(--text-primary); line-height: 1.6; font-weight: 600;'>${point}</span>
-//                                 </li>
-//                             `).join('')}
-//                         </ul>
-//                     </div>
-//                 </div>
-//             </div>
-//         `;
-//     }
-
-//     analyzeTopInsights() {
-//         const critical = [];
-//         const positive = [];
-
-//         const purchases = this.filteredData.filter(t => t.type === 'P').length;
-//         const sales = this.filteredData.filter(t => t.type === 'S').length;
-//         const buyRatio = (purchases + sales) > 0 ? purchases / (purchases + sales) * 100 : 0;
-
-//         if (buyRatio < 30) {
-//             critical.push(`Heavy insider selling: ${sales} sales vs ${purchases} purchases`);
-//         } else if (buyRatio > 70) {
-//             positive.push(`Strong insider buying: ${purchases} purchases vs ${sales} sales`);
-//         }
-
-//         const highConvictionBuys = this.filteredData.filter(t => t.type === 'P' && (t.convictionScore?.score || 0) >= 70).length;
-//         if (highConvictionBuys > 5) {
-//             positive.push(`${highConvictionBuys} high-conviction insider purchases detected`);
-//         }
-
-//         const clusterCompanies = this.detectClusterBuying();
-//         if (clusterCompanies.length > 0) {
-//             positive.push(`Cluster buying detected in ${clusterCompanies.length} companies`);
-//         }
-
-//         if (critical.length === 0) {
-//             critical.push('No major risk factors detected');
-//             critical.push('Transaction volumes within normal ranges');
-//             critical.push('Insider selling appears routine');
-//         }
-
-//         if (positive.length === 0) {
-//             positive.push('Insider buying activity is moderate');
-//             positive.push('No exceptional patterns detected');
-//             positive.push('Market sentiment appears neutral');
-//         }
-
-//         return { critical, positive };
-//     }
-
-//     /**
-//      * 🔍 MODAL DE DÉTAILS DE TRANSACTION
-//      */
-//     viewTransactionDetail(txnId) {
-//         const txn = this.filteredData.find(t => t.id === txnId) || 
-//                     this.allCompaniesData?.allTransactions.find(t => t.id === txnId);
-        
-//         if (!txn) {
-//             console.error('Transaction not found:', txnId);
-//             return;
-//         }
-
-//         const modal = document.getElementById('transactionDetailModal');
-//         const modalBody = document.getElementById('transactionModalBody');
-
-//         if (!modal || !modalBody) {
-//             console.error('❌ Modal elements not found');
-//             return;
-//         }
-
-//         const convictionScore = txn.convictionScore?.score || 0;
-//         const convictionLevel = txn.convictionScore?.level || 'low';
-//         const convictionColor = convictionScore >= 70 ? '#10b981' : convictionScore >= 50 ? '#f59e0b' : '#ef4444';
-
-//         modalBody.innerHTML = `
-//             <div class='detail-grid' style='display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 30px;'>
-//                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
-//                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
-//                         <i class='fas fa-exchange-alt'></i> Transaction Info
-//                     </h4>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Type</span>
-//                         <span class='transaction-type-badge ${txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option'}'>
-//                             ${txn.type === 'P' ? '📈 Purchase' : txn.type === 'S' ? '📉 Sale' : '🎫 Option'}
-//                         </span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Date</span>
-//                         <span style='font-weight: 700;'>${this.engine.formatDate(txn.date)}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Filing</span>
-//                         <a href='${txn.formUrl}' target='_blank' style='color: var(--ml-primary); font-weight: 700;'>
-//                             ${txn.filingType} <i class='fas fa-external-link-alt' style='font-size: 0.8rem;'></i>
-//                         </a>
-//                     </div>
-//                 </div>
-
-//                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
-//                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
-//                         <i class='fas fa-building'></i> Company Info
-//                     </h4>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Symbol</span>
-//                         <span style='font-weight: 900; color: var(--ml-primary);'>${txn.company.symbol}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Name</span>
-//                         <span style='font-weight: 700;'>${txn.company.name}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Sector</span>
-//                         <span class='ipo-sector-badge'>${txn.company.sector}</span>
-//                     </div>
-//                 </div>
-
-//                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
-//                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
-//                         <i class='fas fa-user-tie'></i> Insider Info
-//                     </h4>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Name</span>
-//                         <span style='font-weight: 700;'>${txn.insider.name}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Position</span>
-//                         <span class='ipo-sector-badge'>${txn.insider.position}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Est. Net Worth</span>
-//                         <span style='font-weight: 700;'>$${this.engine.formatNumber(txn.insider.netWorth)}</span>
-//                     </div>
-//                 </div>
-
-//                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
-//                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
-//                         <i class='fas fa-dollar-sign'></i> Financial Details
-//                     </h4>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Shares</span>
-//                         <span style='font-weight: 700;'>${this.engine.formatNumber(txn.shares)}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Price/Share</span>
-//                         <span style='font-weight: 700;'>$${txn.pricePerShare.toFixed(2)}</span>
-//                     </div>
-//                     <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
-//                         <span style='color: var(--text-secondary); font-weight: 600;'>Total Value</span>
-//                         <span style='font-size: 1.2rem; color: var(--ml-primary); font-weight: 900;'>
-//                             $${this.engine.formatNumber(txn.transactionValue)}
-//                         </span>
-//                     </div>
-//                 </div>
-
-//                 <div class='detail-card' style='grid-column: span 2; background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
-//                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
-//                         <i class='fas fa-chart-line'></i> Analysis & Impact
-//                     </h4>
-//                     <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;'>
-//                         <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 12px;'>
-//                             <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>CONVICTION SCORE</p>
-//                             <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${convictionColor};'>
-//                                 ${convictionScore}<span style='font-size: 1rem;'>/100</span>
-//                             </p>
-//                             <p style='color: var(--text-tertiary); font-size: 0.85rem; margin: 8px 0 0 0; text-transform: uppercase; font-weight: 700;'>${convictionLevel}</p>
-//                         </div>
-//                         <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 12px;'>
-//                             <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>PRICE IMPACT (7D)</p>
-//                             <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${txn.priceImpact7d >= 0 ? '#10b981' : '#ef4444'};'>
-//                                 ${txn.priceImpact7d >= 0 ? '+' : ''}${txn.priceImpact7d.toFixed(1)}%
-//                             </p>
-//                         </div>
-//                         <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); border-radius: 12px;'>
-//                             <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>PRICE IMPACT (30D)</p>
-//                             <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${txn.priceImpact30d >= 0 ? '#10b981' : '#ef4444'};'>
-//                                 ${txn.priceImpact30d >= 0 ? '+' : ''}${txn.priceImpact30d.toFixed(1)}%
-//                             </p>
-//                         </div>
-//                         <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-radius: 12px;'>
-//                             <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>DAYS TO EARNINGS</p>
-//                             <p style='font-size: 2rem; font-weight: 900; margin: 0; color: var(--text-primary);'>
-//                                 ${txn.daysToEarnings}
-//                             </p>
-//                             <p style='color: var(--text-tertiary); font-size: 0.85rem; margin: 8px 0 0 0;'>
-//                                 ${txn.daysToEarnings <= 14 ? '⚠ Pre-Earnings Window' : '✓ Normal Window'}
-//                             </p>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         `;
-
-//         modal.style.display = 'flex';
-//         document.body.style.overflow = 'hidden';
-        
-//         console.log('✅ Transaction detail modal opened');
-//     }
-
-//     /**
-//      * 📚 MODALS D'EXPLICATION (INFO MODALS)
-//      */
-//     showInfoModal(topic) {
-//         const modalContent = this.getInfoModalContent(topic);
-        
-//         const modal = document.createElement('div');
-//         modal.className = 'modal';
-//         modal.style.display = 'flex';
-//         modal.id = 'infoModal';
-        
-//         modal.innerHTML = `
-//             <div class='modal-content' style='max-width: 700px; max-height: 85vh; overflow-y: auto;'>
-//                 <div class='modal-header' style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 24px; border-radius: 16px 16px 0 0;'>
-//                     <h2 style='margin: 0; font-size: 1.5rem; font-weight: 900;'>
-//                         <i class='fas fa-info-circle'></i> ${modalContent.title}
-//                     </h2>
-//                     <button class='modal-close' onclick='this.closest(".modal").remove(); document.body.style.overflow=""' style='background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 8px;'>
-//                         <i class='fas fa-times'></i>
-//                     </button>
-//                 </div>
-//                 <div class='modal-body' style='padding: 30px;'>
-//                     ${modalContent.content}
-//                 </div>
-//                 <div class='modal-footer' style='padding: 20px 30px; background: var(--card-bg); border-top: 1px solid var(--border-color);'>
-//                     <button onclick='this.closest(".modal").remove(); document.body.style.overflow=""' style='width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem;'>
-//                         Got it!
-//                     </button>
-//                 </div>
-//             </div>
-//         `;
-        
-//         document.body.appendChild(modal);
-//         document.body.style.overflow = 'hidden';
-        
-//         modal.addEventListener('click', (e) => {
-//             if (e.target === modal) {
-//                 modal.remove();
-//                 document.body.style.overflow = '';
-//             }
-//         });
-//     }
-
-//     getInfoModalContent(topic) {
-//         const contents = {
-//             totalTransactions: {
-//                 title: 'Total Transactions',
-//                 content: `
-//                     <h3 style='color: var(--ml-primary); font-weight: 800; margin-bottom: 16px;'>What are Insider Transactions?</h3>
-//                     <p style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         Insider transactions are trades made by company executives, directors, and major shareholders (>10% ownership). 
-//                         These individuals have access to material non-public information and must report their trades to the SEC within 2 business days.
-//                     </p>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Why Track Total Transactions?</h4>
-//                     <ul style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         <li><strong>Volume Signal:</strong> High transaction volume often precedes major company events</li>
-//                         <li><strong>Market Activity:</strong> Increased insider activity can indicate upcoming volatility</li>
-//                         <li><strong>Confidence Indicator:</strong> The number of insiders trading reflects collective sentiment</li>
-//                     </ul>
-                    
-//                     <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;'>
-//                         <h4 style='margin: 0 0 12px 0; color: var(--ml-primary); font-weight: 800;'>
-//                             <i class='fas fa-lightbulb'></i> Pro Tip
-//                         </h4>
-//                         <p style='margin: 0; line-height: 1.8;'>
-//                             A sudden spike in transaction volume (especially buys) can be a leading indicator of positive news. 
-//                             Compare current volume to the 30-day and 90-day averages for context.
-//                         </p>
-//                     </div>
-//                 `
-//             },
-//             insiderPurchases: {
-//                 title: 'Insider Purchases',
-//                 content: `
-//                     <h3 style='color: var(--ml-primary); font-weight: 800; margin-bottom: 16px;'>Understanding Insider Purchases</h3>
-//                     <p style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         Insider purchases occur when company executives and directors <strong>buy shares with their own money</strong>. 
-//                         This is generally considered a <strong style='color: #10b981;'>bullish signal</strong> because insiders are investing their personal capital in the company.
-//                     </p>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Why Insider Purchases Matter</h4>
-//                     <ul style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         <li><strong>Confidence Signal:</strong> Insiders believe the stock is undervalued</li>
-//                         <li><strong>Information Advantage:</strong> They know the company's future better than the market</li>
-//                         <li><strong>Skin in the Game:</strong> Personal capital at risk aligns with shareholder interests</li>
-//                         <li><strong>Timing Clues:</strong> Often precedes positive earnings or announcements</li>
-//                     </ul>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Types of Purchases</h4>
-//                     <div style='display: grid; gap: 12px; margin-bottom: 20px;'>
-//                         <div style='padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;'>
-//                             <strong style='color: #10b981;'>Open Market Purchases (P-Transaction)</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Strongest signal - insiders buy at market price</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;'>
-//                             <strong style='color: #3b82f6;'>Option Exercises (M-Transaction)</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Moderate signal - converting options to shares</span>
-//                         </div>
-//                     </div>
-                    
-//                     <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;'>
-//                         <h4 style='margin: 0 0 12px 0; color: #10b981; font-weight: 800;'>
-//                             <i class='fas fa-chart-line'></i> Historical Performance
-//                         </h4>
-//                         <p style='margin: 0; line-height: 1.8;'>
-//                             Studies show stocks with cluster insider buying (3+ insiders within 7 days) outperform 
-//                             the market by an average of <strong>8-12%</strong> over the following 6 months.
-//                         </p>
-//                     </div>
-//                 `
-//             },
-//             insiderSales: {
-//                 title: 'Insider Sales',
-//                 content: `
-//                     <h3 style='color: var(--ml-primary); font-weight: 800; margin-bottom: 16px;'>Understanding Insider Sales</h3>
-//                     <p style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         Insider sales occur when executives and directors <strong>sell their shares</strong>. 
-//                         Unlike purchases, sales are <strong style='color: #f59e0b;'>ambiguous signals</strong> because insiders sell for many reasons.
-//                     </p>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Why Insiders Sell (Not Always Bearish)</h4>
-//                     <ul style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         <li><strong>Diversification:</strong> Reducing concentration in a single stock (prudent portfolio management)</li>
-//                         <li><strong>Personal Needs:</strong> Buying a house, paying taxes, education expenses</li>
-//                         <li><strong>Scheduled Sales:</strong> Pre-planned 10b5-1 trading plans</li>
-//                         <li><strong>Compensation:</strong> Selling shares received as stock options or bonuses</li>
-//                         <li><strong>⚠ True Bearish Signal:</strong> Large, unexpected sales or cluster selling</li>
-//                     </ul>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Red Flags to Watch</h4>
-//                     <div style='display: grid; gap: 12px; margin-bottom: 20px;'>
-//                         <div style='padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;'>
-//                             <strong style='color: #ef4444;'>Cluster Selling</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Multiple insiders selling simultaneously</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;'>
-//                             <strong style='color: #f59e0b;'>CEO/CFO Divergence</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>CEO selling while CFO buying (or vice versa)</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;'>
-//                             <strong style='color: #ef4444;'>Pre-Earnings Selling</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Sales in the 14 days before earnings (suspicious timing)</span>
-//                         </div>
-//                     </div>
-                    
-//                     <div style='background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;'>
-//                         <h4 style='margin: 0 0 12px 0; color: #ef4444; font-weight: 800;'>
-//                             <i class='fas fa-exclamation-triangle'></i> Critical Analysis
-//                         </h4>
-//                         <p style='margin: 0; line-height: 1.8;'>
-//                             Focus on the <strong>ratio</strong> of buys to sells, not absolute numbers. A 70/30 sell/buy ratio 
-//                             is healthier than 95/5. Also check if sales are part of 10b5-1 plans (disclosed in Form 4 footnotes).
-//                         </p>
-//                     </div>
-//                 `
-//             },
-//             transactionValue: {
-//                 title: 'Total Transaction Value',
-//                 content: `
-//                     <h3 style='color: var(--ml-primary); font-weight: 800; margin-bottom: 16px;'>Transaction Value Analysis</h3>
-//                     <p style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         Total transaction value represents the <strong>aggregate dollar amount</strong> of all insider trades 
-//                         during the selected period. This metric is crucial for understanding the <strong>magnitude</strong> of insider sentiment.
-//                     </p>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Why Dollar Value Matters More Than Share Count</h4>
-//                     <ul style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         <li><strong>Conviction Indicator:</strong> Large dollar amounts signal strong insider confidence</li>
-//                         <li><strong>Normalizes Across Companies:</strong> $1M is significant whether it's 1,000 or 100,000 shares</li>
-//                         <li><strong>Risk Assessment:</strong> Higher values = more personal capital at stake</li>
-//                         <li><strong>Market Impact:</strong> Large trades can move stock prices</li>
-//                     </ul>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Interpreting Transaction Values</h4>
-//                     <div style='display: grid; gap: 12px; margin-bottom: 20px;'>
-//                         <div style='padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;'>
-//                             <strong style='color: #10b981;'>&gt; $5M Total Value</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Exceptional signal - major conviction or concern</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;'>
-//                             <strong style='color: #3b82f6;'>$1M - $5M Total Value</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Strong signal - meaningful insider activity</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;'>
-//                             <strong style='color: #f59e0b;'>$100K - $1M Total Value</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Moderate signal - routine activity</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(107, 114, 128, 0.1); border-radius: 8px;'>
-//                             <strong style='color: #6b7280;'>&lt; $100K Total Value</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Weak signal - likely noise</span>
-//                         </div>
-//                     </div>
-                    
-//                     <div style='background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;'>
-//                         <h4 style='margin: 0 0 12px 0; color: #3b82f6; font-weight: 800;'>
-//                             <i class='fas fa-calculator'></i> Calculation
-//                         </h4>
-//                         <p style='margin: 0; line-height: 1.8;'>
-//                             <code style='background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px;'>
-//                                 Transaction Value = Shares × Price Per Share
-//                             </code><br><br>
-//                             Example: CEO buys 50,000 shares at $120 = <strong>$6,000,000</strong> transaction value
-//                         </p>
-//                     </div>
-//                 `
-//             },
-//             convictionScore: {
-//                 title: 'Conviction Score',
-//                 content: `
-//                     <h3 style='color: var(--ml-primary); font-weight: 800; margin-bottom: 16px;'>Understanding Conviction Scores</h3>
-//                     <p style='line-height: 1.8; color: var(--text-primary); margin-bottom: 20px;'>
-//                         The Conviction Score (0-100) measures how much <strong>personal capital</strong> an insider is risking 
-//                         relative to their estimated net worth. A score of 95 means the transaction represents a significant 
-//                         percentage of their wealth, indicating <strong>extreme confidence</strong>.
-//                     </p>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>How It's Calculated</h4>
-//                     <div style='background: rgba(102, 126, 234, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;'>
-//                         <code style='font-size: 1.1rem; color: var(--ml-primary); font-weight: 700;'>
-//                             Conviction Score = f(Transaction Value / Net Worth)
-//                         </code>
-//                         <ul style='margin-top: 16px; line-height: 1.8;'>
-//                             <li>&gt; 5% of net worth → Score 95 (Very High)</li>
-//                             <li>&gt; 2% of net worth → Score 85 (High)</li>
-//                             <li>&gt; 1% of net worth → Score 70 (Medium-High)</li>
-//                             <li>&gt; 0.5% of net worth → Score 55 (Medium)</li>
-//                             <li>&lt; 0.5% of net worth → Score 30 (Low)</li>
-//                         </ul>
-//                     </div>
-                    
-//                     <h4 style='color: var(--ml-primary); font-weight: 700; margin: 20px 0 12px 0;'>Score Interpretation</h4>
-//                     <div style='display: grid; gap: 12px; margin-bottom: 20px;'>
-//                         <div style='padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;'>
-//                             <strong style='color: #10b981;'>80-100: Very High Conviction</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Insider is betting a huge portion of their wealth - extremely bullish</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;'>
-//                             <strong style='color: #3b82f6;'>60-79: High Conviction</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Significant investment - strong confidence signal</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;'>
-//                             <strong style='color: #f59e0b;'>40-59: Medium Conviction</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Moderate investment - routine activity</span>
-//                         </div>
-//                         <div style='padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;'>
-//                             <strong style='color: #ef4444;'>0-39: Low Conviction</strong><br>
-//                             <span style='font-size: 0.9rem; color: var(--text-secondary);'>Small relative investment - weak signal</span>
-//                         </div>
-//                     </div>
-                    
-//                     <div style='background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;'>
-//                         <h4 style='margin: 0 0 12px 0; color: #f59e0b; font-weight: 800;'>
-//                             <i class='fas fa-star'></i> Real Example
-//                         </h4>
-//                         <p style='margin: 0; line-height: 1.8;'>
-//                             A CFO with $50M net worth buys $2.5M in stock (5% of wealth) = <strong>Score 95</strong><br>
-//                             This signals extreme confidence that the stock will appreciate significantly.
-//                         </p>
-//                     </div>
-//                 `
-//             }
-//         };
-
-//         return contents[topic] || {
-//             title: 'Information',
-//             content: '<p>Detailed information about this metric coming soon.</p>'
-//         };
-//     }
-
-//     /**
-//      * 🛠 UTILITY FUNCTIONS
-//      */
-//     populateCompanyFilter() {
-//         const select = document.getElementById('companyFilter');
-//         if (!select || !this.allCompaniesData) return;
-
-//         const companies = [...new Set(this.allCompaniesData.allTransactions.map(t => t.company.symbol))].sort();
-        
-//         const options = companies.map(symbol => 
-//             `<option value='${symbol}'>${symbol}</option>`
-//         ).join('');
-
-//         select.innerHTML = `<option value='all'>All Companies</option>${options}`;
-//     }
-
-//     checkSmartAlerts() {
-//         const alerts = [];
-
-//         if (this.alertConfig.clusterBuying) {
-//             const clusterCompanies = this.detectClusterBuying();
-//             if (clusterCompanies.length > 0) {
-//                 alerts.push({
-//                     type: 'cluster',
-//                     message: `Cluster buying detected in ${clusterCompanies.length} companies!`
-//                 });
-//             }
-//         }
-
-//         if (alerts.length > 0) {
-//             this.showAlertBanner(alerts[0]);
-//         }
-//     }
-
-//     showAlertBanner(alert) {
-//         const banner = document.getElementById('smartAlertsBanner');
-//         const message = document.getElementById('alertBannerMessage');
-        
-//         if (banner && message) {
-//             message.textContent = alert.message;
-//             banner.style.display = 'block';
-//         }
-//     }
-
-//     filterTransactions(button) {
-//         document.querySelectorAll('.filter-chip').forEach(chip => {
-//             chip.classList.remove('active');
-//         });
-
-//         button.classList.add('active');
-
-//         const type = button.dataset.type;
-//         this.currentTransactionType = type;
-
-//         this.applyFilters();
-//     }
-
-//     updateCorrelation(button) {
-//         document.querySelectorAll('.chart-control-btn').forEach(btn => {
-//             btn.classList.remove('active');
-//         });
-//         button.classList.add('active');
-//     }
-
-//     viewPattern(patternType) {
-//         alert(`Viewing pattern: ${patternType}`);
-//     }
-
-//     showLoading() {
-//         const loadingEl = document.getElementById('loadingState');
-//         if (loadingEl) loadingEl.style.display = 'block';
-//     }
-
-//     hideLoading() {
-//         const loadingEl = document.getElementById('loadingState');
-//         if (loadingEl) loadingEl.style.display = 'none';
-//     }
-
-//     openModal(modalId) {
-//         const modal = document.getElementById(modalId);
-//         if (modal) {
-//             modal.style.display = 'flex';
-//             document.body.style.overflow = 'hidden';
-//             console.log(`✅ Modal opened: ${modalId}`);
-//         } else {
-//             console.error(`❌ Modal not found: ${modalId}`);
-//         }
-//     }
-
-//     closeAllModals() {
-//         document.querySelectorAll('.modal').forEach(modal => {
-//             modal.style.display = 'none';
-//         });
-//         document.body.style.overflow = '';
-//         console.log('✅ All modals closed');
-//     }
-
-//     saveAlertConfig() {
-//         this.alertConfig = {
-//             clusterBuying: document.getElementById('alertClusterBuying')?.checked || true,
-//             highValue: document.getElementById('alertHighValue')?.checked || true,
-//             divergence: document.getElementById('alertDivergence')?.checked || true,
-//             preEarnings: document.getElementById('alertPreEarnings')?.checked || true,
-//             unusualVolume: document.getElementById('alertUnusualVolume')?.checked || true,
-//             highValueThreshold: parseInt(document.getElementById('highValueThreshold')?.value || 1000000)
-//         };
-
-//         console.log('✅ Alert configuration saved:', this.alertConfig);
-//         alert('Alert configuration saved successfully!');
-//         this.closeAllModals();
-//     }
-// }
-
-// // ═══════════════════════════════════════════════════════════════════
-// // 🚀 INITIALISATION GLOBALE
-// // ═══════════════════════════════════════════════════════════════════
-
-// let insiderApp;
-
-// document.addEventListener('DOMContentLoaded', async () => {
-//     console.log('🚀 DOM Loaded - Initializing Insider Flow Tracker...');
-    
-//     if (!insiderApp) {
-//         insiderApp = new AdvancedInsiderFlowTracker();
-        
-//         await insiderApp.init();
-        
-//         await insiderApp.loadAllData();
-        
-//         console.log('✅ Insider Flow Tracker fully initialized');
-//     }
-// });
-
-// function logout() {
-//     if (typeof firebase !== 'undefined' && firebase.auth) {
-//         firebase.auth().signOut().then(() => {
-//             window.location.href = 'login.html';
-//         }).catch(error => {
-//             console.error('Logout error:', error);
-//         });
-//     }
-// }
