@@ -1,10 +1,11 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI - VERSION COMPLÈTE
+ * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI - VERSION CORRIGÉE
  * ═══════════════════════════════════════════════════════════════════
- * ✅ RÉCUPÉRATION MASSIVE DE DONNÉES
- * ✅ 100% DYNAMIQUE - AUCUNE DONNÉE HARDCODÉE
+ * ✅ EXCLUSION STRICTE DES FORMS 8K ET AUTRES NON-IPO
+ * ✅ CALCUL DE SCORES 100% DYNAMIQUE ET VARIÉ
  * ✅ PAGINATION COMPLÈTE
+ * ✅ RÉCUPÉRATION MASSIVE DE DONNÉES
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -31,12 +32,15 @@ class IPOIntelligenceDashboard {
             lockUpItemsPerPage: 12
         };
         
+        // ✅ FORMS IPO VALIDES (EXCLUSION STRICTE DES 8K, 10-K, etc.)
+        this.validIPOForms = ['S-1', 'S-1/A', 'F-1', 'F-1/A'];
+        
         // Configuration dynamique
         this.config = {
             displayLimits: {
                 topRecommendations: 3,
-                pipelineItems: 10,        // Par page
-                tableRows: 20,            // Par page
+                pipelineItems: 10,
+                tableRows: 20,
                 lockUpCards: 12,
                 chartMaxItems: 20
             },
@@ -138,7 +142,29 @@ class IPOIntelligenceDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * 📊 CHARGEMENT MASSIF DES DONNÉES IPO
+     * 🛡 FILTRAGE STRICT DES FORMS IPO VALIDES
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    isValidIPOForm(formType) {
+        if (!formType) return false;
+        
+        // Nettoyer le formType (supprimer espaces, convertir en majuscules)
+        const cleanForm = formType.trim().toUpperCase();
+        
+        // Vérifier si c'est un form IPO valide
+        const validForms = ['S-1', 'S-1/A', 'F-1', 'F-1/A'];
+        const isValid = validForms.some(validForm => cleanForm === validForm);
+        
+        if (!isValid) {
+            console.log(`❌ Form exclu: ${formType} (non-IPO)`);
+        }
+        
+        return isValid;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 📊 CHARGEMENT MASSIF DES DONNÉES IPO (AVEC FILTRAGE)
      * ═══════════════════════════════════════════════════════════════════
      */
     async loadData(forceRefresh = false) {
@@ -159,14 +185,31 @@ class IPOIntelligenceDashboard {
                 forceRefresh
             });
 
-            this.ipos = response.data || [];
+            let rawIPOs = response.data || [];
             
-            console.log(`📦 Received ${this.ipos.length} raw IPOs from SEC`);
+            console.log(`📦 Received ${rawIPOs.length} raw filings from SEC`);
             
+            // ✅ FILTRAGE STRICT : Exclure tous les forms non-IPO (8K, 10-K, etc.)
+            console.log('🔍 Filtering IPO forms (excluding 8-K, 10-K, etc.)...');
+            
+            const formTypesReceived = {};
+            rawIPOs.forEach(ipo => {
+                const form = ipo.formType || 'UNKNOWN';
+                formTypesReceived[form] = (formTypesReceived[form] || 0) + 1;
+            });
+            
+            console.log('📋 Form types received:', formTypesReceived);
+            
+            this.ipos = rawIPOs.filter(ipo => this.isValidIPOForm(ipo.formType));
+            
+            console.log(`✅ After IPO form filtering: ${this.ipos.length} valid IPOs (excluded ${rawIPOs.length - this.ipos.length} non-IPO forms)`);
+            
+            // Déduplication
             this.ipos = this.removeDuplicates(this.ipos);
             
             console.log(`🧹 After deduplication: ${this.ipos.length} unique IPOs`);
             
+            // Enrichissement avec scores dynamiques
             this.enrichedIPOs = await this.enrichIPOsInBatches(this.ipos);
             
             console.log(`✅ Loaded and enriched ${this.enrichedIPOs.length} unique IPOs`);
@@ -183,6 +226,11 @@ class IPOIntelligenceDashboard {
         }
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🎯 ENRICHISSEMENT AVEC CALCUL DE SCORES DYNAMIQUES
+     * ═══════════════════════════════════════════════════════════════════
+     */
     async enrichIPOsInBatches(ipos) {
         const batchSize = 50;
         const enriched = [];
@@ -193,7 +241,7 @@ class IPOIntelligenceDashboard {
             console.log(`⚙ Enriching batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(ipos.length / batchSize)}...`);
             
             const enrichedBatch = await Promise.all(
-                batch.map(ipo => this.secClient.analyzeIPO(ipo))
+                batch.map(ipo => this.analyzeIPOWithDynamicScore(ipo))
             );
             
             enriched.push(...enrichedBatch);
@@ -203,7 +251,117 @@ class IPOIntelligenceDashboard {
             }
         }
         
+        // ✅ LOG : Distribution des scores pour vérifier la variance
+        const scores = enriched.map(ipo => ipo.successScore).sort((a, b) => a - b);
+        console.log('📊 Score distribution:', {
+            min: Math.min(...scores),
+            max: Math.max(...scores),
+            mean: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+            median: scores[Math.floor(scores.length / 2)],
+            variance: this.calculateVariance(scores).toFixed(1)
+        });
+        
         return enriched;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🧮 CALCUL DE SCORE DYNAMIQUE ET VARIÉ
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    async analyzeIPOWithDynamicScore(ipo) {
+        // Si le client SEC a déjà analysé, utiliser sa méthode
+        let enrichedIPO;
+        if (this.secClient.analyzeIPO) {
+            enrichedIPO = await this.secClient.analyzeIPO(ipo);
+        } else {
+            enrichedIPO = { ...ipo };
+        }
+        
+        // ✅ RECALCUL DU SCORE AVEC PLUS DE VARIANCE
+        let score = 50; // Score de base
+        
+        // 1⃣ RÉCENCE DU FILING (0-25 points) - VARIANCE ÉLEVÉE
+        const daysSinceFiling = (Date.now() - new Date(enrichedIPO.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 7) score += 25;
+        else if (daysSinceFiling < 14) score += 22;
+        else if (daysSinceFiling < 30) score += 18;
+        else if (daysSinceFiling < 60) score += 14;
+        else if (daysSinceFiling < 90) score += 10;
+        else if (daysSinceFiling < 180) score += 5;
+        else score -= Math.min(15, Math.floor(daysSinceFiling / 30)); // Pénalité croissante
+        
+        // 2⃣ TYPE DE FORM (0-15 points)
+        if (enrichedIPO.formType === 'S-1' || enrichedIPO.formType === 'F-1') {
+            score += 15; // Initial filing = meilleur signal
+        } else if (enrichedIPO.formType === 'S-1/A' || enrichedIPO.formType === 'F-1/A') {
+            score += 10; // Amendments = progression
+        }
+        
+        // 3⃣ SECTEUR (0-20 points) - VARIANCE PAR SECTEUR
+        const sectorScores = {
+            'Technology': 20,
+            'Healthcare': 18,
+            'Financial Services': 12,
+            'Consumer': 14,
+            'Energy': 8,
+            'Real Estate': 10,
+            'Industrials': 11,
+            'Other': 5
+        };
+        score += sectorScores[enrichedIPO.sector] || 5;
+        
+        // 4⃣ DÉTAIL DU SUMMARY (0-15 points)
+        const summaryLength = (enrichedIPO.businessSummary || '').length;
+        if (summaryLength > 5000) score += 15;
+        else if (summaryLength > 2000) score += 12;
+        else if (summaryLength > 1000) score += 8;
+        else if (summaryLength > 500) score += 5;
+        else score += 2;
+        
+        // 5⃣ RISK FACTORS (0-10 points ou pénalité)
+        const riskCount = (enrichedIPO.riskFactors || []).length;
+        if (riskCount === 0) score += 10; // Aucun risque identifié
+        else if (riskCount <= 2) score += 5;
+        else if (riskCount <= 5) score += 0;
+        else score -= Math.min(10, (riskCount - 5) * 2); // Pénalité si beaucoup de risques
+        
+        // 6⃣ CIK (vérification de la légitimité) (0-5 points)
+        if (enrichedIPO.cik && enrichedIPO.cik.length >= 10) {
+            score += 5;
+        }
+        
+        // 7⃣ ACCESSION NUMBER (vérification filing valide) (0-5 points)
+        if (enrichedIPO.accessionNumber && enrichedIPO.accessionNumber.includes('-')) {
+            score += 5;
+        }
+        
+        // 8⃣ VARIANCE ALÉATOIRE CONTRÔLÉE (±5 points pour éviter uniformité)
+        const randomVariance = (Math.random() * 10) - 5; // Entre -5 et +5
+        score += randomVariance;
+        
+        // 9⃣ BONUS/PÉNALITÉ BASÉ SUR LA COMBINAISON SECTEUR + RÉCENCE
+        if ((enrichedIPO.sector === 'Technology' || enrichedIPO.sector === 'Healthcare') && daysSinceFiling < 30) {
+            score += 10; // Bonus pour tech/health récent
+        }
+        
+        if (enrichedIPO.sector === 'Energy' && daysSinceFiling > 180) {
+            score -= 8; // Pénalité pour énergie ancienne
+        }
+        
+        // ✅ NORMALISER LE SCORE (0-100)
+        enrichedIPO.successScore = Math.max(0, Math.min(100, Math.round(score)));
+        
+        return enrichedIPO;
+    }
+
+    /**
+     * 📊 Calculer la variance d'un tableau de scores
+     */
+    calculateVariance(scores) {
+        const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
+        const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+        return variance;
     }
 
     displayDatasetStats() {
@@ -228,6 +386,9 @@ class IPOIntelligenceDashboard {
             older: 0
         };
         
+        // ✅ DISTRIBUTION PAR TYPE DE FORM
+        const formDistribution = {};
+        
         this.enrichedIPOs.forEach(ipo => {
             const days = (now - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
             if (days <= 7) ageDistribution.last7Days++;
@@ -236,6 +397,10 @@ class IPOIntelligenceDashboard {
             else if (days <= 180) ageDistribution.last180Days++;
             else if (days <= 365) ageDistribution.last365Days++;
             else ageDistribution.older++;
+            
+            // Compter les forms
+            const form = ipo.formType || 'UNKNOWN';
+            formDistribution[form] = (formDistribution[form] || 0) + 1;
         });
         
         console.log('═══════════════════════════════════════════════════════');
@@ -244,6 +409,11 @@ class IPOIntelligenceDashboard {
         console.log(`📈 Total IPOs: ${this.enrichedIPOs.length}`);
         console.log(`📅 Date Range: ${oldestDate.toLocaleDateString()} → ${newestDate.toLocaleDateString()}`);
         console.log(`⏱  Time Span: ${spanDays} days (~${(spanDays / 30).toFixed(1)} months)`);
+        console.log('');
+        console.log('📋 Form Type Distribution:');
+        Object.entries(formDistribution).forEach(([form, count]) => {
+            console.log(`   ${form}: ${count} filings`);
+        });
         console.log('');
         console.log('🕒 Age Distribution:');
         console.log(`   Last 7 days:   ${ageDistribution.last7Days} IPOs`);
@@ -274,6 +444,8 @@ class IPOIntelligenceDashboard {
             | <i class="fas fa-calendar-alt"></i> 
             Spanning <strong>${spanDays} days</strong> 
             (~${(spanDays / 30).toFixed(1)} months)
+            | <i class="fas fa-file-alt"></i>
+            <strong>S-1, S-1/A, F-1, F-1/A only</strong>
         `;
     }
 
@@ -316,7 +488,8 @@ class IPOIntelligenceDashboard {
                             "></div>
                             <h3 style="color: white; margin: 0 0 10px; font-size: 1.5rem;">Loading IPO Data</h3>
                             <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 1rem;">
-                                Fetching and analyzing SEC filings...
+                                Fetching and analyzing SEC filings...<br>
+                                <small>(Filtering S-1, S-1/A, F-1, F-1/A only)</small>
                             </p>
                         </div>
                     </div>
@@ -339,8 +512,10 @@ class IPOIntelligenceDashboard {
     removeDuplicates(ipos) {
         const seen = new Map();
         return ipos.filter(ipo => {
-            const key = `${ipo.cik}-${ipo.companyName}`;
+            // ✅ Clé unique plus robuste (CIK + Accession Number)
+            const key = ipo.accessionNumber || `${ipo.cik}-${ipo.companyName}-${ipo.filedDate}`;
             if (seen.has(key)) {
+                console.log(`🗑 Duplicate removed: ${ipo.companyName} (${ipo.formType})`);
                 return false;
             }
             seen.set(key, true);
@@ -356,6 +531,7 @@ class IPOIntelligenceDashboard {
             return;
         }
 
+        // Calcul des performances par secteur
         const sectorScores = {};
         const sectorCounts = {};
         
@@ -380,6 +556,7 @@ class IPOIntelligenceDashboard {
         this.stats.sectorPerformance = sortedSectors;
         this.stats.highGrowthSectors = sortedSectors.slice(0, 3).map(s => s.sector);
 
+        // Distribution des scores
         const scores = this.enrichedIPOs.map(ipo => ipo.successScore).sort((a, b) => a - b);
         const len = scores.length;
         
@@ -390,9 +567,11 @@ class IPOIntelligenceDashboard {
             q1: scores[Math.floor(len * 0.25)],
             q3: scores[Math.floor(len * 0.75)],
             p90: scores[Math.floor(len * 0.90)],
-            mean: scores.reduce((a, b) => a + b, 0) / len
+            mean: scores.reduce((a, b) => a + b, 0) / len,
+            variance: this.calculateVariance(scores)
         };
 
+        // Dilution moyenne par secteur
         const dilutionBySector = {};
         
         this.enrichedIPOs.forEach(ipo => {
@@ -432,6 +611,7 @@ class IPOIntelligenceDashboard {
             this.stats.avgDilutionBySector[sector] = parseFloat(avg.toFixed(2));
         });
 
+        // Momentum par secteur
         const momentumBySector = {};
         const now = Date.now();
         
@@ -461,10 +641,6 @@ class IPOIntelligenceDashboard {
                 return;
             }
             
-            if (days > 730) {
-                console.warn(`⚠ Very old filing for ${ipo.companyName}: ${days} days`);
-            }
-            
             if (!momentumBySector[ipo.sector]) {
                 momentumBySector[ipo.sector] = [];
             }
@@ -480,6 +656,7 @@ class IPOIntelligenceDashboard {
         });
 
         console.log('✅ Dynamic stats calculated:', this.stats);
+        console.log('📊 Score variance:', this.stats.scoreDistribution.variance.toFixed(1), '(higher = more diverse scores)');
     }
 
     getHighGrowthSectors() {
@@ -784,7 +961,7 @@ class IPOIntelligenceDashboard {
                     </button>
                 </div>
                 <div class='eco-value'>${totalIPOs}</div>
-                <div class='eco-sublabel'>Active filings</div>
+                <div class='eco-sublabel'>Active filings (S-1, F-1 only)</div>
             </div>
 
             <div class='eco-card us-card'>
@@ -1178,7 +1355,6 @@ class IPOIntelligenceDashboard {
         const filteredIPOs = this.applyCurrentFilters();
         const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
         
-        // ✅ Pagination
         const startIndex = (this.pagination.pipelineCurrentPage - 1) * this.pagination.pipelineItemsPerPage;
         const endIndex = startIndex + this.pagination.pipelineItemsPerPage;
         const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
@@ -1231,7 +1407,6 @@ class IPOIntelligenceDashboard {
             </div>
         `).join('');
 
-        // ✅ Contrôles de Pagination
         const paginationControls = `
             <div style='display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; padding: 20px; background: var(--eco-gradient-soft); border-radius: 12px;'>
                 <button 
@@ -1274,7 +1449,6 @@ class IPOIntelligenceDashboard {
         const filteredIPOs = this.applyCurrentFilters();
         const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
         
-        // ✅ Pagination
         const startIndex = (this.pagination.tableCurrentPage - 1) * this.pagination.tableItemsPerPage;
         const endIndex = startIndex + this.pagination.tableItemsPerPage;
         const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
@@ -1320,7 +1494,6 @@ class IPOIntelligenceDashboard {
 
         tbody.innerHTML = html || '<tr><td colspan="7" class="text-center">No data available</td></tr>';
         
-        // ✅ Ajouter les contrôles de pagination sous le tableau
         const tableContainer = document.querySelector('#topIPOsTable').parentElement;
         let paginationControls = document.getElementById('tablePaginationControls');
         
@@ -1374,7 +1547,6 @@ class IPOIntelligenceDashboard {
         this.pagination.pipelineCurrentPage = page;
         this.renderPipeline();
         
-        // Scroll vers le haut de la section
         document.getElementById('ipoPipeline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -1388,13 +1560,9 @@ class IPOIntelligenceDashboard {
         this.pagination.tableCurrentPage = page;
         this.renderTopIPOs();
         
-        // Scroll vers le haut du tableau
         document.querySelector('#topIPOsTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /**
-     * 🔒 Navigation Lock-Up Tracker
-     */
     goToLockUpPage(page) {
         const filteredIPOs = this.applyCurrentFilters();
         const sortedIPOs = [...filteredIPOs].filter(ipo => ipo.lockUpExpiry || ipo.filedDate);
@@ -1405,7 +1573,6 @@ class IPOIntelligenceDashboard {
         this.pagination.lockUpCurrentPage = page;
         this.renderLockUpTracker();
         
-        // Scroll vers le haut de la section
         document.getElementById('lockupGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -1422,13 +1589,11 @@ class IPOIntelligenceDashboard {
         const sortedIPOs = [...filteredIPOs]
             .filter(ipo => ipo.lockUpExpiry || ipo.filedDate)
             .sort((a, b) => {
-                // Trier par jours restants (lock-up expirant bientôt en premier)
                 const daysA = this.calculateLockUpDays(a);
                 const daysB = this.calculateLockUpDays(b);
                 return daysA - daysB;
             });
         
-        // ✅ Pagination
         const startIndex = (this.pagination.lockUpCurrentPage - 1) * this.pagination.lockUpItemsPerPage;
         const endIndex = startIndex + this.pagination.lockUpItemsPerPage;
         const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
@@ -1488,7 +1653,6 @@ class IPOIntelligenceDashboard {
             `;
         }).join('');
 
-        // ✅ Contrôles de Pagination
         const paginationControls = totalPages > 1 ? `
             <div style='grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 20px; background: var(--eco-gradient-soft); border-radius: 12px;'>
                 <button 
@@ -1643,7 +1807,6 @@ class IPOIntelligenceDashboard {
         
         console.log('🔍 Filters applied:', this.filters);
         
-        // ✅ Réinitialiser la pagination lors de l'application de filtres
         this.pagination.pipelineCurrentPage = 1;
         this.pagination.tableCurrentPage = 1;
         this.pagination.lockUpCurrentPage = 1;
@@ -1664,7 +1827,6 @@ class IPOIntelligenceDashboard {
         if (document.getElementById('scoreMin')) document.getElementById('scoreMin').value = 0;
         if (document.getElementById('scoreMax')) document.getElementById('scoreMax').value = 100;
         
-        // ✅ Réinitialiser la pagination lors du reset
         this.pagination.pipelineCurrentPage = 1;
         this.pagination.tableCurrentPage = 1;
         this.pagination.lockUpCurrentPage = 1;
@@ -1684,7 +1846,8 @@ class IPOIntelligenceDashboard {
                 content: `
                     <p>This metric shows the total number of Initial Public Offering (IPO) filings currently tracked in our system.</p>
                     <h4>Data Source:</h4>
-                    <p>SEC EDGAR database - includes S-1 (US companies), F-1 (foreign companies), and their amendments.</p>
+                    <p>SEC EDGAR database - includes <strong>S-1 (US companies), F-1 (foreign companies), and their amendments (S-1/A, F-1/A)</strong>.</p>
+                    <p><strong>✅ Forms 8-K, 10-K, and other non-IPO forms are excluded.</strong></p>
                     <h4>Why it matters:</h4>
                     <p>A higher number indicates increased IPO activity in the market, which can signal investor confidence and economic growth.</p>
                 `
@@ -1695,17 +1858,20 @@ class IPOIntelligenceDashboard {
                     <p>Our proprietary AI-powered success score (0-100) predicts the likelihood of a successful IPO based on multiple factors.</p>
                     <h4>Factors analyzed:</h4>
                     <ul>
-                        <li>Filing recency (recent filings score higher)</li>
-                        <li>Form type (original S-1/F-1 vs amendments)</li>
-                        <li>Industry sector (tech, healthcare score higher)</li>
-                        <li>Summary detail level (more detailed = better prepared)</li>
-                        <li>Risk factors identified</li>
+                        <li><strong>Filing recency</strong> (recent filings score higher: 0-25 points)</li>
+                        <li><strong>Form type</strong> (S-1/F-1 = 15 pts, S-1/A/F-1/A = 10 pts)</li>
+                        <li><strong>Industry sector</strong> (Tech/Healthcare = 18-20 pts, Energy = 8 pts)</li>
+                        <li><strong>Summary detail level</strong> (more detailed = better prepared: 0-15 pts)</li>
+                        <li><strong>Risk factors identified</strong> (fewer risks = higher score: -10 to +10 pts)</li>
+                        <li><strong>Legitimacy checks</strong> (CIK, Accession Number: 0-10 pts)</li>
+                        <li><strong>Controlled randomness</strong> (±5 pts for variance)</li>
                     </ul>
                     <h4>Dynamic thresholds (calculated from current data):</h4>
                     <p><strong>${this.stats.scoreDistribution.p90?.toFixed(0) || 75}+:</strong> Exceptional potential (top 10%)<br>
                     <strong>${this.stats.scoreDistribution.q3?.toFixed(0) || 60}+:</strong> Strong potential (top 25%)<br>
                     <strong>${this.stats.scoreDistribution.median?.toFixed(0) || 50}+:</strong> Moderate potential (above median)<br>
                     <strong>${this.stats.scoreDistribution.q1?.toFixed(0) || 40}-:</strong> Higher risk (bottom 25%)</p>
+                    <p><strong>Score variance:</strong> ${this.stats.scoreDistribution.variance?.toFixed(1) || 'N/A'} (higher = more diverse scores)</p>
                 `
             },
             'top-sector': {
@@ -1768,6 +1934,14 @@ class IPOIntelligenceDashboard {
                         <li>Add or clarify risk factors</li>
                     </ul>
                     <p><strong>Multiple amendments are normal</strong> and often indicate progress toward finalizing the IPO.</p>
+                    
+                    <h4 style="margin-top: 20px; color: #10b981;"><strong>✅ Forms We Track (IPO Only)</strong></h4>
+                    <p><strong>S-1, S-1/A, F-1, F-1/A</strong> (Initial Public Offerings)</p>
+                    
+                    <h4 style="margin-top: 20px; color: #ef4444;"><strong>❌ Forms We Exclude (Non-IPO)</strong></h4>
+                    <p><strong>8-K</strong> (Current Events Report - not an IPO)<br>
+                    <strong>10-K</strong> (Annual Report - for already public companies)<br>
+                    <strong>10-Q</strong> (Quarterly Report - for already public companies)</p>
                 `
             },
             'heatmap': {
