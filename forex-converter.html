@@ -454,10 +454,13 @@
                         </span>
                     </h2>
 
-                    <!-- Fibonacci Retracements -->
+                    <!-- ✨ DANS LA SECTION FIBONACCI -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
                             <i class='fas fa-ruler-combined'></i> Fibonacci Retracements & Extensions
+                            <button class='info-btn' onclick='forexConverter.openModal("fibonacciInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                             <span class='chart-subtitle'>Golden Ratio Support/Resistance Levels (23.6%, 38.2%, 50%, 61.8%, 78.6%, 100%, 161.8%, 261.8%)</span>
                         </h3>
                         <div class='chart-wrapper'>
@@ -465,10 +468,13 @@
                         </div>
                     </div>
 
-                    <!-- Ichimoku Cloud -->
+                    <!-- ✨ DANS LA SECTION ICHIMOKU -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
                             <i class='fas fa-cloud'></i> Ichimoku Cloud (Japanese Trading System)
+                            <button class='info-btn' onclick='forexConverter.openModal("ichimokuInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                             <span class='chart-subtitle'>All-in-One Indicator: Trend Direction, Support/Resistance, Momentum & Volatility</span>
                         </h3>
                         <div class='chart-wrapper'>
@@ -476,10 +482,13 @@
                         </div>
                     </div>
 
-                    <!-- Pivot Points -->
+                    <!-- ✨ DANS LA SECTION PIVOT POINTS -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
                             <i class='fas fa-crosshairs'></i> Pivot Points (Standard, Fibonacci, Camarilla)
+                            <button class='info-btn' onclick='forexConverter.openModal("pivotPointsInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                             <span class='chart-subtitle'>Market Maker Support/Resistance Levels for Intraday Trading</span>
                         </h3>
                         <div class='chart-wrapper'>
@@ -487,10 +496,13 @@
                         </div>
                     </div>
 
-                    <!-- ADX + DMI -->
+                    <!-- ✨ DANS LA SECTION ADX -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
                             <i class='fas fa-bolt'></i> ADX & Directional Movement Index
+                            <button class='info-btn' onclick='forexConverter.openModal("adxInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                             <span class='chart-subtitle'>Trend Strength Indicator (+DI vs -DI for Direction, ADX for Strength)</span>
                         </h3>
                         <div class='chart-wrapper'>
@@ -498,17 +510,19 @@
                         </div>
                     </div>
 
-                    <!-- Stochastic Oscillator -->
+                    <!-- ✨ DANS LA SECTION STOCHASTIC -->
                     <div class='technical-chart-section'>
                         <h3 class='technical-chart-title'>
                             <i class='fas fa-wave-square'></i> Stochastic Oscillator (14, 3, 3)
+                            <button class='info-btn' onclick='forexConverter.openModal("stochasticInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                             <span class='chart-subtitle'>Momentum Indicator: %K (Fast) vs %D (Slow) - Overbought/Oversold Detection</span>
                         </h3>
                         <div class='chart-wrapper'>
                             <div id='stochasticChart' class='chart' style='height: 400px;'></div>
                         </div>
                     </div>
-                </div>
 
                 <!-- ========================================
                      HISTORICAL CHART WITH INDICATORS
@@ -930,6 +944,643 @@
                 
                 <p><strong>How to Use:</strong></p>
                 <p>Monitor economic indicators to anticipate central bank policy changes and currency movements. Combine with technical analysis for optimal timing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+     ✨ NOUVEAUX MODALS INSTITUTIONNELS
+     ======================================== -->
+
+    <!-- Fibonacci Retracements Info Modal -->
+    <div id='fibonacciInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-ruler-combined'></i> Fibonacci Retracements & Extensions</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("fibonacciInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What are Fibonacci Retracements?</strong></p>
+                <p>Fibonacci retracements are horizontal lines that indicate where support and resistance are likely to occur. They are based on the Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, 13, 21, 34...), where each number is the sum of the two preceding ones.</p>
+                
+                <p><strong>The Golden Ratio (φ = 1.618):</strong></p>
+                <p>The ratio between consecutive Fibonacci numbers approaches 1.618, known as the "Golden Ratio" or "Phi". This ratio appears throughout nature, art, and financial markets.</p>
+                
+                <p><strong>Key Fibonacci Levels:</strong></p>
+                <ul>
+                    <li><strong>23.6%</strong> - Shallow retracement (weak pullback)</li>
+                    <li><strong>38.2%</strong> - Moderate retracement (common pullback level)</li>
+                    <li><strong>50.0%</strong> - Psychological level (not technically Fibonacci, but widely used)</li>
+                    <li><strong>61.8%</strong> - <span style="color: #8b5cf6; font-weight: 800;">The Golden Ratio</span> - Most important level</li>
+                    <li><strong>78.6%</strong> - Deep retracement (square root of 0.618)</li>
+                    <li><strong>100%</strong> - Full retracement (back to starting point)</li>
+                </ul>
+                
+                <p><strong>Fibonacci Extensions (for Profit Targets):</strong></p>
+                <ul>
+                    <li><strong>161.8%</strong> - First major extension (common profit target)</li>
+                    <li><strong>261.8%</strong> - Second extension (extended profit target)</li>
+                    <li><strong>423.6%</strong> - Third extension (rare, extreme moves)</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> How to Use Fibonacci in Forex:</h4>
+                <ol>
+                    <li><strong>Identify a Trend:</strong> Find a clear uptrend or downtrend</li>
+                    <li><strong>Draw Fibonacci:</strong> 
+                        <ul>
+                            <li><strong>Uptrend:</strong> From the swing low to swing high</li>
+                            <li><strong>Downtrend:</strong> From the swing high to swing low</li>
+                        </ul>
+                    </li>
+                    <li><strong>Watch for Bounces:</strong> Price often bounces at Fibonacci levels</li>
+                    <li><strong>Combine with Other Indicators:</strong> Use RSI, MACD, candlestick patterns for confirmation</li>
+                </ol>
+                
+                <h4><i class='fas fa-lightbulb'></i> Trading Strategies:</h4>
+                <ul>
+                    <li><strong>Retracement Entry:</strong> Enter long at 61.8% retracement in uptrend</li>
+                    <li><strong>Extension Targets:</strong> Take profit at 161.8% or 261.8% extension</li>
+                    <li><strong>Stop Loss:</strong> Place below next Fibonacci level (e.g., below 78.6% if entering at 61.8%)</li>
+                </ul>
+                
+                <h4><i class='fas fa-exclamation-triangle'></i> Important Notes:</h4>
+                <ul>
+                    <li>Fibonacci levels are <strong>zones</strong>, not exact prices</li>
+                    <li>The 61.8% level is considered the most important</li>
+                    <li>Works best on higher timeframes (4H, Daily, Weekly)</li>
+                    <li>Combine with price action and volume for best results</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Professional Tip:</strong> The more times a Fibonacci level has been tested historically, the stronger it becomes. Also, when multiple Fibonacci levels from different swings align, it creates a "confluence zone" with even stronger support/resistance.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ichimoku Cloud Info Modal -->
+    <div id='ichimokuInfo' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-cloud'></i> Ichimoku Cloud (Ichimoku Kinko Hyo)</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("ichimokuInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is Ichimoku Cloud?</strong></p>
+                <p>Ichimoku Kinko Hyo ("One Glance Equilibrium Chart") is a comprehensive Japanese technical analysis system developed by journalist Goichi Hosoda in the 1960s. It shows support/resistance, trend direction, momentum, and trade signals all in one chart.</p>
+                
+                <p><strong>The 5 Components of Ichimoku:</strong></p>
+                
+                <h4><i class='fas fa-chart-line'></i> 1. Tenkan-sen (Conversion Line) - RED 🔴</h4>
+                <ul>
+                    <li><strong>Formula:</strong> (9-period high + 9-period low) / 2</li>
+                    <li><strong>Purpose:</strong> Short-term momentum indicator</li>
+                    <li><strong>Signal:</strong> Acts like a fast moving average</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> 2. Kijun-sen (Base Line) - BLUE 🔵</h4>
+                <ul>
+                    <li><strong>Formula:</strong> (26-period high + 26-period low) / 2</li>
+                    <li><strong>Purpose:</strong> Medium-term trend indicator</li>
+                    <li><strong>Signal:</strong> Acts like a slow moving average</li>
+                </ul>
+                
+                <h4><i class='fas fa-cloud'></i> 3. Senkou Span A (Leading Span A) - GREEN 🟢</h4>
+                <ul>
+                    <li><strong>Formula:</strong> (Tenkan-sen + Kijun-sen) / 2, plotted 26 periods ahead</li>
+                    <li><strong>Purpose:</strong> Forms the first cloud boundary</li>
+                    <li><strong>Signal:</strong> Future support/resistance</li>
+                </ul>
+                
+                <h4><i class='fas fa-cloud'></i> 4. Senkou Span B (Leading Span B) - RED 🔴</h4>
+                <ul>
+                    <li><strong>Formula:</strong> (52-period high + 52-period low) / 2, plotted 26 periods ahead</li>
+                    <li><strong>Purpose:</strong> Forms the second cloud boundary</li>
+                    <li><strong>Signal:</strong> Stronger future support/resistance</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> 5. Chikou Span (Lagging Span) - PURPLE 🟣</h4>
+                <ul>
+                    <li><strong>Formula:</strong> Current close, plotted 26 periods in the past</li>
+                    <li><strong>Purpose:</strong> Confirms trend strength</li>
+                    <li><strong>Signal:</strong> Price momentum confirmation</li>
+                </ul>
+                
+                <h4><i class='fas fa-cloud'></i> The Kumo (Cloud):</h4>
+                <p>The area between Senkou Span A and Senkou Span B forms the "cloud" (Kumo):</p>
+                <ul>
+                    <li><strong>Green Cloud:</strong> Span A above Span B = Bullish support zone</li>
+                    <li><strong>Red Cloud:</strong> Span B above Span A = Bearish resistance zone</li>
+                    <li><strong>Thick Cloud:</strong> Strong support/resistance</li>
+                    <li><strong>Thin Cloud:</strong> Weak support/resistance (easier to break)</li>
+                </ul>
+                
+                <h4><i class='fas fa-rocket'></i> Ichimoku Trading Signals:</h4>
+                
+                <p><strong>1. Strong Bullish Signal (5/5 conditions):</strong></p>
+                <ul>
+                    <li>✅ Price above the cloud</li>
+                    <li>✅ Tenkan-sen (red) crosses above Kijun-sen (blue) - "TK Cross"</li>
+                    <li>✅ Chikou Span above price and cloud</li>
+                    <li>✅ Cloud is green (bullish)</li>
+                    <li>✅ Future cloud is also green</li>
+                </ul>
+                
+                <p><strong>2. Strong Bearish Signal (5/5 conditions):</strong></p>
+                <ul>
+                    <li>❌ Price below the cloud</li>
+                    <li>❌ Tenkan-sen crosses below Kijun-sen - "TK Cross"</li>
+                    <li>❌ Chikou Span below price and cloud</li>
+                    <li>❌ Cloud is red (bearish)</li>
+                    <li>❌ Future cloud is also red</li>
+                </ul>
+                
+                <p><strong>3. Neutral/Range (Wait for breakout):</strong></p>
+                <ul>
+                    <li>⚪ Price inside the cloud = consolidation/no trade</li>
+                    <li>⚪ Mixed signals = wait for clearer setup</li>
+                </ul>
+                
+                <h4><i class='fas fa-bullseye'></i> Entry & Exit Strategy:</h4>
+                <ul>
+                    <li><strong>Entry (Long):</strong> TK Cross above cloud + Chikou Span clear</li>
+                    <li><strong>Stop Loss:</strong> Below the cloud or below Kijun-sen</li>
+                    <li><strong>Take Profit:</strong> When price reaches opposite cloud edge or TK Cross reverses</li>
+                    <li><strong>Exit:</strong> Price closes inside or below cloud</li>
+                </ul>
+                
+                <h4><i class='fas fa-brain'></i> Advanced Tips:</h4>
+                <ul>
+                    <li><strong>Cloud Breakout:</strong> Strong momentum when price breaks through thick cloud</li>
+                    <li><strong>Kijun-sen Bounce:</strong> Price often bounces off Kijun-sen in strong trends</li>
+                    <li><strong>Flat Kijun-sen:</strong> Indicates range-bound market</li>
+                    <li><strong>Chikou Span Confirmation:</strong> Must be clear of price action for valid signal</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Wall Street Insight:</strong> Ichimoku is one of the most complete technical systems ever created. Japanese institutional traders use it extensively. The key is to wait for ALL 5 components to align before taking high-probability trades. Works best on 4H and Daily timeframes for Forex.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pivot Points Info Modal -->
+    <div id='pivotPointsInfo' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-crosshairs'></i> Pivot Points (Standard, Fibonacci, Camarilla)</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("pivotPointsInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What are Pivot Points?</strong></p>
+                <p>Pivot Points are technical indicators used by day traders, floor traders, and market makers to identify potential support and resistance levels. They are calculated using the previous period's high, low, and close prices.</p>
+                
+                <p><strong>Why Market Makers Use Pivot Points:</strong></p>
+                <ul>
+                    <li>Professional traders and institutions watch these levels closely</li>
+                    <li>They become self-fulfilling prophecies due to widespread use</li>
+                    <li>Excellent for intraday Forex trading (reset daily)</li>
+                    <li>Provide objective price targets without bias</li>
+                </ul>
+                
+                <h4><i class='fas fa-calculator'></i> 1. STANDARD PIVOT POINTS</h4>
+                <p>The most widely used method, developed by floor traders in the 1980s:</p>
+                
+                <p><strong>Formulas:</strong></p>
+                <ul>
+                    <li><strong>Pivot Point (PP):</strong> (High + Low + Close) / 3</li>
+                    <li><strong>Resistance 1 (R1):</strong> (2 × PP) - Low</li>
+                    <li><strong>Resistance 2 (R2):</strong> PP + (High - Low)</li>
+                    <li><strong>Resistance 3 (R3):</strong> High + 2 × (PP - Low)</li>
+                    <li><strong>Support 1 (S1):</strong> (2 × PP) - High</li>
+                    <li><strong>Support 2 (S2):</strong> PP - (High - Low)</li>
+                    <li><strong>Support 3 (S3):</strong> Low - 2 × (High - PP)</li>
+                </ul>
+                
+                <p><strong>Trading Strategy:</strong></p>
+                <ul>
+                    <li><strong>Above PP:</strong> Bullish bias, buy at S1/S2 pullbacks</li>
+                    <li><strong>Below PP:</strong> Bearish bias, sell at R1/R2 rallies</li>
+                    <li><strong>Breakouts:</strong> Strong move when price breaks R1/S1</li>
+                    <li><strong>Range Trading:</strong> Sell at R1, buy at S1 when ranging</li>
+                </ul>
+                
+                <h4><i class='fas fa-ruler-combined'></i> 2. FIBONACCI PIVOT POINTS</h4>
+                <p>Combines pivot points with Fibonacci ratios (38.2%, 61.8%):</p>
+                
+                <p><strong>Formulas:</strong></p>
+                <ul>
+                    <li><strong>Pivot Point (PP):</strong> (High + Low + Close) / 3</li>
+                    <li><strong>Resistance 1 (R1):</strong> PP + 0.382 × (High - Low)</li>
+                    <li><strong>Resistance 2 (R2):</strong> PP + 0.618 × (High - Low)</li>
+                    <li><strong>Resistance 3 (R3):</strong> PP + 1.000 × (High - Low)</li>
+                    <li><strong>Support 1 (S1):</strong> PP - 0.382 × (High - Low)</li>
+                    <li><strong>Support 2 (S2):</strong> PP - 0.618 × (High - Low)</li>
+                    <li><strong>Support 3 (S3):</strong> PP - 1.000 × (High - Low)</li>
+                </ul>
+                
+                <p><strong>When to Use:</strong></p>
+                <ul>
+                    <li>Best for <strong>trending markets</strong></li>
+                    <li>61.8% levels often act as strong turning points</li>
+                    <li>Combines mathematical precision of Fibonacci with pivot logic</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> 3. CAMARILLA PIVOT POINTS</h4>
+                <p>Developed by bond trader Nick Scott in 1989, designed for intraday mean reversion:</p>
+                
+                <p><strong>Formulas (uses multipliers 1.1/12, 1.1/6, 1.1/4, 1.1/2):</strong></p>
+                <ul>
+                    <li><strong>Pivot Point (PP):</strong> (High + Low + Close) / 3</li>
+                    <li><strong>R4:</strong> Close + 1.1/2 × (High - Low)</li>
+                    <li><strong>R3:</strong> Close + 1.1/4 × (High - Low)</li>
+                    <li><strong>R2:</strong> Close + 1.1/6 × (High - Low)</li>
+                    <li><strong>R1:</strong> Close + 1.1/12 × (High - Low)</li>
+                    <li><strong>S1:</strong> Close - 1.1/12 × (High - Low)</li>
+                    <li><strong>S2:</strong> Close - 1.1/6 × (High - Low)</li>
+                    <li><strong>S3:</strong> Close - 1.1/4 × (High - Low)</li>
+                    <li><strong>S4:</strong> Close - 1.1/2 × (High - Low)</li>
+                </ul>
+                
+                <p><strong>Camarilla Trading Rules:</strong></p>
+                <ul>
+                    <li><strong>R3/S3:</strong> Primary reversal zones (80% success rate historically)</li>
+                    <li><strong>R4/S4:</strong> Breakout levels (price rarely reaches these)</li>
+                    <li><strong>Strategy:</strong> 
+                        <ul>
+                            <li>Buy at S3, target R1/R2, stop below S4</li>
+                            <li>Sell at R3, target S1/S2, stop above R4</li>
+                        </ul>
+                    </li>
+                    <li><strong>Breakout Rule:</strong> If price breaks R4/S4, expect strong continuation</li>
+                </ul>
+                
+                <h4><i class='fas fa-trophy'></i> Which Pivot Method to Use?</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                    <thead style="background: rgba(59, 130, 246, 0.1);">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Method</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Best For</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Market Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Standard</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">All-around use, beginners</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Trending & Ranging</td>
+                        </tr>
+                        <tr style="background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Fibonacci</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Trend following, swing trading</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Strong Trends</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Camarilla</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Scalping, mean reversion</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Ranging Markets</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4><i class='fas fa-lightbulb'></i> Professional Tips:</h4>
+                <ul>
+                    <li><strong>Confluence:</strong> When multiple pivot methods align at same level = very strong S/R</li>
+                    <li><strong>Time Reset:</strong> Daily pivots reset at market open (00:00 GMT for Forex)</li>
+                    <li><strong>Weekly/Monthly Pivots:</strong> Also important for longer-term traders</li>
+                    <li><strong>Volume:</strong> Combine with volume analysis for confirmation</li>
+                    <li><strong>News Events:</strong> Pivots less reliable during major news releases</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Institutional Secret:</strong> Market makers and algorithmic trading systems are programmed to react at pivot levels. This is why you often see sudden reversals or breakouts at these exact prices. The R3/S3 Camarilla levels are watched particularly closely by professional day traders for mean reversion trades.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADX Info Modal -->
+    <div id='adxInfo' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-bolt'></i> ADX & Directional Movement Index (DMI)</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("adxInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is ADX?</strong></p>
+                <p>The Average Directional Index (ADX) was developed by J. Welles Wilder Jr. in 1978. It measures the <strong>strength of a trend</strong>, not its direction. ADX is one of the most important indicators for professional traders because it helps filter out weak trends and avoid choppy markets.</p>
+                
+                <p><strong>The DMI System (3 Components):</strong></p>
+                
+                <h4><i class='fas fa-arrow-up'></i> 1. +DI (Plus Directional Indicator) - GREEN 🟢</h4>
+                <ul>
+                    <li>Measures <strong>bullish pressure</strong></li>
+                    <li>Calculated from upward price movements</li>
+                    <li>Higher values = stronger buying pressure</li>
+                </ul>
+                
+                <h4><i class='fas fa-arrow-down'></i> 2. -DI (Minus Directional Indicator) - RED 🔴</h4>
+                <ul>
+                    <li>Measures <strong>bearish pressure</strong></li>
+                    <li>Calculated from downward price movements</li>
+                    <li>Higher values = stronger selling pressure</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> 3. ADX (Average Directional Index) - PURPLE 🟣</h4>
+                <ul>
+                    <li>Measures <strong>trend strength</strong> (not direction!)</li>
+                    <li>Scale: 0 to 100</li>
+                    <li>Smoothed average of the difference between +DI and -DI</li>
+                </ul>
+                
+                <h4><i class='fas fa-ruler'></i> ADX Reading Interpretation:</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                    <thead style="background: rgba(59, 130, 246, 0.1);">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">ADX Value</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Trend Strength</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Trading Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>0-25</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Weak / No Trend</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">❌ Avoid trending strategies, use range trading</td>
+                        </tr>
+                        <tr style="background: rgba(245, 158, 11, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>25-50</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Strong Trend</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">✅ Good for trend following</td>
+                        </tr>
+                        <tr style="background: rgba(16, 185, 129, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>50-75</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Very Strong Trend</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">✅✅ Excellent trending conditions</td>
+                        </tr>
+                        <tr style="background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>75-100</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Extremely Strong Trend</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">🔥 Rare, ride the trend (but watch for exhaustion)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4><i class='fas fa-exchange-alt'></i> +DI vs -DI Crossovers (Directional Signals):</h4>
+                
+                <p><strong>Bullish Signal:</strong></p>
+                <ul>
+                    <li>✅ <strong>+DI crosses ABOVE -DI</strong> = Uptrend starting</li>
+                    <li>✅ Confirmation: ADX > 25 (strong trend)</li>
+                    <li>✅ Action: Go long, ride the uptrend</li>
+                </ul>
+                
+                <p><strong>Bearish Signal:</strong></p>
+                <ul>
+                    <li>❌ <strong>-DI crosses ABOVE +DI</strong> = Downtrend starting</li>
+                    <li>❌ Confirmation: ADX > 25 (strong trend)</li>
+                    <li>❌ Action: Go short, ride the downtrend</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> ADX Trend Phases:</h4>
+                <ol>
+                    <li><strong>ADX Rising:</strong> Trend is strengthening (continue trend trades)</li>
+                    <li><strong>ADX Peaking:</strong> Trend at maximum strength (be cautious, reversal may be near)</li>
+                    <li><strong>ADX Falling:</strong> Trend is weakening (consider taking profits)</li>
+                    <li><strong>ADX Below 25:</strong> No clear trend (switch to range trading or stay out)</li>
+                </ol>
+                
+                <h4><i class='fas fa-bullseye'></i> Professional Trading Strategies:</h4>
+                
+                <p><strong>Strategy 1: Trend Confirmation Filter</strong></p>
+                <ul>
+                    <li>Only take trend-following trades when ADX > 25</li>
+                    <li>Avoid momentum strategies when ADX < 20</li>
+                    <li>This filter eliminates ~70% of false breakouts</li>
+                </ul>
+                
+                <p><strong>Strategy 2: DI Crossover + ADX</strong></p>
+                <ul>
+                    <li><strong>Entry:</strong> +DI crosses above -DI AND ADX > 25</li>
+                    <li><strong>Hold:</strong> While +DI > -DI and ADX is rising</li>
+                    <li><strong>Exit:</strong> When +DI crosses below -DI OR ADX starts falling sharply</li>
+                </ul>
+                
+                <p><strong>Strategy 3: ADX Divergence (Advanced)</strong></p>
+                <ul>
+                    <li>Price making new highs but ADX making lower highs = Trend exhaustion</li>
+                    <li>Early warning of potential reversal</li>
+                    <li>Combine with RSI or MACD for confirmation</li>
+                </ul>
+                
+                <h4><i class='fas fa-brain'></i> Advanced Professional Insights:</h4>
+                <ul>
+                    <li><strong>ADX Lag:</strong> ADX is a lagging indicator (based on 14-period smoothing). Use it to confirm trends, not to predict them.</li>
+                    <li><strong>Flat ADX:</strong> When ADX is flat around 20-25, market is consolidating. Perfect for range trading strategies.</li>
+                    <li><strong>ADX Spike:</strong> Sudden jump in ADX often follows breakouts. Great confirmation signal.</li>
+                    <li><strong>Combine with Price Action:</strong> ADX tells you WHEN to trade (trend strength), price action tells you WHERE (entry/exit levels).</li>
+                </ul>
+                
+                <h4><i class='fas fa-exclamation-circle'></i> Common Mistakes to Avoid:</h4>
+                <ul>
+                    <li>❌ Trading when ADX < 25 (choppy markets)</li>
+                    <li>❌ Confusing ADX with direction (it only measures strength!)</li>
+                    <li>❌ Ignoring +DI/-DI crossovers (they show direction)</li>
+                    <li>❌ Not waiting for confirmation (ADX can rise in both up and down trends)</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Hedge Fund Strategy:</strong> Professional traders use ADX as a "trend filter" to avoid trading during choppy, low-ADX periods. Studies show that 60-70% of the time, markets are range-bound (ADX < 25). By only trading when ADX > 25, you focus on the 30-40% of time when trends are strong and profitable. This dramatically improves win rates.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stochastic Oscillator Info Modal -->
+    <div id='stochasticInfo' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-wave-square'></i> Stochastic Oscillator</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("stochasticInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is the Stochastic Oscillator?</strong></p>
+                <p>Developed by George Lane in the late 1950s, the Stochastic Oscillator is a momentum indicator that compares a security's closing price to its price range over a specific period. It's based on the observation that in uptrends, prices tend to close near their high, while in downtrends, they close near their low.</p>
+                
+                <p><strong>The Core Concept:</strong></p>
+                <p>"The faster the price changes, the faster the oscillator moves. Momentum changes before price changes."</p>
+                
+                <h4><i class='fas fa-calculator'></i> The Two Lines:</h4>
+                
+                <p><strong>%K Line (Fast) - BLUE 🔵</strong></p>
+                <ul>
+                    <li><strong>Formula:</strong> %K = 100 × [(Close - Lowest Low) / (Highest High - Lowest Low)]</li>
+                    <li>Default period: 14</li>
+                    <li>Range: 0 to 100</li>
+                    <li>More sensitive, reacts quickly to price changes</li>
+                </ul>
+                
+                <p><strong>%D Line (Slow) - ORANGE 🟠</strong></p>
+                <ul>
+                    <li><strong>Formula:</strong> 3-period Simple Moving Average of %K</li>
+                    <li>Signal line (like MACD signal line)</li>
+                    <li>Smoother, filters out noise</li>
+                    <li>Used to generate crossover signals</li>
+                </ul>
+                
+                <h4><i class='fas fa-ruler'></i> Reading the Stochastic:</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                    <thead style="background: rgba(59, 130, 246, 0.1);">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Stochastic Value</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Zone</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>80-100</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Overbought</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">🔴 Price near period high - potential reversal down</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>50-80</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Bullish</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">✅ Strong upward momentum</td>
+                        </tr>
+                        <tr style="background: rgba(100, 116, 139, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>20-50</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Bearish</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">❌ Downward momentum</td>
+                        </tr>
+                        <tr style="background: rgba(16, 185, 129, 0.05);">
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>0-20</strong></td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Oversold</td>
+                            <td style="padding: 12px; border: 1px solid var(--glass-border);">🟢 Price near period low - potential reversal up</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4><i class='fas fa-exchange-alt'></i> Trading Signals:</h4>
+                
+                <p><strong>1. Overbought/Oversold (Basic Strategy):</strong></p>
+                <ul>
+                    <li><strong>Sell Signal:</strong> Stochastic > 80 (overbought) → Wait for %K to cross below %D</li>
+                    <li><strong>Buy Signal:</strong> Stochastic < 20 (oversold) → Wait for %K to cross above %D</li>
+                    <li>⚠ <strong>Warning:</strong> In strong trends, price can stay overbought/oversold for extended periods!</li>
+                </ul>
+                
+                <p><strong>2. %K / %D Crossovers:</strong></p>
+                <ul>
+                    <li><strong>Bullish Crossover:</strong> %K (blue) crosses ABOVE %D (orange) = Buy signal
+                        <ul>
+                            <li>Strongest when in oversold zone (< 20)</li>
+                            <li>Confirms upward momentum shift</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bearish Crossover:</strong> %K crosses BELOW %D = Sell signal
+                        <ul>
+                            <li>Strongest when in overbought zone (> 80)</li>
+                            <li>Confirms downward momentum shift</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <p><strong>3. Divergence (Advanced):</strong></p>
+                <ul>
+                    <li><strong>Bullish Divergence:</strong> 
+                        <ul>
+                            <li>Price makes lower lows</li>
+                            <li>Stochastic makes higher lows</li>
+                            <li>Signal: Upward reversal likely</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bearish Divergence:</strong>
+                        <ul>
+                            <li>Price makes higher highs</li>
+                            <li>Stochastic makes lower highs</li>
+                            <li>Signal: Downward reversal likely</li>
+                        </ul>
+                    </li>
+                    <li>💎 <strong>Divergence is one of the most powerful signals in technical analysis!</strong></li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> Stochastic Settings:</h4>
+                <ul>
+                    <li><strong>Standard (14, 3, 3):</strong> Default, good for swing trading
+                        <ul>
+                            <li>%K Period: 14</li>
+                            <li>%K Smoothing: 3</li>
+                            <li>%D Period: 3</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fast Stochastic (5, 3, 3):</strong> More sensitive, for day trading/scalping</li>
+                    <li><strong>Slow Stochastic (21, 5, 5):</strong> Less noise, for position trading</li>
+                </ul>
+                
+                <h4><i class='fas fa-bullseye'></i> Professional Trading Strategies:</h4>
+                
+                <p><strong>Strategy 1: Stochastic + Trend Filter (Recommended)</strong></p>
+                <ol>
+                    <li>Determine overall trend (use 200 SMA or ADX)</li>
+                    <li><strong>In Uptrend:</strong> Only take buy signals (oversold + bullish crossover)</li>
+                    <li><strong>In Downtrend:</strong> Only take sell signals (overbought + bearish crossover)</li>
+                    <li>This reduces false signals by ~60%</li>
+                </ol>
+                
+                <p><strong>Strategy 2: Double Stochastic</strong></p>
+                <ul>
+                    <li>Use two Stochastic indicators:
+                        <ul>
+                            <li>Fast (5, 3, 3) - for entry timing</li>
+                            <li>Slow (21, 5, 5) - for trend confirmation</li>
+                        </ul>
+                    </li>
+                    <li><strong>Entry:</strong> When BOTH show crossover in same direction</li>
+                    <li>Higher probability trades</li>
+                </ul>
+                
+                <p><strong>Strategy 3: Stochastic Pop (Scalping)</strong></p>
+                <ul>
+                    <li>Wait for Stochastic to drop below 20</li>
+                    <li>Enter when %K crosses above %D (while still below 20)</li>
+                    <li>Exit when Stochastic reaches 80 OR %K crosses below %D</li>
+                    <li>Works best on 5-15 minute charts</li>
+                </ul>
+                
+                <h4><i class='fas fa-brain'></i> Advanced Techniques:</h4>
+                <ul>
+                    <li><strong>Bull/Bear Setup:</strong> When Stochastic makes 3+ consecutive overbought readings in uptrend = Very strong momentum (don't sell!)</li>
+                    <li><strong>50 Line:</strong> Some traders use 50 as neutral line:
+                        <ul>
+                            <li>Above 50 = Bullish control</li>
+                            <li>Below 50 = Bearish control</li>
+                        </ul>
+                    </li>
+                    <li><strong>Failure Swings:</strong> When Stochastic fails to reach overbought/oversold zone = Weak momentum (warning sign)</li>
+                    <li><strong>Time Filter:</strong> Wait 1-2 candles after crossover for confirmation (reduces false signals)</li>
+                </ul>
+                
+                <h4><i class='fas fa-exclamation-circle'></i> Common Mistakes:</h4>
+                <ul>
+                    <li>❌ Selling just because Stochastic is overbought in a strong uptrend</li>
+                    <li>❌ Buying just because it's oversold in a strong downtrend</li>
+                    <li>❌ Taking every crossover signal (low win rate without filters)</li>
+                    <li>❌ Ignoring the overall trend direction</li>
+                    <li>❌ Not waiting for price confirmation (candlestick patterns)</li>
+                </ul>
+                
+                <h4><i class='fas fa-tools'></i> Best Combinations:</h4>
+                <ul>
+                    <li>✅ <strong>Stochastic + RSI:</strong> Double confirmation of overbought/oversold</li>
+                    <li>✅ <strong>Stochastic + MACD:</strong> Momentum + Trend confirmation</li>
+                    <li>✅ <strong>Stochastic + Bollinger Bands:</strong> Price extremes + Volatility</li>
+                    <li>✅ <strong>Stochastic + Support/Resistance:</strong> Timing entries at key levels</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Pro Trader Insight:</strong> The Stochastic Oscillator is excellent for range-bound markets but can give false signals in trending markets. The key is to use it WITH the trend, not against it. In strong uptrends, wait for oversold readings to buy. In strong downtrends, wait for overbought readings to sell. Never fight the trend based on Stochastic alone. Divergences, however, are highly reliable reversal signals when they occur at key support/resistance zones.
+                </p>
             </div>
         </div>
     </div>
