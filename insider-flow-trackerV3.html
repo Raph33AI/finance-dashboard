@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang='en'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>💼 Insider Flow Tracker | AlphaVault AI</title>
+    <title>Insider Flow Tracker | AlphaVault AI</title>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -13,17 +13,18 @@
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     <script src='https://code.highcharts.com/modules/export-data.js'></script>
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/solid-gauge.js'></script>
     <script src='https://code.highcharts.com/modules/heatmap.js'></script>
     <script src='https://code.highcharts.com/modules/networkgraph.js'></script>
-    <script src='https://code.highcharts.com/modules/sankey.js'></script>
-    <script src='https://code.highcharts.com/modules/timeline.js'></script>
+    
+    <!-- Vis.js for Network Graph -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
     
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/economic-pages.css'>
-    <link rel='stylesheet' href='assets/css/ipo-intelligence.css'>
     <link rel='stylesheet' href='assets/css/insider-flow-trackerV2.css'>
     
     <!-- Favicon Dynamique -->
@@ -46,15 +47,12 @@
 
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
-    <script src="assets/js/theme-charts.js"></script>
 
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- ============================================
-             📱 SIDEBAR
-             ============================================ -->
+        <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -280,11 +278,8 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
-        <!-- ============================================
-             📊 MAIN CONTENT
-             ============================================ -->
+        <!-- Main Content -->
         <div class='main-content'>
-            <!-- Header -->
             <header class='top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
@@ -301,35 +296,28 @@
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh</span>
                     </button>
-                    <button class='dashboard-btn' id='darkModeToggle' title='Toggle Dark Mode'>
-                        <i class='fas fa-moon'></i>
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
                     </button>
                 </div>
             </header>
             
             <div class='container'>
                 
-                <!-- ============================================
-                     🎯 SEARCH & FILTERS TOOLBAR
-                     ============================================ -->
+                <!-- Toolbar -->
                 <div class='dashboard-toolbar'>
                     <div class='toolbar-left'>
                         <span class='dashboard-subtitle'>
                             <i class='fas fa-database'></i>
-                            Real-time insider trading analysis from SEC Form 4 filings
+                            Real-time insider trading data from SEC Form 4 filings
                         </span>
                     </div>
                     <div class='toolbar-right'>
-                        <div class='ticker-search-group'>
-                            <i class='fas fa-search'></i>
-                            <input type='text' 
-                                   id='tickerSearchInput' 
-                                   class='ticker-search-input' 
-                                   placeholder='Enter ticker (e.g., AAPL, NVDA, TSLA...)'
-                                   maxlength='6'>
-                            <button class='search-btn' onclick='insiderApp.analyzeCompany()'>
-                                <i class='fas fa-chart-line'></i> Analyze
-                            </button>
+                        <div class='filter-group-inline'>
+                            <label><i class='fas fa-building'></i> Company:</label>
+                            <select id='companyFilter' class='dashboard-select'>
+                                <option value='all'>All Companies</option>
+                            </select>
                         </div>
                         <div class='filter-group-inline'>
                             <label><i class='fas fa-calendar'></i> Period:</label>
@@ -344,366 +332,278 @@
                     </div>
                 </div>
 
-                <!-- ============================================
-                     ⚡ LOADING STATE
-                     ============================================ -->
-                <div id='loadingState' class='eco-loading' style='display: none; padding: 80px 20px; text-align: center;'>
-                    <div class='eco-spinner' style='margin: 0 auto;'></div>
-                    <h2 style='margin-top: 24px; color: var(--text-primary);'>🔍 Analyzing Insider Activity...</h2>
-                    <p style='color: var(--text-secondary); margin-top: 12px; font-size: 1.1rem;'>
-                        Fetching Form 4 filings and running advanced pattern recognition...
-                    </p>
+                <!-- Loading State -->
+                <div id='loadingState' class='loading-overlay' style='display: none;'>
+                    <div class='loading-spinner'></div>
+                    <h2>Loading Insider Data...</h2>
+                    <p>Fetching Form 4 filings from SEC database...</p>
                 </div>
 
-                <!-- ============================================
-                     🎯 RESULTS CONTAINER
-                     ============================================ -->
-                <div id='resultsContainer' style='display: none;'>
+                <!-- Smart Alerts Banner -->
+                <div class='smart-alerts-banner' id='smartAlertsBanner' style='display: none;'>
+                    <div class='alert-banner-content'>
+                        <div class='alert-banner-icon'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                        </div>
+                        <div class='alert-banner-text'>
+                            <h3>Smart Alert Triggered</h3>
+                            <p id='alertBannerMessage'>Significant insider activity detected</p>
+                        </div>
+                        <button class='alert-banner-close' onclick='this.parentElement.parentElement.style.display="none"'>
+                            <i class='fas fa-times'></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alphy AI Recommendation -->
+                <div class='alphy-recommendation' id='alphyRecommendation'>
+                    <div class='loading-content'>
+                        <div class='loading-spinner'></div>
+                        <p style='color: white; margin-top: 16px;'>Analyzing insider activity patterns...</p>
+                    </div>
+                </div>
+
+                <!-- Insider Activity Overview Cards -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-bar'></i> Insider Activity Overview
+                    </h2>
                     
-                    <!-- 🚨 SMART ALERTS BANNER -->
-                    <div class='smart-alerts-banner' id='smartAlertsBanner' style='display: none;'>
-                        <div class='alert-banner-content'>
-                            <div class='alert-banner-icon'>
+                    <div class='insider-overview-grid' id='overviewCards'>
+                        <div class='loading-content'>
+                            <div class='loading-spinner'></div>
+                            <p>Loading insider data...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insider Sentiment Score -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-tachometer-alt'></i> Insider Sentiment Score
+                    </h2>
+                    
+                    <div class='sentiment-grid'>
+                        <div class='chart-card sentiment-gauge-card'>
+                            <div id='sentimentGaugeChart' class='chart'></div>
+                            <div class='sentiment-interpretation'>
+                                <h4>Current Signal: <span id='sentimentSignal' class='sentiment-signal-text'>Loading...</span></h4>
+                                <p id='sentimentInterpretation'>Analyzing insider transactions...</p>
+                            </div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-chart-line'></i> Sentiment by Company</h3>
+                            </div>
+                            <div id='sentimentTrendChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern Recognition Dashboard -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-brain'></i> Pattern Recognition Dashboard
+                    </h2>
+                    
+                    <div class='pattern-grid'>
+                        <div class='pattern-card' id='clusterBuyingCard'>
+                            <div class='pattern-icon cluster-buying'>
+                                <i class='fas fa-users'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>Cluster Buying Detected</h3>
+                                <p class='pattern-count' id='clusterCount'>0 instances</p>
+                                <p class='pattern-description'>Multiple insiders buying simultaneously</p>
+                            </div>
+                        </div>
+                        
+                        <div class='pattern-card' id='preEarningsCard'>
+                            <div class='pattern-icon pre-earnings'>
+                                <i class='fas fa-calendar-check'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>Pre-Earnings Activity</h3>
+                                <p class='pattern-count' id='preEarningsCount'>0 transactions</p>
+                                <p class='pattern-description'>Insider trades 30 days before earnings</p>
+                            </div>
+                        </div>
+                        
+                        <div class='pattern-card' id='divergenceCard'>
+                            <div class='pattern-icon divergence'>
                                 <i class='fas fa-exclamation-triangle'></i>
                             </div>
-                            <div class='alert-banner-text'>
-                                <h3 id='alertBannerTitle'>Smart Alert Triggered</h3>
-                                <p id='alertBannerMessage'>Significant insider activity detected</p>
+                            <div class='pattern-content'>
+                                <h3>CEO/CFO Divergence</h3>
+                                <p class='pattern-count' id='divergenceCount'>0 companies</p>
+                                <p class='pattern-description'>Conflicting signals from top executives</p>
                             </div>
-                            <button class='alert-banner-close' onclick='this.parentElement.parentElement.style.display="none"'>
-                                <i class='fas fa-times'></i>
+                        </div>
+                        
+                        <div class='pattern-card' id='unusualVolumeCard'>
+                            <div class='pattern-icon unusual-volume'>
+                                <i class='fas fa-chart-area'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>High Conviction Trades</h3>
+                                <p class='pattern-count' id='unusualVolumeCount'>0 transactions</p>
+                                <p class='pattern-description'>Transactions > $1M value</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Insider Transactions -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-exchange-alt'></i> Recent Insider Transactions
+                    </h2>
+                    
+                    <div class='transactions-controls'>
+                        <div class='transaction-filters'>
+                            <button class='filter-chip active' data-type='all' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-th'></i> All
+                            </button>
+                            <button class='filter-chip' data-type='buy' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-arrow-up'></i> Purchases
+                            </button>
+                            <button class='filter-chip' data-type='sell' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-arrow-down'></i> Sales
+                            </button>
+                            <button class='filter-chip' data-type='option' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-certificate'></i> Options
                             </button>
                         </div>
                     </div>
-
-                    <!-- 🤖 ALPHY AI RECOMMENDATION -->
-                    <div class='alphy-recommendation' id='alphyRecommendation'>
-                        <div class='eco-loading'>
-                            <div class='eco-spinner'></div>
-                            <p style='color: white; margin-top: 16px;'>🤖 Alphy AI is analyzing insider patterns...</p>
-                        </div>
+                    
+                    <div class='insider-table-wrapper'>
+                        <table class='insider-table' id='transactionsTable'>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Company</th>
+                                    <th>Insider</th>
+                                    <th>Position</th>
+                                    <th>Type</th>
+                                    <th>Shares</th>
+                                    <th>Value</th>
+                                    <th>Conviction</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="9" class='text-center'>
+                                        <div class='loading-content'>
+                                            <div class='loading-spinner'></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- ============================================
-                         📊 OVERALL SCORE & SENTIMENT
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-gauge-high'></i> Overall Insider Score & Sentiment
-                        </h2>
-                        
-                        <div class='score-sentiment-grid'>
-                            <!-- Overall Score Card -->
-                            <div class='dashboard-card score-card'>
-                                <div class='card-header'>
-                                    <div class='card-icon'>
-                                        <i class='fas fa-star'></i>
-                                    </div>
-                                    <h3 class='card-title'>Overall Score</h3>
-                                </div>
-                                
-                                <div class='score-display'>
-                                    <div class='score-value' id='overallScore'>--</div>
-                                    <div class='score-label' id='scoreLabel'>ANALYZING...</div>
-                                </div>
-                                
-                                <div class='progress-bar-container'>
-                                    <div class='progress-bar' id='scoreProgress' style='width: 0%'></div>
-                                </div>
-
-                                <div class='score-components' id='scoreComponents'>
-                                    <!-- Score breakdown will be injected here -->
-                                </div>
-                            </div>
-
-                            <!-- Insider Sentiment Card -->
-                            <div class='dashboard-card sentiment-card'>
-                                <div class='card-header'>
-                                    <div class='card-icon'>
-                                        <i class='fas fa-heart-pulse'></i>
-                                    </div>
-                                    <h3 class='card-title'>Insider Sentiment</h3>
-                                </div>
-                                
-                                <div class='metrics-grid'>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Sentiment Score</div>
-                                        <div class='metric-value' id='sentimentScore'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Signal</div>
-                                        <div class='metric-value' id='sentimentLabel'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Purchases</div>
-                                        <div class='metric-value positive' id='purchaseCount'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Sales</div>
-                                        <div class='metric-value negative' id='saleCount'>--</div>
-                                    </div>
-                                </div>
-
-                                <div class='sentiment-trend' id='sentimentTrend'>
-                                    <!-- Trend indicator will be injected -->
-                                </div>
-                            </div>
-
-                            <!-- Cluster Activity Card -->
-                            <div class='dashboard-card cluster-card'>
-                                <div class='card-header'>
-                                    <div class='card-icon'>
-                                        <i class='fas fa-users'></i>
-                                    </div>
-                                    <h3 class='card-title'>Cluster Buying</h3>
-                                </div>
-                                
-                                <div class='metrics-grid'>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Clusters Detected</div>
-                                        <div class='metric-value' id='clusterCount'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Insiders Involved</div>
-                                        <div class='metric-value' id='clusterInsiders'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Total Value</div>
-                                        <div class='metric-value positive' id='clusterValue'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Signal</div>
-                                        <div class='metric-value' id='clusterSignal'>--</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Conviction Scores Card -->
-                            <div class='dashboard-card conviction-card'>
-                                <div class='card-header'>
-                                    <div class='card-icon'>
-                                        <i class='fas fa-fire'></i>
-                                    </div>
-                                    <h3 class='card-title'>Conviction Analysis</h3>
-                                </div>
-                                
-                                <div class='metrics-grid'>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Avg Conviction</div>
-                                        <div class='metric-value' id='avgConviction'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>High Conviction</div>
-                                        <div class='metric-value' id='highConvictionCount'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Total Value</div>
-                                        <div class='metric-value positive' id='highConvictionValue'>--</div>
-                                    </div>
-                                    <div class='metric-item'>
-                                        <div class='metric-label'>Level</div>
-                                        <div class='metric-value' id='convictionLevel'>--</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         🚨 SMART ALERTS
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-bell'></i> Smart Alerts
-                        </h2>
-                        
-                        <div class='alerts-grid' id='alertsGrid'>
-                            <div class='alert-placeholder'>
-                                <i class='fas fa-info-circle'></i>
-                                <p>No alerts detected. Smart alerts will appear here when significant insider activity is detected.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         🌐 NETWORK ANALYSIS
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-diagram-project'></i> Insider Network Analysis
-                        </h2>
-                        
-                        <div class='network-stats-grid'>
-                            <div class='network-stat'>
-                                <div class='network-stat-label'>Active Insiders</div>
-                                <div class='network-stat-value' id='networkNodes'>--</div>
-                            </div>
-                            <div class='network-stat'>
-                                <div class='network-stat-label'>Connections</div>
-                                <div class='network-stat-value' id='networkEdges'>--</div>
-                            </div>
-                            <div class='network-stat'>
-                                <div class='network-stat-label'>Network Density</div>
-                                <div class='network-stat-value' id='networkDensity'>--</div>
-                            </div>
-                            <div class='network-stat'>
-                                <div class='network-stat-label'>Communities</div>
-                                <div class='network-stat-value' id='networkCommunities'>--</div>
-                            </div>
-                        </div>
-
-                        <div class='network-table-card'>
-                            <h3><i class='fas fa-users'></i> Central Insiders</h3>
-                            <table class='data-table'>
-                                <thead>
-                                    <tr>
-                                        <th>Insider</th>
-                                        <th>Role</th>
-                                        <th>Centrality</th>
-                                        <th>Transactions</th>
-                                        <th>Net Sentiment</th>
-                                    </tr>
-                                </thead>
-                                <tbody id='networkTableBody'>
-                                    <tr>
-                                        <td colspan='5' class='text-center'>
-                                            <div class='eco-loading'><div class='eco-spinner'></div></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         💪 TOP CONVICTION TRADES
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-trophy'></i> Top Conviction Trades
-                        </h2>
-                        
-                        <div class='conviction-table-card'>
-                            <table class='data-table'>
-                                <thead>
-                                    <tr>
-                                        <th>Insider</th>
-                                        <th>Role</th>
-                                        <th>Transaction Value</th>
-                                        <th>% of Wealth</th>
-                                        <th>Conviction Level</th>
-                                    </tr>
-                                </thead>
-                                <tbody id='convictionTableBody'>
-                                    <tr>
-                                        <td colspan='5' class='text-center'>
-                                            <div class='eco-loading'><div class='eco-spinner'></div></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         📈 PATTERN RECOGNITION
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-brain'></i> Pattern Recognition Dashboard
-                        </h2>
-                        
-                        <div class='pattern-grid'>
-                            <div class='pattern-card' id='clusterBuyingCard'>
-                                <div class='pattern-icon cluster-buying'>
-                                    <i class='fas fa-users'></i>
-                                </div>
-                                <div class='pattern-content'>
-                                    <h3>Cluster Buying</h3>
-                                    <p class='pattern-count' id='clusterPatternCount'>0 detected</p>
-                                    <p class='pattern-description'>Multiple insiders buying simultaneously</p>
-                                </div>
-                            </div>
-                            
-                            <div class='pattern-card' id='preEarningsCard'>
-                                <div class='pattern-icon pre-earnings'>
-                                    <i class='fas fa-calendar-check'></i>
-                                </div>
-                                <div class='pattern-content'>
-                                    <h3>Pre-Earnings Activity</h3>
-                                    <p class='pattern-count' id='preEarningsPatternCount'>0 detected</p>
-                                    <p class='pattern-description'>Trades before earnings announcements</p>
-                                </div>
-                            </div>
-                            
-                            <div class='pattern-card' id='divergenceCard'>
-                                <div class='pattern-icon divergence'>
-                                    <i class='fas fa-exclamation-triangle'></i>
-                                </div>
-                                <div class='pattern-content'>
-                                    <h3>CEO/CFO Divergence</h3>
-                                    <p class='pattern-count' id='divergencePatternCount'>0 detected</p>
-                                    <p class='pattern-description'>Conflicting executive signals</p>
-                                </div>
-                            </div>
-                            
-                            <div class='pattern-card' id='unusualVolumeCard'>
-                                <div class='pattern-icon unusual-volume'>
-                                    <i class='fas fa-chart-area'></i>
-                                </div>
-                                <div class='pattern-content'>
-                                    <h3>Unusual Volume</h3>
-                                    <p class='pattern-count' id='unusualVolumePatternCount'>0 detected</p>
-                                    <p class='pattern-description'>Volume >3x average</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         🎯 RECOMMENDATION
-                         ============================================ -->
-                    <div class='section'>
-                        <h2 class='section-title gradient-title'>
-                            <i class='fas fa-lightbulb'></i> Investment Recommendation
-                        </h2>
-                        
-                        <div class='recommendation-card' id='recommendationCard'>
-                            <div class='eco-loading'>
-                                <div class='eco-spinner'></div>
-                                <p>Generating recommendation...</p>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- Footer -->
-                <footer style='margin-top: 60px; padding: 32px 20px; text-align: center; border-top: 1px solid rgba(148, 163, 184, 0.1);'>
-                    <p style='color: var(--text-secondary); font-size: 0.95rem;'>
+                <!-- Conviction Score Analysis -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-star'></i> Conviction Score Analysis
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-trophy'></i> Top Conviction Trades</h3>
+                            </div>
+                            <div id='convictionScoreChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-layer-group'></i> Transaction Size Distribution</h3>
+                            </div>
+                            <div id='transactionSizeChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insider vs Analyst Sentiment -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-balance-scale-right'></i> Insider Activity by Role
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-user-tie'></i> Activity by Executive Role</h3>
+                            </div>
+                            <div id='roleAnalysisChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-exclamation-circle'></i> CEO/CFO Signal Comparison</h3>
+                            </div>
+                            <div id='divergenceAlertsChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Analysis -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-project-diagram'></i> Insider Network Analysis
+                    </h2>
+                    
+                    <div class='network-grid'>
+                        <div class='chart-card network-chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-sitemap'></i> Trading Relationships</h3>
+                            </div>
+                            <div id='networkChart' class='chart network-chart'></div>
+                        </div>
+                        
+                        <div class='network-insights'>
+                            <h3><i class='fas fa-lightbulb'></i> Key Insights</h3>
+                            <div id='networkInsights'>
+                                <div class='insight-item'>
+                                    <i class='fas fa-spinner fa-spin'></i>
+                                    <span>Analyzing network connections...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insider Activity Heatmap -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-fire'></i> Insider Activity Heatmap
+                    </h2>
+                    
+                    <div class='chart-card'>
+                        <div id='activityHeatmap' class='chart'></div>
+                    </div>
+                </div>
+
+                <footer style="text-align: center; padding: 40px 20px; color: var(--text-secondary); border-top: 1px solid var(--glass-border); margin-top: 60px;">
+                    <p style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <i class='fas fa-shield-alt'></i> 
-                        Data from SEC Form 4 Filings (U.S. Securities and Exchange Commission) • 
-                        <i class='fas fa-lock'></i> Secure & Compliant • 
-                        <i class='fas fa-clock'></i> Real-time Updates
-                    </p>
-                    <p style='color: var(--text-tertiary); font-size: 0.85rem; margin-top: 12px;'>
-                        © 2024 AlphaVault AI - Professional Financial Intelligence Platform
+                        Insider Flow Tracker - Data from SEC Form 4 Filings (U.S. Securities and Exchange Commission)
                     </p>
                 </footer>
             </div>
         </div>
     </div>
 
-    <!-- ============================================
-         🔧 MODALS
-         ============================================ -->
-    
     <!-- Alerts Configuration Modal -->
     <div id='alertsConfigModal' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2 class='gradient-title'><i class='fas fa-bell'></i> Configure Smart Alerts</h2>
-                <button class='modal-close' onclick='this.closest(".modal").style.display="none"'>&times;</button>
+                <button class='modal-close' onclick='insiderApp.closeModal("alertsConfigModal")'>&times;</button>
             </div>
             <div class='modal-body'>
                 <div class='alerts-config-content'>
@@ -711,7 +611,6 @@
                         <h4><i class='fas fa-users'></i> Cluster Buying Alerts</h4>
                         <label class='switch-label'>
                             <input type='checkbox' id='alertClusterBuying' checked>
-                            <span class='switch-slider'></span>
                             <span class='switch-text'>Alert when 3+ insiders buy within 7 days</span>
                         </label>
                     </div>
@@ -720,17 +619,27 @@
                         <h4><i class='fas fa-dollar-sign'></i> High Value Transactions</h4>
                         <label class='switch-label'>
                             <input type='checkbox' id='alertHighValue' checked>
-                            <span class='switch-slider'></span>
                             <span class='switch-text'>Alert for transactions > $1M</span>
                         </label>
+                        <div class='input-group'>
+                            <label>Threshold (USD):</label>
+                            <input type='number' id='highValueThreshold' value='1000000' step='100000'>
+                        </div>
                     </div>
                     
                     <div class='alert-config-group'>
                         <h4><i class='fas fa-exclamation-triangle'></i> CEO/CFO Divergence</h4>
                         <label class='switch-label'>
                             <input type='checkbox' id='alertDivergence' checked>
-                            <span class='switch-slider'></span>
-                            <span class='switch-text'>Alert for conflicting executive signals</span>
+                            <span class='switch-text'>Alert when CEO and CFO have conflicting signals</span>
+                        </label>
+                    </div>
+                    
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-calendar'></i> Pre-Earnings Activity</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertPreEarnings' checked>
+                            <span class='switch-text'>Alert for unusual activity before earnings</span>
                         </label>
                     </div>
                     
@@ -744,503 +653,18 @@
         </div>
     </div>
 
-    <!-- Info Modal -->
-    <div id='infoModal' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='infoModalTitle' class='gradient-title'>Information</h2>
-                <button class='modal-close' onclick='this.closest(".modal").style.display="none"'>&times;</button>
-            </div>
-            <div class='modal-body' id='infoModalBody'>
-                <p>Information will be displayed here.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================
-         📚 SCRIPTS
-         ============================================ -->
-    
-    <!-- Core Scripts -->
+    <!-- Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/sec-api-client.js'></script>
+    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/sec-form4-client.js'></script>
-    
-    <!-- Analytics Engine -->
     <script src='assets/js/insider-analytics-engine.js'></script>
-
-    <!-- Chatbot Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
+    <script src='assets/js/insider-flow-tracker.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- Main Application Script -->
-    <script>
-        /**
-         * ═══════════════════════════════════════════════════════════════
-         * 💼 INSIDER FLOW TRACKER - MAIN APPLICATION
-         * ═══════════════════════════════════════════════════════════════
-         */
-
-        class InsiderFlowTrackerApp {
-            constructor() {
-                this.engine = null;
-                this.currentAnalysis = null;
-                this.currentTicker = null;
-                
-                this.init();
-            }
-
-            async init() {
-                console.log('🚀 Initializing Insider Flow Tracker...');
-                
-                // Initialize analytics engine
-                this.engine = new InsiderAnalyticsEngine();
-                
-                // Setup event listeners
-                this.setupEventListeners();
-                
-                // Show initial state
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('resultsContainer').style.display = 'none';
-                
-                console.log('✅ Insider Flow Tracker initialized');
-            }
-
-            setupEventListeners() {
-                // Search button
-                const searchBtn = document.querySelector('.search-btn');
-                if (searchBtn) {
-                    searchBtn.addEventListener('click', () => this.analyzeCompany());
-                }
-
-                // Enter key in search input
-                const searchInput = document.getElementById('tickerSearchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            this.analyzeCompany();
-                        }
-                    });
-                }
-
-                // Refresh button
-                const refreshBtn = document.getElementById('refreshData');
-                if (refreshBtn) {
-                    refreshBtn.addEventListener('click', () => {
-                        if (this.currentTicker) {
-                            this.analyzeCompany(this.currentTicker);
-                        }
-                    });
-                }
-
-                // Alerts config button
-                const alertsBtn = document.getElementById('configureAlerts');
-                if (alertsBtn) {
-                    alertsBtn.addEventListener('click', () => {
-                        document.getElementById('alertsConfigModal').style.display = 'flex';
-                    });
-                }
-
-                // Modal close buttons
-                document.querySelectorAll('.modal-close').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        btn.closest('.modal').style.display = 'none';
-                    });
-                });
-
-                // Click outside modal to close
-                window.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('modal')) {
-                        e.target.style.display = 'none';
-                    }
-                });
-            }
-
-            async analyzeCompany(ticker = null) {
-                // Get ticker from input if not provided
-                if (!ticker) {
-                    const input = document.getElementById('tickerSearchInput');
-                    ticker = input.value.trim().toUpperCase();
-                }
-
-                if (!ticker) {
-                    alert('⚠ Please enter a ticker symbol');
-                    return;
-                }
-
-                this.currentTicker = ticker;
-
-                // Show loading
-                document.getElementById('loadingState').style.display = 'block';
-                document.getElementById('resultsContainer').style.display = 'none';
-
-                try {
-                    console.log(`🔍 Analyzing ${ticker}...`);
-
-                    // Run comprehensive analysis
-                    const analysis = await this.engine.analyzeCompany(ticker, {
-                        months: 12,
-                        includeDerivatives: true,
-                        includePriceImpact: false,
-                        includeNetworkAnalysis: true
-                    });
-
-                    this.currentAnalysis = analysis;
-
-                    console.log('📊 Analysis complete:', analysis);
-
-                    // Display results
-                    this.displayResults(analysis);
-
-                } catch (error) {
-                    console.error('❌ Analysis error:', error);
-                    alert(`Error analyzing ${ticker}: ${error.message}`);
-                    document.getElementById('loadingState').style.display = 'none';
-                }
-            }
-
-            displayResults(analysis) {
-                // Hide loading, show results
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('resultsContainer').style.display = 'block';
-
-                // 1. Overall Score
-                this.displayOverallScore(analysis.overallScore);
-
-                // 2. Insider Sentiment
-                this.displayInsiderSentiment(analysis.insiderSentiment);
-
-                // 3. Cluster Activity
-                this.displayClusterActivity(analysis.clusterActivity);
-
-                // 4. Conviction Scores
-                this.displayConvictionScores(analysis.convictionScores);
-
-                // 5. Smart Alerts
-                this.displaySmartAlerts(analysis.alerts);
-
-                // 6. Network Analysis
-                this.displayNetworkAnalysis(analysis.networkGraph);
-
-                // 7. Top Conviction Trades
-                this.displayTopConvictionTrades(analysis.convictionScores.scores);
-
-                // 8. Pattern Recognition
-                this.displayPatternRecognition(analysis);
-
-                // 9. Recommendation
-                this.displayRecommendation(analysis.recommendation);
-
-                // 10. Alphy AI Insight
-                this.displayAlphyRecommendation(analysis);
-
-                // Scroll to top of results
-                document.getElementById('resultsContainer').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-
-            displayOverallScore(scoreData) {
-                document.getElementById('overallScore').textContent = scoreData.score;
-                document.getElementById('scoreLabel').textContent = scoreData.label;
-                document.getElementById('scoreProgress').style.width = scoreData.score + '%';
-
-                // Score components breakdown
-                const componentsHtml = `
-                    <div class='score-breakdown'>
-                        <div class='breakdown-item'>
-                            <span>Sentiment:</span>
-                            <span>${scoreData.components.sentiment}</span>
-                        </div>
-                        <div class='breakdown-item'>
-                            <span>Cluster:</span>
-                            <span>${scoreData.components.cluster}</span>
-                        </div>
-                        <div class='breakdown-item'>
-                            <span>Role Analysis:</span>
-                            <span>${scoreData.components.role}</span>
-                        </div>
-                        <div class='breakdown-item'>
-                            <span>Conviction:</span>
-                            <span>${scoreData.components.conviction}</span>
-                        </div>
-                    </div>
-                `;
-                
-                const componentsEl = document.getElementById('scoreComponents');
-                if (componentsEl) {
-                    componentsEl.innerHTML = componentsHtml;
-                }
-            }
-
-            displayInsiderSentiment(sentimentData) {
-                document.getElementById('sentimentScore').textContent = sentimentData.score;
-                document.getElementById('sentimentLabel').textContent = sentimentData.label;
-                document.getElementById('purchaseCount').textContent = sentimentData.breakdown.purchases;
-                document.getElementById('saleCount').textContent = sentimentData.breakdown.sales;
-
-                // Trend indicator
-                const trendEl = document.getElementById('sentimentTrend');
-                if (trendEl) {
-                    const trendIcons = {
-                        'IMPROVING': '<i class="fas fa-arrow-trend-up" style="color: #10b981;"></i> Improving',
-                        'DETERIORATING': '<i class="fas fa-arrow-trend-down" style="color: #ef4444;"></i> Deteriorating',
-                        'STABLE': '<i class="fas fa-minus" style="color: #94a3b8;"></i> Stable'
-                    };
-                    trendEl.innerHTML = `<div class="trend-badge">${trendIcons[sentimentData.trend] || 'N/A'}</div>`;
-                }
-            }
-
-            displayClusterActivity(clusterData) {
-                document.getElementById('clusterCount').textContent = clusterData.count;
-                document.getElementById('clusterInsiders').textContent = clusterData.totalInsidersInvolved || 0;
-                document.getElementById('clusterValue').textContent = this.formatMoney(clusterData.totalValueInClusters || 0);
-                document.getElementById('clusterSignal').textContent = clusterData.overallSignal || 'N/A';
-            }
-
-            displayConvictionScores(convictionData) {
-                document.getElementById('avgConviction').textContent = Math.round(convictionData.averageConviction);
-                document.getElementById('highConvictionCount').textContent = convictionData.highConvictionCount;
-                document.getElementById('highConvictionValue').textContent = this.formatMoney(convictionData.highConvictionValue);
-                document.getElementById('convictionLevel').textContent = convictionData.scores[0]?.convictionLevel || 'N/A';
-            }
-
-            displaySmartAlerts(alerts) {
-                const container = document.getElementById('alertsGrid');
-                
-                if (!alerts || alerts.length === 0) {
-                    container.innerHTML = `
-                        <div class='alert-placeholder'>
-                            <i class='fas fa-check-circle'></i>
-                            <p>No alerts detected. All insider activity appears normal.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                container.innerHTML = '';
-
-                alerts.forEach(alert => {
-                    const severityClass = alert.severity.toLowerCase();
-                    const signalClass = alert.signal.includes('BUY') ? 'bullish' : 
-                                       alert.signal.includes('SELL') ? 'bearish' : 'warning';
-
-                    const alertCard = document.createElement('div');
-                    alertCard.className = `alert-card ${severityClass}`;
-                    alertCard.innerHTML = `
-                        <div class='alert-header'>
-                            <div class='alert-title'>${alert.title}</div>
-                            <div class='alert-severity ${severityClass}'>${alert.severity}</div>
-                        </div>
-                        <div class='alert-description'>${alert.description}</div>
-                        <div class='alert-footer'>
-                            <div class='alert-signal ${signalClass}'>
-                                <i class='fas fa-${signalClass === 'bullish' ? 'arrow-trend-up' : signalClass === 'bearish' ? 'arrow-trend-down' : 'exclamation-triangle'}'></i>
-                                ${alert.signal}
-                            </div>
-                            <div class='alert-confidence'>
-                                <i class='fas fa-chart-line'></i> ${alert.confidence}% confidence
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(alertCard);
-                });
-
-                // Show banner for highest severity alert
-                if (alerts.length > 0 && alerts[0].severity === 'HIGH') {
-                    const banner = document.getElementById('smartAlertsBanner');
-                    document.getElementById('alertBannerTitle').textContent = alerts[0].title;
-                    document.getElementById('alertBannerMessage').textContent = alerts[0].description;
-                    banner.style.display = 'block';
-                }
-            }
-
-            displayNetworkAnalysis(networkData) {
-                if (!networkData) return;
-
-                document.getElementById('networkNodes').textContent = networkData.nodeCount;
-                document.getElementById('networkEdges').textContent = networkData.edgeCount;
-                document.getElementById('networkDensity').textContent = (networkData.density * 100).toFixed(1) + '%';
-                document.getElementById('networkCommunities').textContent = networkData.communityCount;
-
-                // Network table
-                const tbody = document.getElementById('networkTableBody');
-                tbody.innerHTML = '';
-
-                if (networkData.centralInsiders && networkData.centralInsiders.length > 0) {
-                    networkData.centralInsiders.forEach(insider => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td><strong>${insider.name}</strong></td>
-                            <td>${insider.role || 'N/A'}</td>
-                            <td>${insider.centrality || 0}</td>
-                            <td>${insider.transactionCount || 0}</td>
-                            <td class='${insider.sentiment > 0 ? "positive" : "negative"}'>
-                                ${this.formatMoney(insider.sentiment)}
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">No network data available</td></tr>';
-                }
-            }
-
-            displayTopConvictionTrades(convictionScores) {
-                const tbody = document.getElementById('convictionTableBody');
-                tbody.innerHTML = '';
-
-                if (!convictionScores || convictionScores.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">No conviction data available</td></tr>';
-                    return;
-                }
-
-                const topTrades = convictionScores.slice(0, 10);
-
-                topTrades.forEach(score => {
-                    const row = document.createElement('tr');
-                    const convictionClass = score.convictionLevel.toLowerCase().replace('_', '-');
-                    
-                    row.innerHTML = `
-                        <td><strong>${score.insider}</strong></td>
-                        <td>${score.role}</td>
-                        <td class='positive'>${this.formatMoney(score.transactionValue)}</td>
-                        <td>${score.wealthRatio ? score.wealthRatio.toFixed(2) + '%' : 'N/A'}</td>
-                        <td>
-                            <span class='conviction-badge ${convictionClass}'>
-                                ${score.convictionLevel}
-                            </span>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-
-            displayPatternRecognition(analysis) {
-                // Cluster Buying
-                const clusterCount = analysis.clusterActivity.count || 0;
-                document.getElementById('clusterPatternCount').textContent = `${clusterCount} detected`;
-
-                // Pre-Earnings
-                const preEarningsCount = analysis.timingPatterns?.preEarningsActivity?.count || 0;
-                document.getElementById('preEarningsPatternCount').textContent = `${preEarningsCount} detected`;
-
-                // Divergence
-                const divergenceDetected = analysis.divergenceAnalysis?.detected ? 1 : 0;
-                document.getElementById('divergencePatternCount').textContent = `${divergenceDetected} detected`;
-
-                // Unusual Volume (placeholder)
-                document.getElementById('unusualVolumePatternCount').textContent = '0 detected';
-            }
-
-            displayRecommendation(recommendation) {
-                const card = document.getElementById('recommendationCard');
-                
-                if (!recommendation) {
-                    card.innerHTML = '<p>No recommendation available</p>';
-                    return;
-                }
-
-                const actionClass = recommendation.action.includes('BUY') ? 'bullish' : 
-                                   recommendation.action.includes('SELL') ? 'bearish' : 'neutral';
-
-                card.innerHTML = `
-                    <div class='recommendation-content'>
-                        <div class='recommendation-header'>
-                            <div class='recommendation-action ${actionClass}'>
-                                ${recommendation.action}
-                            </div>
-                            <div class='recommendation-confidence'>
-                                Confidence: <strong>${recommendation.confidence}</strong>
-                            </div>
-                        </div>
-                        <div class='recommendation-score'>
-                            Score: <strong>${recommendation.score}/100</strong>
-                        </div>
-                        <div class='recommendation-rationale'>
-                            <h4>Key Factors:</h4>
-                            <ul>
-                                ${recommendation.rationale.map(r => `<li>${r}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            }
-
-            displayAlphyRecommendation(analysis) {
-                const container = document.getElementById('alphyRecommendation');
-                
-                const sentiment = analysis.insiderSentiment.label;
-                const score = analysis.overallScore.score;
-                const action = analysis.recommendation.action;
-
-                let message = '';
-                let icon = '🤖';
-
-                if (score >= 75) {
-                    icon = '🚀';
-                    message = `Strong insider buying detected! ${sentiment} sentiment with ${score}/100 score. Consider this a ${action} opportunity.`;
-                } else if (score >= 60) {
-                    icon = '✅';
-                    message = `Positive insider activity. ${sentiment} sentiment suggests ${action}.`;
-                } else if (score >= 40) {
-                    icon = '⚠';
-                    message = `Mixed insider signals. ${sentiment} sentiment indicates neutral stance. Recommend ${action}.`;
-                } else {
-                    icon = '🔻';
-                    message = `Negative insider activity detected. ${sentiment} sentiment with ${score}/100 score. ${action} may be warranted.`;
-                }
-
-                container.innerHTML = `
-                    <div class='alphy-content'>
-                        <div class='alphy-icon'>${icon}</div>
-                        <div class='alphy-text'>
-                            <h3>Alphy AI Analysis</h3>
-                            <p>${message}</p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            saveAlertConfig() {
-                alert('✅ Alert configuration saved successfully!');
-                document.getElementById('alertsConfigModal').style.display = 'none';
-            }
-
-            formatMoney(value) {
-                if (value >= 1000000) {
-                    return '$' + (value / 1000000).toFixed(2) + 'M';
-                }
-                if (value >= 1000) {
-                    return '$' + (value / 1000).toFixed(2) + 'K';
-                }
-                return '$' + value.toFixed(2);
-            }
-        }
-
-        // Initialize app
-        let insiderApp;
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Initializing Insider Flow Tracker App...');
-            insiderApp = new InsiderFlowTrackerApp();
-        });
-    </script>
 
     <!-- User Menu Init -->
     <script>
         (function forceUserMenuInit() {
-            console.log('🔧 Force initializing user menu...');
-            
             const initMenu = () => {
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
@@ -1283,34 +707,6 @@
                 setTimeout(initMenu, 100);
             }
         })();
-    </script>
-
-    <!-- Chatbot Initialization -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Initialisation du chatbot FinanceGPT...');
-        
-        if (typeof ChatbotConfig === 'undefined') {
-            console.error('❌ ChatbotConfig non défini !');
-            return;
-        }
-        
-        console.log('✅ ChatbotConfig chargé');
-        
-        if (typeof ChatbotUI === 'undefined') {
-            console.error('❌ ChatbotUI non défini !');
-            return;
-        }
-        
-        console.log('✅ ChatbotUI chargé');
-        
-        try {
-            window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-        }
-    });
     </script>
 
 </body>
