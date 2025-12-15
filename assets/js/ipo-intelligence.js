@@ -266,7 +266,7 @@ class IPOIntelligenceDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * 🧮 CALCUL DE SCORE DYNAMIQUE ET VARIÉ
+     * 🧮 CALCUL DE SCORE DYNAMIQUE ET VARIÉ (100% DÉTERMINISTE)
      * ═══════════════════════════════════════════════════════════════════
      */
     async analyzeIPOWithDynamicScore(ipo) {
@@ -278,7 +278,7 @@ class IPOIntelligenceDashboard {
             enrichedIPO = { ...ipo };
         }
         
-        // ✅ RECALCUL DU SCORE AVEC PLUS DE VARIANCE
+        // ✅ RECALCUL DU SCORE AVEC PLUS DE VARIANCE (SANS RANDOM)
         let score = 50; // Score de base
         
         // 1⃣ RÉCENCE DU FILING (0-25 points) - VARIANCE ÉLEVÉE
@@ -336,9 +336,16 @@ class IPOIntelligenceDashboard {
             score += 5;
         }
         
-        // 8⃣ VARIANCE ALÉATOIRE CONTRÔLÉE (±5 points pour éviter uniformité)
-        const randomVariance = (Math.random() * 10) - 5; // Entre -5 et +5
-        score += randomVariance;
+        // 8⃣ VARIANCE DÉTERMINISTE BASÉE SUR LE NOM (±5 points)
+        // ✅ Utilise un hash simple du nom de l'entreprise (toujours le même pour la même entreprise)
+        const companyName = enrichedIPO.companyName || '';
+        let nameHash = 0;
+        for (let i = 0; i < companyName.length; i++) {
+            nameHash = ((nameHash << 5) - nameHash) + companyName.charCodeAt(i);
+            nameHash = nameHash & nameHash; // Convert to 32bit integer
+        }
+        const deterministicVariance = (Math.abs(nameHash) % 11) - 5; // Entre -5 et +5 (mais toujours pareil pour le même nom)
+        score += deterministicVariance;
         
         // 9⃣ BONUS/PÉNALITÉ BASÉ SUR LA COMBINAISON SECTEUR + RÉCENCE
         if ((enrichedIPO.sector === 'Technology' || enrichedIPO.sector === 'Healthcare') && daysSinceFiling < 30) {
@@ -348,6 +355,12 @@ class IPOIntelligenceDashboard {
         if (enrichedIPO.sector === 'Energy' && daysSinceFiling > 180) {
             score -= 8; // Pénalité pour énergie ancienne
         }
+        
+        // 🔟 FACTEUR BASÉ SUR LE JOUR DU MOIS DU FILING (variance déterministe supplémentaire)
+        const filingDate = new Date(enrichedIPO.filedDate);
+        const dayOfMonth = filingDate.getDate(); // 1-31
+        const dayVariance = Math.floor((dayOfMonth - 15) / 5); // -3 à +3
+        score += dayVariance;
         
         // ✅ NORMALISER LE SCORE (0-100)
         enrichedIPO.successScore = Math.max(0, Math.min(100, Math.round(score)));
@@ -831,9 +844,9 @@ class IPOIntelligenceDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * 🎯 RISK/OPPORTUNITY RATIO - VERSION AMÉLIORÉE
+     * 🎯 RISK/OPPORTUNITY RATIO - VERSION 100% DÉTERMINISTE
      * ═══════════════════════════════════════════════════════════════════
-     * Calcul basé sur 6 facteurs dynamiques :
+     * Calcul basé sur 6 facteurs dynamiques (AUCUN RANDOM) :
      * 1. Gravité des risques (analyse sémantique)
      * 2. Dilution attendue
      * 3. Momentum du filing (vitesse de progression)
@@ -842,6 +855,7 @@ class IPOIntelligenceDashboard {
      * 6. Success Score (potentiel de réussite)
      * 
      * Résultat normalisé sur échelle 0-10 (plus bas = meilleur)
+     * ⚠ IMPORTANT : Résultat 100% déterministe (même input = même output)
      * ═══════════════════════════════════════════════════════════════════
      */
     calculateRiskOpportunityRatio(ipo) {
@@ -855,19 +869,20 @@ class IPOIntelligenceDashboard {
             const highSeverityKeywords = [
                 'material adverse', 'substantial risk', 'significant uncertainty',
                 'may fail', 'bankruptcy', 'liquidity', 'going concern',
-                'insufficient funds', 'default', 'litigation'
+                'insufficient funds', 'default', 'litigation', 'insolvency'
             ];
             
             // Mots-clés de gravité moyenne
             const mediumSeverityKeywords = [
                 'regulatory', 'compliance', 'competition', 'market conditions',
-                'economic downturn', 'customer concentration', 'reliance on'
+                'economic downturn', 'customer concentration', 'reliance on',
+                'cybersecurity', 'data breach', 'intellectual property'
             ];
             
             // Mots-clés de gravité faible
             const lowSeverityKeywords = [
                 'may experience', 'could be affected', 'potential', 'might',
-                'general economic', 'industry trends'
+                'general economic', 'industry trends', 'fluctuations'
             ];
             
             let weightedRiskScore = 0;
@@ -980,19 +995,38 @@ class IPOIntelligenceDashboard {
         totalRiskScore -= opportunityBonus;
         
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 7⃣ VARIANCE ALÉATOIRE CONTRÔLÉE (±3 points)
+        // 7⃣ VARIANCE DÉTERMINISTE BASÉE SUR LE NOM DE L'ENTREPRISE
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const randomVariance = (Math.random() * 6) - 3; // Entre -3 et +3
-        totalRiskScore += randomVariance;
+        // ✅ Hash du nom pour créer une variance unique mais déterministe (±2 points)
+        const companyName = ipo.companyName || '';
+        let nameHash = 0;
+        for (let i = 0; i < companyName.length; i++) {
+            nameHash = ((nameHash << 5) - nameHash) + companyName.charCodeAt(i);
+            nameHash = nameHash & nameHash;
+        }
+        const deterministicVariance = ((Math.abs(nameHash) % 5) - 2) * 0.5; // Entre -1 et +1
+        totalRiskScore += deterministicVariance;
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 8⃣ VARIANCE BASÉE SUR LA LONGUEUR DU NOM (±1 point)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Noms longs = entreprises établies (moins de risque)
+        // Noms courts = startups (plus de risque)
+        const nameLength = companyName.length;
+        if (nameLength > 50) {
+            totalRiskScore -= 1; // Nom long = établi
+        } else if (nameLength < 15) {
+            totalRiskScore += 1; // Nom court = startup
+        }
         
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 📊 NORMALISATION SUR ÉCHELLE 0-10
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // Score max théorique : 40 + 25 + 15 + 15 + 10 - 20 + 3 = 88
-        // Score min théorique : 5 + 2 + 2 + 6 + 0 - 20 - 3 = -8
+        // Score max théorique : 40 + 25 + 15 + 15 + 10 - 20 + 1 + 1 = 87
+        // Score min théorique : 5 + 2 + 2 + 6 + 0 - 20 - 1 - 1 = -7
         
         // Normaliser sur 0-10 (où 0 = risque minimal, 10 = risque maximal)
-        const normalizedRatio = Math.max(0, Math.min(10, (totalRiskScore + 8) / 9.6));
+        const normalizedRatio = Math.max(0, Math.min(10, (totalRiskScore + 7) / 9.4));
         
         // Retourner avec 2 décimales
         return normalizedRatio.toFixed(2);
