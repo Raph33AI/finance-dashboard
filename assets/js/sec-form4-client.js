@@ -353,7 +353,7 @@ class SECForm4Client {
      */
     async getAllForm4Transactions(options = {}) {
         const {
-            maxTransactions = 5000,
+            maxTransactions = 200,
             days = 90,
             forceRefresh = false
         } = options;
