@@ -1302,7 +1302,7 @@ class AdvancedInsiderAnalyticsEngine {
     }
 
     /**
-     * ✅ MÉTHODE PRINCIPALE : CHARGE TOUTES LES TRANSACTIONS (AVEC DIAGNOSTIC)
+     * ✅ SOLUTION 2 : Filtrer les vrais Form 4 avant extraction
      */
     async loadAllCompanies(options = {}) {
         const {
@@ -1311,105 +1311,81 @@ class AdvancedInsiderAnalyticsEngine {
             months = 3
         } = options;
 
-        console.log(`🌐 Loading ALL companies from SEC Form 4 filings (last ${months} months)...`);
-
-        if (this.globalCache.isLoading) {
-            console.log('⏳ Already loading, waiting for completion...');
-            return this.waitForLoadingComplete();
-        }
-
-        if (!forceRefresh && this.globalCache.allTransactions.length > 0) {
-            const cacheAge = Date.now() - this.globalCache.lastUpdate;
-            if (cacheAge < 3600000) {
-                console.log(`✅ Using cached data (${this.globalCache.allTransactions.length} transactions)`);
-                return this.globalCache;
-            }
-        }
+        console.log(`🌐 Loading Form 4 filings from SEC...`);
 
         this.globalCache.isLoading = true;
 
         try {
-            console.log('📡 Fetching REAL Form 4 data from SEC...');
-            
             const rawFilings = await this.form4Client.getAllForm4Transactions({
                 maxTransactions: maxFilings,
                 days: months * 30,
                 forceRefresh: forceRefresh
             });
 
-            console.log(`✅ Got ${rawFilings.length} raw Form 4 filings from SEC`);
+            console.log(`✅ Got ${rawFilings.length} raw filings from SEC`);
 
-            // ✅ DIAGNOSTIC : Affiche la structure du premier filing
-            if (rawFilings.length > 0) {
-                console.log('🔍 DIAGNOSTIC - Structure du premier filing:');
-                console.log(rawFilings[0]);
-                console.log('📋 Keys disponibles:', Object.keys(rawFilings[0]));
+            // ✅ FILTRE UNIQUEMENT LES VRAIS FORM 4
+            const form4Only = rawFilings.filter(filing => {
+                const isForm4 = filing.formType === '4' || 
+                            filing.title?.includes('Form 4') ||
+                            filing.category === 'Insider Trading';
+                return isForm4;
+            });
+
+            console.log(`📋 Filtered to ${form4Only.length} Form 4 filings`);
+
+            if (form4Only.length === 0) {
+                console.warn('⚠ No Form 4 found - using ticker list approach');
+                // Bascule vers Solution 1
+                return await this.loadWithTickerList(months);
             }
 
-            // ✅ EXTRACTION DES TICKERS UNIQUES (méthode améliorée)
-            const tickers = this.extractUniqueTickersImproved(rawFilings);
-            console.log(`📊 Found ${tickers.length} unique companies:`, tickers.slice(0, 10));
-
-            if (tickers.length === 0) {
-                console.warn('⚠ No tickers extracted - falling back to intelligent mock data');
-                const transactions = this.generateIntelligentFallback(100);
-                this.globalCache.allTransactions = transactions;
-                this.organizeByCompany(transactions);
-                this.globalCache.lastUpdate = Date.now();
-                this.globalCache.isLoading = false;
-                return this.globalCache;
+            // Diagnostic
+            if (form4Only.length > 0) {
+                console.log('🔍 Sample Form 4:', form4Only[0]);
             }
 
-            // ✅ RÉCUPÉRATION DES TRANSACTIONS STRUCTURÉES PAR TICKER
+            // Extrait les CIK uniques
+            const uniqueCIKs = [...new Set(form4Only.map(f => f.cik))];
+            console.log(`📊 Found ${uniqueCIKs.length} unique CIKs`);
+
+            // Convertit CIK en tickers (via Worker ou table de mapping)
+            const tickers = await this.convertCIKsToTickers(uniqueCIKs.slice(0, 50));
+            console.log(`📊 Resolved ${tickers.length} tickers:`, tickers.slice(0, 10));
+
+            // Charge les transactions par ticker
             const allTransactions = [];
             
-            for (const ticker of tickers.slice(0, 50)) {
+            for (const ticker of tickers) {
                 try {
-                    console.log(`📥 Loading transactions for ${ticker}...`);
-                    
+                    console.log(`📥 Loading ${ticker}...`);
                     const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
                     
-                    if (history && history.transactions && history.transactions.length > 0) {
-                        const convertedTransactions = this.convertToDisplayFormat(history.transactions, ticker);
-                        allTransactions.push(...convertedTransactions);
-                        
-                        console.log(`✅ ${ticker}: ${convertedTransactions.length} transactions loaded`);
+                    if (history?.transactions?.length > 0) {
+                        const converted = this.convertToDisplayFormat(history.transactions, ticker);
+                        allTransactions.push(...converted);
+                        console.log(`✅ ${ticker}: ${converted.length} transactions`);
                     }
                     
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    
+                    await new Promise(resolve => setTimeout(resolve, 300));
                 } catch (error) {
-                    console.warn(`⚠ Error loading ${ticker}:`, error.message);
+                    console.warn(`⚠ ${ticker}:`, error.message);
                 }
             }
 
-            console.log(`✅ Total transactions loaded: ${allTransactions.length}`);
-
-            if (allTransactions.length === 0) {
-                console.warn('⚠ No transactions extracted - using fallback data');
-                const transactions = this.generateIntelligentFallback(100);
-                this.globalCache.allTransactions = transactions;
-                this.organizeByCompany(transactions);
-                this.globalCache.lastUpdate = Date.now();
-                this.globalCache.isLoading = false;
-                return this.globalCache;
-            }
+            console.log(`✅ Total: ${allTransactions.length} transactions`);
 
             this.organizeByCompany(allTransactions);
-
             this.globalCache.allTransactions = allTransactions;
             this.globalCache.lastUpdate = Date.now();
             this.globalCache.isLoading = false;
 
-            console.log(`🎉 Successfully loaded ${this.globalCache.companiesData.size} companies with REAL SEC data`);
-
             return this.globalCache;
 
         } catch (error) {
-            console.error('❌ Error loading all companies:', error);
+            console.error('❌ Error:', error);
             this.globalCache.isLoading = false;
             
-            console.warn('⚠ Falling back to intelligent mock data...');
             const transactions = this.generateIntelligentFallback(100);
             this.globalCache.allTransactions = transactions;
             this.organizeByCompany(transactions);
@@ -1417,6 +1393,63 @@ class AdvancedInsiderAnalyticsEngine {
             
             return this.globalCache;
         }
+    }
+
+    /**
+     * 🔄 Convertit CIK en Tickers (via Worker ou mapping)
+     */
+    async convertCIKsToTickers(ciks) {
+        const tickers = [];
+        
+        for (const cik of ciks) {
+            try {
+                // Appel au Worker pour convertir CIK -> Ticker
+                const response = await fetch(`https://sec-edgar-api.raphnardone.workers.dev/api/sec/cik-to-ticker?cik=${cik}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ticker) {
+                        tickers.push(data.ticker);
+                    }
+                }
+            } catch (error) {
+                console.warn(`⚠ CIK ${cik}: cannot convert to ticker`);
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        return tickers;
+    }
+
+    /**
+     * 🔄 Méthode de secours avec liste de tickers
+     */
+    async loadWithTickerList(months) {
+        const majorTickers = [
+            'NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN', 'JPM', 'BAC', 'WMT'
+        ];
+        
+        const allTransactions = [];
+        
+        for (const ticker of majorTickers) {
+            try {
+                const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
+                if (history?.transactions?.length > 0) {
+                    const converted = this.convertToDisplayFormat(history.transactions, ticker);
+                    allTransactions.push(...converted);
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            } catch (error) {
+                console.warn(`⚠ ${ticker}:`, error.message);
+            }
+        }
+        
+        this.organizeByCompany(allTransactions);
+        this.globalCache.allTransactions = allTransactions;
+        this.globalCache.lastUpdate = Date.now();
+        this.globalCache.isLoading = false;
+        
+        return this.globalCache;
     }
 
     /**
