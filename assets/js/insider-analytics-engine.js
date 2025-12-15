@@ -1302,7 +1302,7 @@ class AdvancedInsiderAnalyticsEngine {
     }
 
     /**
-     * ✅ MÉTHODE PRINCIPALE : CHARGE TOUTES LES TRANSACTIONS (LOGIQUE DU 1ER CODE)
+     * ✅ MÉTHODE PRINCIPALE : CHARGE TOUTES LES TRANSACTIONS (AVEC DIAGNOSTIC)
      */
     async loadAllCompanies(options = {}) {
         const {
@@ -1320,7 +1320,7 @@ class AdvancedInsiderAnalyticsEngine {
 
         if (!forceRefresh && this.globalCache.allTransactions.length > 0) {
             const cacheAge = Date.now() - this.globalCache.lastUpdate;
-            if (cacheAge < 3600000) { // 1 heure
+            if (cacheAge < 3600000) {
                 console.log(`✅ Using cached data (${this.globalCache.allTransactions.length} transactions)`);
                 return this.globalCache;
             }
@@ -1329,7 +1329,6 @@ class AdvancedInsiderAnalyticsEngine {
         this.globalCache.isLoading = true;
 
         try {
-            // ✅ RÉCUPÉRATION DES FILINGS BRUTS
             console.log('📡 Fetching REAL Form 4 data from SEC...');
             
             const rawFilings = await this.form4Client.getAllForm4Transactions({
@@ -1340,29 +1339,43 @@ class AdvancedInsiderAnalyticsEngine {
 
             console.log(`✅ Got ${rawFilings.length} raw Form 4 filings from SEC`);
 
-            // ✅ EXTRACTION DES TICKERS UNIQUES
-            const tickers = this.extractUniqueTickers(rawFilings);
-            console.log(`📊 Found ${tickers.length} unique companies`);
+            // ✅ DIAGNOSTIC : Affiche la structure du premier filing
+            if (rawFilings.length > 0) {
+                console.log('🔍 DIAGNOSTIC - Structure du premier filing:');
+                console.log(rawFilings[0]);
+                console.log('📋 Keys disponibles:', Object.keys(rawFilings[0]));
+            }
 
-            // ✅ RÉCUPÉRATION DES TRANSACTIONS STRUCTURÉES PAR TICKER (LOGIQUE DU 1ER CODE)
+            // ✅ EXTRACTION DES TICKERS UNIQUES (méthode améliorée)
+            const tickers = this.extractUniqueTickersImproved(rawFilings);
+            console.log(`📊 Found ${tickers.length} unique companies:`, tickers.slice(0, 10));
+
+            if (tickers.length === 0) {
+                console.warn('⚠ No tickers extracted - falling back to intelligent mock data');
+                const transactions = this.generateIntelligentFallback(100);
+                this.globalCache.allTransactions = transactions;
+                this.organizeByCompany(transactions);
+                this.globalCache.lastUpdate = Date.now();
+                this.globalCache.isLoading = false;
+                return this.globalCache;
+            }
+
+            // ✅ RÉCUPÉRATION DES TRANSACTIONS STRUCTURÉES PAR TICKER
             const allTransactions = [];
             
-            for (const ticker of tickers.slice(0, 50)) { // Limite à 50 entreprises
+            for (const ticker of tickers.slice(0, 50)) {
                 try {
                     console.log(`📥 Loading transactions for ${ticker}...`);
                     
-                    // ✅ UTILISE getCompanyInsiderHistory (méthode du 1er code qui fonctionne)
                     const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
                     
                     if (history && history.transactions && history.transactions.length > 0) {
-                        // ✅ CONVERTIT LES TRANSACTIONS AU FORMAT ATTENDU PAR LE 2ÈME CODE
                         const convertedTransactions = this.convertToDisplayFormat(history.transactions, ticker);
                         allTransactions.push(...convertedTransactions);
                         
                         console.log(`✅ ${ticker}: ${convertedTransactions.length} transactions loaded`);
                     }
                     
-                    // Pause pour éviter de surcharger l'API
                     await new Promise(resolve => setTimeout(resolve, 200));
                     
                 } catch (error) {
@@ -1372,7 +1385,16 @@ class AdvancedInsiderAnalyticsEngine {
 
             console.log(`✅ Total transactions loaded: ${allTransactions.length}`);
 
-            // ✅ ORGANISATION PAR ENTREPRISE
+            if (allTransactions.length === 0) {
+                console.warn('⚠ No transactions extracted - using fallback data');
+                const transactions = this.generateIntelligentFallback(100);
+                this.globalCache.allTransactions = transactions;
+                this.organizeByCompany(transactions);
+                this.globalCache.lastUpdate = Date.now();
+                this.globalCache.isLoading = false;
+                return this.globalCache;
+            }
+
             this.organizeByCompany(allTransactions);
 
             this.globalCache.allTransactions = allTransactions;
@@ -1387,7 +1409,6 @@ class AdvancedInsiderAnalyticsEngine {
             console.error('❌ Error loading all companies:', error);
             this.globalCache.isLoading = false;
             
-            // ✅ FALLBACK MINIMAL
             console.warn('⚠ Falling back to intelligent mock data...');
             const transactions = this.generateIntelligentFallback(100);
             this.globalCache.allTransactions = transactions;
@@ -1396,6 +1417,131 @@ class AdvancedInsiderAnalyticsEngine {
             
             return this.globalCache;
         }
+    }
+
+    /**
+     * ✅ EXTRACTION AMÉLIORÉE DES TICKERS UNIQUES (avec multi-stratégies)
+     */
+    extractUniqueTickersImproved(rawFilings) {
+        const tickers = new Set();
+        
+        rawFilings.forEach((filing, index) => {
+            // Stratégie 1 : Extraction depuis summary/title
+            let symbol = this.extractSymbolFromFiling(filing);
+            
+            // Stratégie 2 : Extraction depuis companyName
+            if (!symbol && filing.companyName) {
+                symbol = this.extractSymbolFromCompanyName(filing.companyName);
+            }
+            
+            // Stratégie 3 : Extraction depuis le lien (URL peut contenir le CIK)
+            if (!symbol && filing.link) {
+                symbol = this.extractSymbolFromUrl(filing.link);
+            }
+            
+            // Stratégie 4 : Utiliser le CIK comme fallback
+            if (!symbol && filing.cik) {
+                // On va chercher le ticker via le CIK plus tard
+                symbol = `CIK_${filing.cik}`;
+            }
+            
+            // Validation et ajout
+            if (symbol && symbol.length >= 1 && symbol.length <= 10) {
+                tickers.add(symbol);
+            }
+            
+            // Debug pour les 5 premiers filings
+            if (index < 5) {
+                console.log(`🔍 Filing ${index + 1}:`, {
+                    summary: filing.summary?.substring(0, 100),
+                    title: filing.title?.substring(0, 100),
+                    companyName: filing.companyName,
+                    link: filing.link,
+                    cik: filing.cik,
+                    extractedSymbol: symbol
+                });
+            }
+        });
+        
+        // Filtre les CIK_xxxxx pour ne garder que les vrais tickers
+        const realTickers = Array.from(tickers).filter(t => !t.startsWith('CIK_'));
+        
+        return realTickers.sort();
+    }
+
+    /**
+     * 🔍 EXTRACTION DEPUIS LE NOM DE LA COMPAGNIE
+     */
+    extractSymbolFromCompanyName(companyName) {
+        // Pattern : "NVIDIA CORP" -> "NVDA" (on va chercher dans une map ou via API)
+        // Pour l'instant, on extrait les initiales si le nom est court
+        
+        const cleanName = companyName.replace(/\b(Inc|Corp|Ltd|LLC|Co|Corporation|Company)\b/gi, '').trim();
+        
+        // Si le nom nettoyé fait moins de 6 caractères et est en majuscules, c'est probablement le ticker
+        if (cleanName.length <= 5 && cleanName.match(/^[A-Z]+$/)) {
+            return cleanName;
+        }
+        
+        // Sinon, on cherche un pattern "NAME (TICKER)"
+        const tickerMatch = companyName.match(/\(([A-Z]{1,5})\)/);
+        if (tickerMatch) {
+            return tickerMatch[1];
+        }
+        
+        return null;
+    }
+
+    /**
+     * 🔗 EXTRACTION DEPUIS L'URL
+     */
+    extractSymbolFromUrl(url) {
+        // Pattern typique : https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810
+        const cikMatch = url.match(/CIK=(\d+)/i);
+        if (cikMatch) {
+            return `CIK_${cikMatch[1]}`;
+        }
+        return null;
+    }
+
+    /**
+     * 🔍 EXTRACTION DU SYMBOLE DEPUIS UN FILING (méthode originale améliorée)
+     */
+    extractSymbolFromFiling(filing) {
+        // Essaie d'extraire depuis summary ou title
+        const text = (filing.summary || filing.title || '').toUpperCase();
+        
+        // Pattern 1 : Ticker entre parenthèses (NVDA)
+        const patterns = [
+            /\(([A-Z]{1,5})\)/,
+            /\bTicker:\s*([A-Z]{1,5})\b/i,
+            /\bSymbol:\s*([A-Z]{1,5})\b/i,
+            /\b([A-Z]{2,5})\s+\-\s+Form\s+4/i  // Pattern SEC typique
+        ];
+        
+        for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match && match[1] && this.isValidTicker(match[1])) {
+                return match[1];
+            }
+        }
+        
+        // Pattern 2 : Nom de compagnie suivi de Inc/Corp
+        const companyName = filing.companyName || filing.title || '';
+        const nameMatch = companyName.match(/([A-Z]{2,5})\s+(Inc|Corp|Ltd|LLC)/i);
+        if (nameMatch && nameMatch[1].length <= 5 && this.isValidTicker(nameMatch[1])) {
+            return nameMatch[1].toUpperCase();
+        }
+        
+        return null;
+    }
+
+    /**
+     * ✅ VALIDATION DE TICKER (filtre les mots communs qui ne sont pas des tickers)
+     */
+    isValidTicker(symbol) {
+        const blacklist = ['FORM', 'THE', 'INC', 'CORP', 'LLC', 'LTD', 'CO', 'AND', 'FOR'];
+        return !blacklist.includes(symbol.toUpperCase());
     }
 
     /**
