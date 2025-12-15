@@ -3,6 +3,7 @@
  * 🧠 INSIDER ANALYTICS ENGINE - AlphaVault AI
  * ═══════════════════════════════════════════════════════════════════
  * Moteur d'analyse avancée pour détecter patterns, anomalies et signaux
+ * VERSION 2.0 - WITH PREMIUM FEATURES
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -148,30 +149,25 @@ class InsiderAnalyticsEngine {
 
     /**
      * 📊 CLUSTER BUYING DETECTION
-     * Détecte quand plusieurs insiders achètent simultanément
      */
     async detectClusterBuying(transactions) {
         const clusters = [];
         const windowDays = this.thresholds.clusterBuying.windowDays;
 
-        // Filtre uniquement les achats
         const purchases = transactions.filter(t => 
             t.nonDerivativeTransactions?.some(nt => nt.transactionType === 'Purchase')
         );
 
-        // Groupe par fenêtre temporelle
         for (let i = 0; i < purchases.length; i++) {
             const baseTransaction = purchases[i];
             const baseDate = new Date(baseTransaction.filingDate);
 
-            // Trouve toutes les transactions dans la fenêtre
             const clusterTransactions = purchases.filter(t => {
                 const tDate = new Date(t.filingDate);
                 const daysDiff = Math.abs((tDate - baseDate) / (1000 * 60 * 60 * 24));
                 return daysDiff <= windowDays;
             });
 
-            // Calcule les métriques du cluster
             const uniqueInsiders = new Set(clusterTransactions.map(t => t.reportingOwner?.name));
             const totalValue = clusterTransactions.reduce((sum, t) => {
                 return sum + (t.nonDerivativeTransactions || [])
@@ -179,7 +175,6 @@ class InsiderAnalyticsEngine {
                     .reduce((s, nt) => s + nt.totalValue, 0);
             }, 0);
 
-            // Si critères remplis = cluster significatif
             if (uniqueInsiders.size >= this.thresholds.clusterBuying.minInsiders &&
                 totalValue >= this.thresholds.clusterBuying.minTotalValue) {
                 
@@ -191,42 +186,30 @@ class InsiderAnalyticsEngine {
                     totalValue,
                     averageValuePerInsider: totalValue / uniqueInsiders.size,
                     insiders: Array.from(uniqueInsiders),
-                    
-                    // Détails des transactions
                     transactions: clusterTransactions,
-                    
-                    // Scoring
                     signal: 'BULLISH',
                     confidence: this.calculateClusterConfidence(uniqueInsiders.size, totalValue),
                     severity: this.calculateClusterSeverity(uniqueInsiders.size, totalValue),
-                    
-                    // Contexte
                     insiderRoles: this.extractInsiderRoles(clusterTransactions),
-                    isPreEarnings: false // Sera enrichi plus tard
+                    isPreEarnings: false
                 });
             }
         }
 
-        // Déduplique les clusters qui se chevauchent
         const deduplicated = this.deduplicateClusters(clusters);
 
         return {
             detected: deduplicated.length > 0,
             count: deduplicated.length,
             clusters: deduplicated.sort((a, b) => b.confidence - a.confidence),
-            
-            // Statistiques
             totalInsidersInvolved: new Set(deduplicated.flatMap(c => c.insiders)).size,
             totalValueInClusters: deduplicated.reduce((sum, c) => sum + c.totalValue, 0),
-            
-            // Signal global
             overallSignal: this.calculateClusterSignal(deduplicated)
         };
     }
 
     /**
      * 💭 INSIDER SENTIMENT SCORE
-     * Score agrégé de -100 (très bearish) à +100 (très bullish)
      */
     calculateInsiderSentiment(transactions) {
         if (!transactions || transactions.length === 0) {
@@ -254,20 +237,17 @@ class InsiderAnalyticsEngine {
             });
         });
 
-        // Calcul du score composite
         const totalValue = purchaseValue + saleValue;
         const valueRatio = totalValue > 0 ? (purchaseValue - saleValue) / totalValue : 0;
         
         const totalCount = purchaseCount + saleCount;
         const countRatio = totalCount > 0 ? (purchaseCount - saleCount) / totalCount : 0;
         
-        // Pondération: 70% valeur, 30% fréquence
         const score = Math.round((valueRatio * 0.7 + countRatio * 0.3) * 100);
         
         return {
             score: Math.max(-100, Math.min(100, score)),
             label: this.getSentimentLabel(score),
-            
             breakdown: {
                 purchases: purchaseCount,
                 sales: saleCount,
@@ -276,18 +256,14 @@ class InsiderAnalyticsEngine {
                 netValue: purchaseValue - saleValue,
                 netCount: purchaseCount - saleCount
             },
-            
-            // Contexte
             dominantActivity: purchaseValue > saleValue ? 'BUYING' : 'SELLING',
             intensity: this.calculateIntensity(totalValue, totalCount),
-            
-            // Historique
             trend: this.calculateSentimentTrend(transactions)
         };
     }
 
     /**
-     * 👔 ANALYSE PAR RÔLE (CEO, CFO, Directors, etc.)
+     * 👔 ANALYSE PAR RÔLE
      */
     analyzeByRole(transactions) {
         const roleData = {
@@ -317,7 +293,6 @@ class InsiderAnalyticsEngine {
             });
         });
 
-        // Calcule les scores par rôle
         const roleScores = {};
         Object.keys(roleData).forEach(role => {
             const data = roleData[role];
@@ -330,37 +305,25 @@ class InsiderAnalyticsEngine {
                 purchaseValue: totalPurchaseValue,
                 saleValue: totalSaleValue,
                 netValue: data.netValue,
-                
-                // Score spécifique au rôle
                 score: this.calculateRoleScore(role, totalPurchaseValue, totalSaleValue),
                 signal: data.netValue > 0 ? 'BULLISH' : data.netValue < 0 ? 'BEARISH' : 'NEUTRAL',
-                
-                // Importance du signal (CEO/CFO plus importants)
                 weight: this.getRoleWeight(role)
             };
         });
 
         return {
             byRole: roleScores,
-            
-            // Insights clés
             mostActiveRole: this.getMostActiveRole(roleScores),
             mostBullishRole: this.getMostBullishRole(roleScores),
             mostBearishRole: this.getMostBearishRole(roleScores),
-            
-            // Pondération globale
             weightedScore: this.calculateWeightedRoleScore(roleScores)
         };
     }
 
     /**
      * ⏰ TIMING PATTERNS DETECTION
-     * Détecte les achats/ventes avant earnings, annonces, etc.
      */
     async detectTimingPatterns(transactions, ticker) {
-        // Note: Pour une vraie implémentation, il faudrait récupérer
-        // le calendrier des earnings depuis une API (Alpha Vantage, etc.)
-        
         const patterns = {
             preEarnings: [],
             postEarnings: [],
@@ -368,7 +331,6 @@ class InsiderAnalyticsEngine {
             unusual: []
         };
 
-        // Détecte les clusters temporels suspects
         const sortedTransactions = [...transactions].sort((a, b) => 
             new Date(a.filingDate) - new Date(b.filingDate)
         );
@@ -377,8 +339,6 @@ class InsiderAnalyticsEngine {
             const txn = sortedTransactions[i];
             const txnDate = new Date(txn.filingDate);
 
-            // Vérifie si c'est dans une période suspecte (ex: 14 jours avant quarter-end)
-            const dayOfYear = this.getDayOfYear(txnDate);
             const isNearQuarterEnd = this.isNearQuarterEnd(txnDate);
 
             if (isNearQuarterEnd) {
@@ -398,7 +358,6 @@ class InsiderAnalyticsEngine {
                 });
             }
 
-            // Détecte les transactions inhabituelles (taille, fréquence)
             const isUnusual = this.isUnusualTransaction(txn, sortedTransactions);
             if (isUnusual.detected) {
                 patterns.unusual.push({
@@ -417,13 +376,10 @@ class InsiderAnalyticsEngine {
                 totalValue: patterns.preEarnings.reduce((sum, p) => sum + Math.abs(p.netValue), 0),
                 signal: this.aggregateSignal(patterns.preEarnings)
             },
-            
             unusualActivity: {
                 count: patterns.unusual.length,
                 transactions: patterns.unusual
             },
-            
-            // Pattern global
             hasSignificantTiming: patterns.preEarnings.length > 0 || patterns.unusual.length > 0,
             riskLevel: this.calculateTimingRiskLevel(patterns)
         };
@@ -431,7 +387,6 @@ class InsiderAnalyticsEngine {
 
     /**
      * 💪 CONVICTION SCORES
-     * Mesure la conviction basée sur la taille relative des transactions
      */
     calculateConvictionScores(transactions) {
         const scores = transactions.map(t => {
@@ -447,21 +402,15 @@ class InsiderAnalyticsEngine {
                 transactionValue: totalValue,
                 convictionLevel: this.getConvictionLevel(totalValue),
                 convictionScore: this.calculateConvictionScore(totalValue, threshold),
-                
-                // Métrique: transaction value vs wealth (si disponible)
-                // Pour l'instant, on se base uniquement sur la valeur absolue
                 isHighConviction: totalValue > threshold
             };
         }).filter(s => s.transactionValue > 0);
 
         return {
             scores: scores.sort((a, b) => b.convictionScore - a.convictionScore),
-            
-            // Statistiques
             averageConviction: scores.length > 0 
                 ? scores.reduce((sum, s) => sum + s.convictionScore, 0) / scores.length 
                 : 0,
-            
             highConvictionCount: scores.filter(s => s.isHighConviction).length,
             highConvictionValue: scores
                 .filter(s => s.isHighConviction)
@@ -471,7 +420,6 @@ class InsiderAnalyticsEngine {
 
     /**
      * 🚨 CEO/CFO DIVERGENCE DETECTION
-     * Red flag quand CEO vend et CFO achète (ou inverse)
      */
     detectCEOCFODivergence(transactions) {
         const ceoTransactions = transactions.filter(t => 
@@ -488,11 +436,9 @@ class InsiderAnalyticsEngine {
             };
         }
 
-        // Calcule le sentiment net pour chaque rôle
         const ceoSentiment = this.calculateRoleSentiment(ceoTransactions);
         const cfoSentiment = this.calculateRoleSentiment(cfoTransactions);
 
-        // Divergence = signes opposés
         const isDivergent = (ceoSentiment > 0 && cfoSentiment < 0) || 
                            (ceoSentiment < 0 && cfoSentiment > 0);
 
@@ -505,64 +451,48 @@ class InsiderAnalyticsEngine {
             };
         }
 
-        // Calcule la sévérité de la divergence
         const divergenceScore = Math.abs(ceoSentiment - cfoSentiment);
 
         return {
             detected: true,
-            
             ceo: {
                 sentiment: ceoSentiment,
                 direction: ceoSentiment > 0 ? 'BUYING' : 'SELLING',
                 transactionCount: ceoTransactions.length
             },
-            
             cfo: {
                 sentiment: cfoSentiment,
                 direction: cfoSentiment > 0 ? 'BUYING' : 'SELLING',
                 transactionCount: cfoTransactions.length
             },
-            
             divergenceScore,
             severity: this.getDivergenceSeverity(divergenceScore),
-            
-            // Signal (CEO selling + CFO buying = potentiel red flag)
             redFlag: ceoSentiment < 0 && cfoSentiment > 0,
-            
             interpretation: this.interpretDivergence(ceoSentiment, cfoSentiment)
         };
     }
 
     /**
      * 📈 PRICE IMPACT ANALYSIS
-     * Analyse l'impact historique des insider trades sur le cours
      */
     async analyzePriceImpact(ticker, transactions) {
-        // Note: Nécessite une API de prix historiques (Alpha Vantage, Yahoo Finance, etc.)
-        // Pour l'instant, retourne une structure vide
-        
         console.log(`📈 Price impact analysis for ${ticker} (placeholder)`);
         
         return {
             available: false,
             message: 'Price data integration required',
-            
-            // Structure pour future implémentation
             correlations: [],
             averageImpact: {
                 after1Day: null,
                 after5Days: null,
                 after30Days: null
             },
-            
-            // Accuracy du signal insider
             historicalAccuracy: null
         };
     }
 
     /**
      * 🕸 NETWORK ANALYSIS
-     * Construit le graphe des relations entre insiders
      */
     buildInsiderNetwork(transactions) {
         const network = {
@@ -571,7 +501,6 @@ class InsiderAnalyticsEngine {
             communities: []
         };
 
-        // Construit les nœuds (insiders)
         const insiderMap = new Map();
         transactions.forEach(t => {
             const name = t.reportingOwner?.name;
@@ -602,8 +531,6 @@ class InsiderAnalyticsEngine {
 
         network.nodes = Array.from(insiderMap.values());
 
-        // Détecte les "board interlocks" (insiders qui agissent ensemble)
-        // Simplifié: considère comme connectés les insiders qui transactent dans la même période
         const windowDays = 7;
         const connections = new Map();
 
@@ -628,7 +555,6 @@ class InsiderAnalyticsEngine {
             }
         }
 
-        // Convertit les connexions en edges
         connections.forEach((weight, edgeKey) => {
             const [source, target] = edgeKey.split('_');
             network.edges.push({
@@ -639,17 +565,13 @@ class InsiderAnalyticsEngine {
             });
         });
 
-        // Détecte les communautés (groupes d'insiders fortement connectés)
         network.communities = this.detectCommunities(network.nodes, network.edges);
 
         return {
             nodeCount: network.nodes.length,
             edgeCount: network.edges.length,
             communityCount: network.communities.length,
-            
             network,
-            
-            // Métriques du réseau
             density: this.calculateNetworkDensity(network.nodes.length, network.edges.length),
             centralInsiders: this.findCentralInsiders(network.nodes, network.edges)
         };
@@ -657,7 +579,6 @@ class InsiderAnalyticsEngine {
 
     /**
      * 🎯 OVERALL SCORE CALCULATION
-     * Combine tous les signaux pour un score global
      */
     calculateOverallScore(analyses) {
         const {
@@ -669,29 +590,23 @@ class InsiderAnalyticsEngine {
             divergenceAnalysis
         } = analyses;
 
-        let score = 50; // Base neutre
+        let score = 50;
 
-        // 1. Sentiment insider (+/- 20 points)
         score += (insiderSentiment.score / 100) * 20;
 
-        // 2. Cluster buying (+15 points si détecté)
         if (clusterActivity.detected) {
             score += 15 * (clusterActivity.overallSignal === 'BULLISH' ? 1 : -1);
         }
 
-        // 3. Role-based score (+/- 15 points)
         score += (roleAnalysis.weightedScore / 100) * 15;
 
-        // 4. Conviction (+10 points)
         const avgConviction = convictionScores.averageConviction;
         score += (avgConviction / 100) * 10;
 
-        // 5. Timing patterns (-10 points si suspect)
         if (timingPatterns.hasSignificantTiming && timingPatterns.riskLevel === 'HIGH') {
             score -= 10;
         }
 
-        // 6. CEO/CFO divergence (-15 points si red flag)
         if (divergenceAnalysis.detected && divergenceAnalysis.redFlag) {
             score -= 15;
         }
@@ -716,14 +631,13 @@ class InsiderAnalyticsEngine {
     generateSmartAlerts(data) {
         const alerts = [];
 
-        // Alert 1: Cluster buying détecté
         if (data.clusterActivity.detected && data.clusterActivity.clusters.length > 0) {
             const topCluster = data.clusterActivity.clusters[0];
             alerts.push({
                 type: 'CLUSTER_BUYING',
                 severity: topCluster.severity,
-                title: `${topCluster.insiderCount} insiders achètent simultanément`,
-                description: `Valeur totale: $${this.formatNumber(topCluster.totalValue)}`,
+                title: `${topCluster.insiderCount} insiders buying simultaneously`,
+                description: `Total value: $${this.formatNumber(topCluster.totalValue)}`,
                 confidence: topCluster.confidence,
                 signal: 'BULLISH',
                 data: topCluster,
@@ -731,12 +645,11 @@ class InsiderAnalyticsEngine {
             });
         }
 
-        // Alert 2: CEO/CFO divergence
         if (data.divergenceAnalysis.detected && data.divergenceAnalysis.redFlag) {
             alerts.push({
                 type: 'CEO_CFO_DIVERGENCE',
                 severity: 'HIGH',
-                title: '⚠ Divergence CEO/CFO détectée',
+                title: '⚠ CEO/CFO Divergence Detected',
                 description: `CEO: ${data.divergenceAnalysis.ceo.direction}, CFO: ${data.divergenceAnalysis.cfo.direction}`,
                 confidence: 85,
                 signal: 'WARNING',
@@ -745,14 +658,13 @@ class InsiderAnalyticsEngine {
             });
         }
 
-        // Alert 3: Activité pré-earnings suspecte
         if (data.timingPatterns.hasSignificantTiming && 
             data.timingPatterns.preEarningsActivity.count > 0) {
             alerts.push({
                 type: 'PRE_EARNINGS_ACTIVITY',
                 severity: data.timingPatterns.riskLevel,
-                title: 'Activité insider avant earnings',
-                description: `${data.timingPatterns.preEarningsActivity.count} transactions suspectes`,
+                title: 'Pre-Earnings Insider Activity',
+                description: `${data.timingPatterns.preEarningsActivity.count} suspicious transactions`,
                 confidence: 70,
                 signal: data.timingPatterns.preEarningsActivity.signal,
                 data: data.timingPatterns.preEarningsActivity,
@@ -760,7 +672,6 @@ class InsiderAnalyticsEngine {
             });
         }
 
-        // Alert 4: C-level achète massivement
         const ceoData = data.roleAnalysis.byRole.CEO;
         const cfoData = data.roleAnalysis.byRole.CFO;
         
@@ -768,8 +679,8 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'CEO_MAJOR_PURCHASE',
                 severity: 'HIGH',
-                title: 'CEO achète massivement',
-                description: `Valeur: $${this.formatNumber(ceoData.purchaseValue)}`,
+                title: 'CEO Major Purchase',
+                description: `Value: $${this.formatNumber(ceoData.purchaseValue)}`,
                 confidence: 90,
                 signal: 'BULLISH',
                 data: ceoData,
@@ -781,8 +692,8 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'CFO_MAJOR_SALE',
                 severity: 'MEDIUM',
-                title: 'CFO vend massivement',
-                description: `Valeur: $${this.formatNumber(cfoData.saleValue)}`,
+                title: 'CFO Major Sale',
+                description: `Value: $${this.formatNumber(cfoData.saleValue)}`,
                 confidence: 75,
                 signal: 'BEARISH',
                 data: cfoData,
@@ -790,12 +701,11 @@ class InsiderAnalyticsEngine {
             });
         }
 
-        // Alert 5: Score global extrême
         if (data.overallScore.score >= 80) {
             alerts.push({
                 type: 'STRONG_BUY_SIGNAL',
                 severity: 'HIGH',
-                title: '🚀 Signal d\'achat fort des insiders',
+                title: '🚀 Strong Buy Signal from Insiders',
                 description: `Score: ${data.overallScore.score}/100`,
                 confidence: 95,
                 signal: 'STRONG_BUY',
@@ -806,7 +716,7 @@ class InsiderAnalyticsEngine {
             alerts.push({
                 type: 'STRONG_SELL_SIGNAL',
                 severity: 'HIGH',
-                title: '⚠ Signal de vente fort des insiders',
+                title: '⚠ Strong Sell Signal from Insiders',
                 description: `Score: ${data.overallScore.score}/100`,
                 confidence: 90,
                 signal: 'STRONG_SELL',
@@ -832,32 +742,31 @@ class InsiderAnalyticsEngine {
         if (score >= 75) {
             action = 'STRONG BUY';
             confidence = 'HIGH';
-            rationale.push('Forte activité d\'achat des insiders');
+            rationale.push('Strong insider buying activity');
         } else if (score >= 60) {
             action = 'BUY';
             confidence = 'MEDIUM';
-            rationale.push('Sentiment insider positif');
+            rationale.push('Positive insider sentiment');
         } else if (score >= 40) {
             action = 'HOLD';
             confidence = 'LOW';
-            rationale.push('Activité insider mixte');
+            rationale.push('Mixed insider activity');
         } else if (score >= 25) {
             action = 'SELL';
             confidence = 'MEDIUM';
-            rationale.push('Sentiment insider négatif');
+            rationale.push('Negative insider sentiment');
         } else {
             action = 'STRONG SELL';
             confidence = 'HIGH';
-            rationale.push('Forte activité de vente des insiders');
+            rationale.push('Heavy insider selling');
         }
 
-        // Ajoute les rationales des alertes majeures
         alerts.filter(a => a.severity === 'HIGH').forEach(alert => {
             if (alert.type === 'CLUSTER_BUYING') {
-                rationale.push('Cluster buying détecté');
+                rationale.push('Cluster buying detected');
             }
             if (alert.type === 'CEO_CFO_DIVERGENCE') {
-                rationale.push('⚠ Divergence CEO/CFO (red flag)');
+                rationale.push('⚠ CEO/CFO divergence (red flag)');
             }
         });
 
@@ -865,18 +774,18 @@ class InsiderAnalyticsEngine {
             action,
             confidence,
             score: overallScore.score,
-            rationale: rationale.slice(0, 5), // Max 5 raisons
+            rationale: rationale.slice(0, 5),
             timestamp: new Date().toISOString()
         };
     }
 
-    /**
-     * 🔧 HELPER METHODS
-     */
+    // ═══════════════════════════════════════════════════════════════
+    // 🔧 HELPER METHODS
+    // ═══════════════════════════════════════════════════════════════
 
     calculateClusterConfidence(insiderCount, totalValue) {
         let confidence = 50;
-        confidence += Math.min(insiderCount * 10, 30); // +30 max pour nombre d'insiders
+        confidence += Math.min(insiderCount * 10, 30);
         confidence += totalValue > 5000000 ? 20 : totalValue > 1000000 ? 10 : 0;
         return Math.min(100, confidence);
     }
@@ -933,7 +842,6 @@ class InsiderAnalyticsEngine {
     }
 
     calculateSentimentTrend(transactions) {
-        // Simplifié: compare première moitié vs deuxième moitié
         if (!transactions || transactions.length < 4) {
             return 'INSUFFICIENT_DATA';
         }
@@ -942,7 +850,6 @@ class InsiderAnalyticsEngine {
         const firstHalf = transactions.slice(0, mid);
         const secondHalf = transactions.slice(mid);
 
-        // ✅ CORRECTION : Calcul direct sans appeler calculateInsiderSentiment
         const calculateSimpleSentiment = (txns) => {
             let purchaseValue = 0;
             let saleValue = 0;
@@ -1058,21 +965,13 @@ class InsiderAnalyticsEngine {
         return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
     }
 
-    getDayOfYear(date) {
-        const start = new Date(date.getFullYear(), 0, 0);
-        const diff = date - start;
-        const oneDay = 1000 * 60 * 60 * 24;
-        return Math.floor(diff / oneDay);
-    }
-
     isNearQuarterEnd(date) {
         const month = date.getMonth() + 1;
         const day = date.getDate();
         
-        // Derniers 14 jours avant fin de quarter (Mars, Juin, Sept, Déc)
         const quarterEndMonths = [3, 6, 9, 12];
         if (quarterEndMonths.includes(month)) {
-            return day >= 17; // 14 derniers jours du mois
+            return day >= 17;
         }
         
         return false;
@@ -1080,8 +979,6 @@ class InsiderAnalyticsEngine {
 
     daysUntilQuarterEnd(date) {
         const month = date.getMonth() + 1;
-        const day = date.getDate();
-        
         const quarterEndMonths = [3, 6, 9, 12];
         const nextQuarter = quarterEndMonths.find(m => m >= month) || 12;
         
@@ -1090,7 +987,7 @@ class InsiderAnalyticsEngine {
     }
 
     calculateSuspicionLevel(netValue, role) {
-        const threshold = this.thresholds.significantTransaction[role.toLowerCase() + 'MinValue'] || 100000;
+        const threshold = this.thresholds.significantTransaction[role?.toLowerCase() + 'MinValue'] || 100000;
         
         if (Math.abs(netValue) > threshold * 5) return 'VERY_HIGH';
         if (Math.abs(netValue) > threshold * 2) return 'HIGH';
@@ -1102,7 +999,6 @@ class InsiderAnalyticsEngine {
         const totalValue = (txn.nonDerivativeTransactions || [])
             .reduce((sum, nt) => sum + nt.totalValue, 0);
 
-        // Calcule la moyenne et l'écart-type
         const values = allTransactions.map(t => 
             (t.nonDerivativeTransactions || []).reduce((sum, nt) => sum + nt.totalValue, 0)
         );
@@ -1111,7 +1007,6 @@ class InsiderAnalyticsEngine {
         const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
         const stdDev = Math.sqrt(variance);
 
-        // Transaction inhabituelle si > 2 écarts-types
         const zScore = (totalValue - mean) / stdDev;
         
         if (Math.abs(zScore) > 2) {
@@ -1147,7 +1042,7 @@ class InsiderAnalyticsEngine {
     }
 
     getConvictionThreshold(role) {
-        return this.thresholds.significantTransaction[role.toLowerCase() + 'MinValue'] || 100000;
+        return this.thresholds.significantTransaction[role?.toLowerCase() + 'MinValue'] || 100000;
     }
 
     getConvictionLevel(value) {
@@ -1161,7 +1056,7 @@ class InsiderAnalyticsEngine {
 
     calculateConvictionScore(value, threshold) {
         const ratio = value / threshold;
-        return Math.min(100, Math.round(ratio * 20)); // Max 100
+        return Math.min(100, Math.round(ratio * 20));
     }
 
     calculateRoleSentiment(transactions) {
@@ -1178,12 +1073,12 @@ class InsiderAnalyticsEngine {
 
     interpretDivergence(ceoSentiment, cfoSentiment) {
         if (ceoSentiment < 0 && cfoSentiment > 0) {
-            return '⚠ RED FLAG: CEO vend alors que CFO achète. Possible désaccord stratégique ou diversification personnelle du CEO.';
+            return '⚠ RED FLAG: CEO selling while CFO buying. Possible strategic disagreement or CEO diversification.';
         }
         if (ceoSentiment > 0 && cfoSentiment < 0) {
-            return '⚠ ATTENTION: CEO achète mais CFO vend. CFO peut avoir besoin de liquidités ou doute de la valorisation.';
+            return '⚠ CAUTION: CEO buying but CFO selling. CFO may need liquidity or doubt valuation.';
         }
-        return 'Alignment normal entre CEO et CFO.';
+        return 'Normal alignment between CEO and CFO.';
     }
 
     calculateNetworkDensity(nodeCount, edgeCount) {
@@ -1193,7 +1088,6 @@ class InsiderAnalyticsEngine {
     }
 
     findCentralInsiders(nodes, edges) {
-        // Calcule le degré de centralité (nombre de connexions)
         const degrees = new Map();
         nodes.forEach(n => degrees.set(n.id, 0));
         
@@ -1209,8 +1103,6 @@ class InsiderAnalyticsEngine {
     }
 
     detectCommunities(nodes, edges) {
-        // Algorithme simplifié de détection de communautés
-        // Pour une vraie implémentation, utiliser Louvain ou autre algorithme avancé
         return [{
             id: 1,
             members: nodes.map(n => n.id),
@@ -1219,11 +1111,11 @@ class InsiderAnalyticsEngine {
     }
 
     getScoreLabel(score) {
-        if (score >= 80) return 'TRÈS POSITIF';
-        if (score >= 60) return 'POSITIF';
-        if (score >= 40) return 'NEUTRE';
-        if (score >= 20) return 'NÉGATIF';
-        return 'TRÈS NÉGATIF';
+        if (score >= 80) return 'VERY POSITIVE';
+        if (score >= 60) return 'POSITIVE';
+        if (score >= 40) return 'NEUTRAL';
+        if (score >= 20) return 'NEGATIVE';
+        return 'VERY NEGATIVE';
     }
 
     assessDataQuality(transactions) {
@@ -1247,563 +1139,8 @@ class InsiderAnalyticsEngine {
 // Export global
 window.InsiderAnalyticsEngine = InsiderAnalyticsEngine;
 
-/**
- * ═══════════════════════════════════════════════════════════════════
- * 🆕 NOUVELLES FONCTIONNALITÉS - INSIDER FLOW TRACKER PREMIUM
- * ═══════════════════════════════════════════════════════════════════
- */
-
-/**
- * 📊 COMPARAISON AVEC ANALYST UPGRADES/DOWNGRADES
- */
-async compareWithAnalystActivity(ticker, insiderData) {
-    try {
-        console.log(`📊 Comparing insider activity with analyst ratings for ${ticker}...`);
-        
-        // Note: Nécessite une API d'analyst ratings (Finnhub, Alpha Vantage, etc.)
-        // Pour l'instant, structure de démonstration
-        
-        const analystData = await this.fetchAnalystRatings(ticker);
-        
-        // Calcule la corrélation entre insider activity et analyst changes
-        const correlation = this.calculateInsiderAnalystCorrelation(
-            insiderData.transactions,
-            analystData.changes
-        );
-        
-        // Détecte les divergences (insiders achètent mais analysts downgradent)
-        const divergences = this.detectInsiderAnalystDivergence(
-            insiderData.insiderSentiment,
-            analystData.consensus
-        );
-        
-        return {
-            analystConsensus: analystData.consensus,
-            recentChanges: analystData.changes,
-            
-            correlation: {
-                score: correlation.score,
-                strength: correlation.strength,
-                interpretation: correlation.interpretation
-            },
-            
-            divergence: {
-                detected: divergences.detected,
-                severity: divergences.severity,
-                description: divergences.description,
-                signal: divergences.signal
-            },
-            
-            // Combinaison des signaux
-            combinedSignal: this.combineInsiderAnalystSignals(
-                insiderData.overallScore.score,
-                analystData.consensus.score
-            ),
-            
-            // Insights
-            insights: this.generateInsiderAnalystInsights(
-                insiderData,
-                analystData,
-                divergences
-            )
-        };
-        
-    } catch (error) {
-        console.error('❌ Error comparing with analyst activity:', error);
-        return {
-            available: false,
-            message: 'Analyst data not available',
-            fallback: this.generateFallbackAnalystComparison(insiderData)
-        };
-    }
-}
-
-/**
- * 🎯 FETCH ANALYST RATINGS (avec fallback si API non disponible)
- */
-async fetchAnalystRatings(ticker) {
-    // Structure de retour simulée (à remplacer par vraie API)
-    return {
-        consensus: {
-            rating: 'BUY', // STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL
-            score: 75, // 0-100
-            buyCount: 12,
-            holdCount: 5,
-            sellCount: 2,
-            targetPrice: 150.50,
-            currentPrice: 142.30
-        },
-        changes: [
-            {
-                date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                firm: 'Goldman Sachs',
-                action: 'UPGRADE',
-                from: 'HOLD',
-                to: 'BUY',
-                targetPrice: 160
-            },
-            {
-                date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-                firm: 'Morgan Stanley',
-                action: 'MAINTAIN',
-                rating: 'BUY',
-                targetPrice: 155
-            }
-        ]
-    };
-}
-
-/**
- * 🔗 CALCUL CORRÉLATION INSIDER/ANALYST
- */
-calculateInsiderAnalystCorrelation(insiderTransactions, analystChanges) {
-    // Simplifié: compare les tendances sur même période
-    const insiderBullishDays = this.getInsiderBullishDays(insiderTransactions);
-    const analystBullishDays = this.getAnalystBullishDays(analystChanges);
-    
-    const commonDays = insiderBullishDays.filter(day => 
-        analystBullishDays.some(aDay => 
-            Math.abs(day - aDay) <= 7 // 7 jours de fenêtre
-        )
-    );
-    
-    const correlationScore = commonDays.length / Math.max(insiderBullishDays.length, analystBullishDays.length);
-    
-    return {
-        score: Math.round(correlationScore * 100),
-        strength: correlationScore > 0.7 ? 'STRONG' : correlationScore > 0.4 ? 'MODERATE' : 'WEAK',
-        interpretation: correlationScore > 0.7 
-            ? 'Forte corrélation - Insiders et analysts alignés' 
-            : correlationScore > 0.4
-            ? 'Corrélation modérée - Signaux partiellement alignés'
-            : 'Faible corrélation - Divergence possible'
-    };
-}
-
-/**
- * 🚨 DÉTECTION DIVERGENCE INSIDER/ANALYST
- */
-detectInsiderAnalystDivergence(insiderSentiment, analystConsensus) {
-    const insiderScore = insiderSentiment.score; // -100 à +100
-    const analystScore = (analystConsensus.score - 50) * 2; // Normalise à -100/+100
-    
-    const divergence = Math.abs(insiderScore - analystScore);
-    const isOpposite = (insiderScore > 0 && analystScore < 0) || 
-                       (insiderScore < 0 && analystScore > 0);
-    
-    if (isOpposite && divergence > 100) {
-        return {
-            detected: true,
-            severity: 'CRITICAL',
-            description: `⚠ DIVERGENCE CRITIQUE: Insiders ${insiderScore > 0 ? 'achètent' : 'vendent'} mais analysts ${analystScore > 0 ? 'upgradent' : 'downgradent'}`,
-            signal: 'CONTRARIAN_OPPORTUNITY',
-            confidence: 85
-        };
-    }
-    
-    if (divergence > 80) {
-        return {
-            detected: true,
-            severity: 'HIGH',
-            description: `Divergence significative entre insiders (${insiderSentiment.label}) et analysts (${analystConsensus.rating})`,
-            signal: 'WATCH',
-            confidence: 70
-        };
-    }
-    
-    return {
-        detected: false,
-        severity: 'NONE',
-        description: 'Insiders et analysts alignés',
-        signal: 'ALIGNED',
-        confidence: 90
-    };
-}
-
-/**
- * 🎨 COMBINAISON SIGNAUX INSIDER + ANALYST
- */
-combineInsiderAnalystSignals(insiderScore, analystScore) {
-    const combined = (insiderScore * 0.6 + analystScore * 0.4); // Pond: 60% insider, 40% analyst
-    
-    return {
-        score: Math.round(combined),
-        rating: this.getScoreLabel(combined),
-        
-        components: {
-            insiderContribution: insiderScore * 0.6,
-            analystContribution: analystScore * 0.4
-        },
-        
-        agreement: Math.abs(insiderScore - analystScore) < 20 ? 'HIGH' : 
-                   Math.abs(insiderScore - analystScore) < 50 ? 'MODERATE' : 'LOW',
-        
-        recommendation: this.getCombinedRecommendation(combined, insiderScore, analystScore)
-    };
-}
-
-/**
- * 💡 INSIGHTS INSIDER/ANALYST
- */
-generateInsiderAnalystInsights(insiderData, analystData, divergence) {
-    const insights = [];
-    
-    // Insight 1: Alignment fort
-    if (!divergence.detected) {
-        insights.push({
-            type: 'ALIGNMENT',
-            icon: '✅',
-            title: 'Forte convergence Insiders/Analysts',
-            description: 'Les deux sources de signal sont alignées, augmente la confiance',
-            impact: 'POSITIVE',
-            confidence: 90
-        });
-    }
-    
-    // Insight 2: Divergence = opportunité contrarian
-    if (divergence.detected && divergence.severity === 'CRITICAL') {
-        insights.push({
-            type: 'CONTRARIAN',
-            icon: '🎯',
-            title: 'Opportunité contrarian détectée',
-            description: divergence.description,
-            impact: 'OPPORTUNITY',
-            confidence: divergence.confidence
-        });
-    }
-    
-    // Insight 3: Insiders en avance sur analysts
-    if (insiderData.overallScore.score > 70 && analystData.consensus.score < 60) {
-        insights.push({
-            type: 'LEADING_INDICATOR',
-            icon: '⚡',
-            title: 'Insiders possiblement en avance',
-            description: 'Forte activité d\'achat insider avant upgrades analysts',
-            impact: 'BULLISH',
-            confidence: 75
-        });
-    }
-    
-    return insights;
-}
-
-/**
- * 📈 BACKTESTING & HISTORICAL PRICE IMPACT (Version améliorée)
- */
-async analyzeHistoricalPriceImpact(ticker, transactions) {
-    try {
-        console.log(`📈 Analyzing historical price impact for ${ticker}...`);
-        
-        // Récupère les données de prix (à connecter à une vraie API)
-        const priceData = await this.fetchHistoricalPrices(ticker, 365);
-        
-        if (!priceData || priceData.length === 0) {
-            throw new Error('Price data not available');
-        }
-        
-        const impacts = [];
-        
-        // Pour chaque transaction, calcule l'impact sur le prix
-        transactions.forEach(txn => {
-            const txnDate = new Date(txn.filingDate);
-            const txnValue = (txn.nonDerivativeTransactions || [])
-                .reduce((sum, nt) => sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue), 0);
-            
-            // Trouve le prix à la date de transaction
-            const priceAtTxn = this.findPriceAtDate(priceData, txnDate);
-            
-            if (!priceAtTxn) return;
-            
-            // Calcule les variations de prix après transaction
-            const impact1Day = this.calculatePriceChange(priceData, txnDate, 1);
-            const impact5Days = this.calculatePriceChange(priceData, txnDate, 5);
-            const impact30Days = this.calculatePriceChange(priceData, txnDate, 30);
-            
-            impacts.push({
-                date: txnDate,
-                insider: txn.reportingOwner?.name,
-                role: txn.reportingOwner?.classification,
-                transactionValue: txnValue,
-                transactionType: txnValue > 0 ? 'PURCHASE' : 'SALE',
-                
-                priceAtTransaction: priceAtTxn.close,
-                
-                impact: {
-                    day1: impact1Day,
-                    day5: impact5Days,
-                    day30: impact30Days
-                },
-                
-                // Accuracy du signal
-                correct1Day: (txnValue > 0 && impact1Day > 0) || (txnValue < 0 && impact1Day < 0),
-                correct5Days: (txnValue > 0 && impact5Days > 0) || (txnValue < 0 && impact5Days < 0),
-                correct30Days: (txnValue > 0 && impact30Days > 0) || (txnValue < 0 && impact30Days < 0)
-            });
-        });
-        
-        // Calcule les statistiques globales
-        const avgImpact1Day = impacts.reduce((sum, i) => sum + i.impact.day1, 0) / impacts.length;
-        const avgImpact5Days = impacts.reduce((sum, i) => sum + i.impact.day5, 0) / impacts.length;
-        const avgImpact30Days = impacts.reduce((sum, i) => sum + i.impact.day30, 0) / impacts.length;
-        
-        const accuracy1Day = impacts.filter(i => i.correct1Day).length / impacts.length;
-        const accuracy5Days = impacts.filter(i => i.correct5Days).length / impacts.length;
-        const accuracy30Days = impacts.filter(i => i.correct30Days).length / impacts.length;
-        
-        return {
-            available: true,
-            sampleSize: impacts.length,
-            
-            averageImpact: {
-                after1Day: avgImpact1Day,
-                after5Days: avgImpact5Days,
-                after30Days: avgImpact30Days
-            },
-            
-            accuracy: {
-                after1Day: Math.round(accuracy1Day * 100),
-                after5Days: Math.round(accuracy5Days * 100),
-                after30Days: Math.round(accuracy30Days * 100)
-            },
-            
-            // Breakdown par type de transaction
-            purchaseImpact: this.calculateImpactByType(impacts.filter(i => i.transactionType === 'PURCHASE')),
-            saleImpact: this.calculateImpactByType(impacts.filter(i => i.transactionType === 'SALE')),
-            
-            // Breakdown par rôle
-            byRole: this.calculateImpactByRole(impacts),
-            
-            // Toutes les transactions avec impact
-            detailedImpacts: impacts.sort((a, b) => Math.abs(b.transactionValue) - Math.abs(a.transactionValue)),
-            
-            // Insight global
-            interpretation: this.interpretPriceImpact(accuracy30Days, avgImpact30Days)
-        };
-        
-    } catch (error) {
-        console.error('❌ Error analyzing price impact:', error);
-        return {
-            available: false,
-            message: 'Price data integration required for backtesting',
-            placeholder: true
-        };
-    }
-}
-
-/**
- * 💰 CONVICTION SCORE AMÉLIORÉ (avec ratio vs patrimoine estimé)
- */
-calculateEnhancedConvictionScores(transactions) {
-    const scores = transactions.map(t => {
-        const totalValue = (t.nonDerivativeTransactions || [])
-            .reduce((sum, nt) => sum + nt.totalValue, 0);
-
-        const role = t.reportingOwner?.classification;
-        
-        // Estime le patrimoine de l'insider basé sur son rôle et ses holdings
-        const estimatedWealth = this.estimateInsiderWealth(t.reportingOwner, t.ownershipData);
-        
-        // Calcul du ratio transaction / patrimoine
-        const wealthRatio = estimatedWealth > 0 ? (totalValue / estimatedWealth) * 100 : 0;
-        
-        // Score de conviction basé sur le ratio
-        let convictionScore = 0;
-        if (wealthRatio > 20) convictionScore = 100; // Très haute conviction
-        else if (wealthRatio > 10) convictionScore = 80;
-        else if (wealthRatio > 5) convictionScore = 60;
-        else if (wealthRatio > 2) convictionScore = 40;
-        else if (wealthRatio > 1) convictionScore = 20;
-        else convictionScore = 10;
-        
-        return {
-            insider: t.reportingOwner?.name,
-            role,
-            transactionValue: totalValue,
-            estimatedWealth,
-            wealthRatio: Math.round(wealthRatio * 100) / 100,
-            
-            convictionLevel: this.getEnhancedConvictionLevel(wealthRatio),
-            convictionScore,
-            
-            // Interprétation
-            interpretation: this.interpretConviction(wealthRatio, totalValue),
-            
-            // Signal
-            isHighConviction: wealthRatio > 5,
-            isExtremeConviction: wealthRatio > 15
-        };
-    }).filter(s => s.transactionValue > 0);
-
-    return {
-        scores: scores.sort((a, b) => b.convictionScore - a.convictionScore),
-        
-        // Statistiques
-        averageWealthRatio: scores.length > 0 
-            ? scores.reduce((sum, s) => sum + s.wealthRatio, 0) / scores.length 
-            : 0,
-        
-        highConvictionCount: scores.filter(s => s.isHighConviction).length,
-        extremeConvictionCount: scores.filter(s => s.isExtremeConviction).length,
-        
-        // Top conviction trades
-        topConvictionTrades: scores.slice(0, 5),
-        
-        // Insight global
-        overallConvictionLevel: this.getOverallConvictionLevel(scores)
-    };
-}
-
-/**
- * 💵 ESTIMATION DU PATRIMOINE INSIDER
- */
-estimateInsiderWealth(reportingOwner, ownershipData) {
-    // Méthode 1: Basé sur les shares détenus
-    const sharesOwned = ownershipData?.sharesOwnedFollowingTransaction || 0;
-    const estimatedSharePrice = 100; // À récupérer de l'API
-    const equityValue = sharesOwned * estimatedSharePrice;
-    
-    // Méthode 2: Estimation basée sur le rôle
-    const roleMultipliers = {
-        'CEO': 50000000, // CEO moyen a ~$50M de patrimoine
-        'CFO': 20000000,
-        'CTO': 15000000,
-        'COO': 15000000,
-        'President': 30000000,
-        'Director': 5000000,
-        '10% Owner': 100000000,
-        'Officer': 2000000
-    };
-    
-    const roleEstimate = roleMultipliers[reportingOwner?.classification] || 1000000;
-    
-    // Combine les deux estimations (priorité aux shares si disponibles)
-    return equityValue > 0 ? equityValue : roleEstimate;
-}
-
-/**
- * 🎯 INTERPRÉTATION CONVICTION
- */
-interpretConviction(wealthRatio, transactionValue) {
-    if (wealthRatio > 20) {
-        return `🔥 CONVICTION EXTRÊME: L'insider mise ${wealthRatio.toFixed(1)}% de son patrimoine estimé`;
-    }
-    if (wealthRatio > 10) {
-        return `💪 TRÈS HAUTE CONVICTION: Transaction représente ${wealthRatio.toFixed(1)}% du patrimoine`;
-    }
-    if (wealthRatio > 5) {
-        return `✅ HAUTE CONVICTION: ${wealthRatio.toFixed(1)}% du patrimoine engagé`;
-    }
-    if (wealthRatio > 2) {
-        return `📊 CONVICTION MODÉRÉE: ${wealthRatio.toFixed(1)}% du patrimoine`;
-    }
-    return `ℹ FAIBLE CONVICTION: Transaction mineure (${wealthRatio.toFixed(1)}%)`;
-}
-
-// ===== MÉTHODES HELPER =====
-
-getInsiderBullishDays(transactions) {
-    return transactions
-        .filter(t => (t.nonDerivativeTransactions || [])
-            .some(nt => nt.transactionType === 'Purchase'))
-        .map(t => new Date(t.filingDate).getTime());
-}
-
-getAnalystBullishDays(changes) {
-    return changes
-        .filter(c => c.action === 'UPGRADE' || (c.action === 'MAINTAIN' && c.rating.includes('BUY')))
-        .map(c => c.date.getTime());
-}
-
-getCombinedRecommendation(combinedScore, insiderScore, analystScore) {
-    if (combinedScore >= 75) return 'STRONG BUY';
-    if (combinedScore >= 60) return 'BUY';
-    if (combinedScore >= 40) return 'HOLD';
-    if (combinedScore >= 25) return 'SELL';
-    return 'STRONG SELL';
-}
-
-generateFallbackAnalystComparison(insiderData) {
-    return {
-        message: 'Analyst data not available - using insider signals only',
-        recommendation: insiderData.recommendation
-    };
-}
-
-async fetchHistoricalPrices(ticker, days) {
-    // Placeholder - À connecter à une vraie API (Alpha Vantage, Yahoo Finance, etc.)
-    console.log(`Fetching ${days} days of price data for ${ticker}...`);
-    return null;
-}
-
-findPriceAtDate(priceData, date) {
-    return priceData.find(p => 
-        Math.abs(new Date(p.date) - date) < 24 * 60 * 60 * 1000
-    );
-}
-
-calculatePriceChange(priceData, startDate, days) {
-    const startPrice = this.findPriceAtDate(priceData, startDate);
-    const endDate = new Date(startDate.getTime() + days * 24 * 60 * 60 * 1000);
-    const endPrice = this.findPriceAtDate(priceData, endDate);
-    
-    if (!startPrice || !endPrice) return 0;
-    
-    return ((endPrice.close - startPrice.close) / startPrice.close) * 100;
-}
-
-calculateImpactByType(impacts) {
-    if (impacts.length === 0) return null;
-    
-    return {
-        count: impacts.length,
-        avgImpact1Day: impacts.reduce((sum, i) => sum + i.impact.day1, 0) / impacts.length,
-        avgImpact5Days: impacts.reduce((sum, i) => sum + i.impact.day5, 0) / impacts.length,
-        avgImpact30Days: impacts.reduce((sum, i) => sum + i.impact.day30, 0) / impacts.length,
-        accuracy30Days: impacts.filter(i => i.correct30Days).length / impacts.length
-    };
-}
-
-calculateImpactByRole(impacts) {
-    const byRole = {};
-    impacts.forEach(i => {
-        if (!byRole[i.role]) byRole[i.role] = [];
-        byRole[i.role].push(i);
-    });
-    
-    const result = {};
-    Object.keys(byRole).forEach(role => {
-        result[role] = this.calculateImpactByType(byRole[role]);
-    });
-    
-    return result;
-}
-
-interpretPriceImpact(accuracy, avgImpact) {
-    if (accuracy > 0.7 && avgImpact > 3) {
-        return '🚀 Insider trades sont un excellent leading indicator (+70% accuracy)';
-    }
-    if (accuracy > 0.6) {
-        return '✅ Insider trades ont une bonne valeur prédictive';
-    }
-    if (accuracy > 0.5) {
-        return '📊 Insider trades ont une valeur prédictive modérée';
-    }
-    return '⚠ Insider trades ont une faible corrélation avec le prix';
-}
-
-getEnhancedConvictionLevel(wealthRatio) {
-    if (wealthRatio > 20) return 'EXTREME';
-    if (wealthRatio > 10) return 'VERY_HIGH';
-    if (wealthRatio > 5) return 'HIGH';
-    if (wealthRatio > 2) return 'MEDIUM';
-    if (wealthRatio > 1) return 'LOW';
-    return 'VERY_LOW';
-}
-
-getOverallConvictionLevel(scores) {
-    const avgWealthRatio = scores.reduce((sum, s) => sum + s.wealthRatio, 0) / scores.length;
-    return this.getEnhancedConvictionLevel(avgWealthRatio);
-}
+console.log('✅ InsiderAnalyticsEngine v2.0 loaded successfully!');
+console.log('🚀 Premium features: Cluster Detection, Sentiment Analysis, Pattern Recognition, Network Analysis');
 
 
 
