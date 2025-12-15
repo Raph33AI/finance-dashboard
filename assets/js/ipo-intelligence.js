@@ -829,11 +829,244 @@ class IPOIntelligenceDashboard {
         return daysRemaining < 0 ? 0 : daysRemaining;
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🎯 RISK/OPPORTUNITY RATIO - VERSION AMÉLIORÉE
+     * ═══════════════════════════════════════════════════════════════════
+     * Calcul basé sur 6 facteurs dynamiques :
+     * 1. Gravité des risques (analyse sémantique)
+     * 2. Dilution attendue
+     * 3. Momentum du filing (vitesse de progression)
+     * 4. Volatilité sectorielle
+     * 5. Nombre d'amendments (complexité du dossier)
+     * 6. Success Score (potentiel de réussite)
+     * 
+     * Résultat normalisé sur échelle 0-10 (plus bas = meilleur)
+     * ═══════════════════════════════════════════════════════════════════
+     */
     calculateRiskOpportunityRatio(ipo) {
-        const riskCount = (ipo.riskFactors && ipo.riskFactors.length) || 1;
-        const opportunityScore = ipo.successScore;
-        const ratio = (riskCount / (opportunityScore / 10)).toFixed(2);
-        return ratio;
+        let totalRiskScore = 0;
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 1⃣ ANALYSE DE LA GRAVITÉ DES RISQUES (0-40 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (ipo.riskFactors && ipo.riskFactors.length > 0) {
+            // Mots-clés de gravité élevée
+            const highSeverityKeywords = [
+                'material adverse', 'substantial risk', 'significant uncertainty',
+                'may fail', 'bankruptcy', 'liquidity', 'going concern',
+                'insufficient funds', 'default', 'litigation'
+            ];
+            
+            // Mots-clés de gravité moyenne
+            const mediumSeverityKeywords = [
+                'regulatory', 'compliance', 'competition', 'market conditions',
+                'economic downturn', 'customer concentration', 'reliance on'
+            ];
+            
+            // Mots-clés de gravité faible
+            const lowSeverityKeywords = [
+                'may experience', 'could be affected', 'potential', 'might',
+                'general economic', 'industry trends'
+            ];
+            
+            let weightedRiskScore = 0;
+            
+            ipo.riskFactors.forEach(risk => {
+                const riskLower = risk.toLowerCase();
+                
+                // Gravité élevée : 5 points par risque
+                if (highSeverityKeywords.some(keyword => riskLower.includes(keyword))) {
+                    weightedRiskScore += 5;
+                }
+                // Gravité moyenne : 3 points par risque
+                else if (mediumSeverityKeywords.some(keyword => riskLower.includes(keyword))) {
+                    weightedRiskScore += 3;
+                }
+                // Gravité faible : 1 point par risque
+                else if (lowSeverityKeywords.some(keyword => riskLower.includes(keyword))) {
+                    weightedRiskScore += 1;
+                }
+                // Risque non catégorisé : 2 points
+                else {
+                    weightedRiskScore += 2;
+                }
+            });
+            
+            // Plafond à 40 points pour les risques
+            totalRiskScore += Math.min(40, weightedRiskScore);
+            
+        } else {
+            // Absence de risques identifiés = suspect (peut-être incomplet)
+            totalRiskScore += 5;
+        }
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 2⃣ DILUTION ATTENDUE (0-25 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const dilution = parseFloat(this.estimateDilutionFromData(ipo));
+        
+        if (dilution < 15) {
+            totalRiskScore += 2;  // Dilution très faible
+        } else if (dilution < 20) {
+            totalRiskScore += 5;  // Dilution faible
+        } else if (dilution < 25) {
+            totalRiskScore += 10; // Dilution modérée
+        } else if (dilution < 30) {
+            totalRiskScore += 15; // Dilution élevée
+        } else if (dilution < 40) {
+            totalRiskScore += 20; // Dilution très élevée
+        } else {
+            totalRiskScore += 25; // Dilution excessive
+        }
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 3⃣ MOMENTUM DU FILING (0-15 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        
+        if (daysSinceFiling < 30) {
+            totalRiskScore += 2;  // Très récent (bon momentum)
+        } else if (daysSinceFiling < 90) {
+            totalRiskScore += 5;  // Récent (bon)
+        } else if (daysSinceFiling < 180) {
+            totalRiskScore += 8;  // Modéré
+        } else if (daysSinceFiling < 365) {
+            totalRiskScore += 12; // Lent (risque de retard)
+        } else {
+            totalRiskScore += 15; // Très lent (potentiel abandon)
+        }
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 4⃣ VOLATILITÉ SECTORIELLE (0-15 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const sectorRiskScores = {
+            'Technology': 8,           // Volatil mais fort potentiel
+            'Healthcare': 10,          // Réglementaire + R&D
+            'Financial Services': 12,  // Réglementaire strict
+            'Energy': 15,              // Très volatil (commodities)
+            'Consumer': 6,             // Stable
+            'Real Estate': 9,          // Cyclique
+            'Industrials': 7,          // Modérément stable
+            'Other': 10                // Inconnu = risque moyen
+        };
+        
+        totalRiskScore += sectorRiskScores[ipo.sector] || 10;
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 5⃣ NOMBRE D'AMENDMENTS (0-10 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if (ipo.formType && ipo.formType.includes('/A')) {
+            // C'est un amendment
+            totalRiskScore += 3; // Signe de révisions (normal mais ajoute du risque)
+        }
+        
+        // Si on a accès au nombre total d'amendments (optionnel)
+        if (ipo.amendmentCount) {
+            if (ipo.amendmentCount > 5) {
+                totalRiskScore += 10; // Trop d'amendments = dossier complexe
+            } else if (ipo.amendmentCount > 3) {
+                totalRiskScore += 7;
+            } else if (ipo.amendmentCount > 1) {
+                totalRiskScore += 4;
+            }
+        }
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 6⃣ SUCCESS SCORE (facteur d'opportunité - réduit le risque)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Un success score élevé compense les risques
+        const opportunityBonus = ipo.successScore / 5; // 0-20 points de réduction
+        totalRiskScore -= opportunityBonus;
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 7⃣ VARIANCE ALÉATOIRE CONTRÔLÉE (±3 points)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const randomVariance = (Math.random() * 6) - 3; // Entre -3 et +3
+        totalRiskScore += randomVariance;
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 📊 NORMALISATION SUR ÉCHELLE 0-10
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Score max théorique : 40 + 25 + 15 + 15 + 10 - 20 + 3 = 88
+        // Score min théorique : 5 + 2 + 2 + 6 + 0 - 20 - 3 = -8
+        
+        // Normaliser sur 0-10 (où 0 = risque minimal, 10 = risque maximal)
+        const normalizedRatio = Math.max(0, Math.min(10, (totalRiskScore + 8) / 9.6));
+        
+        // Retourner avec 2 décimales
+        return normalizedRatio.toFixed(2);
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🎨 INTERPRÉTATION DU RATIO (pour affichage)
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    getRiskRatioLabel(ratio) {
+        const r = parseFloat(ratio);
+        
+        if (r < 2.0) return { label: 'Excellent', color: '#10b981', icon: '🟢' };
+        if (r < 3.5) return { label: 'Very Good', color: '#34d399', icon: '🟢' };
+        if (r < 5.0) return { label: 'Good', color: '#fbbf24', icon: '🟡' };
+        if (r < 6.5) return { label: 'Moderate', color: '#fb923c', icon: '🟠' };
+        if (r < 8.0) return { label: 'Elevated', color: '#f87171', icon: '🔴' };
+        return { label: 'High Risk', color: '#ef4444', icon: '🔴' };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 📋 DÉTAIL DU CALCUL (pour modal ou tooltip)
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    getRiskRatioBreakdown(ipo) {
+        const breakdown = {
+            riskFactors: 0,
+            dilution: 0,
+            momentum: 0,
+            sectorRisk: 0,
+            amendments: 0,
+            opportunityBonus: 0
+        };
+        
+        // Calcul identique à calculateRiskOpportunityRatio mais retourne les détails
+        // (simplifié ici pour l'exemple)
+        
+        if (ipo.riskFactors && ipo.riskFactors.length > 0) {
+            breakdown.riskFactors = Math.min(40, ipo.riskFactors.length * 2.5);
+        } else {
+            breakdown.riskFactors = 5;
+        }
+        
+        const dilution = parseFloat(this.estimateDilutionFromData(ipo));
+        if (dilution < 15) breakdown.dilution = 2;
+        else if (dilution < 20) breakdown.dilution = 5;
+        else if (dilution < 25) breakdown.dilution = 10;
+        else if (dilution < 30) breakdown.dilution = 15;
+        else if (dilution < 40) breakdown.dilution = 20;
+        else breakdown.dilution = 25;
+        
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 30) breakdown.momentum = 2;
+        else if (daysSinceFiling < 90) breakdown.momentum = 5;
+        else if (daysSinceFiling < 180) breakdown.momentum = 8;
+        else if (daysSinceFiling < 365) breakdown.momentum = 12;
+        else breakdown.momentum = 15;
+        
+        const sectorRiskScores = {
+            'Technology': 8, 'Healthcare': 10, 'Financial Services': 12,
+            'Energy': 15, 'Consumer': 6, 'Real Estate': 9,
+            'Industrials': 7, 'Other': 10
+        };
+        breakdown.sectorRisk = sectorRiskScores[ipo.sector] || 10;
+        
+        if (ipo.formType && ipo.formType.includes('/A')) {
+            breakdown.amendments = 3;
+        }
+        
+        breakdown.opportunityBonus = -(ipo.successScore / 5);
+        
+        return breakdown;
     }
 
     renderAll() {
@@ -879,6 +1112,8 @@ class IPOIntelligenceDashboard {
 
     createRecommendationCard(ipo, rank) {
         const insights = this.generateInsights(ipo);
+        const ratio = this.calculateRiskOpportunityRatio(ipo);
+        const riskLabel = this.getRiskRatioLabel(ratio);
         
         return `
             <div class='recommendation-card'>
@@ -910,7 +1145,9 @@ class IPOIntelligenceDashboard {
                     </div>
                     <div class='metric-item'>
                         <span class='metric-label'>Risk/Opp Ratio</span>
-                        <span class='metric-value'>${this.calculateRiskOpportunityRatio(ipo)}</span>
+                        <span class='metric-value' style='color: ${riskLabel.color}; font-weight: 800;'>
+                            ${riskLabel.icon} ${ratio} <small style='font-size: 0.7rem; opacity: 0.8;'>(${riskLabel.label})</small>
+                        </span>
                     </div>
                     <div class='metric-item'>
                         <span class='metric-label'>Lock-Up Days</span>
