@@ -739,6 +739,7 @@
 
         const analyticsEngine = new InsiderAnalyticsEngine();
         let currentAnalysis = null;
+        let roleChartInstance = null; // ✅ Variable globale pour stocker le graphique
 
         /**
          * 🚀 FONCTION PRINCIPALE D'ANALYSE
@@ -808,7 +809,7 @@
                 document.getElementById('clusterSection').classList.add('hidden');
             }
 
-            // 5. Role Chart
+            // 5. Role Chart (AVANT le tableau pour éviter les erreurs)
             displayRoleChart(analysis.roleAnalysis);
 
             // 6. Transactions Table
@@ -993,13 +994,24 @@
          * 📊 AFFICHE LE GRAPHIQUE PAR RÔLE
          */
         function displayRoleChart(roleAnalysis) {
-            const ctx = document.getElementById('roleChart').getContext('2d');
+            const canvas = document.getElementById('roleChart');
+            const ctx = canvas.getContext('2d');
+            
+            // ✅ DESTRUCTION du graphique existant
+            if (roleChartInstance !== null) {
+                console.log('🗑 Destroying previous chart...');
+                roleChartInstance.destroy();
+                roleChartInstance = null;
+            }
             
             const roles = Object.keys(roleAnalysis.byRole);
             const purchases = roles.map(r => roleAnalysis.byRole[r].purchaseValue);
             const sales = roles.map(r => Math.abs(roleAnalysis.byRole[r].saleValue));
 
-            new Chart(ctx, {
+            console.log('📊 Creating new chart...');
+            
+            // ✅ CRÉATION et STOCKAGE du nouveau graphique
+            roleChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: roles,
@@ -1062,6 +1074,8 @@
                     }
                 }
             });
+
+            console.log('✅ New chart created successfully');
         }
 
         /**
@@ -1070,10 +1084,35 @@
         function displayTransactionsTable(analysis) {
             const container = document.getElementById('transactionsTable');
             
+            // ✅ DIAGNOSTIC : Logs détaillés
+            console.log('═══════════════════════════════════════════');
+            console.log('🔍 DIAGNOSTIC displayTransactionsTable');
+            console.log('═══════════════════════════════════════════');
+            console.log('📊 Ticker analysé:', analysis.ticker);
+            console.log('📊 Total transactions dans analysis:', analysis.transactionCount);
+            console.log('📊 Transactions array exists:', !!analysis.transactions);
+            console.log('📊 Transactions array length:', analysis.transactions?.length || 0);
+            
+            if (analysis.transactions && analysis.transactions.length > 0) {
+                console.log('📊 First transaction insider:', analysis.transactions[0].reportingOwner?.name);
+                console.log('📊 First transaction date:', analysis.transactions[0].filingDate);
+                console.log('📊 Last transaction insider:', analysis.transactions[analysis.transactions.length - 1].reportingOwner?.name);
+            }
+            
             // ✅ CORRECTION : Prend les transactions depuis analysis.transactions
             const transactions = (analysis.transactions || [])
-                .slice(0, 20)
-                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate)); // Plus récentes en premier
+                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate))
+                .slice(0, 20);
+
+            console.log('📋 Transactions triées et filtrées:', transactions.length);
+            
+            if (transactions.length > 0) {
+                console.log('📋 Première transaction affichée:');
+                console.log('   - Insider:', transactions[0].reportingOwner?.name);
+                console.log('   - Date:', transactions[0].filingDate);
+                console.log('   - Rôle:', transactions[0].reportingOwner?.classification);
+            }
+            console.log('═══════════════════════════════════════════\n');
 
             if (transactions.length === 0) {
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune transaction à afficher</p>';
@@ -1099,8 +1138,8 @@
                                     return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
                                 }, 0);
                             
-                            const type = netValue > 0 ? 'Purchase' : 'Sale';
-                            const badgeClass = netValue > 0 ? 'badge-buy' : 'badge-sell';
+                            const type = netValue > 0 ? 'Purchase' : netValue < 0 ? 'Sale' : 'N/A';
+                            const badgeClass = netValue > 0 ? 'badge-buy' : netValue < 0 ? 'badge-sell' : 'badge-neutral';
                             
                             return `
                                 <tr>
@@ -1109,7 +1148,7 @@
                                     <td>${t.reportingOwner?.classification || 'N/A'}</td>
                                     <td><span class="badge ${badgeClass}">${type}</span></td>
                                     <td>$${formatNumber(Math.abs(netValue))}</td>
-                                    <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : 'BEARISH'}</span></td>
+                                    <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : netValue < 0 ? 'BEARISH' : 'NEUTRAL'}</span></td>
                                 </tr>
                             `;
                         }).join('')}
@@ -1131,18 +1170,15 @@
             return num.toFixed(2);
         }
 
-        // ✅ CORRECTION : Event listeners après définition des fonctions
-        // Enter key support
+        // ✅ Event listeners
         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 analyzeInsiderActivity();
             }
         });
 
-        // Button click support
         document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
 
-        // Auto-focus on input
         window.addEventListener('load', () => {
             document.getElementById('tickerInput').focus();
         });
