@@ -52,16 +52,23 @@ class InsiderAnalyticsEngine {
     async analyzeCompany(ticker, options = {}) {
         const {
             months = 12,
+            maxFilings = 100, // ✅ AJOUT : Récupère maxFilings
             includeDerivatives = true,
             includePriceImpact = true,
-            includeNetworkAnalysis = true
+            includeNetworkAnalysis = true,
+            onProgress = null // ✅ AJOUT : Callback pour progression
         } = options;
 
         console.log(`🔍 Starting comprehensive analysis for ${ticker}...`);
 
         try {
             // 1. Récupération de l'historique complet
-            const history = await this.form4Client.getCompanyInsiderHistory(ticker, months);
+            if (onProgress) onProgress(20, 'Fetching Form 4 filings...');
+            
+            const history = await this.form4Client.getCompanyInsiderHistory(ticker, months, {
+                maxFilings: maxFilings, // ✅ CORRECTION : Passe maxFilings
+                verbose: false
+            });
             
             if (!history || history.transactions.length === 0) {
                 return {
@@ -70,6 +77,8 @@ class InsiderAnalyticsEngine {
                     analysis: null
                 };
             }
+
+            if (onProgress) onProgress(50, 'Analyzing patterns...');
 
             // 2. Analyses parallèles
             const [
@@ -92,6 +101,8 @@ class InsiderAnalyticsEngine {
                 includeNetworkAnalysis ? this.buildInsiderNetwork(history.transactions) : null
             ]);
 
+            if (onProgress) onProgress(80, 'Calculating scores...');
+
             // 3. Score global et recommandation
             const overallScore = this.calculateOverallScore({
                 clusterActivity,
@@ -112,11 +123,13 @@ class InsiderAnalyticsEngine {
                 overallScore
             });
 
+            if (onProgress) onProgress(95, 'Finalizing analysis...');
+
             return {
                 ticker,
                 period: history.period,
                 transactionCount: history.transactions.length,
-                transactions: history.transactions, // ✅ AJOUT : transactions brutes
+                transactions: history.transactions,
                 
                 // Scores principaux
                 overallScore,

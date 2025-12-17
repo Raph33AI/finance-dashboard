@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -261,7 +261,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           LOADING STATE
+           LOADING STATE + PROGRESS BAR
            ═══════════════════════════════════════════════════════════════ */
         .loading {
             text-align: center;
@@ -280,6 +280,32 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            max-width: 400px;
+            margin: 24px auto 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .progress-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 12px;
         }
 
         /* ═══════════════════════════════════════════════════════════════
@@ -454,7 +480,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           TRANSACTIONS TABLE
+           TRANSACTIONS TABLE + PAGINATION
            ═══════════════════════════════════════════════════════════════ */
         .table-container {
             overflow-x: auto;
@@ -515,6 +541,43 @@
 
         .badge-neutral {
             background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px 20px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pagination button {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            font-weight: 700;
             color: var(--text-secondary);
         }
 
@@ -706,6 +769,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- ═══════════════════════════════════════════════════════════════
          HEADER
@@ -713,7 +777,7 @@
     <header class="header">
         <div class="header-content">
             <h1><i class="fas fa-chart-line"></i> Insider Flow Tracker</h1>
-            <p>Détection temps réel des mouvements d'initiés • Analyse avancée des patterns • Signaux d'achat/vente</p>
+            <p>Real-time insider trading detection • Advanced pattern analysis • Buy/Sell signals</p>
         </div>
     </header>
 
@@ -726,33 +790,32 @@
             <input 
                 type="text" 
                 id="tickerInput" 
-                placeholder="Entrez un ticker (ex: AAPL, TSLA, NVDA...)"
+                placeholder="Enter a ticker (e.g., AAPL, TSLA, NVDA...)"
                 autocomplete="off"
             >
             <button class="search-btn" id="analyzeBtn">
-                <i class="fas fa-chart-bar"></i> Analyser
+                <i class="fas fa-chart-bar"></i> Analyze
             </button>
         </div>
         
-        <!-- ✅ NOUVEAUX SÉLECTEURS -->
         <div class="search-options">
             <div class="option-group">
                 <label for="periodSelect">
-                    <i class="fas fa-calendar-alt"></i> Période
+                    <i class="fas fa-calendar-alt"></i> Period
                 </label>
                 <select id="periodSelect">
-                    <option value="0.25">Dernière semaine</option>
-                    <option value="1">Dernier mois</option>
-                    <option value="3">3 derniers mois</option>
-                    <option value="6">6 derniers mois</option>
-                    <option value="12" selected>1 an</option>
-                    <option value="24">2 ans</option>
+                    <option value="0.25">Last week</option>
+                    <option value="1">Last month</option>
+                    <option value="3">Last 3 months</option>
+                    <option value="6">Last 6 months</option>
+                    <option value="12" selected>1 year</option>
+                    <option value="24">2 years</option>
                 </select>
             </div>
             
             <div class="option-group">
                 <label for="filingsSelect">
-                    <i class="fas fa-file-alt"></i> Nombre de filings
+                    <i class="fas fa-file-alt"></i> Number of filings
                 </label>
                 <select id="filingsSelect">
                     <option value="25">25 filings</option>
@@ -772,23 +835,23 @@
         <!-- Loading State -->
         <div id="loadingState" class="loading hidden">
             <div class="spinner"></div>
-            <h2>Analyse en cours...</h2>
-            <p style="color: var(--text-secondary); margin-top: 12px;">
-                Récupération des Form 4, analyse des patterns, calcul des scores...
+            <h2>Analysis in progress...</h2>
+            <p style="color: var(--text-secondary); margin-top: 12px;" id="loadingMessage">
+                Fetching Form 4 filings, analyzing patterns, calculating scores...
             </p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
         </div>
 
         <!-- Results Container -->
         <div id="resultsContainer" class="hidden">
             <!-- Recommendation Panel -->
-            <div class="recommendation" id="recommendationPanel">
-                <!-- Will be populated dynamically -->
-            </div>
+            <div class="recommendation" id="recommendationPanel"></div>
 
             <!-- Score Cards -->
-            <div class="score-container mt-4" id="scoreContainer">
-                <!-- Will be populated dynamically -->
-            </div>
+            <div class="score-container mt-4" id="scoreContainer"></div>
 
             <!-- Alerts -->
             <div class="card mt-4">
@@ -797,28 +860,24 @@
                         <i class="fas fa-bell"></i> Smart Alerts
                     </h2>
                 </div>
-                <div class="alerts-grid" id="alertsContainer">
-                    <!-- Will be populated dynamically -->
-                </div>
+                <div class="alerts-grid" id="alertsContainer"></div>
             </div>
 
             <!-- Cluster Buying -->
             <div class="card mt-4" id="clusterSection">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-users"></i> Cluster Buying Détecté
+                        <i class="fas fa-users"></i> Cluster Buying Detected
                     </h2>
                 </div>
-                <div class="cluster-grid" id="clusterContainer">
-                    <!-- Will be populated dynamically -->
-                </div>
+                <div class="cluster-grid" id="clusterContainer"></div>
             </div>
 
             <!-- Role Analysis -->
             <div class="card mt-4">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-user-tie"></i> Analyse par Rôle
+                        <i class="fas fa-user-tie"></i> Analysis by Role
                     </h2>
                 </div>
                 <canvas id="roleChart" height="100"></canvas>
@@ -828,12 +887,10 @@
             <div class="card mt-4">
                 <div class="card-header">
                     <h2 class="card-title">
-                        <i class="fas fa-list"></i> Transactions Récentes
+                        <i class="fas fa-list"></i> Recent Transactions
                     </h2>
                 </div>
-                <div class="table-container" id="transactionsTable">
-                    <!-- Will be populated dynamically -->
-                </div>
+                <div class="table-container" id="transactionsTable"></div>
             </div>
         </div>
     </div>
@@ -842,7 +899,6 @@
          SCRIPTS
          ═══════════════════════════════════════════════════════════════ -->
     
-    <!-- Tes fichiers JS -->
     <script src="assets/js/sec-form4-client.js"></script>
     <script src="assets/js/form4-parser.js"></script>
     <script src="assets/js/insider-analytics-engine.js"></script>
@@ -855,75 +911,96 @@
         const analyticsEngine = new InsiderAnalyticsEngine();
         let currentAnalysis = null;
         let roleChartInstance = null;
+        let currentPage = 1;
+        let transactionsPerPage = 20;
+        let allTransactions = [];
 
         /**
-         * 🚀 FONCTION PRINCIPALE D'ANALYSE (AVEC PARAMÈTRES UTILISATEUR)
+         * 🚀 MAIN ANALYSIS FUNCTION (WITH USER PARAMETERS)
          */
         async function analyzeInsiderActivity() {
             const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
             
             if (!ticker) {
-                alert('⚠ Veuillez entrer un ticker valide');
+                alert('⚠ Please enter a valid ticker');
                 return;
             }
 
-            // ✅ RÉCUPÈRE LES PARAMÈTRES DE L'UTILISATEUR
             const months = parseFloat(document.getElementById('periodSelect').value);
             const maxFilings = parseInt(document.getElementById('filingsSelect').value);
 
             console.log(`🔍 Analyzing ${ticker} with ${maxFilings} filings over ${months} months...`);
 
-            // Show loading
+            // Show loading with progress
             document.getElementById('loadingState').classList.remove('hidden');
             document.getElementById('resultsContainer').classList.add('hidden');
+            updateProgress(0, 'Initializing analysis...');
 
             try {
                 console.log(`🔍 Analyzing insider activity for ${ticker}...`);
                 
-                // ✅ PASSE LES PARAMÈTRES À L'ANALYSE
+                // Progress updates simulation
+                updateProgress(10, 'Fetching CIK number...');
+                
                 currentAnalysis = await analyticsEngine.analyzeCompany(ticker, {
                     months: months,
                     maxFilings: maxFilings,
                     includeDerivatives: true,
                     includePriceImpact: false,
-                    includeNetworkAnalysis: true
+                    includeNetworkAnalysis: true,
+                    onProgress: (progress, message) => {
+                        updateProgress(progress, message);
+                    }
                 });
 
                 console.log('✅ Analysis complete:', currentAnalysis);
 
-                // Affiche les résultats
+                updateProgress(100, 'Analysis complete!');
+                
+                // Small delay to show 100%
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Display results
                 displayResults(currentAnalysis);
 
             } catch (error) {
                 console.error('❌ Analysis error:', error);
-                alert(`Erreur lors de l'analyse: ${error.message}`);
+                alert(`Error during analysis: ${error.message}`);
             } finally {
                 document.getElementById('loadingState').classList.add('hidden');
             }
         }
 
         /**
-         * 📊 AFFICHAGE DES RÉSULTATS
+         * 📊 UPDATE PROGRESS BAR
+         */
+        function updateProgress(percentage, message) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const loadingMessage = document.getElementById('loadingMessage');
+
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${Math.round(percentage)}%`;
+            if (message) {
+                loadingMessage.textContent = message;
+            }
+        }
+
+        /**
+         * 📊 DISPLAY RESULTS
          */
         function displayResults(analysis) {
             if (!analysis || analysis.error) {
-                alert(analysis.error || 'Aucune donnée disponible');
+                alert(analysis.error || 'No data available');
                 return;
             }
 
-            // Show results container
             document.getElementById('resultsContainer').classList.remove('hidden');
 
-            // 1. Recommendation Panel
             displayRecommendation(analysis.recommendation, analysis.overallScore);
-
-            // 2. Score Cards
             displayScoreCards(analysis);
-
-            // 3. Alerts
             displayAlerts(analysis.alerts);
 
-            // 4. Cluster Buying
             if (analysis.clusterActivity.detected) {
                 displayClusters(analysis.clusterActivity.clusters);
                 document.getElementById('clusterSection').classList.remove('hidden');
@@ -931,13 +1008,9 @@
                 document.getElementById('clusterSection').classList.add('hidden');
             }
 
-            // 5. Role Chart
             displayRoleChart(analysis.roleAnalysis);
-
-            // 6. Transactions Table
             displayTransactionsTable(analysis);
 
-            // Scroll to results
             document.getElementById('resultsContainer').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
@@ -945,7 +1018,7 @@
         }
 
         /**
-         * 💡 AFFICHE LA RECOMMANDATION
+         * 💡 DISPLAY RECOMMENDATION
          */
         function displayRecommendation(recommendation, overallScore) {
             const panel = document.getElementById('recommendationPanel');
@@ -974,7 +1047,7 @@
                 </div>
                 <div class="recommendation-score">${overallScore.score}/100</div>
                 <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">
-                    Confiance: ${recommendation.confidence}
+                    Confidence: ${recommendation.confidence}
                 </div>
                 <div class="recommendation-rationale">
                     <div style="font-weight: 700; margin-bottom: 12px; font-size: 1.1rem;">
@@ -991,7 +1064,7 @@
         }
 
         /**
-         * 📊 AFFICHE LES SCORE CARDS
+         * 📊 DISPLAY SCORE CARDS
          */
         function displayScoreCards(analysis) {
             const container = document.getElementById('scoreContainer');
@@ -1007,19 +1080,19 @@
                     label: 'Transactions',
                     value: analysis.transactionCount,
                     suffix: '',
-                    sublabel: `Derniers ${Math.round((new Date() - new Date(analysis.period.start)) / (1000 * 60 * 60 * 24))} jours`
+                    sublabel: `Last ${Math.round((new Date() - new Date(analysis.period.start)) / (1000 * 60 * 60 * 24))} days`
                 },
                 {
                     label: 'Cluster Activity',
                     value: analysis.clusterActivity.count,
                     suffix: '',
-                    sublabel: analysis.clusterActivity.detected ? 'Détecté' : 'Aucun'
+                    sublabel: analysis.clusterActivity.detected ? 'Detected' : 'None'
                 },
                 {
-                    label: 'Qualité Data',
+                    label: 'Data Quality',
                     value: analysis.dataQuality,
                     suffix: '',
-                    sublabel: 'Score de fiabilité'
+                    sublabel: 'Reliability score'
                 }
             ];
 
@@ -1033,7 +1106,7 @@
         }
 
         /**
-         * 🚨 AFFICHE LES ALERTES
+         * 🚨 DISPLAY ALERTS
          */
         function displayAlerts(alerts) {
             const container = document.getElementById('alertsContainer');
@@ -1042,7 +1115,7 @@
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: var(--text-muted);">
                         <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
-                        <p>Aucune alerte critique détectée</p>
+                        <p>No critical alerts detected</p>
                     </div>
                 `;
                 return;
@@ -1067,13 +1140,13 @@
                         <div class="alert-title">${alert.title}</div>
                         <div class="alert-description">${alert.description}</div>
                     </div>
-                    <span class="alert-badge">${alert.confidence}% confiance</span>
+                    <span class="alert-badge">${alert.confidence}% confidence</span>
                 </div>
             `).join('');
         }
 
         /**
-         * 🔥 AFFICHE LES CLUSTERS
+         * 🔥 DISPLAY CLUSTERS
          */
         function displayClusters(clusters) {
             const container = document.getElementById('clusterContainer');
@@ -1082,10 +1155,10 @@
                 <div class="cluster-card">
                     <div class="cluster-header">
                         <div class="cluster-date">
-                            ${new Date(cluster.startDate).toLocaleDateString('fr-FR')}
+                            ${new Date(cluster.startDate).toLocaleDateString('en-US')}
                         </div>
                         <div class="confidence-badge">
-                            ${cluster.confidence}% confiance
+                            ${cluster.confidence}% confidence
                         </div>
                     </div>
                     <h3 style="margin-bottom: 16px;">
@@ -1093,33 +1166,32 @@
                     </h3>
                     <div class="cluster-stats">
                         <div class="cluster-stat">
-                            <div class="cluster-stat-label">Valeur totale</div>
+                            <div class="cluster-stat-label">Total Value</div>
                             <div class="cluster-stat-value">
                                 $${formatNumber(cluster.totalValue)}
                             </div>
                         </div>
                         <div class="cluster-stat">
-                            <div class="cluster-stat-label">Moyenne/Insider</div>
+                            <div class="cluster-stat-label">Avg/Insider</div>
                             <div class="cluster-stat-value">
                                 $${formatNumber(cluster.averageValuePerInsider)}
                             </div>
                         </div>
                     </div>
                     <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: var(--text-secondary);">
-                        <strong>Rôles:</strong> ${cluster.insiderRoles.join(', ')}
+                        <strong>Roles:</strong> ${cluster.insiderRoles.join(', ')}
                     </div>
                 </div>
             `).join('');
         }
 
         /**
-         * 📊 AFFICHE LE GRAPHIQUE PAR RÔLE
+         * 📊 DISPLAY ROLE CHART
          */
         function displayRoleChart(roleAnalysis) {
             const canvas = document.getElementById('roleChart');
             const ctx = canvas.getContext('2d');
             
-            // Détruit l'ancien graphique
             if (roleChartInstance !== null) {
                 console.log('🗑 Destroying previous chart...');
                 roleChartInstance.destroy();
@@ -1132,21 +1204,20 @@
 
             console.log('📊 Creating new chart...');
             
-            // Crée et stocke le nouveau graphique
             roleChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: roles,
                     datasets: [
                         {
-                            label: 'Achats',
+                            label: 'Purchases',
                             data: purchases,
                             backgroundColor: 'rgba(16, 185, 129, 0.8)',
                             borderColor: 'rgba(16, 185, 129, 1)',
                             borderWidth: 2
                         },
                         {
-                            label: 'Ventes',
+                            label: 'Sales',
                             data: sales,
                             backgroundColor: 'rgba(239, 68, 68, 0.8)',
                             borderColor: 'rgba(239, 68, 68, 1)',
@@ -1201,44 +1272,35 @@
         }
 
         /**
-         * 📋 AFFICHE LE TABLEAU DES TRANSACTIONS
+         * 📋 DISPLAY TRANSACTIONS TABLE (WITH PAGINATION)
          */
         function displayTransactionsTable(analysis) {
             const container = document.getElementById('transactionsTable');
             
-            // Prend les transactions depuis analysis.transactions
-            const transactions = (analysis.transactions || [])
-                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate))
-                .slice(0, 20);
+            allTransactions = (analysis.transactions || [])
+                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate));
 
-            console.log('═══════════════════════════════════════════');
-            console.log('🔍 DIAGNOSTIC displayTransactionsTable');
-            console.log('═══════════════════════════════════════════');
-            console.log('📊 Ticker analysé:', analysis.ticker);
-            console.log('📊 Total transactions dans analysis:', analysis.transactionCount);
-            console.log('📊 Transactions array exists:', !!analysis.transactions);
-            console.log('📊 Transactions array length:', analysis.transactions?.length || 0);
+            currentPage = 1;
             
-            if (analysis.transactions && analysis.transactions.length > 0) {
-                console.log('📊 First transaction insider:', analysis.transactions[0].reportingOwner?.name);
-                console.log('📊 First transaction date:', analysis.transactions[0].filingDate);
-                console.log('📊 Last transaction insider:', analysis.transactions[analysis.transactions.length - 1].reportingOwner?.name);
-            }
-            
-            console.log('📋 Transactions triées et filtrées:', transactions.length);
-            
-            if (transactions.length > 0) {
-                console.log('📋 Première transaction affichée:');
-                console.log('   - Insider:', transactions[0].reportingOwner?.name);
-                console.log('   - Date:', transactions[0].filingDate);
-                console.log('   - Rôle:', transactions[0].reportingOwner?.classification);
-            }
-            console.log('═══════════════════════════════════════════\n');
+            console.log(`📋 Total transactions: ${allTransactions.length}`);
 
-            if (transactions.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune transaction à afficher</p>';
+            if (allTransactions.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">No transactions to display</p>';
                 return;
             }
+
+            renderTransactionsPage();
+        }
+
+        /**
+         * 📄 RENDER TRANSACTIONS PAGE
+         */
+        function renderTransactionsPage() {
+            const container = document.getElementById('transactionsTable');
+            const start = (currentPage - 1) * transactionsPerPage;
+            const end = start + transactionsPerPage;
+            const pageTransactions = allTransactions.slice(start, end);
+            const totalPages = Math.ceil(allTransactions.length / transactionsPerPage);
 
             container.innerHTML = `
                 <table>
@@ -1246,14 +1308,14 @@
                         <tr>
                             <th>Date</th>
                             <th>Insider</th>
-                            <th>Rôle</th>
+                            <th>Role</th>
                             <th>Type</th>
-                            <th>Valeur</th>
+                            <th>Value</th>
                             <th>Signal</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${transactions.map(t => {
+                        ${pageTransactions.map(t => {
                             const netValue = (t.nonDerivativeTransactions || [])
                                 .reduce((sum, nt) => {
                                     return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
@@ -1264,7 +1326,7 @@
                             
                             return `
                                 <tr>
-                                    <td>${new Date(t.filingDate).toLocaleDateString('fr-FR')}</td>
+                                    <td>${new Date(t.filingDate).toLocaleDateString('en-US')}</td>
                                     <td>${t.reportingOwner?.name || 'N/A'}</td>
                                     <td>${t.reportingOwner?.classification || 'N/A'}</td>
                                     <td><span class="badge ${badgeClass}">${type}</span></td>
@@ -1275,7 +1337,39 @@
                         }).join('')}
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-angle-double-left"></i> First
+                    </button>
+                    <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-angle-left"></i> Previous
+                    </button>
+                    <span>Page ${currentPage} of ${totalPages} (${allTransactions.length} total)</span>
+                    <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                        Next <i class="fas fa-angle-right"></i>
+                    </button>
+                    <button onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </button>
+                </div>
             `;
+        }
+
+        /**
+         * 📄 GO TO PAGE
+         */
+        function goToPage(page) {
+            const totalPages = Math.ceil(allTransactions.length / transactionsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTransactionsPage();
+            
+            // Scroll to table
+            document.getElementById('transactionsTable').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
         }
 
         /**
