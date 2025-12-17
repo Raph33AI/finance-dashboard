@@ -2761,17 +2761,27 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // DISPLAY TRANSACTIONS TABLE
+    // DISPLAY TRANSACTIONS TABLE (✅ FILTRE: Exclut transactions à 0$)
     // ═══════════════════════════════════════════════════════════════
     function displayTransactionsTable(analysis) {
         const container = document.getElementById('transactionsTable');
         
+        // ✅ CORRECTION: Calcul du netValue et filtrage des transactions à 0$
         allTransactions = (analysis.transactions || [])
+            .map(t => {
+                const netValue = (t.nonDerivativeTransactions || [])
+                    .reduce((sum, nt) => {
+                        return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
+                    }, 0);
+                
+                return { ...t, netValue }; // On ajoute netValue à l'objet transaction
+            })
+            .filter(t => Math.abs(t.netValue) > 0) // ✅ Exclut les transactions à 0$
             .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate));
 
         currentPage = 1;
         
-        console.log(`📋 Total transactions: ${allTransactions.length}`);
+        console.log(`📋 Total transactions: ${allTransactions.length} (hors transactions à 0$)`);
 
         if (allTransactions.length === 0) {
             container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-tertiary);">No transactions to display</p>';
@@ -2782,7 +2792,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // RENDER TRANSACTIONS PAGE
+    // RENDER TRANSACTIONS PAGE (✅ Utilise netValue pré-calculé)
     // ═══════════════════════════════════════════════════════════════
     function renderTransactionsPage() {
         const container = document.getElementById('transactionsTable');
@@ -2805,13 +2815,11 @@
                 </thead>
                 <tbody>
                     ${pageTransactions.map(t => {
-                        const netValue = (t.nonDerivativeTransactions || [])
-                            .reduce((sum, nt) => {
-                                return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
-                            }, 0);
+                        // ✅ netValue déjà calculé dans displayTransactionsTable
+                        const netValue = t.netValue;
                         
-                        const type = netValue > 0 ? 'Purchase' : netValue < 0 ? 'Sale' : 'N/A';
-                        const badgeClass = netValue > 0 ? 'badge-buy' : netValue < 0 ? 'badge-sell' : 'badge-neutral';
+                        const type = netValue > 0 ? 'Purchase' : 'Sale';
+                        const badgeClass = netValue > 0 ? 'badge-buy' : 'badge-sell';
                         
                         return `
                             <tr>
@@ -2820,7 +2828,7 @@
                                 <td>${t.reportingOwner?.classification || 'N/A'}</td>
                                 <td><span class="badge ${badgeClass}">${type}</span></td>
                                 <td>$${formatNumber(Math.abs(netValue))}</td>
-                                <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : netValue < 0 ? 'BEARISH' : 'NEUTRAL'}</span></td>
+                                <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : 'BEARISH'}</span></td>
                             </tr>
                         `;
                     }).join('')}

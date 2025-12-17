@@ -171,7 +171,9 @@ body.dark-mode .option-group select {
     height: 60px;
     margin: 0 auto 24px;
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .spinner i {
@@ -180,10 +182,12 @@ body.dark-mode .option-group select {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: inline-block;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
+    from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
