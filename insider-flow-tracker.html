@@ -1,137 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💼 Insider Flow Tracker - AlphaVault AI</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Insider Flow Tracker | AlphaVault AI</title>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection de la page -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+
+    <!-- Custom Styles for Insider Flow -->
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           VARIABLES CSS
+           INSIDER FLOW TRACKER - CUSTOM STYLES
            ═══════════════════════════════════════════════════════════════ */
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-hover: #334155;
-            
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            
-            --border-color: rgba(255, 255, 255, 0.1);
-            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            
-            --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
-            --gradient-success: linear-gradient(135deg, #10b981, #059669);
-            --gradient-danger: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           RESET & BASE
-           ═══════════════════════════════════════════════════════════════ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           HEADER
-           ═══════════════════════════════════════════════════════════════ */
-        .header {
+        
+        /* Page Title Gradient */
+        .page-title {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 10px,
-                rgba(255, 255, 255, 0.05) 10px,
-                rgba(255, 255, 255, 0.05) 20px
-            );
-            animation: moveStripes 20s linear infinite;
-        }
-
-        @keyframes moveStripes {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            font-weight: 500;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           SEARCH BAR
-           ═══════════════════════════════════════════════════════════════ */
+        /* Search Container */
         .search-container {
-            max-width: 800px;
-            margin: -30px auto 40px;
-            padding: 0 20px;
-            position: relative;
-            z-index: 10;
+            max-width: 100%;
+            margin-bottom: 32px;
         }
 
         .search-box {
-            background: var(--bg-card);
-            border-radius: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius);
             padding: 12px 24px;
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--border-color);
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
             transition: all 0.3s ease;
         }
 
         .search-box:focus-within {
-            border-color: var(--primary);
+            border-color: var(--eco-primary);
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
         }
 
@@ -147,11 +84,11 @@
         }
 
         .search-box input::placeholder {
-            color: var(--text-muted);
+            color: var(--text-tertiary);
         }
 
         .search-btn {
-            background: var(--gradient-primary);
+            background: var(--eco-gradient);
             border: none;
             padding: 14px 32px;
             border-radius: 12px;
@@ -159,7 +96,7 @@
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition-smooth);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
             height: 48px;
             display: flex;
@@ -172,37 +109,30 @@
             box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
         }
 
-        .search-btn:active {
-            transform: translateY(0);
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           SEARCH OPTIONS
-           ═══════════════════════════════════════════════════════════════ */
+        /* Search Options */
         .search-options {
-            max-width: 800px;
-            margin: 16px auto 0;
-            padding: 0 20px;
             display: flex;
             gap: 20px;
-            justify-content: center;
+            margin-top: 16px;
             flex-wrap: wrap;
         }
 
         .option-group {
-            background: var(--bg-card);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
             border-radius: 12px;
             padding: 12px 20px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
             min-width: 250px;
             transition: all 0.3s ease;
         }
 
         .option-group:hover {
-            border-color: var(--primary);
+            border-color: var(--eco-primary);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
@@ -217,15 +147,18 @@
         }
 
         .option-group label i {
-            color: var(--primary);
+            background: var(--eco-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 1rem;
         }
 
         .option-group select {
             flex: 1;
-            background: var(--bg-hover);
+            background: var(--bg-secondary);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
             border-radius: 8px;
             padding: 8px 12px;
             font-size: 0.95rem;
@@ -236,33 +169,19 @@
         }
 
         .option-group select:hover {
-            border-color: var(--primary);
-            background: var(--bg-card);
+            border-color: var(--eco-primary);
         }
 
         .option-group select:focus {
-            border-color: var(--primary);
+            border-color: var(--eco-primary);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
 
-        .option-group select option {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            padding: 8px;
+        body.dark-mode .option-group select {
+            background: var(--bg-tertiary);
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           CONTAINER
-           ═══════════════════════════════════════════════════════════════ */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           LOADING STATE + PROGRESS BAR
-           ═══════════════════════════════════════════════════════════════ */
+        /* Loading State */
         .loading {
             text-align: center;
             padding: 80px 20px;
@@ -271,8 +190,8 @@
         .spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary);
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--eco-primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 24px;
@@ -285,16 +204,16 @@
         .progress-container {
             max-width: 400px;
             margin: 24px auto 16px;
-            background: var(--bg-card);
+            background: var(--glass-bg);
             border-radius: 12px;
             overflow: hidden;
             height: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
         }
 
         .progress-bar {
             height: 100%;
-            background: var(--gradient-primary);
+            background: var(--eco-gradient);
             width: 0%;
             transition: width 0.3s ease;
             border-radius: 12px;
@@ -304,51 +223,14 @@
         .progress-text {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--primary);
+            background: var(--eco-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-top: 12px;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           CARDS
-           ═══════════════════════════════════════════════════════════════ */
-        .card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-title i {
-            color: var(--primary);
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           SCORE DISPLAY
-           ═══════════════════════════════════════════════════════════════ */
+        /* Score Cards */
         .score-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -357,12 +239,16 @@
         }
 
         .score-card {
-            background: var(--bg-hover);
-            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius);
             padding: 24px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition-smooth);
         }
 
         .score-card::before {
@@ -372,15 +258,21 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--gradient-primary);
+            background: var(--eco-gradient);
+        }
+
+        .score-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
         }
 
         .score-value {
             font-size: 3rem;
             font-weight: 900;
-            background: var(--gradient-primary);
+            background: var(--eco-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 12px 0;
         }
 
@@ -393,28 +285,28 @@
         }
 
         .score-sublabel {
-            color: var(--text-muted);
+            color: var(--text-tertiary);
             font-size: 0.85rem;
             margin-top: 8px;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           ALERTS
-           ═══════════════════════════════════════════════════════════════ */
+        /* Alerts */
         .alerts-grid {
             display: grid;
             gap: 16px;
         }
 
         .alert {
-            background: var(--bg-hover);
-            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius);
             padding: 20px 24px;
             display: flex;
             align-items: flex-start;
             gap: 16px;
             border-left: 4px solid;
-            transition: all 0.3s ease;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--glass-border);
         }
 
         .alert:hover {
@@ -423,17 +315,17 @@
         }
 
         .alert.severity-HIGH {
-            border-color: var(--danger);
+            border-left-color: var(--eco-danger);
             background: rgba(239, 68, 68, 0.1);
         }
 
         .alert.severity-MEDIUM {
-            border-color: var(--warning);
+            border-left-color: var(--eco-warning);
             background: rgba(245, 158, 11, 0.1);
         }
 
         .alert.severity-LOW {
-            border-color: var(--info);
+            border-left-color: var(--eco-info);
             background: rgba(59, 130, 246, 0.1);
         }
 
@@ -443,15 +335,15 @@
         }
 
         .alert.severity-HIGH .alert-icon {
-            color: var(--danger);
+            color: var(--eco-danger);
         }
 
         .alert.severity-MEDIUM .alert-icon {
-            color: var(--warning);
+            color: var(--eco-warning);
         }
 
         .alert.severity-LOW .alert-icon {
-            color: var(--info);
+            color: var(--eco-info);
         }
 
         .alert-content {
@@ -479,111 +371,86 @@
             letter-spacing: 0.5px;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           TRANSACTIONS TABLE + PAGINATION
-           ═══════════════════════════════════════════════════════════════ */
-        .table-container {
-            overflow-x: auto;
+        /* Recommendation Panel */
+        .recommendation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius-lg);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .recommendation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+            animation: moveStripes 20s linear infinite;
+        }
+
+        @keyframes moveStripes {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .recommendation-action {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .recommendation-score {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 16px 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .recommendation-rationale {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            background: var(--bg-hover);
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        th {
-            padding: 16px;
-            text-align: left;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        td {
-            padding: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        tbody tr {
-            transition: background 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge-buy {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .badge-sell {
-            background: var(--gradient-danger);
-            color: white;
-        }
-
-        .badge-neutral {
-            background: rgba(148, 163, 184, 0.2);
-            color: var(--text-secondary);
-        }
-
-        .pagination {
+        .rationale-item {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 12px;
-            padding: 24px 20px;
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-color);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
         }
 
-        .pagination button {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .rationale-item:last-child {
+            border-bottom: none;
         }
 
-        .pagination button:hover:not(:disabled) {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-2px);
+        .rationale-item i {
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        .pagination button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .pagination span {
-            font-weight: 700;
-            color: var(--text-secondary);
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           CLUSTER CARDS
-           ═══════════════════════════════════════════════════════════════ */
+        /* Cluster Cards */
         .cluster-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -592,11 +459,17 @@
 
         .cluster-card {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
-            border: 2px solid var(--success);
-            border-radius: 16px;
+            border: 2px solid var(--eco-success);
+            border-radius: var(--border-radius);
             padding: 24px;
             position: relative;
             overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .cluster-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
 
         .cluster-card::before {
@@ -618,10 +491,11 @@
         .cluster-date {
             font-size: 0.9rem;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .confidence-badge {
-            background: var(--gradient-success);
+            background: var(--eco-gradient-success);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -644,75 +518,136 @@
 
         .cluster-stat-label {
             font-size: 0.75rem;
-            color: var(--text-muted);
+            color: var(--text-tertiary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 700;
         }
 
         .cluster-stat-value {
             font-size: 1.3rem;
             font-weight: 800;
-            color: var(--success);
+            color: var(--eco-success);
             margin-top: 4px;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           RECOMMENDATION PANEL
-           ═══════════════════════════════════════════════════════════════ */
-        .recommendation {
-            background: var(--gradient-primary);
-            border-radius: 20px;
-            padding: 32px;
-            text-align: center;
-            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.4);
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
         }
 
-        .recommendation-action {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .recommendation-score {
-            font-size: 4rem;
-            font-weight: 900;
-            margin: 16px 0;
-            opacity: 0.95;
+        thead {
+            background: var(--eco-gradient-soft);
         }
 
-        .recommendation-rationale {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            backdrop-filter: blur(10px);
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--eco-primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
         }
 
-        .rationale-item {
+        td {
+            padding: 16px;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--eco-gradient-soft);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-buy {
+            background: var(--eco-gradient-success);
+            color: white;
+        }
+
+        .badge-sell {
+            background: var(--eco-gradient-danger);
+            color: white;
+        }
+
+        .badge-neutral {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+        }
+
+        /* Pagination */
+        .pagination {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px 20px;
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
         }
 
-        .rationale-item:last-child {
-            border-bottom: none;
+        .pagination button {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
         }
 
-        .rationale-item i {
-            color: rgba(255, 255, 255, 0.8);
+        .pagination button:hover:not(:disabled) {
+            background: var(--eco-gradient);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           RESPONSIVE
-           ═══════════════════════════════════════════════════════════════ */
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        /* Chart Container */
+        .chart-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
             .search-box {
                 flex-direction: column;
             }
@@ -749,160 +684,456 @@
             }
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           UTILITIES
-           ═══════════════════════════════════════════════════════════════ */
+        /* Utilities */
         .hidden {
             display: none !important;
         }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mt-4 {
-            margin-top: 32px;
-        }
-
-        .mb-4 {
-            margin-bottom: 32px;
-        }
     </style>
 </head>
-
 <body>
-    <!-- ═══════════════════════════════════════════════════════════════
-         HEADER
-         ═══════════════════════════════════════════════════════════════ -->
-    <header class="header">
-        <div class="header-content">
-            <h1><i class="fas fa-chart-line"></i> Insider Flow Tracker</h1>
-            <p>Real-time insider trading detection • Advanced pattern analysis • Buy/Sell signals</p>
-        </div>
-    </header>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         SEARCH BAR + OPTIONS
-         ═══════════════════════════════════════════════════════════════ -->
-    <div class="search-container">
-        <div class="search-box">
-            <i class="fas fa-search" style="color: var(--text-muted); font-size: 1.2rem;"></i>
-            <input 
-                type="text" 
-                id="tickerInput" 
-                placeholder="Enter a ticker (e.g., AAPL, TSLA, NVDA...)"
-                autocomplete="off"
-            >
-            <button class="search-btn" id="analyzeBtn">
-                <i class="fas fa-chart-bar"></i> Analyze
-            </button>
-        </div>
-        
-        <div class="search-options">
-            <div class="option-group">
-                <label for="periodSelect">
-                    <i class="fas fa-calendar-alt"></i> Period
-                </label>
-                <select id="periodSelect">
-                    <option value="0.25">Last week</option>
-                    <option value="1">Last month</option>
-                    <option value="3">Last 3 months</option>
-                    <option value="6">Last 6 months</option>
-                    <option value="12" selected>1 year</option>
-                    <option value="24">2 years</option>
-                </select>
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        <!-- Sidebar -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
             </div>
             
-            <div class="option-group">
-                <label for="filingsSelect">
-                    <i class="fas fa-file-alt"></i> Number of filings
-                </label>
-                <select id="filingsSelect">
-                    <option value="25">25 filings</option>
-                    <option value="50">50 filings</option>
-                    <option value="100" selected>100 filings</option>
-                    <option value="200">200 filings</option>
-                    <option value="500">500 filings</option>
-                </select>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link active'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <!-- Main Content -->
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title'><i class="fas fa-user-secret"></i> Insider Flow Tracker</h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' id='refreshBtn' title='Refresh Analysis'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- Search Bar + Options -->
+                <div class="section">
+                    <div class='dashboard-toolbar' style="margin-bottom: 24px;">
+                        <div class='toolbar-left'>
+                            <span class='dashboard-subtitle'>
+                                <i class='fas fa-database'></i>
+                                Real-time insider trading detection • Advanced pattern analysis • Buy/Sell signals
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search" style="color: var(--text-tertiary); font-size: 1.2rem;"></i>
+                            <input 
+                                type="text" 
+                                id="tickerInput" 
+                                placeholder="Enter a ticker (e.g., AAPL, TSLA, NVDA...)"
+                                autocomplete="off"
+                            >
+                            <button class="search-btn" id="analyzeBtn">
+                                <i class="fas fa-chart-bar"></i> Analyze
+                            </button>
+                        </div>
+                        
+                        <div class="search-options">
+                            <div class="option-group">
+                                <label for="periodSelect">
+                                    <i class="fas fa-calendar-alt"></i> Period
+                                </label>
+                                <select id="periodSelect">
+                                    <option value="0.25">Last week</option>
+                                    <option value="1">Last month</option>
+                                    <option value="3">Last 3 months</option>
+                                    <option value="6">Last 6 months</option>
+                                    <option value="12" selected>1 year</option>
+                                    <option value="24">2 years</option>
+                                </select>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="filingsSelect">
+                                    <i class="fas fa-file-alt"></i> Number of filings
+                                </label>
+                                <select id="filingsSelect">
+                                    <option value="25">25 filings</option>
+                                    <option value="50">50 filings</option>
+                                    <option value="100" selected>100 filings</option>
+                                    <option value="200">200 filings</option>
+                                    <option value="500">500 filings</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading hidden">
+                    <div class="spinner"></div>
+                    <h2>Analysis in progress...</h2>
+                    <p style="color: var(--text-secondary); margin-top: 12px;" id="loadingMessage">
+                        Fetching Form 4 filings, analyzing patterns, calculating scores...
+                    </p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <!-- Results Container -->
+                <div id="resultsContainer" class="hidden">
+                    <!-- Recommendation Panel -->
+                    <div class="recommendation" id="recommendationPanel"></div>
+
+                    <!-- Score Cards -->
+                    <div class="score-container" id="scoreContainer"></div>
+
+                    <!-- Alerts -->
+                    <div class="section">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-bell"></i> Smart Alerts
+                        </h2>
+                        <div class="alerts-grid" id="alertsContainer"></div>
+                    </div>
+
+                    <!-- Cluster Buying -->
+                    <div class="section" id="clusterSection">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-users"></i> Cluster Buying Detected
+                        </h2>
+                        <div class="cluster-grid" id="clusterContainer"></div>
+                    </div>
+
+                    <!-- Role Analysis -->
+                    <div class="section">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-user-tie"></i> Analysis by Role
+                        </h2>
+                        <div class="chart-wrapper">
+                            <canvas id="roleChart" height="100"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="section">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-list"></i> Recent Transactions
+                        </h2>
+                        <div class="table-container" id="transactionsTable"></div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-shield-alt'></i> Insider Flow Tracker - Data from SEC EDGAR (U.S. Securities and Exchange Commission)
+                    </p>
+                </footer>
             </div>
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         CONTAINER
-         ═══════════════════════════════════════════════════════════════ -->
-    <div class="container">
-        <!-- Loading State -->
-        <div id="loadingState" class="loading hidden">
-            <div class="spinner"></div>
-            <h2>Analysis in progress...</h2>
-            <p style="color: var(--text-secondary); margin-top: 12px;" id="loadingMessage">
-                Fetching Form 4 filings, analyzing patterns, calculating scores...
-            </p>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            <div class="progress-text" id="progressText">0%</div>
-        </div>
-
-        <!-- Results Container -->
-        <div id="resultsContainer" class="hidden">
-            <!-- Recommendation Panel -->
-            <div class="recommendation" id="recommendationPanel"></div>
-
-            <!-- Score Cards -->
-            <div class="score-container mt-4" id="scoreContainer"></div>
-
-            <!-- Alerts -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-bell"></i> Smart Alerts
-                    </h2>
-                </div>
-                <div class="alerts-grid" id="alertsContainer"></div>
-            </div>
-
-            <!-- Cluster Buying -->
-            <div class="card mt-4" id="clusterSection">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-users"></i> Cluster Buying Detected
-                    </h2>
-                </div>
-                <div class="cluster-grid" id="clusterContainer"></div>
-            </div>
-
-            <!-- Role Analysis -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-user-tie"></i> Analysis by Role
-                    </h2>
-                </div>
-                <canvas id="roleChart" height="100"></canvas>
-            </div>
-
-            <!-- Recent Transactions -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-list"></i> Recent Transactions
-                    </h2>
-                </div>
-                <div class="table-container" id="transactionsTable"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS
-         ═══════════════════════════════════════════════════════════════ -->
-    
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src="assets/js/sec-form4-client.js"></script>
     <script src="assets/js/form4-parser.js"></script>
     <script src="assets/js/insider-analytics-engine.js"></script>
 
+    <!-- Chatbot Scripts -->
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- User Menu Init -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) return;
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    freshDropdown.classList.toggle('active');
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
+
+    <!-- Main Application Logic -->
     <script>
         // ═══════════════════════════════════════════════════════════════
         // MAIN APPLICATION LOGIC
@@ -1046,7 +1277,7 @@
                     ${actionIcons[recommendation.action]} ${recommendation.action}
                 </div>
                 <div class="recommendation-score">${overallScore.score}/100</div>
-                <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">
+                <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9; position: relative; z-index: 1;">
                     Confidence: ${recommendation.confidence}
                 </div>
                 <div class="recommendation-rationale">
@@ -1113,7 +1344,7 @@
             
             if (!alerts || alerts.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <div style="text-align: center; padding: 40px; color: var(--text-tertiary);">
                         <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
                         <p>No critical alerts detected</p>
                     </div>
@@ -1231,7 +1462,7 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: '#f1f5f9',
+                                color: 'var(--text-primary)',
                                 font: { size: 14, weight: 'bold' }
                             }
                         },
@@ -1247,21 +1478,21 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 callback: function(value) {
                                     return '$' + formatNumber(value);
                                 }
                             },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'var(--glass-border)'
                             }
                         },
                         x: {
                             ticks: {
-                                color: '#94a3b8'
+                                color: 'var(--text-secondary)'
                             },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'var(--glass-border)'
                             }
                         }
                     }
@@ -1285,7 +1516,7 @@
             console.log(`📋 Total transactions: ${allTransactions.length}`);
 
             if (allTransactions.length === 0) {
-                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">No transactions to display</p>';
+                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-tertiary);">No transactions to display</p>';
                 return;
             }
 
@@ -1393,10 +1624,47 @@
         });
 
         document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
+        
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            if (document.getElementById('tickerInput').value.trim()) {
+                analyzeInsiderActivity();
+            } else {
+                alert('⚠ Please enter a ticker first');
+            }
+        });
 
         window.addEventListener('load', () => {
             document.getElementById('tickerInput').focus();
         });
     </script>
+
+    <!-- Chatbot Initialization -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🤖 Initialisation du chatbot FinanceGPT...');
+        
+        if (typeof ChatbotConfig === 'undefined') {
+            console.error('❌ ChatbotConfig non défini !');
+            return;
+        }
+        
+        console.log('✅ ChatbotConfig chargé');
+        
+        if (typeof ChatbotUI === 'undefined') {
+            console.error('❌ ChatbotUI non défini !');
+            return;
+        }
+        
+        console.log('✅ ChatbotUI chargé');
+        
+        try {
+            window.financialChatbot = new ChatbotUI(ChatbotConfig);
+            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+        }
+    });
+    </script>
+
 </body>
 </html>
