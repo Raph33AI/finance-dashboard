@@ -333,11 +333,11 @@
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 SEC FORM 4 API CLIENT - AlphaVault AI (VERSION ULTRA-OPTIMIZED)
+ * 📊 SEC FORM 4 API CLIENT - AlphaVault AI (VERSION CONFIGURABLE)
  * ═══════════════════════════════════════════════════════════════════
  * Client spécialisé pour récupérer et analyser les Form 4 (Insider Trading)
- * ✅ AUCUNE LIMITE ARBITRAIRE - RÉCUPÈRE TOUTES LES TRANSACTIONS
- * ✅ PAGINATION AUTOMATIQUE COMPLÈTE
+ * ✅ CONFIGURABLE PAR L'UTILISATEUR (nombre de filings + période)
+ * ✅ PAGINATION AUTOMATIQUE
  * ✅ RATE LIMITING RESPECTÉ
  * ═══════════════════════════════════════════════════════════════════
  */
@@ -355,12 +355,12 @@ class SECForm4Client {
      */
     async getAllForm4Transactions(options = {}) {
         const {
-            maxTransactions = Infinity, // ✅ CORRECTION : Illimité par défaut
+            maxTransactions = 100,
             days = 90,
             forceRefresh = false
         } = options;
 
-        console.log(`🌐 Loading ALL Form 4 transactions from last ${days} days...`);
+        console.log(`🌐 Loading Form 4 transactions (max ${maxTransactions} from last ${days} days)...`);
 
         const cacheKey = `all-form4-${days}-${maxTransactions}`;
         
@@ -471,23 +471,26 @@ class SECForm4Client {
      */
     async getForm4ByCIK(cik, options = {}) {
         const {
-            limit = Infinity, // ✅ CORRECTION : Illimité par défaut
+            limit = 100,
             startDate = null,
             endDate = null
         } = options;
 
         try {
-            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker (unlimited)...`);
+            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker (max ${limit})...`);
             
             let allFilings = [];
             let start = 0;
             const batchSize = 100; // SEC limite par requête
             let hasMore = true;
 
-            // ✅ NOUVELLE PAGINATION AUTOMATIQUE
+            // ✅ PAGINATION AUTOMATIQUE avec limite
             while (hasMore && allFilings.length < limit) {
+                const remaining = limit - allFilings.length;
+                const currentBatch = Math.min(batchSize, remaining);
+
                 const response = await fetch(
-                    `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${batchSize}&start=${start}`
+                    `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${currentBatch}&start=${start}`
                 );
 
                 if (!response.ok) {
@@ -505,7 +508,7 @@ class SECForm4Client {
                 allFilings.push(...data.filings);
                 console.log(`   📥 Batch ${Math.floor(start / batchSize) + 1}: ${data.filings.length} filings (total: ${allFilings.length})`);
 
-                hasMore = data.filings.length === batchSize;
+                hasMore = data.filings.length === currentBatch && allFilings.length < limit;
                 start += batchSize;
 
                 await this.sleep(150); // Rate limiting
@@ -577,16 +580,16 @@ class SECForm4Client {
 
     /**
      * 📊 Récupère l'historique complet des insiders d'une entreprise
-     * ✅ CORRECTION MAJEURE : Parse TOUS les filings (pas de slice(50))
+     * ✅ CONFIGURABLE : maxFilings et months
      */
     async getCompanyInsiderHistory(ticker, months = 12, options = {}) {
         const {
-            maxFilings = Infinity, // ✅ NOUVEAU : Limite optionnelle
-            verbose = true
+            maxFilings = 100, // ✅ Valeur par défaut raisonnable
+            verbose = false // ✅ Désactive les logs détaillés par défaut
         } = options;
 
         try {
-            console.log(`📊 Fetching insider history for ${ticker} (${months} months, max ${maxFilings === Infinity ? '∞' : maxFilings} filings)`);
+            console.log(`📊 Fetching insider history for ${ticker} (${months} months, max ${maxFilings} filings)`);
             
             const cik = await this.getCIKFromTicker(ticker);
             
@@ -595,14 +598,14 @@ class SECForm4Client {
             startDate.setMonth(startDate.getMonth() - months);
 
             const filings = await this.getForm4ByCIK(cik, {
-                limit: Infinity, // ✅ CORRECTION : Récupère TOUS les Form 4 disponibles
+                limit: maxFilings, // ✅ Utilise la limite de l'utilisateur
                 startDate: this.formatDate(startDate),
                 endDate: this.formatDate(endDate)
             });
 
             console.log(`📄 Got ${filings.length} Form 4 filings for ${ticker}`);
 
-            if (filings.length > 0) {
+            if (filings.length > 0 && verbose) {
                 console.log('🔍 First filing structure:', filings[0]);
             }
 
@@ -610,14 +613,9 @@ class SECForm4Client {
             let successCount = 0;
             let errorCount = 0;
 
-            // ✅ CORRECTION MAJEURE : Suppression du .slice(0, 50)
-            const filingsToProcess = maxFilings === Infinity 
-                ? filings 
-                : filings.slice(0, maxFilings);
+            console.log(`🔄 Processing ${filings.length} Form 4 filings...`);
 
-            console.log(`🔄 Processing ${filingsToProcess.length} Form 4 filings...`);
-
-            for (const filing of filingsToProcess) {
+            for (const filing of filings) {
                 try {
                     const accessionNumber = filing.accessionNumber;
                     
@@ -649,8 +647,9 @@ class SECForm4Client {
                         });
                         successCount++;
                         
-                        if (verbose && successCount % 10 === 0) {
-                            console.log(`   ✅ Progress: ${successCount}/${filingsToProcess.length} parsed`);
+                        // ✅ Affiche la progression tous les 25 filings
+                        if (successCount % 25 === 0) {
+                            console.log(`   ✅ Progress: ${successCount}/${filings.length} parsed`);
                         }
                     } else {
                         errorCount++;
@@ -673,10 +672,10 @@ class SECForm4Client {
                 transactions,
                 stats: {
                     totalFilings: filings.length,
-                    filingsProcessed: filingsToProcess.length,
+                    filingsProcessed: filings.length,
                     parsedSuccessfully: successCount,
                     parseErrors: errorCount,
-                    successRate: Math.round((successCount / filingsToProcess.length) * 100)
+                    successRate: filings.length > 0 ? Math.round((successCount / filings.length) * 100) : 0
                 }
             };
 
@@ -744,7 +743,7 @@ class SECForm4Client {
 
     calculateClusterConfidence(cluster) {
         const insiderCount = new Set(cluster.map(c => c.reportingOwner?.name)).size;
-        const totalValue = cluster.reduce((sum, c) => sum + (c.totalValue || 0), 0);
+        const totalValue = cluster.reduce((sum, c => sum + (c.totalValue || 0), 0);
         
         let score = 50;
         score += Math.min(insiderCount * 10, 30);

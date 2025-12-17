@@ -143,7 +143,7 @@
             color: var(--text-primary);
             font-size: 1.1rem;
             padding: 14px 0;
-            height: 48px; /* ✅ CORRECTION : Hauteur fixe */
+            height: 48px;
         }
 
         .search-box input::placeholder {
@@ -161,10 +161,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            height: 48px; /* ✅ CORRECTION : Hauteur fixe identique */
-            display: flex; /* ✅ CORRECTION : Flexbox pour centrage */
-            align-items: center; /* ✅ CORRECTION : Centre verticalement */
-            gap: 8px; /* ✅ CORRECTION : Espace entre icône et texte */
+            height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .search-btn:hover {
@@ -174,6 +174,81 @@
 
         .search-btn:active {
             transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           SEARCH OPTIONS
+           ═══════════════════════════════════════════════════════════════ */
+        .search-options {
+            max-width: 800px;
+            margin: 16px auto 0;
+            padding: 0 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .option-group {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .option-group:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-group label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .option-group label i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .option-group select {
+            flex: 1;
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .option-group select:hover {
+            border-color: var(--primary);
+            background: var(--bg-card);
+        }
+
+        .option-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-group select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 8px;
         }
 
         /* ═══════════════════════════════════════════════════════════════
@@ -584,6 +659,16 @@
                 justify-content: center;
             }
 
+            .search-options {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .option-group {
+                min-width: auto;
+                width: 100%;
+            }
+
             .score-container {
                 grid-template-columns: 1fr;
             }
@@ -633,7 +718,7 @@
     </header>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SEARCH BAR
+         SEARCH BAR + OPTIONS
          ═══════════════════════════════════════════════════════════════ -->
     <div class="search-container">
         <div class="search-box">
@@ -647,6 +732,36 @@
             <button class="search-btn" id="analyzeBtn">
                 <i class="fas fa-chart-bar"></i> Analyser
             </button>
+        </div>
+        
+        <!-- ✅ NOUVEAUX SÉLECTEURS -->
+        <div class="search-options">
+            <div class="option-group">
+                <label for="periodSelect">
+                    <i class="fas fa-calendar-alt"></i> Période
+                </label>
+                <select id="periodSelect">
+                    <option value="0.25">Dernière semaine</option>
+                    <option value="1">Dernier mois</option>
+                    <option value="3">3 derniers mois</option>
+                    <option value="6">6 derniers mois</option>
+                    <option value="12" selected>1 an</option>
+                    <option value="24">2 ans</option>
+                </select>
+            </div>
+            
+            <div class="option-group">
+                <label for="filingsSelect">
+                    <i class="fas fa-file-alt"></i> Nombre de filings
+                </label>
+                <select id="filingsSelect">
+                    <option value="25">25 filings</option>
+                    <option value="50">50 filings</option>
+                    <option value="100" selected>100 filings</option>
+                    <option value="200">200 filings</option>
+                    <option value="500">500 filings</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -739,10 +854,10 @@
 
         const analyticsEngine = new InsiderAnalyticsEngine();
         let currentAnalysis = null;
-        let roleChartInstance = null; // ✅ Variable globale pour stocker le graphique
+        let roleChartInstance = null;
 
         /**
-         * 🚀 FONCTION PRINCIPALE D'ANALYSE
+         * 🚀 FONCTION PRINCIPALE D'ANALYSE (AVEC PARAMÈTRES UTILISATEUR)
          */
         async function analyzeInsiderActivity() {
             const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
@@ -752,6 +867,12 @@
                 return;
             }
 
+            // ✅ RÉCUPÈRE LES PARAMÈTRES DE L'UTILISATEUR
+            const months = parseFloat(document.getElementById('periodSelect').value);
+            const maxFilings = parseInt(document.getElementById('filingsSelect').value);
+
+            console.log(`🔍 Analyzing ${ticker} with ${maxFilings} filings over ${months} months...`);
+
             // Show loading
             document.getElementById('loadingState').classList.remove('hidden');
             document.getElementById('resultsContainer').classList.add('hidden');
@@ -759,9 +880,10 @@
             try {
                 console.log(`🔍 Analyzing insider activity for ${ticker}...`);
                 
-                // Lance l'analyse complète
+                // ✅ PASSE LES PARAMÈTRES À L'ANALYSE
                 currentAnalysis = await analyticsEngine.analyzeCompany(ticker, {
-                    months: 12,
+                    months: months,
+                    maxFilings: maxFilings,
                     includeDerivatives: true,
                     includePriceImpact: false,
                     includeNetworkAnalysis: true
@@ -809,7 +931,7 @@
                 document.getElementById('clusterSection').classList.add('hidden');
             }
 
-            // 5. Role Chart (AVANT le tableau pour éviter les erreurs)
+            // 5. Role Chart
             displayRoleChart(analysis.roleAnalysis);
 
             // 6. Transactions Table
@@ -997,7 +1119,7 @@
             const canvas = document.getElementById('roleChart');
             const ctx = canvas.getContext('2d');
             
-            // ✅ DESTRUCTION du graphique existant
+            // Détruit l'ancien graphique
             if (roleChartInstance !== null) {
                 console.log('🗑 Destroying previous chart...');
                 roleChartInstance.destroy();
@@ -1010,7 +1132,7 @@
 
             console.log('📊 Creating new chart...');
             
-            // ✅ CRÉATION et STOCKAGE du nouveau graphique
+            // Crée et stocke le nouveau graphique
             roleChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1084,7 +1206,11 @@
         function displayTransactionsTable(analysis) {
             const container = document.getElementById('transactionsTable');
             
-            // ✅ DIAGNOSTIC : Logs détaillés
+            // Prend les transactions depuis analysis.transactions
+            const transactions = (analysis.transactions || [])
+                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate))
+                .slice(0, 20);
+
             console.log('═══════════════════════════════════════════');
             console.log('🔍 DIAGNOSTIC displayTransactionsTable');
             console.log('═══════════════════════════════════════════');
@@ -1099,11 +1225,6 @@
                 console.log('📊 Last transaction insider:', analysis.transactions[analysis.transactions.length - 1].reportingOwner?.name);
             }
             
-            // ✅ CORRECTION : Prend les transactions depuis analysis.transactions
-            const transactions = (analysis.transactions || [])
-                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate))
-                .slice(0, 20);
-
             console.log('📋 Transactions triées et filtrées:', transactions.length);
             
             if (transactions.length > 0) {
@@ -1170,7 +1291,7 @@
             return num.toFixed(2);
         }
 
-        // ✅ Event listeners
+        // Event listeners
         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 analyzeInsiderActivity();
