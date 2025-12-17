@@ -116,6 +116,7 @@ class InsiderAnalyticsEngine {
                 ticker,
                 period: history.period,
                 transactionCount: history.transactions.length,
+                transactions: history.transactions, // ✅ AJOUT : transactions brutes
                 
                 // Scores principaux
                 overallScore,
@@ -228,7 +229,7 @@ class InsiderAnalyticsEngine {
      * Score agrégé de -100 (très bearish) à +100 (très bullish)
      */
     calculateInsiderSentiment(transactions, options = {}) {
-        // Option pour désactiver le calcul du trend (évite la récursion)
+        // ✅ CORRECTION : Option pour désactiver le calcul du trend (évite la récursion)
         const { includeTrend = true } = options;
 
         if (!transactions || transactions.length === 0) {
@@ -283,7 +284,7 @@ class InsiderAnalyticsEngine {
             dominantActivity: purchaseValue > saleValue ? 'BUYING' : 'SELLING',
             intensity: this.calculateIntensity(totalValue, totalCount),
             
-            // ⚠ CORRECTION: Évite la récursion infinie
+            // ✅ CORRECTION: Évite la récursion infinie
             trend: includeTrend ? this.calculateSentimentTrend(transactions) : null
         };
     }
@@ -1136,7 +1137,7 @@ class InsiderAnalyticsEngine {
     }
 
     calculateRoleSentiment(transactions) {
-        const sentiment = this.calculateInsiderSentiment(transactions);
+        const sentiment = this.calculateInsiderSentiment(transactions, { includeTrend: false });
         return sentiment.score;
     }
 

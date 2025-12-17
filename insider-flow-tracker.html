@@ -142,7 +142,8 @@
             outline: none;
             color: var(--text-primary);
             font-size: 1.1rem;
-            padding: 12px 0;
+            padding: 14px 0;
+            height: 48px; /* ✅ CORRECTION : Hauteur fixe */
         }
 
         .search-box input::placeholder {
@@ -160,6 +161,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            height: 48px; /* ✅ CORRECTION : Hauteur fixe identique */
+            display: flex; /* ✅ CORRECTION : Flexbox pour centrage */
+            align-items: center; /* ✅ CORRECTION : Centre verticalement */
+            gap: 8px; /* ✅ CORRECTION : Espace entre icône et texte */
         }
 
         .search-btn:hover {
@@ -576,6 +581,7 @@
 
             .search-btn {
                 width: 100%;
+                justify-content: center;
             }
 
             .score-container {
@@ -638,7 +644,7 @@
                 placeholder="Entrez un ticker (ex: AAPL, TSLA, NVDA...)"
                 autocomplete="off"
             >
-            <button class="search-btn" id="analyzeBtn"></button>
+            <button class="search-btn" id="analyzeBtn">
                 <i class="fas fa-chart-bar"></i> Analyser
             </button>
         </div>
@@ -733,16 +739,6 @@
 
         const analyticsEngine = new InsiderAnalyticsEngine();
         let currentAnalysis = null;
-
-        // Enter key support
-        document.getElementById('tickerInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                analyzeInsiderActivity();
-            }
-        });
-
-        // Event listener pour le bouton d'analyse
-        document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
 
         /**
          * 🚀 FONCTION PRINCIPALE D'ANALYSE
@@ -1074,10 +1070,10 @@
         function displayTransactionsTable(analysis) {
             const container = document.getElementById('transactionsTable');
             
-            // Prend les 20 premières transactions
-            const transactions = analysis.clusterActivity.clusters
-                .flatMap(c => c.transactions)
-                .slice(0, 20);
+            // ✅ CORRECTION : Prend les transactions depuis analysis.transactions
+            const transactions = (analysis.transactions || [])
+                .slice(0, 20)
+                .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate)); // Plus récentes en premier
 
             if (transactions.length === 0) {
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune transaction à afficher</p>';
@@ -1134,6 +1130,17 @@
             }
             return num.toFixed(2);
         }
+
+        // ✅ CORRECTION : Event listeners après définition des fonctions
+        // Enter key support
+        document.getElementById('tickerInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                analyzeInsiderActivity();
+            }
+        });
+
+        // Button click support
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
 
         // Auto-focus on input
         window.addEventListener('load', () => {
