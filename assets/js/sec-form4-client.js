@@ -584,8 +584,8 @@ class SECForm4Client {
      */
     async getCompanyInsiderHistory(ticker, months = 12, options = {}) {
         const {
-            maxFilings = 100, // ✅ Valeur par défaut raisonnable
-            verbose = false // ✅ Désactive les logs détaillés par défaut
+            maxFilings = 100,
+            verbose = false
         } = options;
 
         try {
@@ -598,7 +598,7 @@ class SECForm4Client {
             startDate.setMonth(startDate.getMonth() - months);
 
             const filings = await this.getForm4ByCIK(cik, {
-                limit: maxFilings, // ✅ Utilise la limite de l'utilisateur
+                limit: maxFilings,
                 startDate: this.formatDate(startDate),
                 endDate: this.formatDate(endDate)
             });
@@ -647,7 +647,7 @@ class SECForm4Client {
                         });
                         successCount++;
                         
-                        // ✅ Affiche la progression tous les 25 filings
+                        // Affiche la progression tous les 25 filings
                         if (successCount % 25 === 0) {
                             console.log(`   ✅ Progress: ${successCount}/${filings.length} parsed`);
                         }
@@ -743,7 +743,7 @@ class SECForm4Client {
 
     calculateClusterConfidence(cluster) {
         const insiderCount = new Set(cluster.map(c => c.reportingOwner?.name)).size;
-        const totalValue = cluster.reduce((sum, c => sum + (c.totalValue || 0), 0);
+        const totalValue = cluster.reduce((sum, c) => sum + (c.totalValue || 0), 0); // ✅ CORRECTION : Parenthèse ajoutée
         
         let score = 50;
         score += Math.min(insiderCount * 10, 30);
