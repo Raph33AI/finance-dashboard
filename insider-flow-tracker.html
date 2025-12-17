@@ -11,6 +11,10 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- Vis.js Network (pour l'analyse de réseau) -->
+    <script src="https://unpkg.com/vis-network@9.1.6/dist/vis-network.min.js"></script>
+    <link href="https://unpkg.com/vis-network@9.1.6/dist/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
@@ -280,6 +284,14 @@
                     <h1 class='page-title'><i class="fas fa-user-secret"></i> Insider Flow Tracker</h1>
                 </div>
                 <div class='header-right'>
+                    <button class='dashboard-btn' id='compareBtn' title='Compare Companies'>
+                        <i class='fas fa-exchange-alt'></i>
+                        <span class='btn-text'>Compare</span>
+                    </button>
+                    <button class='dashboard-btn' id='networkBtn' title='Network Analysis'>
+                        <i class='fas fa-project-diagram'></i>
+                        <span class='btn-text'>Network</span>
+                    </button>
                     <button class='dashboard-btn' id='refreshBtn' title='Refresh Analysis'>
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh</span>
@@ -295,7 +307,7 @@
                         <div class='toolbar-left'>
                             <span class='dashboard-subtitle'>
                                 <i class='fas fa-database'></i>
-                                Real-time insider trading detection • Advanced pattern analysis • Buy/Sell signals
+                                Real-time insider trading detection • Advanced pattern analysis • AI-powered recommendations
                             </span>
                         </div>
                     </div>
@@ -362,8 +374,20 @@
 
                 <!-- Results Container -->
                 <div id="resultsContainer" class="hidden">
-                    <!-- Recommendation Panel -->
-                    <div class="recommendation" id="recommendationPanel"></div>
+                    
+                    <!-- 🤖 ALPHY AI RECOMMENDATION (NOUVELLE SECTION ULTRA-DÉTAILLÉE) -->
+                    <div class="section alphy-recommendation-section">
+                        <div class="alphy-header">
+                            <div class="alphy-logo">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="alphy-title">
+                                <h2>Alphy AI Recommendation</h2>
+                                <p>Advanced AI-powered insider trading analysis</p>
+                            </div>
+                        </div>
+                        <div id="alphyRecommendationPanel" class="alphy-panel"></div>
+                    </div>
 
                     <!-- Score Cards -->
                     <div class="score-container" id="scoreContainer"></div>
@@ -374,6 +398,14 @@
                             <i class="fas fa-bell"></i> Smart Alerts
                         </h2>
                         <div class="alerts-grid" id="alertsContainer"></div>
+                    </div>
+
+                    <!-- Advanced Pattern Analysis -->
+                    <div class="section">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-brain"></i> Advanced Pattern Analysis
+                        </h2>
+                        <div class="pattern-grid" id="patternContainer"></div>
                     </div>
 
                     <!-- Cluster Buying -->
@@ -391,6 +423,16 @@
                         </h2>
                         <div class="chart-wrapper">
                             <canvas id="roleChart" height="100"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Temporal Heatmap -->
+                    <div class="section">
+                        <h2 class='section-title gradient-title'>
+                            <i class="fas fa-fire"></i> Temporal Activity Heatmap
+                        </h2>
+                        <div class="chart-wrapper">
+                            <canvas id="heatmapChart" height="80"></canvas>
                         </div>
                     </div>
 
@@ -412,12 +454,69 @@
         </div>
     </div>
 
+    <!-- 🆕 MODAL: COMPARAISON MULTI-ENTREPRISES -->
+    <div id="comparisonModal" class="modal hidden">
+        <div class="modal-content modal-xl">
+            <div class="modal-header">
+                <h2><i class="fas fa-exchange-alt"></i> Compare Companies</h2>
+                <button class="modal-close" id="closeComparisonModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="comparison-search">
+                    <input type="text" id="comparisonTickerInput" placeholder="Add tickers (e.g., AAPL, TSLA, MSFT...)" />
+                    <button class="primary-btn" id="addComparisonBtn">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+                <div class="comparison-tags" id="comparisonTags"></div>
+                <button class="primary-btn" id="runComparisonBtn" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-chart-bar"></i> Run Comparison
+                </button>
+                <div id="comparisonResults" class="hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🆕 MODAL: ANALYSE DE RÉSEAU -->
+    <div id="networkModal" class="modal hidden">
+        <div class="modal-content modal-xl">
+            <div class="modal-header">
+                <h2><i class="fas fa-project-diagram"></i> Network Analysis</h2>
+                <button class="modal-close" id="closeNetworkModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="network-controls">
+                    <button class="network-btn" id="showFirstDegree">
+                        <i class="fas fa-circle"></i> 1st Degree
+                    </button>
+                    <button class="network-btn" id="showSecondDegree">
+                        <i class="fas fa-dot-circle"></i> 2nd Degree
+                    </button>
+                    <button class="network-btn" id="showAllNodes">
+                        <i class="fas fa-globe"></i> All Nodes
+                    </button>
+                </div>
+                <div id="networkGraph" style="width: 100%; height: 600px; background: var(--bg-secondary); border-radius: 12px; margin-top: 20px;"></div>
+                <div id="networkStats" class="network-stats"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src="assets/js/sec-form4-client.js"></script>
     <script src="assets/js/form4-parser.js"></script>
     <script src="assets/js/insider-analytics-engine.js"></script>
+
+    <!-- 🆕 NEW SCRIPTS -->
+    <script src="assets/js/insider-comparison-engine.js"></script>
+    <script src="assets/js/insider-network-graph.js"></script>
+    <script src="assets/js/insider-pattern-detector.js"></script>
 
     <!-- Main App Script -->
     <script src="assets/js/insider-flow-tracker.js"></script>
