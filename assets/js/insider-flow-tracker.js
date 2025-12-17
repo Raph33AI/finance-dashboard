@@ -559,9 +559,9 @@
  * AlphaVault AI - Advanced Insider Trading Analysis Dashboard
  * 
  * Features:
- * ✅ Alphy AI Recommendation (detailed analysis)
- * ✅ Multi-company comparison (integrated)
- * ✅ Network graph (1st/2nd degree connections)
+ * ✅ Alphy AI Recommendation (simplified, no robot logo)
+ * ✅ Multi-company comparison (inline, no modal)
+ * ✅ Network graph (inline, no modal)
  * ✅ Advanced pattern detection
  * ✅ Temporal heatmap
  * ✅ Anomaly detection
@@ -732,6 +732,10 @@
             });
 
             const counts = Object.values(monthlyCount);
+            if (counts.length === 0) {
+                return { detected: false };
+            }
+
             const maxCount = Math.max(...counts);
             const avgCount = counts.reduce((a, b) => a + b, 0) / counts.length;
 
@@ -760,6 +764,11 @@
             });
 
             const total = Object.values(roleCounts).reduce((a, b) => a + b, 0);
+            
+            if (total === 0 || Object.keys(roleCounts).length === 0) {
+                return { detected: false };
+            }
+
             const dominantRole = Object.keys(roleCounts).reduce((a, b) => 
                 roleCounts[a] > roleCounts[b] ? a : b
             );
@@ -934,6 +943,17 @@
         render(transactions) {
             if (!transactions || transactions.length === 0) {
                 console.warn('⚠ No transactions available for network graph');
+                const container = document.getElementById('networkGraph');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-secondary);">
+                            <div style="text-align: center;">
+                                <i class="fas fa-project-diagram" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
+                                <p>No transaction data available for network visualization</p>
+                            </div>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -1159,7 +1179,6 @@
 
             if (degree === 1) {
                 // Show only 1st degree (company + direct insiders)
-                const firstDegreeNodes = this.nodes.filter(n => n.level <= 1).map(n => n.id);
                 const firstDegreeEdges = this.edges.filter(e => e.from === 'company' || e.to === 'company');
 
                 this.network.setData({
@@ -1202,7 +1221,7 @@
     let comparisonTickers = [];
 
     // ═══════════════════════════════════════════════════════════════
-    // MAIN ANALYSIS FUNCTION (✅ CORRECTION DU SPINNER)
+    // MAIN ANALYSIS FUNCTION
     // ═══════════════════════════════════════════════════════════════
     async function analyzeInsiderActivity() {
         const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
@@ -1217,7 +1236,6 @@
 
         console.log(`🔍 Analyzing ${ticker} with ${maxFilings} filings over ${months} months...`);
 
-        // Show loading with progress
         const loadingState = document.getElementById('loadingState');
         const resultsContainer = document.getElementById('resultsContainer');
         
@@ -1243,14 +1261,12 @@
 
             console.log('✅ Analysis complete:', currentAnalysis);
 
-            // ✅ CORRECTION: Vérifier si l'analyse est valide
             if (!currentAnalysis || currentAnalysis.error) {
                 throw new Error(currentAnalysis?.error || 'Analysis failed - no data returned');
             }
 
             updateProgress(95, 'Detecting advanced patterns...');
             
-            // ✅ Advanced pattern detection
             if (currentAnalysis.transactions && currentAnalysis.transactions.length > 0) {
                 currentAnalysis.patterns = patternDetector.detectPatterns(currentAnalysis.transactions);
             }
@@ -1266,7 +1282,6 @@
             console.error('❌ Analysis error:', error);
             showNotification(`Error: ${error.message}`, 'error');
             
-            // ✅ CORRECTION: Afficher un message d'erreur dans l'interface
             resultsContainer.innerHTML = `
                 <div class="error-state">
                     <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--eco-danger); margin-bottom: 20px;"></i>
@@ -1280,7 +1295,6 @@
             resultsContainer.classList.remove('hidden');
             
         } finally {
-            // ✅ CORRECTION CRITIQUE: Toujours masquer le loading state
             console.log('🛑 Hiding loading state...');
             loadingState.classList.add('hidden');
         }
@@ -1312,13 +1326,10 @@
 
         document.getElementById('resultsContainer').classList.remove('hidden');
 
-        // 🤖 ALPHY AI RECOMMENDATION (NOUVELLE SECTION)
         displayAlphyRecommendation(analysis);
-        
         displayScoreCards(analysis);
         displayAlerts(analysis.alerts);
 
-        // Advanced patterns
         if (analysis.patterns) {
             displayPatterns(analysis.patterns);
         }
@@ -1332,6 +1343,10 @@
 
         displayRoleChart(analysis.roleAnalysis);
         displayTemporalHeatmap(analysis.transactions);
+        
+        // Render network graph
+        networkGraph.render(analysis.transactions);
+        
         displayTransactionsTable(analysis);
 
         document.getElementById('resultsContainer').scrollIntoView({ 
@@ -1341,7 +1356,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🤖 ALPHY AI RECOMMENDATION (ULTRA-DÉTAILLÉE)
+    // 🤖 ALPHY AI RECOMMENDATION (SIMPLIFIED - NO ROBOT, NO BIG BADGE)
     // ═══════════════════════════════════════════════════════════════
     function displayAlphyRecommendation(analysis) {
         const panel = document.getElementById('alphyRecommendationPanel');
@@ -1349,117 +1364,114 @@
         const overallScore = analysis.overallScore;
 
         const actionColors = {
-            'STRONG BUY': { gradient: 'linear-gradient(135deg, #10b981, #059669)', icon: '🚀' },
-            'BUY': { gradient: 'linear-gradient(135deg, #10b981, #34d399)', icon: '📈' },
-            'HOLD': { gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)', icon: '⏸' },
-            'SELL': { gradient: 'linear-gradient(135deg, #ef4444, #f87171)', icon: '📉' },
-            'STRONG SELL': { gradient: 'linear-gradient(135deg, #dc2626, #b91c1c)', icon: '🔻' }
+            'STRONG BUY': { color: '#10b981', icon: '🚀' },
+            'BUY': { color: '#10b981', icon: '📈' },
+            'HOLD': { color: '#f59e0b', icon: '⏸' },
+            'SELL': { color: '#ef4444', icon: '📉' },
+            'STRONG SELL': { color: '#ef4444', icon: '🔻' }
         };
 
         const config = actionColors[recommendation.action] || actionColors['HOLD'];
-
-        // AI-generated detailed analysis
         const aiAnalysis = generateAIAnalysis(analysis);
 
         panel.innerHTML = `
-            <div class="alphy-grid">
-                <!-- Left: Action + Score -->
-                <div class="alphy-action-card" style="background: ${config.gradient};">
-                    <div class="alphy-action-icon">${config.icon}</div>
-                    <div class="alphy-action-label">${recommendation.action}</div>
-                    <div class="alphy-confidence">
-                        <i class="fas fa-check-circle"></i>
-                        ${recommendation.confidence} Confidence
-                    </div>
-                    <div class="alphy-score-badge">
-                        <span class="score-value">${overallScore.score}</span>
-                        <span class="score-label">/100</span>
+            <div class="alphy-simple-grid">
+                <!-- Action Summary -->
+                <div class="alphy-summary">
+                    <div class="alphy-action-row">
+                        <div class="alphy-action-icon-small">${config.icon}</div>
+                        <div>
+                            <div class="alphy-action-text" style="color: ${config.color};">${recommendation.action}</div>
+                            <div class="alphy-score-text">Score: <strong>${overallScore.score}/100</strong> • Confidence: <strong>${recommendation.confidence}</strong></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Right: Detailed Analysis -->
-                <div class="alphy-details">
-                    <div class="alphy-section">
-                        <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
-                        <div class="insight-list">
-                            ${recommendation.rationale.map(r => `
-                                <div class="insight-item">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>${r}</span>
-                                </div>
-                            `).join('')}
+                <!-- Key Insights -->
+                <div class="alphy-section">
+                    <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
+                    <div class="insight-list">
+                        ${recommendation.rationale.map(r => `
+                            <div class="insight-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>${r}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- AI Analysis -->
+                <div class="alphy-section">
+                    <h3><i class="fas fa-brain"></i> AI Analysis</h3>
+                    <p class="ai-text">${aiAnalysis.summary}</p>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="alphy-metrics-grid">
+                    <div class="alphy-metric-compact">
+                        <div class="metric-icon-small" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Insider Sentiment</div>
+                            <div class="metric-value">${analysis.insiderSentiment.label}</div>
                         </div>
                     </div>
 
-                    <div class="alphy-section">
-                        <h3><i class="fas fa-brain"></i> AI Analysis</h3>
-                        <p class="ai-text">${aiAnalysis.summary}</p>
-                    </div>
-
-                    <div class="alphy-metrics-grid">
-                        <div class="alphy-metric">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-label">Insider Sentiment</div>
-                                <div class="metric-value">${analysis.insiderSentiment.label}</div>
-                            </div>
+                    <div class="alphy-metric-compact">
+                        <div class="metric-icon-small" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-users"></i>
                         </div>
-
-                        <div class="alphy-metric">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-label">Active Insiders</div>
-                                <div class="metric-value">${analysis.uniqueInsiders || 'N/A'}</div>
-                            </div>
-                        </div>
-
-                        <div class="alphy-metric">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-label">Risk Level</div>
-                                <div class="metric-value">${aiAnalysis.riskLevel}</div>
-                            </div>
-                        </div>
-
-                        <div class="alphy-metric">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-trophy"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-label">Data Quality</div>
-                                <div class="metric-value">${analysis.dataQuality}</div>
-                            </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Active Insiders</div>
+                            <div class="metric-value">${analysis.uniqueInsiders || 'N/A'}</div>
                         </div>
                     </div>
 
-                    <div class="alphy-section">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Risk Factors</h3>
-                        <div class="risk-list">
-                            ${aiAnalysis.risks.map(risk => `
-                                <div class="risk-item">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <span>${risk}</span>
-                                </div>
-                            `).join('')}
+                    <div class="alphy-metric-compact">
+                        <div class="metric-icon-small" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Risk Level</div>
+                            <div class="metric-value">${aiAnalysis.riskLevel}</div>
                         </div>
                     </div>
 
-                    <div class="alphy-section">
-                        <h3><i class="fas fa-bullseye"></i> Action Items</h3>
-                        <div class="action-list">
-                            ${aiAnalysis.actions.map(action => `
-                                <div class="action-item">
-                                    <i class="fas fa-arrow-right"></i>
-                                    <span>${action}</span>
-                                </div>
-                            `).join('')}
+                    <div class="alphy-metric-compact">
+                        <div class="metric-icon-small" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-trophy"></i>
                         </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Data Quality</div>
+                            <div class="metric-value">${analysis.dataQuality}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Factors -->
+                <div class="alphy-section">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Risk Factors</h3>
+                    <div class="risk-list">
+                        ${aiAnalysis.risks.map(risk => `
+                            <div class="risk-item">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>${risk}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Action Items -->
+                <div class="alphy-section">
+                    <h3><i class="fas fa-bullseye"></i> Action Items</h3>
+                    <div class="action-list">
+                        ${aiAnalysis.actions.map(action => `
+                            <div class="action-item">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>${action}</span>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             </div>
@@ -1467,7 +1479,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // GENERATE AI ANALYSIS (SIMULATION)
+    // GENERATE AI ANALYSIS
     // ═══════════════════════════════════════════════════════════════
     function generateAIAnalysis(analysis) {
         const sentiment = analysis.insiderSentiment.score;
@@ -1629,7 +1641,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🆕 DISPLAY ADVANCED PATTERNS
+    // DISPLAY PATTERNS
     // ═══════════════════════════════════════════════════════════════
     function displayPatterns(patterns) {
         const container = document.getElementById('patternContainer');
@@ -1849,7 +1861,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🆕 DISPLAY TEMPORAL HEATMAP
+    // DISPLAY TEMPORAL HEATMAP
     // ═══════════════════════════════════════════════════════════════
     function displayTemporalHeatmap(transactions) {
         const canvas = document.getElementById('heatmapChart');
@@ -2083,30 +2095,8 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🆕 COMPARISON MODAL FUNCTIONS
+    // COMPARISON FUNCTIONS
     // ═══════════════════════════════════════════════════════════════
-    function openComparisonModal() {
-        const modal = document.getElementById('comparisonModal');
-        if (!modal) return;
-        
-        modal.classList.remove('hidden');
-        comparisonTickers = [];
-        updateComparisonTags();
-        
-        const resultsContainer = document.getElementById('comparisonResults');
-        if (resultsContainer) {
-            resultsContainer.innerHTML = '';
-            resultsContainer.classList.add('hidden');
-        }
-    }
-
-    function closeComparisonModal() {
-        const modal = document.getElementById('comparisonModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
     function addComparisonTicker() {
         const input = document.getElementById('comparisonTickerInput');
         if (!input) return;
@@ -2145,7 +2135,7 @@
         if (!container) return;
         
         if (comparisonTickers.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px;">No tickers added yet</p>';
+            container.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px; width: 100%;">No tickers added yet</p>';
             return;
         }
 
@@ -2362,37 +2352,9 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🆕 NETWORK MODAL FUNCTIONS
-    // ═══════════════════════════════════════════════════════════════
-    function openNetworkModal() {
-        const modal = document.getElementById('networkModal');
-        if (!modal) return;
-        
-        if (!currentAnalysis || !currentAnalysis.transactions) {
-            showNotification('⚠ Please run an analysis first', 'warning');
-            return;
-        }
-        
-        modal.classList.remove('hidden');
-        
-        // Render network with delay to ensure modal is visible
-        setTimeout(() => {
-            networkGraph.render(currentAnalysis.transactions);
-        }, 300);
-    }
-
-    function closeNetworkModal() {
-        const modal = document.getElementById('networkModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
     // NOTIFICATION SYSTEM
     // ═══════════════════════════════════════════════════════════════
     function showNotification(message, type = 'info') {
-        // Remove existing notifications
         const existing = document.querySelectorAll('.notification');
         existing.forEach(n => n.remove());
 
@@ -2473,9 +2435,7 @@
             }
         });
 
-        // Comparison modal
-        document.getElementById('compareBtn')?.addEventListener('click', openComparisonModal);
-        document.getElementById('closeComparisonModal')?.addEventListener('click', closeComparisonModal);
+        // Comparison
         document.getElementById('addComparisonBtn')?.addEventListener('click', addComparisonTicker);
         document.getElementById('runComparisonBtn')?.addEventListener('click', runComparison);
         
@@ -2485,10 +2445,7 @@
             }
         });
 
-        // Network modal
-        document.getElementById('networkBtn')?.addEventListener('click', openNetworkModal);
-        document.getElementById('closeNetworkModal')?.addEventListener('click', closeNetworkModal);
-        
+        // Network filters
         document.getElementById('showFirstDegree')?.addEventListener('click', () => {
             networkGraph.filterByDegree(1);
         });
@@ -2499,19 +2456,6 @@
         
         document.getElementById('showAllNodes')?.addEventListener('click', () => {
             networkGraph.filterByDegree(0);
-        });
-
-        // Close modals on outside click
-        document.getElementById('comparisonModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'comparisonModal') {
-                closeComparisonModal();
-            }
-        });
-
-        document.getElementById('networkModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'networkModal') {
-                closeNetworkModal();
-            }
         });
 
         // Focus input on load
@@ -2559,7 +2503,7 @@
     document.head.appendChild(style);
 
     // ═══════════════════════════════════════════════════════════════
-    // GLOBAL EXPORT (pour pagination et fonctions appelées depuis HTML)
+    // GLOBAL EXPORT
     // ═══════════════════════════════════════════════════════════════
     window.InsiderFlowTracker = {
         goToPage: goToPage,
