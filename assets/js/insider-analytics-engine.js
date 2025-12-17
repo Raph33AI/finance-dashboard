@@ -227,7 +227,10 @@ class InsiderAnalyticsEngine {
      * 💭 INSIDER SENTIMENT SCORE
      * Score agrégé de -100 (très bearish) à +100 (très bullish)
      */
-    calculateInsiderSentiment(transactions) {
+    calculateInsiderSentiment(transactions, options = {}) {
+        // Option pour désactiver le calcul du trend (évite la récursion)
+        const { includeTrend = true } = options;
+
         if (!transactions || transactions.length === 0) {
             return {
                 score: 0,
@@ -280,8 +283,8 @@ class InsiderAnalyticsEngine {
             dominantActivity: purchaseValue > saleValue ? 'BUYING' : 'SELLING',
             intensity: this.calculateIntensity(totalValue, totalCount),
             
-            // Historique
-            trend: this.calculateSentimentTrend(transactions)
+            // ⚠ CORRECTION: Évite la récursion infinie
+            trend: includeTrend ? this.calculateSentimentTrend(transactions) : null
         };
     }
 
@@ -937,8 +940,9 @@ class InsiderAnalyticsEngine {
         const firstHalf = transactions.slice(0, mid);
         const secondHalf = transactions.slice(mid);
 
-        const firstSentiment = this.calculateInsiderSentiment(firstHalf).score;
-        const secondSentiment = this.calculateInsiderSentiment(secondHalf).score;
+        // ✅ CORRECTION: Appelle avec { includeTrend: false } pour éviter la récursion
+        const firstSentiment = this.calculateInsiderSentiment(firstHalf, { includeTrend: false }).score;
+        const secondSentiment = this.calculateInsiderSentiment(secondHalf, { includeTrend: false }).score;
 
         if (secondSentiment > firstSentiment + 20) return 'IMPROVING';
         if (secondSentiment < firstSentiment - 20) return 'DETERIORATING';

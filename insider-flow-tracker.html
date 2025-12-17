@@ -638,7 +638,7 @@
                 placeholder="Entrez un ticker (ex: AAPL, TSLA, NVDA...)"
                 autocomplete="off"
             >
-            <button class="search-btn" onclick="analyzeInsiderActivity()">
+            <button class="search-btn" id="analyzeBtn"></button>
                 <i class="fas fa-chart-bar"></i> Analyser
             </button>
         </div>
@@ -740,6 +740,9 @@
                 analyzeInsiderActivity();
             }
         });
+
+        // Event listener pour le bouton d'analyse
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
 
         /**
          * 🚀 FONCTION PRINCIPALE D'ANALYSE
