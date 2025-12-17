@@ -333,10 +333,12 @@
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 SEC FORM 4 API CLIENT - AlphaVault AI (VERSION BULK)
+ * 📊 SEC FORM 4 API CLIENT - AlphaVault AI (VERSION ULTRA-OPTIMIZED)
  * ═══════════════════════════════════════════════════════════════════
  * Client spécialisé pour récupérer et analyser les Form 4 (Insider Trading)
- * ✅ SUPPORTE LA PAGINATION POUR CHARGER DES MILLIERS DE TRANSACTIONS
+ * ✅ AUCUNE LIMITE ARBITRAIRE - RÉCUPÈRE TOUTES LES TRANSACTIONS
+ * ✅ PAGINATION AUTOMATIQUE COMPLÈTE
+ * ✅ RATE LIMITING RESPECTÉ
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -353,12 +355,12 @@ class SECForm4Client {
      */
     async getAllForm4Transactions(options = {}) {
         const {
-            maxTransactions = 200,
+            maxTransactions = Infinity, // ✅ CORRECTION : Illimité par défaut
             days = 90,
             forceRefresh = false
         } = options;
 
-        console.log(`🌐 Loading ALL Form 4 transactions (up to ${maxTransactions} from last ${days} days)...`);
+        console.log(`🌐 Loading ALL Form 4 transactions from last ${days} days...`);
 
         const cacheKey = `all-form4-${days}-${maxTransactions}`;
         
@@ -398,7 +400,7 @@ class SECForm4Client {
                 console.log(`   ✅ Got ${data.filings.length} filings (total: ${allFilings.length})`);
 
                 // Vérifie si le Worker indique qu'il y a plus de données
-                hasMore = data.hasMore !== false;
+                hasMore = data.hasMore !== false && data.filings.length === limit;
                 start += limit;
 
                 // Petit délai pour respecter le rate limiting SEC (10 req/sec max)
@@ -465,30 +467,53 @@ class SECForm4Client {
     }
 
     /**
-     * 🔍 Recherche Form 4 par CIK (VIA WORKER)
+     * 🔍 Recherche Form 4 par CIK (VIA WORKER) - AVEC PAGINATION AUTOMATIQUE
      */
     async getForm4ByCIK(cik, options = {}) {
         const {
-            limit = 100,
+            limit = Infinity, // ✅ CORRECTION : Illimité par défaut
             startDate = null,
             endDate = null
         } = options;
 
         try {
-            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker`);
+            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker (unlimited)...`);
             
-            const response = await fetch(
-                `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${limit}`
-            );
+            let allFilings = [];
+            let start = 0;
+            const batchSize = 100; // SEC limite par requête
+            let hasMore = true;
 
-            if (!response.ok) {
-                throw new Error(`Worker error: ${response.status}`);
+            // ✅ NOUVELLE PAGINATION AUTOMATIQUE
+            while (hasMore && allFilings.length < limit) {
+                const response = await fetch(
+                    `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${batchSize}&start=${start}`
+                );
+
+                if (!response.ok) {
+                    console.warn(`⚠ Worker error at start=${start}: ${response.status}`);
+                    break;
+                }
+
+                const data = await response.json();
+                
+                if (!data.filings || data.filings.length === 0) {
+                    hasMore = false;
+                    break;
+                }
+
+                allFilings.push(...data.filings);
+                console.log(`   📥 Batch ${Math.floor(start / batchSize) + 1}: ${data.filings.length} filings (total: ${allFilings.length})`);
+
+                hasMore = data.filings.length === batchSize;
+                start += batchSize;
+
+                await this.sleep(150); // Rate limiting
             }
 
-            const data = await response.json();
+            let filings = allFilings;
 
-            let filings = data.filings || [];
-
+            // Filtre par date si nécessaire
             if (startDate || endDate) {
                 const start = startDate ? new Date(startDate) : new Date(0);
                 const end = endDate ? new Date(endDate) : new Date();
@@ -552,10 +577,16 @@ class SECForm4Client {
 
     /**
      * 📊 Récupère l'historique complet des insiders d'une entreprise
+     * ✅ CORRECTION MAJEURE : Parse TOUS les filings (pas de slice(50))
      */
-    async getCompanyInsiderHistory(ticker, months = 12) {
+    async getCompanyInsiderHistory(ticker, months = 12, options = {}) {
+        const {
+            maxFilings = Infinity, // ✅ NOUVEAU : Limite optionnelle
+            verbose = true
+        } = options;
+
         try {
-            console.log(`📊 Fetching insider history for ${ticker} (${months} months)`);
+            console.log(`📊 Fetching insider history for ${ticker} (${months} months, max ${maxFilings === Infinity ? '∞' : maxFilings} filings)`);
             
             const cik = await this.getCIKFromTicker(ticker);
             
@@ -564,7 +595,7 @@ class SECForm4Client {
             startDate.setMonth(startDate.getMonth() - months);
 
             const filings = await this.getForm4ByCIK(cik, {
-                limit: 500,
+                limit: Infinity, // ✅ CORRECTION : Récupère TOUS les Form 4 disponibles
                 startDate: this.formatDate(startDate),
                 endDate: this.formatDate(endDate)
             });
@@ -579,7 +610,14 @@ class SECForm4Client {
             let successCount = 0;
             let errorCount = 0;
 
-            for (const filing of filings.slice(0, 50)) {
+            // ✅ CORRECTION MAJEURE : Suppression du .slice(0, 50)
+            const filingsToProcess = maxFilings === Infinity 
+                ? filings 
+                : filings.slice(0, maxFilings);
+
+            console.log(`🔄 Processing ${filingsToProcess.length} Form 4 filings...`);
+
+            for (const filing of filingsToProcess) {
                 try {
                     const accessionNumber = filing.accessionNumber;
                     
@@ -589,7 +627,9 @@ class SECForm4Client {
                         continue;
                     }
 
-                    console.log(`🌐 Fetching Form 4 XML via Worker: ${accessionNumber}`);
+                    if (verbose) {
+                        console.log(`🌐 Fetching Form 4 XML via Worker: ${accessionNumber}`);
+                    }
 
                     const xmlText = await this.getForm4XML(accessionNumber, cik);
                     
@@ -608,6 +648,10 @@ class SECForm4Client {
                             accessionNumber: accessionNumber
                         });
                         successCount++;
+                        
+                        if (verbose && successCount % 10 === 0) {
+                            console.log(`   ✅ Progress: ${successCount}/${filingsToProcess.length} parsed`);
+                        }
                     } else {
                         errorCount++;
                     }
@@ -616,7 +660,7 @@ class SECForm4Client {
                     errorCount++;
                 }
 
-                await this.sleep(100);
+                await this.sleep(100); // Rate limiting
             }
 
             console.log(`✅ Successfully parsed ${successCount} transactions (${errorCount} errors)`);
@@ -629,8 +673,10 @@ class SECForm4Client {
                 transactions,
                 stats: {
                     totalFilings: filings.length,
+                    filingsProcessed: filingsToProcess.length,
                     parsedSuccessfully: successCount,
-                    parseErrors: errorCount
+                    parseErrors: errorCount,
+                    successRate: Math.round((successCount / filingsToProcess.length) * 100)
                 }
             };
 
