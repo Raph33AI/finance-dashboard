@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (CORRECTED V2)
+   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (FIXED V3)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -90,7 +90,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SEARCH OPTIONS (✅ FIX: CONTOURS BLEU/VIOLET)
+   SEARCH OPTIONS
    ═══════════════════════════════════════════════════════════════ */
 .search-options {
     display: flex;
@@ -188,55 +188,76 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ LOADING STATE - FIX FINAL: SEUL LE SPINNER TOURNE
+   ✅ LOADING STATE - FIX COMPLET: CENTRÉ EN PLEIN ÉCRAN
    ═══════════════════════════════════════════════════════════════ */
 .loading {
-    text-align: center;
-    padding: 80px 20px;
-    position: relative;
-    transform: none !important; /* ✅ BLOQUER TOUTE ROTATION DU CONTENEUR */
-    animation: none !important; /* ✅ AUCUNE ANIMATION SUR LE CONTENEUR */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    animation: fadeIn 0.3s ease;
 }
 
-.loading * {
-    transform: none !important; /* ✅ BLOQUER ROTATION DE TOUS LES ENFANTS */
-    animation: none !important; /* ✅ AUCUNE ANIMATION PAR DÉFAUT */
+body.dark-mode .loading {
+    background: rgba(15, 23, 42, 0.95);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.loading-content {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
 }
 
 .loading h2 {
     color: var(--text-primary);
-    font-size: 1.5rem;
-    margin-bottom: 12px;
-    transform: none !important;
-    animation: none !important;
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .loading p {
-    transform: none !important;
-    animation: none !important;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
 }
 
 .spinner {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 24px;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 32px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: none !important; /* ✅ LE CONTENEUR DU SPINNER NE TOURNE PAS */
-    animation: none !important;
 }
 
-/* ✅ SEULE L'ICÔNE TOURNE - PRIORITÉ ABSOLUE */
 .spinner i {
-    font-size: 60px;
+    font-size: 80px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: inline-block;
-    animation: spin 1s linear infinite !important; /* ✅ FORCER L'ANIMATION ICI */
+    animation: spin 1s linear infinite !important;
     transform-origin: center center !important;
     will-change: transform;
 }
@@ -248,14 +269,13 @@ body.dark-mode .option-group select {
 
 .progress-container {
     max-width: 400px;
-    margin: 24px auto 16px;
-    background: var(--glass-bg);
+    width: 100%;
+    margin: 0 auto 16px;
+    background: rgba(102, 126, 234, 0.1);
     border-radius: 12px;
     overflow: hidden;
     height: 12px;
-    border: 1px solid var(--glass-border);
-    transform: none !important;
-    animation: none !important;
+    border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
 .progress-bar {
@@ -265,20 +285,16 @@ body.dark-mode .option-group select {
     transition: width 0.3s ease;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-    transform: none !important;
-    animation: none !important;
 }
 
 .progress-text {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 800;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-top: 12px;
-    transform: none !important;
-    animation: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -317,7 +333,7 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   🤖 ALPHY AI RECOMMENDATION (SIMPLIFIED)
+   🤖 ALPHY AI RECOMMENDATION
    ═══════════════════════════════════════════════════════════════ */
 .alphy-panel {
     background: var(--glass-bg);
@@ -903,13 +919,13 @@ body.dark-mode .cluster-stat {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--glass-border);
-    max-width: 100%; /* ✅ FIX MOBILE */
+    max-width: 100%;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* ✅ LARGEUR MINIMALE POUR SCROLL HORIZONTAL */
+    min-width: 600px;
 }
 
 thead {
@@ -1010,7 +1026,7 @@ tbody tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ CHART CONTAINER - FIX RESPONSIVE MOBILE
+   ✅ CHART WRAPPER - FIX GRAPHIQUES MOBILES
    ═══════════════════════════════════════════════════════════════ */
 .chart-wrapper {
     background: var(--glass-bg);
@@ -1019,26 +1035,30 @@ tbody tr:hover {
     padding: 24px;
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    position: relative; /* ✅ IMPORTANT */
-    overflow: hidden; /* ✅ ÉVITE LES DÉBORDEMENTS */
-    max-width: 100%; /* ✅ LIMITE À LA LARGEUR DU CONTENEUR */
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    min-height: 400px;
 }
 
-/* ✅ FORCER LES CANVAS À RESPECTER LE CONTENEUR */
 .chart-wrapper canvas {
     max-width: 100% !important;
+    width: 100% !important;
+    min-height: 350px !important;
     height: auto !important;
     display: block;
 }
 
-/* ✅ RESPONSIVE CHART.JS */
+/* ✅ Forcer Chart.js à respecter les conteneurs */
 .chart-wrapper > div {
     position: relative;
     max-width: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   NETWORK GRAPH (INLINE) - ✅ FIX: CONTOURS BLEU/VIOLET
+   NETWORK GRAPH
    ═══════════════════════════════════════════════════════════════ */
 .network-controls {
     display: flex;
@@ -1099,7 +1119,7 @@ tbody tr:hover {
     border-radius: 12px;
     margin-top: 20px;
     border: 1px solid var(--glass-border);
-    overflow: hidden; /* ✅ FIX DÉBORDEMENT */
+    overflow: hidden;
 }
 
 .network-stats {
@@ -1144,7 +1164,7 @@ tbody tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   COMPARISON SECTION (INLINE) - ✅ FIX: CONTOURS BLEU/VIOLET
+   COMPARISON SECTION
    ═══════════════════════════════════════════════════════════════ */
 .comparison-search {
     display: flex;
@@ -1332,9 +1352,28 @@ body.dark-mode .comparison-search input {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ RESPONSIVE - CORRECTIONS MOBILE COMPLÈTES
+   ✅ RESPONSIVE - MOBILE OPTIMIZATIONS
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+    /* ✅ LOADING CENTRÉ */
+    .loading {
+        padding: 20px;
+    }
+
+    .loading h2 {
+        font-size: 1.4rem;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 24px;
+    }
+
+    .spinner i {
+        font-size: 60px;
+    }
+
     /* ✅ SEARCH BOX */
     .search-box {
         flex-direction: column;
@@ -1401,6 +1440,10 @@ body.dark-mode .comparison-search input {
         text-align: center;
     }
 
+    .alphy-panel {
+        padding: 20px;
+    }
+
     /* ✅ COMPARISON */
     .comparison-search {
         flex-direction: column;
@@ -1420,7 +1463,7 @@ body.dark-mode .comparison-search input {
     }
 
     .network-graph-container {
-        height: 450px;
+        height: 500px;
     }
 
     /* ✅ RANKING */
@@ -1465,51 +1508,34 @@ body.dark-mode .comparison-search input {
         justify-content: center;
     }
 
-    /* ✅ GRAPHIQUES - HAUTEUR AUGMENTÉE POUR MOBILE */
+    /* ✅ GRAPHIQUES - HAUTEUR FIXE MOBILE */
     .chart-wrapper {
         padding: 16px;
-        min-height: 300px; /* ✅ HAUTEUR MINIMALE */
+        min-height: 350px;
     }
 
     .chart-wrapper canvas {
-        min-height: 280px !important;
-        max-height: 450px !important;
-    }
-
-    #roleChart,
-    #heatmapChart {
-        height: 320px !important;
-    }
-
-    #comparisonChart,
-    #correlationChart {
-        height: 350px !important;
-    }
-
-    .network-graph-container {
-        height: 450px !important;
-    }
-
-    #crossCompanyNetwork {
-        height: 420px !important;
-    }
-
-    /* ✅ ALPHY PANEL */
-    .alphy-panel {
-        padding: 20px;
-    }
-
-    .alphy-action-text {
-        font-size: 1.5rem;
-    }
-
-    .alphy-action-icon-small {
-        font-size: 2.5rem;
+        min-height: 320px !important;
+        max-height: 500px !important;
     }
 }
 
 /* ✅ TRÈS PETITS ÉCRANS (< 480px) */
 @media (max-width: 480px) {
+    /* ✅ LOADING */
+    .loading h2 {
+        font-size: 1.2rem;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+    }
+
+    .spinner i {
+        font-size: 50px;
+    }
+
     /* ✅ SCORE CARDS */
     .score-card {
         flex-direction: column;
@@ -1527,39 +1553,21 @@ body.dark-mode .comparison-search input {
     /* ✅ GRAPHIQUES - ENCORE PLUS GRANDS */
     .chart-wrapper {
         padding: 12px;
-        min-height: 320px;
+        min-height: 380px;
     }
 
     .chart-wrapper canvas {
-        min-height: 300px !important;
-        max-height: 500px !important;
-    }
-
-    #roleChart,
-    #heatmapChart {
-        height: 350px !important;
-    }
-
-    #comparisonChart,
-    #correlationChart {
-        height: 380px !important;
+        min-height: 350px !important;
+        max-height: 550px !important;
     }
 
     .network-graph-container {
-        height: 500px !important;
-    }
-
-    #crossCompanyNetwork {
-        height: 450px !important;
+        height: 450px;
     }
 
     /* ✅ TEXTES */
     .page-title {
         font-size: 1.8rem;
-    }
-
-    .loading h2 {
-        font-size: 1.2rem;
     }
 
     /* ✅ BUTTONS */
@@ -1612,7 +1620,7 @@ body.dark-mode .comparison-search input {
 }
 
 body {
-    overflow-x: hidden; /* ✅ ÉVITE LE SCROLL HORIZONTAL GLOBAL */
+    overflow-x: hidden;
 }
 
 /* ═══════════════════════════════════════════════════════════════
