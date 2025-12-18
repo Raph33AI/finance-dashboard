@@ -5,6 +5,7 @@
 /* ═══════════════════════════════════════════════════════════════
    GRADIENT UTILITIES
    ═══════════════════════════════════════════════════════════════ */
+   
 .gradient-title {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
@@ -24,6 +25,15 @@
 /* ═══════════════════════════════════════════════════════════════
    SEARCH CONTAINER
    ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX: CONTAINER PARENT POUR LOADING
+   ═══════════════════════════════════════════════════════════════ */
+.container {
+    position: relative;
+    min-height: calc(100vh - 80px); /* Hauteur minimale pour le loading */
+}
+
 .search-container {
     max-width: 100%;
     margin-bottom: 32px;
@@ -188,16 +198,16 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ LOADING STATE - FIX COMPLET: CENTRÉ EN PLEIN ÉCRAN
+   ✅ LOADING STATE - FIX FINAL: LIMITÉ AU MAIN-CONTENT
    ═══════════════════════════════════════════════════════════════ */
 .loading {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 9999;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px) saturate(180%);
     display: flex;
     flex-direction: column;
@@ -205,10 +215,11 @@ body.dark-mode .option-group select {
     justify-content: center;
     padding: 40px 20px;
     animation: fadeIn 0.3s ease;
+    border-radius: var(--border-radius);
 }
 
 body.dark-mode .loading {
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(15, 23, 42, 0.98);
 }
 
 @keyframes fadeIn {
