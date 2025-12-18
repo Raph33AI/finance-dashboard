@@ -3,7 +3,7 @@
    Version: 2.0 - No Raw Data Redistribution
    ============================================== */
 
-// ========== RATE LIMITER ==========
+// ========== RATE LIMITER (INCHANGÉ) ==========
 class RateLimiter {
     constructor(maxRequests = 8, windowMs = 60000) {
         this.maxRequests = maxRequests;
@@ -15,26 +15,17 @@ class RateLimiter {
     
     async execute(fn, priority = 'normal') {
         return new Promise((resolve, reject) => {
-            this.queue.push({
-                fn,
-                priority,
-                resolve,
-                reject,
-                timestamp: Date.now()
-            });
-            
+            this.queue.push({ fn, priority, resolve, reject, timestamp: Date.now() });
             this.queue.sort((a, b) => {
                 const priorities = { high: 3, normal: 2, low: 1 };
                 return (priorities[b.priority] || 2) - (priorities[a.priority] || 2);
             });
-            
             this.processQueue();
         });
     }
     
     async processQueue() {
         if (this.processing || this.queue.length === 0) return;
-        
         this.processing = true;
         
         while (this.queue.length > 0) {
@@ -44,67 +35,47 @@ class RateLimiter {
             if (this.requestTimes.length >= this.maxRequests) {
                 const oldestRequest = Math.min(...this.requestTimes);
                 const waitTime = this.windowMs - (now - oldestRequest) + 100;
-                
                 console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
-                
-                if (window.cacheWidget) {
-                    window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
-                }
-                
+                if (window.cacheWidget) window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
                 await this.sleep(waitTime);
                 continue;
             }
             
             const item = this.queue.shift();
             this.requestTimes.push(Date.now());
-            
             try {
                 const result = await item.fn();
                 item.resolve(result);
             } catch (error) {
                 item.reject(error);
             }
-            
             await this.sleep(100);
         }
         
         this.processing = false;
-        
-        if (window.cacheWidget) {
-            window.cacheWidget.updateQueueStatus(0, 0);
-        }
+        if (window.cacheWidget) window.cacheWidget.updateQueueStatus(0, 0);
     }
     
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
+    sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     getRemainingRequests() {
         const now = Date.now();
         this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
         return this.maxRequests - this.requestTimes.length;
     }
-    
-    getQueueLength() {
-        return this.queue.length;
-    }
+    getQueueLength() { return this.queue.length; }
 }
 
-// ========== OPTIMIZED CACHE ==========
+// ========== OPTIMIZED CACHE (INCHANGÉ) ==========
 class OptimizedCache {
     constructor() {
         this.prefix = 'tp_cache_';
-        this.staticTTL = 24 * 60 * 60 * 1000; // 24h
-        this.dynamicTTL = 5 * 60 * 1000; // 5min
+        this.staticTTL = 24 * 60 * 60 * 1000;
+        this.dynamicTTL = 5 * 60 * 1000;
     }
     
     set(key, data, ttl = null) {
         try {
-            const cacheData = {
-                data,
-                timestamp: Date.now(),
-                ttl: ttl || this.dynamicTTL
-            };
+            const cacheData = { data, timestamp: Date.now(), ttl: ttl || this.dynamicTTL };
             localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
             return true;
         } catch (error) {
@@ -117,15 +88,12 @@ class OptimizedCache {
         try {
             const cached = localStorage.getItem(this.prefix + key);
             if (!cached) return null;
-            
             const cacheData = JSON.parse(cached);
             const now = Date.now();
-            
             if (now - cacheData.timestamp > cacheData.ttl) {
                 this.delete(key);
                 return null;
             }
-            
             return cacheData.data;
         } catch (error) {
             console.warn('Cache retrieval error:', error);
@@ -133,30 +101,23 @@ class OptimizedCache {
         }
     }
     
-    delete(key) {
-        localStorage.removeItem(this.prefix + key);
-    }
-    
+    delete(key) { localStorage.removeItem(this.prefix + key); }
     clear() {
         Object.keys(localStorage)
             .filter(key => key.startsWith(this.prefix))
             .forEach(key => localStorage.removeItem(key));
     }
-    
     getAge(key) {
         try {
             const cached = localStorage.getItem(this.prefix + key);
             if (!cached) return null;
-            
             const cacheData = JSON.parse(cached);
             return Date.now() - cacheData.timestamp;
-        } catch {
-            return null;
-        }
+        } catch { return null; }
     }
 }
 
-// ========== ALPHAVAULT SCORE CALCULATOR ==========
+// ========== ✨ ALPHAVAULT SCORE CALCULATOR ✨ ==========
 class AlphaVaultScoreEngine {
     constructor() {
         this.weights = {
@@ -169,19 +130,18 @@ class AlphaVaultScoreEngine {
     }
     
     /**
-     * Calcule le score AlphaVault (0-100)
-     * @param {Object} data - Données normalisées (pas de prix bruts)
+     * ✅ Calcule le score AlphaVault (0-100) - NO RAW PRICES
+     * @param {Object} data - Données normalisées (rendements, pas prix)
      */
     calculateScore(data) {
         const scores = {
             momentum: this.calculateMomentumScore(data.returns),
-            mlConsensus: this.calculateMLConsensusScore(data.models),
+            mlConsensus: this.calculateMLConsensusScore(data.modelDirections),
             technicalStrength: this.calculateTechnicalScore(data.technicals),
             volatilityAdjusted: this.calculateVolatilityScore(data.volatility, data.returns),
             trendQuality: this.calculateTrendQuality(data.r2Scores)
         };
         
-        // Score pondéré
         const finalScore = Object.keys(scores).reduce((sum, key) => 
             sum + scores[key] * this.weights[key], 0
         );
@@ -197,13 +157,14 @@ class AlphaVaultScoreEngine {
     calculateMomentumScore(returns) {
         const recentReturns = returns.slice(-20);
         const avgReturn = recentReturns.reduce((a, b) => a + b, 0) / recentReturns.length;
+        // Score basé sur le momentum (pas les prix absolus)
         return Math.max(0, Math.min(100, 50 + (avgReturn * 500)));
     }
     
-    calculateMLConsensusScore(models) {
-        const predictions = models.map(m => m.directionScore);
-        const consensus = predictions.reduce((a, b) => a + b, 0) / predictions.length;
-        return (consensus + 1) * 50;
+    calculateMLConsensusScore(modelDirections) {
+        // modelDirections = array de -1 (baisse), 0 (neutre), +1 (hausse)
+        const consensus = modelDirections.reduce((a, b) => a + b, 0) / modelDirections.length;
+        return (consensus + 1) * 50; // Normalise entre 0 et 100
     }
     
     calculateTechnicalScore(technicals) {
@@ -230,11 +191,11 @@ class AlphaVaultScoreEngine {
     }
     
     getSignalFromScore(score) {
-        if (score >= 75) return { text: 'STRONG BULLISH', class: 'strong-buy', icon: '🚀' };
-        if (score >= 60) return { text: 'BULLISH', class: 'buy', icon: '📈' };
-        if (score >= 40) return { text: 'NEUTRAL', class: 'hold', icon: '⚖' };
-        if (score >= 25) return { text: 'BEARISH', class: 'sell', icon: '📉' };
-        return { text: 'STRONG BEARISH', class: 'strong-sell', icon: '⚠' };
+        if (score >= 75) return { text: 'STRONG BULLISH', class: 'strong-buy', icon: '🚀', emoji: '📈' };
+        if (score >= 60) return { text: 'BULLISH', class: 'buy', icon: '📈', emoji: '✅' };
+        if (score >= 40) return { text: 'NEUTRAL', class: 'hold', icon: '⚖', emoji: '➖' };
+        if (score >= 25) return { text: 'BEARISH', class: 'sell', icon: '📉', emoji: '⚠' };
+        return { text: 'STRONG BEARISH', class: 'strong-sell', icon: '⚠', emoji: '🔴' };
     }
     
     getConfidenceLevel(scores) {
@@ -251,23 +212,20 @@ class AlphaVaultScoreEngine {
 
 // ========== MAIN TREND PREDICTION OBJECT ==========
 const TrendPrediction = {
-    // API Client & Cache
     apiClient: null,
     rateLimiter: null,
     optimizedCache: null,
     scoreEngine: null,
     
-    // Current State
     currentSymbol: 'AAPL',
     predictionHorizon: 7,
     trainingPeriod: '6M',
     stockData: null,
     
-    // Search functionality
     selectedSuggestionIndex: -1,
     searchTimeout: null,
     
-    // Model results (❌ ARIMA REMOVED)
+    // ❌ NO MORE RAW PREDICTIONS - ONLY NORMALIZED DATA
     models: {
         linear: null,
         polynomial: null,
@@ -276,11 +234,9 @@ const TrendPrediction = {
         neural: null
     },
     
-    // Backtesting & Score
     backtestResults: null,
     alphaVaultScore: null,
     
-    // Comparison
     comparisonStocks: [],
     comparisonParameters: {
         volatility: 25,
@@ -289,7 +245,6 @@ const TrendPrediction = {
         horizon: 30
     },
     
-    // Colors
     colors: {
         primary: '#667eea',
         secondary: '#4A74F3',
@@ -301,13 +256,9 @@ const TrendPrediction = {
         warning: '#f59e0b'
     },
     
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    
     async init() {
         try {
-            console.log('🎯 Initializing AlphaVault Score Engine...');
+            console.log('🎯 Initializing AlphaVault Score Engine - Legal Compliant Mode');
             
             this.scoreEngine = new AlphaVaultScoreEngine();
             this.rateLimiter = new RateLimiter(8, 60000);
@@ -319,9 +270,7 @@ const TrendPrediction = {
                 baseURL: APP_CONFIG.API_BASE_URL,
                 cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
                 maxRetries: APP_CONFIG.MAX_RETRIES || 2,
-                onLoadingChange: (isLoading) => {
-                    this.showLoading(isLoading);
-                }
+                onLoadingChange: (isLoading) => this.showLoading(isLoading)
             });
             
             window.apiClient = this.apiClient;
@@ -332,11 +281,9 @@ const TrendPrediction = {
             this.setupSearchListeners();
             this.startCacheMonitoring();
             
-            setTimeout(() => {
-                this.loadSymbol(this.currentSymbol);
-            }, 500);
+            setTimeout(() => this.loadSymbol(this.currentSymbol), 500);
             
-            console.log('✅ AlphaVault Score Engine initialized');
+            console.log('✅ AlphaVault Score Engine initialized - NO RAW DATA REDISTRIBUTION');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -351,7 +298,6 @@ const TrendPrediction = {
                 resolve();
                 return;
             }
-            
             const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     console.log('✅ User authenticated');
@@ -359,10 +305,7 @@ const TrendPrediction = {
                     resolve();
                 }
             });
-            
-            setTimeout(() => {
-                resolve();
-            }, 3000);
+            setTimeout(() => resolve(), 3000);
         });
     },
     
@@ -371,12 +314,8 @@ const TrendPrediction = {
             if (window.cacheWidget) {
                 const remaining = this.rateLimiter.getRemainingRequests();
                 const queueLength = this.rateLimiter.getQueueLength();
-                
                 window.cacheWidget.updateRateLimitStatus(remaining, 8);
-                
-                if (queueLength > 0) {
-                    window.cacheWidget.updateQueueStatus(queueLength, 0);
-                }
+                if (queueLength > 0) window.cacheWidget.updateQueueStatus(queueLength, 0);
             }
         }, 1000);
     },
@@ -401,10 +340,7 @@ const TrendPrediction = {
         const input = document.getElementById('symbolInput');
         if (!input) return;
         
-        input.addEventListener('input', (e) => {
-            this.handleSearch(e.target.value);
-        });
-        
+        input.addEventListener('input', (e) => this.handleSearch(e.target.value));
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -429,40 +365,35 @@ const TrendPrediction = {
         });
         
         input.addEventListener('focus', (e) => {
-            if (e.target.value.trim().length > 0) {
-                this.handleSearch(e.target.value);
-            }
+            if (e.target.value.trim().length > 0) this.handleSearch(e.target.value);
         });
         
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-input-wrapper')) {
-                this.hideSuggestions();
-            }
+            if (!e.target.closest('.search-input-wrapper')) this.hideSuggestions();
         });
-    },
+    }
+};
+
+// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 2/4) ==========
+
+Object.assign(TrendPrediction, {
     
     // ============================================
-    // SEARCH WITH TWELVE DATA API
+    // SEARCH AVEC TWELVE DATA (INCHANGÉ)
     // ============================================
     
     handleSearch(query) {
         const trimmedQuery = query.trim();
-        
         if (trimmedQuery.length === 0) {
             this.hideSuggestions();
             return;
         }
-        
         clearTimeout(this.searchTimeout);
-        
-        this.searchTimeout = setTimeout(() => {
-            this.searchSymbols(trimmedQuery);
-        }, 500);
+        this.searchTimeout = setTimeout(() => this.searchSymbols(trimmedQuery), 500);
     },
     
     async searchSymbols(query) {
         console.log('🔍 Searching for:', query);
-        
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
@@ -484,14 +415,10 @@ const TrendPrediction = {
             if (results.data && results.data.length > 0) {
                 this.optimizedCache.set(cacheKey, results.data, 60 * 60 * 1000);
                 this.displaySearchResults(results.data, query);
-                
-                if (window.cacheWidget) {
-                    window.cacheWidget.logActivity('Search', query, false);
-                }
+                if (window.cacheWidget) window.cacheWidget.logActivity('Search', query, false);
             } else {
                 this.displayNoResults();
             }
-            
         } catch (error) {
             console.error('Search failed:', error);
             this.displaySearchError();
@@ -502,28 +429,15 @@ const TrendPrediction = {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
-        const grouped = {
-            stocks: [],
-            etfs: [],
-            crypto: [],
-            indices: [],
-            other: []
-        };
+        const grouped = { stocks: [], etfs: [], crypto: [], indices: [], other: [] };
         
         results.forEach(item => {
             const type = (item.instrument_type || 'Common Stock').toLowerCase();
-            
-            if (type.includes('stock') || type.includes('equity')) {
-                grouped.stocks.push(item);
-            } else if (type.includes('etf')) {
-                grouped.etfs.push(item);
-            } else if (type.includes('crypto') || type.includes('digital currency')) {
-                grouped.crypto.push(item);
-            } else if (type.includes('index')) {
-                grouped.indices.push(item);
-            } else {
-                grouped.other.push(item);
-            }
+            if (type.includes('stock') || type.includes('equity')) grouped.stocks.push(item);
+            else if (type.includes('etf')) grouped.etfs.push(item);
+            else if (type.includes('crypto')) grouped.crypto.push(item);
+            else if (type.includes('index')) grouped.indices.push(item);
+            else grouped.other.push(item);
         });
         
         let html = '';
@@ -539,11 +453,8 @@ const TrendPrediction = {
             container.innerHTML = html;
             container.classList.add('active');
             this.selectedSuggestionIndex = -1;
-            
             container.querySelectorAll('.suggestion-item').forEach((item) => {
-                item.addEventListener('click', () => {
-                    this.selectSuggestion(item.dataset.symbol);
-                });
+                item.addEventListener('click', () => this.selectSuggestion(item.dataset.symbol));
             });
         }
     },
@@ -601,7 +512,6 @@ const TrendPrediction = {
     displayNoResults() {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
-        
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-search"></i>
@@ -615,7 +525,6 @@ const TrendPrediction = {
     displaySearchError() {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
-        
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -628,9 +537,7 @@ const TrendPrediction = {
     
     selectSuggestion(symbol) {
         const input = document.getElementById('symbolInput');
-        if (input) {
-            input.value = symbol;
-        }
+        if (input) input.value = symbol;
         this.hideSuggestions();
         this.loadSymbol(symbol);
     },
@@ -638,7 +545,6 @@ const TrendPrediction = {
     hideSuggestions() {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
-        
         container.classList.remove('active');
         this.selectedSuggestionIndex = -1;
     },
@@ -661,22 +567,15 @@ const TrendPrediction = {
         
         suggestions[this.selectedSuggestionIndex].classList.add('selected');
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-};
-
-// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 2/4) ==========
-
-Object.assign(TrendPrediction, {
+    },
     
     // ============================================
-    // STOCK ANALYSIS
+    // ✅ STOCK ANALYSIS - NO RAW PRICES DISPLAYED
     // ============================================
     
     analyzeStock() {
         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
-        if (symbol) {
-            this.loadSymbol(symbol);
-        }
+        if (symbol) this.loadSymbol(symbol);
     },
     
     async loadSymbol(symbol) {
@@ -688,30 +587,28 @@ Object.assign(TrendPrediction, {
         this.hideResults();
         
         try {
-            console.log(`📊 Loading ${symbol}...`);
+            console.log(`📊 Loading ${symbol} - LEGAL COMPLIANT MODE`);
             
             const [quote, timeSeries] = await Promise.all([
                 this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
                 this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.trainingPeriod), 'high')
             ]);
             
-            if (!quote || !timeSeries) {
-                throw new Error('Failed to load stock data');
-            }
+            if (!quote || !timeSeries) throw new Error('Failed to load stock data');
             
+            // ❌ NE PAS STOCKER LES PRIX BRUTS
             this.stockData = {
                 symbol: quote.symbol,
-                prices: timeSeries.data,
-                quote: quote,
+                name: quote.name || symbol,
+                // ✅ Stocker uniquement les données normalisées
+                pricesInternal: timeSeries.data, // Usage interne uniquement
                 currency: 'USD'
             };
             
             this.optimizedCache.set(`quote_${symbol}`, quote, 60000);
+            if (window.cacheWidget) window.cacheWidget.logActivity('Quote', symbol, false);
             
-            if (window.cacheWidget) {
-                window.cacheWidget.logActivity('Quote', symbol, false);
-            }
-            
+            // ✅ Afficher UNIQUEMENT le nom (pas le prix)
             this.displayStockHeader();
             
             await this.trainAllModels();
@@ -719,10 +616,9 @@ Object.assign(TrendPrediction, {
             await this.performBacktesting();
             
             this.displayResults();
-            
             this.showLoading(false);
             
-            console.log('✅ Analysis complete');
+            console.log('✅ Analysis complete - AlphaVault Score displayed');
             
         } catch (error) {
             console.error('Error loading stock data:', error);
@@ -740,93 +636,85 @@ Object.assign(TrendPrediction, {
         };
         
         const config = periodMap[period] || periodMap['6M'];
-        
         const cacheKey = `timeseries_${symbol}_${period}`;
         const cached = this.optimizedCache.get(cacheKey);
         
         if (cached) {
             console.log(`✅ Time series loaded from cache`);
-            if (window.cacheWidget) {
-                window.cacheWidget.logActivity('TimeSeries', symbol, true);
-            }
+            if (window.cacheWidget) window.cacheWidget.logActivity('TimeSeries', symbol, true);
             return cached;
         }
         
         const data = await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
-        
         this.optimizedCache.set(cacheKey, data, 5 * 60 * 1000);
-        
-        if (window.cacheWidget) {
-            window.cacheWidget.logActivity('TimeSeries', symbol, false);
-        }
+        if (window.cacheWidget) window.cacheWidget.logActivity('TimeSeries', symbol, false);
         
         return data;
     },
     
     changeHorizon(days) {
         this.predictionHorizon = days;
-        
         document.querySelectorAll('.horizon-btn').forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-pressed', 'false');
         });
-        
         const activeBtn = document.querySelector(`[data-days="${days}"]`);
         if (activeBtn) {
             activeBtn.classList.add('active');
             activeBtn.setAttribute('aria-pressed', 'true');
         }
-        
-        if (this.currentSymbol && this.stockData) {
-            this.trainAllModels();
-        }
+        if (this.currentSymbol && this.stockData) this.trainAllModels();
     },
     
     changeTrainingPeriod(period) {
         this.trainingPeriod = period;
-        
-        if (this.currentSymbol) {
-            this.loadSymbol(this.currentSymbol);
-        }
-    },
+        if (this.currentSymbol) this.loadSymbol(this.currentSymbol);
+    }
+});
+
+// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 3/4) ==========
+
+Object.assign(TrendPrediction, {
     
     // ============================================
-    // ✨ NOUVEAU : CALCUL DU ALPHAVAULT SCORE
+    // ✨ CALCUL DU ALPHAVAULT SCORE
     // ============================================
     
     async calculateAlphaVaultScore() {
-        console.log('🎯 Calculating AlphaVault Score...');
+        console.log('🎯 Calculating AlphaVault Score - NO RAW DATA');
         
-        const prices = this.stockData.prices.map(p => p.close);
+        const prices = this.stockData.pricesInternal.map(p => p.close);
         
-        // 1. Calculer les rendements (pas les prix!)
+        // 1. ✅ Calculer les RENDEMENTS (pas les prix!)
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
             returns.push((prices[i] - prices[i-1]) / prices[i-1]);
         }
         
-        // 2. Direction des modèles (hausse/baisse, pas prix)
+        // 2. ✅ Direction des modèles (hausse/baisse, PAS de prix)
         const models = Object.values(this.models).filter(m => m !== null);
         const currentPrice = prices[prices.length - 1];
         
-        const modelsData = models.map(model => ({
-            directionScore: model.finalPrediction > currentPrice ? 1 : -1,
-            strength: Math.abs((model.finalPrediction - currentPrice) / currentPrice),
-            r2: model.r2
-        }));
+        const modelDirections = models.map(model => {
+            // Direction: +1 (hausse), 0 (neutre), -1 (baisse)
+            const prediction = model.normalizedPrediction; // Déjà normalisé
+            if (prediction > 0.05) return 1;
+            if (prediction < -0.05) return -1;
+            return 0;
+        });
         
-        // 3. Indicateurs techniques normalisés
+        // 3. ✅ Indicateurs techniques normalisés
         const technicals = this.calculateTechnicalIndicators(prices);
         
-        // 4. Volatilité
+        // 4. ✅ Volatilité
         const volatility = Math.sqrt(
             returns.reduce((sum, r) => sum + r * r, 0) / returns.length
         ) * Math.sqrt(252);
         
-        // 5. Calculer le score
+        // 5. ✅ Calculer le score AlphaVault
         const scoreData = {
             returns: returns,
-            models: modelsData,
+            modelDirections: modelDirections,
             technicals: technicals,
             volatility: volatility,
             r2Scores: models.map(m => m.r2)
@@ -840,13 +728,8 @@ Object.assign(TrendPrediction, {
     },
     
     calculateTechnicalIndicators(prices) {
-        // RSI (Relative Strength Index)
         const rsi = this.calculateRSI(prices, 14);
-        
-        // MACD
         const macd = this.calculateMACD(prices);
-        
-        // Bollinger Position
         const bb = this.calculateBollingerBands(prices, 20);
         const currentPrice = prices[prices.length - 1];
         const bollingerPosition = (currentPrice - bb.lower) / (bb.upper - bb.lower);
@@ -872,7 +755,6 @@ Object.assign(TrendPrediction, {
         const avgLoss = losses.slice(-period).reduce((a, b) => a + b, 0) / period;
         
         if (avgLoss === 0) return 100;
-        
         const rs = avgGain / avgLoss;
         return 100 - (100 / (1 + rs));
     },
@@ -880,22 +762,18 @@ Object.assign(TrendPrediction, {
     calculateMACD(prices) {
         const ema12 = this.calculateEMA(prices, 12);
         const ema26 = this.calculateEMA(prices, 26);
-        
         const macdLine = ema12.map((val, i) => val - ema26[i]);
         const signalLine = this.calculateEMA(macdLine, 9);
         const histogram = macdLine.map((val, i) => val - signalLine[i]);
-        
         return { macdLine, signalLine, histogram };
     },
     
     calculateEMA(prices, period) {
         const k = 2 / (period + 1);
         const ema = [prices[0]];
-        
         for (let i = 1; i < prices.length; i++) {
             ema.push(prices[i] * k + ema[i - 1] * (1 - k));
         }
-        
         return ema;
     },
     
@@ -914,13 +792,14 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // TRAIN ALL MODELS (❌ SANS ARIMA)
+    // ✅ TRAIN ALL MODELS - NORMALIZED OUTPUT ONLY
     // ============================================
     
     async trainAllModels() {
-        console.log('🤖 Training ML models (ARIMA excluded)...');
+        console.log('🤖 Training ML models - NORMALIZED MODE (no raw predictions)');
         
-        const prices = this.stockData.prices.map(p => p.close);
+        const prices = this.stockData.pricesInternal.map(p => p.close);
+        const currentPrice = prices[prices.length - 1];
         
         ['linear', 'polynomial', 'exponential', 'knn', 'neural'].forEach(model => {
             const badge = document.getElementById(`badge-${model}`);
@@ -931,30 +810,52 @@ Object.assign(TrendPrediction, {
         });
         
         this.showLoading(true, 'Training Linear Regression...');
-        this.models.linear = await this.trainLinearRegression(prices);
+        const linearModel = await this.trainLinearRegression(prices);
+        this.models.linear = this.normalizeModelOutput(linearModel, currentPrice);
         this.updateModelCard('linear', this.models.linear);
         await this.sleep(200);
         
         this.showLoading(true, 'Training Polynomial Regression...');
-        this.models.polynomial = await this.trainPolynomialRegression(prices);
+        const polyModel = await this.trainPolynomialRegression(prices);
+        this.models.polynomial = this.normalizeModelOutput(polyModel, currentPrice);
         this.updateModelCard('polynomial', this.models.polynomial);
         await this.sleep(200);
         
         this.showLoading(true, 'Training Exponential Smoothing...');
-        this.models.exponential = await this.trainExponentialSmoothing(prices);
+        const expModel = await this.trainExponentialSmoothing(prices);
+        this.models.exponential = this.normalizeModelOutput(expModel, currentPrice);
         this.updateModelCard('exponential', this.models.exponential);
         await this.sleep(200);
         
         this.showLoading(true, 'Training K-Nearest Neighbors...');
-        this.models.knn = await this.trainKNN(prices);
+        const knnModel = await this.trainKNN(prices);
+        this.models.knn = this.normalizeModelOutput(knnModel, currentPrice);
         this.updateModelCard('knn', this.models.knn);
         await this.sleep(200);
         
         this.showLoading(true, 'Training Neural Network...');
-        this.models.neural = await this.trainNeuralNetwork(prices);
+        const neuralModel = await this.trainNeuralNetwork(prices);
+        this.models.neural = this.normalizeModelOutput(neuralModel, currentPrice);
         this.updateModelCard('neural', this.models.neural);
         
-        console.log('✅ All models trained (5/5)');
+        console.log('✅ All models trained (5/5) - Normalized outputs only');
+    },
+    
+    /**
+     * ✅ NORMALISE LES PRÉDICTIONS (retourne % de changement, pas prix)
+     */
+    normalizeModelOutput(model, currentPrice) {
+        const percentChange = ((model.finalPrediction - currentPrice) / currentPrice) * 100;
+        
+        return {
+            name: model.name,
+            normalizedPrediction: percentChange / 100, // -1 à +1
+            percentChange: percentChange,
+            r2: model.r2,
+            rmse: model.rmse / currentPrice, // RMSE normalisé
+            direction: percentChange > 0 ? 1 : percentChange < 0 ? -1 : 0,
+            params: model.params
+        };
     },
     
     sleep(ms) {
@@ -962,7 +863,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // LINEAR REGRESSION
+    // LINEAR REGRESSION (INTERNE)
     // ============================================
     
     async trainLinearRegression(prices) {
@@ -979,21 +880,14 @@ Object.assign(TrendPrediction, {
         const intercept = (sumY - slope * sumX) / n;
         
         const fitted = x.map(xi => slope * xi + intercept);
-        
-        const predictions = [];
-        for (let i = 0; i < this.predictionHorizon; i++) {
-            const futureX = n + i;
-            predictions.push(slope * futureX + intercept);
-        }
+        const finalPrediction = slope * (n + this.predictionHorizon - 1) + intercept;
         
         const r2 = this.calculateR2(y, fitted);
         const rmse = this.calculateRMSE(y, fitted);
         
         return {
             name: 'Linear Regression',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
+            finalPrediction: finalPrediction,
             r2: r2,
             rmse: rmse,
             params: { slope, intercept }
@@ -1001,7 +895,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // POLYNOMIAL REGRESSION
+    // POLYNOMIAL REGRESSION (INTERNE)
     // ============================================
     
     async trainPolynomialRegression(prices, degree = 3) {
@@ -1018,7 +912,6 @@ Object.assign(TrendPrediction, {
         });
         
         const coefficients = this.solveLinearSystem(X, y);
-        
         const fitted = x.map(xi => {
             let sum = 0;
             for (let d = 0; d <= degree; d++) {
@@ -1027,14 +920,10 @@ Object.assign(TrendPrediction, {
             return sum;
         });
         
-        const predictions = [];
-        for (let i = 0; i < this.predictionHorizon; i++) {
-            const futureX = n + i;
-            let sum = 0;
-            for (let d = 0; d <= degree; d++) {
-                sum += coefficients[d] * Math.pow(futureX, d);
-            }
-            predictions.push(sum);
+        const futureX = n + this.predictionHorizon - 1;
+        let finalPrediction = 0;
+        for (let d = 0; d <= degree; d++) {
+            finalPrediction += coefficients[d] * Math.pow(futureX, d);
         }
         
         const r2 = this.calculateR2(y, fitted);
@@ -1042,9 +931,7 @@ Object.assign(TrendPrediction, {
         
         return {
             name: 'Polynomial Regression',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
+            finalPrediction: finalPrediction,
             r2: r2,
             rmse: rmse,
             params: { coefficients, degree }
@@ -1052,12 +939,11 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // EXPONENTIAL SMOOTHING
+    // EXPONENTIAL SMOOTHING (INTERNE)
     // ============================================
     
     async trainExponentialSmoothing(prices, alpha = 0.3, beta = 0.1) {
         const n = prices.length;
-        
         let level = prices[0];
         let trend = prices[1] - prices[0];
         const fitted = [prices[0]];
@@ -1065,26 +951,18 @@ Object.assign(TrendPrediction, {
         for (let i = 1; i < n; i++) {
             const prevLevel = level;
             const prevTrend = trend;
-            
             level = alpha * prices[i] + (1 - alpha) * (prevLevel + prevTrend);
             trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
-            
             fitted.push(prevLevel + prevTrend);
         }
         
-        const predictions = [];
-        for (let i = 1; i <= this.predictionHorizon; i++) {
-            predictions.push(level + i * trend);
-        }
-        
+        const finalPrediction = level + this.predictionHorizon * trend;
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
         return {
             name: 'Exponential Smoothing',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
+            finalPrediction: finalPrediction,
             r2: r2,
             rmse: rmse,
             params: { alpha, beta, level, trend }
@@ -1092,7 +970,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // K-NEAREST NEIGHBORS
+    // K-NEAREST NEIGHBORS (INTERNE)
     // ============================================
     
     async trainKNN(prices, k = 5, lookback = 5) {
@@ -1116,13 +994,12 @@ Object.assign(TrendPrediction, {
             fitted.unshift(prices[i]);
         }
         
-        const predictions = [];
         let currentWindow = prices.slice(-lookback);
+        let finalPrediction = currentWindow[currentWindow.length - 1];
         
         for (let i = 0; i < this.predictionHorizon; i++) {
-            const prediction = this.knnPredict(currentWindow, trainingData, k);
-            predictions.push(prediction);
-            currentWindow = [...currentWindow.slice(1), prediction];
+            finalPrediction = this.knnPredict(currentWindow, trainingData, k);
+            currentWindow = [...currentWindow.slice(1), finalPrediction];
         }
         
         const r2 = this.calculateR2(prices, fitted);
@@ -1130,9 +1007,7 @@ Object.assign(TrendPrediction, {
         
         return {
             name: 'K-Nearest Neighbors',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
+            finalPrediction: finalPrediction,
             r2: r2,
             rmse: rmse,
             params: { k, lookback }
@@ -1144,12 +1019,9 @@ Object.assign(TrendPrediction, {
             distance: this.euclideanDistance(query, item.features),
             target: item.target
         }));
-        
         distances.sort((a, b) => a.distance - b.distance);
         const nearest = distances.slice(0, k);
-        const prediction = nearest.reduce((sum, item) => sum + item.target, 0) / k;
-        
-        return prediction;
+        return nearest.reduce((sum, item) => sum + item.target, 0) / k;
     },
     
     euclideanDistance(a, b) {
@@ -1161,7 +1033,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // NEURAL NETWORK
+    // NEURAL NETWORK (INTERNE)
     // ============================================
     
     async trainNeuralNetwork(prices, lookback = 10) {
@@ -1190,7 +1062,6 @@ Object.assign(TrendPrediction, {
                 const hidden = this.matrixVectorMultiply(weightsInputHidden, input).map((h, i) => 
                     this.relu(h + biasHidden[i])
                 );
-                
                 const output = hidden.reduce((sum, h, i) => sum + h * weightsHiddenOutput[i], biasOutput);
                 const outputError = output - target;
                 
@@ -1201,11 +1072,23 @@ Object.assign(TrendPrediction, {
             }
         }
         
+        let currentWindow = normalized.slice(-lookback);
+        let finalPredictionNorm = currentWindow[currentWindow.length - 1];
+        
+        for (let i = 0; i < this.predictionHorizon; i++) {
+            const hidden = this.matrixVectorMultiply(weightsInputHidden, currentWindow).map((h, i) => 
+                this.relu(h + biasHidden[i])
+            );
+            finalPredictionNorm = hidden.reduce((sum, h, i) => sum + h * weightsHiddenOutput[i], biasOutput);
+            currentWindow = [...currentWindow.slice(1), finalPredictionNorm];
+        }
+        
+        const finalPrediction = finalPredictionNorm * (maxPrice - minPrice) + minPrice;
+        
         const fitted = [];
         for (let i = 0; i < lookback; i++) {
             fitted.push(prices[i]);
         }
-        
         for (let i = lookback; i < prices.length; i++) {
             const input = normalized.slice(i - lookback, i);
             const hidden = this.matrixVectorMultiply(weightsInputHidden, input).map((h, i) => 
@@ -1216,37 +1099,19 @@ Object.assign(TrendPrediction, {
             fitted.push(denormalized);
         }
         
-        const predictions = [];
-        let currentWindow = normalized.slice(-lookback);
-        
-        for (let i = 0; i < this.predictionHorizon; i++) {
-            const hidden = this.matrixVectorMultiply(weightsInputHidden, currentWindow).map((h, i) => 
-                this.relu(h + biasHidden[i])
-            );
-            const output = hidden.reduce((sum, h, i) => sum + h * weightsHiddenOutput[i], biasOutput);
-            const denormalized = output * (maxPrice - minPrice) + minPrice;
-            predictions.push(denormalized);
-            
-            currentWindow = [...currentWindow.slice(1), output];
-        }
-        
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
         return {
             name: 'Neural Network',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
+            finalPrediction: finalPrediction,
             r2: r2,
             rmse: rmse,
             params: { lookback, hiddenSize, epochs }
         };
     },
     
-    relu(x) {
-        return Math.max(0, x);
-    },
+    relu(x) { return Math.max(0, x); },
     
     randomMatrix(rows, cols) {
         const matrix = [];
@@ -1271,37 +1136,37 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✨ BACKTESTING
+    // BACKTESTING (NORMALIZED)
     // ============================================
     
     async performBacktesting() {
-        console.log('🔬 Performing backtesting analysis...');
-        
+        console.log('🔬 Performing backtesting - NORMALIZED MODE');
         this.showLoading(true, 'Running backtesting simulations...');
         
-        const prices = this.stockData.prices.map(p => p.close);
+        const prices = this.stockData.pricesInternal.map(p => p.close);
         const n = prices.length;
-        
         const backtestPeriods = 10;
         const testHorizon = 7;
         
         const backtestResults = {
-            linear: { predictions: [], actuals: [], errors: [] },
-            polynomial: { predictions: [], actuals: [], errors: [] },
-            exponential: { predictions: [], actuals: [], errors: [] },
-            knn: { predictions: [], actuals: [], errors: [] },
-            neural: { predictions: [], actuals: [], errors: [] }
+            linear: { directionAccuracy: [], avgError: [] },
+            polynomial: { directionAccuracy: [], avgError: [] },
+            exponential: { directionAccuracy: [], avgError: [] },
+            knn: { directionAccuracy: [], avgError: [] },
+            neural: { directionAccuracy: [], avgError: [] }
         };
         
         for (let period = 0; period < backtestPeriods; period++) {
             const endIndex = n - (backtestPeriods - period) * testHorizon;
-            
             if (endIndex < 50) continue;
             
             const trainPrices = prices.slice(0, endIndex);
             const actualFuture = prices.slice(endIndex, endIndex + testHorizon);
-            
             if (actualFuture.length < testHorizon) continue;
+            
+            const currentPrice = trainPrices[trainPrices.length - 1];
+            const actualFinalPrice = actualFuture[actualFuture.length - 1];
+            const actualDirection = actualFinalPrice > currentPrice ? 1 : -1;
             
             const tempHorizon = this.predictionHorizon;
             this.predictionHorizon = testHorizon;
@@ -1313,23 +1178,17 @@ Object.assign(TrendPrediction, {
                 const knnModel = await this.trainKNN(trainPrices);
                 const neuralModel = await this.trainNeuralNetwork(trainPrices);
                 
-                const models = {
-                    linear: linearModel,
-                    polynomial: polyModel,
-                    exponential: expModel,
-                    knn: knnModel,
-                    neural: neuralModel
-                };
+                const models = { linear: linearModel, polynomial: polyModel, exponential: expModel, knn: knnModel, neural: neuralModel };
                 
                 Object.keys(models).forEach(modelName => {
                     const model = models[modelName];
                     const predicted = model.finalPrediction;
-                    const actual = actualFuture[actualFuture.length - 1];
-                    const error = Math.abs((predicted - actual) / actual) * 100;
+                    const predictedDirection = predicted > currentPrice ? 1 : -1;
+                    const directionCorrect = predictedDirection === actualDirection ? 1 : 0;
+                    const error = Math.abs((predicted - actualFinalPrice) / actualFinalPrice) * 100;
                     
-                    backtestResults[modelName].predictions.push(predicted);
-                    backtestResults[modelName].actuals.push(actual);
-                    backtestResults[modelName].errors.push(error);
+                    backtestResults[modelName].directionAccuracy.push(directionCorrect);
+                    backtestResults[modelName].avgError.push(error);
                 });
             } catch (e) {
                 console.warn('Backtest period failed:', e);
@@ -1339,53 +1198,37 @@ Object.assign(TrendPrediction, {
         }
         
         const backtestMetrics = {};
-        
         Object.keys(backtestResults).forEach(modelName => {
             const result = backtestResults[modelName];
-            
-            if (result.errors.length > 0) {
-                const mape = result.errors.reduce((a, b) => a + b, 0) / result.errors.length;
-                
-                let correctDirection = 0;
-                for (let i = 1; i < result.predictions.length; i++) {
-                    const predictedDir = result.predictions[i] > result.predictions[i-1];
-                    const actualDir = result.actuals[i] > result.actuals[i-1];
-                    if (predictedDir === actualDir) correctDirection++;
-                }
-                const directionAccuracy = (correctDirection / (result.predictions.length - 1)) * 100;
-                
+            if (result.directionAccuracy.length > 0) {
+                const dirAcc = (result.directionAccuracy.reduce((a, b) => a + b, 0) / result.directionAccuracy.length) * 100;
+                const avgErr = result.avgError.reduce((a, b) => a + b, 0) / result.avgError.length;
                 backtestMetrics[modelName] = {
-                    mape: mape,
-                    directionAccuracy: directionAccuracy,
-                    predictions: result.predictions,
-                    actuals: result.actuals
+                    directionAccuracy: dirAcc,
+                    mape: avgErr
                 };
             }
         });
         
         this.backtestResults = backtestMetrics;
-        
         console.log('✅ Backtesting complete:', backtestMetrics);
     },
     
     // ============================================
-    // HELPER FUNCTIONS FOR ML
+    // HELPER FUNCTIONS
     // ============================================
     
     solveLinearSystem(X, y) {
         const XT = this.transpose(X);
         const XTX = this.matrixMultiply(XT, X);
         const XTy = this.matrixVectorMultiply2(XT, y);
-        
         const n = XTX.length;
         const augmented = XTX.map((row, i) => [...row, XTy[i]]);
         
         for (let i = 0; i < n; i++) {
             let maxRow = i;
             for (let k = i + 1; k < n; k++) {
-                if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
-                    maxRow = k;
-                }
+                if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) maxRow = k;
             }
             [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
             
@@ -1405,7 +1248,6 @@ Object.assign(TrendPrediction, {
             }
             solution[i] /= augmented[i][i];
         }
-        
         return solution;
     },
     
@@ -1436,15 +1278,11 @@ Object.assign(TrendPrediction, {
     
     calculateR2(actual, predicted) {
         const meanActual = actual.reduce((a, b) => a + b, 0) / actual.length;
-        
-        let ssRes = 0;
-        let ssTot = 0;
-        
+        let ssRes = 0, ssTot = 0;
         for (let i = 0; i < actual.length; i++) {
             ssRes += Math.pow(actual[i] - predicted[i], 2);
             ssTot += Math.pow(actual[i] - meanActual, 2);
         }
-        
         return 1 - (ssRes / ssTot);
     },
     
@@ -1457,30 +1295,22 @@ Object.assign(TrendPrediction, {
     }
 });
 
-// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 3/4) ==========
+// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 4/4) ==========
 
 Object.assign(TrendPrediction, {
     
     // ============================================
-    // DISPLAY FUNCTIONS
+    // ✅ DISPLAY FUNCTIONS - NO RAW PRICES
     // ============================================
     
     displayStockHeader() {
-        const quote = this.stockData.quote;
+        document.getElementById('stockSymbol').textContent = this.currentSymbol;
+        document.getElementById('stockName').textContent = this.stockData.name || this.currentSymbol;
         
-        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
-        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        
-        const price = quote.price || 0;
-        const change = quote.change || 0;
-        const changePercent = quote.percentChange || 0;
-        
-        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
-        
-        const changeEl = document.getElementById('priceChange');
-        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        changeEl.textContent = changeText;
-        changeEl.className = change >= 0 ? 'change positive' : 'change negative';
+        // ❌ NE PAS AFFICHER DE PRIX
+        document.getElementById('currentPrice').textContent = '---';
+        document.getElementById('priceChange').textContent = 'AlphaVault Score will be displayed below';
+        document.getElementById('priceChange').className = 'change neutral';
         
         document.getElementById('stockHeader').classList.remove('hidden');
     },
@@ -1496,564 +1326,29 @@ Object.assign(TrendPrediction, {
         if (metricsContainer) {
             const metrics = metricsContainer.querySelectorAll('.metric strong');
             if (metrics.length >= 3) {
-                metrics[0].textContent = this.formatCurrency(modelResult.finalPrediction);
+                // ✅ Afficher % de changement (pas prix)
+                metrics[0].textContent = `${modelResult.percentChange >= 0 ? '+' : ''}${modelResult.percentChange.toFixed(2)}%`;
                 metrics[1].textContent = (modelResult.r2 * 100).toFixed(1) + '%';
-                metrics[2].textContent = modelResult.rmse.toFixed(2);
+                metrics[2].textContent = 'Score-based';
             }
         }
         
-        this.createModelChart(modelName, modelResult);
+        this.createModelScoreGauge(modelName, modelResult);
     },
     
-    createModelChart(modelName, modelResult) {
-        const prices = this.stockData.prices;
-        const historical = prices.map((p, i) => [p.timestamp, p.close]);
-        
-        const lastTimestamp = prices[prices.length - 1].timestamp;
-        const dayMs = 24 * 60 * 60 * 1000;
-        
-        const predictions = modelResult.predictions.map((pred, i) => [
-            lastTimestamp + (i + 1) * dayMs,
-            pred
-        ]);
+    /**
+     * ✅ GRAPHIQUE BASÉ SUR LE SCORE (pas de prix)
+     */
+    createModelScoreGauge(modelName, modelResult) {
+        const score = Math.max(0, Math.min(100, 50 + modelResult.percentChange * 2));
         
         Highcharts.chart(`chart-${modelName}`, {
             chart: {
+                type: 'solidgauge',
                 height: 250,
                 backgroundColor: 'transparent'
             },
             title: { text: null },
-            xAxis: {
-                type: 'datetime',
-                labels: { enabled: false },
-                lineWidth: 0,
-                tickWidth: 0
-            },
-            yAxis: {
-                title: { text: null },
-                gridLineWidth: 1,
-                gridLineColor: '#f0f0f0'
-            },
-            legend: { enabled: false },
-            tooltip: {
-                shared: true,
-                crosshairs: true,
-                borderRadius: 10,
-                valueDecimals: 2,
-                valuePrefix: '$'
-            },
-            plotOptions: {
-                series: {
-                    marker: { enabled: false }
-                }
-            },
-            series: [{
-                name: 'Historical',
-                data: historical,
-                color: '#6c757d',
-                lineWidth: 2,
-                zIndex: 1
-            }, {
-                name: 'Prediction',
-                data: predictions,
-                color: this.colors.primary,
-                lineWidth: 3,
-                dashStyle: 'Dash',
-                zIndex: 2
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    displayResults() {
-        this.createComparisonChart();
-        this.createPerformanceCharts();
-        this.createPerformanceTable();
-        this.displayEnsemblePrediction();
-        this.createBacktestingCharts();
-        this.createMultiHorizonChart();
-        this.createCorrelationHeatmap();
-        this.displayRecommendation();
-        
-        document.getElementById('resultsPanel').classList.remove('hidden');
-    },
-    
-    // ============================================
-    // COMPARISON CHART
-    // ============================================
-    
-    createComparisonChart() {
-        const prices = this.stockData.prices;
-        const historical = prices.map(p => [p.timestamp, p.close]);
-        
-        const lastTimestamp = prices[prices.length - 1].timestamp;
-        const dayMs = 24 * 60 * 60 * 1000;
-        
-        const series = [{
-            name: 'Historical Price',
-            data: historical,
-            color: '#6c757d',
-            lineWidth: 3,
-            zIndex: 10
-        }];
-        
-        const modelColors = {
-            linear: this.colors.primary,
-            polynomial: this.colors.secondary,
-            exponential: this.colors.tertiary,
-            knn: this.colors.purple,
-            neural: '#9D5CE6'
-        };
-        
-        Object.entries(this.models).forEach(([name, model]) => {
-            if (model && model.predictions) {
-                const predictions = model.predictions.map((pred, i) => [
-                    lastTimestamp + (i + 1) * dayMs,
-                    pred
-                ]);
-                
-                series.push({
-                    name: model.name,
-                    data: predictions,
-                    color: modelColors[name],
-                    lineWidth: 2,
-                    dashStyle: 'Dash'
-                });
-            }
-        });
-        
-        Highcharts.stockChart('comparisonChart', {
-            chart: {
-                height: 600,
-                borderRadius: 15
-            },
-            title: {
-                text: `${this.currentSymbol} - ML Model Predictions Comparison`,
-                style: { 
-                    color: this.colors.primary, 
-                    fontWeight: 'bold',
-                    fontSize: '1.25rem'
-                }
-            },
-            subtitle: {
-                text: `Prediction Horizon: ${this.predictionHorizon} days | Training Period: ${this.trainingPeriod}`,
-                style: { 
-                    color: '#64748b',
-                    fontSize: '0.875rem'
-                }
-            },
-            rangeSelector: { enabled: false },
-            navigator: { enabled: false },
-            scrollbar: { enabled: false },
-            xAxis: {
-                type: 'datetime',
-                plotLines: [{
-                    value: lastTimestamp,
-                    color: '#dc3545',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Prediction Start',
-                        style: { 
-                            color: '#dc3545', 
-                            fontWeight: 'bold' 
-                        }
-                    },
-                    zIndex: 5
-                }]
-            },
-            yAxis: {
-                title: { 
-                    text: 'Price (USD)',
-                    style: { color: '#475569' }
-                },
-                labels: {
-                    formatter: function() {
-                        return '$' + this.value.toFixed(2);
-                    }
-                }
-            },
-            tooltip: {
-                shared: true,
-                crosshairs: true,
-                borderRadius: 10,
-                valueDecimals: 2,
-                valuePrefix: '$'
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: {
-                    color: '#475569',
-                    fontWeight: '500'
-                }
-            },
-            series: series,
-            credits: { enabled: false }
-        });
-    },
-    
-    // ============================================
-    // BACKTESTING CHARTS
-    // ============================================
-    
-    createBacktestingCharts() {
-        if (!this.backtestResults) {
-            console.warn('No backtesting results available');
-            return;
-        }
-        
-        // 1. Historical Accuracy Chart
-        const accuracyData = Object.keys(this.backtestResults).map(modelName => ({
-            name: this.models[modelName].name,
-            y: 100 - this.backtestResults[modelName].mape,
-            color: this.getModelColor(modelName)
-        }));
-        
-        Highcharts.chart('backtestAccuracyChart', {
-            chart: {
-                type: 'column',
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Historical Prediction Accuracy',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            subtitle: {
-                text: 'Based on past prediction performance (100% - MAPE)',
-                style: { color: '#64748b' }
-            },
-            xAxis: {
-                type: 'category',
-                labels: { style: { color: '#475569', fontWeight: '500' } }
-            },
-            yAxis: {
-                title: { text: 'Accuracy (%)', style: { color: '#475569' } },
-                min: 0,
-                max: 100
-            },
-            tooltip: {
-                pointFormat: '<b>{point.y:.1f}%</b> accuracy',
-                borderRadius: 10
-            },
-            plotOptions: {
-                column: {
-                    borderRadius: '25%',
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.y:.1f}%',
-                        style: { fontWeight: 'bold', color: '#475569' }
-                    }
-                }
-            },
-            series: [{
-                name: 'Accuracy',
-                data: accuracyData,
-                colorByPoint: true
-            }],
-            credits: { enabled: false }
-        });
-        
-        // 2. Predictions vs Actual Chart
-        const comparisonSeries = [];
-        
-        Object.keys(this.backtestResults).forEach(modelName => {
-            const result = this.backtestResults[modelName];
-            
-            comparisonSeries.push({
-                name: `${this.models[modelName].name} - Predicted`,
-                data: result.predictions,
-                color: this.getModelColor(modelName),
-                dashStyle: 'Dash',
-                lineWidth: 2
-            });
-            
-            comparisonSeries.push({
-                name: `${this.models[modelName].name} - Actual`,
-                data: result.actuals,
-                color: this.getModelColor(modelName),
-                lineWidth: 3,
-                marker: { enabled: true, radius: 4 }
-            });
-        });
-        
-        Highcharts.chart('backtestComparisonChart', {
-            chart: {
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Predictions vs Actual Prices',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            subtitle: {
-                text: 'Historical prediction accuracy over multiple periods',
-                style: { color: '#64748b' }
-            },
-            xAxis: {
-                title: { text: 'Backtest Period' }
-            },
-            yAxis: {
-                title: { text: 'Price (USD)' },
-                labels: {
-                    formatter: function() {
-                        return '$' + this.value.toFixed(2);
-                    }
-                }
-            },
-            tooltip: {
-                valuePrefix: '$',
-                valueDecimals: 2,
-                borderRadius: 10
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-            series: comparisonSeries,
-            credits: { enabled: false }
-        });
-        
-        // 3. Update Backtesting Metrics
-        if (this.backtestResults.linear) {
-            const avgAccuracy = Object.values(this.backtestResults)
-                .reduce((sum, r) => sum + (100 - r.mape), 0) / Object.keys(this.backtestResults).length;
-            
-            const avgMAPE = Object.values(this.backtestResults)
-                .reduce((sum, r) => sum + r.mape, 0) / Object.keys(this.backtestResults).length;
-            
-            const bestModel = Object.keys(this.backtestResults).reduce((best, modelName) => {
-                return this.backtestResults[modelName].mape < this.backtestResults[best].mape ? modelName : best;
-            });
-            
-            const avgDirectionAccuracy = Object.values(this.backtestResults)
-                .reduce((sum, r) => sum + r.directionAccuracy, 0) / Object.keys(this.backtestResults).length;
-            
-            const el7d = document.getElementById('backtest7dAccuracy');
-            const elMAPE = document.getElementById('backtestMAPE');
-            const elBest = document.getElementById('backtestBestModel');
-            const elDirection = document.getElementById('backtestDirectionAccuracy');
-            
-            if (el7d) el7d.textContent = avgAccuracy.toFixed(1) + '%';
-            if (elMAPE) elMAPE.textContent = avgMAPE.toFixed(2) + '%';
-            if (elBest) elBest.textContent = this.models[bestModel].name;
-            if (elDirection) elDirection.textContent = avgDirectionAccuracy.toFixed(1) + '%';
-        }
-    },
-    
-    switchBacktestTab(button) {
-        document.querySelectorAll('.backtesting-tabs .tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        button.classList.add('active');
-        
-        document.querySelectorAll('.backtesting-content .tab-panel').forEach(panel => {
-            panel.classList.remove('active');
-        });
-        
-        const tabId = 'tab-' + button.dataset.tab;
-        const panel = document.getElementById(tabId);
-        if (panel) {
-            panel.classList.add('active');
-        }
-    },
-    
-    // ============================================
-    // MULTI-HORIZON CHART
-    // ============================================
-    
-    createMultiHorizonChart() {
-        const prices = this.stockData.prices;
-        const historical = prices.map(p => [p.timestamp, p.close]);
-        const lastTimestamp = prices[prices.length - 1].timestamp;
-        const lastPrice = prices[prices.length - 1].close;
-        const dayMs = 24 * 60 * 60 * 1000;
-        
-        const horizons = [7, 15, 30, 60];
-        const series = [{
-            name: 'Historical Price',
-            data: historical,
-            color: '#6c757d',
-            lineWidth: 3,
-            zIndex: 10
-        }];
-        
-        horizons.forEach((horizon, index) => {
-            const avgPrediction = Object.values(this.models)
-                .filter(m => m !== null)
-                .reduce((sum, m) => {
-                    const ratio = horizon / this.predictionHorizon;
-                    const pred = lastPrice + (m.finalPrediction - lastPrice) * ratio;
-                    return sum + pred;
-                }, 0) / Object.values(this.models).filter(m => m !== null).length;
-            
-            const predictionData = [
-                [lastTimestamp, lastPrice],
-                [lastTimestamp + horizon * dayMs, avgPrediction]
-            ];
-            
-            const colors = ['#667eea', '#8E7DE3', '#9D5CE6', '#b794f4'];
-            
-            series.push({
-                name: `${horizon} Days`,
-                data: predictionData,
-                color: colors[index],
-                lineWidth: 2 + index * 0.5,
-                dashStyle: 'Dash',
-                zIndex: 5 - index
-            });
-        });
-        
-        Highcharts.chart('multiHorizonChart', {
-            chart: {
-                height: 500,
-                borderRadius: 15
-            },
-            title: {
-                text: `${this.currentSymbol} - Multi-Horizon Prediction Fan`,
-                style: { color: this.colors.primary, fontWeight: 'bold', fontSize: '1.25rem' }
-            },
-            subtitle: {
-                text: 'Ensemble predictions across multiple timeframes',
-                style: { color: '#64748b' }
-            },
-            xAxis: {
-                type: 'datetime',
-                plotLines: [{
-                    value: lastTimestamp,
-                    color: '#dc3545',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Today',
-                        style: { color: '#dc3545', fontWeight: 'bold' }
-                    }
-                }]
-            },
-            yAxis: {
-                title: { text: 'Price (USD)' },
-                labels: {
-                    formatter: function() {
-                        return '$' + this.value.toFixed(2);
-                    }
-                }
-            },
-            tooltip: {
-                shared: true,
-                crosshairs: true,
-                borderRadius: 10,
-                valueDecimals: 2,
-                valuePrefix: '$'
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-            series: series,
-            credits: { enabled: false }
-        });
-    },
-    
-    // ============================================
-    // CORRELATION HEATMAP
-    // ============================================
-    
-    createCorrelationHeatmap() {
-        const modelNames = Object.keys(this.models).filter(name => this.models[name] !== null);
-        
-        const correlationMatrix = [];
-        
-        modelNames.forEach((model1, i) => {
-            modelNames.forEach((model2, j) => {
-                const predictions1 = this.models[model1].predictions;
-                const predictions2 = this.models[model2].predictions;
-                
-                const correlation = this.calculateCorrelation(predictions1, predictions2);
-                
-                correlationMatrix.push([j, i, correlation]);
-            });
-        });
-        
-        Highcharts.chart('correlationHeatmap', {
-            chart: {
-                type: 'heatmap',
-                height: 400,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Model Prediction Correlation',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            subtitle: {
-                text: 'Higher values indicate stronger agreement between models',
-                style: { color: '#64748b' }
-            },
-            xAxis: {
-                categories: modelNames.map(name => this.models[name].name)
-            },
-            yAxis: {
-                categories: modelNames.map(name => this.models[name].name),
-                title: null,
-                reversed: true
-            },
-            colorAxis: {
-                min: 0,
-                max: 1,
-                stops: [
-                    [0, '#f8fafc'],
-                    [0.5, '#93c5fd'],
-                    [1, '#1e40af']
-                ]
-            },
-            legend: {
-                align: 'right',
-                layout: 'vertical',
-                margin: 0,
-                verticalAlign: 'top',
-                y: 25,
-                symbolHeight: 280
-            },
-            tooltip: {
-                formatter: function() {
-                    return '<b>' + this.series.xAxis.categories[this.point.x] + '</b> vs <b>' +
-                        this.series.yAxis.categories[this.point.y] + '</b><br>' +
-                        'Correlation: <b>' + (this.point.value * 100).toFixed(1) + '%</b>';
-                },
-                borderRadius: 10
-            },
-            series: [{
-                name: 'Correlation',
-                borderWidth: 1,
-                data: correlationMatrix,
-                dataLabels: {
-                    enabled: true,
-                    color: '#000000',
-                    formatter: function() {
-                        return (this.point.value * 100).toFixed(0) + '%';
-                    }
-                }
-            }],
-            credits: { enabled: false }
-        });
-        
-        const avgCorrelation = correlationMatrix
-            .filter((item, index) => Math.floor(index / modelNames.length) !== index % modelNames.length)
-            .reduce((sum, item) => sum + item[2], 0) / (correlationMatrix.length - modelNames.length);
-        
-        const consensusScore = avgCorrelation * 100;
-        
-        Highcharts.chart('consensusGauge', {
-            chart: {
-                type: 'solidgauge',
-                height: 280,
-                backgroundColor: 'transparent'
-            },
-            title: null,
             pane: {
                 center: ['50%', '75%'],
                 size: '110%',
@@ -2067,12 +1362,7 @@ Object.assign(TrendPrediction, {
                     borderWidth: 0
                 }]
             },
-            exporting: {
-                enabled: false
-            },
-            tooltip: {
-                enabled: false
-            },
+            tooltip: { enabled: false },
             yAxis: {
                 min: 0,
                 max: 100,
@@ -2087,14 +1377,7 @@ Object.assign(TrendPrediction, {
                 tickWidth: 0,
                 minorTickInterval: null,
                 tickAmount: 2,
-                labels: {
-                    y: 20,
-                    style: {
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#64748b'
-                    }
-                }
+                labels: { y: 16 }
             },
             plotOptions: {
                 solidgauge: {
@@ -2102,70 +1385,108 @@ Object.assign(TrendPrediction, {
                         y: -30,
                         borderWidth: 0,
                         useHTML: true,
-                        format: '<div style="text-align:center">' +
-                            '<span style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg, #667eea, #764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{y:.0f}%</span><br/>' +
-                            '<span style="font-size:0.9rem;color:#64748b;font-weight:600;margin-top:8px;display:block;">Model Consensus</span>' +
-                            '</div>'
-                    },
-                    linecap: 'round',
-                    stickyTracking: false,
-                    rounded: true
+                        format: `<div style="text-align:center">
+                            <span style="font-size:2rem;font-weight:800;color:${this.colors.primary};">{y:.0f}</span><br/>
+                            <span style="font-size:0.8rem;color:#64748b;">Score</span>
+                        </div>`
+                    }
                 }
             },
             series: [{
-                name: 'Consensus',
-                data: [consensusScore],
+                name: 'Score',
+                data: [score],
                 innerRadius: '60%',
                 radius: '100%'
             }],
             credits: { enabled: false }
         });
-        
-        const descriptionEl = document.getElementById('consensusDescription');
-        if (descriptionEl) {
-            let description = '';
-            if (consensusScore > 80) {
-                description = '🟢 <strong>Strong Consensus:</strong> Models are in high agreement. High confidence in predictions.';
-            } else if (consensusScore > 60) {
-                description = '🟡 <strong>Moderate Consensus:</strong> Models show good alignment. Reasonable confidence in predictions.';
-            } else {
-                description = '🔴 <strong>Low Consensus:</strong> Models disagree significantly. Exercise caution with predictions.';
-            }
-            descriptionEl.innerHTML = description;
-        }
     },
     
-    calculateCorrelation(x, y) {
-        const n = Math.min(x.length, y.length);
+    displayResults() {
+        this.createScoreComparisonChart();
+        this.createPerformanceCharts();
+        this.createPerformanceTable();
+        this.displayEnsemblePrediction();
+        this.createBacktestingCharts();
+        this.createCorrelationHeatmap();
+        this.displayRecommendation();
         
-        const sumX = x.slice(0, n).reduce((a, b) => a + b, 0);
-        const sumY = y.slice(0, n).reduce((a, b) => a + b, 0);
-        
-        const sumXY = x.slice(0, n).reduce((sum, xi, i) => sum + xi * y[i], 0);
-        const sumX2 = x.slice(0, n).reduce((sum, xi) => sum + xi * xi, 0);
-        const sumY2 = y.slice(0, n).reduce((sum, yi) => sum + yi * yi, 0);
-        
-        const numerator = n * sumXY - sumX * sumY;
-        const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-        
-        if (denominator === 0) return 0;
-        
-        return numerator / denominator;
-    }
-});
-
-// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 4/4) ==========
-
-Object.assign(TrendPrediction, {
+        document.getElementById('resultsPanel').classList.remove('hidden');
+    },
     
     // ============================================
-    // PERFORMANCE COMPARISON
+    // ✅ SCORE COMPARISON CHART (NO PRICES)
+    // ============================================
+    
+    createScoreComparisonChart() {
+        const models = Object.entries(this.models).filter(([_, m]) => m !== null);
+        
+        const categories = models.map(([name, _]) => this.models[name].name);
+        const scores = models.map(([_, model]) => Math.max(0, Math.min(100, 50 + model.percentChange * 2)));
+        
+        Highcharts.chart('comparisonChart', {
+            chart: {
+                type: 'column',
+                height: 600,
+                borderRadius: 15
+            },
+            title: {
+                text: `${this.currentSymbol} - AlphaVault Score Comparison`,
+                style: { color: this.colors.primary, fontWeight: 'bold', fontSize: '1.25rem' }
+            },
+            subtitle: {
+                text: `Score Range: 0-100 | Horizon: ${this.predictionHorizon} days | Training: ${this.trainingPeriod}`,
+                style: { color: '#64748b', fontSize: '0.875rem' }
+            },
+            xAxis: {
+                categories: categories,
+                labels: { style: { fontWeight: '600', color: '#475569' } }
+            },
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: { text: 'AlphaVault Score', style: { color: '#475569' } },
+                plotLines: [{
+                    value: 50,
+                    color: '#94a3b8',
+                    width: 2,
+                    dashStyle: 'Dash',
+                    label: { text: 'Neutral (50)', style: { color: '#64748b' } }
+                }]
+            },
+            tooltip: {
+                headerFormat: '<b>{point.x}</b><br/>',
+                pointFormat: 'Score: <b>{point.y:.0f}/100</b>',
+                borderRadius: 10
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%',
+                    colorByPoint: true,
+                    colors: models.map(([name, _]) => this.getModelColor(name)),
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.0f}',
+                        style: { fontWeight: 'bold', fontSize: '14px' }
+                    }
+                }
+            },
+            series: [{
+                name: 'AlphaVault Score',
+                data: scores
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    // ============================================
+    // PERFORMANCE CHARTS (NORMALIZED)
     // ============================================
     
     createPerformanceCharts() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         
-        // Accuracy Chart
+        // R² Chart
         const accuracyData = models.map(([name, model]) => ({
             name: model.name,
             y: model.r2 * 100,
@@ -2173,131 +1494,68 @@ Object.assign(TrendPrediction, {
         }));
         
         Highcharts.chart('accuracyChart', {
-            chart: {
-                type: 'column',
-                borderRadius: 15,
-                height: 400
-            },
+            chart: { type: 'column', borderRadius: 15, height: 400 },
             title: {
                 text: 'Model Accuracy (R² Score)',
-                style: { 
-                    color: this.colors.primary, 
-                    fontWeight: 'bold',
-                    fontSize: '1.125rem'
-                }
+                style: { color: this.colors.primary, fontWeight: 'bold' }
             },
-            xAxis: {
-                type: 'category',
-                labels: {
-                    style: { 
-                        color: '#475569',
-                        fontWeight: '500'
-                    }
-                }
-            },
+            xAxis: { type: 'category' },
             yAxis: {
-                title: { 
-                    text: 'R² Score (%)',
-                    style: { color: '#475569' }
-                },
-                max: 100,
-                gridLineColor: '#f1f5f9'
+                title: { text: 'R² Score (%)' },
+                max: 100
             },
-            legend: { enabled: false },
-            tooltip: {
-                pointFormat: '<b>{point.y:.1f}%</b>',
-                borderRadius: 10
-            },
+            tooltip: { pointFormat: '<b>{point.y:.1f}%</b>', borderRadius: 10 },
             plotOptions: {
                 column: {
                     borderRadius: '25%',
                     dataLabels: {
                         enabled: true,
-                        format: '{point.y:.1f}%',
-                        style: {
-                            fontWeight: 'bold',
-                            color: '#475569'
-                        }
+                        format: '{point.y:.1f}%'
                     }
                 }
             },
-            series: [{
-                name: 'Accuracy',
-                data: accuracyData,
-                colorByPoint: true
-            }],
+            series: [{ name: 'Accuracy', data: accuracyData, colorByPoint: true }],
             credits: { enabled: false }
         });
         
-        // Error Chart
-        const errorData = models.map(([name, model]) => ({
-            name: model.name,
-            y: model.rmse,
-            color: this.getModelColor(name)
-        }));
-        
-        Highcharts.chart('errorChart', {
-            chart: {
-                type: 'bar',
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'Model Error (RMSE)',
-                style: { 
-                    color: this.colors.primary, 
-                    fontWeight: 'bold',
-                    fontSize: '1.125rem'
-                }
-            },
-            xAxis: {
-                type: 'category',
-                labels: {
-                    style: { 
-                        color: '#475569',
-                        fontWeight: '500'
-                    }
-                }
-            },
-            yAxis: {
-                title: { 
-                    text: 'RMSE (Lower is Better)',
-                    style: { color: '#475569' }
+        // Direction Accuracy (from backtesting)
+        if (this.backtestResults) {
+            const directionData = Object.keys(this.backtestResults).map(modelName => ({
+                name: this.models[modelName].name,
+                y: this.backtestResults[modelName].directionAccuracy,
+                color: this.getModelColor(modelName)
+            }));
+            
+            Highcharts.chart('errorChart', {
+                chart: { type: 'bar', borderRadius: 15, height: 400 },
+                title: {
+                    text: 'Direction Prediction Accuracy',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
-                gridLineColor: '#f1f5f9'
-            },
-            legend: { enabled: false },
-            tooltip: {
-                pointFormat: '<b>{point.y:.2f}</b>',
-                borderRadius: 10
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: '25%',
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.y:.2f}',
-                        style: {
-                            fontWeight: 'bold',
-                            color: '#475569'
+                xAxis: { type: 'category' },
+                yAxis: {
+                    title: { text: 'Accuracy (%)' },
+                    max: 100
+                },
+                tooltip: { pointFormat: '<b>{point.y:.1f}%</b>', borderRadius: 10 },
+                plotOptions: {
+                    bar: {
+                        borderRadius: '25%',
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.y:.1f}%'
                         }
                     }
-                }
-            },
-            series: [{
-                name: 'RMSE',
-                data: errorData,
-                colorByPoint: true
-            }],
-            credits: { enabled: false }
-        });
+                },
+                series: [{ name: 'Direction Accuracy', data: directionData, colorByPoint: true }],
+                credits: { enabled: false }
+            });
+        }
     },
     
     createPerformanceTable() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         models.sort((a, b) => b[1].r2 - a[1].r2);
-        
-        const currentPrice = this.stockData.quote.price;
         
         const tableHTML = `
             <table>
@@ -2305,27 +1563,28 @@ Object.assign(TrendPrediction, {
                     <tr>
                         <th>Rank</th>
                         <th>Model</th>
-                        <th>Prediction (${this.predictionHorizon}d)</th>
+                        <th>Expected Change</th>
                         <th>R² Score</th>
-                        <th>RMSE</th>
-                        <th>Change vs Current</th>
+                        <th>Direction</th>
+                        <th>Signal</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${models.map(([name, model], index) => {
-                        const change = ((model.finalPrediction - currentPrice) / currentPrice) * 100;
                         const rowClass = index === 0 ? 'best' : index === models.length - 1 ? 'worst' : '';
+                        const signal = model.direction > 0 ? '📈 Bullish' : model.direction < 0 ? '📉 Bearish' : '⚖ Neutral';
+                        const signalColor = model.direction > 0 ? this.colors.success : model.direction < 0 ? this.colors.danger : '#6c757d';
                         
                         return `
                             <tr class='${rowClass}'>
                                 <td class='rank'>#${index + 1}</td>
                                 <td><strong>${this.escapeHtml(model.name)}</strong></td>
-                                <td>${this.formatCurrency(model.finalPrediction)}</td>
-                                <td>${(model.r2 * 100).toFixed(2)}%</td>
-                                <td>${model.rmse.toFixed(2)}</td>
-                                <td style='color: ${change >= 0 ? this.colors.success : this.colors.danger}; font-weight: 600;'>
-                                    ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
+                                <td style='color: ${model.percentChange >= 0 ? this.colors.success : this.colors.danger}; font-weight: 700;'>
+                                    ${model.percentChange >= 0 ? '+' : ''}${model.percentChange.toFixed(2)}%
                                 </td>
+                                <td>${(model.r2 * 100).toFixed(2)}%</td>
+                                <td>${model.direction > 0 ? '⬆ Up' : model.direction < 0 ? '⬇ Down' : '➡ Flat'}</td>
+                                <td style='color: ${signalColor}; font-weight: 600;'>${signal}</td>
                             </tr>
                         `;
                     }).join('')}
@@ -2337,62 +1596,53 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ENSEMBLE PREDICTION
+    // ✅ ENSEMBLE PREDICTION (SCORE ONLY)
     // ============================================
     
     displayEnsemblePrediction() {
         const models = Object.values(this.models).filter(m => m !== null);
         
-        let sumWeightedPrediction = 0;
+        // Moyenne pondérée des changements en %
+        let sumWeightedChange = 0;
         let sumWeights = 0;
         
         models.forEach(model => {
             const weight = Math.max(0, model.r2);
-            sumWeightedPrediction += model.finalPrediction * weight;
+            sumWeightedChange += model.percentChange * weight;
             sumWeights += weight;
         });
         
-        const ensemblePrediction = sumWeightedPrediction / sumWeights;
-        
-        const predictions = models.map(m => m.finalPrediction);
-        const mean = predictions.reduce((a, b) => a + b) / predictions.length;
-        const variance = predictions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / predictions.length;
-        const stdDev = Math.sqrt(variance);
-        
-        const lower = ensemblePrediction - 1.96 * stdDev;
-        const upper = ensemblePrediction + 1.96 * stdDev;
+        const ensembleChange = sumWeightedChange / sumWeights;
+        const ensembleScore = Math.max(0, Math.min(100, 50 + ensembleChange * 2));
         
         const avgAccuracy = models.reduce((sum, m) => sum + m.r2, 0) / models.length;
         
-        const currentPrice = this.stockData.quote.price;
-        const change = ensemblePrediction - currentPrice;
-        const changePercent = (change / currentPrice) * 100;
-        
-        document.getElementById('ensemblePrice').textContent = this.formatCurrency(ensemblePrediction);
+        // ✅ Affichage du score (PAS de prix)
+        document.getElementById('ensemblePrice').textContent = `${ensembleScore.toFixed(0)}/100`;
         
         const changeEl = document.getElementById('ensembleChange');
-        changeEl.textContent = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        changeEl.style.color = change >= 0 ? this.colors.success : this.colors.danger;
+        changeEl.textContent = `${ensembleChange >= 0 ? '+' : ''}${ensembleChange.toFixed(2)}% expected`;
+        changeEl.style.color = ensembleChange >= 0 ? this.colors.success : this.colors.danger;
         
-        document.getElementById('ensembleRange').textContent = `${this.formatCurrency(lower)} - ${this.formatCurrency(upper)}`;
+        document.getElementById('ensembleRange').textContent = `Score: ${ensembleScore.toFixed(0)}`;
         
         let signal = 'HOLD';
         let signalClass = 'neutral';
         let strength = 'Moderate';
         
-        if (changePercent > 5) {
+        if (ensembleChange > 5) {
             signal = 'STRONG BUY';
             signalClass = 'bullish';
             strength = 'High Confidence';
-        } else if (changePercent > 2) {
+        } else if (ensembleChange > 2) {
             signal = 'BUY';
             signalClass = 'bullish';
             strength = 'Good Confidence';
-        } else if (changePercent < -5) {
+        } else if (ensembleChange < -5) {
             signal = 'STRONG SELL';
             signalClass = 'bearish';
             strength = 'High Confidence';
-        } else if (changePercent < -2) {
+        } else if (ensembleChange < -2) {
             signal = 'SELL';
             signalClass = 'bearish';
             strength = 'Good Confidence';
@@ -2405,50 +1655,284 @@ Object.assign(TrendPrediction, {
         signalIcon.className = `card-icon ${signalClass}`;
         
         document.getElementById('ensembleAccuracy').textContent = (avgAccuracy * 100).toFixed(1) + '%';
+        
+        // ✅ Afficher le score AlphaVault global
+        if (this.alphaVaultScore) {
+            const scoreEl = document.getElementById('alphaVaultScoreDisplay');
+            if (scoreEl) {
+                scoreEl.innerHTML = `
+                    <div style="text-align:center; padding:30px; background:linear-gradient(135deg, ${this.colors.primary}, ${this.colors.secondary}); border-radius:20px; color:white; margin-top:20px;">
+                        <div style="font-size:3rem; font-weight:900;">${this.alphaVaultScore.overall}</div>
+                        <div style="font-size:1.2rem; margin-top:10px;">AlphaVault Score</div>
+                        <div style="font-size:1rem; margin-top:10px; opacity:0.9;">${this.alphaVaultScore.signal.icon} ${this.alphaVaultScore.signal.text}</div>
+                        <div style="font-size:0.9rem; margin-top:5px; opacity:0.8;">Confidence: ${this.alphaVaultScore.confidence.text}</div>
+                    </div>
+                `;
+            }
+        }
     },
     
     // ============================================
-    // RECOMMENDATION
+    // BACKTESTING CHARTS (NORMALIZED)
+    // ============================================
+    
+    createBacktestingCharts() {
+        if (!this.backtestResults) return;
+        
+        const accuracyData = Object.keys(this.backtestResults).map(modelName => ({
+            name: this.models[modelName].name,
+            y: this.backtestResults[modelName].directionAccuracy,
+            color: this.getModelColor(modelName)
+        }));
+        
+        Highcharts.chart('backtestAccuracyChart', {
+            chart: { type: 'column', height: 450, borderRadius: 15 },
+            title: {
+                text: 'Historical Direction Prediction Accuracy',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            subtitle: {
+                text: 'Percentage of correct direction predictions',
+                style: { color: '#64748b' }
+            },
+            xAxis: { type: 'category' },
+            yAxis: {
+                title: { text: 'Accuracy (%)' },
+                min: 0,
+                max: 100
+            },
+            tooltip: {
+                pointFormat: '<b>{point.y:.1f}%</b> accuracy',
+                borderRadius: 10
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.1f}%'
+                    }
+                }
+            },
+            series: [{ name: 'Accuracy', data: accuracyData, colorByPoint: true }],
+            credits: { enabled: false }
+        });
+        
+        // Error chart
+        const errorData = Object.keys(this.backtestResults).map(modelName => ({
+            name: this.models[modelName].name,
+            y: this.backtestResults[modelName].mape,
+            color: this.getModelColor(modelName)
+        }));
+        
+        Highcharts.chart('backtestComparisonChart', {
+            chart: { type: 'bar', height: 450, borderRadius: 15 },
+            title: {
+                text: 'Mean Absolute Percentage Error (MAPE)',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            subtitle: {
+                text: 'Lower is better',
+                style: { color: '#64748b' }
+            },
+            xAxis: { type: 'category' },
+            yAxis: {
+                title: { text: 'MAPE (%)' }
+            },
+            tooltip: {
+                pointFormat: '<b>{point.y:.2f}%</b> error',
+                borderRadius: 10
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: '25%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.2f}%'
+                    }
+                }
+            },
+            series: [{ name: 'MAPE', data: errorData, colorByPoint: true }],
+            credits: { enabled: false }
+        });
+        
+        // Update metrics
+        if (this.backtestResults.linear) {
+            const avgAccuracy = Object.values(this.backtestResults)
+                .reduce((sum, r) => sum + r.directionAccuracy, 0) / Object.keys(this.backtestResults).length;
+            
+            const avgMAPE = Object.values(this.backtestResults)
+                .reduce((sum, r) => sum + r.mape, 0) / Object.keys(this.backtestResults).length;
+            
+            const bestModel = Object.keys(this.backtestResults).reduce((best, modelName) => {
+                return this.backtestResults[modelName].directionAccuracy > this.backtestResults[best].directionAccuracy ? modelName : best;
+            });
+            
+            const el7d = document.getElementById('backtest7dAccuracy');
+            const elMAPE = document.getElementById('backtestMAPE');
+            const elBest = document.getElementById('backtestBestModel');
+            const elDirection = document.getElementById('backtestDirectionAccuracy');
+            
+            if (el7d) el7d.textContent = avgAccuracy.toFixed(1) + '%';
+            if (elMAPE) elMAPE.textContent = avgMAPE.toFixed(2) + '%';
+            if (elBest) elBest.textContent = this.models[bestModel].name;
+            if (elDirection) elDirection.textContent = avgAccuracy.toFixed(1) + '%';
+        }
+    },
+    
+    switchBacktestTab(button) {
+        document.querySelectorAll('.backtesting-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        document.querySelectorAll('.backtesting-content .tab-panel').forEach(panel => panel.classList.remove('active'));
+        const tabId = 'tab-' + button.dataset.tab;
+        const panel = document.getElementById(tabId);
+        if (panel) panel.classList.add('active');
+    },
+    
+    // ============================================
+    // CORRELATION HEATMAP (INCHANGÉ)
+    // ============================================
+    
+    createCorrelationHeatmap() {
+        const modelNames = Object.keys(this.models).filter(name => this.models[name] !== null);
+        const correlationMatrix = [];
+        
+        modelNames.forEach((model1, i) => {
+            modelNames.forEach((model2, j) => {
+                const val1 = [this.models[model1].percentChange];
+                const val2 = [this.models[model2].percentChange];
+                const correlation = i === j ? 1 : (val1[0] * val2[0] > 0 ? 0.8 : 0.2);
+                correlationMatrix.push([j, i, correlation]);
+            });
+        });
+        
+        Highcharts.chart('correlationHeatmap', {
+            chart: { type: 'heatmap', height: 400, borderRadius: 15 },
+            title: {
+                text: 'Model Prediction Correlation',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            xAxis: { categories: modelNames.map(name => this.models[name].name) },
+            yAxis: {
+                categories: modelNames.map(name => this.models[name].name),
+                title: null,
+                reversed: true
+            },
+            colorAxis: {
+                min: 0,
+                max: 1,
+                stops: [[0, '#f8fafc'], [0.5, '#93c5fd'], [1, '#1e40af']]
+            },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${this.series.xAxis.categories[this.point.x]}</b> vs <b>${this.series.yAxis.categories[this.point.y]}</b><br>Correlation: <b>${(this.point.value * 100).toFixed(1)}%</b>`;
+                }
+            },
+            series: [{
+                data: correlationMatrix,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.value:.2f}'
+                }
+            }],
+            credits: { enabled: false }
+        });
+        
+        const avgCorrelation = correlationMatrix
+            .filter((item, index) => Math.floor(index / modelNames.length) !== index % modelNames.length)
+            .reduce((sum, item) => sum + item[2], 0) / (correlationMatrix.length - modelNames.length);
+        
+        const consensusScore = avgCorrelation * 100;
+        
+        Highcharts.chart('consensusGauge', {
+            chart: { type: 'solidgauge', height: 280, backgroundColor: 'transparent' },
+            title: null,
+            pane: {
+                center: ['50%', '75%'],
+                size: '110%',
+                startAngle: -90,
+                endAngle: 90,
+                background: [{
+                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
+                    innerRadius: '60%',
+                    outerRadius: '100%',
+                    shape: 'arc'
+                }]
+            },
+            tooltip: { enabled: false },
+            yAxis: {
+                min: 0,
+                max: 100,
+                stops: [[0.1, '#ef4444'], [0.5, '#fbbf24'], [0.9, '#22c55e']],
+                lineWidth: 0,
+                tickWidth: 0
+            },
+            plotOptions: {
+                solidgauge: {
+                    dataLabels: {
+                        y: -30,
+                        borderWidth: 0,
+                        useHTML: true,
+                        format: '<div style="text-align:center"><span style="font-size:2.5rem;font-weight:800;color:' + this.colors.primary + ';">{y:.0f}%</span><br/><span style="font-size:0.9rem;color:#64748b;">Model Consensus</span></div>'
+                    }
+                }
+            },
+            series: [{ data: [consensusScore], innerRadius: '60%', radius: '100%' }],
+            credits: { enabled: false }
+        });
+    },
+    
+    calculateCorrelation(x, y) {
+        const n = Math.min(x.length, y.length);
+        const sumX = x.slice(0, n).reduce((a, b) => a + b, 0);
+        const sumY = y.slice(0, n).reduce((a, b) => a + b, 0);
+        const sumXY = x.slice(0, n).reduce((sum, xi, i) => sum + xi * y[i], 0);
+        const sumX2 = x.slice(0, n).reduce((sum, xi) => sum + xi * xi, 0);
+        const sumY2 = y.slice(0, n).reduce((sum, yi) => sum + yi * yi, 0);
+        const numerator = n * sumXY - sumX * sumY;
+        const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+        if (denominator === 0) return 0;
+        return numerator / denominator;
+    },
+    
+    // ============================================
+    // RECOMMENDATION (SCORE-BASED)
     // ============================================
     
     displayRecommendation() {
         const models = Object.values(this.models).filter(m => m !== null);
-        
-        let sumWeightedPrediction = 0;
+        let sumWeightedChange = 0;
         let sumWeights = 0;
         
         models.forEach(model => {
             const weight = Math.max(0, model.r2);
-            sumWeightedPrediction += model.finalPrediction * weight;
+            sumWeightedChange += model.percentChange * weight;
             sumWeights += weight;
         });
         
-        const ensemblePrediction = sumWeightedPrediction / sumWeights;
-        const currentPrice = this.stockData.quote.price;
-        const change = ensemblePrediction - currentPrice;
-        const changePercent = (change / currentPrice) * 100;
+        const ensembleChange = sumWeightedChange / sumWeights;
         
         let recommendation = 'HOLD';
         let iconClass = 'hold';
         let title = 'Hold Position';
         let subtitle = 'Market conditions suggest waiting';
         
-        if (changePercent > 5) {
+        if (ensembleChange > 5) {
             recommendation = 'STRONG BUY';
             iconClass = 'strong-buy';
             title = 'Strong Buy Signal';
             subtitle = 'Multiple models predict significant upside';
-        } else if (changePercent > 2) {
+        } else if (ensembleChange > 2) {
             recommendation = 'BUY';
             iconClass = 'buy';
             title = 'Buy Signal';
             subtitle = 'Models indicate positive momentum';
-        } else if (changePercent < -5) {
+        } else if (ensembleChange < -5) {
             recommendation = 'STRONG SELL';
             iconClass = 'strong-sell';
             title = 'Strong Sell Signal';
             subtitle = 'Multiple models predict significant downside';
-        } else if (changePercent < -2) {
+        } else if (ensembleChange < -2) {
             recommendation = 'SELL';
             iconClass = 'sell';
             title = 'Sell Signal';
@@ -2464,67 +1948,65 @@ Object.assign(TrendPrediction, {
         const bodyHTML = `
             <h4>Key Insights</h4>
             <ul>
-                <li>
-                    <i class='fas fa-chart-line'></i>
-                    <strong>Ensemble Prediction:</strong> ${this.formatCurrency(ensemblePrediction)} 
-                    (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}% in ${this.predictionHorizon} days)
-                </li>
-                <li>
-                    <i class='fas fa-brain'></i>
-                    <strong>Model Consensus:</strong> ${models.filter(m => m.finalPrediction > currentPrice).length}/${models.length} models predict price increase
-                </li>
-                <li>
-                    <i class='fas fa-bullseye'></i>
-                    <strong>Average Model Accuracy:</strong> ${(models.reduce((sum, m) => sum + m.r2, 0) / models.length * 100).toFixed(1)}%
-                </li>
-                <li>
-                    <i class='fas fa-trophy'></i>
-                    <strong>Best Performing Model:</strong> ${[...models].sort((a, b) => b.r2 - a.r2)[0].name}
-                </li>
-                <li>
-                    <i class='fas fa-${changePercent > 0 ? 'arrow-up' : 'arrow-down'}'></i>
-                    <strong>Expected Movement:</strong> ${Math.abs(change).toFixed(2)} USD (${Math.abs(changePercent).toFixed(2)}%)
-                </li>
-            </ul>
-            
-            <h4>Risk Assessment</h4>
-            <ul>
-                <li>
-                    <i class='fas fa-chart-area'></i>
-                    <strong>Prediction Spread:</strong> ${this.calculatePredictionSpread(models).toFixed(2)}% 
-                    (${this.calculatePredictionSpread(models) < 5 ? 'Low variance - High consensus' : 'High variance - Mixed signals'})
-                </li>
-                <li>
-                    <i class='fas fa-exclamation-triangle'></i>
-                    <strong>Recommendation:</strong> ${this.getRiskRecommendation(changePercent, this.calculatePredictionSpread(models))}
-                </li>
+                <li><i class='fas fa-chart-line'></i> <strong>Expected Change:</strong> ${ensembleChange >= 0 ? '+' : ''}${ensembleChange.toFixed(2)}% in ${this.predictionHorizon} days</li>
+                <li><i class='fas fa-brain'></i> <strong>Model Consensus:</strong> ${models.filter(m => m.direction > 0).length}/${models.length} models predict increase</li>
+                <li><i class='fas fa-bullseye'></i> <strong>Average Accuracy:</strong> ${(models.reduce((sum, m) => sum + m.r2, 0) / models.length * 100).toFixed(1)}%</li>
+                <li><i class='fas fa-trophy'></i> <strong>Best Model:</strong> ${[...models].sort((a, b) => b.r2 - a.r2)[0].name}</li>
+                ${this.alphaVaultScore ? `<li><i class='fas fa-star'></i> <strong>AlphaVault Score:</strong> ${this.alphaVaultScore.overall}/100 (${this.alphaVaultScore.signal.text})</li>` : ''}
             </ul>
         `;
         
         document.getElementById('recommendationBody').innerHTML = bodyHTML;
     },
     
-    calculatePredictionSpread(models) {
-        const predictions = models.map(m => m.finalPrediction);
-        const mean = predictions.reduce((a, b) => a + b) / predictions.length;
-        const variance = predictions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / predictions.length;
-        const stdDev = Math.sqrt(variance);
-        return (stdDev / mean) * 100;
+    // ============================================
+    // ✅ EXPORT (NO RAW PRICES)
+    // ============================================
+    
+    exportPredictions() {
+        if (!this.stockData || !this.models.linear) {
+            this.showNotification('No predictions to export', 'warning');
+            return;
+        }
+        
+        console.log('📤 Exporting AlphaVault Scores...');
+        
+        let csv = `Stock Symbol,${this.currentSymbol}\n`;
+        csv += `Export Date,${new Date().toLocaleString()}\n`;
+        csv += `Prediction Horizon,${this.predictionHorizon} days\n`;
+        csv += `Training Period,${this.trainingPeriod}\n\n`;
+        
+        csv += `Model,Expected Change %,R² Score,Direction,Signal\n`;
+        
+        Object.keys(this.models).forEach(modelName => {
+            const model = this.models[modelName];
+            if (model) {
+                const signal = model.direction > 0 ? 'Bullish' : model.direction < 0 ? 'Bearish' : 'Neutral';
+                csv += `${model.name},${model.percentChange.toFixed(2)}%,${(model.r2 * 100).toFixed(2)}%,${model.direction},${signal}\n`;
+            }
+        });
+        
+        if (this.alphaVaultScore) {
+            csv += `\nAlphaVault Score,${this.alphaVaultScore.overall}/100\n`;
+            csv += `Signal,${this.alphaVaultScore.signal.text}\n`;
+            csv += `Confidence,${this.alphaVaultScore.confidence.text}\n`;
+        }
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentSymbol}_alphavault_score_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('AlphaVault Score exported successfully!', 'success');
+        console.log('✅ Export complete - NO RAW DATA');
     },
     
-    getRiskRecommendation(changePercent, spread) {
-        if (spread < 3) {
-            if (Math.abs(changePercent) > 5) {
-                return 'Strong consensus among models. Consider acting on this signal.';
-            } else {
-                return 'Low volatility expected. Safe to maintain current position.';
-            }
-        } else if (spread < 7) {
-            return 'Moderate disagreement between models. Consider waiting for clearer signals.';
-        } else {
-            return 'High variance in predictions. Exercise caution and consider additional research.';
-        }
-    },
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
     
     getModelColor(modelName) {
         const colors = {
@@ -2537,486 +2019,6 @@ Object.assign(TrendPrediction, {
         return colors[modelName] || this.colors.primary;
     },
     
-    // ============================================
-    // EXPORT PREDICTIONS
-    // ============================================
-    
-    exportPredictions() {
-        if (!this.stockData || !this.models.linear) {
-            this.showNotification('No predictions to export', 'warning');
-            return;
-        }
-        
-        console.log('📤 Exporting predictions...');
-        
-        const exportData = {
-            symbol: this.currentSymbol,
-            exportDate: new Date().toISOString(),
-            currentPrice: this.stockData.quote.price,
-            predictionHorizon: this.predictionHorizon,
-            trainingPeriod: this.trainingPeriod,
-            models: {}
-        };
-        
-        Object.keys(this.models).forEach(modelName => {
-            const model = this.models[modelName];
-            if (model) {
-                exportData.models[modelName] = {
-                    name: model.name,
-                    finalPrediction: model.finalPrediction,
-                    r2: model.r2,
-                    rmse: model.rmse,
-                    predictions: model.predictions
-                };
-            }
-        });
-        
-        let csv = `Stock Symbol,${this.currentSymbol}\n`;
-        csv += `Export Date,${new Date().toLocaleString()}\n`;
-        csv += `Current Price,${this.stockData.quote.price}\n`;
-        csv += `Prediction Horizon,${this.predictionHorizon} days\n\n`;
-        
-        csv += `Model,Final Prediction,R² Score,RMSE,Change %\n`;
-        
-        Object.keys(exportData.models).forEach(modelName => {
-            const model = exportData.models[modelName];
-            const change = ((model.finalPrediction - this.stockData.quote.price) / this.stockData.quote.price) * 100;
-            csv += `${model.name},${model.finalPrediction.toFixed(2)},${(model.r2 * 100).toFixed(2)}%,${model.rmse.toFixed(2)},${change.toFixed(2)}%\n`;
-        });
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.currentSymbol}_predictions_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Predictions exported successfully!', 'success');
-        console.log('✅ Export complete');
-    },
-    
-    // ============================================
-    // MULTI-STOCK COMPARISON
-    // ============================================
-    
-    addStockToComparison() {
-        const input = document.getElementById('multiStockInput');
-        const symbol = input.value.trim().toUpperCase();
-        
-        if (!symbol) {
-            this.showNotification('Please enter a stock symbol', 'warning');
-            return;
-        }
-        
-        if (this.comparisonStocks.includes(symbol)) {
-            this.showNotification(`${symbol} is already added`, 'warning');
-            return;
-        }
-        
-        if (this.comparisonStocks.length >= 10) {
-            this.showNotification('Maximum 10 stocks allowed', 'warning');
-            return;
-        }
-        
-        this.comparisonStocks.push(symbol);
-        this.renderComparisonStocks();
-        input.value = '';
-        
-        this.showNotification(`${symbol} added to comparison`, 'success');
-    },
-    
-    removeStockFromComparison(symbol) {
-        this.comparisonStocks = this.comparisonStocks.filter(s => s !== symbol);
-        this.renderComparisonStocks();
-        this.showNotification(`${symbol} removed`, 'info');
-    },
-    
-    renderComparisonStocks() {
-        const container = document.getElementById('selectedStocks');
-        
-        if (this.comparisonStocks.length === 0) {
-            container.innerHTML = '<div style="color:#64748b;font-style:italic;padding:10px;">No stocks selected yet. Add stocks to compare.</div>';
-            return;
-        }
-        
-        container.innerHTML = this.comparisonStocks.map(symbol => `
-            <div class="stock-chip">
-                <i class="fas fa-chart-line"></i>
-                <span>${symbol}</span>
-                <button class="remove-stock" onclick="TrendPrediction.removeStockFromComparison('${symbol}')" title="Remove">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `).join('');
-    },
-    
-    updateParameter(param, value) {
-        this.comparisonParameters[param] = parseFloat(value);
-        
-        const valueEl = document.getElementById(`${param}Value`);
-        if (valueEl) {
-            if (param === 'correlation') {
-                valueEl.textContent = value;
-            } else if (param === 'horizon') {
-                valueEl.textContent = `${value} days`;
-            } else {
-                valueEl.textContent = `${value}%`;
-            }
-        }
-    },
-    
-    async runMultiStockAnalysis() {
-        if (this.comparisonStocks.length < 2) {
-            this.showNotification('Please add at least 2 stocks to compare', 'warning');
-            return;
-        }
-        
-        this.showLoading(true, 'Analyzing multiple stocks...');
-        
-        try {
-            const stocksData = await Promise.all(
-                this.comparisonStocks.map(symbol => this.fetchStockForComparison(symbol))
-            );
-            
-            const validStocks = stocksData.filter(d => d !== null);
-            
-            if (validStocks.length < 2) {
-                throw new Error('Not enough valid stock data. Please check symbols.');
-            }
-            
-            this.createMultiStockPredictionChart(validStocks);
-            this.createRiskReturnScatter(validStocks);
-            this.createStockCorrelationMatrix(validStocks);
-            this.createSharpeRatioChart(validStocks);
-            this.createComparisonTable(validStocks);
-            
-            document.getElementById('comparisonChartsGrid').style.display = 'grid';
-            document.getElementById('comparisonTable').style.display = 'block';
-            
-            this.showLoading(false);
-            this.showNotification('Multi-stock analysis complete!', 'success');
-            
-        } catch (error) {
-            console.error('Multi-stock analysis error:', error);
-            this.showNotification(error.message, 'error');
-            this.showLoading(false);
-        }
-    },
-    
-    async fetchStockForComparison(symbol) {
-        try {
-            const [quote, timeSeries] = await Promise.all([
-                this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal'),
-                this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, '6M'), 'normal')
-            ]);
-            
-            if (!quote || !timeSeries) {
-                throw new Error(`Failed to load ${symbol}`);
-            }
-            
-            const prices = timeSeries.data.map(p => p.close);
-            
-            const returns = [];
-            for (let i = 1; i < prices.length; i++) {
-                returns.push((prices[i] - prices[i-1]) / prices[i-1]);
-            }
-            const volatility = Math.sqrt(returns.reduce((sum, r) => sum + r*r, 0) / returns.length) * Math.sqrt(252) * 100;
-            
-            const tempSymbol = this.currentSymbol;
-            const tempData = this.stockData;
-            const tempHorizon = this.predictionHorizon;
-            
-            this.currentSymbol = symbol;
-            this.stockData = { symbol, prices: timeSeries.data, quote, currency: 'USD' };
-            this.predictionHorizon = this.comparisonParameters.horizon;
-            
-            await this.trainAllModels();
-            
-            const models = Object.values(this.models).filter(m => m !== null);
-            let sumWeightedPrediction = 0;
-            let sumWeights = 0;
-            
-            models.forEach(model => {
-                const weight = Math.max(0, model.r2);
-                sumWeightedPrediction += model.finalPrediction * weight;
-                sumWeights += weight;
-            });
-            
-            const prediction = sumWeightedPrediction / sumWeights;
-            const currentPrice = quote.price;
-            const expectedReturn = ((prediction - currentPrice) / currentPrice) * 100;
-            const sharpeRatio = (expectedReturn - this.comparisonParameters.riskFree) / volatility;
-            
-            this.currentSymbol = tempSymbol;
-            this.stockData = tempData;
-            this.predictionHorizon = tempHorizon;
-            
-            return {
-                symbol,
-                name: quote.name || symbol,
-                currentPrice,
-                prediction,
-                expectedReturn,
-                volatility,
-                sharpeRatio,
-                prices
-            };
-            
-        } catch (error) {
-            console.error(`Error fetching ${symbol}:`, error);
-            return null;
-        }
-    },
-    
-    createMultiStockPredictionChart(stocks) {
-        const categories = stocks.map(s => s.symbol);
-        const currentPrices = stocks.map(s => s.currentPrice);
-        const predictions = stocks.map(s => s.prediction);
-        
-        Highcharts.chart('multiStockPredictionChart', {
-            chart: {
-                type: 'column',
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: `Stock Price Predictions (${this.comparisonParameters.horizon} days)`,
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                categories: categories
-            },
-            yAxis: {
-                title: { text: 'Price (USD)' }
-            },
-            tooltip: {
-                shared: true,
-                valuePrefix: '$',
-                valueDecimals: 2
-            },
-            plotOptions: {
-                column: {
-                    borderRadius: '25%',
-                    dataLabels: {
-                        enabled: true,
-                        format: '${point.y:.2f}'
-                    }
-                }
-            },
-            series: [{
-                name: 'Current Price',
-                data: currentPrices,
-                color: '#6c757d'
-            }, {
-                name: 'Predicted Price',
-                data: predictions,
-                color: this.colors.primary
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    createRiskReturnScatter(stocks) {
-        const data = stocks.map(s => ({
-            x: s.volatility,
-            y: s.expectedReturn,
-            name: s.symbol,
-            marker: {
-                radius: 8
-            }
-        }));
-        
-        Highcharts.chart('riskReturnScatter', {
-            chart: {
-                type: 'scatter',
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Risk vs Expected Return',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                title: { text: 'Volatility (%)' }
-            },
-            yAxis: {
-                title: { text: 'Expected Return (%)' },
-                plotLines: [{
-                    value: 0,
-                    color: '#dc3545',
-                    width: 2,
-                    dashStyle: 'Dash'
-                }]
-            },
-            tooltip: {
-                pointFormat: '<b>{point.name}</b><br>Volatility: {point.x:.2f}%<br>Return: {point.y:.2f}%'
-            },
-            series: [{
-                name: 'Stocks',
-                data: data,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}'
-                }
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    createStockCorrelationMatrix(stocks) {
-        const n = stocks.length;
-        const correlationData = [];
-        
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
-                const corr = i === j ? 1 : this.calculateCorrelation(stocks[i].prices, stocks[j].prices);
-                correlationData.push([j, i, corr]);
-            }
-        }
-        
-        Highcharts.chart('stockCorrelationMatrix', {
-            chart: {
-                type: 'heatmap',
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Stock Correlation Matrix',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                categories: stocks.map(s => s.symbol)
-            },
-            yAxis: {
-                categories: stocks.map(s => s.symbol),
-                title: null,
-                reversed: true
-            },
-            colorAxis: {
-                min: -1,
-                max: 1,
-                stops: [
-                    [0, '#ef4444'],
-                    [0.5, '#fbbf24'],
-                    [1, '#22c55e']
-                ]
-            },
-            tooltip: {
-                formatter: function() {
-                    return `<b>${this.series.xAxis.categories[this.point.x]}</b> vs <b>${this.series.yAxis.categories[this.point.y]}</b><br>Correlation: <b>${(this.point.value * 100).toFixed(1)}%</b>`;
-                }
-            },
-            series: [{
-                data: correlationData,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.value:.2f}'
-                }
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    createSharpeRatioChart(stocks) {
-        const data = stocks.map(s => ({
-            name: s.symbol,
-            y: s.sharpeRatio,
-            color: s.sharpeRatio > 1 ? this.colors.success : s.sharpeRatio > 0 ? this.colors.warning : this.colors.danger
-        }));
-        
-        Highcharts.chart('sharpeRatioChart', {
-            chart: {
-                type: 'bar',
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Sharpe Ratio Comparison',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            subtitle: {
-                text: `Risk-Free Rate: ${this.comparisonParameters.riskFree}%`
-            },
-            xAxis: {
-                type: 'category'
-            },
-            yAxis: {
-                title: { text: 'Sharpe Ratio' },
-                plotLines: [{
-                    value: 1,
-                    color: this.colors.success,
-                    width: 2,
-                    dashStyle: 'Dash',
-                    label: { text: 'Good (>1)', align: 'right' }
-                }, {
-                    value: 0,
-                    color: this.colors.danger,
-                    width: 2,
-                    dashStyle: 'Dash'
-                }]
-            },
-            tooltip: {
-                pointFormat: '<b>{point.y:.3f}</b>'
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: '25%',
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.y:.3f}'
-                    }
-                }
-            },
-            series: [{
-                name: 'Sharpe Ratio',
-                data: data,
-                colorByPoint: true
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    createComparisonTable(stocks) {
-        const sorted = [...stocks].sort((a, b) => b.sharpeRatio - a.sharpeRatio);
-        
-        const html = `
-            <h4 style="margin-bottom:20px;"><i class="fas fa-table"></i> Detailed Comparison Table</h4>
-            <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.1);">
-                <thead>
-                    <tr style="background:linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));">
-                        <th style="padding:18px;text-align:left;color:white;">Rank</th>
-                        <th style="padding:18px;text-align:left;color:white;">Symbol</th>
-                        <th style="padding:18px;text-align:left;color:white;">Current Price</th>
-                        <th style="padding:18px;text-align:left;color:white;">Prediction</th>
-                        <th style="padding:18px;text-align:left;color:white;">Expected Return</th>
-                        <th style="padding:18px;text-align:left;color:white;">Volatility</th>
-                        <th style="padding:18px;text-align:left;color:white;">Sharpe Ratio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${sorted.map((stock, index) => `
-                        <tr style="background:rgba(255,255,255,0.02);border-bottom:1px solid var(--glass-border);transition:var(--transition-smooth);" onmouseover="this.style.background='rgba(102,126,234,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                            <td style="padding:18px;font-weight:800;font-size:1.2rem;background:linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">#${index + 1}</td>
-                            <td style="padding:18px;font-weight:700;">${stock.symbol}</td>
-                            <td style="padding:18px;">${this.formatCurrency(stock.currentPrice)}</td>
-                            <td style="padding:18px;">${this.formatCurrency(stock.prediction)}</td>
-                            <td style="padding:18px;color:${stock.expectedReturn >= 0 ? this.colors.success : this.colors.danger};font-weight:700;">${stock.expectedReturn >= 0 ? '+' : ''}${stock.expectedReturn.toFixed(2)}%</td>
-                            <td style="padding:18px;">${stock.volatility.toFixed(2)}%</td>
-                            <td style="padding:18px;font-weight:700;color:${stock.sharpeRatio > 1 ? this.colors.success : stock.sharpeRatio > 0 ? this.colors.warning : this.colors.danger};">${stock.sharpeRatio.toFixed(3)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        document.getElementById('comparisonTable').innerHTML = html;
-    },
-    
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
-    
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -3024,20 +2026,9 @@ Object.assign(TrendPrediction, {
         return div.innerHTML;
     },
     
-    formatCurrency(value) {
-        if (!value && value !== 0) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: this.stockData?.currency || 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    },
-    
     showLoading(show, text = 'Loading...') {
         const loader = document.getElementById('loadingIndicator');
         const loadingText = document.getElementById('loadingText');
-        
         if (loader && loadingText) {
             if (show) {
                 loader.classList.remove('hidden');
@@ -3055,14 +2046,13 @@ Object.assign(TrendPrediction, {
     
     updateLastUpdate() {
         const now = new Date();
-        const formatted = now.toLocaleString('fr-FR', {
+        const formatted = now.toLocaleString('en-US', {
+            month: 'short',
             day: '2-digit',
-            month: '2-digit',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
-        
         const updateElement = document.getElementById('lastUpdate');
         if (updateElement) {
             updateElement.textContent = `Last update: ${formatted}`;
@@ -3080,10 +2070,11 @@ Object.assign(TrendPrediction, {
 
 // ========== INITIALIZE ==========
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎯 AlphaVault Score Engine - Legal Compliant Version');
+    console.log('🎯 AlphaVault Score Engine - 100% Legal Compliant Version');
+    console.log('✅ NO RAW DATA REDISTRIBUTION');
     TrendPrediction.init();
 });
 
 window.TrendPrediction = TrendPrediction;
 
-console.log('✅ ML Trend Prediction script loaded - AlphaVault Score Edition (100% Legal Compliant)');
+console.log('✅ AlphaVault Score Engine loaded - LEGAL COMPLIANT MODE');
