@@ -13,13 +13,13 @@
     <link rel='preconnect' href='https://code.highcharts.com'>
     <link rel='preconnect' href='https://cdnjs.cloudflare.com'>
     
-    <!-- Highcharts -->
-    <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
-    <script src='https://code.highcharts.com/highcharts-more.js' defer></script>
-    <script src='https://code.highcharts.com/modules/solid-gauge.js' defer></script>
-    <script src='https://code.highcharts.com/modules/heatmap.js' defer></script>
-    <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
-    <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
+    <!-- ✅ CORRECTION : Retirer defer pour charger Highcharts immédiatement -->
+    <script src='https://code.highcharts.com/stock/highstock.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/solid-gauge.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/accessibility.js'></script>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' integrity='sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==' crossorigin='anonymous' referrerpolicy='no-referrer'>
@@ -300,8 +300,8 @@
                         <h1><i class="fas fa-star"></i> AlphaVault Score Engine</h1>
                     </div>
                     <div class='header-right'>
-                        <!-- Bouton de contrôle du cache -->
-                        <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
+                        <!-- ✅ CORRECTION : Remplacer onclick par data-action -->
+                        <button class='btn-icon-header' data-action='toggle-cache' aria-label='Toggle cache widget' title='View cache statistics'>
                             <i class='fas fa-database' aria-hidden='true'></i>
                             <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
                         </button>
@@ -314,7 +314,7 @@
                 <!-- Main Content -->
                 <div class='content'>
                     
-                    <!-- ⚖ LEGAL DISCLAIMER (AMÉLIORÉ) -->
+                    <!-- ⚖ LEGAL DISCLAIMER -->
                     <section class="legal-notice card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05)); border: 2px solid rgba(245, 158, 11, 0.3); border-left: 6px solid #f59e0b; padding: 28px; margin-bottom: 32px; border-radius: 20px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);">
                         <div style="display: flex; align-items: start; gap: 20px;">
                             <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: #f59e0b; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.3));"></i>
@@ -350,7 +350,8 @@
                             <h2 class='card-title' id='search-title'>
                                 <i class='fas fa-search'></i> Select Stock for AlphaVault Score Analysis
                             </h2>
-                            <button class='help-icon' onclick='openModal("modalIntro")' aria-label='Help about AlphaVault Score'>?</button>
+                            <!-- ✅ CORRECTION : Remplacer onclick par data-modal -->
+                            <button class='help-icon' data-modal='modalIntro' aria-label='Help about AlphaVault Score'>?</button>
                         </div>
                         
                         <div class='card-body'>
@@ -364,7 +365,8 @@
                                            autocomplete='off'
                                            value='AAPL'
                                            aria-describedby='search-instructions'>
-                                    <button class='btn btn-primary btn-analyze' onclick='TrendPrediction.analyzeStock()' aria-label='Calculate AlphaVault Score'>
+                                    <!-- ✅ CORRECTION : Remplacer onclick par data-action -->
+                                    <button class='btn btn-primary btn-analyze' data-action='analyze' aria-label='Calculate AlphaVault Score'>
                                         <i class='fas fa-star' aria-hidden='true'></i> Calculate Score
                                     </button>
                                     
@@ -376,28 +378,29 @@
                                 
                                 <div class='popular-stocks'>
                                     <span class='quick-label'>Popular Stocks:</span>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")' aria-label='Load Apple stock'>
+                                    <!-- ✅ CORRECTION : Remplacer onclick par data-symbol -->
+                                    <button class='symbol-chip' data-symbol='AAPL' aria-label='Load Apple stock'>
                                         <i class='fab fa-apple' aria-hidden='true'></i> AAPL
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("MSFT")' aria-label='Load Microsoft stock'>
+                                    <button class='symbol-chip' data-symbol='MSFT' aria-label='Load Microsoft stock'>
                                         <i class='fab fa-microsoft' aria-hidden='true'></i> MSFT
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("GOOGL")' aria-label='Load Google stock'>
+                                    <button class='symbol-chip' data-symbol='GOOGL' aria-label='Load Google stock'>
                                         <i class='fab fa-google' aria-hidden='true'></i> GOOGL
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AMZN")' aria-label='Load Amazon stock'>
+                                    <button class='symbol-chip' data-symbol='AMZN' aria-label='Load Amazon stock'>
                                         <i class='fab fa-amazon' aria-hidden='true'></i> AMZN
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("TSLA")' aria-label='Load Tesla stock'>
+                                    <button class='symbol-chip' data-symbol='TSLA' aria-label='Load Tesla stock'>
                                         <i class='fas fa-car' aria-hidden='true'></i> TSLA
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NVDA")' aria-label='Load Nvidia stock'>
+                                    <button class='symbol-chip' data-symbol='NVDA' aria-label='Load Nvidia stock'>
                                         <i class='fas fa-microchip' aria-hidden='true'></i> NVDA
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("META")' aria-label='Load Meta stock'>
+                                    <button class='symbol-chip' data-symbol='META' aria-label='Load Meta stock'>
                                         <i class='fab fa-meta' aria-hidden='true'></i> META
                                     </button>
-                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NFLX")' aria-label='Load Netflix stock'>
+                                    <button class='symbol-chip' data-symbol='NFLX' aria-label='Load Netflix stock'>
                                         <i class='fas fa-film' aria-hidden='true'></i> NFLX
                                     </button>
                                 </div>
@@ -406,16 +409,18 @@
                                     <div class='setting-group'>
                                         <label id='horizon-label'>Prediction Horizon:</label>
                                         <div role='group' aria-labelledby='horizon-label'>
-                                            <button class='horizon-btn active' data-days='7' onclick='TrendPrediction.changeHorizon(7)' aria-pressed='true'>7 days</button>
-                                            <button class='horizon-btn' data-days='15' onclick='TrendPrediction.changeHorizon(15)' aria-pressed='false'>15 days</button>
-                                            <button class='horizon-btn' data-days='30' onclick='TrendPrediction.changeHorizon(30)' aria-pressed='false'>30 days</button>
-                                            <button class='horizon-btn' data-days='60' onclick='TrendPrediction.changeHorizon(60)' aria-pressed='false'>60 days</button>
+                                            <!-- ✅ CORRECTION : Remplacer onclick par data-horizon -->
+                                            <button class='horizon-btn active' data-horizon='7' aria-pressed='true'>7 days</button>
+                                            <button class='horizon-btn' data-horizon='15' aria-pressed='false'>15 days</button>
+                                            <button class='horizon-btn' data-horizon='30' aria-pressed='false'>30 days</button>
+                                            <button class='horizon-btn' data-horizon='60' aria-pressed='false'>60 days</button>
                                         </div>
                                     </div>
                                     
                                     <div class='setting-group'>
                                         <label for='trainingPeriod'>Training Period:</label>
-                                        <select id='trainingPeriod' class='form-select' onchange='TrendPrediction.changeTrainingPeriod(this.value)'>
+                                        <!-- ✅ CORRECTION : Remplacer onchange par data-action -->
+                                        <select id='trainingPeriod' class='form-select' data-action='change-period'>
                                             <option value='3M'>3 Months</option>
                                             <option value='6M' selected>6 Months</option>
                                             <option value='1Y'>1 Year</option>
@@ -433,7 +438,7 @@
                         <span id='loadingText'>Training ML models and calculating AlphaVault Score...</span>
                     </div>
                     
-                    <!-- ✅ Stock Header (NO PRICES - ONLY NAME) -->
+                    <!-- Stock Header -->
                     <section id='stockHeader' class='stock-header card hidden' aria-labelledby='stock-title'>
                         <div class='card-body'>
                             <div class='header-content'>
@@ -452,14 +457,13 @@
                     <!-- Results Panel -->
                     <div id='resultsPanel' class='results-panel hidden'>
                         
-                        <!-- ============================================
-                             ✨ ALPHAVAULT SCORE PRINCIPAL
-                             ============================================ -->
+                        <!-- AlphaVault Score Section -->
                         <section class='alphavault-score-section' aria-labelledby='alphavault-main-title'>
                             <div class='section-header'>
                                 <h2 class='section-title' id='alphavault-main-title'>
                                     <i class='fas fa-star' aria-hidden='true'></i> AlphaVault Score
-                                    <button class='help-icon' onclick='openModal("modalIntro")' aria-label='Help about AlphaVault Score'>?</button>
+                                    <!-- ✅ CORRECTION : Remplacer onclick par data-modal -->
+                                    <button class='help-icon' data-modal='modalIntro' aria-label='Help about AlphaVault Score'>?</button>
                                 </h2>
                             </div>
 
@@ -517,13 +521,12 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             ENSEMBLE PREDICTION OVERVIEW (SCORE-BASED)
-                             ============================================ -->
+                        <!-- Ensemble Prediction Section -->
                         <section class='prediction-overview' aria-labelledby='ensemble-title'>
                             <h3 class='section-title' id='ensemble-title'>
                                 <i class='fas fa-layer-group' aria-hidden='true'></i> Ensemble Prediction
-                                <button class='help-icon' onclick='openModal("modalEnsemble")' aria-label='Help about ensemble prediction'>?</button>
+                                <!-- ✅ CORRECTION : Remplacer onclick par data-modal -->
+                                <button class='help-icon' data-modal='modalEnsemble' aria-label='Help about ensemble prediction'>?</button>
                             </h3>
                             
                             <div class='ensemble-cards' role='list' aria-label='Ensemble prediction metrics'>
@@ -573,9 +576,7 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             INDIVIDUAL MODELS (5 MODÈLES - SCORE-BASED)
-                             ============================================ -->
+                        <!-- ML Models Section -->
                         <section class='models-section' aria-labelledby='models-title'>
                             <h3 class='section-title' id='models-title'>
                                 <i class='fas fa-microchip' aria-hidden='true'></i> Machine Learning Models
@@ -666,16 +667,14 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             SCORE COMPARISON CHART
-                             ============================================ -->
+                        <!-- Score Comparison Chart -->
                         <section class='chart-section card' aria-labelledby='comparison-chart-title'>
                             <div class='card-header'>
                                 <h3 class='card-title' id='comparison-chart-title'>
                                     <i class='fas fa-chart-bar' aria-hidden='true'></i> Model Score Comparison
                                 </h3>
-                                <!-- Export button -->
-                                <button class='btn-export' onclick='TrendPrediction.exportPredictions()' title='Export AlphaVault Scores'>
+                                <!-- ✅ CORRECTION : Remplacer onclick par data-action -->
+                                <button class='btn-export' data-action='export' title='Export AlphaVault Scores'>
                                     <i class='fas fa-download'></i> Export Scores
                                 </button>
                             </div>
@@ -684,23 +683,23 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             BACKTESTING SECTION
-                             ============================================ -->
+                        <!-- Backtesting Section -->
                         <section class='backtesting-section card' aria-labelledby='backtesting-title'>
                             <div class='card-header'>
                                 <h3 class='card-title' id='backtesting-title'>
                                     <i class='fas fa-history' aria-hidden='true'></i> Backtesting & Accuracy Analysis
                                 </h3>
-                                <button class='help-icon' onclick='openModal("modalBacktesting")' aria-label='Help about backtesting'>?</button>
+                                <!-- ✅ CORRECTION : Remplacer onclick par data-modal -->
+                                <button class='help-icon' data-modal='modalBacktesting' aria-label='Help about backtesting'>?</button>
                             </div>
                             <div class='card-body'>
-                                <!-- Tabs pour navigation -->
+                                <!-- Tabs -->
                                 <div class='backtesting-tabs'>
-                                    <button class='tab-btn active' data-tab='historical-accuracy' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                    <!-- ✅ CORRECTION : Remplacer onclick par data-tab -->
+                                    <button class='tab-btn active' data-tab='historical-accuracy'>
                                         <i class='fas fa-check-circle'></i> Direction Accuracy
                                     </button>
-                                    <button class='tab-btn' data-tab='prediction-vs-actual' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                    <button class='tab-btn' data-tab='prediction-vs-actual'>
                                         <i class='fas fa-percent'></i> Error Analysis
                                     </button>
                                 </div>
@@ -757,9 +756,7 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             PERFORMANCE COMPARISON
-                             ============================================ -->
+                        <!-- Performance Comparison -->
                         <section class='performance-section card' aria-labelledby='performance-title'>
                             <div class='card-header'>
                                 <h3 class='card-title' id='performance-title'>
@@ -776,15 +773,14 @@
                             </div>
                         </section>
                         
-                        <!-- ============================================
-                             MODEL CORRELATION HEATMAP
-                             ============================================ -->
+                        <!-- Correlation Heatmap -->
                         <section class='correlation-section card' aria-labelledby='correlation-title'>
                             <div class='card-header'>
                                 <h3 class='card-title' id='correlation-title'>
                                     <i class='fas fa-project-diagram' aria-hidden='true'></i> Model Correlation & Consensus
                                 </h3>
-                                <button class='help-icon' onclick='openModal("modalCorrelation")' aria-label='Help about correlation'>?</button>
+                                <!-- ✅ CORRECTION : Remplacer onclick par data-modal -->
+                                <button class='help-icon' data-modal='modalCorrelation' aria-label='Help about correlation'>?</button>
                             </div>
                             <div class='card-body'>
                                 <div class='correlation-grid'>
@@ -798,9 +794,7 @@
                             </div>
                         </section>
 
-                        <!-- ============================================
-                             RECOMMENDATION
-                             ============================================ -->
+                        <!-- Recommendation -->
                         <section class='recommendation-section' aria-labelledby='recommendation-main-title'>
                             <h3 class='section-title' id='recommendation-main-title'>
                                 <i class='fas fa-lightbulb' aria-hidden='true'></i> Alphy AI-Powered Recommendation
@@ -847,17 +841,17 @@
         
     </div>
     
-    <!-- CACHE MONITORING WIDGET (INCHANGÉ) -->
+    <!-- Cache Widget -->
     <div id='cacheWidget' class='cache-widget'>
         <div class='cache-widget-header'>
             <h3><i class='fas fa-database'></i> Cache & Rate Limit Monitor</h3>
-            <button class='cache-close-btn' onclick='toggleCacheWidget()' aria-label='Close cache widget'>
+            <!-- ✅ CORRECTION : Remplacer onclick par data-action -->
+            <button class='cache-close-btn' data-action='toggle-cache' aria-label='Close cache widget'>
                 <i class='fas fa-times'></i>
             </button>
         </div>
         
         <div class='cache-widget-body'>
-            <!-- Rate Limit Section -->
             <div class='cache-section'>
                 <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit</h4>
                 <div class='cache-stat-row'>
@@ -875,7 +869,6 @@
                 </div>
             </div>
             
-            <!-- Cache Statistics -->
             <div class='cache-section'>
                 <h4><i class='fas fa-hdd'></i> Local Cache Statistics</h4>
                 <div class='cache-stat-row'>
@@ -892,23 +885,22 @@
                 </div>
             </div>
             
-            <!-- Actions -->
             <div class='cache-section'>
                 <h4><i class='fas fa-wrench'></i> Actions</h4>
                 <div class='cache-actions'>
-                    <button class='btn-cache btn-cache-refresh' onclick='refreshCacheStats()'>
+                    <!-- ✅ CORRECTION : Remplacer onclick par data-action -->
+                    <button class='btn-cache btn-cache-refresh' data-action='refresh-cache'>
                         <i class='fas fa-sync-alt'></i> Refresh Stats
                     </button>
-                    <button class='btn-cache btn-cache-clear' onclick='clearLocalCache()'>
+                    <button class='btn-cache btn-cache-clear' data-action='clear-cache'>
                         <i class='fas fa-broom'></i> Clear Cache
                     </button>
-                    <button class='btn-cache btn-cache-export' onclick='exportCacheData()'>
+                    <button class='btn-cache btn-cache-export' data-action='export-cache'>
                         <i class='fas fa-download'></i> Export Data
                     </button>
                 </div>
             </div>
             
-            <!-- Recent Activity -->
             <div class='cache-section'>
                 <h4><i class='fas fa-history'></i> Recent API Calls</h4>
                 <div class='cache-activity' id='cacheActivity'>
@@ -918,14 +910,15 @@
         </div>
     </div>
     
-    <!-- MODALS (INCHANGÉS - GARDER VOS MODAUX EXISTANTS) -->
+    <!-- Modals -->
     
     <!-- Modal Intro -->
     <div id='modalIntro' class='modal' role='dialog' aria-labelledby='intro-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2 id='intro-modal-title'>⭐ AlphaVault Score Engine</h2>
-                <button class='close-modal' onclick='closeModal("modalIntro")' aria-label='Close dialog'>
+                <!-- ✅ CORRECTION : Remplacer onclick par data-close -->
+                <button class='close-modal' data-close='modalIntro' aria-label='Close dialog'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
@@ -966,7 +959,7 @@
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2 id='ensemble-modal-title'>🎯 Ensemble Prediction</h2>
-                <button class='close-modal' onclick='closeModal("modalEnsemble")' aria-label='Close dialog'>
+                <button class='close-modal' data-close='modalEnsemble' aria-label='Close dialog'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
@@ -998,7 +991,7 @@
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2 id='backtesting-modal-title'>📈 Backtesting & Validation</h2>
-                <button class='close-modal' onclick='closeModal("modalBacktesting")' aria-label='Close dialog'>
+                <button class='close-modal' data-close='modalBacktesting' aria-label='Close dialog'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
@@ -1026,7 +1019,7 @@
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2 id='correlation-modal-title'>🔗 Model Correlation</h2>
-                <button class='close-modal' onclick='closeModal("modalCorrelation")' aria-label='Close dialog'>
+                <button class='close-modal' data-close='modalCorrelation' aria-label='Close dialog'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
@@ -1051,7 +1044,121 @@
         </div>
     </div>
     
-    <!-- Cache Widget Script (INCHANGÉ) -->
+    <!-- ✅ NOUVEAUX SCRIPTS EVENT LISTENERS -->
+    <script>
+        // Event Listeners Globaux (délégation d'événements)
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('[data-action], [data-symbol], [data-modal], [data-close], [data-horizon], [data-tab]');
+            if (!target) return;
+            
+            // Actions génériques
+            if (target.hasAttribute('data-action')) {
+                const action = target.getAttribute('data-action');
+                handleAction(action, target);
+            }
+            
+            // Symboles de stock
+            if (target.hasAttribute('data-symbol')) {
+                const symbol = target.getAttribute('data-symbol');
+                if (window.TrendPrediction) {
+                    window.TrendPrediction.loadSymbol(symbol);
+                }
+            }
+            
+            // Modals
+            if (target.hasAttribute('data-modal')) {
+                const modalId = target.getAttribute('data-modal');
+                openModal(modalId);
+            }
+            
+            // Close modal
+            if (target.hasAttribute('data-close')) {
+                const modalId = target.getAttribute('data-close');
+                closeModal(modalId);
+            }
+            
+            // Horizon
+            if (target.hasAttribute('data-horizon')) {
+                const days = parseInt(target.getAttribute('data-horizon'));
+                if (window.TrendPrediction) {
+                    window.TrendPrediction.changeHorizon(days);
+                }
+            }
+            
+            // Tabs
+            if (target.hasAttribute('data-tab')) {
+                if (window.TrendPrediction) {
+                    window.TrendPrediction.switchBacktestTab(target);
+                }
+            }
+        });
+        
+        // Gestion des actions
+        function handleAction(action, element) {
+            switch(action) {
+                case 'analyze':
+                    if (window.TrendPrediction) window.TrendPrediction.analyzeStock();
+                    break;
+                case 'export':
+                    if (window.TrendPrediction) window.TrendPrediction.exportPredictions();
+                    break;
+                case 'toggle-cache':
+                    toggleCacheWidget();
+                    break;
+                case 'refresh-cache':
+                    refreshCacheStats();
+                    break;
+                case 'clear-cache':
+                    clearLocalCache();
+                    break;
+                case 'export-cache':
+                    exportCacheData();
+                    break;
+                case 'change-period':
+                    if (window.TrendPrediction) {
+                        window.TrendPrediction.changeTrainingPeriod(element.value);
+                    }
+                    break;
+            }
+        }
+        
+        // Fonctions modales
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Close modal on background click
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close modal on Escape
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+    
+    <!-- Cache Widget Scripts -->
     <script>
         let cacheWidgetOpen = false;
         let cacheStats = { hits: 0, misses: 0, entries: 0, size: 0 };
@@ -1246,41 +1353,6 @@
         document.addEventListener('DOMContentLoaded', () => refreshCacheStats());
     </script>
     
-    <!-- Modal Management Script (INCHANGÉ) -->
-    <script>
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
-        
-        window.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-        
-        window.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                document.querySelectorAll('.modal.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-                document.body.style.overflow = '';
-            }
-        });
-    </script>
-    
     <!-- Core Scripts (ORDRE IMPORTANT) -->
     <script src='assets/js/config.js'></script>
     <script src='assets/js/api-client.js'></script>
@@ -1288,10 +1360,10 @@
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ TREND PREDICTION SCRIPT - VERSION LEGAL COMPLIANT -->
+    <!-- ✅ TREND PREDICTION SCRIPT -->
     <script src='assets/js/trend-prediction-legal.js'></script>
     
-    <!-- User Menu Fix (INCHANGÉ) -->
+    <!-- User Menu Fix -->
     <script>
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
@@ -1356,7 +1428,7 @@
     <!-- CHATBOT IA FINANCIER -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
+    <!-- Scripts du chatbot -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -1367,7 +1439,7 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- INITIALISATION DU CHATBOT -->
+    <!-- Initialisation du chatbot -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
