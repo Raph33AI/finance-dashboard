@@ -3,7 +3,7 @@
    Version: 2.0 - No Raw Data Redistribution
    ============================================== */
 
-// ========== RATE LIMITER (INCHANGÉ) ==========
+// ========== RATE LIMITER ==========
 class RateLimiter {
     constructor(maxRequests = 8, windowMs = 60000) {
         this.maxRequests = maxRequests;
@@ -65,7 +65,7 @@ class RateLimiter {
     getQueueLength() { return this.queue.length; }
 }
 
-// ========== OPTIMIZED CACHE (INCHANGÉ) ==========
+// ========== OPTIMIZED CACHE ==========
 class OptimizedCache {
     constructor() {
         this.prefix = 'tp_cache_';
@@ -157,14 +157,12 @@ class AlphaVaultScoreEngine {
     calculateMomentumScore(returns) {
         const recentReturns = returns.slice(-20);
         const avgReturn = recentReturns.reduce((a, b) => a + b, 0) / recentReturns.length;
-        // Score basé sur le momentum (pas les prix absolus)
         return Math.max(0, Math.min(100, 50 + (avgReturn * 500)));
     }
     
     calculateMLConsensusScore(modelDirections) {
-        // modelDirections = array de -1 (baisse), 0 (neutre), +1 (hausse)
         const consensus = modelDirections.reduce((a, b) => a + b, 0) / modelDirections.length;
-        return (consensus + 1) * 50; // Normalise entre 0 et 100
+        return (consensus + 1) * 50;
     }
     
     calculateTechnicalScore(technicals) {
@@ -225,7 +223,6 @@ const TrendPrediction = {
     selectedSuggestionIndex: -1,
     searchTimeout: null,
     
-    // ❌ NO MORE RAW PREDICTIONS - ONLY NORMALIZED DATA
     models: {
         linear: null,
         polynomial: null,
@@ -254,7 +251,15 @@ const TrendPrediction = {
         success: '#10b981',
         danger: '#ef4444',
         warning: '#f59e0b'
-    },
+    }
+};
+
+// ✅ CORRECTION PRINCIPALE : EXPOSER IMMÉDIATEMENT SUR WINDOW
+window.TrendPrediction = TrendPrediction;
+console.log('✅ TrendPrediction object exposed globally');
+
+// ========== MÉTHODES PRINCIPALES ==========
+Object.assign(TrendPrediction, {
     
     async init() {
         try {
@@ -371,15 +376,10 @@ const TrendPrediction = {
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-input-wrapper')) this.hideSuggestions();
         });
-    }
-};
-
-// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 2/4) ==========
-
-Object.assign(TrendPrediction, {
+    },
     
     // ============================================
-    // SEARCH AVEC TWELVE DATA (INCHANGÉ)
+    // SEARCH
     // ============================================
     
     handleSearch(query) {
@@ -570,7 +570,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✅ STOCK ANALYSIS - NO RAW PRICES DISPLAYED
+    // STOCK ANALYSIS
     // ============================================
     
     analyzeStock() {
@@ -596,19 +596,16 @@ Object.assign(TrendPrediction, {
             
             if (!quote || !timeSeries) throw new Error('Failed to load stock data');
             
-            // ❌ NE PAS STOCKER LES PRIX BRUTS
             this.stockData = {
                 symbol: quote.symbol,
                 name: quote.name || symbol,
-                // ✅ Stocker uniquement les données normalisées
-                pricesInternal: timeSeries.data, // Usage interne uniquement
+                pricesInternal: timeSeries.data,
                 currency: 'USD'
             };
             
             this.optimizedCache.set(`quote_${symbol}`, quote, 60000);
             if (window.cacheWidget) window.cacheWidget.logActivity('Quote', symbol, false);
             
-            // ✅ Afficher UNIQUEMENT le nom (pas le prix)
             this.displayStockHeader();
             
             await this.trainAllModels();
@@ -669,15 +666,10 @@ Object.assign(TrendPrediction, {
     changeTrainingPeriod(period) {
         this.trainingPeriod = period;
         if (this.currentSymbol) this.loadSymbol(this.currentSymbol);
-    }
-});
-
-// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 3/4) ==========
-
-Object.assign(TrendPrediction, {
+    },
     
     // ============================================
-    // ✨ CALCUL DU ALPHAVAULT SCORE
+    // ALPHAVAULT SCORE CALCULATION
     // ============================================
     
     async calculateAlphaVaultScore() {
@@ -685,33 +677,27 @@ Object.assign(TrendPrediction, {
         
         const prices = this.stockData.pricesInternal.map(p => p.close);
         
-        // 1. ✅ Calculer les RENDEMENTS (pas les prix!)
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
             returns.push((prices[i] - prices[i-1]) / prices[i-1]);
         }
         
-        // 2. ✅ Direction des modèles (hausse/baisse, PAS de prix)
         const models = Object.values(this.models).filter(m => m !== null);
         const currentPrice = prices[prices.length - 1];
         
         const modelDirections = models.map(model => {
-            // Direction: +1 (hausse), 0 (neutre), -1 (baisse)
-            const prediction = model.normalizedPrediction; // Déjà normalisé
+            const prediction = model.normalizedPrediction;
             if (prediction > 0.05) return 1;
             if (prediction < -0.05) return -1;
             return 0;
         });
         
-        // 3. ✅ Indicateurs techniques normalisés
         const technicals = this.calculateTechnicalIndicators(prices);
         
-        // 4. ✅ Volatilité
         const volatility = Math.sqrt(
             returns.reduce((sum, r) => sum + r * r, 0) / returns.length
         ) * Math.sqrt(252);
         
-        // 5. ✅ Calculer le score AlphaVault
         const scoreData = {
             returns: returns,
             modelDirections: modelDirections,
@@ -723,6 +709,24 @@ Object.assign(TrendPrediction, {
         this.alphaVaultScore = this.scoreEngine.calculateScore(scoreData);
         
         console.log('✅ AlphaVault Score:', this.alphaVaultScore);
+        
+        // Afficher les scores des composants
+        if (this.alphaVaultScore && this.alphaVaultScore.components) {
+            const comp = this.alphaVaultScore.components;
+            const els = {
+                momentum: document.getElementById('momentumScore'),
+                mlConsensus: document.getElementById('mlConsensusScore'),
+                technical: document.getElementById('technicalScore'),
+                volatility: document.getElementById('volatilityScore'),
+                trend: document.getElementById('trendScore')
+            };
+            
+            if (els.momentum) els.momentum.textContent = Math.round(comp.momentum) + '/100';
+            if (els.mlConsensus) els.mlConsensus.textContent = Math.round(comp.mlConsensus) + '/100';
+            if (els.technical) els.technical.textContent = Math.round(comp.technicalStrength) + '/100';
+            if (els.volatility) els.volatility.textContent = Math.round(comp.volatilityAdjusted) + '/100';
+            if (els.trend) els.trend.textContent = Math.round(comp.trendQuality) + '/100';
+        }
         
         return this.alphaVaultScore;
     },
@@ -792,7 +796,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✅ TRAIN ALL MODELS - NORMALIZED OUTPUT ONLY
+    // TRAIN ALL MODELS
     // ============================================
     
     async trainAllModels() {
@@ -841,18 +845,15 @@ Object.assign(TrendPrediction, {
         console.log('✅ All models trained (5/5) - Normalized outputs only');
     },
     
-    /**
-     * ✅ NORMALISE LES PRÉDICTIONS (retourne % de changement, pas prix)
-     */
     normalizeModelOutput(model, currentPrice) {
         const percentChange = ((model.finalPrediction - currentPrice) / currentPrice) * 100;
         
         return {
             name: model.name,
-            normalizedPrediction: percentChange / 100, // -1 à +1
+            normalizedPrediction: percentChange / 100,
             percentChange: percentChange,
             r2: model.r2,
-            rmse: model.rmse / currentPrice, // RMSE normalisé
+            rmse: model.rmse / currentPrice,
             direction: percentChange > 0 ? 1 : percentChange < 0 ? -1 : 0,
             params: model.params
         };
@@ -863,7 +864,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // LINEAR REGRESSION (INTERNE)
+    // LINEAR REGRESSION
     // ============================================
     
     async trainLinearRegression(prices) {
@@ -895,7 +896,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // POLYNOMIAL REGRESSION (INTERNE)
+    // POLYNOMIAL REGRESSION
     // ============================================
     
     async trainPolynomialRegression(prices, degree = 3) {
@@ -939,7 +940,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // EXPONENTIAL SMOOTHING (INTERNE)
+    // EXPONENTIAL SMOOTHING
     // ============================================
     
     async trainExponentialSmoothing(prices, alpha = 0.3, beta = 0.1) {
@@ -970,7 +971,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // K-NEAREST NEIGHBORS (INTERNE)
+    // K-NEAREST NEIGHBORS
     // ============================================
     
     async trainKNN(prices, k = 5, lookback = 5) {
@@ -1033,7 +1034,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // NEURAL NETWORK (INTERNE)
+    // NEURAL NETWORK
     // ============================================
     
     async trainNeuralNetwork(prices, lookback = 10) {
@@ -1136,7 +1137,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // BACKTESTING (NORMALIZED)
+    // BACKTESTING
     // ============================================
     
     async performBacktesting() {
@@ -1295,19 +1296,13 @@ Object.assign(TrendPrediction, {
     }
 });
 
-// ========== CONTINUATION TREND-PREDICTION.JS (PARTIE 4/4) ==========
-
+// ========== DISPLAY FUNCTIONS ==========
 Object.assign(TrendPrediction, {
-    
-    // ============================================
-    // ✅ DISPLAY FUNCTIONS - NO RAW PRICES
-    // ============================================
     
     displayStockHeader() {
         document.getElementById('stockSymbol').textContent = this.currentSymbol;
         document.getElementById('stockName').textContent = this.stockData.name || this.currentSymbol;
         
-        // ❌ NE PAS AFFICHER DE PRIX
         document.getElementById('currentPrice').textContent = '---';
         document.getElementById('priceChange').textContent = 'AlphaVault Score will be displayed below';
         document.getElementById('priceChange').className = 'change neutral';
@@ -1326,7 +1321,6 @@ Object.assign(TrendPrediction, {
         if (metricsContainer) {
             const metrics = metricsContainer.querySelectorAll('.metric strong');
             if (metrics.length >= 3) {
-                // ✅ Afficher % de changement (pas prix)
                 metrics[0].textContent = `${modelResult.percentChange >= 0 ? '+' : ''}${modelResult.percentChange.toFixed(2)}%`;
                 metrics[1].textContent = (modelResult.r2 * 100).toFixed(1) + '%';
                 metrics[2].textContent = 'Score-based';
@@ -1336,9 +1330,6 @@ Object.assign(TrendPrediction, {
         this.createModelScoreGauge(modelName, modelResult);
     },
     
-    /**
-     * ✅ GRAPHIQUE BASÉ SUR LE SCORE (pas de prix)
-     */
     createModelScoreGauge(modelName, modelResult) {
         const score = Math.max(0, Math.min(100, 50 + modelResult.percentChange * 2));
         
@@ -1415,7 +1406,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✅ SCORE COMPARISON CHART (NO PRICES)
+    // SCORE COMPARISON CHART
     // ============================================
     
     createScoreComparisonChart() {
@@ -1480,13 +1471,12 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // PERFORMANCE CHARTS (NORMALIZED)
+    // PERFORMANCE CHARTS
     // ============================================
     
     createPerformanceCharts() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         
-        // R² Chart
         const accuracyData = models.map(([name, model]) => ({
             name: model.name,
             y: model.r2 * 100,
@@ -1518,7 +1508,6 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // Direction Accuracy (from backtesting)
         if (this.backtestResults) {
             const directionData = Object.keys(this.backtestResults).map(modelName => ({
                 name: this.models[modelName].name,
@@ -1596,13 +1585,12 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✅ ENSEMBLE PREDICTION (SCORE ONLY)
+    // ENSEMBLE PREDICTION
     // ============================================
     
     displayEnsemblePrediction() {
         const models = Object.values(this.models).filter(m => m !== null);
         
-        // Moyenne pondérée des changements en %
         let sumWeightedChange = 0;
         let sumWeights = 0;
         
@@ -1617,7 +1605,6 @@ Object.assign(TrendPrediction, {
         
         const avgAccuracy = models.reduce((sum, m) => sum + m.r2, 0) / models.length;
         
-        // ✅ Affichage du score (PAS de prix)
         document.getElementById('ensemblePrice').textContent = `${ensembleScore.toFixed(0)}/100`;
         
         const changeEl = document.getElementById('ensembleChange');
@@ -1656,7 +1643,6 @@ Object.assign(TrendPrediction, {
         
         document.getElementById('ensembleAccuracy').textContent = (avgAccuracy * 100).toFixed(1) + '%';
         
-        // ✅ Afficher le score AlphaVault global
         if (this.alphaVaultScore) {
             const scoreEl = document.getElementById('alphaVaultScoreDisplay');
             if (scoreEl) {
@@ -1673,7 +1659,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // BACKTESTING CHARTS (NORMALIZED)
+    // BACKTESTING CHARTS
     // ============================================
     
     createBacktestingCharts() {
@@ -1718,7 +1704,6 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // Error chart
         const errorData = Object.keys(this.backtestResults).map(modelName => ({
             name: this.models[modelName].name,
             y: this.backtestResults[modelName].mape,
@@ -1756,7 +1741,6 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // Update metrics
         if (this.backtestResults.linear) {
             const avgAccuracy = Object.values(this.backtestResults)
                 .reduce((sum, r) => sum + r.directionAccuracy, 0) / Object.keys(this.backtestResults).length;
@@ -1790,7 +1774,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // CORRELATION HEATMAP (INCHANGÉ)
+    // CORRELATION HEATMAP
     // ============================================
     
     createCorrelationHeatmap() {
@@ -1880,6 +1864,17 @@ Object.assign(TrendPrediction, {
             series: [{ data: [consensusScore], innerRadius: '60%', radius: '100%' }],
             credits: { enabled: false }
         });
+        
+        const descEl = document.getElementById('consensusDescription');
+        if (descEl) {
+            if (consensusScore > 80) {
+                descEl.innerHTML = '<strong style="color: #22c55e;">High Consensus</strong> - Models strongly agree on direction';
+            } else if (consensusScore > 60) {
+                descEl.innerHTML = '<strong style="color: #fbbf24;">Moderate Consensus</strong> - Models show reasonable agreement';
+            } else {
+                descEl.innerHTML = '<strong style="color: #ef4444;">Low Consensus</strong> - Models have mixed predictions';
+            }
+        }
     },
     
     calculateCorrelation(x, y) {
@@ -1896,7 +1891,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // RECOMMENDATION (SCORE-BASED)
+    // RECOMMENDATION
     // ============================================
     
     displayRecommendation() {
@@ -1960,7 +1955,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✅ EXPORT (NO RAW PRICES)
+    // EXPORT
     // ============================================
     
     exportPredictions() {
@@ -2074,7 +2069,5 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ NO RAW DATA REDISTRIBUTION');
     TrendPrediction.init();
 });
-
-window.TrendPrediction = TrendPrediction;
 
 console.log('✅ AlphaVault Score Engine loaded - LEGAL COMPLIANT MODE');
