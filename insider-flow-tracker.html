@@ -47,6 +47,16 @@
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
+    <!-- ✅ LOADING STATE GLOBAL (POSITION FIXED) -->
+    <div id="loadingState" class="loading hidden">
+        <div class="loading-content-simple">
+            <div class="spinner">
+                <i class="fas fa-circle-notch"></i>
+            </div>
+            <p id="loadingMessage">Analyzing insider activity...</p>
+        </div>
+    </div>
+
     <div class='layout-wrapper'>
         <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
@@ -291,8 +301,7 @@
                 </div>
             </header>
             
-            <!-- ✅ CONTAINER AVEC POSITION RELATIVE POUR LE LOADING -->
-            <div class='container' style="position: relative; min-height: 600px;">
+            <div class='container'>
                 
                 <!-- Search Bar + Options -->
                 <div class="section">
@@ -347,16 +356,6 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- ✅ LOADING STATE SIMPLIFIÉ (STYLE COMPARE COMPANIES) -->
-                <div id="loadingState" class="loading hidden">
-                    <div class="loading-content-simple">
-                        <div class="spinner">
-                            <i class="fas fa-circle-notch"></i>
-                        </div>
-                        <p id="loadingMessage">Analyzing insider activity...</p>
                     </div>
                 </div>
 

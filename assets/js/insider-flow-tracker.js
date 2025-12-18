@@ -1040,7 +1040,7 @@
     let comparisonTickers = [];
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ UPDATE PROGRESS (VERSION SIMPLE - MESSAGES UNIQUEMENT)
+    // ✅ UPDATE PROGRESS (VERSION SIMPLE)
     // ═══════════════════════════════════════════════════════════════
     function updateProgress(percentage, message) {
         const loadingMessage = document.getElementById('loadingMessage');
