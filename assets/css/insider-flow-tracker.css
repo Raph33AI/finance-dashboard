@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (SIMPLIFIED)
+   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (CORRECTED)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -89,7 +89,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SEARCH OPTIONS
+   SEARCH OPTIONS (✅ FIX: CONTOURS BLEU/VIOLET)
    ═══════════════════════════════════════════════════════════════ */
 .search-options {
     display: flex;
@@ -103,18 +103,41 @@
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 12px;
     padding: 12px 20px;
-    border: 1px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
     display: flex;
     align-items: center;
     gap: 12px;
     flex: 1;
     min-width: 250px;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+.option-group::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.option-group:hover::before {
+    opacity: 1;
 }
 
 .option-group:hover {
-    border-color: var(--eco-primary);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
 
 .option-group label {
@@ -139,7 +162,7 @@
     flex: 1;
     background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid var(--glass-border);
+    border: 2px solid transparent;
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 0.95rem;
@@ -147,19 +170,23 @@
     cursor: pointer;
     outline: none;
     transition: all 0.3s ease;
+    background-image: linear-gradient(var(--bg-secondary), var(--bg-secondary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .option-group select:hover {
-    border-color: var(--eco-primary);
-}
-
-.option-group select:focus {
-    border-color: var(--eco-primary);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
+.option-group select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+}
+
 body.dark-mode .option-group select {
-    background: var(--bg-tertiary);
+    background-image: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -425,6 +452,110 @@ body.dark-mode .option-group select {
     font-weight: 800;
     color: var(--text-primary);
     margin-top: 4px;
+}
+
+/* ✅ NOUVEAU: PREDICTIVE CONFIDENCE GAUGE */
+.predictive-gauge-container {
+    margin-top: 24px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.02));
+    border-radius: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.15);
+}
+
+.gauge-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.confidence-gauge {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.gauge-svg {
+    transform: rotate(-90deg);
+}
+
+.gauge-bg {
+    fill: none;
+    stroke: rgba(148, 163, 184, 0.2);
+    stroke-width: 20;
+}
+
+.gauge-fill {
+    fill: none;
+    stroke: url(#gaugeGradient);
+    stroke-width: 20;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+.gauge-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.gauge-percentage {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.gauge-label {
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.gauge-details {
+    flex: 1;
+    min-width: 250px;
+}
+
+.gauge-details h4 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.gauge-factor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.gauge-factor:last-child {
+    border-bottom: none;
+}
+
+.gauge-factor-name {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.gauge-factor-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -731,6 +862,113 @@ body.dark-mode .cluster-stat {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ✅ NOUVEAU: WHALE INSIDER TRACKER
+   ═══════════════════════════════════════════════════════════════ */
+.whale-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.whale-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: var(--transition-smooth);
+}
+
+.whale-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+}
+
+.whale-rank {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+
+.whale-rank.rank-1 {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.whale-rank.rank-2 {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    box-shadow: 0 0 20px rgba(148, 163, 184, 0.5);
+}
+
+.whale-rank.rank-3 {
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.5);
+}
+
+.whale-info {
+    flex: 1;
+}
+
+.whale-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.whale-role {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.whale-stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.whale-stat {
+    text-align: right;
+}
+
+.whale-stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.whale-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+.whale-badge {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    TABLE
    ═══════════════════════════════════════════════════════════════ */
 .table-container {
@@ -855,7 +1093,7 @@ tbody tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   NETWORK GRAPH (INLINE)
+   NETWORK GRAPH (INLINE) - ✅ FIX: CONTOURS BLEU/VIOLET
    ═══════════════════════════════════════════════════════════════ */
 .network-controls {
     display: flex;
@@ -867,7 +1105,11 @@ tbody tr:hover {
     flex: 1;
     padding: 12px 24px;
     background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
     border-radius: 12px;
     color: var(--text-primary);
     font-weight: 700;
@@ -877,13 +1119,30 @@ tbody tr:hover {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
+}
+
+.network-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.network-btn:hover::before {
+    opacity: 1;
 }
 
 .network-btn:hover {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border-color: transparent;
     transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
 
 .network-graph-container {
@@ -937,7 +1196,7 @@ tbody tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   COMPARISON SECTION (INLINE)
+   COMPARISON SECTION (INLINE) - ✅ FIX: CONTOURS BLEU/VIOLET
    ═══════════════════════════════════════════════════════════════ */
 .comparison-search {
     display: flex;
@@ -948,9 +1207,12 @@ tbody tr:hover {
 .comparison-search input {
     flex: 1;
     padding: 12px 20px;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--bg-secondary), var(--bg-secondary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
     border-radius: 12px;
-    background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
     outline: none;
@@ -958,8 +1220,12 @@ tbody tr:hover {
 }
 
 .comparison-search input:focus {
-    border-color: var(--eco-primary);
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .comparison-search input {
+    background-image: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)), 
+                      linear-gradient(135deg, #667eea, #764ba2);
 }
 
 .comparison-tags {
@@ -1067,6 +1333,16 @@ tbody tr:hover {
     font-size: 0.85rem;
 }
 
+/* ✅ NOUVEAU: CROSS-COMPANY NETWORK */
+.cross-company-network-container {
+    margin-top: 32px;
+}
+
+/* ✅ NOUVEAU: CORRELATION HEATMAP */
+.correlation-matrix {
+    margin-top: 24px;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    NOTIFICATIONS
    ═══════════════════════════════════════════════════════════════ */
@@ -1155,6 +1431,20 @@ tbody tr:hover {
         width: 100%;
         text-align: center;
         font-size: 0.9rem;
+    }
+
+    .gauge-wrapper {
+        flex-direction: column;
+    }
+
+    .whale-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .whale-stats {
+        width: 100%;
+        justify-content: space-around;
     }
 }
 

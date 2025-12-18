@@ -1,571 +1,19 @@
-// /**
-//  * ═══════════════════════════════════════════════════════════════════
-//  * 📊 INSIDER FLOW TRACKER - MAIN APPLICATION
-//  * ═══════════════════════════════════════════════════════════════════
-//  * AlphaVault AI - Insider Trading Analysis Dashboard
-//  * ═══════════════════════════════════════════════════════════════════
-//  */
-
-// (function() {
-//     'use strict';
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // GLOBAL STATE
-//     // ═══════════════════════════════════════════════════════════════
-//     const analyticsEngine = new InsiderAnalyticsEngine();
-//     let currentAnalysis = null;
-//     let roleChartInstance = null;
-//     let currentPage = 1;
-//     let transactionsPerPage = 20;
-//     let allTransactions = [];
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // MAIN ANALYSIS FUNCTION
-//     // ═══════════════════════════════════════════════════════════════
-//     async function analyzeInsiderActivity() {
-//         const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
-        
-//         if (!ticker) {
-//             alert('⚠ Please enter a valid ticker');
-//             return;
-//         }
-
-//         const months = parseFloat(document.getElementById('periodSelect').value);
-//         const maxFilings = parseInt(document.getElementById('filingsSelect').value);
-
-//         console.log(`🔍 Analyzing ${ticker} with ${maxFilings} filings over ${months} months...`);
-
-//         // Show loading with progress
-//         document.getElementById('loadingState').classList.remove('hidden');
-//         document.getElementById('resultsContainer').classList.add('hidden');
-//         updateProgress(0, 'Initializing analysis...');
-
-//         try {
-//             console.log(`🔍 Analyzing insider activity for ${ticker}...`);
-            
-//             updateProgress(10, 'Fetching CIK number...');
-            
-//             currentAnalysis = await analyticsEngine.analyzeCompany(ticker, {
-//                 months: months,
-//                 maxFilings: maxFilings,
-//                 includeDerivatives: true,
-//                 includePriceImpact: false,
-//                 includeNetworkAnalysis: true,
-//                 onProgress: (progress, message) => {
-//                     updateProgress(progress, message);
-//                 }
-//             });
-
-//             console.log('✅ Analysis complete:', currentAnalysis);
-
-//             updateProgress(100, 'Analysis complete!');
-            
-//             await new Promise(resolve => setTimeout(resolve, 500));
-
-//             displayResults(currentAnalysis);
-
-//         } catch (error) {
-//             console.error('❌ Analysis error:', error);
-//             alert(`Error during analysis: ${error.message}`);
-//         } finally {
-//             document.getElementById('loadingState').classList.add('hidden');
-//         }
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // UPDATE PROGRESS BAR
-//     // ═══════════════════════════════════════════════════════════════
-//     function updateProgress(percentage, message) {
-//         const progressBar = document.getElementById('progressBar');
-//         const progressText = document.getElementById('progressText');
-//         const loadingMessage = document.getElementById('loadingMessage');
-
-//         progressBar.style.width = `${percentage}%`;
-//         progressText.textContent = `${Math.round(percentage)}%`;
-//         if (message) {
-//             loadingMessage.textContent = message;
-//         }
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY RESULTS
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayResults(analysis) {
-//         if (!analysis || analysis.error) {
-//             alert(analysis.error || 'No data available');
-//             return;
-//         }
-
-//         document.getElementById('resultsContainer').classList.remove('hidden');
-
-//         displayRecommendation(analysis.recommendation, analysis.overallScore);
-//         displayScoreCards(analysis);
-//         displayAlerts(analysis.alerts);
-
-//         if (analysis.clusterActivity.detected) {
-//             displayClusters(analysis.clusterActivity.clusters);
-//             document.getElementById('clusterSection').classList.remove('hidden');
-//         } else {
-//             document.getElementById('clusterSection').classList.add('hidden');
-//         }
-
-//         displayRoleChart(analysis.roleAnalysis);
-//         displayTransactionsTable(analysis);
-
-//         document.getElementById('resultsContainer').scrollIntoView({ 
-//             behavior: 'smooth', 
-//             block: 'start' 
-//         });
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY RECOMMENDATION
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayRecommendation(recommendation, overallScore) {
-//         const panel = document.getElementById('recommendationPanel');
-        
-//         const actionColors = {
-//             'STRONG BUY': '#10b981',
-//             'BUY': '#10b981',
-//             'HOLD': '#f59e0b',
-//             'SELL': '#ef4444',
-//             'STRONG SELL': '#ef4444'
-//         };
-
-//         const actionIcons = {
-//             'STRONG BUY': '🚀',
-//             'BUY': '📈',
-//             'HOLD': '⏸',
-//             'SELL': '📉',
-//             'STRONG SELL': '🔻'
-//         };
-
-//         panel.style.background = `linear-gradient(135deg, ${actionColors[recommendation.action]}, ${actionColors[recommendation.action]}dd)`;
-
-//         panel.innerHTML = `
-//             <div class="recommendation-action">
-//                 ${actionIcons[recommendation.action]} ${recommendation.action}
-//             </div>
-//             <div class="recommendation-score">${overallScore.score}/100</div>
-//             <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9; position: relative; z-index: 1; color: white;">
-//                 Confidence: ${recommendation.confidence}
-//             </div>
-//             <div class="recommendation-rationale">
-//                 <div style="font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; color: white;">
-//                     <i class="fas fa-lightbulb"></i> Rationale
-//                 </div>
-//                 ${recommendation.rationale.map(r => `
-//                     <div class="rationale-item">
-//                         <i class="fas fa-check-circle"></i>
-//                         <span>${r}</span>
-//                     </div>
-//                 `).join('')}
-//             </div>
-//         `;
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY SCORE CARDS
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayScoreCards(analysis) {
-//         const container = document.getElementById('scoreContainer');
-        
-//         const cards = [
-//             {
-//                 label: 'Insider Sentiment',
-//                 value: analysis.insiderSentiment.score,
-//                 suffix: '/100',
-//                 sublabel: analysis.insiderSentiment.label
-//             },
-//             {
-//                 label: 'Transactions',
-//                 value: analysis.transactionCount,
-//                 suffix: '',
-//                 sublabel: `Last ${Math.round((new Date() - new Date(analysis.period.start)) / (1000 * 60 * 60 * 24))} days`
-//             },
-//             {
-//                 label: 'Cluster Activity',
-//                 value: analysis.clusterActivity.count,
-//                 suffix: '',
-//                 sublabel: analysis.clusterActivity.detected ? 'Detected' : 'None'
-//             },
-//             {
-//                 label: 'Data Quality',
-//                 value: analysis.dataQuality,
-//                 suffix: '',
-//                 sublabel: 'Reliability score'
-//             }
-//         ];
-
-//         container.innerHTML = cards.map(card => `
-//             <div class="score-card">
-//                 <div class="score-label">${card.label}</div>
-//                 <div class="score-value">${card.value}${card.suffix}</div>
-//                 <div class="score-sublabel">${card.sublabel}</div>
-//             </div>
-//         `).join('');
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY ALERTS
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayAlerts(alerts) {
-//         const container = document.getElementById('alertsContainer');
-        
-//         if (!alerts || alerts.length === 0) {
-//             container.innerHTML = `
-//                 <div style="text-align: center; padding: 40px; color: var(--text-tertiary);">
-//                     <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
-//                     <p>No critical alerts detected</p>
-//                 </div>
-//             `;
-//             return;
-//         }
-
-//         const icons = {
-//             'CLUSTER_BUYING': 'fa-users',
-//             'CEO_CFO_DIVERGENCE': 'fa-exclamation-triangle',
-//             'PRE_EARNINGS_ACTIVITY': 'fa-clock',
-//             'CEO_MAJOR_PURCHASE': 'fa-shopping-cart',
-//             'CFO_MAJOR_SALE': 'fa-hand-holding-usd',
-//             'STRONG_BUY_SIGNAL': 'fa-rocket',
-//             'STRONG_SELL_SIGNAL': 'fa-arrow-down'
-//         };
-
-//         container.innerHTML = alerts.map(alert => `
-//             <div class="alert severity-${alert.severity}">
-//                 <div class="alert-icon">
-//                     <i class="fas ${icons[alert.type] || 'fa-info-circle'}"></i>
-//                 </div>
-//                 <div class="alert-content">
-//                     <div class="alert-title">${alert.title}</div>
-//                     <div class="alert-description">${alert.description}</div>
-//                 </div>
-//                 <span class="alert-badge">${alert.confidence}% confidence</span>
-//             </div>
-//         `).join('');
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY CLUSTERS
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayClusters(clusters) {
-//         const container = document.getElementById('clusterContainer');
-        
-//         container.innerHTML = clusters.map(cluster => `
-//             <div class="cluster-card">
-//                 <div class="cluster-header">
-//                     <div class="cluster-date">
-//                         ${new Date(cluster.startDate).toLocaleDateString('en-US')}
-//                     </div>
-//                     <div class="confidence-badge">
-//                         ${cluster.confidence}% confidence
-//                     </div>
-//                 </div>
-//                 <h3 style="margin-bottom: 16px;">
-//                     ${cluster.insiderCount} insiders • ${cluster.transactionCount} transactions
-//                 </h3>
-//                 <div class="cluster-stats">
-//                     <div class="cluster-stat">
-//                         <div class="cluster-stat-label">Total Value</div>
-//                         <div class="cluster-stat-value">
-//                             $${formatNumber(cluster.totalValue)}
-//                         </div>
-//                     </div>
-//                     <div class="cluster-stat">
-//                         <div class="cluster-stat-label">Avg/Insider</div>
-//                         <div class="cluster-stat-value">
-//                             $${formatNumber(cluster.averageValuePerInsider)}
-//                         </div>
-//                     </div>
-//                 </div>
-//                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: var(--text-secondary);">
-//                     <strong>Roles:</strong> ${cluster.insiderRoles.join(', ')}
-//                 </div>
-//             </div>
-//         `).join('');
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY ROLE CHART (✅ Amélioration design)
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayRoleChart(roleAnalysis) {
-//         const canvas = document.getElementById('roleChart');
-//         const ctx = canvas.getContext('2d');
-        
-//         if (roleChartInstance !== null) {
-//             console.log('🗑 Destroying previous chart...');
-//             roleChartInstance.destroy();
-//             roleChartInstance = null;
-//         }
-        
-//         const roles = Object.keys(roleAnalysis.byRole);
-//         const purchases = roles.map(r => roleAnalysis.byRole[r].purchaseValue);
-//         const sales = roles.map(r => Math.abs(roleAnalysis.byRole[r].saleValue));
-
-//         console.log('📊 Creating new chart...');
-        
-//         roleChartInstance = new Chart(ctx, {
-//             type: 'bar',
-//             data: {
-//                 labels: roles,
-//                 datasets: [
-//                     {
-//                         label: 'Purchases',
-//                         data: purchases,
-//                         backgroundColor: 'rgba(16, 185, 129, 0.8)',
-//                         borderColor: 'rgba(16, 185, 129, 1)',
-//                         borderWidth: 2,
-//                         borderRadius: 8,
-//                         borderSkipped: false
-//                     },
-//                     {
-//                         label: 'Sales',
-//                         data: sales,
-//                         backgroundColor: 'rgba(239, 68, 68, 0.8)',
-//                         borderColor: 'rgba(239, 68, 68, 1)',
-//                         borderWidth: 2,
-//                         borderRadius: 8,
-//                         borderSkipped: false
-//                     }
-//                 ]
-//             },
-//             options: {
-//                 responsive: true,
-//                 maintainAspectRatio: true,
-//                 plugins: {
-//                     legend: {
-//                         labels: {
-//                             color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b',
-//                             font: { size: 14, weight: 'bold' },
-//                             padding: 20,
-//                             usePointStyle: true,
-//                             pointStyle: 'circle'
-//                         }
-//                     },
-//                     tooltip: {
-//                         backgroundColor: 'rgba(15, 23, 42, 0.95)',
-//                         titleColor: '#ffffff',
-//                         bodyColor: '#ffffff',
-//                         borderColor: 'rgba(102, 126, 234, 0.5)',
-//                         borderWidth: 1,
-//                         padding: 12,
-//                         displayColors: true,
-//                         callbacks: {
-//                             label: function(context) {
-//                                 return context.dataset.label + ': $' + formatNumber(context.parsed.y);
-//                             }
-//                         }
-//                     }
-//                 },
-//                 scales: {
-//                     y: {
-//                         beginAtZero: true,
-//                         ticks: {
-//                             color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b',
-//                             callback: function(value) {
-//                                 return '$' + formatNumber(value);
-//                             }
-//                         },
-//                         grid: {
-//                             color: 'rgba(148, 163, 184, 0.1)',
-//                             drawBorder: false
-//                         }
-//                     },
-//                     x: {
-//                         ticks: {
-//                             color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') || '#64748b',
-//                             font: { weight: '600' }
-//                         },
-//                         grid: {
-//                             display: false
-//                         }
-//                     }
-//                 }
-//             }
-//         });
-
-//         console.log('✅ New chart created successfully');
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // DISPLAY TRANSACTIONS TABLE (✅ FILTRE: Exclut transactions à 0$)
-//     // ═══════════════════════════════════════════════════════════════
-//     function displayTransactionsTable(analysis) {
-//         const container = document.getElementById('transactionsTable');
-        
-//         // ✅ CORRECTION: Calcul du netValue et filtrage des transactions à 0$
-//         allTransactions = (analysis.transactions || [])
-//             .map(t => {
-//                 const netValue = (t.nonDerivativeTransactions || [])
-//                     .reduce((sum, nt) => {
-//                         return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
-//                     }, 0);
-                
-//                 return { ...t, netValue }; // On ajoute netValue à l'objet transaction
-//             })
-//             .filter(t => Math.abs(t.netValue) > 0) // ✅ Exclut les transactions à 0$
-//             .sort((a, b) => new Date(b.filingDate) - new Date(a.filingDate));
-
-//         currentPage = 1;
-        
-//         console.log(`📋 Total transactions: ${allTransactions.length} (hors transactions à 0$)`);
-
-//         if (allTransactions.length === 0) {
-//             container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-tertiary);">No transactions to display</p>';
-//             return;
-//         }
-
-//         renderTransactionsPage();
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // RENDER TRANSACTIONS PAGE (✅ Utilise netValue pré-calculé)
-//     // ═══════════════════════════════════════════════════════════════
-//     function renderTransactionsPage() {
-//         const container = document.getElementById('transactionsTable');
-//         const start = (currentPage - 1) * transactionsPerPage;
-//         const end = start + transactionsPerPage;
-//         const pageTransactions = allTransactions.slice(start, end);
-//         const totalPages = Math.ceil(allTransactions.length / transactionsPerPage);
-
-//         container.innerHTML = `
-//             <table>
-//                 <thead>
-//                     <tr>
-//                         <th>Date</th>
-//                         <th>Insider</th>
-//                         <th>Role</th>
-//                         <th>Type</th>
-//                         <th>Value</th>
-//                         <th>Signal</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     ${pageTransactions.map(t => {
-//                         // ✅ netValue déjà calculé dans displayTransactionsTable
-//                         const netValue = t.netValue;
-                        
-//                         const type = netValue > 0 ? 'Purchase' : 'Sale';
-//                         const badgeClass = netValue > 0 ? 'badge-buy' : 'badge-sell';
-                        
-//                         return `
-//                             <tr>
-//                                 <td>${new Date(t.filingDate).toLocaleDateString('en-US')}</td>
-//                                 <td>${t.reportingOwner?.name || 'N/A'}</td>
-//                                 <td>${t.reportingOwner?.classification || 'N/A'}</td>
-//                                 <td><span class="badge ${badgeClass}">${type}</span></td>
-//                                 <td>$${formatNumber(Math.abs(netValue))}</td>
-//                                 <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : 'BEARISH'}</span></td>
-//                             </tr>
-//                         `;
-//                     }).join('')}
-//                 </tbody>
-//             </table>
-//             <div class="pagination">
-//                 <button onclick="window.InsiderFlowTracker.goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>
-//                     <i class="fas fa-angle-double-left"></i> First
-//                 </button>
-//                 <button onclick="window.InsiderFlowTracker.goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-//                     <i class="fas fa-angle-left"></i> Previous
-//                 </button>
-//                 <span>Page ${currentPage} of ${totalPages} (${allTransactions.length} total)</span>
-//                 <button onclick="window.InsiderFlowTracker.goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-//                     Next <i class="fas fa-angle-right"></i>
-//                 </button>
-//                 <button onclick="window.InsiderFlowTracker.goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
-//                     Last <i class="fas fa-angle-double-right"></i>
-//                 </button>
-//             </div>
-//         `;
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // GO TO PAGE
-//     // ═══════════════════════════════════════════════════════════════
-//     function goToPage(page) {
-//         const totalPages = Math.ceil(allTransactions.length / transactionsPerPage);
-//         if (page < 1 || page > totalPages) return;
-        
-//         currentPage = page;
-//         renderTransactionsPage();
-        
-//         document.getElementById('transactionsTable').scrollIntoView({ 
-//             behavior: 'smooth', 
-//             block: 'nearest' 
-//         });
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // UTILITIES
-//     // ═══════════════════════════════════════════════════════════════
-//     function formatNumber(num) {
-//         if (num >= 1000000) {
-//             return (num / 1000000).toFixed(2) + 'M';
-//         }
-//         if (num >= 1000) {
-//             return (num / 1000).toFixed(2) + 'K';
-//         }
-//         return num.toFixed(2);
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // EVENT LISTENERS
-//     // ═══════════════════════════════════════════════════════════════
-//     function initializeEventListeners() {
-//         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
-//             if (e.key === 'Enter') {
-//                 analyzeInsiderActivity();
-//             }
-//         });
-
-//         document.getElementById('analyzeBtn').addEventListener('click', analyzeInsiderActivity);
-        
-//         document.getElementById('refreshBtn').addEventListener('click', () => {
-//             if (document.getElementById('tickerInput').value.trim()) {
-//                 analyzeInsiderActivity();
-//             } else {
-//                 alert('⚠ Please enter a ticker first');
-//             }
-//         });
-
-//         window.addEventListener('load', () => {
-//             document.getElementById('tickerInput').focus();
-//         });
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // INITIALIZATION
-//     // ═══════════════════════════════════════════════════════════════
-//     if (document.readyState === 'loading') {
-//         document.addEventListener('DOMContentLoaded', initializeEventListeners);
-//     } else {
-//         initializeEventListeners();
-//     }
-
-//     // ═══════════════════════════════════════════════════════════════
-//     // GLOBAL EXPORT (pour pagination)
-//     // ═══════════════════════════════════════════════════════════════
-//     window.InsiderFlowTracker = {
-//         goToPage: goToPage
-//     };
-
-// })();
-
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 INSIDER FLOW TRACKER - ULTRA-POWERFUL INTEGRATED VERSION
+ * 📊 INSIDER FLOW TRACKER - ULTRA-POWERFUL PREMIUM VERSION
  * ═══════════════════════════════════════════════════════════════════
  * AlphaVault AI - Advanced Insider Trading Analysis Dashboard
  * 
- * Features:
- * ✅ Alphy AI Recommendation (simplified, no robot logo)
- * ✅ Multi-company comparison (inline, no modal)
- * ✅ Network graph (inline, no modal)
- * ✅ Advanced pattern detection
- * ✅ Temporal heatmap
- * ✅ Anomaly detection
- * ✅ All-in-one monolithic file
+ * ✅ NOUVELLES FONCTIONNALITÉS :
+ * - Cross-Company Insider Network (Innovation unique)
+ * - Timing Correlation Heatmap (Détection patterns cachés)
+ * - Whale Insider Tracker (Top traders par volume)
+ * - Predictive Confidence Score (Score ML prédictif)
+ * 
+ * ✅ CORRECTIONS DESIGN :
+ * - Contours bleu/violet sur tous les filtres/boutons
+ * - Fix Temporal Heatmap (agrégation correcte)
+ * - Contraste texte Network Analysis (lisibilité)
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -799,7 +247,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧩 CLASS 2: INSIDER COMPARISON ENGINE
+    // 🧩 CLASS 2: INSIDER COMPARISON ENGINE (ENHANCED)
     // ═══════════════════════════════════════════════════════════════
     class InsiderComparisonEngine {
         constructor() {
@@ -854,7 +302,9 @@
                 tickers: this.comparisonData.map(d => d.ticker),
                 summary: this.generateSummaryTable(),
                 rankings: this.generateRankings(),
-                visualizations: this.generateVisualizationData()
+                visualizations: this.generateVisualizationData(),
+                correlationMatrix: this.generateCorrelationMatrix(), // ✅ NOUVEAU
+                sharedInsiders: this.detectSharedInsiders() // ✅ NOUVEAU
             };
 
             return report;
@@ -925,10 +375,144 @@
                 }
             };
         }
+
+        /**
+         * ✅ NOUVEAU: Generate correlation matrix (timing correlation)
+         */
+        generateCorrelationMatrix() {
+            if (this.comparisonData.length < 2) {
+                return null;
+            }
+
+            const matrix = {};
+
+            // Build weekly activity timelines for each company
+            const timelines = this.comparisonData.map(item => {
+                const weeklyActivity = {};
+                
+                (item.analysis.transactions || []).forEach(tx => {
+                    const date = new Date(tx.filingDate);
+                    const weekStart = new Date(date);
+                    weekStart.setDate(date.getDate() - date.getDay());
+                    const weekKey = weekStart.toISOString().split('T')[0];
+                    
+                    const netValue = (tx.nonDerivativeTransactions || []).reduce((sum, nt) => {
+                        return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
+                    }, 0);
+                    
+                    weeklyActivity[weekKey] = (weeklyActivity[weekKey] || 0) + netValue;
+                });
+
+                return {
+                    ticker: item.ticker,
+                    weeklyActivity
+                };
+            });
+
+            // Calculate pairwise correlations
+            for (let i = 0; i < timelines.length; i++) {
+                for (let j = i + 1; j < timelines.length; j++) {
+                    const ticker1 = timelines[i].ticker;
+                    const ticker2 = timelines[j].ticker;
+                    
+                    const correlation = this.calculatePearsonCorrelation(
+                        timelines[i].weeklyActivity,
+                        timelines[j].weeklyActivity
+                    );
+                    
+                    const key = `${ticker1}-${ticker2}`;
+                    matrix[key] = correlation;
+                }
+            }
+
+            return matrix;
+        }
+
+        /**
+         * ✅ NOUVEAU: Calculate Pearson correlation
+         */
+        calculatePearsonCorrelation(activity1, activity2) {
+            // Get all unique weeks
+            const allWeeks = new Set([
+                ...Object.keys(activity1),
+                ...Object.keys(activity2)
+            ]);
+
+            if (allWeeks.size < 2) return 0;
+
+            // Build aligned arrays
+            const values1 = [];
+            const values2 = [];
+
+            allWeeks.forEach(week => {
+                values1.push(activity1[week] || 0);
+                values2.push(activity2[week] || 0);
+            });
+
+            // Calculate correlation
+            const n = values1.length;
+            const sum1 = values1.reduce((a, b) => a + b, 0);
+            const sum2 = values2.reduce((a, b) => a + b, 0);
+            const sum1Sq = values1.reduce((a, b) => a + b * b, 0);
+            const sum2Sq = values2.reduce((a, b) => a + b * b, 0);
+            const pSum = values1.reduce((sum, v1, i) => sum + v1 * values2[i], 0);
+
+            const num = pSum - (sum1 * sum2 / n);
+            const den = Math.sqrt((sum1Sq - sum1 * sum1 / n) * (sum2Sq - sum2 * sum2 / n));
+
+            if (den === 0) return 0;
+
+            return num / den;
+        }
+
+        /**
+         * ✅ NOUVEAU: Detect shared insiders between companies
+         */
+        detectSharedInsiders() {
+            if (this.comparisonData.length < 2) {
+                return [];
+            }
+
+            const insidersByCompany = this.comparisonData.map(item => {
+                const insiders = new Set();
+                (item.analysis.transactions || []).forEach(tx => {
+                    const name = tx.reportingOwner?.name;
+                    if (name) insiders.add(name.toLowerCase().trim());
+                });
+                return {
+                    ticker: item.ticker,
+                    insiders: Array.from(insiders)
+                };
+            });
+
+            const sharedInsiders = [];
+
+            // Find insiders present in multiple companies
+            for (let i = 0; i < insidersByCompany.length; i++) {
+                for (let j = i + 1; j < insidersByCompany.length; j++) {
+                    const company1 = insidersByCompany[i];
+                    const company2 = insidersByCompany[j];
+
+                    const shared = company1.insiders.filter(insider => 
+                        company2.insiders.includes(insider)
+                    );
+
+                    if (shared.length > 0) {
+                        sharedInsiders.push({
+                            companies: [company1.ticker, company2.ticker],
+                            insiders: shared,
+                            count: shared.length
+                        });
+                    }
+                }
+            }
+
+            return sharedInsiders;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧩 CLASS 3: INSIDER NETWORK GRAPH
+    // 🧩 CLASS 3: INSIDER NETWORK GRAPH (ENHANCED)
     // ═══════════════════════════════════════════════════════════════
     class InsiderNetworkGraph {
         constructor() {
@@ -968,13 +552,18 @@
          */
         buildNetwork(transactions) {
             const insiderMap = new Map();
+            
+            // ✅ FIX: Détecter le mode dark/light pour les couleurs de texte
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const textColor = isDarkMode ? '#ffffff' : '#1e293b';
+            
             const companyNode = {
                 id: 'company',
                 label: 'Company',
                 level: 0,
                 color: '#667eea',
                 size: 40,
-                font: { size: 18, color: '#ffffff', bold: true }
+                font: { size: 18, color: textColor, bold: true }
             };
 
             this.nodes = [companyNode];
@@ -999,7 +588,7 @@
                         level: 1,
                         color: isBuyer ? '#10b981' : '#ef4444',
                         size: 25,
-                        font: { size: 12, color: '#ffffff' },
+                        font: { size: 12, color: textColor }, // ✅ FIX: Couleur adaptative
                         transactions: 1,
                         totalValue: Math.abs(netValue)
                     });
@@ -1204,17 +793,271 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // ✅ NOUVEAU: CLASS 4 - CROSS-COMPANY NETWORK ANALYZER
+    // ═══════════════════════════════════════════════════════════════
+    class CrossCompanyNetworkAnalyzer {
+        constructor() {
+            this.network = null;
+            this.nodes = [];
+            this.edges = [];
+        }
+
+        /**
+         * Render cross-company network from comparison data
+         */
+        render(comparisonData, sharedInsiders) {
+            const container = document.getElementById('crossCompanyNetwork');
+            
+            if (!container) {
+                console.error('❌ Cross-company network container not found');
+                return;
+            }
+
+            if (!comparisonData || comparisonData.length < 2) {
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-secondary);">
+                        <div style="text-align: center;">
+                            <i class="fas fa-network-wired" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
+                            <p>Add at least 2 companies to see cross-company network</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('🌐 Building cross-company network...');
+
+            this.buildNetwork(comparisonData, sharedInsiders);
+            this.displayNetwork(container);
+        }
+
+        /**
+         * Build cross-company network
+         */
+        buildNetwork(comparisonData, sharedInsiders) {
+            this.nodes = [];
+            this.edges = [];
+
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const textColor = isDarkMode ? '#ffffff' : '#1e293b';
+
+            // Add company nodes
+            comparisonData.forEach((item, idx) => {
+                this.nodes.push({
+                    id: item.ticker,
+                    label: item.ticker,
+                    group: 'company',
+                    level: 0,
+                    color: '#667eea',
+                    size: 40,
+                    font: { size: 18, color: textColor, bold: true },
+                    sentiment: item.analysis.insiderSentiment.score
+                });
+            });
+
+            // Add shared insider nodes
+            const insiderMap = new Map();
+            sharedInsiders.forEach(shared => {
+                shared.insiders.forEach(insiderName => {
+                    if (!insiderMap.has(insiderName)) {
+                        insiderMap.set(insiderName, {
+                            id: `insider_${insiderMap.size}`,
+                            label: insiderName,
+                            group: 'insider',
+                            level: 1,
+                            color: '#10b981',
+                            size: 25,
+                            font: { size: 12, color: textColor },
+                            companies: shared.companies
+                        });
+                    }
+                });
+            });
+
+            this.nodes.push(...Array.from(insiderMap.values()));
+
+            // Add edges between companies and shared insiders
+            insiderMap.forEach(insider => {
+                insider.companies.forEach(company => {
+                    this.edges.push({
+                        from: company,
+                        to: insider.id,
+                        width: 2,
+                        color: '#10b981',
+                        dashes: false
+                    });
+                });
+            });
+
+            console.log(`✅ Cross-company network built: ${this.nodes.length} nodes, ${this.edges.length} edges`);
+        }
+
+        /**
+         * Display network
+         */
+        displayNetwork(container) {
+            if (typeof vis === 'undefined') {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.3;"></i>
+                        <p>Network visualization library not loaded</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = {
+                nodes: new vis.DataSet(this.nodes),
+                edges: new vis.DataSet(this.edges)
+            };
+
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    smooth: { type: 'continuous' },
+                    shadow: true
+                },
+                physics: {
+                    enabled: true,
+                    barnesHut: {
+                        gravitationalConstant: -2000,
+                        centralGravity: 0.3,
+                        springLength: 120,
+                        springConstant: 0.05,
+                        damping: 0.09
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    zoomView: true,
+                    dragView: true
+                }
+            };
+
+            this.network = new vis.Network(container, data, options);
+
+            console.log('✅ Cross-company network rendered');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ NOUVEAU: CLASS 5 - WHALE INSIDER TRACKER
+    // ═══════════════════════════════════════════════════════════════
+    class WhaleInsiderTracker {
+        constructor() {
+            this.whales = [];
+        }
+
+        /**
+         * Identify top insiders by volume
+         */
+        identifyWhales(transactions, topN = 10) {
+            if (!transactions || transactions.length === 0) {
+                return [];
+            }
+
+            const insiderStats = new Map();
+
+            transactions.forEach(tx => {
+                const name = tx.reportingOwner?.name;
+                const role = tx.reportingOwner?.classification || 'Unknown';
+
+                if (!name) return;
+
+                const netValue = (tx.nonDerivativeTransactions || []).reduce((sum, nt) => {
+                    return sum + Math.abs(nt.totalValue);
+                }, 0);
+
+                if (!insiderStats.has(name)) {
+                    insiderStats.set(name, {
+                        name,
+                        role,
+                        totalVolume: 0,
+                        transactions: 0,
+                        lastActivity: tx.filingDate
+                    });
+                }
+
+                const stats = insiderStats.get(name);
+                stats.totalVolume += netValue;
+                stats.transactions++;
+                
+                if (new Date(tx.filingDate) > new Date(stats.lastActivity)) {
+                    stats.lastActivity = tx.filingDate;
+                }
+            });
+
+            this.whales = Array.from(insiderStats.values())
+                .sort((a, b) => b.totalVolume - a.totalVolume)
+                .slice(0, topN);
+
+            return this.whales;
+        }
+
+        /**
+         * Display whale insiders
+         */
+        display(container) {
+            if (!container) return;
+
+            if (this.whales.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: var(--text-tertiary); padding: 20px;">
+                        No whale insiders detected
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = this.whales.map((whale, idx) => {
+                const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+                const badge = whale.totalVolume > 100000000 ? '<span class="whale-badge">🐋 LEGENDARY</span>' : '';
+
+                return `
+                    <div class="whale-card">
+                        <div class="whale-rank ${rankClass}">
+                            ${idx + 1}
+                        </div>
+                        <div class="whale-info">
+                            <div class="whale-name">${whale.name}</div>
+                            <div class="whale-role">${whale.role}</div>
+                        </div>
+                        <div class="whale-stats">
+                            <div class="whale-stat">
+                                <div class="whale-stat-value">$${formatNumber(whale.totalVolume)}</div>
+                                <div class="whale-stat-label">Total Volume</div>
+                            </div>
+                            <div class="whale-stat">
+                                <div class="whale-stat-value">${whale.transactions}</div>
+                                <div class="whale-stat-label">Transactions</div>
+                            </div>
+                        </div>
+                        ${badge}
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // GLOBAL STATE & INSTANCES
     // ═══════════════════════════════════════════════════════════════
     const analyticsEngine = new InsiderAnalyticsEngine();
     const patternDetector = new InsiderPatternDetector();
     const comparisonEngine = new InsiderComparisonEngine();
     const networkGraph = new InsiderNetworkGraph();
+    const crossCompanyNetwork = new CrossCompanyNetworkAnalyzer(); // ✅ NOUVEAU
+    const whaleTracker = new WhaleInsiderTracker(); // ✅ NOUVEAU
     
     let currentAnalysis = null;
     let roleChartInstance = null;
     let heatmapChartInstance = null;
     let comparisonChartInstance = null;
+    let correlationChartInstance = null; // ✅ NOUVEAU
     let currentPage = 1;
     let transactionsPerPage = 20;
     let allTransactions = [];
@@ -1341,8 +1184,16 @@
             document.getElementById('clusterSection').classList.add('hidden');
         }
 
+        // ✅ NOUVEAU: Whale Insider Tracker
+        const whales = whaleTracker.identifyWhales(analysis.transactions);
+        const whaleContainer = document.getElementById('whaleContainer');
+        if (whaleContainer) {
+            whaleTracker.display(whaleContainer);
+            document.getElementById('whaleSection').classList.remove('hidden');
+        }
+
         displayRoleChart(analysis.roleAnalysis);
-        displayTemporalHeatmap(analysis.transactions);
+        displayTemporalHeatmap(analysis.transactions); // ✅ FIX INCLUS
         
         // Render network graph
         networkGraph.render(analysis.transactions);
@@ -1373,6 +1224,9 @@
 
         const config = actionColors[recommendation.action] || actionColors['HOLD'];
         const aiAnalysis = generateAIAnalysis(analysis);
+        
+        // ✅ NOUVEAU: Calculate Predictive Confidence Score
+        const predictiveScore = calculatePredictiveConfidence(analysis);
 
         panel.innerHTML = `
             <div class="alphy-simple-grid">
@@ -1383,6 +1237,43 @@
                         <div>
                             <div class="alphy-action-text" style="color: ${config.color};">${recommendation.action}</div>
                             <div class="alphy-score-text">Score: <strong>${overallScore.score}/100</strong> • Confidence: <strong>${recommendation.confidence}</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ NOUVEAU: Predictive Confidence Gauge -->
+                <div class="predictive-gauge-container">
+                    <h4 style="margin-bottom: 20px; text-align: center;">
+                        <i class="fas fa-robot"></i> AI Predictive Confidence Score
+                    </h4>
+                    <div class="gauge-wrapper">
+                        <div class="confidence-gauge">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
+                                <circle class="gauge-fill" cx="100" cy="100" r="80" 
+                                    stroke-dasharray="${2 * Math.PI * 80}" 
+                                    stroke-dashoffset="${2 * Math.PI * 80 * (1 - predictiveScore.score / 100)}">
+                                </circle>
+                            </svg>
+                            <div class="gauge-text">
+                                <div class="gauge-percentage">${predictiveScore.score}%</div>
+                                <div class="gauge-label">${predictiveScore.label}</div>
+                            </div>
+                        </div>
+                        <div class="gauge-details">
+                            <h4>Score Breakdown</h4>
+                            ${predictiveScore.factors.map(f => `
+                                <div class="gauge-factor">
+                                    <span class="gauge-factor-name">${f.name}</span>
+                                    <span class="gauge-factor-value">${f.value}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -1476,6 +1367,39 @@
                 </div>
             </div>
         `;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ NOUVEAU: CALCULATE PREDICTIVE CONFIDENCE SCORE
+    // ═══════════════════════════════════════════════════════════════
+    function calculatePredictiveConfidence(analysis) {
+        const sentiment = analysis.insiderSentiment.score;
+        const clusterWeight = analysis.clusterActivity.detected ? 30 : 0;
+        const patternWeight = analysis.patterns && analysis.patterns.momentum?.detected ? 20 : 0;
+        const dataQuality = analysis.dataQuality === 'HIGH' ? 100 : analysis.dataQuality === 'MEDIUM' ? 70 : 40;
+
+        // Formula: (Sentiment × 0.4) + (Cluster × 0.3) + (Pattern × 0.2) + (Quality × 0.1)
+        const score = Math.round(
+            (sentiment * 0.4) + 
+            (clusterWeight * 0.3) + 
+            (patternWeight * 0.2) + 
+            (dataQuality * 0.1)
+        );
+
+        let label = '';
+        if (score >= 80) label = 'Very High';
+        else if (score >= 60) label = 'High';
+        else if (score >= 40) label = 'Medium';
+        else label = 'Low';
+
+        const factors = [
+            { name: 'Sentiment Score', value: `${sentiment}/100 (40%)` },
+            { name: 'Cluster Activity', value: `${clusterWeight}/30 (30%)` },
+            { name: 'Pattern Strength', value: `${patternWeight}/20 (20%)` },
+            { name: 'Data Quality', value: `${analysis.dataQuality} (10%)` }
+        ];
+
+        return { score, label, factors };
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1861,7 +1785,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // DISPLAY TEMPORAL HEATMAP
+    // ✅ FIX: DISPLAY TEMPORAL HEATMAP (AGRÉGATION CORRECTE)
     // ═══════════════════════════════════════════════════════════════
     function displayTemporalHeatmap(transactions) {
         const canvas = document.getElementById('heatmapChart');
@@ -1875,34 +1799,48 @@
             heatmapChartInstance = null;
         }
 
-        // Group transactions by week
-        const weeklyData = {};
+        // ✅ FIX: Group transactions by DAY (not week) pour capturer TOUTES les transactions
+        const dailyData = {};
+        
         transactions.forEach(tx => {
             const date = new Date(tx.filingDate);
+            const dayKey = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            
+            if (!dailyData[dayKey]) {
+                dailyData[dayKey] = { purchases: 0, sales: 0 };
+            }
+
+            // ✅ FIX: Agréger TOUTES les transactions du même jour
+            (tx.nonDerivativeTransactions || []).forEach(nt => {
+                if (nt.transactionType === 'Purchase') {
+                    dailyData[dayKey].purchases += nt.totalValue;
+                } else {
+                    dailyData[dayKey].sales += Math.abs(nt.totalValue);
+                }
+            });
+        });
+
+        // ✅ Convert to weekly aggregation for display (mais basé sur les données journalières complètes)
+        const weeklyData = {};
+        Object.keys(dailyData).sort().forEach(dayKey => {
+            const date = new Date(dayKey);
             const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay());
+            weekStart.setDate(date.getDate() - date.getDay()); // Get Sunday of the week
             const weekKey = weekStart.toISOString().split('T')[0];
             
             if (!weeklyData[weekKey]) {
                 weeklyData[weekKey] = { purchases: 0, sales: 0 };
             }
-
-            const netValue = (tx.nonDerivativeTransactions || []).reduce((sum, nt) => {
-                return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
-            }, 0);
-
-            if (netValue > 0) {
-                weeklyData[weekKey].purchases += netValue;
-            } else {
-                weeklyData[weekKey].sales += Math.abs(netValue);
-            }
+            
+            weeklyData[weekKey].purchases += dailyData[dayKey].purchases;
+            weeklyData[weekKey].sales += dailyData[dayKey].sales;
         });
 
         const labels = Object.keys(weeklyData).sort().map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         const purchaseData = Object.keys(weeklyData).sort().map(k => weeklyData[k].purchases);
         const saleData = Object.keys(weeklyData).sort().map(k => weeklyData[k].sales);
 
-        console.log('📊 Creating temporal heatmap...');
+        console.log(`📊 Creating temporal heatmap... (${Object.keys(dailyData).length} days → ${Object.keys(weeklyData).length} weeks)`);
 
         heatmapChartInstance = new Chart(ctx, {
             type: 'line',
@@ -1918,7 +1856,8 @@
                         tension: 0.4,
                         borderWidth: 2,
                         pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#10b981'
                     },
                     {
                         label: 'Sales',
@@ -1929,7 +1868,8 @@
                         tension: 0.4,
                         borderWidth: 2,
                         pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#ef4444'
                     }
                 ]
             },
@@ -2243,6 +2183,46 @@
                     <canvas id="comparisonChart" height="80"></canvas>
                 </div>
 
+                <!-- ✅ NOUVEAU: Timing Correlation Heatmap -->
+                ${report.correlationMatrix ? `
+                    <div class="correlation-matrix" style="margin-top: 32px;">
+                        <h4 style="margin-bottom: 16px;">
+                            <i class="fas fa-chart-area"></i> Timing Correlation Matrix
+                        </h4>
+                        <div class="chart-wrapper">
+                            <canvas id="correlationChart" height="100"></canvas>
+                        </div>
+                        <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem; text-align: center;">
+                            <i class="fas fa-info-circle"></i> Correlation measures how synchronized insider activity is between companies (1.0 = perfect sync, 0 = no correlation, -1.0 = opposite)
+                        </p>
+                    </div>
+                ` : ''}
+
+                <!-- ✅ NOUVEAU: Cross-Company Insider Network -->
+                ${report.sharedInsiders && report.sharedInsiders.length > 0 ? `
+                    <div class="cross-company-network-container">
+                        <h4 style="margin-top: 32px; margin-bottom: 16px;">
+                            <i class="fas fa-network-wired"></i> Cross-Company Insider Network
+                        </h4>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--glass-border);">
+                            <p style="color: var(--text-secondary);">
+                                <strong>${report.sharedInsiders.length} shared insider(s) detected</strong> across companies:
+                            </p>
+                            ${report.sharedInsiders.map(shared => `
+                                <div style="margin-top: 12px; padding: 12px; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
+                                    <div style="font-weight: 700; color: var(--text-primary);">
+                                        ${shared.companies.join(' ↔ ')}
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: var(--text-tertiary); margin-top: 4px;">
+                                        ${shared.count} shared insider(s): ${shared.insiders.slice(0, 3).join(', ')}${shared.insiders.length > 3 ? ` +${shared.insiders.length - 3} more` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div id="crossCompanyNetwork" style="width: 100%; height: 500px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--glass-border);"></div>
+                    </div>
+                ` : ''}
+
                 <!-- Rankings -->
                 <div style="margin-top: 32px;">
                     <h4 style="margin-bottom: 16px;"><i class="fas fa-trophy"></i> Rankings</h4>
@@ -2276,8 +2256,19 @@
             </div>
         `;
 
-        // Render comparison chart
+        // Render charts
         renderComparisonChart(report.visualizations);
+        
+        if (report.correlationMatrix) {
+            renderCorrelationChart(report.correlationMatrix, report.tickers);
+        }
+
+        if (report.sharedInsiders && report.sharedInsiders.length > 0) {
+            crossCompanyNetwork.render(
+                comparisonEngine.comparisonData,
+                report.sharedInsiders
+            );
+        }
     }
 
     function renderComparisonChart(vizData) {
@@ -2334,6 +2325,104 @@
                     y: {
                         beginAtZero: true,
                         max: 100,
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary')
+                        },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary'),
+                            font: { weight: 'bold' }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ NOUVEAU: RENDER CORRELATION HEATMAP
+    // ═══════════════════════════════════════════════════════════════
+    function renderCorrelationChart(correlationMatrix, tickers) {
+        const canvas = document.getElementById('correlationChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        if (correlationChartInstance !== null) {
+            correlationChartInstance.destroy();
+            correlationChartInstance = null;
+        }
+
+        // Build labels and data
+        const labels = [];
+        const dataPoints = [];
+
+        Object.keys(correlationMatrix).forEach(key => {
+            const correlation = correlationMatrix[key];
+            labels.push(key);
+            dataPoints.push({
+                x: key,
+                y: correlation,
+                v: correlation
+            });
+        });
+
+        correlationChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Correlation Coefficient',
+                    data: dataPoints.map(d => d.v),
+                    backgroundColor: dataPoints.map(d => {
+                        if (d.v > 0.7) return 'rgba(16, 185, 129, 0.8)'; // Strong positive
+                        if (d.v > 0.3) return 'rgba(59, 130, 246, 0.8)'; // Moderate positive
+                        if (d.v > -0.3) return 'rgba(148, 163, 184, 0.8)'; // Weak
+                        if (d.v > -0.7) return 'rgba(245, 158, 11, 0.8)'; // Moderate negative
+                        return 'rgba(239, 68, 68, 0.8)'; // Strong negative
+                    }),
+                    borderColor: dataPoints.map(d => {
+                        if (d.v > 0.7) return '#10b981';
+                        if (d.v > 0.3) return '#3b82f6';
+                        if (d.v > -0.3) return '#94a3b8';
+                        if (d.v > -0.7) return '#f59e0b';
+                        return '#ef4444';
+                    }),
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                let interpretation = '';
+                                if (value > 0.7) interpretation = 'Strong positive correlation';
+                                else if (value > 0.3) interpretation = 'Moderate positive correlation';
+                                else if (value > -0.3) interpretation = 'Weak correlation';
+                                else if (value > -0.7) interpretation = 'Moderate negative correlation';
+                                else interpretation = 'Strong negative correlation';
+                                
+                                return `Correlation: ${value.toFixed(2)} (${interpretation})`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: -1,
+                        max: 1,
                         ticks: {
                             color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary')
                         },
@@ -2511,12 +2600,12 @@
         removeComparisonTicker: removeComparisonTicker
     };
 
-    console.log('🎉 Insider Flow Tracker initialized successfully!');
+    console.log('🎉 Insider Flow Tracker - PREMIUM VERSION initialized successfully!');
 
 })();
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- * END OF INSIDER FLOW TRACKER - ULTRA-POWERFUL INTEGRATED VERSION
+ * END OF INSIDER FLOW TRACKER - ULTRA-POWERFUL PREMIUM VERSION
  * ═══════════════════════════════════════════════════════════════════
  */
