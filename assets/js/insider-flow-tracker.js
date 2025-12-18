@@ -1074,6 +1074,15 @@
             return;
         }
 
+        // ✅ DEBUG: Vérifier que InsiderAnalyticsEngine existe
+        if (typeof InsiderAnalyticsEngine === 'undefined') {
+            console.error('❌ InsiderAnalyticsEngine is not defined!');
+            showNotification('❌ Error: Analytics engine not loaded. Check console.', 'error');
+            return;
+        }
+
+        
+
         const months = parseFloat(document.getElementById('periodSelect').value);
         const maxFilings = parseInt(document.getElementById('filingsSelect').value);
 
@@ -1224,9 +1233,6 @@
 
         const config = actionColors[recommendation.action] || actionColors['HOLD'];
         const aiAnalysis = generateAIAnalysis(analysis);
-        
-        // ✅ NOUVEAU: Calculate Predictive Confidence Score
-        const predictiveScore = calculatePredictiveConfidence(analysis);
 
         panel.innerHTML = `
             <div class="alphy-simple-grid">
@@ -1237,43 +1243,6 @@
                         <div>
                             <div class="alphy-action-text" style="color: ${config.color};">${recommendation.action}</div>
                             <div class="alphy-score-text">Score: <strong>${overallScore.score}/100</strong> • Confidence: <strong>${recommendation.confidence}</strong></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ✅ NOUVEAU: Predictive Confidence Gauge -->
-                <div class="predictive-gauge-container">
-                    <h4 style="margin-bottom: 20px; text-align: center;">
-                        <i class="fas fa-robot"></i> AI Predictive Confidence Score
-                    </h4>
-                    <div class="gauge-wrapper">
-                        <div class="confidence-gauge">
-                            <svg class="gauge-svg" viewBox="0 0 200 200">
-                                <defs>
-                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                                <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
-                                <circle class="gauge-fill" cx="100" cy="100" r="80" 
-                                    stroke-dasharray="${2 * Math.PI * 80}" 
-                                    stroke-dashoffset="${2 * Math.PI * 80 * (1 - predictiveScore.score / 100)}">
-                                </circle>
-                            </svg>
-                            <div class="gauge-text">
-                                <div class="gauge-percentage">${predictiveScore.score}%</div>
-                                <div class="gauge-label">${predictiveScore.label}</div>
-                            </div>
-                        </div>
-                        <div class="gauge-details">
-                            <h4>Score Breakdown</h4>
-                            ${predictiveScore.factors.map(f => `
-                                <div class="gauge-factor">
-                                    <span class="gauge-factor-name">${f.name}</span>
-                                    <span class="gauge-factor-value">${f.value}</span>
-                                </div>
-                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -1367,39 +1336,6 @@
                 </div>
             </div>
         `;
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // ✅ NOUVEAU: CALCULATE PREDICTIVE CONFIDENCE SCORE
-    // ═══════════════════════════════════════════════════════════════
-    function calculatePredictiveConfidence(analysis) {
-        const sentiment = analysis.insiderSentiment.score;
-        const clusterWeight = analysis.clusterActivity.detected ? 30 : 0;
-        const patternWeight = analysis.patterns && analysis.patterns.momentum?.detected ? 20 : 0;
-        const dataQuality = analysis.dataQuality === 'HIGH' ? 100 : analysis.dataQuality === 'MEDIUM' ? 70 : 40;
-
-        // Formula: (Sentiment × 0.4) + (Cluster × 0.3) + (Pattern × 0.2) + (Quality × 0.1)
-        const score = Math.round(
-            (sentiment * 0.4) + 
-            (clusterWeight * 0.3) + 
-            (patternWeight * 0.2) + 
-            (dataQuality * 0.1)
-        );
-
-        let label = '';
-        if (score >= 80) label = 'Very High';
-        else if (score >= 60) label = 'High';
-        else if (score >= 40) label = 'Medium';
-        else label = 'Low';
-
-        const factors = [
-            { name: 'Sentiment Score', value: `${sentiment}/100 (40%)` },
-            { name: 'Cluster Activity', value: `${clusterWeight}/30 (30%)` },
-            { name: 'Pattern Strength', value: `${patternWeight}/20 (20%)` },
-            { name: 'Data Quality', value: `${analysis.dataQuality} (10%)` }
-        ];
-
-        return { score, label, factors };
     }
 
     // ═══════════════════════════════════════════════════════════════

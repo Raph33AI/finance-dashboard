@@ -103,11 +103,7 @@
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 12px;
     padding: 12px 20px;
-    border: 2px solid transparent;
-    background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), 
-                      linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: 2px solid rgba(102, 126, 234, 0.6);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -136,6 +132,7 @@
 }
 
 .option-group:hover {
+    border-color: rgba(102, 126, 234, 1);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
@@ -148,6 +145,7 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+    pointer-events: none; /* ✅ FIX: Label ne bloque pas le clic */
 }
 
 .option-group label i {
@@ -162,7 +160,7 @@
     flex: 1;
     background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 2px solid transparent;
+    border: 2px solid rgba(102, 126, 234, 0.4);
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 0.95rem;
@@ -170,23 +168,22 @@
     cursor: pointer;
     outline: none;
     transition: all 0.3s ease;
-    background-image: linear-gradient(var(--bg-secondary), var(--bg-secondary)), 
-                      linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    position: relative; /* ✅ FIX: Z-index relatif */
+    z-index: 2; /* ✅ FIX: Au-dessus des pseudo-éléments */
 }
 
 .option-group select:hover {
+    border-color: rgba(102, 126, 234, 0.8);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 .option-group select:focus {
+    border-color: rgba(102, 126, 234, 1);
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
 }
 
 body.dark-mode .option-group select {
-    background-image: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)), 
-                      linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--bg-tertiary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -452,110 +449,6 @@ body.dark-mode .option-group select {
     font-weight: 800;
     color: var(--text-primary);
     margin-top: 4px;
-}
-
-/* ✅ NOUVEAU: PREDICTIVE CONFIDENCE GAUGE */
-.predictive-gauge-container {
-    margin-top: 24px;
-    padding: 24px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.02));
-    border-radius: 16px;
-    border: 2px solid rgba(102, 126, 234, 0.15);
-}
-
-.gauge-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 32px;
-    flex-wrap: wrap;
-}
-
-.confidence-gauge {
-    position: relative;
-    width: 200px;
-    height: 200px;
-}
-
-.gauge-svg {
-    transform: rotate(-90deg);
-}
-
-.gauge-bg {
-    fill: none;
-    stroke: rgba(148, 163, 184, 0.2);
-    stroke-width: 20;
-}
-
-.gauge-fill {
-    fill: none;
-    stroke: url(#gaugeGradient);
-    stroke-width: 20;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1s ease-out;
-}
-
-.gauge-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.gauge-percentage {
-    font-size: 3rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-}
-
-.gauge-label {
-    font-size: 0.9rem;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
-    margin-top: 8px;
-}
-
-.gauge-details {
-    flex: 1;
-    min-width: 250px;
-}
-
-.gauge-details h4 {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 16px;
-}
-
-.gauge-factor {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-}
-
-.gauge-factor:last-child {
-    border-bottom: none;
-}
-
-.gauge-factor-name {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-.gauge-factor-value {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1207,25 +1100,55 @@ tbody tr:hover {
 .comparison-search input {
     flex: 1;
     padding: 12px 20px;
-    border: 2px solid transparent;
-    background-image: linear-gradient(var(--bg-secondary), var(--bg-secondary)), 
-                      linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: 2px solid rgba(102, 126, 234, 0.6);
     border-radius: 12px;
+    background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
     outline: none;
     transition: all 0.3s ease;
 }
 
+.comparison-search input:hover {
+    border-color: rgba(102, 126, 234, 0.8);
+}
+
 .comparison-search input:focus {
+    border-color: rgba(102, 126, 234, 1);
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .comparison-search input {
-    background-image: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)), 
+    background: var(--bg-tertiary);
+}
+
+/* ✅ NOUVEAU: Bouton "Run Comparison" avec contours */
+#runComparisonBtn {
+    border: 2px solid transparent;
+    background-image: linear-gradient(135deg, #667eea, #764ba2), 
                       linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+}
+
+#runComparisonBtn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+#runComparisonBtn:hover::before {
+    opacity: 1;
 }
 
 .comparison-tags {
@@ -1446,6 +1369,34 @@ body.dark-mode .comparison-search input {
         width: 100%;
         justify-content: space-around;
     }
+
+    /* ✅ NOUVEAU: Agrandir graphiques sur mobile */
+    .chart-wrapper canvas {
+        min-height: 300px !important;
+    }
+
+    #roleChart,
+    #heatmapChart {
+        height: 300px !important;
+    }
+
+    #comparisonChart,
+    #correlationChart {
+        height: 350px !important;
+    }
+
+    .network-graph-container {
+        height: 500px !important; /* Augmenté de 400px */
+    }
+
+    #crossCompanyNetwork {
+        height: 450px !important;
+    }
+
+    /* ✅ Ajuster hauteur des canvas Chart.js */
+    .chart-wrapper {
+        min-height: 320px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1456,6 +1407,19 @@ body.dark-mode .comparison-search input {
 
     .score-icon {
         margin: 0 auto;
+    }
+
+    .chart-wrapper canvas {
+        min-height: 350px !important;
+    }
+
+    #roleChart,
+    #heatmapChart {
+        height: 350px !important;
+    }
+
+    .network-graph-container {
+        height: 550px !important;
     }
 }
 
