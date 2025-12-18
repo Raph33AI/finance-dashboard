@@ -1040,35 +1040,20 @@
     let comparisonTickers = [];
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ UPDATE PROGRESS BAR V2 (DÉTAILLÉE)
+    // ✅ UPDATE PROGRESS (VERSION SIMPLE - MESSAGES UNIQUEMENT)
     // ═══════════════════════════════════════════════════════════════
-    function updateProgress(percentage, message, detail = '') {
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
+    function updateProgress(percentage, message) {
         const loadingMessage = document.getElementById('loadingMessage');
-        const loadingDetail = document.getElementById('loadingDetail');
 
-        if (progressBar) {
-            progressBar.style.width = `${percentage}%`;
-        }
-        
-        if (progressText) {
-            progressText.textContent = `${Math.round(percentage)}%`;
-        }
-        
         if (message && loadingMessage) {
             loadingMessage.textContent = message;
         }
 
-        if (detail && loadingDetail) {
-            loadingDetail.textContent = detail;
-        }
-
-        console.log(`📊 Progress: ${Math.round(percentage)}% - ${message}${detail ? ' - ' + detail : ''}`);
+        console.log(`📊 Progress: ${Math.round(percentage)}% - ${message}`);
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ MAIN ANALYSIS FUNCTION V2 (AVEC PROGRESSION DÉTAILLÉE)
+    // ✅ MAIN ANALYSIS FUNCTION (LOADING SIMPLIFIÉ)
     // ═══════════════════════════════════════════════════════════════
     async function analyzeInsiderActivity() {
         const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
@@ -1095,19 +1080,17 @@
         loadingState.classList.remove('hidden');
         resultsContainer.classList.add('hidden');
         
-        updateProgress(0, 'Initializing analysis...', 'Preparing SEC data request');
+        updateProgress(0, `Analyzing ${ticker}...`);
 
         try {
-            updateProgress(5, 'Fetching CIK number...', `Looking up ${ticker}`);
-            
             currentAnalysis = await analyticsEngine.analyzeCompany(ticker, {
                 months: months,
                 maxFilings: maxFilings,
                 includeDerivatives: true,
                 includePriceImpact: false,
                 includeNetworkAnalysis: true,
-                onProgress: (progress, message, detail) => {
-                    updateProgress(progress, message, detail || '');
+                onProgress: (progress, message) => {
+                    updateProgress(progress, message);
                 }
             });
 
@@ -1117,14 +1100,13 @@
                 throw new Error(currentAnalysis?.error || 'Analysis failed - no data returned');
             }
 
-            updateProgress(92, 'Detecting advanced patterns...', 'Running pattern recognition algorithms');
+            updateProgress(92, 'Detecting patterns...');
             
             if (currentAnalysis.transactions && currentAnalysis.transactions.length > 0) {
                 currentAnalysis.patterns = patternDetector.detectPatterns(currentAnalysis.transactions);
             }
 
-            updateProgress(96, 'Identifying whale insiders...', 'Ranking top traders by volume');
-            updateProgress(100, 'Analysis complete!', `Successfully analyzed ${ticker}`);
+            updateProgress(100, 'Analysis complete!');
             
             await new Promise(resolve => setTimeout(resolve, 500));
 
