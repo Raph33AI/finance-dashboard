@@ -1,23 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='fr'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaVault Score Engine - AI-Powered Stock Analysis</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta name='description' content='AlphaVault Score - ML-powered stock trend prediction without raw data redistribution'>
+    <meta name='author' content='Raphael NARDONE'>
+    <meta name='theme-color' content='#2649B2'>
     
-    <!-- Meta Tags -->
-    <meta name="description" content="AlphaVault Score Engine - Advanced ML-based stock analysis with proprietary scoring system">
-    <meta name="keywords" content="stock analysis, machine learning, AlphaVault Score, AI trading">
+    <title>AlphaVault Score Engine - 100% Legal Compliant</title>
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <!-- Preconnect pour optimisation -->
+    <link rel='preconnect' href='https://code.highcharts.com'>
+    <link rel='preconnect' href='https://cdnjs.cloudflare.com'>
     
-    <!-- External CSS -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
+    <script src='https://code.highcharts.com/highcharts-more.js' defer></script>
+    <script src='https://code.highcharts.com/modules/solid-gauge.js' defer></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js' defer></script>
+    <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
+    <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' integrity='sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==' crossorigin='anonymous' referrerpolicy='no-referrer'>
+    
+    <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel='stylesheet' href='assets/css/user-menu.css'>
+    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
+    <link rel='stylesheet' href='assets/css/cache-widget.css'>
     <link rel='stylesheet' href='assets/css/trend-prediction.css'>
-    <link rel='stylesheet' href='assets/css/dark-mode.css'>
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -27,743 +43,1367 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Page Protection -->
+    <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
+
+    <!-- ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
-    
-    <!-- Highcharts -->
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
-    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
 </head>
-
 <body>
-    <!-- ========================================
-         LAYOUT WRAPPER
-         ======================================== -->
-    <div class="layout-wrapper">
+
+    <!-- THEME SCRIPT -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- THEME CHARTS -->
+    <script src="assets/js/theme-charts.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
         
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-chart-line"></i>
-                    <span>AlphaVault AI</span>
-                </div>
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a href="dashboard-financier.html" class="nav-item">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="trend-prediction.html" class="nav-item active">
-                    <i class="fas fa-brain"></i>
-                    <span>AlphaVault Score</span>
-                    <span class="badge">AI</span>
-                </a>
-                <a href="advanced-analysis.html" class="nav-item">
-                    <i class="fas fa-chart-area"></i>
-                    <span>Advanced Analysis</span>
-                </a>
-                <a href="monte-carlo.html" class="nav-item">
-                    <i class="fas fa-dice"></i>
-                    <span>Monte Carlo</span>
-                </a>
-                <a href="risk-parity.html" class="nav-item">
-                    <i class="fas fa-balance-scale"></i>
-                    <span>Risk Parity</span>
-                </a>
-                <a href="analyst-coverage.html" class="nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Analyst Coverage</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-profile" id="userProfile">
-                    <img src="assets/images/default-avatar.png" alt="User" id="userAvatar">
-                    <div class="user-info">
-                        <span class="user-name" id="userName">Loading...</span>
-                        <span class="user-plan" id="userPlan">Free Plan</span>
+                <div class="logo-container">
+                    <!-- Logo 3D SVG -->
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            
+                            <!-- Graphique -->
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            
+                            <!-- Points -->
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            
+                            <!-- Flèche -->
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Brand Text -->
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                <button class="btn-logout" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                
+                <!-- Toggle Button -->
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
                 </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link active'>
+                            <i class='fas fa-robot'></i>
+                            <span>AlphaVault Score</span>
+                        </a>
+                        <a href='market-intelligence.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Intelligence</span>
+                        </a>
+                        <a href='company-insights.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Company Insights</span>
+                        </a>
+                        <a href='analyst-coverage.html' class='nav-link'>
+                            <i class='fas fa-users'></i>
+                            <span>Analyst Coverage</span>
+                        </a>
+                        <a href='earnings-estimates.html' class='nav-link'>
+                            <i class='fas fa-coins'></i>
+                            <span>Earnings & Estimates</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- NOUVELLE SECTION : AI ASSISTANT -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- SIDEBAR FOOTER - MENU UTILISATEUR -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <!-- Dropdown (s'ouvre vers le haut) -->
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            
-            <!-- TOP HEADER -->
-            <header class="top-header">
-                <div class="header-left">
-                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title">
-                        <i class="fas fa-brain"></i>
-                        AlphaVault Score Engine
-                        <span class="subtitle">AI-Powered Predictive Analysis</span>
-                    </h1>
-                </div>
-
-                <div class="header-right">
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search stocks...">
+        
+        <!-- Sidebar Overlay (mobile) -->
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+        
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <main class='main-content' role='main'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class="header-content-wrapper">
+                    <div class='header-left'>
+                        <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
+                            <i class='fas fa-bars' aria-hidden='true'></i>
+                        </button>
+                        <h1><i class="fas fa-star"></i> AlphaVault Score Engine</h1>
                     </div>
-                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="notifications-btn" title="Notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
+                    <div class='header-right'>
+                        <!-- Bouton de contrôle du cache -->
+                        <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
+                            <i class='fas fa-database' aria-hidden='true'></i>
+                            <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
+                        </button>
+                    </div>
                 </div>
             </header>
-
-            <!-- CONTAINER -->
-            <div class="container">
-
-                <!-- ========================================
-                     STOCK SEARCH & ANALYSIS
-                     ======================================== -->
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-search"></i>
-                            Stock Analysis
-                        </h2>
-                        <p class="section-description">
-                            Enter a stock symbol to generate AlphaVault Score and AI predictions
-                        </p>
-                    </div>
-
-                    <div class="search-section">
-                        <div class="search-input-wrapper">
-                            <div class="input-group">
-                                <span class="input-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </span>
-                                <input 
-                                    type="text" 
-                                    id="symbolInput" 
-                                    class="search-input" 
-                                    placeholder="Enter stock symbol (e.g., AAPL, TSLA, NVDA)"
-                                    autocomplete="off"
-                                >
-                                <button class="btn btn-primary" onclick="TrendPrediction.analyzeStock()">
-                                    <i class="fas fa-brain"></i>
-                                    Analyze
-                                </button>
-                            </div>
-                            
-                            <!-- Search Suggestions Dropdown -->
-                            <div id="searchSuggestions" class="search-suggestions"></div>
-                        </div>
-
-                        <!-- Analysis Parameters -->
-                        <div class="analysis-parameters">
-                            <div class="parameter-group">
-                                <label>
-                                    <i class="fas fa-calendar-alt"></i>
-                                    Training Period
-                                </label>
-                                <div class="btn-group">
-                                    <button class="param-btn" onclick="TrendPrediction.changeTrainingPeriod('3M')">3M</button>
-                                    <button class="param-btn active" onclick="TrendPrediction.changeTrainingPeriod('6M')">6M</button>
-                                    <button class="param-btn" onclick="TrendPrediction.changeTrainingPeriod('1Y')">1Y</button>
-                                    <button class="param-btn" onclick="TrendPrediction.changeTrainingPeriod('2Y')">2Y</button>
-                                </div>
-                            </div>
-
-                            <div class="parameter-group">
-                                <label>
-                                    <i class="fas fa-clock"></i>
-                                    Prediction Horizon
-                                </label>
-                                <div class="btn-group">
-                                    <button class="horizon-btn active" data-days="7" onclick="TrendPrediction.changeHorizon(7)">7 Days</button>
-                                    <button class="horizon-btn" data-days="15" onclick="TrendPrediction.changeHorizon(15)">15 Days</button>
-                                    <button class="horizon-btn" data-days="30" onclick="TrendPrediction.changeHorizon(30)">30 Days</button>
-                                    <button class="horizon-btn" data-days="60" onclick="TrendPrediction.changeHorizon(60)">60 Days</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ========================================
-                     LOADING INDICATOR
-                     ======================================== -->
-                <div id="loadingIndicator" class="loading-indicator hidden">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                    </div>
-                    <p id="loadingText">Analyzing stock data...</p>
-                </div>
-
-                <!-- ========================================
-                     STOCK HEADER (NO PRICES)
-                     ======================================== -->
-                <div id="stockHeader" class="stock-header hidden">
-                    <div class="stock-info">
-                        <div class="stock-symbol-container">
-                            <h2 class="stock-symbol" id="stockSymbol">AAPL</h2>
-                            <span class="stock-exchange">NASDAQ</span>
-                        </div>
-                        <p class="stock-name" id="stockName">Apple Inc.</p>
-                    </div>
-                    <div class="stock-metrics">
-                        <div class="metric-item">
-                            <span class="metric-label">Status</span>
-                            <span class="metric-value" id="currentPrice">Analysis Ready</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-label">Info</span>
-                            <span class="change neutral" id="priceChange">AlphaVault Score below</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     RESULTS PANEL
-                     ======================================== -->
-                <div id="resultsPanel" class="results-panel hidden">
-
-                    <!-- ========================================
-                         ALPHAVAULT SCORE PRINCIPAL
-                         ======================================== -->
-                    <section class="section alphavault-score-section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-star"></i>
-                                AlphaVault Score
-                                <button class="help-icon" title="The AlphaVault Score is a proprietary metric (0-100) combining momentum, ML consensus, technical strength, volatility, and trend quality">
-                                    <i class="fas fa-question-circle"></i>
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div id="alphaVaultScoreDisplay" class="alphavault-score-display">
-                            <!-- Score will be injected by JS -->
-                        </div>
-
-                        <!-- Score Components Breakdown -->
-                        <div class="score-components">
-                            <div class="component-card">
-                                <div class="component-icon momentum">
-                                    <i class="fas fa-rocket"></i>
-                                </div>
-                                <div class="component-info">
-                                    <span class="component-label">Momentum</span>
-                                    <span class="component-value" id="momentumScore">--</span>
-                                </div>
-                            </div>
-                            <div class="component-card">
-                                <div class="component-icon ml-consensus">
-                                    <i class="fas fa-brain"></i>
-                                </div>
-                                <div class="component-info">
-                                    <span class="component-label">ML Consensus</span>
-                                    <span class="component-value" id="mlConsensusScore">--</span>
-                                </div>
-                            </div>
-                            <div class="component-card">
-                                <div class="component-icon technical">
-                                    <i class="fas fa-chart-area"></i>
-                                </div>
-                                <div class="component-info">
-                                    <span class="component-label">Technical</span>
-                                    <span class="component-value" id="technicalScore">--</span>
-                                </div>
-                            </div>
-                            <div class="component-card">
-                                <div class="component-icon volatility">
-                                    <i class="fas fa-wave-square"></i>
-                                </div>
-                                <div class="component-info">
-                                    <span class="component-label">Volatility Adj.</span>
-                                    <span class="component-value" id="volatilityScore">--</span>
-                                </div>
-                            </div>
-                            <div class="component-card">
-                                <div class="component-icon trend">
-                                    <i class="fas fa-arrow-trend-up"></i>
-                                </div>
-                                <div class="component-info">
-                                    <span class="component-label">Trend Quality</span>
-                                    <span class="component-value" id="trendScore">--</span>
+            
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    
+                    <!-- ⚖ LEGAL DISCLAIMER (AMÉLIORÉ) -->
+                    <section class="legal-notice card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05)); border: 2px solid rgba(245, 158, 11, 0.3); border-left: 6px solid #f59e0b; padding: 28px; margin-bottom: 32px; border-radius: 20px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);">
+                        <div style="display: flex; align-items: start; gap: 20px;">
+                            <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: #f59e0b; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.3));"></i>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 16px 0; color: #92400e; font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-balance-scale"></i> 100% Legal Compliance Notice
+                                </h3>
+                                <p style="margin: 0 0 12px 0; color: #78350f; line-height: 1.7; font-size: 1rem;">
+                                    <strong style="color: #92400e;">AlphaVault Score</strong> is a <strong>proprietary analytical indicator (0-100)</strong> derived from machine learning models. 
+                                    This platform does <strong style="color: #dc2626;">NOT redistribute raw market data</strong> from Twelve Data or Finnhub APIs.
+                                </p>
+                                <p style="margin: 0 0 16px 0; color: #78350f; line-height: 1.7; font-size: 0.95rem;">
+                                    All displayed metrics are <strong>transformed analytical outputs</strong>: scores, directional signals (↑↓), percentage changes, and risk-adjusted indicators. 
+                                    No actual historical prices or quote data are shown to ensure <strong>full compliance</strong> with data provider terms of service.
+                                </p>
+                                <div style="background: rgba(255, 255, 255, 0.6); padding: 14px 18px; border-radius: 12px; border-left: 4px solid #10b981;">
+                                    <p style="margin: 0; color: #065f46; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.1rem;"></i> 
+                                        Legal Compliant | 
+                                        <i class="fas fa-lock" style="color: #10b981;"></i> 
+                                        No Raw Data Redistribution | 
+                                        <i class="fas fa-brain" style="color: #667eea;"></i> 
+                                        Proprietary AI Analysis
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </section>
-
-                    <!-- ========================================
-                         ML MODELS (SCORE-BASED)
-                         ======================================== -->
-                    <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-microchip"></i>
-                                Machine Learning Models
-                                <button class="help-icon" title="5 AI models trained on historical patterns to predict direction and magnitude">
-                                    <i class="fas fa-question-circle"></i>
-                                </button>
+                    
+                    <!-- Search Panel -->
+                    <section class='search-panel card' aria-labelledby='search-title'>
+                        <div class='card-header'>
+                            <h2 class='card-title' id='search-title'>
+                                <i class='fas fa-search'></i> Select Stock for AlphaVault Score Analysis
                             </h2>
-                            <p class="section-description">
-                                Individual model scores and predictions (no raw prices displayed)
-                            </p>
+                            <button class='help-icon' onclick='openModal("modalIntro")' aria-label='Help about AlphaVault Score'>?</button>
                         </div>
-
-                        <div class="models-grid">
-                            <!-- Linear Regression -->
-                            <div class="model-card">
-                                <div class="model-header">
-                                    <div class="model-icon linear">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                    <div class="model-info">
-                                        <h3 class="model-name">Linear Regression</h3>
-                                        <span class="model-badge" id="badge-linear">Pending</span>
-                                    </div>
+                        
+                        <div class='card-body'>
+                            <div class='search-container'>
+                                <div class='search-input-wrapper'>
+                                    <label for='symbolInput' class='sr-only'>Stock symbol or company name</label>
+                                    <input type='text' 
+                                           id='symbolInput' 
+                                           class='form-input'
+                                           placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                           autocomplete='off'
+                                           value='AAPL'
+                                           aria-describedby='search-instructions'>
+                                    <button class='btn btn-primary btn-analyze' onclick='TrendPrediction.analyzeStock()' aria-label='Calculate AlphaVault Score'>
+                                        <i class='fas fa-star' aria-hidden='true'></i> Calculate Score
+                                    </button>
+                                    
+                                    <!-- Suggestions dropdown -->
+                                    <div class='search-suggestions' id='searchSuggestions' role='listbox' aria-label='Search suggestions'></div>
                                 </div>
-                                <div class="model-chart" id="chart-linear"></div>
-                                <div class="model-metrics" id="metrics-linear">
-                                    <div class="metric">
-                                        <span class="metric-label">Expected Change</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">R² Accuracy</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">Type</span>
-                                        <strong>Score-based</strong>
-                                    </div>
+                                
+                                <span id='search-instructions' class='sr-only'>Type to search for stocks. Use arrow keys to navigate suggestions, Enter to select.</span>
+                                
+                                <div class='popular-stocks'>
+                                    <span class='quick-label'>Popular Stocks:</span>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")' aria-label='Load Apple stock'>
+                                        <i class='fab fa-apple' aria-hidden='true'></i> AAPL
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("MSFT")' aria-label='Load Microsoft stock'>
+                                        <i class='fab fa-microsoft' aria-hidden='true'></i> MSFT
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("GOOGL")' aria-label='Load Google stock'>
+                                        <i class='fab fa-google' aria-hidden='true'></i> GOOGL
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AMZN")' aria-label='Load Amazon stock'>
+                                        <i class='fab fa-amazon' aria-hidden='true'></i> AMZN
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("TSLA")' aria-label='Load Tesla stock'>
+                                        <i class='fas fa-car' aria-hidden='true'></i> TSLA
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NVDA")' aria-label='Load Nvidia stock'>
+                                        <i class='fas fa-microchip' aria-hidden='true'></i> NVDA
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("META")' aria-label='Load Meta stock'>
+                                        <i class='fab fa-meta' aria-hidden='true'></i> META
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NFLX")' aria-label='Load Netflix stock'>
+                                        <i class='fas fa-film' aria-hidden='true'></i> NFLX
+                                    </button>
                                 </div>
-                            </div>
-
-                            <!-- Polynomial Regression -->
-                            <div class="model-card">
-                                <div class="model-header">
-                                    <div class="model-icon polynomial">
-                                        <i class="fas fa-project-diagram"></i>
+                                
+                                <div class='prediction-settings' role='group' aria-label='Prediction parameters'>
+                                    <div class='setting-group'>
+                                        <label id='horizon-label'>Prediction Horizon:</label>
+                                        <div role='group' aria-labelledby='horizon-label'>
+                                            <button class='horizon-btn active' data-days='7' onclick='TrendPrediction.changeHorizon(7)' aria-pressed='true'>7 days</button>
+                                            <button class='horizon-btn' data-days='15' onclick='TrendPrediction.changeHorizon(15)' aria-pressed='false'>15 days</button>
+                                            <button class='horizon-btn' data-days='30' onclick='TrendPrediction.changeHorizon(30)' aria-pressed='false'>30 days</button>
+                                            <button class='horizon-btn' data-days='60' onclick='TrendPrediction.changeHorizon(60)' aria-pressed='false'>60 days</button>
+                                        </div>
                                     </div>
-                                    <div class="model-info">
-                                        <h3 class="model-name">Polynomial Regression</h3>
-                                        <span class="model-badge" id="badge-polynomial">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="model-chart" id="chart-polynomial"></div>
-                                <div class="model-metrics" id="metrics-polynomial">
-                                    <div class="metric">
-                                        <span class="metric-label">Expected Change</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">R² Accuracy</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">Type</span>
-                                        <strong>Score-based</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Exponential Smoothing -->
-                            <div class="model-card">
-                                <div class="model-header">
-                                    <div class="model-icon exponential">
-                                        <i class="fas fa-wave-square"></i>
-                                    </div>
-                                    <div class="model-info">
-                                        <h3 class="model-name">Exponential Smoothing</h3>
-                                        <span class="model-badge" id="badge-exponential">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="model-chart" id="chart-exponential"></div>
-                                <div class="model-metrics" id="metrics-exponential">
-                                    <div class="metric">
-                                        <span class="metric-label">Expected Change</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">R² Accuracy</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">Type</span>
-                                        <strong>Score-based</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- K-Nearest Neighbors -->
-                            <div class="model-card">
-                                <div class="model-header">
-                                    <div class="model-icon knn">
-                                        <i class="fas fa-network-wired"></i>
-                                    </div>
-                                    <div class="model-info">
-                                        <h3 class="model-name">K-Nearest Neighbors</h3>
-                                        <span class="model-badge" id="badge-knn">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="model-chart" id="chart-knn"></div>
-                                <div class="model-metrics" id="metrics-knn">
-                                    <div class="metric">
-                                        <span class="metric-label">Expected Change</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">R² Accuracy</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">Type</span>
-                                        <strong>Score-based</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Neural Network -->
-                            <div class="model-card">
-                                <div class="model-header">
-                                    <div class="model-icon neural">
-                                        <i class="fas fa-brain"></i>
-                                    </div>
-                                    <div class="model-info">
-                                        <h3 class="model-name">Neural Network</h3>
-                                        <span class="model-badge" id="badge-neural">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="model-chart" id="chart-neural"></div>
-                                <div class="model-metrics" id="metrics-neural">
-                                    <div class="metric">
-                                        <span class="metric-label">Expected Change</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">R² Accuracy</span>
-                                        <strong>--</strong>
-                                    </div>
-                                    <div class="metric">
-                                        <span class="metric-label">Type</span>
-                                        <strong>Score-based</strong>
+                                    
+                                    <div class='setting-group'>
+                                        <label for='trainingPeriod'>Training Period:</label>
+                                        <select id='trainingPeriod' class='form-select' onchange='TrendPrediction.changeTrainingPeriod(this.value)'>
+                                            <option value='3M'>3 Months</option>
+                                            <option value='6M' selected>6 Months</option>
+                                            <option value='1Y'>1 Year</option>
+                                            <option value='2Y'>2 Years</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </section>
-
-                    <!-- ========================================
-                         ENSEMBLE PREDICTION
-                         ======================================== -->
-                    <section class="section prediction-overview">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-layer-group"></i>
-                                Ensemble Prediction
-                                <button class="help-icon" title="Combined prediction from all models weighted by accuracy">
-                                    <i class="fas fa-question-circle"></i>
-                                </button>
-                            </h2>
-                        </div>
-
-                        <div class="ensemble-cards">
-                            <div class="ensemble-card">
-                                <div class="card-icon accuracy">
-                                    <i class="fas fa-bullseye"></i>
+                    
+                    <!-- Loading Indicator -->
+                    <div id='loadingIndicator' class='loading-indicator hidden' role='status' aria-live='polite'>
+                        <i class='fas fa-spinner fa-spin' aria-hidden='true'></i> 
+                        <span id='loadingText'>Training ML models and calculating AlphaVault Score...</span>
+                    </div>
+                    
+                    <!-- ✅ Stock Header (NO PRICES - ONLY NAME) -->
+                    <section id='stockHeader' class='stock-header card hidden' aria-labelledby='stock-title'>
+                        <div class='card-body'>
+                            <div class='header-content'>
+                                <div class='stock-info'>
+                                    <h2 id='stockSymbol'>-</h2>
+                                    <span id='stockName' class='stock-name'>-</span>
                                 </div>
-                                <div class="card-content">
-                                    <span class="card-label">Ensemble Score</span>
-                                    <div class="card-value" id="ensemblePrice">--/100</div>
-                                    <span class="card-sublabel" id="ensembleChange">Calculating...</span>
-                                </div>
-                            </div>
-
-                            <div class="ensemble-card">
-                                <div class="card-icon bullish" id="signalIcon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="card-content">
-                                    <span class="card-label">Signal</span>
-                                    <div class="card-value" id="ensembleSignal">--</div>
-                                    <span class="card-sublabel" id="ensembleStrength">--</span>
-                                </div>
-                            </div>
-
-                            <div class="ensemble-card">
-                                <div class="card-icon neutral">
-                                    <i class="fas fa-percent"></i>
-                                </div>
-                                <div class="card-content">
-                                    <span class="card-label">Confidence Range</span>
-                                    <div class="card-value" id="ensembleRange">--</div>
-                                    <span class="card-sublabel">95% Confidence</span>
-                                </div>
-                            </div>
-
-                            <div class="ensemble-card">
-                                <div class="card-icon accuracy">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="card-content">
-                                    <span class="card-label">Model Accuracy</span>
-                                    <div class="card-value" id="ensembleAccuracy">--</div>
-                                    <span class="card-sublabel">Average R² Score</span>
+                                <div class='stock-price'>
+                                    <div id='currentPrice' class='price' aria-label='Status'>Analysis Ready</div>
+                                    <div id='priceChange' class='change neutral' aria-label='Info'>AlphaVault Score below</div>
                                 </div>
                             </div>
                         </div>
                     </section>
-
-                    <!-- ========================================
-                         SCORE COMPARISON CHART
-                         ======================================== -->
-                    <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-chart-bar"></i>
-                                Score Comparison
-                            </h2>
-                        </div>
-                        <div class="chart-container">
-                            <div id="comparisonChart" class="chart"></div>
-                        </div>
-                    </section>
-
-                    <!-- ========================================
-                         PERFORMANCE ANALYSIS
-                         ======================================== -->
-                    <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-trophy"></i>
-                                Performance Analysis
-                            </h2>
-                        </div>
-
-                        <div class="charts-grid">
-                            <div class="chart-wrapper">
-                                <h3 class="chart-title">Model Accuracy (R²)</h3>
-                                <div id="accuracyChart" class="chart"></div>
+                    
+                    <!-- Results Panel -->
+                    <div id='resultsPanel' class='results-panel hidden'>
+                        
+                        <!-- ============================================
+                             ✨ ALPHAVAULT SCORE PRINCIPAL
+                             ============================================ -->
+                        <section class='alphavault-score-section' aria-labelledby='alphavault-main-title'>
+                            <div class='section-header'>
+                                <h2 class='section-title' id='alphavault-main-title'>
+                                    <i class='fas fa-star' aria-hidden='true'></i> AlphaVault Score
+                                    <button class='help-icon' onclick='openModal("modalIntro")' aria-label='Help about AlphaVault Score'>?</button>
+                                </h2>
                             </div>
-                            <div class="chart-wrapper">
-                                <h3 class="chart-title">Direction Prediction</h3>
-                                <div id="errorChart" class="chart"></div>
-                            </div>
-                        </div>
 
-                        <div class="performance-table-container">
-                            <h3 class="table-title">
-                                <i class="fas fa-table"></i>
-                                Detailed Performance Metrics
+                            <div id='alphaVaultScoreDisplay' class='alphavault-score-display'>
+                                <!-- Score will be injected by JS -->
+                            </div>
+
+                            <!-- Score Components Breakdown -->
+                            <div class='score-components'>
+                                <div class='component-card'>
+                                    <div class='component-icon momentum'>
+                                        <i class='fas fa-rocket'></i>
+                                    </div>
+                                    <div class='component-info'>
+                                        <span class='component-label'>Momentum</span>
+                                        <span class='component-value' id='momentumScore'>--</span>
+                                    </div>
+                                </div>
+                                <div class='component-card'>
+                                    <div class='component-icon ml-consensus'>
+                                        <i class='fas fa-brain'></i>
+                                    </div>
+                                    <div class='component-info'>
+                                        <span class='component-label'>ML Consensus</span>
+                                        <span class='component-value' id='mlConsensusScore'>--</span>
+                                    </div>
+                                </div>
+                                <div class='component-card'>
+                                    <div class='component-icon technical'>
+                                        <i class='fas fa-chart-area'></i>
+                                    </div>
+                                    <div class='component-info'>
+                                        <span class='component-label'>Technical</span>
+                                        <span class='component-value' id='technicalScore'>--</span>
+                                    </div>
+                                </div>
+                                <div class='component-card'>
+                                    <div class='component-icon volatility'>
+                                        <i class='fas fa-wave-square'></i>
+                                    </div>
+                                    <div class='component-info'>
+                                        <span class='component-label'>Volatility Adj.</span>
+                                        <span class='component-value' id='volatilityScore'>--</span>
+                                    </div>
+                                </div>
+                                <div class='component-card'>
+                                    <div class='component-icon trend'>
+                                        <i class='fas fa-arrow-trend-up'></i>
+                                    </div>
+                                    <div class='component-info'>
+                                        <span class='component-label'>Trend Quality</span>
+                                        <span class='component-value' id='trendScore'>--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             ENSEMBLE PREDICTION OVERVIEW (SCORE-BASED)
+                             ============================================ -->
+                        <section class='prediction-overview' aria-labelledby='ensemble-title'>
+                            <h3 class='section-title' id='ensemble-title'>
+                                <i class='fas fa-layer-group' aria-hidden='true'></i> Ensemble Prediction
+                                <button class='help-icon' onclick='openModal("modalEnsemble")' aria-label='Help about ensemble prediction'>?</button>
                             </h3>
-                            <div id="performanceTable"></div>
-                        </div>
-                    </section>
-
-                    <!-- ========================================
-                         BACKTESTING RESULTS
-                         ======================================== -->
-                    <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-history"></i>
-                                Backtesting Results
-                                <button class="help-icon" title="Historical performance validation of models">
-                                    <i class="fas fa-question-circle"></i>
+                            
+                            <div class='ensemble-cards' role='list' aria-label='Ensemble prediction metrics'>
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon accuracy' aria-hidden='true'>
+                                        <i class='fas fa-bullseye'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Ensemble Score</div>
+                                        <div class='card-value' id='ensemblePrice' aria-label='Ensemble score'>--/100</div>
+                                        <div class='card-sublabel' id='ensembleChange'>Calculating...</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon bullish' id='signalIcon' aria-hidden='true'>
+                                        <i class='fas fa-chart-line'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Trading Signal</div>
+                                        <div class='card-value' id='ensembleSignal' aria-label='Trading signal'>--</div>
+                                        <div class='card-sublabel' id='ensembleStrength'>--</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon neutral' aria-hidden='true'>
+                                        <i class='fas fa-percent'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Expected Change</div>
+                                        <div class='card-value' id='ensembleRange' aria-label='Expected change'>--</div>
+                                        <div class='card-sublabel'>Prediction Range</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon accuracy' aria-hidden='true'>
+                                        <i class='fas fa-check-circle'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Model Accuracy</div>
+                                        <div class='card-value' id='ensembleAccuracy' aria-label='Model accuracy'>--</div>
+                                        <div class='card-sublabel'>Average R² Score</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             INDIVIDUAL MODELS (5 MODÈLES - SCORE-BASED)
+                             ============================================ -->
+                        <section class='models-section' aria-labelledby='models-title'>
+                            <h3 class='section-title' id='models-title'>
+                                <i class='fas fa-microchip' aria-hidden='true'></i> Machine Learning Models
+                            </h3>
+                            
+                            <div class='models-grid' role='list' aria-label='Individual ML models'>
+                                
+                                <!-- Linear Regression -->
+                                <article class='model-card card' role='listitem' aria-labelledby='model-linear-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-linear-title'><i class='fas fa-chart-line' aria-hidden='true'></i> Linear Regression</h4>
+                                        <span class='model-badge' id='badge-linear'>Pending</span>
+                                    </div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-linear' role='img' aria-label='Linear regression score gauge'></div>
+                                        <div class='model-metrics' id='metrics-linear' role='list' aria-label='Linear regression metrics'>
+                                            <div class='metric' role='listitem'><span>Expected Change:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>R² Accuracy:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>Type:</span> <strong>Score-based</strong></div>
+                                        </div>
+                                    </div>
+                                </article>
+                                
+                                <!-- Polynomial Regression -->
+                                <article class='model-card card' role='listitem' aria-labelledby='model-polynomial-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-polynomial-title'><i class='fas fa-project-diagram' aria-hidden='true'></i> Polynomial Regression</h4>
+                                        <span class='model-badge' id='badge-polynomial'>Pending</span>
+                                    </div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-polynomial' role='img' aria-label='Polynomial regression score gauge'></div>
+                                        <div class='model-metrics' id='metrics-polynomial' role='list' aria-label='Polynomial regression metrics'>
+                                            <div class='metric' role='listitem'><span>Expected Change:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>R² Accuracy:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>Type:</span> <strong>Score-based</strong></div>
+                                        </div>
+                                    </div>
+                                </article>
+                                
+                                <!-- Exponential Smoothing -->
+                                <article class='model-card card' role='listitem' aria-labelledby='model-exponential-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-exponential-title'><i class='fas fa-wave-square' aria-hidden='true'></i> Exponential Smoothing</h4>
+                                        <span class='model-badge' id='badge-exponential'>Pending</span>
+                                    </div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-exponential' role='img' aria-label='Exponential smoothing score gauge'></div>
+                                        <div class='model-metrics' id='metrics-exponential' role='list' aria-label='Exponential smoothing metrics'>
+                                            <div class='metric' role='listitem'><span>Expected Change:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>R² Accuracy:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>Type:</span> <strong>Score-based</strong></div>
+                                        </div>
+                                    </div>
+                                </article>
+                                
+                                <!-- K-Nearest Neighbors -->
+                                <article class='model-card card' role='listitem' aria-labelledby='model-knn-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-knn-title'><i class='fas fa-network-wired' aria-hidden='true'></i> K-Nearest Neighbors</h4>
+                                        <span class='model-badge' id='badge-knn'>Pending</span>
+                                    </div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-knn' role='img' aria-label='KNN score gauge'></div>
+                                        <div class='model-metrics' id='metrics-knn' role='list' aria-label='KNN metrics'>
+                                            <div class='metric' role='listitem'><span>Expected Change:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>R² Accuracy:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>Type:</span> <strong>Score-based</strong></div>
+                                        </div>
+                                    </div>
+                                </article>
+                                
+                                <!-- Neural Network -->
+                                <article class='model-card card' role='listitem' aria-labelledby='model-neural-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-neural-title'><i class='fas fa-brain' aria-hidden='true'></i> Neural Network</h4>
+                                        <span class='model-badge' id='badge-neural'>Pending</span>
+                                    </div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-neural' role='img' aria-label='Neural network score gauge'></div>
+                                        <div class='model-metrics' id='metrics-neural' role='list' aria-label='Neural network metrics'>
+                                            <div class='metric' role='listitem'><span>Expected Change:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>R² Accuracy:</span> <strong>--</strong></div>
+                                            <div class='metric' role='listitem'><span>Type:</span> <strong>Score-based</strong></div>
+                                        </div>
+                                    </div>
+                                </article>
+                                
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             SCORE COMPARISON CHART
+                             ============================================ -->
+                        <section class='chart-section card' aria-labelledby='comparison-chart-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='comparison-chart-title'>
+                                    <i class='fas fa-chart-bar' aria-hidden='true'></i> Model Score Comparison
+                                </h3>
+                                <!-- Export button -->
+                                <button class='btn-export' onclick='TrendPrediction.exportPredictions()' title='Export AlphaVault Scores'>
+                                    <i class='fas fa-download'></i> Export Scores
                                 </button>
-                            </h2>
-                            <p class="section-description">
-                                Model validation on historical data (no actual prices shown)
-                            </p>
-                        </div>
+                            </div>
+                            <div class='card-body'>
+                                <div id='comparisonChart' class='chart chart-large' role='img' aria-labelledby='comparison-chart-title'></div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             BACKTESTING SECTION
+                             ============================================ -->
+                        <section class='backtesting-section card' aria-labelledby='backtesting-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='backtesting-title'>
+                                    <i class='fas fa-history' aria-hidden='true'></i> Backtesting & Accuracy Analysis
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalBacktesting")' aria-label='Help about backtesting'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <!-- Tabs pour navigation -->
+                                <div class='backtesting-tabs'>
+                                    <button class='tab-btn active' data-tab='historical-accuracy' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                        <i class='fas fa-check-circle'></i> Direction Accuracy
+                                    </button>
+                                    <button class='tab-btn' data-tab='prediction-vs-actual' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                        <i class='fas fa-percent'></i> Error Analysis
+                                    </button>
+                                </div>
+                                
+                                <!-- Tab Content -->
+                                <div class='backtesting-content'>
+                                    <div id='tab-historical-accuracy' class='tab-panel active'>
+                                        <div id='backtestAccuracyChart' class='chart chart-large' role='img' aria-label='Direction accuracy chart'></div>
+                                    </div>
+                                    <div id='tab-prediction-vs-actual' class='tab-panel'>
+                                        <div id='backtestComparisonChart' class='chart chart-large' role='img' aria-label='Mean absolute percentage error'></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Backtesting Metrics -->
+                                <div class='backtesting-metrics'>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-compass'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Avg. Direction Accuracy</span>
+                                            <span class='metric-value' id='backtest7dAccuracy'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-percentage'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Mean Abs. % Error</span>
+                                            <span class='metric-value' id='backtestMAPE'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-medal'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Best Model</span>
+                                            <span class='metric-value' id='backtestBestModel'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-check-circle'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Direction Consensus</span>
+                                            <span class='metric-value' id='backtestDirectionAccuracy'>-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             PERFORMANCE COMPARISON
+                             ============================================ -->
+                        <section class='performance-section card' aria-labelledby='performance-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='performance-title'>
+                                    <i class='fas fa-trophy' aria-hidden='true'></i> Model Performance Comparison
+                                </h3>
+                            </div>
+                            <div class='card-body'>
+                                <div class='performance-grid'>
+                                    <div class='performance-chart' id='accuracyChart' role='img' aria-label='Model accuracy comparison'></div>
+                                    <div class='performance-chart' id='errorChart' role='img' aria-label='Direction prediction accuracy'></div>
+                                </div>
+                                
+                                <div class='performance-table' id='performanceTable' role='region' aria-label='Performance metrics table'></div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             MODEL CORRELATION HEATMAP
+                             ============================================ -->
+                        <section class='correlation-section card' aria-labelledby='correlation-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='correlation-title'>
+                                    <i class='fas fa-project-diagram' aria-hidden='true'></i> Model Correlation & Consensus
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalCorrelation")' aria-label='Help about correlation'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <div class='correlation-grid'>
+                                    <div id='correlationHeatmap' class='chart chart-medium' role='img' aria-label='Model correlation heatmap'></div>
+                                    <div class='consensus-gauge'>
+                                        <h4>Consensus Score</h4>
+                                        <div id='consensusGauge' class='gauge-container'></div>
+                                        <p class='gauge-description' id='consensusDescription'>-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
 
-                        <!-- Backtesting Metrics -->
-                        <div class="backtesting-metrics">
-                            <div class="metric-card">
-                                <div class="metric-icon">
-                                    <i class="fas fa-calendar-week"></i>
-                                </div>
-                                <div class="metric-content">
-                                    <span class="metric-label">Avg. Direction Accuracy</span>
-                                    <strong class="metric-value" id="backtest7dAccuracy">--</strong>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">
-                                    <i class="fas fa-percent"></i>
-                                </div>
-                                <div class="metric-content">
-                                    <span class="metric-label">Mean Abs. % Error</span>
-                                    <strong class="metric-value" id="backtestMAPE">--</strong>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">
-                                    <i class="fas fa-medal"></i>
-                                </div>
-                                <div class="metric-content">
-                                    <span class="metric-label">Best Model</span>
-                                    <strong class="metric-value" id="backtestBestModel">--</strong>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">
-                                    <i class="fas fa-compass"></i>
-                                </div>
-                                <div class="metric-content">
-                                    <span class="metric-label">Direction Consensus</span>
-                                    <strong class="metric-value" id="backtestDirectionAccuracy">--</strong>
+                        <!-- ============================================
+                             RECOMMENDATION
+                             ============================================ -->
+                        <section class='recommendation-section' aria-labelledby='recommendation-main-title'>
+                            <h3 class='section-title' id='recommendation-main-title'>
+                                <i class='fas fa-lightbulb' aria-hidden='true'></i> Alphy AI-Powered Recommendation
+                            </h3>
+                            
+                            <div class='recommendation-card card' id='recommendationCard'>
+                                <div class='card-body'>
+                                    <div class='recommendation-header'>
+                                        <div class='recommendation-icon' id='recommendationIcon' aria-hidden='true'>
+                                            <i class='fas fa-robot'></i>
+                                        </div>
+                                        <div>
+                                            <h4 id='recommendationTitle'>Analyzing...</h4>
+                                            <p id='recommendationSubtitle'>AlphaVault Score is being calculated...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class='recommendation-body' id='recommendationBody'>
+                                        <!-- Sera rempli dynamiquement -->
+                                    </div>
+                                    
+                                    <div class='recommendation-footer'>
+                                        <div class='disclaimer'>
+                                            <i class='fas fa-exclamation-triangle' aria-hidden='true'></i>
+                                            <div>
+                                                <strong>Disclaimer:</strong> AlphaVault Scores are proprietary indicators for educational purposes only. 
+                                                No raw market data is redistributed. Always conduct your own research and consult with financial advisors before making investment decisions.
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Backtesting Tabs -->
-                        <div class="backtesting-tabs">
-                            <button class="tab-btn active" data-tab="accuracy" onclick="TrendPrediction.switchBacktestTab(this)">
-                                <i class="fas fa-check-circle"></i>
-                                Accuracy
-                            </button>
-                            <button class="tab-btn" data-tab="errors" onclick="TrendPrediction.switchBacktestTab(this)">
-                                <i class="fas fa-chart-line"></i>
-                                Error Analysis
-                            </button>
-                        </div>
-
-                        <div class="backtesting-content">
-                            <div class="tab-panel active" id="tab-accuracy">
-                                <div id="backtestAccuracyChart" class="chart"></div>
-                            </div>
-                            <div class="tab-panel" id="tab-errors">
-                                <div id="backtestComparisonChart" class="chart"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ========================================
-                         MODEL CORRELATION
-                         ======================================== -->
-                    <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-project-diagram"></i>
-                                Model Correlation & Consensus
-                            </h2>
-                        </div>
-
-                        <div class="charts-grid">
-                            <div class="chart-wrapper">
-                                <h3 class="chart-title">Correlation Heatmap</h3>
-                                <div id="correlationHeatmap" class="chart"></div>
-                            </div>
-                            <div class="chart-wrapper">
-                                <h3 class="chart-title">Consensus Score</h3>
-                                <div id="consensusGauge" class="chart"></div>
-                                <p class="chart-description" id="consensusDescription"></p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ========================================
-                         RECOMMENDATION
-                         ======================================== -->
-                    <section class="section recommendation-section">
-                        <div class="recommendation-card">
-                            <div class="recommendation-header">
-                                <div class="recommendation-icon" id="recommendationIcon">
-                                    <i class="fas fa-thumbs-up"></i>
-                                </div>
-                                <div class="recommendation-info">
-                                    <h2 class="recommendation-title" id="recommendationTitle">Analyzing...</h2>
-                                    <p class="recommendation-subtitle" id="recommendationSubtitle">Please wait...</p>
-                                </div>
-                            </div>
-                            <div class="recommendation-body" id="recommendationBody">
-                                <!-- Content injected by JS -->
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ========================================
-                         EXPORT & ACTIONS
-                         ======================================== -->
-                    <section class="section">
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="TrendPrediction.exportPredictions()">
-                                <i class="fas fa-download"></i>
-                                Export AlphaVault Score
-                            </button>
-                            <button class="btn btn-secondary" onclick="TrendPrediction.loadSymbol(TrendPrediction.currentSymbol)">
-                                <i class="fas fa-sync-alt"></i>
-                                Refresh Analysis
-                            </button>
-                            <button class="btn btn-secondary" onclick="window.print()">
-                                <i class="fas fa-print"></i>
-                                Print Report
-                            </button>
-                        </div>
-                    </section>
-
+                        </section>
+                        
+                    </div>
                 </div>
-                <!-- END RESULTS PANEL -->
-
+                
+                <!-- Footer -->
+                <footer role='contentinfo'>
+                    <p>&copy; AlphaVault Score Engine | 100% Legal Compliant | No Raw Data Redistribution | Powered by Proprietary ML</p>
+                </footer>
             </div>
-            <!-- END CONTAINER -->
-
-            <!-- FOOTER -->
-            <footer class="footer">
-                <div class="footer-content">
-                    <p>&copy; 2024 AlphaVault AI. All rights reserved.</p>
-                    <p class="footer-disclaimer">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        AlphaVault Score is for informational purposes only. Not financial advice. Past performance does not guarantee future results.
-                    </p>
-                    <p id="lastUpdate" class="last-update">Last update: --</p>
-                </div>
-            </footer>
-
         </main>
-        <!-- END MAIN CONTENT -->
-
+        
     </div>
-    <!-- END LAYOUT WRAPPER -->
-
-    <!-- ========================================
-         SCRIPTS
-         ======================================== -->
     
-    <!-- Core Scripts -->
+    <!-- CACHE MONITORING WIDGET (INCHANGÉ) -->
+    <div id='cacheWidget' class='cache-widget'>
+        <div class='cache-widget-header'>
+            <h3><i class='fas fa-database'></i> Cache & Rate Limit Monitor</h3>
+            <button class='cache-close-btn' onclick='toggleCacheWidget()' aria-label='Close cache widget'>
+                <i class='fas fa-times'></i>
+            </button>
+        </div>
+        
+        <div class='cache-widget-body'>
+            <!-- Rate Limit Section -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Remaining Requests:</span>
+                    <span class='cache-stat-value' id='rateLimitRemaining'>8</span>
+                    <span class='cache-stat-unit'>/ 8 per minute</span>
+                </div>
+                <div class='cache-progress-bar'>
+                    <div class='cache-progress-fill' id='rateLimitProgress' style='width: 100%;'></div>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Queue Length:</span>
+                    <span class='cache-stat-value' id='queueLength'>0</span>
+                    <span class='cache-stat-unit'>pending requests</span>
+                </div>
+            </div>
+            
+            <!-- Cache Statistics -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-hdd'></i> Local Cache Statistics</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cached Entries:</span>
+                    <span class='cache-stat-value' id='cacheEntriesCount'>0</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cache Size:</span>
+                    <span class='cache-stat-value' id='cacheSize'>0 KB</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Hit Rate:</span>
+                    <span class='cache-stat-value' id='cacheHitRate'>N/A</span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-wrench'></i> Actions</h4>
+                <div class='cache-actions'>
+                    <button class='btn-cache btn-cache-refresh' onclick='refreshCacheStats()'>
+                        <i class='fas fa-sync-alt'></i> Refresh Stats
+                    </button>
+                    <button class='btn-cache btn-cache-clear' onclick='clearLocalCache()'>
+                        <i class='fas fa-broom'></i> Clear Cache
+                    </button>
+                    <button class='btn-cache btn-cache-export' onclick='exportCacheData()'>
+                        <i class='fas fa-download'></i> Export Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-history'></i> Recent API Calls</h4>
+                <div class='cache-activity' id='cacheActivity'>
+                    <p class='cache-empty-state'>No recent activity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODALS (INCHANGÉS - GARDER VOS MODAUX EXISTANTS) -->
+    
+    <!-- Modal Intro -->
+    <div id='modalIntro' class='modal' role='dialog' aria-labelledby='intro-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='intro-modal-title'>⭐ AlphaVault Score Engine</h2>
+                <button class='close-modal' onclick='closeModal("modalIntro")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>🧠 What is AlphaVault Score?</h3>
+                <p>A <span class='key-term'>proprietary normalized indicator (0-100)</span> combining advanced machine learning analysis with technical indicators, momentum, and risk metrics.</p>
+                
+                <h3>📊 How It Works</h3>
+                <p>Our engine trains <strong>5 ML models</strong> on historical patterns (no raw data redistributed) and transforms predictions into:</p>
+                <ul>
+                    <li><strong>Directional Signals:</strong> ↑ Bullish / ↓ Bearish / ⚖ Neutral</li>
+                    <li><strong>Percentage Changes:</strong> Expected movement magnitude</li>
+                    <li><strong>Risk-Adjusted Scores:</strong> Normalized 0-100 scale</li>
+                    <li><strong>Confidence Levels:</strong> High / Medium / Low</li>
+                </ul>
+                
+                <h3>🎯 Score Components</h3>
+                <ul>
+                    <li>📈 <strong>Momentum (25%):</strong> Recent trend strength</li>
+                    <li>🧠 <strong>ML Consensus (30%):</strong> Model agreement</li>
+                    <li>📊 <strong>Technical (20%):</strong> RSI, MACD, Bollinger</li>
+                    <li>🎯 <strong>Volatility (15%):</strong> Risk-adjusted performance</li>
+                    <li>✨ <strong>Trend Quality (10%):</strong> R² accuracy</li>
+                </ul>
+                
+                <h3>⚖ Legal Compliance</h3>
+                <p><strong>100% Compliant:</strong> No raw market data is redistributed. All outputs are proprietary analytical transformations.</p>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Important:</strong> For educational purposes only. Not financial advice.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Ensemble -->
+    <div id='modalEnsemble' class='modal' role='dialog' aria-labelledby='ensemble-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='ensemble-modal-title'>🎯 Ensemble Prediction</h2>
+                <button class='close-modal' onclick='closeModal("modalEnsemble")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Ensemble Learning?</h3>
+                <p><span class='key-term'>Ensemble methods</span> combine multiple ML models (weighted by R² accuracy) to produce more reliable predictions than any single model.</p>
+                
+                <h3>AlphaVault Ensemble Score</h3>
+                <p>Instead of showing raw price predictions, we calculate a <strong>normalized score (0-100)</strong> representing market sentiment and direction strength.</p>
+                
+                <div class='formula-box'>
+                    <strong>Score Interpretation:</strong><br>
+                    • <strong>75-100:</strong> Strong Bullish 🚀<br>
+                    • <strong>60-74:</strong> Bullish 📈<br>
+                    • <strong>40-59:</strong> Neutral ⚖<br>
+                    • <strong>25-39:</strong> Bearish 📉<br>
+                    • <strong>0-24:</strong> Strong Bearish ⚠
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Higher confidence scores indicate stronger model consensus.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Backtesting -->
+    <div id='modalBacktesting' class='modal' role='dialog' aria-labelledby='backtesting-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='backtesting-modal-title'>📈 Backtesting & Validation</h2>
+                <button class='close-modal' onclick='closeModal("modalBacktesting")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Backtesting?</h3>
+                <p><span class='key-term'>Backtesting</span> validates model performance by testing predictions against historical outcomes (direction accuracy, not price accuracy to maintain compliance).</p>
+                
+                <h3>Key Metrics (Legal Compliant)</h3>
+                <div class='formula-box'>
+                    <strong>Measured Metrics:</strong><br>
+                    • <strong>Direction Accuracy:</strong> % of correct ↑/↓ predictions<br>
+                    • <strong>MAPE:</strong> Mean Absolute Percentage Error<br>
+                    • <strong>R² Score:</strong> Model fit quality (0-100%)
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Models with >70% direction accuracy are generally more reliable.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Correlation -->
+    <div id='modalCorrelation' class='modal' role='dialog' aria-labelledby='correlation-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='correlation-modal-title'>🔗 Model Correlation</h2>
+                <button class='close-modal' onclick='closeModal("modalCorrelation")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>Model Correlation Heatmap</h3>
+                <p>Shows how similarly different models predict directional changes. High correlation = strong consensus.</p>
+                
+                <h3>Consensus Score</h3>
+                <p>A single metric (0-100%) indicating overall model agreement.</p>
+                
+                <div class='formula-box'>
+                    <strong>Interpretation:</strong><br>
+                    • <strong>>80%:</strong> High confidence (strong consensus)<br>
+                    • <strong>60-80%:</strong> Moderate confidence<br>
+                    • <strong><60%:</strong> Low confidence (mixed signals)
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Low consensus often precedes market volatility.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cache Widget Script (INCHANGÉ) -->
+    <script>
+        let cacheWidgetOpen = false;
+        let cacheStats = { hits: 0, misses: 0, entries: 0, size: 0 };
+        
+        function toggleCacheWidget() {
+            const widget = document.getElementById('cacheWidget');
+            if (!widget) return;
+            cacheWidgetOpen = !cacheWidgetOpen;
+            if (cacheWidgetOpen) {
+                widget.classList.add('active');
+                refreshCacheStats();
+            } else {
+                widget.classList.remove('active');
+            }
+        }
+        
+        function refreshCacheStats() {
+            console.log('🔄 Refreshing cache stats...');
+            let entries = 0;
+            let totalSize = 0;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    entries++;
+                    const value = localStorage.getItem(key);
+                    if (value) totalSize += value.length;
+                }
+            }
+            
+            cacheStats.entries = entries;
+            cacheStats.size = totalSize;
+            
+            const entriesEl = document.getElementById('cacheEntriesCount');
+            const sizeEl = document.getElementById('cacheSize');
+            const hitRateEl = document.getElementById('cacheHitRate');
+            const badgeMiniEl = document.getElementById('cacheBadgeMini');
+            
+            if (entriesEl) entriesEl.textContent = entries;
+            if (sizeEl) sizeEl.textContent = (totalSize / 1024).toFixed(2) + ' KB';
+            if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            
+            const total = cacheStats.hits + cacheStats.misses;
+            if (total > 0 && hitRateEl) {
+                const hitRate = (cacheStats.hits / total * 100).toFixed(1);
+                hitRateEl.textContent = hitRate + '%';
+            }
+            
+            console.log('✅ Cache stats refreshed:', cacheStats);
+        }
+        
+        function clearLocalCache() {
+            if (!confirm('Clear cache? This removes all cached stock data.')) return;
+            console.log('🗑 Clearing cache...');
+            
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) keys.push(key);
+            }
+            
+            keys.forEach(key => localStorage.removeItem(key));
+            cacheStats.hits = 0;
+            cacheStats.misses = 0;
+            
+            console.log(`✅ Cleared ${keys.length} entries`);
+            refreshCacheStats();
+            
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification(`Cache cleared: ${keys.length} entries`, 'success');
+            } else {
+                alert(`Cache cleared: ${keys.length} entries`);
+            }
+        }
+        
+        function exportCacheData() {
+            console.log('📤 Exporting cache...');
+            const cacheData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    try {
+                        cacheData[key] = JSON.parse(localStorage.getItem(key));
+                    } catch (e) {
+                        cacheData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            const json = JSON.stringify({
+                exportDate: new Date().toISOString(),
+                stats: cacheStats,
+                data: cacheData
+            }, null, 2);
+            
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cache_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Cache exported');
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification('Cache exported!', 'success');
+            }
+        }
+        
+        setInterval(() => {
+            if (cacheWidgetOpen) {
+                refreshCacheStats();
+            } else {
+                let entries = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('tp_cache_')) entries++;
+                }
+                const badgeMiniEl = document.getElementById('cacheBadgeMini');
+                if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            }
+        }, 5000);
+        
+        window.cacheWidget = {
+            updateRateLimitStatus: function(remaining, max) {
+                const remainingEl = document.getElementById('rateLimitRemaining');
+                const progressEl = document.getElementById('rateLimitProgress');
+                
+                if (remainingEl) remainingEl.textContent = remaining;
+                if (progressEl) {
+                    const percentage = (remaining / max) * 100;
+                    progressEl.style.width = percentage + '%';
+                    
+                    if (percentage > 50) {
+                        progressEl.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+                    } else if (percentage > 25) {
+                        progressEl.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        progressEl.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    }
+                }
+            },
+            
+            updateQueueStatus: function(length, waitTime) {
+                const queueEl = document.getElementById('queueLength');
+                if (queueEl) {
+                    queueEl.textContent = length;
+                    if (length > 0) {
+                        queueEl.style.color = '#ef4444';
+                        queueEl.style.fontWeight = '700';
+                    } else {
+                        queueEl.style.color = '';
+                        queueEl.style.fontWeight = '';
+                    }
+                }
+            },
+            
+            logActivity: function(type, symbol, fromCache) {
+                const activityEl = document.getElementById('cacheActivity');
+                if (!activityEl) return;
+                
+                const now = new Date().toLocaleTimeString('fr-FR');
+                const icon = fromCache ? '💾' : '🌐';
+                const source = fromCache ? 'Cache' : 'API';
+                
+                const entry = document.createElement('div');
+                entry.className = 'cache-activity-entry';
+                entry.innerHTML = `
+                    <span class='cache-activity-time'>${now}</span>
+                    <span class='cache-activity-icon'>${icon}</span>
+                    <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
+                `;
+                
+                const emptyState = activityEl.querySelector('.cache-empty-state');
+                if (emptyState) activityEl.innerHTML = '';
+                
+                activityEl.insertBefore(entry, activityEl.firstChild);
+                
+                while (activityEl.children.length > 10) {
+                    activityEl.removeChild(activityEl.lastChild);
+                }
+                
+                if (fromCache) {
+                    cacheStats.hits++;
+                } else {
+                    cacheStats.misses++;
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => refreshCacheStats());
+    </script>
+    
+    <!-- Modal Management Script (INCHANGÉ) -->
+    <script>
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+    
+    <!-- Core Scripts (ORDRE IMPORTANT) -->
     <script src='assets/js/config.js'></script>
     <script src='assets/js/api-client.js'></script>
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- AlphaVault Score Engine (Legal Compliant Version) -->
+    <!-- ✅ TREND PREDICTION SCRIPT - VERSION LEGAL COMPLIANT -->
     <script src='assets/js/trend-prediction-legal.js'></script>
-
-    <!-- Initialize -->
+    
+    <!-- User Menu Fix (INCHANGÉ) -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 AlphaVault Score Engine - Legal Compliant Mode');
-            console.log('✅ NO RAW DATA REDISTRIBUTION');
-            console.log('✅ PROPRIETARY ANALYTICAL OUTPUTS ONLY');
-        });
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                    } else {
+                        freshDropdown.classList.add('active');
+                    }
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                console.log('✅ User menu initialized!');
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
+    
+    <!-- CHATBOT IA FINANCIER -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- INITIALISATION DU CHATBOT -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
+        
+        const initChatbotWhenReady = () => {
+            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            
+            if (accessDenied) {
+                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
+                return;
+            }
+            
+            if (typeof ChatbotConfig === 'undefined') {
+                console.error('❌ ChatbotConfig non défini !');
+                return;
+            }
+            
+            console.log('✅ ChatbotConfig chargé');
+            
+            if (typeof ChatbotUI === 'undefined') {
+                console.error('❌ ChatbotUI non défini !');
+                return;
+            }
+            
+            console.log('✅ ChatbotUI chargé');
+            
+            try {
+                window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+            }
+        };
+        
+        setTimeout(initChatbotWhenReady, 500);
+    });
     </script>
 
 </body>
