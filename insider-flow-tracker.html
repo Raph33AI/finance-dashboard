@@ -11,7 +11,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Vis.js Network (pour l'analyse de réseau) -->
+    <!-- Vis.js Network -->
     <script src="https://unpkg.com/vis-network@9.1.6/dist/vis-network.min.js"></script>
     <link href="https://unpkg.com/vis-network@9.1.6/dist/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
     
@@ -291,7 +291,8 @@
                 </div>
             </header>
             
-            <div class='container'>
+            <!-- ✅ CONTAINER AVEC POSITION RELATIVE POUR LE LOADING -->
+            <div class='container' style="position: relative; min-height: 600px;">
                 
                 <!-- Search Bar + Options -->
                 <div class="section">
@@ -349,27 +350,26 @@
                     </div>
                 </div>
 
-                <!-- Loading State -->
+                <!-- ✅ LOADING STATE AMÉLIORÉ -->
                 <div id="loadingState" class="loading hidden">
                     <div class="loading-content">
                         <div class="spinner">
                             <i class="fas fa-circle-notch"></i>
                         </div>
                         <h2>Analysis in progress...</h2>
-                        <p id="loadingMessage">
-                            Fetching Form 4 filings, analyzing patterns, calculating scores...
-                        </p>
+                        <p id="loadingMessage">Initializing analysis...</p>
                         <div class="progress-container">
                             <div class="progress-bar" id="progressBar"></div>
                         </div>
                         <div class="progress-text" id="progressText">0%</div>
+                        <p class="loading-detail" id="loadingDetail">Please wait...</p>
                     </div>
                 </div>
 
                 <!-- Results Container -->
                 <div id="resultsContainer" class="hidden">
                     
-                    <!-- 🤖 ALPHY AI RECOMMENDATION (SIMPLIFIÉE) -->
+                    <!-- 🤖 ALPHY AI RECOMMENDATION -->
                     <div class="section">
                         <h2 class='section-title gradient-title'>
                             <i class="fas fa-brain"></i> Alphy AI Recommendation
@@ -396,7 +396,7 @@
                         <div class="pattern-grid" id="patternContainer"></div>
                     </div>
 
-                    <!-- ✅ NOUVEAU: Whale Insider Tracker -->
+                    <!-- Whale Insider Tracker -->
                     <div class="section" id="whaleSection">
                         <h2 class='section-title gradient-title'>
                             <i class="fas fa-water"></i> Whale Insider Tracker
@@ -421,7 +421,7 @@
                             <i class="fas fa-user-tie"></i> Analysis by Role
                         </h2>
                         <div class="chart-wrapper">
-                            <canvas id="roleChart" height="120"></canvas>
+                            <canvas id="roleChart"></canvas>
                         </div>
                     </div>
 
@@ -431,11 +431,11 @@
                             <i class="fas fa-fire"></i> Temporal Activity Heatmap
                         </h2>
                         <div class="chart-wrapper">
-                            <canvas id="heatmapChart" height="100"></canvas>
+                            <canvas id="heatmapChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- NETWORK ANALYSIS (INLINE) -->
+                    <!-- NETWORK ANALYSIS -->
                     <div class="section">
                         <h2 class='section-title gradient-title'>
                             <i class="fas fa-project-diagram"></i> Network Analysis
@@ -464,7 +464,7 @@
                     </div>
                 </div>
 
-                <!-- COMPARISON SECTION (INLINE) -->
+                <!-- COMPARISON SECTION -->
                 <div class="section" id="comparisonSection">
                     <h2 class='section-title gradient-title'>
                         <i class="fas fa-exchange-alt"></i> Compare Companies

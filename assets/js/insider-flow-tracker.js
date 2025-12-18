@@ -1,19 +1,14 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 INSIDER FLOW TRACKER - ULTRA-POWERFUL PREMIUM VERSION
+ * 📊 INSIDER FLOW TRACKER - ULTRA-POWERFUL PREMIUM VERSION V4
  * ═══════════════════════════════════════════════════════════════════
  * AlphaVault AI - Advanced Insider Trading Analysis Dashboard
  * 
- * ✅ NOUVELLES FONCTIONNALITÉS :
- * - Cross-Company Insider Network (Innovation unique)
- * - Timing Correlation Heatmap (Détection patterns cachés)
- * - Whale Insider Tracker (Top traders par volume)
- * - Predictive Confidence Score (Score ML prédictif)
- * 
- * ✅ CORRECTIONS DESIGN :
- * - Contours bleu/violet sur tous les filtres/boutons
- * - Fix Temporal Heatmap (agrégation correcte)
- * - Contraste texte Network Analysis (lisibilité)
+ * ✅ CORRECTIONS V4 :
+ * - Loading state avec progression détaillée (0-100%)
+ * - Graphiques responsive (PC + Mobile)
+ * - Chart.js avec aspect ratio optimisé
+ * - Progress bar animée
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -104,7 +99,6 @@
                 return { detected: false };
             }
 
-            // Split into two halves
             const midPoint = Math.floor(transactions.length / 2);
             const recentHalf = transactions.slice(0, midPoint);
             const olderHalf = transactions.slice(midPoint);
@@ -154,7 +148,7 @@
             const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
             const stdDev = Math.sqrt(variance);
 
-            const threshold = mean + (2 * stdDev); // 2 standard deviations
+            const threshold = mean + (2 * stdDev);
             const anomalies = values.filter(v => v > threshold).length;
 
             const detected = anomalies > 0;
@@ -247,7 +241,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧩 CLASS 2: INSIDER COMPARISON ENGINE (ENHANCED)
+    // 🧩 CLASS 2: INSIDER COMPARISON ENGINE
     // ═══════════════════════════════════════════════════════════════
     class InsiderComparisonEngine {
         constructor() {
@@ -303,8 +297,8 @@
                 summary: this.generateSummaryTable(),
                 rankings: this.generateRankings(),
                 visualizations: this.generateVisualizationData(),
-                correlationMatrix: this.generateCorrelationMatrix(), // ✅ NOUVEAU
-                sharedInsiders: this.detectSharedInsiders() // ✅ NOUVEAU
+                correlationMatrix: this.generateCorrelationMatrix(),
+                sharedInsiders: this.detectSharedInsiders()
             };
 
             return report;
@@ -377,7 +371,7 @@
         }
 
         /**
-         * ✅ NOUVEAU: Generate correlation matrix (timing correlation)
+         * Generate correlation matrix (timing correlation)
          */
         generateCorrelationMatrix() {
             if (this.comparisonData.length < 2) {
@@ -386,7 +380,6 @@
 
             const matrix = {};
 
-            // Build weekly activity timelines for each company
             const timelines = this.comparisonData.map(item => {
                 const weeklyActivity = {};
                 
@@ -409,7 +402,6 @@
                 };
             });
 
-            // Calculate pairwise correlations
             for (let i = 0; i < timelines.length; i++) {
                 for (let j = i + 1; j < timelines.length; j++) {
                     const ticker1 = timelines[i].ticker;
@@ -429,10 +421,9 @@
         }
 
         /**
-         * ✅ NOUVEAU: Calculate Pearson correlation
+         * Calculate Pearson correlation
          */
         calculatePearsonCorrelation(activity1, activity2) {
-            // Get all unique weeks
             const allWeeks = new Set([
                 ...Object.keys(activity1),
                 ...Object.keys(activity2)
@@ -440,7 +431,6 @@
 
             if (allWeeks.size < 2) return 0;
 
-            // Build aligned arrays
             const values1 = [];
             const values2 = [];
 
@@ -449,7 +439,6 @@
                 values2.push(activity2[week] || 0);
             });
 
-            // Calculate correlation
             const n = values1.length;
             const sum1 = values1.reduce((a, b) => a + b, 0);
             const sum2 = values2.reduce((a, b) => a + b, 0);
@@ -466,7 +455,7 @@
         }
 
         /**
-         * ✅ NOUVEAU: Detect shared insiders between companies
+         * Detect shared insiders between companies
          */
         detectSharedInsiders() {
             if (this.comparisonData.length < 2) {
@@ -487,7 +476,6 @@
 
             const sharedInsiders = [];
 
-            // Find insiders present in multiple companies
             for (let i = 0; i < insidersByCompany.length; i++) {
                 for (let j = i + 1; j < insidersByCompany.length; j++) {
                     const company1 = insidersByCompany[i];
@@ -512,7 +500,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧩 CLASS 3: INSIDER NETWORK GRAPH (ENHANCED)
+    // 🧩 CLASS 3: INSIDER NETWORK GRAPH
     // ═══════════════════════════════════════════════════════════════
     class InsiderNetworkGraph {
         constructor() {
@@ -553,7 +541,6 @@
         buildNetwork(transactions) {
             const insiderMap = new Map();
             
-            // ✅ FIX: Détecter le mode dark/light pour les couleurs de texte
             const isDarkMode = document.body.classList.contains('dark-mode');
             const textColor = isDarkMode ? '#ffffff' : '#1e293b';
             
@@ -569,7 +556,6 @@
             this.nodes = [companyNode];
             this.edges = [];
 
-            // 1st degree: Insiders directly connected to company
             transactions.forEach((tx, idx) => {
                 const insiderName = tx.reportingOwner?.name || `Insider ${idx}`;
                 const insiderRole = tx.reportingOwner?.classification || 'Unknown';
@@ -588,7 +574,7 @@
                         level: 1,
                         color: isBuyer ? '#10b981' : '#ef4444',
                         size: 25,
-                        font: { size: 12, color: textColor }, // ✅ FIX: Couleur adaptative
+                        font: { size: 12, color: textColor },
                         transactions: 1,
                         totalValue: Math.abs(netValue)
                     });
@@ -603,13 +589,11 @@
                         arrows: { to: { enabled: true, scaleFactor: 0.5 } }
                     });
                 } else {
-                    // Update existing insider
                     const insider = insiderMap.get(insiderName);
                     insider.transactions++;
                 }
             });
 
-            // 2nd degree: Connections between insiders (same role or overlapping transactions)
             const insiders = Array.from(insiderMap.values());
             for (let i = 0; i < insiders.length; i++) {
                 for (let j = i + 1; j < insiders.length; j++) {
@@ -639,7 +623,6 @@
                 return;
             }
 
-            // Check if vis library is loaded
             if (typeof vis === 'undefined') {
                 console.error('❌ vis.js library not loaded');
                 container.innerHTML = `
@@ -707,7 +690,6 @@
 
             this.network = new vis.Network(container, data, options);
 
-            // Display stats
             this.displayNetworkStats();
 
             console.log('✅ Network rendered successfully');
@@ -720,7 +702,7 @@
             const statsContainer = document.getElementById('networkStats');
             if (!statsContainer) return;
 
-            const insiderCount = this.nodes.length - 1; // Exclude company node
+            const insiderCount = this.nodes.length - 1;
             const connectionCount = this.edges.length;
 
             const buyers = this.nodes.filter(n => n.color === '#10b981').length;
@@ -767,7 +749,6 @@
             if (!this.network) return;
 
             if (degree === 1) {
-                // Show only 1st degree (company + direct insiders)
                 const firstDegreeEdges = this.edges.filter(e => e.from === 'company' || e.to === 'company');
 
                 this.network.setData({
@@ -775,13 +756,11 @@
                     edges: new vis.DataSet(firstDegreeEdges)
                 });
             } else if (degree === 2) {
-                // Show 1st and 2nd degree
                 this.network.setData({
                     nodes: new vis.DataSet(this.nodes),
                     edges: new vis.DataSet(this.edges)
                 });
             } else {
-                // Show all
                 this.network.setData({
                     nodes: new vis.DataSet(this.nodes),
                     edges: new vis.DataSet(this.edges)
@@ -793,7 +772,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ NOUVEAU: CLASS 4 - CROSS-COMPANY NETWORK ANALYZER
+    // CLASS 4: CROSS-COMPANY NETWORK ANALYZER
     // ═══════════════════════════════════════════════════════════════
     class CrossCompanyNetworkAnalyzer {
         constructor() {
@@ -841,7 +820,6 @@
             const isDarkMode = document.body.classList.contains('dark-mode');
             const textColor = isDarkMode ? '#ffffff' : '#1e293b';
 
-            // Add company nodes
             comparisonData.forEach((item, idx) => {
                 this.nodes.push({
                     id: item.ticker,
@@ -855,7 +833,6 @@
                 });
             });
 
-            // Add shared insider nodes
             const insiderMap = new Map();
             sharedInsiders.forEach(shared => {
                 shared.insiders.forEach(insiderName => {
@@ -876,7 +853,6 @@
 
             this.nodes.push(...Array.from(insiderMap.values()));
 
-            // Add edges between companies and shared insiders
             insiderMap.forEach(insider => {
                 insider.companies.forEach(company => {
                     this.edges.push({
@@ -945,7 +921,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ NOUVEAU: CLASS 5 - WHALE INSIDER TRACKER
+    // CLASS 5: WHALE INSIDER TRACKER
     // ═══════════════════════════════════════════════════════════════
     class WhaleInsiderTracker {
         constructor() {
@@ -1050,21 +1026,49 @@
     const patternDetector = new InsiderPatternDetector();
     const comparisonEngine = new InsiderComparisonEngine();
     const networkGraph = new InsiderNetworkGraph();
-    const crossCompanyNetwork = new CrossCompanyNetworkAnalyzer(); // ✅ NOUVEAU
-    const whaleTracker = new WhaleInsiderTracker(); // ✅ NOUVEAU
+    const crossCompanyNetwork = new CrossCompanyNetworkAnalyzer();
+    const whaleTracker = new WhaleInsiderTracker();
     
     let currentAnalysis = null;
     let roleChartInstance = null;
     let heatmapChartInstance = null;
     let comparisonChartInstance = null;
-    let correlationChartInstance = null; // ✅ NOUVEAU
+    let correlationChartInstance = null;
     let currentPage = 1;
     let transactionsPerPage = 20;
     let allTransactions = [];
     let comparisonTickers = [];
 
     // ═══════════════════════════════════════════════════════════════
-    // MAIN ANALYSIS FUNCTION
+    // ✅ UPDATE PROGRESS BAR V2 (DÉTAILLÉE)
+    // ═══════════════════════════════════════════════════════════════
+    function updateProgress(percentage, message, detail = '') {
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const loadingDetail = document.getElementById('loadingDetail');
+
+        if (progressBar) {
+            progressBar.style.width = `${percentage}%`;
+        }
+        
+        if (progressText) {
+            progressText.textContent = `${Math.round(percentage)}%`;
+        }
+        
+        if (message && loadingMessage) {
+            loadingMessage.textContent = message;
+        }
+
+        if (detail && loadingDetail) {
+            loadingDetail.textContent = detail;
+        }
+
+        console.log(`📊 Progress: ${Math.round(percentage)}% - ${message}${detail ? ' - ' + detail : ''}`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ MAIN ANALYSIS FUNCTION V2 (AVEC PROGRESSION DÉTAILLÉE)
     // ═══════════════════════════════════════════════════════════════
     async function analyzeInsiderActivity() {
         const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
@@ -1074,14 +1078,11 @@
             return;
         }
 
-        // ✅ DEBUG: Vérifier que InsiderAnalyticsEngine existe
         if (typeof InsiderAnalyticsEngine === 'undefined') {
             console.error('❌ InsiderAnalyticsEngine is not defined!');
             showNotification('❌ Error: Analytics engine not loaded. Check console.', 'error');
             return;
         }
-
-        
 
         const months = parseFloat(document.getElementById('periodSelect').value);
         const maxFilings = parseInt(document.getElementById('filingsSelect').value);
@@ -1093,12 +1094,11 @@
         
         loadingState.classList.remove('hidden');
         resultsContainer.classList.add('hidden');
-        updateProgress(0, 'Initializing analysis...');
+        
+        updateProgress(0, 'Initializing analysis...', 'Preparing SEC data request');
 
         try {
-            console.log(`🔍 Analyzing insider activity for ${ticker}...`);
-            
-            updateProgress(10, 'Fetching CIK number...');
+            updateProgress(5, 'Fetching CIK number...', `Looking up ${ticker}`);
             
             currentAnalysis = await analyticsEngine.analyzeCompany(ticker, {
                 months: months,
@@ -1106,8 +1106,8 @@
                 includeDerivatives: true,
                 includePriceImpact: false,
                 includeNetworkAnalysis: true,
-                onProgress: (progress, message) => {
-                    updateProgress(progress, message);
+                onProgress: (progress, message, detail) => {
+                    updateProgress(progress, message, detail || '');
                 }
             });
 
@@ -1117,13 +1117,14 @@
                 throw new Error(currentAnalysis?.error || 'Analysis failed - no data returned');
             }
 
-            updateProgress(95, 'Detecting advanced patterns...');
+            updateProgress(92, 'Detecting advanced patterns...', 'Running pattern recognition algorithms');
             
             if (currentAnalysis.transactions && currentAnalysis.transactions.length > 0) {
                 currentAnalysis.patterns = patternDetector.detectPatterns(currentAnalysis.transactions);
             }
 
-            updateProgress(100, 'Analysis complete!');
+            updateProgress(96, 'Identifying whale insiders...', 'Ranking top traders by volume');
+            updateProgress(100, 'Analysis complete!', `Successfully analyzed ${ticker}`);
             
             await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -1153,21 +1154,6 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // UPDATE PROGRESS BAR
-    // ═══════════════════════════════════════════════════════════════
-    function updateProgress(percentage, message) {
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const loadingMessage = document.getElementById('loadingMessage');
-
-        if (progressBar) progressBar.style.width = `${percentage}%`;
-        if (progressText) progressText.textContent = `${Math.round(percentage)}%`;
-        if (message && loadingMessage) {
-            loadingMessage.textContent = message;
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════
     // DISPLAY RESULTS
     // ═══════════════════════════════════════════════════════════════
     function displayResults(analysis) {
@@ -1193,7 +1179,6 @@
             document.getElementById('clusterSection').classList.add('hidden');
         }
 
-        // ✅ NOUVEAU: Whale Insider Tracker
         const whales = whaleTracker.identifyWhales(analysis.transactions);
         const whaleContainer = document.getElementById('whaleContainer');
         if (whaleContainer) {
@@ -1202,9 +1187,8 @@
         }
 
         displayRoleChart(analysis.roleAnalysis);
-        displayTemporalHeatmap(analysis.transactions); // ✅ FIX INCLUS
+        displayTemporalHeatmap(analysis.transactions);
         
-        // Render network graph
         networkGraph.render(analysis.transactions);
         
         displayTransactionsTable(analysis);
@@ -1216,7 +1200,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // 🤖 ALPHY AI RECOMMENDATION (SIMPLIFIED - NO ROBOT, NO BIG BADGE)
+    // ALPHY AI RECOMMENDATION
     // ═══════════════════════════════════════════════════════════════
     function displayAlphyRecommendation(analysis) {
         const panel = document.getElementById('alphyRecommendationPanel');
@@ -1236,7 +1220,6 @@
 
         panel.innerHTML = `
             <div class="alphy-simple-grid">
-                <!-- Action Summary -->
                 <div class="alphy-summary">
                     <div class="alphy-action-row">
                         <div class="alphy-action-icon-small">${config.icon}</div>
@@ -1247,7 +1230,6 @@
                     </div>
                 </div>
 
-                <!-- Key Insights -->
                 <div class="alphy-section">
                     <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
                     <div class="insight-list">
@@ -1260,13 +1242,11 @@
                     </div>
                 </div>
 
-                <!-- AI Analysis -->
                 <div class="alphy-section">
                     <h3><i class="fas fa-brain"></i> AI Analysis</h3>
                     <p class="ai-text">${aiAnalysis.summary}</p>
                 </div>
 
-                <!-- Metrics Grid -->
                 <div class="alphy-metrics-grid">
                     <div class="alphy-metric-compact">
                         <div class="metric-icon-small" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
@@ -1309,7 +1289,6 @@
                     </div>
                 </div>
 
-                <!-- Risk Factors -->
                 <div class="alphy-section">
                     <h3><i class="fas fa-exclamation-triangle"></i> Risk Factors</h3>
                     <div class="risk-list">
@@ -1322,7 +1301,6 @@
                     </div>
                 </div>
 
-                <!-- Action Items -->
                 <div class="alphy-section">
                     <h3><i class="fas fa-bullseye"></i> Action Items</h3>
                     <div class="action-list">
@@ -1617,7 +1595,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // DISPLAY ROLE CHART
+    // ✅ DISPLAY ROLE CHART V2 (RESPONSIVE)
     // ═══════════════════════════════════════════════════════════════
     function displayRoleChart(roleAnalysis) {
         const canvas = document.getElementById('roleChart');
@@ -1664,7 +1642,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         labels: {
@@ -1721,7 +1699,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ FIX: DISPLAY TEMPORAL HEATMAP (AGRÉGATION CORRECTE)
+    // ✅ DISPLAY TEMPORAL HEATMAP V2 (RESPONSIVE)
     // ═══════════════════════════════════════════════════════════════
     function displayTemporalHeatmap(transactions) {
         const canvas = document.getElementById('heatmapChart');
@@ -1735,18 +1713,16 @@
             heatmapChartInstance = null;
         }
 
-        // ✅ FIX: Group transactions by DAY (not week) pour capturer TOUTES les transactions
         const dailyData = {};
         
         transactions.forEach(tx => {
             const date = new Date(tx.filingDate);
-            const dayKey = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            const dayKey = date.toISOString().split('T')[0];
             
             if (!dailyData[dayKey]) {
                 dailyData[dayKey] = { purchases: 0, sales: 0 };
             }
 
-            // ✅ FIX: Agréger TOUTES les transactions du même jour
             (tx.nonDerivativeTransactions || []).forEach(nt => {
                 if (nt.transactionType === 'Purchase') {
                     dailyData[dayKey].purchases += nt.totalValue;
@@ -1756,12 +1732,11 @@
             });
         });
 
-        // ✅ Convert to weekly aggregation for display (mais basé sur les données journalières complètes)
         const weeklyData = {};
         Object.keys(dailyData).sort().forEach(dayKey => {
             const date = new Date(dayKey);
             const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay()); // Get Sunday of the week
+            weekStart.setDate(date.getDate() - date.getDay());
             const weekKey = weekStart.toISOString().split('T')[0];
             
             if (!weeklyData[weekKey]) {
@@ -1811,7 +1786,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         labels: {
@@ -2078,7 +2053,6 @@
                     <i class="fas fa-chart-bar"></i> Comparison Results
                 </h3>
 
-                <!-- Summary Table -->
                 <div class="table-container" style="margin-bottom: 32px;">
                     <table>
                         <thead>
@@ -2114,27 +2088,24 @@
                     </table>
                 </div>
 
-                <!-- Comparison Chart -->
                 <div class="chart-wrapper">
-                    <canvas id="comparisonChart" height="80"></canvas>
+                    <canvas id="comparisonChart"></canvas>
                 </div>
 
-                <!-- ✅ NOUVEAU: Timing Correlation Heatmap -->
                 ${report.correlationMatrix ? `
                     <div class="correlation-matrix" style="margin-top: 32px;">
                         <h4 style="margin-bottom: 16px;">
                             <i class="fas fa-chart-area"></i> Timing Correlation Matrix
                         </h4>
                         <div class="chart-wrapper">
-                            <canvas id="correlationChart" height="100"></canvas>
+                            <canvas id="correlationChart"></canvas>
                         </div>
                         <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem; text-align: center;">
-                            <i class="fas fa-info-circle"></i> Correlation measures how synchronized insider activity is between companies (1.0 = perfect sync, 0 = no correlation, -1.0 = opposite)
+                            <i class="fas fa-info-circle"></i> Correlation measures how synchronized insider activity is between companies
                         </p>
                     </div>
                 ` : ''}
 
-                <!-- ✅ NOUVEAU: Cross-Company Insider Network -->
                 ${report.sharedInsiders && report.sharedInsiders.length > 0 ? `
                     <div class="cross-company-network-container">
                         <h4 style="margin-top: 32px; margin-bottom: 16px;">
@@ -2159,7 +2130,6 @@
                     </div>
                 ` : ''}
 
-                <!-- Rankings -->
                 <div style="margin-top: 32px;">
                     <h4 style="margin-bottom: 16px;"><i class="fas fa-trophy"></i> Rankings</h4>
                     <div class="ranking-grid">
@@ -2192,7 +2162,6 @@
             </div>
         `;
 
-        // Render charts
         renderComparisonChart(report.visualizations);
         
         if (report.correlationMatrix) {
@@ -2243,7 +2212,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         labels: {
@@ -2278,9 +2247,6 @@
         });
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // ✅ NOUVEAU: RENDER CORRELATION HEATMAP
-    // ═══════════════════════════════════════════════════════════════
     function renderCorrelationChart(correlationMatrix, tickers) {
         const canvas = document.getElementById('correlationChart');
         if (!canvas) return;
@@ -2292,7 +2258,6 @@
             correlationChartInstance = null;
         }
 
-        // Build labels and data
         const labels = [];
         const dataPoints = [];
 
@@ -2314,11 +2279,11 @@
                     label: 'Correlation Coefficient',
                     data: dataPoints.map(d => d.v),
                     backgroundColor: dataPoints.map(d => {
-                        if (d.v > 0.7) return 'rgba(16, 185, 129, 0.8)'; // Strong positive
-                        if (d.v > 0.3) return 'rgba(59, 130, 246, 0.8)'; // Moderate positive
-                        if (d.v > -0.3) return 'rgba(148, 163, 184, 0.8)'; // Weak
-                        if (d.v > -0.7) return 'rgba(245, 158, 11, 0.8)'; // Moderate negative
-                        return 'rgba(239, 68, 68, 0.8)'; // Strong negative
+                        if (d.v > 0.7) return 'rgba(16, 185, 129, 0.8)';
+                        if (d.v > 0.3) return 'rgba(59, 130, 246, 0.8)';
+                        if (d.v > -0.3) return 'rgba(148, 163, 184, 0.8)';
+                        if (d.v > -0.7) return 'rgba(245, 158, 11, 0.8)';
+                        return 'rgba(239, 68, 68, 0.8)';
                     }),
                     borderColor: dataPoints.map(d => {
                         if (d.v > 0.7) return '#10b981';
@@ -2333,7 +2298,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -2443,7 +2408,6 @@
     // EVENT LISTENERS
     // ═══════════════════════════════════════════════════════════════
     function initializeEventListeners() {
-        // Main analysis
         document.getElementById('tickerInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 analyzeInsiderActivity();
@@ -2460,7 +2424,6 @@
             }
         });
 
-        // Comparison
         document.getElementById('addComparisonBtn')?.addEventListener('click', addComparisonTicker);
         document.getElementById('runComparisonBtn')?.addEventListener('click', runComparison);
         
@@ -2470,7 +2433,6 @@
             }
         });
 
-        // Network filters
         document.getElementById('showFirstDegree')?.addEventListener('click', () => {
             networkGraph.filterByDegree(1);
         });
@@ -2483,7 +2445,6 @@
             networkGraph.filterByDegree(0);
         });
 
-        // Focus input on load
         window.addEventListener('load', () => {
             document.getElementById('tickerInput')?.focus();
         });
@@ -2500,7 +2461,6 @@
         initializeEventListeners();
     }
 
-    // Add CSS animations
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideIn {
@@ -2536,12 +2496,6 @@
         removeComparisonTicker: removeComparisonTicker
     };
 
-    console.log('🎉 Insider Flow Tracker - PREMIUM VERSION initialized successfully!');
+    console.log('🎉 Insider Flow Tracker - PREMIUM VERSION V4 initialized successfully!');
 
 })();
-
-/**
- * ═══════════════════════════════════════════════════════════════════
- * END OF INSIDER FLOW TRACKER - ULTRA-POWERFUL PREMIUM VERSION
- * ═══════════════════════════════════════════════════════════════════
- */

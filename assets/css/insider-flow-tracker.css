@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (FIXED V3)
+   INSIDER FLOW TRACKER - ULTRA-MODERN STYLES (FIXED V4)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -23,17 +23,16 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SEARCH CONTAINER
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════
-   FIX: CONTAINER PARENT POUR LOADING
+   CONTAINER PARENT POUR LOADING
    ═══════════════════════════════════════════════════════════════ */
 .container {
     position: relative;
-    min-height: calc(100vh - 80px); /* Hauteur minimale pour le loading */
+    min-height: calc(100vh - 80px);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH CONTAINER
+   ═══════════════════════════════════════════════════════════════ */
 .search-container {
     max-width: 100%;
     margin-bottom: 32px;
@@ -198,7 +197,7 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ LOADING STATE - FIX FINAL: LIMITÉ AU MAIN-CONTENT
+   ✅ LOADING STATE - FIX FINAL V2
    ═══════════════════════════════════════════════════════════════ */
 .loading {
     position: absolute;
@@ -229,7 +228,7 @@ body.dark-mode .loading {
 
 .loading-content {
     text-align: center;
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
 }
 
@@ -249,6 +248,15 @@ body.dark-mode .loading {
     font-size: 1rem;
     line-height: 1.6;
     margin-bottom: 32px;
+    min-height: 24px;
+}
+
+.loading-detail {
+    font-size: 0.9rem !important;
+    color: var(--text-tertiary) !important;
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+    font-style: italic;
 }
 
 .spinner {
@@ -279,33 +287,52 @@ body.dark-mode .loading {
 }
 
 .progress-container {
-    max-width: 400px;
+    max-width: 500px;
     width: 100%;
     margin: 0 auto 16px;
     background: rgba(102, 126, 234, 0.1);
     border-radius: 12px;
     overflow: hidden;
-    height: 12px;
+    height: 14px;
     border: 1px solid rgba(102, 126, 234, 0.2);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .progress-bar {
     height: 100%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     width: 0%;
-    transition: width 0.3s ease;
+    transition: width 0.5s ease;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .progress-text {
-    font-size: 1.2rem;
-    font-weight: 800;
+    font-size: 1.4rem;
+    font-weight: 900;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-top: 12px;
+    letter-spacing: 1px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1037,7 +1064,7 @@ tbody tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ CHART WRAPPER - FIX GRAPHIQUES MOBILES
+   ✅ CHART WRAPPER - FIX GRAPHIQUES V2 (RESPONSIVE)
    ═══════════════════════════════════════════════════════════════ */
 .chart-wrapper {
     background: var(--glass-bg);
@@ -1047,25 +1074,23 @@ tbody tr:hover {
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     max-width: 100%;
-    min-height: 400px;
 }
 
 .chart-wrapper canvas {
     max-width: 100% !important;
     width: 100% !important;
-    min-height: 350px !important;
-    height: auto !important;
+    height: 400px !important;
     display: block;
 }
 
-/* ✅ Forcer Chart.js à respecter les conteneurs */
+/* ✅ Container Chart.js */
 .chart-wrapper > div {
     position: relative;
     max-width: 100%;
     width: 100%;
-    height: 100%;
+    height: 400px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1363,7 +1388,7 @@ body.dark-mode .comparison-search input {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ RESPONSIVE - MOBILE OPTIMIZATIONS
+   ✅ RESPONSIVE - MOBILE OPTIMIZATIONS V2
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
     /* ✅ LOADING CENTRÉ */
@@ -1519,15 +1544,17 @@ body.dark-mode .comparison-search input {
         justify-content: center;
     }
 
-    /* ✅ GRAPHIQUES - HAUTEUR FIXE MOBILE */
+    /* ✅ GRAPHIQUES - HAUTEUR MOBILE */
     .chart-wrapper {
         padding: 16px;
-        min-height: 350px;
     }
 
     .chart-wrapper canvas {
-        min-height: 320px !important;
-        max-height: 500px !important;
+        height: 350px !important;
+    }
+
+    .chart-wrapper > div {
+        height: 350px;
     }
 }
 
@@ -1562,14 +1589,12 @@ body.dark-mode .comparison-search input {
     }
 
     /* ✅ GRAPHIQUES - ENCORE PLUS GRANDS */
-    .chart-wrapper {
-        padding: 12px;
-        min-height: 380px;
+    .chart-wrapper canvas {
+        height: 320px !important;
     }
 
-    .chart-wrapper canvas {
-        min-height: 350px !important;
-        max-height: 550px !important;
+    .chart-wrapper > div {
+        height: 320px;
     }
 
     .network-graph-container {
