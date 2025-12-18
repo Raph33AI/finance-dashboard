@@ -47,15 +47,22 @@
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
-    <!-- ✅ LOADING STATE GLOBAL (POSITION FIXED) -->
-    <div id="loadingState" class="loading hidden">
-        <div class="loading-content-simple">
-            <div class="spinner">
-                <i class="fas fa-circle-notch"></i>
+    <!-- ✅ VERSION ULTRA-SIMPLE GARANTIE -->
+    <div id="loadingState" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.98); z-index: 999999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <div style="width: 80px; height: 80px; margin: 0 auto 20px;">
+                <i class="fas fa-circle-notch" style="font-size: 80px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: spin 1s linear infinite;"></i>
             </div>
-            <p id="loadingMessage">Analyzing insider activity...</p>
+            <p id="loadingMessage" style="color: #64748b; font-size: 1rem;">Analyzing...</p>
         </div>
     </div>
+
+    <style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    </style>
 
     <div class='layout-wrapper'>
         <!-- Sidebar -->
