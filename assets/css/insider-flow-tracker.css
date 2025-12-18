@@ -188,20 +188,32 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ LOADING STATE - FIX: SEUL LE SPINNER TOURNE
+   ✅ LOADING STATE - FIX FINAL: SEUL LE SPINNER TOURNE
    ═══════════════════════════════════════════════════════════════ */
 .loading {
     text-align: center;
     padding: 80px 20px;
     position: relative;
+    transform: none !important; /* ✅ BLOQUER TOUTE ROTATION DU CONTENEUR */
+    animation: none !important; /* ✅ AUCUNE ANIMATION SUR LE CONTENEUR */
+}
+
+.loading * {
+    transform: none !important; /* ✅ BLOQUER ROTATION DE TOUS LES ENFANTS */
+    animation: none !important; /* ✅ AUCUNE ANIMATION PAR DÉFAUT */
 }
 
 .loading h2 {
     color: var(--text-primary);
     font-size: 1.5rem;
     margin-bottom: 12px;
-    transform: none !important; /* ✅ EMPÊCHE LA ROTATION DU TEXTE */
-    animation: none !important; /* ✅ AUCUNE ANIMATION SUR LE TITRE */
+    transform: none !important;
+    animation: none !important;
+}
+
+.loading p {
+    transform: none !important;
+    animation: none !important;
 }
 
 .spinner {
@@ -212,9 +224,11 @@ body.dark-mode .option-group select {
     display: flex;
     align-items: center;
     justify-content: center;
+    transform: none !important; /* ✅ LE CONTENEUR DU SPINNER NE TOURNE PAS */
+    animation: none !important;
 }
 
-/* ✅ SEULE L'ICÔNE TOURNE */
+/* ✅ SEULE L'ICÔNE TOURNE - PRIORITÉ ABSOLUE */
 .spinner i {
     font-size: 60px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -222,14 +236,14 @@ body.dark-mode .option-group select {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: inline-block;
-    animation: spin 1s linear infinite; /* ✅ ANIMATION ISOLÉE ICI */
-    transform-origin: center center; /* ✅ ROTATION CENTRÉE */
-    will-change: transform; /* ✅ OPTIMISATION GPU */
+    animation: spin 1s linear infinite !important; /* ✅ FORCER L'ANIMATION ICI */
+    transform-origin: center center !important;
+    will-change: transform;
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .progress-container {
@@ -240,6 +254,8 @@ body.dark-mode .option-group select {
     overflow: hidden;
     height: 12px;
     border: 1px solid var(--glass-border);
+    transform: none !important;
+    animation: none !important;
 }
 
 .progress-bar {
@@ -249,6 +265,8 @@ body.dark-mode .option-group select {
     transition: width 0.3s ease;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    transform: none !important;
+    animation: none !important;
 }
 
 .progress-text {
@@ -259,8 +277,8 @@ body.dark-mode .option-group select {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-top: 12px;
-    transform: none !important; /* ✅ EMPÊCHE LA ROTATION DU TEXTE */
-    animation: none !important; /* ✅ AUCUNE ANIMATION SUR LE TEXTE */
+    transform: none !important;
+    animation: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
