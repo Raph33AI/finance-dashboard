@@ -3,11 +3,11 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <meta name='description' content='ML Trend Prediction - Machine learning stock price forecasting with multiple AI models'>
+    <meta name='description' content='AlphaVault Score - ML-powered stock trend prediction without raw data redistribution'>
     <meta name='author' content='Raphael NARDONE'>
     <meta name='theme-color' content='#2649B2'>
     
-    <title>ML Trend Prediction</title>
+    <title>AlphaVault Score - ML Trend Prediction</title>
     
     <!-- Preconnect pour optimisation -->
     <link rel='preconnect' href='https://code.highcharts.com'>
@@ -31,7 +31,8 @@
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/cache-widget.css'>
     <link rel='stylesheet' href='assets/css/trend-prediction.css'>
-    <!-- ✅ FAVICON DYNAMIQUE -->
+    
+    <!-- Favicon Dynamique -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Firebase SDK -->
@@ -45,15 +46,15 @@
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ ACCESS CONTROL -->
+    <!-- ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT -->
+    <!-- THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
 
-    <!-- 🎨 THEME CHARTS -->
+    <!-- THEME CHARTS -->
     <script src="assets/js/theme-charts.js"></script>
 
     <!-- Particles Background -->
@@ -182,17 +183,13 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
                     <div class='nav-submenu' style='display: block;'>
-                        <!-- <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-database'></i>
-                            <span>Market Data</span>
-                        </a> -->
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
                         </a>
                         <a href='trend-prediction.html' class='nav-link active'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
+                            <i class='fas fa-robot'></i>
+                            <span>AlphaVault Score</span>
                         </a>
                         <a href='market-intelligence.html' class='nav-link'>
                             <i class='fas fa-globe'></i>
@@ -213,7 +210,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
+                <!-- NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -229,7 +226,7 @@
                 </div>
             </nav>
             
-            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
+            <!-- SIDEBAR FOOTER - MENU UTILISATEUR -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <!-- Trigger (élément cliquable) -->
@@ -300,10 +297,10 @@
                         <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
                             <i class='fas fa-bars' aria-hidden='true'></i>
                         </button>
-                        <h1></i> Machine Learning Trend Prediction</h1>
+                        <h1><i class="fas fa-robot"></i> AlphaVault Score Engine</h1>
                     </div>
                     <div class='header-right'>
-                        <!-- ✅ Bouton de contrôle du cache -->
+                        <!-- Bouton de contrôle du cache -->
                         <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
                             <i class='fas fa-database' aria-hidden='true'></i>
                             <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
@@ -316,6 +313,21 @@
             <div class='container'>
                 <!-- Main Content -->
                 <div class='content'>
+                    
+                    <!-- ⚖ LEGAL DISCLAIMER (NOUVEAU) -->
+                    <section class="legal-notice card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); border: 2px solid rgba(59, 130, 246, 0.3); border-left: 6px solid #3b82f6; padding: 24px; margin-bottom: 30px; border-radius: 16px;">
+                        <div style="display: flex; align-items: start; gap: 20px;">
+                            <i class="fas fa-shield-alt" style="font-size: 2rem; color: #3b82f6; flex-shrink: 0;"></i>
+                            <div>
+                                <h3 style="margin: 0 0 12px 0; color: #1e40af; font-size: 1.2rem; font-weight: 800;">⚖ 100% Legal Compliant Analysis</h3>
+                                <p style="margin: 0; color: #475569; line-height: 1.6; font-size: 0.95rem;">
+                                    <strong>AlphaVault Score</strong> is a proprietary normalized indicator (0-100) based on machine learning analysis. 
+                                    <strong>No raw market data is redistributed.</strong> All predictions are transformed into directional signals and risk-adjusted scores. 
+                                    For educational and informational purposes only.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
                     
                     <!-- Search Panel -->
                     <section class='search-panel card' aria-labelledby='search-title'>
@@ -482,7 +494,7 @@
                         </section>
                         
                         <!-- ============================================
-                             ✨ NOUVEAU : BACKTESTING SECTION
+                             BACKTESTING SECTION
                              ============================================ -->
                         <section class='backtesting-section card' aria-labelledby='backtesting-title'>
                             <div class='card-header'>
@@ -500,9 +512,6 @@
                                     <button class='tab-btn' data-tab='prediction-vs-actual' onclick='TrendPrediction.switchBacktestTab(this)'>
                                         <i class='fas fa-crosshairs'></i> Predictions vs Actual
                                     </button>
-                                    <!-- <button class='tab-btn' data-tab='error-evolution' onclick='TrendPrediction.switchBacktestTab(this)'>
-                                        <i class='fas fa-chart-line'></i> Error Evolution
-                                    </button> -->
                                 </div>
                                 
                                 <!-- Tab Content -->
@@ -513,9 +522,6 @@
                                     <div id='tab-prediction-vs-actual' class='tab-panel'>
                                         <div id='backtestComparisonChart' class='chart chart-large' role='img' aria-label='Predictions vs actual prices'></div>
                                     </div>
-                                    <!-- <div id='tab-error-evolution' class='tab-panel'>
-                                        <div id='backtestErrorChart' class='chart chart-large' role='img' aria-label='Error evolution over time'></div>
-                                    </div> -->
                                 </div>
                                 
                                 <!-- Backtesting Metrics -->
@@ -568,7 +574,7 @@
                                 <h3 class='card-title' id='comparison-chart-title'>
                                     <i class='fas fa-layer-group' aria-hidden='true'></i> Model Comparison Chart
                                 </h3>
-                                <!-- ✅ NOUVEAU : Export button -->
+                                <!-- Export button -->
                                 <button class='btn-export' onclick='TrendPrediction.exportPredictions()' title='Export predictions'>
                                     <i class='fas fa-download'></i> Export
                                 </button>
@@ -579,7 +585,7 @@
                         </section>
                         
                         <!-- ============================================
-                             ✨ NOUVEAU : MULTI-HORIZON COMPARISON
+                             MULTI-HORIZON COMPARISON
                              ============================================ -->
                         <section class='multi-horizon-section card' aria-labelledby='multi-horizon-title'>
                             <div class='card-header'>
@@ -600,7 +606,7 @@
                         </section>
                         
                         <!-- ============================================
-                             INDIVIDUAL MODELS
+                             INDIVIDUAL MODELS (❌ SANS ARIMA - SEULEMENT 5 MODÈLES)
                              ============================================ -->
                         <section class='models-section' aria-labelledby='models-title'>
                             <h3 class='section-title' id='models-title'>
@@ -689,21 +695,7 @@
                                     </div>
                                 </article>
                                 
-                                <!-- ARIMA -->
-                                <article class='model-card card' role='listitem' aria-labelledby='model-arima-title'>
-                                    <div class='card-header model-header'>
-                                        <h4 id='model-arima-title'><i class='fas fa-chart-area' aria-hidden='true'></i> ARIMA</h4>
-                                        <span class='model-badge' id='badge-arima'>Training...</span>
-                                    </div>
-                                    <div class='card-body'>
-                                        <div class='model-chart' id='chart-arima' role='img' aria-label='ARIMA chart'></div>
-                                        <div class='model-metrics' id='metrics-arima' role='list' aria-label='ARIMA metrics'>
-                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
-                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
-                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
-                                        </div>
-                                    </div>
-                                </article>
+                                <!-- ❌ ARIMA SUPPRIMÉ - Plus de 6ème modèle -->
                                 
                             </div>
                         </section>
@@ -728,7 +720,7 @@
                         </section>
                         
                         <!-- ============================================
-                             ✨ NOUVEAU : MODEL CORRELATION HEATMAP
+                             MODEL CORRELATION HEATMAP
                              ============================================ -->
                         <section class='correlation-section card' aria-labelledby='correlation-title'>
                             <div class='card-header'>
@@ -750,7 +742,7 @@
                         </section>
 
                         <!-- ============================================
-                            ✨ NOUVELLE SECTION : MULTI-STOCK COMPARISON
+                            MULTI-STOCK COMPARISON
                             ============================================ -->
                         <section class='multi-stock-comparison card' aria-labelledby='multi-stock-title'>
                             <div class='card-header'>
@@ -776,7 +768,7 @@
                                     
                                     <!-- Selected Stocks -->
                                     <div class='selected-stocks' id='selectedStocks'>
-                                        <!-- Les stocks sélectionnés apparaîtront ici -->
+                                        <div style="color:#64748b;font-style:italic;padding:10px;">No stocks selected yet. Add stocks to compare.</div>
                                     </div>
                                 </div>
                                 
@@ -901,42 +893,6 @@
                                 <div id='comparisonTable' style='display: none; margin-top: 30px;'></div>
                             </div>
                         </section>
-
-                        <!-- Modal Multi-Stock -->
-                        <div id='modalMultiStock' class='modal' role='dialog' aria-labelledby='multi-stock-modal-title' aria-modal='true'>
-                            <div class='modal-content'>
-                                <div class='modal-header'>
-                                    <h2 id='multi-stock-modal-title'>📊 Multi-Stock Comparison</h2>
-                                    <button class='close-modal' onclick='closeModal("modalMultiStock")' aria-label='Close dialog'>
-                                        <i class='fas fa-times'></i>
-                                    </button>
-                                </div>
-                                <div class='modal-body'>
-                                    <h3>What is Multi-Stock Comparison?</h3>
-                                    <p>This feature allows you to compare predictions and risk metrics for multiple stocks simultaneously using advanced ML ensemble models.</p>
-                                    
-                                    <h3>Key Features</h3>
-                                    <ul>
-                                        <li><strong>Prediction Comparison:</strong> Side-by-side predictions across different horizons</li>
-                                        <li><strong>Risk-Return Scatter:</strong> Visualize risk vs. expected return for each stock</li>
-                                        <li><strong>Correlation Matrix:</strong> Identify diversification opportunities</li>
-                                        <li><strong>Sharpe Ratio:</strong> Compare risk-adjusted returns</li>
-                                    </ul>
-                                    
-                                    <h3>How to Use</h3>
-                                    <ol>
-                                        <li>Add 2-10 stocks using the input field</li>
-                                        <li>Adjust analysis parameters (volatility, correlation, risk-free rate, horizon)</li>
-                                        <li>Click "Run Multi-Stock Analysis"</li>
-                                        <li>Review comparative charts and metrics</li>
-                                    </ol>
-                                    
-                                    <div class='tip-box'>
-                                        💡 <strong>Pro Tip:</strong> Use this to build a diversified portfolio by selecting stocks with low correlation and high Sharpe ratios.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         
                         <!-- ============================================
                              RECOMMENDATION
@@ -980,7 +936,7 @@
                 
                 <!-- Footer -->
                 <footer role='contentinfo'>
-                    <p>&copy; ML Trend Prediction | Powered by Alphy AI Algorithms</p>
+                    <p>&copy; AlphaVault Score Engine | 100% Legal Compliant | Powered by ML Algorithms</p>
                 </footer>
             </div>
         </main>
@@ -988,7 +944,7 @@
     </div>
     
     <!-- ============================================
-         🗄 CACHE MONITORING WIDGET
+         CACHE MONITORING WIDGET
          ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
         <div class='cache-widget-header'>
@@ -1068,14 +1024,14 @@
     <div id='modalIntro' class='modal' role='dialog' aria-labelledby='intro-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2 id='intro-modal-title'>🤖 Machine Learning Trend Prediction</h2>
+                <h2 id='intro-modal-title'>🤖 AlphaVault Score Engine</h2>
                 <button class='close-modal' onclick='closeModal("modalIntro")' aria-label='Close dialog'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
             <div class='modal-body'>
                 <h3>🧠 What is this page?</h3>
-                <p>This page uses <span class='key-term'>advanced machine learning algorithms</span> to predict future stock price movements based on historical data patterns.</p>
+                <p>This page uses <span class='key-term'>advanced machine learning algorithms</span> to analyze stock trends and generate proprietary <strong>AlphaVault Scores</strong> (0-100).</p>
                 
                 <h3>📊 Models Used</h3>
                 <ul>
@@ -1084,22 +1040,23 @@
                     <li><strong>Exponential Smoothing:</strong> Time-series forecasting with trend damping</li>
                     <li><strong>K-Nearest Neighbors:</strong> Pattern matching based on historical similarities</li>
                     <li><strong>Neural Network:</strong> Deep learning model with backpropagation</li>
-                    <li><strong>ARIMA:</strong> Statistical model for time-series prediction</li>
                 </ul>
                 
-                <h3>🎯 Ensemble Method</h3>
-                <p>The final prediction combines all models using weighted averaging based on their historical accuracy, providing more robust forecasts than any single model.</p>
+                <h3>🎯 AlphaVault Score</h3>
+                <p>A proprietary normalized indicator (0-100) combining:</p>
+                <ul>
+                    <li>📈 <strong>Momentum Analysis</strong></li>
+                    <li>🧠 <strong>ML Consensus</strong></li>
+                    <li>📊 <strong>Technical Indicators</strong> (RSI, MACD, Bollinger)</li>
+                    <li>🎯 <strong>Risk-Adjusted Performance</strong></li>
+                    <li>✨ <strong>Trend Quality</strong></li>
+                </ul>
                 
-                <h3>⚙ How to Use</h3>
-                <ol>
-                    <li>Search for a stock by symbol or company name</li>
-                    <li>Select prediction horizon (7-60 days)</li>
-                    <li>Click "Run ML Models"</li>
-                    <li>Compare model predictions and view the ensemble forecast</li>
-                </ol>
+                <h3>⚖ Legal Compliance</h3>
+                <p><strong>No raw market data is redistributed.</strong> All predictions are transformed into directional signals and normalized scores.</p>
                 
                 <div class='warning-box'>
-                    ⚠ <strong>Important:</strong> ML predictions are based on historical patterns and do not account for future events, news, or market changes. Use as one tool among many in your investment research.
+                    ⚠ <strong>Important:</strong> AlphaVault Scores are for educational purposes only. Always conduct your own research before investing.
                 </div>
             </div>
         </div>
@@ -1137,7 +1094,7 @@
         </div>
     </div>
     
-    <!-- ✨ NOUVEAU : Modal Backtesting -->
+    <!-- Modal Backtesting -->
     <div id='modalBacktesting' class='modal' role='dialog' aria-labelledby='backtesting-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -1170,7 +1127,7 @@
         </div>
     </div>
     
-    <!-- ✨ NOUVEAU : Modal Multi-Horizon -->
+    <!-- Modal Multi-Horizon -->
     <div id='modalMultiHorizon' class='modal' role='dialog' aria-labelledby='multi-horizon-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -1200,7 +1157,7 @@
         </div>
     </div>
     
-    <!-- ✨ NOUVEAU : Modal Correlation -->
+    <!-- Modal Correlation -->
     <div id='modalCorrelation' class='modal' role='dialog' aria-labelledby='correlation-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -1233,12 +1190,48 @@
         </div>
     </div>
     
+    <!-- Modal Multi-Stock -->
+    <div id='modalMultiStock' class='modal' role='dialog' aria-labelledby='multi-stock-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='multi-stock-modal-title'>📊 Multi-Stock Comparison</h2>
+                <button class='close-modal' onclick='closeModal("modalMultiStock")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Multi-Stock Comparison?</h3>
+                <p>This feature allows you to compare predictions and risk metrics for multiple stocks simultaneously using advanced ML ensemble models.</p>
+                
+                <h3>Key Features</h3>
+                <ul>
+                    <li><strong>Prediction Comparison:</strong> Side-by-side predictions across different horizons</li>
+                    <li><strong>Risk-Return Scatter:</strong> Visualize risk vs. expected return for each stock</li>
+                    <li><strong>Correlation Matrix:</strong> Identify diversification opportunities</li>
+                    <li><strong>Sharpe Ratio:</strong> Compare risk-adjusted returns</li>
+                </ul>
+                
+                <h3>How to Use</h3>
+                <ol>
+                    <li>Add 2-10 stocks using the input field</li>
+                    <li>Adjust analysis parameters (volatility, correlation, risk-free rate, horizon)</li>
+                    <li>Click "Run Multi-Stock Analysis"</li>
+                    <li>Review comparative charts and metrics</li>
+                </ol>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Use this to build a diversified portfolio by selecting stocks with low correlation and high Sharpe ratios.
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- ============================================
-         📜 CACHE WIDGET SCRIPT
+         CACHE WIDGET SCRIPT
          ============================================ -->
     <script>
         /**
-         * 🗄 Cache Widget Management
+         * Cache Widget Management
          */
         let cacheWidgetOpen = false;
         let cacheStats = {
@@ -1285,12 +1278,10 @@
             const entriesEl = document.getElementById('cacheEntriesCount');
             const sizeEl = document.getElementById('cacheSize');
             const hitRateEl = document.getElementById('cacheHitRate');
-            const badgeEl = document.getElementById('cacheBadge');
             const badgeMiniEl = document.getElementById('cacheBadgeMini');
             
             if (entriesEl) entriesEl.textContent = entries;
             if (sizeEl) sizeEl.textContent = (totalSize / 1024).toFixed(2) + ' KB';
-            if (badgeEl) badgeEl.textContent = entries;
             if (badgeMiniEl) badgeMiniEl.textContent = entries;
             
             const total = cacheStats.hits + cacheStats.misses;
@@ -1388,9 +1379,7 @@
                         entries++;
                     }
                 }
-                const badgeEl = document.getElementById('cacheBadge');
                 const badgeMiniEl = document.getElementById('cacheBadgeMini');
-                if (badgeEl) badgeEl.textContent = entries;
                 if (badgeMiniEl) badgeMiniEl.textContent = entries;
             }
         }, 5000);
@@ -1511,18 +1500,18 @@
         });
     </script>
     
-    <!-- ✅ Core Scripts (ORDRE IMPORTANT) -->
+    <!-- Core Scripts (ORDRE IMPORTANT) -->
     <script src='assets/js/config.js'></script>
     <script src='assets/js/api-client.js'></script>
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ Trend Prediction Script (VERSION AMÉLIORÉE AVEC BACKTESTING) -->
+    <!-- Trend Prediction Script (VERSION ALPHAVAULT SCORE) -->
     <script src='assets/js/trend-prediction.js'></script>
     
     <!-- ============================================
-         ✅ FIX MENU UTILISATEUR
+         FIX MENU UTILISATEUR
          ============================================ -->
     <script>
         (function forceUserMenuInit() {
@@ -1611,7 +1600,7 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT -->
+    <!-- INITIALISATION DU CHATBOT -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');

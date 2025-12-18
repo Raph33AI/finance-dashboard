@@ -1,6 +1,6 @@
 /* ==============================================
-   TREND-PREDICTION.JS - ML STOCK PREDICTION
-   VERSION AMÉLIORÉE AVEC BACKTESTING + MULTI-HORIZON + CORRELATION
+   ALPHAVAULT SCORE ENGINE - LEGAL COMPLIANT
+   Version: 2.0 - No Raw Data Redistribution
    ============================================== */
 
 // ========== RATE LIMITER ==========
@@ -90,7 +90,7 @@ class RateLimiter {
     }
 }
 
-// ========== CACHE OPTIMISÉ ==========
+// ========== OPTIMIZED CACHE ==========
 class OptimizedCache {
     constructor() {
         this.prefix = 'tp_cache_';
@@ -156,12 +156,106 @@ class OptimizedCache {
     }
 }
 
+// ========== ALPHAVAULT SCORE CALCULATOR ==========
+class AlphaVaultScoreEngine {
+    constructor() {
+        this.weights = {
+            momentum: 0.25,
+            mlConsensus: 0.30,
+            technicalStrength: 0.20,
+            volatilityAdjusted: 0.15,
+            trendQuality: 0.10
+        };
+    }
+    
+    /**
+     * Calcule le score AlphaVault (0-100)
+     * @param {Object} data - Données normalisées (pas de prix bruts)
+     */
+    calculateScore(data) {
+        const scores = {
+            momentum: this.calculateMomentumScore(data.returns),
+            mlConsensus: this.calculateMLConsensusScore(data.models),
+            technicalStrength: this.calculateTechnicalScore(data.technicals),
+            volatilityAdjusted: this.calculateVolatilityScore(data.volatility, data.returns),
+            trendQuality: this.calculateTrendQuality(data.r2Scores)
+        };
+        
+        // Score pondéré
+        const finalScore = Object.keys(scores).reduce((sum, key) => 
+            sum + scores[key] * this.weights[key], 0
+        );
+        
+        return {
+            overall: Math.round(Math.max(0, Math.min(100, finalScore))),
+            components: scores,
+            signal: this.getSignalFromScore(finalScore),
+            confidence: this.getConfidenceLevel(scores)
+        };
+    }
+    
+    calculateMomentumScore(returns) {
+        const recentReturns = returns.slice(-20);
+        const avgReturn = recentReturns.reduce((a, b) => a + b, 0) / recentReturns.length;
+        return Math.max(0, Math.min(100, 50 + (avgReturn * 500)));
+    }
+    
+    calculateMLConsensusScore(models) {
+        const predictions = models.map(m => m.directionScore);
+        const consensus = predictions.reduce((a, b) => a + b, 0) / predictions.length;
+        return (consensus + 1) * 50;
+    }
+    
+    calculateTechnicalScore(technicals) {
+        const rsi = technicals.rsi || 50;
+        const macd = technicals.macd || 0;
+        const bollingerPosition = technicals.bollingerPosition || 0.5;
+        
+        const rsiScore = rsi > 70 ? (100 - rsi) : (rsi < 30 ? rsi : 50);
+        const macdScore = macd > 0 ? 60 : 40;
+        const bbScore = bollingerPosition * 100;
+        
+        return (rsiScore + macdScore + bbScore) / 3;
+    }
+    
+    calculateVolatilityScore(volatility, returns) {
+        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const sharpe = volatility > 0 ? avgReturn / volatility : 0;
+        return Math.max(0, Math.min(100, (sharpe + 1) * 33.33));
+    }
+    
+    calculateTrendQuality(r2Scores) {
+        const avgR2 = r2Scores.reduce((a, b) => a + b, 0) / r2Scores.length;
+        return avgR2 * 100;
+    }
+    
+    getSignalFromScore(score) {
+        if (score >= 75) return { text: 'STRONG BULLISH', class: 'strong-buy', icon: '🚀' };
+        if (score >= 60) return { text: 'BULLISH', class: 'buy', icon: '📈' };
+        if (score >= 40) return { text: 'NEUTRAL', class: 'hold', icon: '⚖' };
+        if (score >= 25) return { text: 'BEARISH', class: 'sell', icon: '📉' };
+        return { text: 'STRONG BEARISH', class: 'strong-sell', icon: '⚠' };
+    }
+    
+    getConfidenceLevel(scores) {
+        const values = Object.values(scores);
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+        const variance = values.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / values.length;
+        const stdDev = Math.sqrt(variance);
+        
+        if (stdDev < 10) return { text: 'HIGH', class: 'high', value: 90 };
+        if (stdDev < 20) return { text: 'MEDIUM', class: 'medium', value: 65 };
+        return { text: 'LOW', class: 'low', value: 40 };
+    }
+}
+
 // ========== MAIN TREND PREDICTION OBJECT ==========
 const TrendPrediction = {
     // API Client & Cache
     apiClient: null,
     rateLimiter: null,
     optimizedCache: null,
+    scoreEngine: null,
     
     // Current State
     currentSymbol: 'AAPL',
@@ -173,18 +267,27 @@ const TrendPrediction = {
     selectedSuggestionIndex: -1,
     searchTimeout: null,
     
-    // Model results
+    // Model results (❌ ARIMA REMOVED)
     models: {
         linear: null,
         polynomial: null,
         exponential: null,
         knn: null,
-        neural: null,
-        arima: null
+        neural: null
     },
     
-    // ✨ NOUVEAU : Backtesting data
+    // Backtesting & Score
     backtestResults: null,
+    alphaVaultScore: null,
+    
+    // Comparison
+    comparisonStocks: [],
+    comparisonParameters: {
+        volatility: 25,
+        correlation: 0.5,
+        riskFree: 4.5,
+        horizon: 30
+    },
     
     // Colors
     colors: {
@@ -193,9 +296,9 @@ const TrendPrediction = {
         tertiary: '#8E7DE3',
         purple: '#9D5CE6',
         lightBlue: '#6C8BE0',
-        success: '#28a745',
-        danger: '#dc3545',
-        warning: '#ffc107'
+        success: '#10b981',
+        danger: '#ef4444',
+        warning: '#f59e0b'
     },
     
     // ============================================
@@ -204,8 +307,9 @@ const TrendPrediction = {
     
     async init() {
         try {
-            console.log('🤖 Initializing ML Trend Prediction with Backtesting...');
+            console.log('🎯 Initializing AlphaVault Score Engine...');
             
+            this.scoreEngine = new AlphaVaultScoreEngine();
             this.rateLimiter = new RateLimiter(8, 60000);
             this.optimizedCache = new OptimizedCache();
             
@@ -232,7 +336,7 @@ const TrendPrediction = {
                 this.loadSymbol(this.currentSymbol);
             }, 500);
             
-            console.log('✅ ML Trend Prediction initialized');
+            console.log('✅ AlphaVault Score Engine initialized');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -557,7 +661,12 @@ const TrendPrediction = {
         
         suggestions[this.selectedSuggestionIndex].classList.add('selected');
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    },
+    }
+};
+
+// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 2/4) ==========
+
+Object.assign(TrendPrediction, {
     
     // ============================================
     // STOCK ANALYSIS
@@ -606,8 +715,7 @@ const TrendPrediction = {
             this.displayStockHeader();
             
             await this.trainAllModels();
-            
-            // ✨ NOUVEAU : Lancer le backtesting
+            await this.calculateAlphaVaultScore();
             await this.performBacktesting();
             
             this.displayResults();
@@ -683,15 +791,138 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // TRAIN ALL MODELS
+    // ✨ NOUVEAU : CALCUL DU ALPHAVAULT SCORE
     // ============================================
     
-    async trainAllModels() {
-        console.log('🤖 Training all ML models...');
+    async calculateAlphaVaultScore() {
+        console.log('🎯 Calculating AlphaVault Score...');
         
         const prices = this.stockData.prices.map(p => p.close);
         
-        ['linear', 'polynomial', 'exponential', 'knn', 'neural', 'arima'].forEach(model => {
+        // 1. Calculer les rendements (pas les prix!)
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+        }
+        
+        // 2. Direction des modèles (hausse/baisse, pas prix)
+        const models = Object.values(this.models).filter(m => m !== null);
+        const currentPrice = prices[prices.length - 1];
+        
+        const modelsData = models.map(model => ({
+            directionScore: model.finalPrediction > currentPrice ? 1 : -1,
+            strength: Math.abs((model.finalPrediction - currentPrice) / currentPrice),
+            r2: model.r2
+        }));
+        
+        // 3. Indicateurs techniques normalisés
+        const technicals = this.calculateTechnicalIndicators(prices);
+        
+        // 4. Volatilité
+        const volatility = Math.sqrt(
+            returns.reduce((sum, r) => sum + r * r, 0) / returns.length
+        ) * Math.sqrt(252);
+        
+        // 5. Calculer le score
+        const scoreData = {
+            returns: returns,
+            models: modelsData,
+            technicals: technicals,
+            volatility: volatility,
+            r2Scores: models.map(m => m.r2)
+        };
+        
+        this.alphaVaultScore = this.scoreEngine.calculateScore(scoreData);
+        
+        console.log('✅ AlphaVault Score:', this.alphaVaultScore);
+        
+        return this.alphaVaultScore;
+    },
+    
+    calculateTechnicalIndicators(prices) {
+        // RSI (Relative Strength Index)
+        const rsi = this.calculateRSI(prices, 14);
+        
+        // MACD
+        const macd = this.calculateMACD(prices);
+        
+        // Bollinger Position
+        const bb = this.calculateBollingerBands(prices, 20);
+        const currentPrice = prices[prices.length - 1];
+        const bollingerPosition = (currentPrice - bb.lower) / (bb.upper - bb.lower);
+        
+        return {
+            rsi: rsi,
+            macd: macd.histogram[macd.histogram.length - 1],
+            bollingerPosition: bollingerPosition
+        };
+    },
+    
+    calculateRSI(prices, period = 14) {
+        const gains = [];
+        const losses = [];
+        
+        for (let i = 1; i < prices.length; i++) {
+            const change = prices[i] - prices[i - 1];
+            gains.push(change > 0 ? change : 0);
+            losses.push(change < 0 ? -change : 0);
+        }
+        
+        const avgGain = gains.slice(-period).reduce((a, b) => a + b, 0) / period;
+        const avgLoss = losses.slice(-period).reduce((a, b) => a + b, 0) / period;
+        
+        if (avgLoss === 0) return 100;
+        
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
+    },
+    
+    calculateMACD(prices) {
+        const ema12 = this.calculateEMA(prices, 12);
+        const ema26 = this.calculateEMA(prices, 26);
+        
+        const macdLine = ema12.map((val, i) => val - ema26[i]);
+        const signalLine = this.calculateEMA(macdLine, 9);
+        const histogram = macdLine.map((val, i) => val - signalLine[i]);
+        
+        return { macdLine, signalLine, histogram };
+    },
+    
+    calculateEMA(prices, period) {
+        const k = 2 / (period + 1);
+        const ema = [prices[0]];
+        
+        for (let i = 1; i < prices.length; i++) {
+            ema.push(prices[i] * k + ema[i - 1] * (1 - k));
+        }
+        
+        return ema;
+    },
+    
+    calculateBollingerBands(prices, period = 20) {
+        const sma = prices.slice(-period).reduce((a, b) => a + b, 0) / period;
+        const variance = prices.slice(-period).reduce((sum, p) => 
+            sum + Math.pow(p - sma, 2), 0
+        ) / period;
+        const stdDev = Math.sqrt(variance);
+        
+        return {
+            middle: sma,
+            upper: sma + 2 * stdDev,
+            lower: sma - 2 * stdDev
+        };
+    },
+    
+    // ============================================
+    // TRAIN ALL MODELS (❌ SANS ARIMA)
+    // ============================================
+    
+    async trainAllModels() {
+        console.log('🤖 Training ML models (ARIMA excluded)...');
+        
+        const prices = this.stockData.prices.map(p => p.close);
+        
+        ['linear', 'polynomial', 'exponential', 'knn', 'neural'].forEach(model => {
             const badge = document.getElementById(`badge-${model}`);
             if (badge) {
                 badge.className = 'model-badge training';
@@ -702,49 +933,37 @@ const TrendPrediction = {
         this.showLoading(true, 'Training Linear Regression...');
         this.models.linear = await this.trainLinearRegression(prices);
         this.updateModelCard('linear', this.models.linear);
-        await this.sleep(300);
+        await this.sleep(200);
         
         this.showLoading(true, 'Training Polynomial Regression...');
         this.models.polynomial = await this.trainPolynomialRegression(prices);
         this.updateModelCard('polynomial', this.models.polynomial);
-        await this.sleep(300);
+        await this.sleep(200);
         
         this.showLoading(true, 'Training Exponential Smoothing...');
         this.models.exponential = await this.trainExponentialSmoothing(prices);
         this.updateModelCard('exponential', this.models.exponential);
-        await this.sleep(300);
+        await this.sleep(200);
         
         this.showLoading(true, 'Training K-Nearest Neighbors...');
         this.models.knn = await this.trainKNN(prices);
         this.updateModelCard('knn', this.models.knn);
-        await this.sleep(300);
+        await this.sleep(200);
         
         this.showLoading(true, 'Training Neural Network...');
         this.models.neural = await this.trainNeuralNetwork(prices);
         this.updateModelCard('neural', this.models.neural);
-        await this.sleep(300);
         
-        this.showLoading(true, 'Training ARIMA...');
-        this.models.arima = await this.trainARIMA(prices);
-        this.updateModelCard('arima', this.models.arima);
-        
-        console.log('✅ All models trained');
+        console.log('✅ All models trained (5/5)');
     },
     
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
-};
-
-// ========== CONTINUATION (FICHIER TROP LONG - SUITE DANS PROCHAIN MESSAGE) ==========
-
-// ========== CONTINUATION DE TREND-PREDICTION.JS ==========
-
-// ============================================
-// LINEAR REGRESSION
-// ============================================
-
-Object.assign(TrendPrediction, {
+    },
+    
+    // ============================================
+    // LINEAR REGRESSION
+    // ============================================
     
     async trainLinearRegression(prices) {
         const n = prices.length;
@@ -1052,87 +1271,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ARIMA
-    // ============================================
-    
-    async trainARIMA(prices, p = 5, d = 1, q = 2) {
-        let diffPrices = prices;
-        for (let i = 0; i < d; i++) {
-            const temp = [];
-            for (let j = 1; j < diffPrices.length; j++) {
-                temp.push(diffPrices[j] - diffPrices[j - 1]);
-            }
-            diffPrices = temp;
-        }
-        
-        const n = diffPrices.length;
-        const arCoeffs = [];
-        
-        for (let lag = 1; lag <= p; lag++) {
-            let sumXY = 0;
-            let sumX2 = 0;
-            for (let i = lag; i < n; i++) {
-                sumXY += diffPrices[i] * diffPrices[i - lag];
-                sumX2 += diffPrices[i - lag] * diffPrices[i - lag];
-            }
-            arCoeffs.push(sumX2 !== 0 ? sumXY / sumX2 : 0);
-        }
-        
-        const fitted = [];
-        for (let i = 0; i < p; i++) {
-            fitted.push(prices[i]);
-        }
-        
-        for (let i = p; i < prices.length; i++) {
-            let prediction = 0;
-            for (let lag = 1; lag <= p; lag++) {
-                if (i - lag >= 0) {
-                    prediction += arCoeffs[lag - 1] * (fitted[i - lag] - (i - lag > 0 ? fitted[i - lag - 1] : prices[0]));
-                }
-            }
-            fitted.push(fitted[i - 1] + prediction);
-        }
-        
-        const predictions = [];
-        let lastValue = prices[prices.length - 1];
-        let recentDiffs = [];
-        
-        for (let i = 0; i < p; i++) {
-            if (prices.length - 1 - i >= 0) {
-                recentDiffs.unshift(prices[prices.length - 1 - i] - (prices.length - 2 - i >= 0 ? prices[prices.length - 2 - i] : prices[0]));
-            }
-        }
-        
-        for (let i = 0; i < this.predictionHorizon; i++) {
-            let prediction = 0;
-            for (let lag = 0; lag < Math.min(p, recentDiffs.length); lag++) {
-                prediction += arCoeffs[lag] * recentDiffs[recentDiffs.length - 1 - lag];
-            }
-            
-            lastValue = lastValue + prediction;
-            predictions.push(lastValue);
-            recentDiffs.push(prediction);
-            if (recentDiffs.length > p) {
-                recentDiffs.shift();
-            }
-        }
-        
-        const r2 = this.calculateR2(prices, fitted);
-        const rmse = this.calculateRMSE(prices, fitted);
-        
-        return {
-            name: 'ARIMA',
-            predictions: predictions,
-            fitted: fitted,
-            finalPrediction: predictions[predictions.length - 1],
-            r2: r2,
-            rmse: rmse,
-            params: { p, d, q, arCoeffs }
-        };
-    },
-    
-    // ============================================
-    // ✨ NOUVEAU : BACKTESTING
+    // ✨ BACKTESTING
     // ============================================
     
     async performBacktesting() {
@@ -1143,31 +1282,27 @@ Object.assign(TrendPrediction, {
         const prices = this.stockData.prices.map(p => p.close);
         const n = prices.length;
         
-        // On va simuler des prédictions passées
-        const backtestPeriods = 10; // Nombre de périodes de backtest
-        const testHorizon = 7; // Horizon de prédiction pour le backtest
+        const backtestPeriods = 10;
+        const testHorizon = 7;
         
         const backtestResults = {
             linear: { predictions: [], actuals: [], errors: [] },
             polynomial: { predictions: [], actuals: [], errors: [] },
             exponential: { predictions: [], actuals: [], errors: [] },
             knn: { predictions: [], actuals: [], errors: [] },
-            neural: { predictions: [], actuals: [], errors: [] },
-            arima: { predictions: [], actuals: [], errors: [] }
+            neural: { predictions: [], actuals: [], errors: [] }
         };
         
-        // Pour chaque période de backtest
         for (let period = 0; period < backtestPeriods; period++) {
             const endIndex = n - (backtestPeriods - period) * testHorizon;
             
-            if (endIndex < 50) continue; // Pas assez de données
+            if (endIndex < 50) continue;
             
             const trainPrices = prices.slice(0, endIndex);
             const actualFuture = prices.slice(endIndex, endIndex + testHorizon);
             
             if (actualFuture.length < testHorizon) continue;
             
-            // Entraîner chaque modèle sur les données d'entraînement
             const tempHorizon = this.predictionHorizon;
             this.predictionHorizon = testHorizon;
             
@@ -1177,16 +1312,13 @@ Object.assign(TrendPrediction, {
                 const expModel = await this.trainExponentialSmoothing(trainPrices);
                 const knnModel = await this.trainKNN(trainPrices);
                 const neuralModel = await this.trainNeuralNetwork(trainPrices);
-                const arimaModel = await this.trainARIMA(trainPrices);
                 
-                // Stocker les résultats
                 const models = {
                     linear: linearModel,
                     polynomial: polyModel,
                     exponential: expModel,
                     knn: knnModel,
-                    neural: neuralModel,
-                    arima: arimaModel
+                    neural: neuralModel
                 };
                 
                 Object.keys(models).forEach(modelName => {
@@ -1206,7 +1338,6 @@ Object.assign(TrendPrediction, {
             this.predictionHorizon = tempHorizon;
         }
         
-        // Calculer les métriques globales
         const backtestMetrics = {};
         
         Object.keys(backtestResults).forEach(modelName => {
@@ -1215,7 +1346,6 @@ Object.assign(TrendPrediction, {
             if (result.errors.length > 0) {
                 const mape = result.errors.reduce((a, b) => a + b, 0) / result.errors.length;
                 
-                // Direction accuracy (bon sens de prédiction)
                 let correctDirection = 0;
                 for (let i = 1; i < result.predictions.length; i++) {
                     const predictedDir = result.predictions[i] > result.predictions[i-1];
@@ -1236,93 +1366,6 @@ Object.assign(TrendPrediction, {
         this.backtestResults = backtestMetrics;
         
         console.log('✅ Backtesting complete:', backtestMetrics);
-    },
-    
-    // ============================================
-    // ✨ NOUVEAU : SWITCH BACKTEST TAB
-    // ============================================
-    
-    switchBacktestTab(button) {
-        // Désactiver tous les boutons
-        document.querySelectorAll('.backtesting-tabs .tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Activer le bouton cliqué
-        button.classList.add('active');
-        
-        // Cacher tous les panels
-        document.querySelectorAll('.backtesting-content .tab-panel').forEach(panel => {
-            panel.classList.remove('active');
-        });
-        
-        // Afficher le panel correspondant
-        const tabId = 'tab-' + button.dataset.tab;
-        const panel = document.getElementById(tabId);
-        if (panel) {
-            panel.classList.add('active');
-        }
-    },
-    
-    // ============================================
-    // ✨ NOUVEAU : EXPORT PREDICTIONS
-    // ============================================
-    
-    exportPredictions() {
-        if (!this.stockData || !this.models.linear) {
-            this.showNotification('No predictions to export', 'warning');
-            return;
-        }
-        
-        console.log('📤 Exporting predictions...');
-        
-        const exportData = {
-            symbol: this.currentSymbol,
-            exportDate: new Date().toISOString(),
-            currentPrice: this.stockData.quote.price,
-            predictionHorizon: this.predictionHorizon,
-            trainingPeriod: this.trainingPeriod,
-            models: {}
-        };
-        
-        Object.keys(this.models).forEach(modelName => {
-            const model = this.models[modelName];
-            if (model) {
-                exportData.models[modelName] = {
-                    name: model.name,
-                    finalPrediction: model.finalPrediction,
-                    r2: model.r2,
-                    rmse: model.rmse,
-                    predictions: model.predictions
-                };
-            }
-        });
-        
-        // Générer CSV
-        let csv = `Stock Symbol,${this.currentSymbol}\n`;
-        csv += `Export Date,${new Date().toLocaleString()}\n`;
-        csv += `Current Price,${this.stockData.quote.price}\n`;
-        csv += `Prediction Horizon,${this.predictionHorizon} days\n\n`;
-        
-        csv += `Model,Final Prediction,R² Score,RMSE,Change %\n`;
-        
-        Object.keys(exportData.models).forEach(modelName => {
-            const model = exportData.models[modelName];
-            const change = ((model.finalPrediction - this.stockData.quote.price) / this.stockData.quote.price) * 100;
-            csv += `${model.name},${model.finalPrediction.toFixed(2)},${(model.r2 * 100).toFixed(2)}%,${model.rmse.toFixed(2)},${change.toFixed(2)}%\n`;
-        });
-        
-        // Télécharger le fichier
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.currentSymbol}_predictions_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Predictions exported successfully!', 'success');
-        console.log('✅ Export complete');
     },
     
     // ============================================
@@ -1412,16 +1455,15 @@ Object.assign(TrendPrediction, {
         }
         return Math.sqrt(sum / actual.length);
     }
-    
 });
 
-// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 3/3) ==========
-
-// ============================================
-// DISPLAY FUNCTIONS
-// ============================================
+// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 3/4) ==========
 
 Object.assign(TrendPrediction, {
+    
+    // ============================================
+    // DISPLAY FUNCTIONS
+    // ============================================
     
     displayStockHeader() {
         const quote = this.stockData.quote;
@@ -1528,12 +1570,9 @@ Object.assign(TrendPrediction, {
         this.createPerformanceCharts();
         this.createPerformanceTable();
         this.displayEnsemblePrediction();
-        
-        // ✨ NOUVEAUX GRAPHIQUES
         this.createBacktestingCharts();
         this.createMultiHorizonChart();
         this.createCorrelationHeatmap();
-        
         this.displayRecommendation();
         
         document.getElementById('resultsPanel').classList.remove('hidden');
@@ -1563,8 +1602,7 @@ Object.assign(TrendPrediction, {
             polynomial: this.colors.secondary,
             exponential: this.colors.tertiary,
             knn: this.colors.purple,
-            neural: '#9D5CE6',
-            arima: this.colors.lightBlue
+            neural: '#9D5CE6'
         };
         
         Object.entries(this.models).forEach(([name, model]) => {
@@ -1657,7 +1695,7 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✨ NOUVEAU : BACKTESTING CHARTS
+    // BACKTESTING CHARTS
     // ============================================
     
     createBacktestingCharts() {
@@ -1779,51 +1817,7 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // // 3. Error Evolution Chart
-        // const errorSeries = Object.keys(this.backtestResults).map(modelName => {
-        //     const result = this.backtestResults[modelName];
-        //     return {
-        //         name: this.models[modelName].name,
-        //         data: result.errors || [],
-        //         color: this.getModelColor(modelName),
-        //         lineWidth: 2
-        //     };
-        // });
-        
-        // Highcharts.chart('backtestErrorChart', {
-        //     chart: {
-        //         height: 450,
-        //         borderRadius: 15
-        //     },
-        //     title: {
-        //         text: 'Prediction Error Evolution',
-        //         style: { color: this.colors.primary, fontWeight: 'bold' }
-        //     },
-        //     subtitle: {
-        //         text: 'MAPE (Mean Absolute Percentage Error) over time',
-        //         style: { color: '#64748b' }
-        //     },
-        //     xAxis: {
-        //         title: { text: 'Backtest Period' }
-        //     },
-        //     yAxis: {
-        //         title: { text: 'Error (%)' },
-        //         min: 0
-        //     },
-        //     tooltip: {
-        //         valueSuffix: '%',
-        //         borderRadius: 10
-        //     },
-        //     legend: {
-        //         enabled: true,
-        //         align: 'center',
-        //         verticalAlign: 'bottom'
-        //     },
-        //     series: errorSeries,
-        //     credits: { enabled: false }
-        // });
-        
-        // 4. Update Backtesting Metrics
+        // 3. Update Backtesting Metrics
         if (this.backtestResults.linear) {
             const avgAccuracy = Object.values(this.backtestResults)
                 .reduce((sum, r) => sum + (100 - r.mape), 0) / Object.keys(this.backtestResults).length;
@@ -1850,8 +1844,26 @@ Object.assign(TrendPrediction, {
         }
     },
     
+    switchBacktestTab(button) {
+        document.querySelectorAll('.backtesting-tabs .tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        button.classList.add('active');
+        
+        document.querySelectorAll('.backtesting-content .tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        
+        const tabId = 'tab-' + button.dataset.tab;
+        const panel = document.getElementById(tabId);
+        if (panel) {
+            panel.classList.add('active');
+        }
+    },
+    
     // ============================================
-    // ✨ NOUVEAU : MULTI-HORIZON CHART
+    // MULTI-HORIZON CHART
     // ============================================
     
     createMultiHorizonChart() {
@@ -1861,7 +1873,6 @@ Object.assign(TrendPrediction, {
         const lastPrice = prices[prices.length - 1].close;
         const dayMs = 24 * 60 * 60 * 1000;
         
-        // Prédictions pour différents horizons (7, 15, 30, 60 jours)
         const horizons = [7, 15, 30, 60];
         const series = [{
             name: 'Historical Price',
@@ -1872,11 +1883,9 @@ Object.assign(TrendPrediction, {
         }];
         
         horizons.forEach((horizon, index) => {
-            // Calculer prédiction moyenne pour cet horizon
             const avgPrediction = Object.values(this.models)
                 .filter(m => m !== null)
                 .reduce((sum, m) => {
-                    // Interpolation linéaire pour l'horizon spécifique
                     const ratio = horizon / this.predictionHorizon;
                     const pred = lastPrice + (m.finalPrediction - lastPrice) * ratio;
                     return sum + pred;
@@ -1951,13 +1960,12 @@ Object.assign(TrendPrediction, {
     },
     
     // ============================================
-    // ✨ NOUVEAU : CORRELATION HEATMAP
+    // CORRELATION HEATMAP
     // ============================================
     
     createCorrelationHeatmap() {
         const modelNames = Object.keys(this.models).filter(name => this.models[name] !== null);
         
-        // Calculer la matrice de corrélation
         const correlationMatrix = [];
         
         modelNames.forEach((model1, i) => {
@@ -1971,7 +1979,6 @@ Object.assign(TrendPrediction, {
             });
         });
         
-        // Créer la heatmap
         Highcharts.chart('correlationHeatmap', {
             chart: {
                 type: 'heatmap',
@@ -2034,14 +2041,12 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // Calculer le consensus score
         const avgCorrelation = correlationMatrix
             .filter((item, index) => Math.floor(index / modelNames.length) !== index % modelNames.length)
             .reduce((sum, item) => sum + item[2], 0) / (correlationMatrix.length - modelNames.length);
         
         const consensusScore = avgCorrelation * 100;
         
-        // Créer une jauge pour le consensus (VERSION PREMIUM)
         Highcharts.chart('consensusGauge', {
             chart: {
                 type: 'solidgauge',
@@ -2072,11 +2077,11 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 100,
                 stops: [
-                    [0.1, '#ef4444'],   // Rouge
-                    [0.3, '#f59e0b'],   // Orange
-                    [0.5, '#fbbf24'],   // Jaune
-                    [0.7, '#84cc16'],   // Vert clair
-                    [0.9, '#22c55e']    // Vert
+                    [0.1, '#ef4444'],
+                    [0.3, '#f59e0b'],
+                    [0.5, '#fbbf24'],
+                    [0.7, '#84cc16'],
+                    [0.9, '#22c55e']
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
@@ -2116,7 +2121,6 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // Description du consensus
         const descriptionEl = document.getElementById('consensusDescription');
         if (descriptionEl) {
             let description = '';
@@ -2147,7 +2151,12 @@ Object.assign(TrendPrediction, {
         if (denominator === 0) return 0;
         
         return numerator / denominator;
-    },
+    }
+});
+
+// ========== CONTINUATION DE TREND-PREDICTION.JS (PARTIE 4/4) ==========
+
+Object.assign(TrendPrediction, {
     
     // ============================================
     // PERFORMANCE COMPARISON
@@ -2523,91 +2532,73 @@ Object.assign(TrendPrediction, {
             polynomial: this.colors.secondary,
             exponential: this.colors.tertiary,
             knn: this.colors.purple,
-            neural: '#9D5CE6',
-            arima: this.colors.lightBlue
+            neural: '#9D5CE6'
         };
         return colors[modelName] || this.colors.primary;
     },
     
     // ============================================
-    // UTILITY FUNCTIONS
+    // EXPORT PREDICTIONS
     // ============================================
     
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    },
-    
-    formatCurrency(value) {
-        if (!value && value !== 0) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: this.stockData?.currency || 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    },
-    
-    showLoading(show, text = 'Loading...') {
-        const loader = document.getElementById('loadingIndicator');
-        const loadingText = document.getElementById('loadingText');
-        
-        if (loader && loadingText) {
-            if (show) {
-                loader.classList.remove('hidden');
-                loadingText.textContent = text;
-            } else {
-                loader.classList.add('hidden');
-            }
+    exportPredictions() {
+        if (!this.stockData || !this.models.linear) {
+            this.showNotification('No predictions to export', 'warning');
+            return;
         }
-    },
-    
-    hideResults() {
-        document.getElementById('stockHeader').classList.add('hidden');
-        document.getElementById('resultsPanel').classList.add('hidden');
-    },
-    
-    updateLastUpdate() {
-        const now = new Date();
-        const formatted = now.toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        
+        console.log('📤 Exporting predictions...');
+        
+        const exportData = {
+            symbol: this.currentSymbol,
+            exportDate: new Date().toISOString(),
+            currentPrice: this.stockData.quote.price,
+            predictionHorizon: this.predictionHorizon,
+            trainingPeriod: this.trainingPeriod,
+            models: {}
+        };
+        
+        Object.keys(this.models).forEach(modelName => {
+            const model = this.models[modelName];
+            if (model) {
+                exportData.models[modelName] = {
+                    name: model.name,
+                    finalPrediction: model.finalPrediction,
+                    r2: model.r2,
+                    rmse: model.rmse,
+                    predictions: model.predictions
+                };
+            }
         });
         
-        const updateElement = document.getElementById('lastUpdate');
-        if (updateElement) {
-            updateElement.textContent = `Last update: ${formatted}`;
-        }
+        let csv = `Stock Symbol,${this.currentSymbol}\n`;
+        csv += `Export Date,${new Date().toLocaleString()}\n`;
+        csv += `Current Price,${this.stockData.quote.price}\n`;
+        csv += `Prediction Horizon,${this.predictionHorizon} days\n\n`;
+        
+        csv += `Model,Final Prediction,R² Score,RMSE,Change %\n`;
+        
+        Object.keys(exportData.models).forEach(modelName => {
+            const model = exportData.models[modelName];
+            const change = ((model.finalPrediction - this.stockData.quote.price) / this.stockData.quote.price) * 100;
+            csv += `${model.name},${model.finalPrediction.toFixed(2)},${(model.r2 * 100).toFixed(2)}%,${model.rmse.toFixed(2)},${change.toFixed(2)}%\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentSymbol}_predictions_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Predictions exported successfully!', 'success');
+        console.log('✅ Export complete');
     },
     
-    showNotification(message, type = 'info') {
-        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-            window.FinanceDashboard.showNotification(message, type);
-        } else {
-            console.log(`[${type.toUpperCase()}]`, message);
-        }
-    }
-    
-});
-
-// ============================================
-// ✨ NOUVEAU : MULTI-STOCK COMPARISON
-// ============================================
-
-Object.assign(TrendPrediction, {
-    
-    comparisonStocks: [],
-    comparisonParameters: {
-        volatility: 25,
-        correlation: 0.5,
-        riskFree: 4.5,
-        horizon: 30
-    },
+    // ============================================
+    // MULTI-STOCK COMPARISON
+    // ============================================
     
     addStockToComparison() {
         const input = document.getElementById('multiStockInput');
@@ -2684,26 +2675,22 @@ Object.assign(TrendPrediction, {
         this.showLoading(true, 'Analyzing multiple stocks...');
         
         try {
-            // Fetch data for all stocks
             const stocksData = await Promise.all(
                 this.comparisonStocks.map(symbol => this.fetchStockForComparison(symbol))
             );
             
-            // Filter out failed requests
             const validStocks = stocksData.filter(d => d !== null);
             
             if (validStocks.length < 2) {
                 throw new Error('Not enough valid stock data. Please check symbols.');
             }
             
-            // Create comparison charts
             this.createMultiStockPredictionChart(validStocks);
             this.createRiskReturnScatter(validStocks);
             this.createStockCorrelationMatrix(validStocks);
             this.createSharpeRatioChart(validStocks);
             this.createComparisonTable(validStocks);
             
-            // Show charts
             document.getElementById('comparisonChartsGrid').style.display = 'grid';
             document.getElementById('comparisonTable').style.display = 'block';
             
@@ -2730,14 +2717,12 @@ Object.assign(TrendPrediction, {
             
             const prices = timeSeries.data.map(p => p.close);
             
-            // Calculate volatility
             const returns = [];
             for (let i = 1; i < prices.length; i++) {
                 returns.push((prices[i] - prices[i-1]) / prices[i-1]);
             }
             const volatility = Math.sqrt(returns.reduce((sum, r) => sum + r*r, 0) / returns.length) * Math.sqrt(252) * 100;
             
-            // Run ensemble prediction
             const tempSymbol = this.currentSymbol;
             const tempData = this.stockData;
             const tempHorizon = this.predictionHorizon;
@@ -2763,7 +2748,6 @@ Object.assign(TrendPrediction, {
             const expectedReturn = ((prediction - currentPrice) / currentPrice) * 100;
             const sharpeRatio = (expectedReturn - this.comparisonParameters.riskFree) / volatility;
             
-            // Restore
             this.currentSymbol = tempSymbol;
             this.stockData = tempData;
             this.predictionHorizon = tempHorizon;
@@ -3027,17 +3011,79 @@ Object.assign(TrendPrediction, {
         `;
         
         document.getElementById('comparisonTable').innerHTML = html;
+    },
+    
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+    
+    formatCurrency(value) {
+        if (!value && value !== 0) return 'N/A';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: this.stockData?.currency || 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
+    },
+    
+    showLoading(show, text = 'Loading...') {
+        const loader = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        
+        if (loader && loadingText) {
+            if (show) {
+                loader.classList.remove('hidden');
+                loadingText.textContent = text;
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+    },
+    
+    hideResults() {
+        document.getElementById('stockHeader').classList.add('hidden');
+        document.getElementById('resultsPanel').classList.add('hidden');
+    },
+    
+    updateLastUpdate() {
+        const now = new Date();
+        const formatted = now.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const updateElement = document.getElementById('lastUpdate');
+        if (updateElement) {
+            updateElement.textContent = `Last update: ${formatted}`;
+        }
+    },
+    
+    showNotification(message, type = 'info') {
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
     }
 });
 
-// ========== INITIALIZE WHEN DOM IS LOADED ==========
-
+// ========== INITIALIZE ==========
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🤖 ML Trend Prediction - Starting initialization...');
+    console.log('🎯 AlphaVault Score Engine - Legal Compliant Version');
     TrendPrediction.init();
 });
 
-// ========== EXPOSITION GLOBALE ==========
 window.TrendPrediction = TrendPrediction;
 
-console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION WITH BACKTESTING');
+console.log('✅ ML Trend Prediction script loaded - AlphaVault Score Edition (100% Legal Compliant)');
