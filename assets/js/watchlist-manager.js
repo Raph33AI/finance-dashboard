@@ -340,10 +340,15 @@ const WatchlistManager = {
         
         const portfolioData = await PortfolioManager.loadFromCloud(portfolioName);
         
-        if (!portfolioData.watchlist) return;
+        // ✅ FIX: Vérifier que watchlist existe ET est un tableau
+        if (!portfolioData.watchlist || !Array.isArray(portfolioData.watchlist)) {
+            console.warn('⚠ Watchlist is not an array, initializing...');
+            portfolioData.watchlist = [];
+            return;
+        }
         
         // Retirer le symbole
-        portfolioData.watchlist = portfolioData.filter(s => s !== symbol);
+        portfolioData.watchlist = portfolioData.watchlist.filter(s => s !== symbol);
         
         // Sauvegarder
         await PortfolioManager.saveToCloud(portfolioName, portfolioData);

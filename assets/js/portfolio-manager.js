@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // 📁 PORTFOLIO MANAGER - Multi-portfolios avec Cloud Sync
-// Version simplifiée - Affichage du NOM UNIQUEMENT
+// Version complète - Toutes fonctionnalités + Modals
 // ═══════════════════════════════════════════════════════════════
 
 const PortfolioManager = (function() {
@@ -395,6 +395,35 @@ const PortfolioManager = (function() {
     }
 
     /**
+     * 🗑 Supprimer un portfolio de Firebase
+     */
+    async function deleteFromCloud(portfolioName) {
+        if (!firebaseReady || !currentUser) {
+            console.warn('⚠ Firebase not ready, cannot delete from cloud');
+            return false;
+        }
+        
+        try {
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
+            
+            await db
+                .collection('users')
+                .doc(userId)
+                .collection('portfolios')
+                .doc(portfolioName)
+                .delete();
+            
+            console.log(`🗑 Portfolio "${portfolioName}" deleted from cloud`);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error deleting from cloud:', error);
+            throw error;
+        }
+    }
+
+    /**
      * 🗑 Supprimer un portfolio
      */
     async function deletePortfolio(portfolioName) {
@@ -404,43 +433,40 @@ const PortfolioManager = (function() {
             return false;
         }
         
-        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?`)) {
+        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?\n\nThis action cannot be undone.`)) {
             return false;
         }
         
         console.log(`🗑 Deleting portfolio "${portfolioName}"...`);
         
-        if (firebaseReady && currentUser) {
-            try {
-                const db = firebase.firestore();
-                const userId = currentUser.uid;
-                
-                await db
-                    .collection('users')
-                    .doc(userId)
-                    .collection('portfolios')
-                    .doc(portfolioName)
-                    .delete();
-                
-                console.log('✅ Portfolio deleted from cloud');
-            } catch (error) {
-                console.error('❌ Error deleting from cloud:', error);
+        try {
+            // Supprimer du cloud
+            if (firebaseReady && currentUser) {
+                await deleteFromCloud(portfolioName);
             }
+            
+            // Supprimer du local storage
+            localStorage.removeItem(`portfolio_${portfolioName}`);
+            
+            // Si c'était le portfolio actif, switcher vers default
+            if (currentPortfolio === portfolioName) {
+                currentPortfolio = 'default';
+                localStorage.setItem('currentPortfolio', 'default');
+                await switchPortfolio('default');
+            }
+            
+            // Rafraîchir l'UI
+            await loadPortfoliosList();
+            
+            showNotification(`Portfolio "${portfolioName}" deleted successfully!`, 'success');
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error deleting portfolio:', error);
+            showNotification('Error deleting portfolio', 'error');
+            return false;
         }
-        
-        localStorage.removeItem(`portfolio_${portfolioName}`);
-        
-        if (currentPortfolio === portfolioName) {
-            currentPortfolio = 'default';
-            localStorage.setItem('currentPortfolio', 'default');
-        }
-        
-        // Rafraîchir l'UI
-        await fetchPortfoliosList();
-        
-        showNotification(`Portfolio "${portfolioName}" deleted successfully!`, 'success');
-        
-        return true;
     }
 
     /**
@@ -456,6 +482,14 @@ const PortfolioManager = (function() {
         
         updateCurrentPortfolioDisplay(portfolioName);
         
+        // Rafraîchir le dropdown
+        await loadPortfoliosList();
+        
+        // Recharger la watchlist si disponible
+        if (window.WatchlistManager && window.WatchlistManager.loadWatchlist) {
+            await window.WatchlistManager.loadWatchlist();
+        }
+        
         // Appliquer les données au MarketData (si disponible)
         if (window.MarketData && window.MarketData.loadPortfolioData) {
             window.MarketData.loadPortfolioData(data);
@@ -466,8 +500,278 @@ const PortfolioManager = (function() {
         return data;
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // 🆕 MODAL FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+
     /**
-     * ➕ Créer un nouveau portfolio
+     * 📂 Ouvrir la modal de création de portfolio
+     */
+    function openCreateModal() {
+        console.log('📂 Opening create portfolio modal...');
+        const modal = document.getElementById('modalCreatePortfolio');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Réinitialiser le champ input
+            const input = document.getElementById('newPortfolioName');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+        } else {
+            console.error('❌ Modal #modalCreatePortfolio not found');
+        }
+    }
+
+    /**
+     * ➕ Créer un nouveau portfolio depuis la modal
+     */
+    async function createPortfolio() {
+        const input = document.getElementById('newPortfolioName');
+        if (!input) {
+            console.error('❌ Input #newPortfolioName not found');
+            return;
+        }
+        
+        const portfolioName = input.value.trim();
+        
+        if (!portfolioName) {
+            alert('Please enter a portfolio name');
+            return;
+        }
+        
+        if (portfolioName.length < 3) {
+            alert('Portfolio name must be at least 3 characters');
+            return;
+        }
+        
+        if (portfolioName.length > 50) {
+            alert('Portfolio name must be less than 50 characters');
+            return;
+        }
+        
+        // Vérifier si le portfolio existe déjà
+        const portfolios = await listPortfolios();
+        const exists = portfolios.some(p => p.name.toLowerCase() === portfolioName.toLowerCase());
+        
+        if (exists) {
+            alert(`Portfolio "${portfolioName}" already exists`);
+            return;
+        }
+        
+        // Créer le portfolio
+        const newPortfolio = createDefaultPortfolioData(portfolioName);
+        
+        try {
+            // Sauvegarder
+            await saveToCloud(portfolioName, newPortfolio);
+            
+            console.log(`✅ Portfolio "${portfolioName}" created successfully`);
+            
+            // Fermer la modal
+            closeModal('modalCreatePortfolio');
+            
+            // Switcher vers le nouveau portfolio
+            await switchPortfolio(portfolioName);
+            
+            // Afficher un message de succès
+            showNotification(`Portfolio "${portfolioName}" created successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error creating portfolio:', error);
+            showNotification('Error creating portfolio. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * ⚙ Ouvrir la modal de gestion des portfolios
+     */
+    async function openManageModal() {
+        console.log('⚙ Opening manage portfolios modal...');
+        
+        const modal = document.getElementById('modalManagePortfolios');
+        if (!modal) {
+            console.error('❌ Modal #modalManagePortfolios not found');
+            return;
+        }
+        
+        // Charger la liste des portfolios
+        const portfolios = await listPortfolios();
+        
+        // Remplir la liste
+        const container = document.getElementById('portfoliosListManage');
+        if (!container) {
+            console.error('❌ Container #portfoliosListManage not found');
+            return;
+        }
+        
+        if (portfolios.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.3; margin-bottom: 16px;"></i>
+                    <p>No portfolios found</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = portfolios.map(portfolio => `
+                <div class='portfolio-manage-item'>
+                    <div class='portfolio-manage-name'>${escapeHtml(portfolio.name)}</div>
+                    <div class='portfolio-manage-actions'>
+                        <button class='btn-rename' onclick='PortfolioManager.renamePortfolioModal("${escapeHtml(portfolio.name)}")'>
+                            <i class='fas fa-edit'></i> Rename
+                        </button>
+                        <button class='btn-delete-portfolio' onclick='PortfolioManager.deletePortfolioModal("${escapeHtml(portfolio.name)}")'>
+                            <i class='fas fa-trash'></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Ouvrir la modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * ✏ Renommer un portfolio depuis la modal
+     */
+    async function renamePortfolioModal(oldName) {
+        if (oldName === 'default') {
+            showNotification('Cannot rename default portfolio', 'error');
+            return;
+        }
+        
+        const newName = prompt(`Rename portfolio "${oldName}" to:`, oldName);
+        
+        if (!newName || newName.trim() === '') {
+            return;
+        }
+        
+        const trimmedName = newName.trim();
+        
+        if (trimmedName === oldName) {
+            return;
+        }
+        
+        if (trimmedName.length < 3) {
+            alert('Portfolio name must be at least 3 characters');
+            return;
+        }
+        
+        if (trimmedName.length > 50) {
+            alert('Portfolio name must be less than 50 characters');
+            return;
+        }
+        
+        try {
+            // Charger le portfolio existant
+            const portfolioData = await loadFromCloud(oldName);
+            
+            // Mettre à jour le nom
+            portfolioData.name = trimmedName;
+            
+            // Sauvegarder avec le nouveau nom
+            await saveToCloud(trimmedName, portfolioData);
+            
+            // Supprimer l'ancien
+            await deleteFromCloud(oldName);
+            localStorage.removeItem(`portfolio_${oldName}`);
+            
+            console.log(`✅ Portfolio renamed from "${oldName}" to "${trimmedName}"`);
+            
+            // Si c'était le portfolio actif, switcher vers le nouveau nom
+            if (currentPortfolio === oldName) {
+                currentPortfolio = trimmedName;
+                localStorage.setItem('currentPortfolio', trimmedName);
+                updateCurrentPortfolioDisplay(trimmedName);
+            }
+            
+            // Recharger la modal
+            await openManageModal();
+            
+            // Recharger le dropdown
+            await loadPortfoliosList();
+            
+            showNotification(`Portfolio renamed to "${trimmedName}" successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error renaming portfolio:', error);
+            showNotification('Error renaming portfolio. Please try again.', 'error');
+        }
+    }
+
+    /**
+     * 🗑 Supprimer un portfolio depuis la modal
+     */
+    async function deletePortfolioModal(portfolioName) {
+        const success = await deletePortfolio(portfolioName);
+        
+        if (success) {
+            // Recharger la modal
+            await openManageModal();
+        }
+    }
+
+    /**
+     * 🔄 Charger la liste des portfolios dans le dropdown
+     */
+    async function loadPortfoliosList() {
+        const dropdown = document.getElementById('portfolioSelect');
+        if (!dropdown) {
+            console.warn('⚠ Dropdown #portfolioSelect not found');
+            return;
+        }
+        
+        const portfolios = await listPortfolios();
+        
+        if (portfolios.length === 0) {
+            dropdown.innerHTML = '<option value="">No portfolios</option>';
+            return;
+        }
+        
+        dropdown.innerHTML = portfolios.map(portfolio => 
+            `<option value="${escapeHtml(portfolio.name)}">${escapeHtml(portfolio.name)}</option>`
+        ).join('');
+        
+        // Sélectionner le portfolio actif
+        if (currentPortfolio) {
+            dropdown.value = currentPortfolio;
+        }
+        
+        console.log(`✅ Portfolio dropdown populated with ${portfolios.length} portfolios`);
+    }
+
+    /**
+     * ❌ Fermer une modal
+     */
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            console.log(`✅ Modal "${modalId}" closed`);
+        }
+    }
+
+    /**
+     * 🔒 Échapper HTML (sécurité XSS)
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🖼 UI HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * ➕ Créer un nouveau portfolio (méthode existante - conservée pour compatibilité)
      */
     async function createNewPortfolio() {
         const name = prompt('Nom du nouveau portfolio:', '');
@@ -504,7 +808,7 @@ const PortfolioManager = (function() {
     }
 
     /**
-     * 🔄 Renommer un portfolio
+     * 🔄 Renommer un portfolio (méthode existante - conservée pour compatibilité)
      */
     async function renamePortfolio(oldName) {
         if (oldName === 'default') {
@@ -541,15 +845,7 @@ const PortfolioManager = (function() {
             
             // Supprimer l'ancien (sans confirmation)
             if (firebaseReady && currentUser) {
-                const db = firebase.firestore();
-                const userId = currentUser.uid;
-                
-                await db
-                    .collection('users')
-                    .doc(userId)
-                    .collection('portfolios')
-                    .doc(oldName)
-                    .delete();
+                await deleteFromCloud(oldName);
             }
             
             localStorage.removeItem(`portfolio_${oldName}`);
@@ -621,9 +917,9 @@ const PortfolioManager = (function() {
             
             // ✅ AFFICHAGE SIMPLIFIÉ - NOM UNIQUEMENT
             item.innerHTML = `
-                <div class="simulation-info" onclick="PortfolioManager.loadAndClosePortfolio('${portfolio.name}')" style="cursor: pointer; padding: 1rem; width: 100%;">
+                <div class="simulation-info" onclick="PortfolioManager.loadAndClosePortfolio('${escapeHtml(portfolio.name)}')" style="cursor: pointer; padding: 1rem; width: 100%;">
                     <span class="simulation-name" style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">
-                        ${portfolio.name}
+                        ${escapeHtml(portfolio.name)}
                     </span>
                 </div>
             `;
@@ -655,6 +951,7 @@ const PortfolioManager = (function() {
                 const modal = document.getElementById('portfoliosModal');
                 if (modal) {
                     modal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
                 }
             }
             
@@ -760,6 +1057,7 @@ const PortfolioManager = (function() {
         loadFromCloud,
         saveToCloud,
         deletePortfolio,
+        deleteFromCloud,
         switchPortfolio,
         createNewPortfolio,
         renamePortfolio,
@@ -768,10 +1066,20 @@ const PortfolioManager = (function() {
         getCurrentPortfolio,
         fetchPortfoliosList,
         
+        // ✅ Méthodes pour les MODALS
+        openCreateModal,
+        openManageModal,
+        createPortfolio,
+        renamePortfolioModal,
+        deletePortfolioModal,
+        loadPortfoliosList,
+        closeModal,
+        
         // ✅ Méthodes pour l'UI
         loadAndClosePortfolio,
         renamePortfolioAndRefresh,
         deletePortfolioAndRefresh,
+        updateCurrentPortfolioDisplay,
 
         // ✅ ALIAS POUR COMPATIBILITÉ
         getCurrentPortfolioName: getCurrentPortfolio,
@@ -785,7 +1093,54 @@ const PortfolioManager = (function() {
 
 })();
 
+// ═══════════════════════════════════════════════════════════════
+// 🎬 EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ✅ Enter key dans la modal de création
+    const createInput = document.getElementById('newPortfolioName');
+    if (createInput) {
+        createInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                PortfolioManager.createPortfolio();
+            }
+        });
+    }
+    
+    // ✅ Fermer les modals avec Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = ['modalCreatePortfolio', 'modalManagePortfolios'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && modal.classList.contains('active')) {
+                    PortfolioManager.closeModal(modalId);
+                }
+            });
+        }
+    });
+    
+    // ✅ Event listener pour le dropdown de sélection de portfolio
+    const dropdown = document.getElementById('portfolioSelect');
+    if (dropdown) {
+        dropdown.addEventListener('change', async (e) => {
+            const newPortfolio = e.target.value;
+            if (newPortfolio) {
+                console.log('🔄 Switching to portfolio:', newPortfolio);
+                await PortfolioManager.switchPortfolio(newPortfolio);
+            }
+        });
+        
+        // ✅ Charger la liste au démarrage
+        setTimeout(() => {
+            PortfolioManager.loadPortfoliosList();
+        }, 500);
+    }
+});
+
 // Exposer globalement
 window.PortfolioManager = PortfolioManager;
 
-console.log('✅ Portfolio Manager loaded successfully (Simplified UI - Name Only)');
+console.log('✅ Portfolio Manager loaded successfully (Complete Version with Modals)');
