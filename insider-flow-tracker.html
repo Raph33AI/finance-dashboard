@@ -275,25 +275,7 @@
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
         <!-- Main Content -->
-        <div class='main-content' style="position: relative;">
-            
-            <!-- ✅ LOADING ICI (avant le header) -->
-            <div id="loadingState" class="loading hidden">
-                <div class="loading-content">
-                    <div class="spinner">
-                        <i class="fas fa-circle-notch"></i>
-                    </div>
-                    <h2>Analysis in progress...</h2>
-                    <p id="loadingMessage">
-                        Fetching Form 4 filings, analyzing patterns, calculating scores...
-                    </p>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">0%</div>
-                </div>
-            </div>
-            
+        <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
@@ -366,6 +348,23 @@
                                 </select>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading hidden">
+                    <div class="loading-content">
+                        <div class="spinner">
+                            <i class="fas fa-circle-notch"></i>
+                        </div>
+                        <h2>Analysis in progress...</h2>
+                        <p id="loadingMessage">
+                            Fetching Form 4 filings, analyzing patterns, calculating scores...
+                        </p>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">0%</div>
                     </div>
                 </div>
 
