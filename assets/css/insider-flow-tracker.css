@@ -198,8 +198,12 @@ body.dark-mode .option-group select {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ LOADING STATE - FIX FINAL: LIMITÉ AU MAIN-CONTENT
+   ✅ LOADING STATE - FIX FINAL: ANCRÉ SUR MAIN-CONTENT
    ═══════════════════════════════════════════════════════════════ */
+.main-content {
+    position: relative; /* ✅ ANCRAGE POUR LE LOADING */
+}
+
 .loading {
     position: absolute;
     top: 0;
@@ -215,7 +219,6 @@ body.dark-mode .option-group select {
     justify-content: center;
     padding: 40px 20px;
     animation: fadeIn 0.3s ease;
-    border-radius: var(--border-radius);
 }
 
 body.dark-mode .loading {
@@ -306,6 +309,23 @@ body.dark-mode .loading {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-top: 12px;
+}
+
+/* ✅ RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+    .loading h2 {
+        font-size: 1.4rem;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 24px;
+    }
+
+    .spinner i {
+        font-size: 60px;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
