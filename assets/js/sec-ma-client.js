@@ -3,12 +3,13 @@
  * 🤝 SEC M&A CLIENT - API DATA LAYER
  * ═══════════════════════════════════════════════════════════════════
  * Client pour récupérer les données Form S-4 et 8-K depuis le Worker
+ * + Document Parsing via Worker (CORS-free)
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class SECMAClient {
     constructor(config = {}) {
-        this.workerURL = config.workerURL || 'https://https://sec-edgar-api.raphnardone.workers.dev';
+        this.workerURL = config.workerURL || 'https://sec-edgar-api.raphnardone.workers.dev';
         this.cache = new Map();
         this.cacheTTL = config.cacheTTL || 300000; // 5 minutes
         this.requestQueue = [];
@@ -440,6 +441,42 @@ class SECMAClient {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔧 DOCUMENT PARSING VIA WORKER (CORS-FREE)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Parse any SEC document URL via Worker (bypasses CORS)
+     * @param {string} url - Full SEC document URL
+     * @returns {Promise<Object>} - Parsed document data
+     */
+    async getDocumentParsed(url) {
+        if (!url) {
+            throw new Error('Document URL is required');
+        }
+
+        console.log('📄 Requesting parsed document from Worker:', url);
+
+        return this.request('/api/sec/parse-document', {
+            params: { 
+                url: encodeURIComponent(url)
+            }
+        });
+    }
+
+    /**
+     * Parse S-4 or 8-K by accession number (auto-detects URL)
+     * @param {string} accession - Accession number (e.g., "0001437749-25-038382")
+     * @param {string} cik - Company CIK
+     * @param {string} formType - "S-4" or "8-K"
+     */
+    async getFilingParsed(accession, cik, formType = '8-K') {
+        // Construct SEC URL
+        const url = `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cik}&accession_number=${accession}&xbrl_type=v`;
+        
+        return this.getDocumentParsed(url);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 💾 CACHE MANAGEMENT
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -500,42 +537,6 @@ class SECMAClient {
         }
     }
 }
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔧 DOCUMENT PARSING VIA WORKER (CORS-FREE)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    /**
-     * Parse any SEC document URL via Worker (bypasses CORS)
-     * @param {string} url - Full SEC document URL
-     * @returns {Promise<Object>} - Parsed document data
-     */
-    async getDocumentParsed(url) {
-        if (!url) {
-            throw new Error('Document URL is required');
-        }
-
-        console.log('📄 Requesting parsed document from Worker:', url);
-
-        return this.request('/api/sec/parse-document', {
-            params: { 
-                url: encodeURIComponent(url)
-            }
-        });
-    }
-
-    /**
-     * Parse S-4 or 8-K by accession number (auto-detects URL)
-     * @param {string} accession - Accession number (e.g., "0001437749-25-038382")
-     * @param {string} cik - Company CIK
-     * @param {string} formType - "S-4" or "8-K"
-     */
-    async getFilingParsed(accession, cik, formType = '8-K') {
-        // Construct SEC URL
-        const url = `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cik}&accession_number=${accession}&xbrl_type=v`;
-        
-        return this.getDocumentParsed(url);
-    }
 
 // Export for use in other scripts
 if (typeof window !== 'undefined') {
