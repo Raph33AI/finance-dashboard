@@ -385,9 +385,6 @@ class MAUIController {
         const recommendation = data.recommendation || 'Insufficient data';
         const color = data.color || 'neutral';
 
-        // Calcule l'angle pour le gauge
-        const angle = (probability / 100) * 180;
-
         container.innerHTML = `
             <div class='probability-score-display'>
                 <div class='probability-gauge'>
@@ -431,12 +428,11 @@ class MAUIController {
      */
     async calculateMAProbabilityLocal(ticker, cik) {
         try {
-            // Simule la collecte de signaux
             const signals = {
                 unusual8K: Math.random() > 0.7 ? 1 : 0,
                 insiderFreeze: Math.random() > 0.8 ? 1 : 0,
                 institutionalAccumulation: Math.random() > 0.6 ? 1 : 0,
-                optionsActivity: 0, // Nécessite API externe
+                optionsActivity: 0,
                 boardChanges: Math.random() > 0.9 ? 1 : 0,
                 legalCounselChanges: Math.random() > 0.95 ? 1 : 0
             };
@@ -625,7 +621,6 @@ class MAUIController {
         } catch (error) {
             console.error('❌ Premium calculation error:', error);
             
-            // Fallback: calcul local
             const sectorPremiums = {
                 'Technology': 35,
                 'Healthcare': 40,
@@ -694,10 +689,8 @@ class MAUIController {
         
         this.showNotification('Refreshing data...', 'info');
         
-        // Clear cache
         maClient.clearCache();
         
-        // Reload tout
         await Promise.all([
             this.loadDashboard(),
             this.loadAlerts(),
@@ -712,7 +705,6 @@ class MAUIController {
      * 🎯 Setup Event Listeners
      */
     setupEventListeners() {
-        // Enter key sur le search input
         const searchInput = document.getElementById('companySearchInput');
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
@@ -722,7 +714,6 @@ class MAUIController {
             });
         }
 
-        // Enter key sur les inputs du premium calculator
         ['premiumTicker', 'premiumPrice'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
@@ -796,7 +787,6 @@ class MAUIController {
      */
     showError(message) {
         console.error('Error:', message);
-        // Implémentation future: afficher un toast/notification
     }
 
     /**
@@ -804,7 +794,6 @@ class MAUIController {
      */
     showNotification(message, type = 'info') {
         console.log(`[${type.toUpperCase()}] ${message}`);
-        // Implémentation future: système de notifications/toasts
     }
 
     /**
@@ -834,20 +823,16 @@ class MAUIController {
 // 🚀 INITIALISATION GLOBALE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Instance globale
 const maUI = new MAUIController();
 
-// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 M&A Predictor - Page loaded');
     
-    // Petite attente pour s'assurer que tout est chargé
     setTimeout(() => {
         maUI.init();
     }, 500);
 });
 
-// Gestion de la fermeture des modals au clic extérieur
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
         const modalId = e.target.id;
@@ -855,11 +840,19 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Animation CSS pour le spinner
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎨 CSS ANIMATIONS (inline)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+(function addSpinnerAnimation() {
+    if (!document.getElementById('ma-spinner-animation')) {
+        const spinnerStyle = document.createElement('style');
+        spinnerStyle.id = 'ma-spinner-animation';
+        spinnerStyle.textContent = `
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(spinnerStyle);
     }
-`;
-document.head.appendChild(style);
+})();
