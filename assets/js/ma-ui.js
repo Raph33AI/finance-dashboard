@@ -302,12 +302,13 @@ class MAUIController {
             const sector = document.getElementById('sectorFilter')?.value || '';
             const year = document.getElementById('yearFilter')?.value || '';
             
-            // ✅ Appelle getDealComps qui utilise getAllMADeals en interne
+            // ✅ NOUVEAU CODE (parseDocuments activé pour les 10 premiers)
             const data = await maClient.getDealComps({ 
                 sector: sector || null, 
                 year: year || null,
-                limit: 100, // ✅ Augmenté pour charger plus de deals
-                forceRefresh: false
+                limit: 50,  // ✅ Réduit pour charger plus vite
+                forceRefresh: false,
+                parseDocuments: true  // ✅ ACTIVE LE PARSING !
             });
             
             console.log('📊 Deal comps data received:', data);

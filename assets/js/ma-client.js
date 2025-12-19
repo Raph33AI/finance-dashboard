@@ -108,7 +108,7 @@ class MAClient {
                 await this.sleep(150); // Rate limiting
             }
 
-            // ✅ OPTIONAL: Parse documents for detailed metrics (comme Form 4 parse XML)
+            // ✅ OPTIONAL: Parse documents for detailed metrics
             if (parseDocuments && allDeals.length > 0) {
                 console.log(`🔄 Parsing ${Math.min(allDeals.length, 20)} documents for detailed data...`);
                 
@@ -118,6 +118,56 @@ class MAClient {
                 for (let i = 0; i < Math.min(allDeals.length, 20); i++) {
                     const deal = allDeals[i];
                     try {
+                        // ✅ NOUVEAU : Essaie d'abord le XML de frais (plus rapide)
+                        const cikClean = deal.cik.replace(/^0+/, '');
+                        const cleanAccession = deal.accessionNumber.replace(/-/g, '');
+                        
+                        // Cherche le fichier XML de frais
+                        const feeXMLURL = `https://www.sec.gov/Archives/edgar/data/${cikClean}/${cleanAccession}/`;
+                        
+                        try {
+                            // Fetch directory listing
+                            const dirResponse = await fetch(feeXMLURL, {
+                                headers: { 'User-Agent': this.userAgent }
+                            });
+                            
+                            if (dirResponse.ok) {
+                                const dirHTML = await dirResponse.text();
+                                
+                                // Look for *_htm.xml files (fee exhibit)
+                                const xmlMatch = dirHTML.match(/href=["']([^"']*_htm\.xml)["']/i);
+                                
+                                if (xmlMatch) {
+                                    const xmlFilename = xmlMatch[1];
+                                    const fullXMLURL = `${feeXMLURL}${xmlFilename}`;
+                                    
+                                    console.log(`   📄 Found fee XML: ${xmlFilename}`);
+                                    
+                                    const xmlResponse = await fetch(fullXMLURL, {
+                                        headers: { 'User-Agent': this.userAgent }
+                                    });
+                                    
+                                    if (xmlResponse.ok) {
+                                        const xmlText = await xmlResponse.text();
+                                        const xmlData = this.extractDealDataFromFeeXML(xmlText);
+                                        
+                                        allDeals[i] = { ...deal, ...xmlData };
+                                        parsedCount++;
+                                        
+                                        if (parsedCount % 5 === 0) {
+                                            console.log(`   ✅ Progress: ${parsedCount}/${Math.min(allDeals.length, 20)} parsed`);
+                                        }
+                                        
+                                        await this.sleep(200);  // Rate limiting
+                                        continue;  // Passe au deal suivant
+                                    }
+                                }
+                            }
+                        } catch (xmlError) {
+                            console.warn(`   ⚠ No fee XML for ${deal.accessionNumber}, trying .txt...`);
+                        }
+                        
+                        // ✅ FALLBACK : Parse le document .txt complet (plus lent)
                         const docText = await this.getMADocument(deal.accessionNumber, deal.cik);
                         const extracted = this.extractDealDataFromDocument(docText);
                         
@@ -221,6 +271,63 @@ class MAClient {
             paymentMethod: this.extractPaymentMethod(text),
             dealStatus: this.extractDealStatus(text)
         };
+    }
+
+    /**
+     * 🔍 Parse les données financières depuis le XML de frais SEC
+     * (Alternative plus rapide que parser le .txt complet)
+     */
+    extractDealDataFromFeeXML(xmlText) {
+        try {
+            // Extract total offering amount (deal value)
+            const offeringMatch = xmlText.match(/<ffd:TtlOfferingAmt[^>]*>([\d.]+)<\/ffd:TtlOfferingAmt>/);
+            const offeringValue = offeringMatch ? parseFloat(offeringMatch[1]) : null;
+            
+            // Extract max price per share
+            const priceMatch = xmlText.match(/<ffd:MaxOfferingPricPerScty[^>]*>([\d.]+)<\/ffd:MaxOfferingPricPerScty>/);
+            const pricePerShare = priceMatch ? parseFloat(priceMatch[1]) : null;
+            
+            // Extract number of shares
+            const sharesMatch = xmlText.match(/<ffd:AmtSctiesRegd[^>]*>([\d]+)<\/ffd:AmtSctiesRegd>/);
+            const shares = sharesMatch ? parseInt(sharesMatch[1]) : null;
+            
+            // Extract security types
+            const isDebt = xmlText.includes('<ffd:OfferingSctyTp contextRef="c_offering">Debt</ffd:OfferingSctyTp>');
+            const isEquity = xmlText.includes('<ffd:OfferingSctyTp contextRef="c_offering">Equity</ffd:OfferingSctyTp>');
+            
+            let dealValue = null;
+            if (offeringValue) {
+                // Convert to millions
+                const valueMillions = offeringValue / 1000000;
+                dealValue = {
+                    valueMillions: valueMillions,
+                    formatted: valueMillions >= 1000 
+                        ? `$${(valueMillions / 1000).toFixed(2)}B` 
+                        : `$${valueMillions.toFixed(2)}M`,
+                    currency: 'USD'
+                };
+            }
+            
+            let paymentMethod = 'Unknown';
+            if (isDebt && isEquity) {
+                paymentMethod = 'Cash + Stock';
+            } else if (isDebt) {
+                paymentMethod = 'Debt/Notes';
+            } else if (isEquity) {
+                paymentMethod = 'Stock';
+            }
+            
+            return {
+                dealValue: dealValue,
+                pricePerShare: pricePerShare,
+                sharesOffered: shares,
+                paymentMethod: paymentMethod,
+                dealStatus: 'Registered'  // S-4 = Registration statement
+            };
+        } catch (error) {
+            console.warn('Failed to parse fee XML:', error.message);
+            return {};
+        }
     }
 
     extractDealValue(text) {
