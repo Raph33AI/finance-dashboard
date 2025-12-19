@@ -1630,3 +1630,30 @@ select:focus-visible {
         border: 1px solid #ccc;
     }
 }
+
+/* ========================================
+   FIX SAFARI/IOS - ZOOM PREVENTION
+   ======================================== */
+@supports (-webkit-touch-callout: none) {
+    /* Cible uniquement Safari/iOS */
+    .form-input,
+    .form-select {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+    
+    .form-input:focus,
+    .form-select:focus {
+        font-size: 16px !important;
+        transform: none !important;
+    }
+}
+
+/* Fix pour les champs qui deviennent illisibles */
+input[type="text"]:focus {
+    /* Empêcher les transformations automatiques du navigateur */
+    -webkit-appearance: none;
+    appearance: none;
+    zoom: 1;
+}
