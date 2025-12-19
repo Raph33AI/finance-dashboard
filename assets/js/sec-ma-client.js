@@ -1,665 +1,507 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🤝 SEC M&A DEALS API CLIENT - AlphaVault AI (VERSION CONFIGURABLE)
+ * 🤝 SEC M&A CLIENT - API DATA LAYER
  * ═══════════════════════════════════════════════════════════════════
- * Client spécialisé pour récupérer et analyser les M&A Deals
- * ✅ Parse S-4, DEFM14A, et 8-K (Items M&A)
- * ✅ EXTRACTION RÉELLE : Deal Value, Premium, Multiples, Acquirer, Target
- * ✅ PAGINATION AUTOMATIQUE
- * ✅ RATE LIMITING RESPECTÉ
+ * Client pour récupérer les données Form S-4 et 8-K depuis le Worker
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class SECMAClient {
-    constructor() {
-        this.workerURL = 'https://sec-edgar-api.raphnardone.workers.dev';
-        this.userAgent = 'AlphaVault AI info@alphavault-ai.com';
+    constructor(config = {}) {
+        this.workerURL = config.workerURL || 'https://your-worker.workers.dev';
         this.cache = new Map();
-        this.cacheDuration = 1800000; // 30 minutes (deals changent moins souvent que Form 4)
+        this.cacheTTL = config.cacheTTL || 300000; // 5 minutes
+        this.requestQueue = [];
+        this.isProcessing = false;
+        this.rateLimit = config.rateLimit || 200; // ms entre requêtes
+        
+        console.log('🤝 SEC M&A Client initialized:', this.workerURL);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🌐 CORE REQUEST HANDLER
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Generic API request with caching and rate limiting
+     */
+    async request(endpoint, options = {}) {
+        const cacheKey = `${endpoint}-${JSON.stringify(options)}`;
+        
+        // Check cache
+        if (!options.forceRefresh) {
+            const cached = this.getFromCache(cacheKey);
+            if (cached) {
+                console.log('📦 Cache HIT:', endpoint);
+                return cached;
+            }
+        }
+
+        // Add to queue
+        return new Promise((resolve, reject) => {
+            this.requestQueue.push({ endpoint, options, cacheKey, resolve, reject });
+            this.processQueue();
+        });
     }
 
     /**
-     * 🚀 MÉTHODE PRINCIPALE : Charge TOUS les M&A Deals récents avec parsing COMPLET
+     * Process request queue with rate limiting
      */
-    async getAllMADeals(options = {}) {
-        const {
-            maxDeals = 50,
-            days = 365,
-            sector = null,
-            minDealValue = null,
-            forceRefresh = false,
-            verbose = false
-        } = options;
-
-        console.log(`🤝 Loading M&A Deals (max ${maxDeals} from last ${days} days)...`);
-
-        const cacheKey = `all-ma-deals-${days}-${maxDeals}-${sector || 'all'}`;
+    async processQueue() {
+        if (this.isProcessing || this.requestQueue.length === 0) return;
         
-        if (!forceRefresh && this.isCacheValid(cacheKey)) {
-            console.log('📦 Returning cached M&A deals');
-            return this.cache.get(cacheKey).data;
-        }
-
-        let allDeals = [];
-        const feedTypes = ['s4', 'defm14a', '8k'];
-
-        try {
-            // ✅ ÉTAPE 1 : Récupérer les filings de chaque type
-            for (const feedType of feedTypes) {
-                console.log(`📥 Fetching ${feedType.toUpperCase()} filings...`);
-
-                const filings = await this.getFeedFilings(feedType, {
-                    limit: feedType === '8k' ? 100 : 50, // Plus de 8-K car beaucoup ne sont pas M&A
-                    days: days
+        this.isProcessing = true;
+        
+        while (this.requestQueue.length > 0) {
+            const { endpoint, options, cacheKey, resolve, reject } = this.requestQueue.shift();
+            
+            try {
+                const params = new URLSearchParams(options.params || {});
+                if (options.forceRefresh) {
+                    params.set('_t', Date.now());
+                }
+                
+                const url = `${this.workerURL}${endpoint}?${params.toString()}`;
+                console.log('🌐 Fetching:', url);
+                
+                const response = await fetch(url, {
+                    method: options.method || 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
                 });
 
-                console.log(`   ✅ Got ${filings.length} ${feedType.toUpperCase()} filings`);
-
-                // ✅ ÉTAPE 2 : Parser chaque filing pour extraire les données du deal
-                for (const filing of filings) {
-                    try {
-                        if (verbose) {
-                            console.log(`🔍 Parsing ${filing.accessionNumber}...`);
-                        }
-
-                        const dealData = await this.parseMAFiling(filing, feedType, verbose);
-
-                        if (dealData && dealData.dealValue) {
-                            // Filtrer par secteur si spécifié
-                            if (!sector || dealData.sector === sector) {
-                                // Filtrer par valeur minimale si spécifié
-                                if (!minDealValue || dealData.dealValue.valueMillions >= minDealValue) {
-                                    allDeals.push(dealData);
-                                    
-                                    if (verbose) {
-                                        console.log(`   ✅ Valid deal: ${dealData.acquirerName} → ${dealData.targetName} (${dealData.dealValue.formatted})`);
-                                    }
-                                }
-                            }
-                        }
-
-                        // Arrêter si on a atteint la limite
-                        if (allDeals.length >= maxDeals) {
-                            console.log(`✅ Reached max deals limit (${maxDeals})`);
-                            break;
-                        }
-
-                        await this.sleep(200); // Rate limiting
-
-                    } catch (parseError) {
-                        if (verbose) {
-                            console.warn(`⚠ Error parsing ${filing.accessionNumber}:`, parseError.message);
-                        }
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                if (allDeals.length >= maxDeals) break;
-            }
-
-            // ✅ ÉTAPE 3 : Trier par date (plus récent en premier)
-            allDeals.sort((a, b) => new Date(b.announcementDate) - new Date(a.announcementDate));
-
-            // Limiter au nombre max
-            allDeals = allDeals.slice(0, maxDeals);
-
-            console.log(`🎉 Successfully parsed ${allDeals.length} M&A deals`);
-
-            // Cache le résultat
-            this.cache.set(cacheKey, {
-                data: allDeals,
-                timestamp: Date.now()
-            });
-
-            return allDeals;
-
-        } catch (error) {
-            console.error('❌ Error loading M&A deals:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * 📥 Récupère les filings d'un type spécifique
-     */
-    async getFeedFilings(feedType, options = {}) {
-        const { limit = 50, days = 365 } = options;
-
-        try {
-            const response = await fetch(
-                `${this.workerURL}/api/sec/feed/${feedType}?limit=${limit}`
-            );
-
-            if (!response.ok) {
-                throw new Error(`Worker error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.data || data.data.length === 0) {
-                return [];
-            }
-
-            // Filtrer par date
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - days);
-
-            const filings = data.data.filter(f => {
-                const filedDate = new Date(f.filedDate);
-                return filedDate >= cutoffDate;
-            });
-
-            return filings;
-
-        } catch (error) {
-            console.error(`❌ Error fetching ${feedType} feed:`, error);
-            return [];
-        }
-    }
-
-    /**
-     * 🔍 PARSER PRINCIPAL : Analyse un filing M&A et extrait les données du deal
-     */
-    async parseMAFiling(filing, feedType, verbose = false) {
-        try {
-            // Construction de l'URL du document texte
-            let docURL = filing.filingUrl || filing.link;
-            
-            if (!docURL) {
-                if (verbose) console.warn(`⚠ No filing URL for ${filing.accessionNumber}`);
-                return null;
-            }
-
-            // Convertir l'index HTML en fichier .txt pour parsing
-            docURL = docURL.replace('-index.htm', '.txt').replace('-index.html', '.txt');
-
-            if (verbose) console.log(`📄 Fetching: ${docURL}`);
-
-            const response = await fetch(docURL, {
-                headers: { 
-                    'User-Agent': this.userAgent,
-                    'Accept': 'text/plain, text/html, */*'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const text = await response.text();
-
-            // Pour les 8-K, vérifier d'abord si c'est un M&A filing
-            if (feedType === '8k') {
-                const isMARelated = this.is8KMARelated(text);
-                if (!isMARelated) {
-                    if (verbose) console.log(`   ⏭ Skipping non-M&A 8-K`);
-                    return null;
-                }
-            }
-
-            // ✅ EXTRACTION DES DONNÉES
-            const dealData = {
-                // Métadonnées du filing
-                companyName: filing.companyName,
-                cik: filing.cik,
-                formType: filing.formType || feedType.toUpperCase(),
-                filedDate: filing.filedDate,
-                accessionNumber: filing.accessionNumber,
-                filingUrl: filing.filingUrl,
+                const data = await response.json();
                 
-                // Données du deal extraites
-                dealValue: this.extractDealValue(text),
-                acquirerName: this.extractAcquirerName(text, filing),
-                targetName: this.extractTargetName(text, filing),
-                premium: this.extractPremium(text),
-                evSales: this.extractMultiple(text, 'sales'),
-                evEbitda: this.extractMultiple(text, 'ebitda'),
-                pbRatio: this.extractMultiple(text, 'book'),
-                sector: this.extractSector(text, filing),
-                dealStatus: this.extractDealStatus(text, feedType),
-                announcementDate: this.extractAnnouncementDate(text) || filing.filedDate,
-                paymentMethod: this.extractPaymentMethod(text),
-                synergies: this.extractSynergies(text),
-                dealType: this.extractDealType(text),
-                expectedClose: this.extractExpectedCloseDate(text)
-            };
-
-            // ✅ Validation : au minimum besoin du deal value OU d'un acquirer ET target
-            if (!dealData.dealValue && (!dealData.acquirerName || !dealData.targetName)) {
-                if (verbose) console.log(`   ⚠ Insufficient deal data in ${filing.accessionNumber}`);
-                return null;
+                // Cache result
+                this.setCache(cacheKey, data);
+                
+                resolve(data);
+                
+                // Rate limit
+                if (this.requestQueue.length > 0) {
+                    await this.sleep(this.rateLimit);
+                }
+                
+            } catch (error) {
+                console.error('❌ Request failed:', endpoint, error);
+                reject(error);
             }
+        }
+        
+        this.isProcessing = false;
+    }
 
-            return dealData;
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 FORM S-4 ENDPOINTS (M&A Filings)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        } catch (error) {
-            if (verbose) console.error(`❌ Parse error for ${filing.accessionNumber}:`, error.message);
+    /**
+     * Get S-4 filings feed
+     */
+    async getS4Feed(params = {}) {
+        const options = {
+            params: {
+                limit: params.limit || 50,
+                cik: params.cik || ''
+            },
+            forceRefresh: params.forceRefresh || false
+        };
+        
+        return this.request('/api/sec/s4/feed', options);
+    }
+
+    /**
+     * Get S-4 document content with full parsing
+     */
+    async getS4Content(accession, cik) {
+        if (!accession || !cik) {
+            throw new Error('Accession number and CIK required');
+        }
+        
+        return this.request('/api/sec/s4/content', {
+            params: { accession, cik }
+        });
+    }
+
+    /**
+     * Bulk load S-4 filings
+     */
+    async getS4Bulk(params = {}) {
+        const options = {
+            params: {
+                days: params.days || 90,
+                max: params.max || 200
+            }
+        };
+        
+        return this.request('/api/sec/s4/bulk', options);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 FORM 8-K ENDPOINTS (Material Events)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Get 8-K filings feed
+     */
+    async get8KFeed(params = {}) {
+        const options = {
+            params: {
+                limit: params.limit || 100,
+                cik: params.cik || ''
+            },
+            forceRefresh: params.forceRefresh || false
+        };
+        
+        return this.request('/api/sec/8k/feed', options);
+    }
+
+    /**
+     * Get 8-K document content with full parsing
+     */
+    async get8KContent(accession, cik) {
+        if (!accession || !cik) {
+            throw new Error('Accession number and CIK required');
+        }
+        
+        return this.request('/api/sec/8k/content', {
+            params: { accession, cik }
+        });
+    }
+
+    /**
+     * Bulk load 8-K filings with Item filtering
+     */
+    async get8KBulk(params = {}) {
+        const options = {
+            params: {
+                days: params.days || 90,
+                max: params.max || 500,
+                items: params.items || '' // Ex: "1.01,2.01"
+            }
+        };
+        
+        return this.request('/api/sec/8k/bulk', options);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🤝 M&A ANALYTICS ENDPOINTS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Get recent M&A deals (combined S-4 + 8-K)
+     */
+    async getRecentDeals(params = {}) {
+        const options = {
+            params: {
+                days: params.days || 90,
+                minValue: params.minValue || 0
+            }
+        };
+        
+        return this.request('/api/sec/ma/recent-deals', options);
+    }
+
+    /**
+     * Get material events categorized
+     */
+    async getMaterialEvents(params = {}) {
+        const options = {
+            params: {
+                days: params.days || 30,
+                cik: params.cik || ''
+            }
+        };
+        
+        return this.request('/api/sec/ma/material-events', options);
+    }
+
+    /**
+     * Get company-specific M&A activity
+     */
+    async getCompanyMAActivity(cik, days = 365) {
+        const [s4Data, eightKData] = await Promise.all([
+            this.getS4Feed({ cik, limit: 100 }),
+            this.get8KBulk({ days, items: '1.01,2.01' })
+        ]);
+
+        // Filter 8-K data by CIK
+        const companyEightK = eightKData.filings?.filter(f => f.cik === cik) || [];
+
+        return {
+            cik,
+            s4Filings: s4Data.filings || [],
+            materialEvents: companyEightK,
+            totalActivity: (s4Data.count || 0) + companyEightK.length,
+            period: days
+        };
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔍 TICKER & CIK UTILITIES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Convert ticker to CIK
+     */
+    async tickerToCIK(ticker) {
+        return this.request('/api/sec/ticker-to-cik', {
+            params: { ticker: ticker.toUpperCase() }
+        });
+    }
+
+    /**
+     * Batch ticker to CIK conversion
+     */
+    async batchTickerToCIK(tickers) {
+        const results = {};
+        
+        for (const ticker of tickers) {
+            try {
+                const data = await this.tickerToCIK(ticker);
+                results[ticker] = {
+                    cik: data.cik,
+                    companyName: data.companyName,
+                    success: true
+                };
+            } catch (error) {
+                results[ticker] = {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+        
+        return results;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🧬 PARSING METHODS (Integration avec les parsers)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Parse S-4 XML content
+     */
+    parseS4Content(rawText) {
+        if (typeof FormS4Parser === 'undefined') {
+            console.error('❌ FormS4Parser not loaded');
+            return { error: 'Parser not available' };
+        }
+
+        return FormS4Parser.parse(rawText);
+    }
+
+    /**
+     * Parse 8-K XML content
+     */
+    parse8KContent(rawText) {
+        if (typeof Form8KParser === 'undefined') {
+            console.error('❌ Form8KParser not loaded');
+            return { error: 'Parser not available' };
+        }
+
+        return Form8KParser.parse(rawText);
+    }
+
+    /**
+     * Get S-4 content with enhanced parsing
+     */
+    async getS4ContentParsed(accession, cik) {
+        const rawData = await this.getS4Content(accession, cik);
+        
+        if (rawData.rawContent) {
+            const parsedEnhanced = this.parseS4Content(rawData.rawContent);
+            return {
+                ...rawData,
+                parsedEnhanced
+            };
+        }
+
+        return rawData;
+    }
+
+    /**
+     * Get 8-K content with enhanced parsing
+     */
+    async get8KContentParsed(accession, cik) {
+        const rawData = await this.get8KContent(accession, cik);
+        
+        if (rawData.rawContent) {
+            const parsedEnhanced = this.parse8KContent(rawData.rawContent);
+            return {
+                ...rawData,
+                parsedEnhanced
+            };
+        }
+
+        return rawData;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 ADVANCED QUERIES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * Get all M&A activity for multiple companies
+     */
+    async getPortfolioMAActivity(tickers, days = 90) {
+        console.log('📊 Loading M&A activity for portfolio:', tickers);
+        
+        // Convert tickers to CIKs
+        const cikMap = await this.batchTickerToCIK(tickers);
+        
+        const results = [];
+        
+        for (const [ticker, info] of Object.entries(cikMap)) {
+            if (!info.success) {
+                console.warn(`⚠ Skipping ${ticker}: ${info.error}`);
+                continue;
+            }
+            
+            try {
+                const activity = await this.getCompanyMAActivity(info.cik, days);
+                results.push({
+                    ticker,
+                    ...info,
+                    activity
+                });
+            } catch (error) {
+                console.error(`❌ Failed to load activity for ${ticker}:`, error);
+            }
+        }
+        
+        return results;
+    }
+
+    /**
+     * Search for specific deal terms in S-4 filings
+     */
+    async searchDealTerms(searchParams = {}) {
+        const s4Bulk = await this.getS4Bulk({
+            days: searchParams.days || 180,
+            max: searchParams.max || 200
+        });
+
+        const results = [];
+
+        for (const filing of s4Bulk.filings || []) {
+            try {
+                const content = await this.getS4ContentParsed(filing.accessionNumber, filing.cik);
+                const parsed = content.parsedEnhanced || content.parsed;
+
+                // Filter by criteria
+                let matches = true;
+
+                if (searchParams.minDealValue && (!parsed?.dealStructure?.dealValue || parsed.dealStructure.dealValue < searchParams.minDealValue)) {
+                    matches = false;
+                }
+
+                if (searchParams.dealType && parsed?.dealStructure?.dealType !== searchParams.dealType) {
+                    matches = false;
+                }
+
+                if (matches) {
+                    results.push({
+                        filing,
+                        parsed
+                    });
+                }
+
+            } catch (error) {
+                console.error(`Failed to parse S-4 ${filing.accessionNumber}:`, error);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Get 8-K alerts by Item type
+     */
+    async get8KAlerts(itemNumbers = ['1.01', '2.01'], days = 7) {
+        const data = await this.get8KBulk({
+            days,
+            items: itemNumbers.join(','),
+            max: 500
+        });
+
+        return {
+            count: data.count,
+            alerts: data.filings || [],
+            itemFilter: itemNumbers,
+            period: days
+        };
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💾 CACHE MANAGEMENT
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    setCache(key, data) {
+        this.cache.set(key, {
+            data,
+            timestamp: Date.now()
+        });
+    }
+
+    getFromCache(key) {
+        const cached = this.cache.get(key);
+        
+        if (!cached) return null;
+        
+        const age = Date.now() - cached.timestamp;
+        
+        if (age > this.cacheTTL) {
+            this.cache.delete(key);
             return null;
         }
-    }
-
-    /**
-     * 🔎 Vérifie si un 8-K est lié à du M&A
-     */
-    is8KMARelated(text) {
-        const lowerText = text.toLowerCase();
         
-        // Vérifier la présence d'Items M&A critiques
-        const criticalItems = [
-            'item 1.01', // Entry into Material Definitive Agreement
-            'item 2.01', // Completion of Acquisition or Disposition
-            'item 5.01'  // Changes in Control of Registrant
-        ];
-
-        const hasMAItem = criticalItems.some(item => lowerText.includes(item));
-
-        // Vérifier la présence de mots-clés M&A
-        const maKeywords = [
-            'merger agreement',
-            'acquisition agreement',
-            'purchase agreement',
-            'definitive agreement',
-            'tender offer',
-            'change of control',
-            'stock purchase',
-            'asset purchase'
-        ];
-
-        const keywordCount = maKeywords.filter(keyword => lowerText.includes(keyword)).length;
-
-        return hasMAItem || keywordCount >= 2;
+        return cached.data;
     }
 
-    /**
-     * 💰 EXTRACTION : Deal Value
-     */
-    extractDealValue(text) {
-        const patterns = [
-            /aggregate\s+(?:purchase\s+)?price\s+of\s+(?:approximately\s+)?\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /transaction\s+value\s+of\s+(?:approximately\s+)?\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /purchase\s+price\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /consideration\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /enterprise\s+value\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /equity\s+value\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /\$\s?([\d,]+(?:\.\d+)?)\s*(million|billion)\s+in\s+(?:cash|aggregate)/i,
-            /total\s+consideration\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                const value = parseFloat(match[1].replace(/,/g, ''));
-                const unit = match[2].toLowerCase();
-                const valueMillions = unit === 'billion' ? value * 1000 : value;
-                
-                return {
-                    valueMillions: valueMillions,
-                    formatted: `$${value}${unit === 'billion' ? 'B' : 'M'}`,
-                    currency: 'USD'
-                };
-            }
-        }
-
-        return null;
+    clearCache() {
+        this.cache.clear();
+        console.log('🗑 Cache cleared');
     }
 
-    /**
-     * 🏢 EXTRACTION : Acquirer Name
-     */
-    extractAcquirerName(text, filing) {
-        const patterns = [
-            /(?:the\s+)?acquirer[,\s:]+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /(?:the\s+)?purchaser[,\s:]+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /(?:the\s+)?buyer[,\s:]+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /acquired\s+by\s+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /merger\s+with\s+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))\s+(?:has\s+)?agreed\s+to\s+acquire/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                return this.cleanCompanyName(match[1]);
-            }
-        }
-
-        // Si Form S-4 ou DEFM14A, souvent le filing company est l'acquirer
-        if (filing.formType === 'S-4' || filing.formType === 'DEFM14A') {
-            return filing.companyName;
-        }
-
-        return 'Unknown Acquirer';
-    }
-
-    /**
-     * 🎯 EXTRACTION : Target Name
-     */
-    extractTargetName(text, filing) {
-        const patterns = [
-            /(?:the\s+)?target[,\s:]+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /acquisition\s+of\s+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /purchase\s+of\s+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i,
-            /merger\s+of\s+([A-Z][A-Za-z\s&,\.]+(?:Inc\.|Corp\.|Corporation|Company|LLC|Ltd\.|L\.P\.|LP))/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                return this.cleanCompanyName(match[1]);
-            }
-        }
-
-        // Pour 8-K, souvent la company qui file est la target
-        if (filing.formType === '8-K' || filing.formType === '8K') {
-            return filing.companyName;
-        }
-
-        return 'Unknown Target';
-    }
-
-    /**
-     * 📈 EXTRACTION : Premium
-     */
-    extractPremium(text) {
-        const patterns = [
-            /premium\s+of\s+([\d.]+)%/i,
-            /([\d.]+)%\s+premium/i,
-            /premium\s+to\s+(?:the\s+)?(?:closing\s+)?(?:stock\s+)?price\s+of\s+([\d.]+)%/i,
-            /([\d.]+)%\s+above\s+(?:the\s+)?(?:closing\s+)?price/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                const premium = parseFloat(match[1]);
-                if (premium > 0 && premium < 200) { // Sanity check
-                    return premium;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 📊 EXTRACTION : Multiples (EV/Sales, EV/EBITDA, P/B)
-     */
-    extractMultiple(text, type) {
-        let patterns = [];
-        
-        if (type === 'sales') {
-            patterns = [
-                /ev\s*[/\\]\s*sales\s+(?:multiple\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /enterprise\s+value\s+to\s+sales\s+(?:ratio\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /price\s+to\s+sales\s+(?:ratio\s+)?(?:of\s+)?([\d.]+)x?/i
-            ];
-        } else if (type === 'ebitda') {
-            patterns = [
-                /ev\s*[/\\]\s*ebitda\s+(?:multiple\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /enterprise\s+value\s+to\s+ebitda\s+(?:ratio\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /([\d.]+)x\s+ebitda/i
-            ];
-        } else if (type === 'book') {
-            patterns = [
-                /price\s+to\s+book\s+(?:ratio\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /p\s*[/\\]\s*b\s+(?:ratio\s+)?(?:of\s+)?([\d.]+)x?/i,
-                /([\d.]+)x\s+book\s+value/i
-            ];
-        }
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                const multiple = parseFloat(match[1]);
-                if (multiple > 0 && multiple < 100) { // Sanity check
-                    return multiple;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 🏭 EXTRACTION : Sector
-     */
-    extractSector(text, filing) {
-        const sectors = {
-            'Technology': ['software', 'saas', 'cloud', 'cyber', 'ai', 'machine learning', 'semiconductor'],
-            'Healthcare': ['pharma', 'biotech', 'medical', 'health', 'clinical', 'therapeutics'],
-            'Financial Services': ['bank', 'insurance', 'fintech', 'asset management', 'capital'],
-            'Energy': ['oil', 'gas', 'renewable', 'energy', 'utility'],
-            'Consumer': ['retail', 'consumer', 'e-commerce', 'brand'],
-            'Industrial': ['manufacturing', 'industrial', 'aerospace', 'defense'],
-            'Real Estate': ['reit', 'real estate', 'property'],
-            'Telecom': ['telecom', 'wireless', 'network', '5g']
+    getCacheStats() {
+        return {
+            entries: this.cache.size,
+            ttl: this.cacheTTL
         };
-
-        const lowerText = text.toLowerCase();
-
-        for (const [sector, keywords] of Object.entries(sectors)) {
-            for (const keyword of keywords) {
-                if (lowerText.includes(keyword)) {
-                    return sector;
-                }
-            }
-        }
-
-        return 'Other';
     }
 
-    /**
-     * 📋 EXTRACTION : Deal Status
-     */
-    extractDealStatus(text, feedType) {
-        const lowerText = text.toLowerCase();
-
-        if (lowerText.includes('completed') || lowerText.includes('closing') || lowerText.includes('consummated')) {
-            return 'Completed';
-        } else if (lowerText.includes('definitive agreement') || lowerText.includes('entered into')) {
-            return 'Definitive Agreement';
-        } else if (lowerText.includes('letter of intent') || lowerText.includes('loi')) {
-            return 'Letter of Intent';
-        } else if (lowerText.includes('terminated') || lowerText.includes('withdrawn')) {
-            return 'Terminated';
-        }
-
-        // Par défaut selon le type de form
-        if (feedType === 's4' || feedType === 'defm14a') {
-            return 'Pending';
-        } else if (feedType === '8k' && lowerText.includes('item 2.01')) {
-            return 'Completed';
-        }
-
-        return 'Announced';
-    }
-
-    /**
-     * 📅 EXTRACTION : Announcement Date
-     */
-    extractAnnouncementDate(text) {
-        const patterns = [
-            /announced\s+on\s+([A-Z][a-z]+\s+\d{1,2},\s+\d{4})/i,
-            /entered\s+into\s+on\s+([A-Z][a-z]+\s+\d{1,2},\s+\d{4})/i,
-            /dated\s+(?:as\s+of\s+)?([A-Z][a-z]+\s+\d{1,2},\s+\d{4})/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                const date = new Date(match[1]);
-                if (!isNaN(date.getTime())) {
-                    return date.toISOString().split('T')[0];
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 💳 EXTRACTION : Payment Method
-     */
-    extractPaymentMethod(text) {
-        const lowerText = text.toLowerCase();
-        
-        const methods = [];
-        
-        if (lowerText.includes('all cash') || lowerText.includes('cash consideration')) {
-            methods.push('Cash');
-        }
-        if (lowerText.includes('stock') || lowerText.includes('shares') || lowerText.includes('equity')) {
-            methods.push('Stock');
-        }
-        if (lowerText.includes('cash and stock') || (methods.includes('Cash') && methods.includes('Stock'))) {
-            return 'Cash + Stock';
-        }
-
-        return methods.length > 0 ? methods.join(' + ') : 'Unknown';
-    }
-
-    /**
-     * ⚡ EXTRACTION : Synergies
-     */
-    extractSynergies(text) {
-        const patterns = [
-            /synergies\s+of\s+(?:approximately\s+)?\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /cost\s+savings\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i,
-            /annual\s+(?:run-rate\s+)?synergies\s+of\s+\$?([\d,]+(?:\.\d+)?)\s*(million|billion)/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                const value = parseFloat(match[1].replace(/,/g, ''));
-                const unit = match[2].toLowerCase();
-                return {
-                    value: unit === 'billion' ? value * 1000 : value,
-                    formatted: `$${value}${unit === 'billion' ? 'B' : 'M'}`
-                };
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 🔄 EXTRACTION : Deal Type
-     */
-    extractDealType(text) {
-        const lowerText = text.toLowerCase();
-
-        if (lowerText.includes('merger of equals')) return 'Merger of Equals';
-        if (lowerText.includes('reverse merger')) return 'Reverse Merger';
-        if (lowerText.includes('tender offer')) return 'Tender Offer';
-        if (lowerText.includes('leveraged buyout') || lowerText.includes('lbo')) return 'LBO';
-        if (lowerText.includes('management buyout') || lowerText.includes('mbo')) return 'MBO';
-        if (lowerText.includes('asset purchase')) return 'Asset Purchase';
-        if (lowerText.includes('stock purchase')) return 'Stock Purchase';
-        if (lowerText.includes('merger')) return 'Merger';
-        if (lowerText.includes('acquisition')) return 'Acquisition';
-
-        return 'Other';
-    }
-
-    /**
-     * 📆 EXTRACTION : Expected Close Date
-     */
-    extractExpectedCloseDate(text) {
-        const patterns = [
-            /expected\s+to\s+close\s+(?:in\s+|during\s+)?(?:the\s+)?([A-Z][a-z]+\s+(?:quarter\s+)?(?:of\s+)?\d{4})/i,
-            /anticipated\s+closing\s+(?:in\s+|during\s+)?([A-Z][a-z]+\s+\d{4})/i,
-            /close\s+(?:in\s+|during\s+)?(?:the\s+)?([A-Z][a-z]+\s+(?:quarter\s+)?(?:of\s+)?\d{4})/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match) {
-                return match[1];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 🔧 UTILITY : Clean Company Name
-     */
-    cleanCompanyName(name) {
-        return name
-            .trim()
-            .replace(/\s{2,}/g, ' ')
-            .substring(0, 150); // Limiter la longueur
-    }
-
-    /**
-     * 📊 Analyse des deals pour un ticker spécifique (détection M&A probability)
-     */
-    async getTickerMAActivity(ticker, months = 12) {
-        try {
-            console.log(`🔍 Checking M&A activity for ${ticker}...`);
-
-            const days = months * 30;
-            const deals = await this.getAllMADeals({ 
-                maxDeals: 100, 
-                days: days,
-                verbose: false 
-            });
-
-            // Filtrer les deals où ce ticker est impliqué
-            const tickerLower = ticker.toLowerCase();
-            const relatedDeals = deals.filter(deal => {
-                const acquirer = (deal.acquirerName || '').toLowerCase();
-                const target = (deal.targetName || '').toLowerCase();
-                const company = (deal.companyName || '').toLowerCase();
-                
-                return acquirer.includes(tickerLower) || 
-                       target.includes(tickerLower) || 
-                       company.includes(tickerLower);
-            });
-
-            return {
-                ticker,
-                period: `${months} months`,
-                totalDeals: relatedDeals.length,
-                deals: relatedDeals,
-                asAcquirer: relatedDeals.filter(d => 
-                    (d.acquirerName || '').toLowerCase().includes(tickerLower)
-                ).length,
-                asTarget: relatedDeals.filter(d => 
-                    (d.targetName || '').toLowerCase().includes(tickerLower)
-                ).length,
-                totalValue: relatedDeals.reduce((sum, d) => 
-                    sum + (d.dealValue?.valueMillions || 0), 0
-                )
-            };
-
-        } catch (error) {
-            console.error(`❌ Error checking M&A activity for ${ticker}:`, error);
-            throw error;
-        }
-    }
-
-    /**
-     * 🔧 UTILITY FUNCTIONS
-     */
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🛠 UTILITIES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    isCacheValid(key) {
-        if (!this.cache.has(key)) return false;
-        const cached = this.cache.get(key);
-        return (Date.now() - cached.timestamp) < this.cacheDuration;
-    }
-
-    clearCache() {
-        this.cache.clear();
-        console.log('🧹 M&A Cache cleared');
+    /**
+     * Health check
+     */
+    async healthCheck() {
+        try {
+            const response = await fetch(`${this.workerURL}/health`);
+            const data = await response.json();
+            console.log('✅ Worker health check:', data);
+            return data;
+        } catch (error) {
+            console.error('❌ Worker health check failed:', error);
+            throw error;
+        }
     }
 }
 
-// Export global
-window.SECMAClient = SECMAClient;
-
-console.log('✅ SEC M&A Client loaded');
+// Export for use in other scripts
+if (typeof window !== 'undefined') {
+    window.SECMAClient = SECMAClient;
+}

@@ -20,7 +20,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <script src="assets/js/config.js"></script>
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
@@ -271,7 +270,7 @@
                     </h1>
                 </div>
                 <div class='header-right'>
-                    <button class='dashboard-btn' onclick='maUI.refreshData()'>
+                    <button class='dashboard-btn' onclick='location.reload()'>
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh Data</span>
                     </button>
@@ -281,215 +280,59 @@
             <div class='container'>
                 
                 <!-- ========================================
-                     DASHBOARD OVERVIEW
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-tachometer-alt'></i> M&A Dashboard Overview
-                        <button class='info-btn' onclick='maUI.openModal("dashboardInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div id='maOverviewGrid' class='ma-overview-grid'>
-                        <!-- Rempli dynamiquement par JS -->
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     SEARCH & FILTERS
+                     SEARCH & ANALYSIS
                      ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-search'></i> Company M&A Analysis
+                        <button class='info-btn' onclick='maPredictor.openModal("searchInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
                     </h2>
                     
                     <div class='ma-search-container'>
-                        <div class='search-input-group'>
-                            <input type='text' id='companySearchInput' placeholder='Enter company ticker (e.g., AAPL, MSFT, TSLA)...'>
-                            <button class='search-btn' onclick='maUI.searchCompany()'>
+                        <form id='ma-search-form' class='search-form'>
+                            <input 
+                                type='text' 
+                                id='ma-ticker-input' 
+                                placeholder='Enter company ticker (e.g., AAPL, MSFT, TSLA)...'
+                                class='search-input'
+                            >
+                            <button type='submit' class='search-btn'>
                                 <i class='fas fa-search'></i> Analyze
                             </button>
-                        </div>
-                    </div>
-
-                    <div id='companyAnalysisResult' class='company-analysis-result' style='display: none;'>
-                        <!-- Rempli dynamiquement -->
+                        </form>
                     </div>
                 </div>
 
                 <!-- ========================================
-                     8-K MATERIAL AGREEMENT ALERTS
+                     DASHBOARD VIEWS
                      ======================================== -->
-                <div class='section'>
-                    <div class='section-header-with-controls'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-bell'></i> 8-K Material Agreement Alerts
-                            <button class='info-btn' onclick='maUI.openModal("alerts8KInfo")'>
-                                <i class='fas fa-info-circle'></i>
-                            </button>
-                        </h2>
-                        
-                        <div class='alert-filters'>
-                            <select id='alertPriorityFilter' onchange='maUI.filterAlerts()'>
-                                <option value='all'>All Priorities</option>
-                                <option value='critical'>Critical Only</option>
-                                <option value='high'>High Priority</option>
-                            </select>
-                            
-                            <select id='alertTimeFilter' onchange='maUI.filterAlerts()'>
-                                <option value='7'>Last 7 days</option>
-                                <option value='30' selected>Last 30 days</option>
-                                <option value='90'>Last 90 days</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id='alertsGrid' class='alerts-grid'>
-                        <!-- Rempli dynamiquement -->
+                
+                <!-- Dashboard View -->
+                <div id='ma-dashboard-view' class='ma-view'>
+                    <div id='ma-dashboard-container'>
+                        <!-- Rendered by ma-predictor.js -->
                     </div>
                 </div>
 
-                <!-- ========================================
-                     M&A PROBABILITY SCORE
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-chart-line'></i> M&A Probability Score
-                        <button class='info-btn' onclick='maUI.openModal("probabilityInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div id='probabilityScoreContainer' class='probability-score-container'>
-                        <div class='probability-empty-state'>
-                            <i class='fas fa-chart-pie fa-3x'></i>
-                            <h3>Search for a company above to see M&A Probability Score</h3>
-                            <p>Analyze signals like unusual 8-K activity, insider freeze, institutional accumulation, and more.</p>
-                        </div>
+                <!-- Analysis View -->
+                <div id='ma-analysis-view' class='ma-view' style='display: none;'>
+                    <div id='ma-analysis-container'>
+                        <!-- Rendered by ma-predictor.js -->
                     </div>
                 </div>
 
-                <!-- ========================================
-                     DEAL COMPS DATABASE
-                     ======================================== -->
-                <div class='section'>
-                    <div class='section-header-with-controls'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-database'></i> Deal Comps Database
-                            <button class='info-btn' onclick='maUI.openModal("dealCompsInfo")'>
-                                <i class='fas fa-info-circle'></i>
-                            </button>
-                        </h2>
-                        
-                        <div class='deal-comps-filters'>
-                            <select id='sectorFilter' onchange='maUI.loadDealComps()'>
-                                <option value=''>All Sectors</option>
-                                <option value='Technology'>Technology</option>
-                                <option value='Healthcare'>Healthcare</option>
-                                <option value='Financial Services'>Financial Services</option>
-                                <option value='Consumer'>Consumer</option>
-                                <option value='Industrial'>Industrial</option>
-                            </select>
-                            
-                            <select id='yearFilter' onchange='maUI.loadDealComps()'>
-                                <option value=''>All Years</option>
-                                <option value='2024'>2024</option>
-                                <option value='2023'>2023</option>
-                                <option value='2022'>2022</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id='dealCompsGrid' class='deal-comps-grid'>
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     ACQUIRER PROFILES
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-building'></i> Serial Acquirers by Sector
-                        <button class='info-btn' onclick='maUI.openModal("acquirersInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div id='acquirersGrid' class='acquirers-grid'>
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     TAKEOVER PREMIUM CALCULATOR
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-calculator'></i> Takeover Premium Calculator
-                        <button class='info-btn' onclick='maUI.openModal("premiumCalcInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div class='premium-calculator'>
-                        <div class='calculator-inputs'>
-                            <div class='input-group'>
-                                <label>Ticker Symbol</label>
-                                <input type='text' id='premiumTicker' placeholder='e.g., AAPL'>
-                            </div>
-                            
-                            <div class='input-group'>
-                                <label>Current Stock Price ($)</label>
-                                <input type='number' id='premiumPrice' placeholder='e.g., 150.00' step='0.01'>
-                            </div>
-                            
-                            <div class='input-group'>
-                                <label>Sector</label>
-                                <select id='premiumSector'>
-                                    <option value='Technology'>Technology</option>
-                                    <option value='Healthcare'>Healthcare</option>
-                                    <option value='Financial Services'>Financial Services</option>
-                                    <option value='Consumer'>Consumer</option>
-                                    <option value='Industrial'>Industrial</option>
-                                </select>
-                            </div>
-                            
-                            <button class='calculate-btn' onclick='maUI.calculatePremium()'>
-                                <i class='fas fa-calculator'></i> Calculate
-                            </button>
-                        </div>
-                        
-                        <div id='premiumResults' class='premium-results' style='display: none;'>
-                            <!-- Rempli dynamiquement -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     REGULATORY TIMELINE
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-gavel'></i> Regulatory Timeline Predictor
-                        <button class='info-btn' onclick='maUI.openModal("regulatoryInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div id='regulatoryTimeline' class='regulatory-timeline'>
-                        <div class='timeline-empty-state'>
-                            <i class='fas fa-calendar-alt fa-3x'></i>
-                            <h3>No active deal selected</h3>
-                            <p>Select a deal from the alerts above to see regulatory timeline prediction.</p>
-                        </div>
+                <!-- Deal Details View -->
+                <div id='ma-deal-details-view' class='ma-view' style='display: none;'>
+                    <div id='ma-deal-details-container'>
+                        <!-- Rendered by ma-predictor.js -->
                     </div>
                 </div>
 
                 <footer>
                     <p>
-                        <i class='fas fa-info-circle'></i> M&A Predictor - Early Detection System powered by SEC EDGAR real-time data
+                        <i class='fas fa-info-circle'></i> M&A Predictor powered by SEC EDGAR real-time data
                     </p>
                 </footer>
             </div>
@@ -497,345 +340,56 @@
     </div>
 
     <!-- ========================================
-         MODALS (Info Modals)
+         MODALS
          ======================================== -->
     
-    <!-- Dashboard Info Modal -->
-    <div id='dashboardInfo' class='modal'>
+    <!-- Search Info Modal -->
+    <div id='searchInfo' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2><i class='fas fa-tachometer-alt'></i> M&A Dashboard Overview</h2>
-                <button class='modal-close' onclick='maUI.closeModal("dashboardInfo")'>&times;</button>
+                <h2><i class='fas fa-search'></i> Company M&A Analysis</h2>
+                <button class='modal-close' onclick='maPredictor.closeModal("searchInfo")'>&times;</button>
             </div>
             <div class='modal-body'>
-                <p><strong>What is the M&A Dashboard?</strong></p>
-                <p>The M&A Dashboard provides a real-time overview of merger and acquisition activity based on SEC EDGAR filings.</p>
-                
-                <p><strong>Key Metrics:</strong></p>
-                <ul>
-                    <li><strong>Critical Alerts:</strong> High-priority 8-K filings indicating potential M&A activity (Item 1.01, 2.01, 5.01)</li>
-                    <li><strong>Recent S-4 Filings:</strong> Merger/acquisition registration statements</li>
-                    <li><strong>DEFM14A Filings:</strong> Definitive merger proxy statements</li>
-                    <li><strong>Active Deals:</strong> Total number of ongoing M&A transactions</li>
-                    <li><strong>Average Deal Size:</strong> Mean transaction value (when available)</li>
-                    <li><strong>Top Sectors:</strong> Industries with highest M&A activity</li>
-                </ul>
-                
-                <p><strong>Data Source:</strong></p>
-                <p>All data is sourced directly from the U.S. Securities and Exchange Commission (SEC) EDGAR database via official RSS feeds and filings.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- 8-K Alerts Info Modal -->
-    <div id='alerts8KInfo' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-bell'></i> 8-K Material Agreement Alerts</h2>
-                <button class='modal-close' onclick='maUI.closeModal("alerts8KInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What are 8-K Material Agreement Alerts?</strong></p>
-                <p>Form 8-K is filed when a company experiences a "current event" that shareholders should know about. Certain items in 8-K filings are strong indicators of M&A activity.</p>
-                
-                <p><strong>Critical M&A Indicators (Item Numbers):</strong></p>
-                
-                <h4><i class='fas fa-exclamation-circle'></i> CRITICAL (Red Alerts)</h4>
-                <ul>
-                    <li><strong>Item 1.01 - Entry into Material Definitive Agreement:</strong>
-                        <ul>
-                            <li>Execution of merger/acquisition agreements</li>
-                            <li>Typically filed within 4 business days of signing</li>
-                            <li>Contains deal structure, price, and terms</li>
-                        </ul>
-                    </li>
-                    <li><strong>Item 2.01 - Completion of Acquisition or Disposition:</strong>
-                        <ul>
-                            <li>Deal has closed</li>
-                            <li>Assets or businesses have been transferred</li>
-                            <li>Transaction is finalized</li>
-                        </ul>
-                    </li>
-                    <li><strong>Item 5.01 - Changes in Control:</strong>
-                        <ul>
-                            <li>Ownership change (new shareholders with >5% stake)</li>
-                            <li>Direct indicator of acquisition/takeover</li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <h4><i class='fas fa-flag'></i> HIGH PRIORITY (Orange Alerts)</h4>
-                <ul>
-                    <li><strong>Item 1.02 - Termination of Material Agreement:</strong> Deal fell through (important for arbitrage)</li>
-                    <li><strong>Item 5.02 - Director/Officer Changes:</strong> New management post-merger</li>
-                    <li><strong>Item 8.01 - Other Material Events:</strong> Voluntary disclosure of M&A discussions</li>
-                </ul>
-                
-                <p><strong>How to Use:</strong></p>
+                <p><strong>How to use the M&A Predictor:</strong></p>
                 <ol>
-                    <li><strong>Filter by Priority:</strong> Focus on "Critical" for confirmed deals</li>
-                    <li><strong>Check Filing Date:</strong> Recent filings (last 7-30 days) are most actionable</li>
-                    <li><strong>Read Summary:</strong> Each alert shows detected M&A keywords and Item numbers</li>
-                    <li><strong>Click for Details:</strong> View full SEC filing for complete information</li>
+                    <li>Enter a stock ticker symbol (e.g., AAPL, MSFT, NVDA)</li>
+                    <li>Click "Analyze" to calculate the M&A Probability Score</li>
+                    <li>Review signal breakdown and company M&A activity</li>
+                    <li>Explore recent deals and material events</li>
                 </ol>
                 
-                <p class='warning-box'>
-                    <i class='fas fa-exclamation-triangle'></i> <strong>Legal Note:</strong> Always read the full 8-K filing before making investment decisions. Alerts are automated and may require human verification.
-                </p>
+                <p><strong>What you'll see:</strong></p>
+                <ul>
+                    <li><strong>M&A Probability Score:</strong> 0-100% likelihood of M&A activity</li>
+                    <li><strong>Signal Breakdown:</strong> Individual indicators contributing to the score</li>
+                    <li><strong>Company Activity:</strong> Recent S-4 and 8-K filings</li>
+                    <li><strong>Deal Details:</strong> Full document analysis when available</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> 
+                    <strong>Note:</strong> This is a predictive tool based on SEC filings. Always perform your own due diligence.
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- M&A Probability Info Modal -->
-    <div id='probabilityInfo' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-chart-line'></i> M&A Probability Score</h2>
-                <button class='modal-close' onclick='maUI.closeModal("probabilityInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What is the M&A Probability Score?</strong></p>
-                <p>A quantitative score (0-100%) that estimates the likelihood of a company being acquired or merging within the next 12 months.</p>
-                
-                <p><strong>Scoring Methodology:</strong></p>
-                
-                <h4><i class='fas fa-chart-bar'></i> Signal Weights:</h4>
-                <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-                    <thead style="background: rgba(59, 130, 246, 0.1);">
-                        <tr>
-                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Signal</th>
-                            <th style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">Weight</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid var(--glass-border);">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Unusual 8-K Activity</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">30%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Material agreements, board meetings, legal counsel changes</td>
-                        </tr>
-                        <tr style="background: rgba(139, 92, 246, 0.05);">
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Insider Selling Freeze</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">25%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Sudden drop in Form 4 filings (blackout period)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Institutional Accumulation</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">20%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Increased 13F holdings by large funds</td>
-                        </tr>
-                        <tr style="background: rgba(139, 92, 246, 0.05);">
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Options Activity</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">15%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Unusual call buying (requires external data)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Board Changes</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">5%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">New directors with M&A experience</td>
-                        </tr>
-                        <tr style="background: rgba(139, 92, 246, 0.05);">
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);"><strong>Legal Counsel Changes</strong></td>
-                            <td style="padding: 12px; text-align: center; border: 1px solid var(--glass-border);">5%</td>
-                            <td style="padding: 12px; border: 1px solid var(--glass-border);">Hiring M&A specialist law firms</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <h4><i class='fas fa-traffic-light'></i> Score Interpretation:</h4>
-                <ul>
-                    <li><strong>0-25%:</strong> Low Probability - Normal business operations</li>
-                    <li><strong>25-50%:</strong> Moderate Probability - Some signals detected, monitor</li>
-                    <li><strong>50-75%:</strong> High Probability - Multiple strong signals, elevated risk</li>
-                    <li><strong>75-100%:</strong> Very High Probability - Deal likely imminent or in progress</li>
-                </ul>
-                
-                <p class='warning-box'>
-                    <i class='fas fa-exclamation-triangle'></i> <strong>Disclaimer:</strong> The M&A Probability Score is a predictive model based on historical patterns. It does not guarantee future M&A activity. Always perform your own due diligence.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Deal Comps Info Modal -->
-    <div id='dealCompsInfo' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-database'></i> Deal Comps Database</h2>
-                <button class='modal-close' onclick='maUI.closeModal("dealCompsInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What are Deal Comps?</strong></p>
-                <p>Deal Comparables (Comps) are historical M&A transactions used to benchmark valuation multiples for current deals.</p>
-                
-                <p><strong>Key Multiples:</strong></p>
-                <ul>
-                    <li><strong>EV/Sales:</strong> Enterprise Value / Revenue - Common for growth companies</li>
-                    <li><strong>EV/EBITDA:</strong> Enterprise Value / Earnings Before Interest, Taxes, Depreciation & Amortization - Standard multiple</li>
-                    <li><strong>Takeover Premium:</strong> % above pre-announcement stock price</li>
-                </ul>
-                
-                <p><strong>How to Use:</strong></p>
-                <ol>
-                    <li>Filter by sector to find relevant comparables</li>
-                    <li>Check recent deals (last 1-2 years) for current market conditions</li>
-                    <li>Compare multiples to target company's current valuation</li>
-                    <li>Use average premium to estimate potential takeover price</li>
-                </ol>
-                
-                <p><strong>Data Source:</strong></p>
-                <p>S-4 and DEFM14A filings from SEC EDGAR. Some multiples may require manual extraction from documents.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Acquirers Info Modal -->
-    <div id='acquirersInfo' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-building'></i> Serial Acquirers</h2>
-                <button class='modal-close' onclick='maUI.closeModal("acquirersInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What are Serial Acquirers?</strong></p>
-                <p>Companies that consistently pursue growth through acquisitions. They typically have M&A as a core part of their corporate strategy.</p>
-                
-                <p><strong>Why Track Them?</strong></p>
-                <ul>
-                    <li><strong>Predictive Value:</strong> Knowing who the buyers are helps identify potential targets</li>
-                    <li><strong>Valuation Benchmarks:</strong> Serial acquirers establish price floors in sectors</li>
-                    <li><strong>Deal Flow:</strong> Active acquirers often have multiple deals in pipeline</li>
-                </ul>
-                
-                <p><strong>Profile Metrics:</strong></p>
-                <ul>
-                    <li><strong>Acquisitions Count:</strong> Total deals in last 5 years</li>
-                    <li><strong>Preferred Sectors:</strong> Industries they target</li>
-                    <li><strong>Average Deal Size:</strong> Typical transaction value</li>
-                    <li><strong>Last Acquisition:</strong> Most recent deal date</li>
-                </ul>
-                
-                <p><strong>Examples:</strong></p>
-                <p><em>Technology:</em> Microsoft, Oracle, Salesforce<br>
-                <em>Healthcare:</em> Johnson & Johnson, UnitedHealth, CVS<br>
-                <em>Financial:</em> JPMorgan Chase, Bank of America</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Premium Calculator Info Modal -->
-    <div id='premiumCalcInfo' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-calculator'></i> Takeover Premium Calculator</h2>
-                <button class='modal-close' onclick='maUI.closeModal("premiumCalcInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What is a Takeover Premium?</strong></p>
-                <p>The percentage above the current stock price that an acquirer typically pays to gain control of a target company.</p>
-                
-                <p><strong>How It's Calculated:</strong></p>
-                <ol>
-                    <li>Enter the target company's ticker and current stock price</li>
-                    <li>Select the industry sector</li>
-                    <li>Calculator uses historical sector-specific average premiums</li>
-                    <li>Provides Low/Mid/High estimates based on:
-                        <ul>
-                            <li><strong>Low (70%):</strong> Friendly deals, limited competition</li>
-                            <li><strong>Mid (100%):</strong> Sector average</li>
-                            <li><strong>High (130%):</strong> Competitive bidding, strategic value</li>
-                        </ul>
-                    </li>
-                </ol>
-                
-                <p><strong>Typical Premiums by Sector:</strong></p>
-                <ul>
-                    <li><strong>Technology:</strong> 25-40% (high strategic value)</li>
-                    <li><strong>Healthcare:</strong> 30-50% (regulatory complexity)</li>
-                    <li><strong>Financial Services:</strong> 20-35% (regulatory hurdles)</li>
-                    <li><strong>Consumer:</strong> 25-35% (brand value)</li>
-                    <li><strong>Industrial:</strong> 20-30% (asset-based)</li>
-                </ul>
-                
-                <p class='warning-box'>
-                    <i class='fas fa-exclamation-triangle'></i> <strong>Important:</strong> These are estimates based on historical averages. Actual premiums vary widely based on company-specific factors, market conditions, and deal structure.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Regulatory Timeline Info Modal -->
-    <div id='regulatoryInfo' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-gavel'></i> Regulatory Timeline Predictor</h2>
-                <button class='modal-close' onclick='maUI.closeModal("regulatoryInfo")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>What is the Regulatory Timeline?</strong></p>
-                <p>The estimated time required for government agencies (FTC, DOJ, EU Commission) to review and approve a merger or acquisition.</p>
-                
-                <p><strong>Review Phases:</strong></p>
-                
-                <h4><i class='fas fa-file-alt'></i> 1. Initial Filing (Month 1)</h4>
-                <ul>
-                    <li>Hart-Scott-Rodino (HSR) Act filing in the U.S.</li>
-                    <li>EU merger notification (if applicable)</li>
-                    <li>30-day waiting period begins</li>
-                </ul>
-                
-                <h4><i class='fas fa-search'></i> 2. FTC/DOJ Review (Months 1-3)</h4>
-                <ul>
-                    <li>Antitrust analysis</li>
-                    <li>Market concentration assessment</li>
-                    <li>Competitive impact evaluation</li>
-                </ul>
-                
-                <h4><i class='fas fa-clipboard-list'></i> 3. Second Request (Months 3-6, if triggered)</h4>
-                <ul>
-                    <li>Extensive document production</li>
-                    <li>Depositions and interviews</li>
-                    <li>Economic analysis</li>
-                    <li>Only in ~3% of deals</li>
-                </ul>
-                
-                <h4><i class='fas fa-check-circle'></i> 4. Final Approval (Month 6-12)</h4>
-                <ul>
-                    <li>Clearance or remedies (asset divestitures)</li>
-                    <li>Consent decree (if conditions imposed)</li>
-                    <li>Deal closes</li>
-                </ul>
-                
-                <p><strong>Factors Affecting Timeline:</strong></p>
-                <ul>
-                    <li><strong>Deal Size:</strong> >$10B = Longer review (6-12 months)</li>
-                    <li><strong>Sector:</strong> Tech, Healthcare, Defense = High scrutiny</li>
-                    <li><strong>Market Share:</strong> Combined >40% = Likely challenge</li>
-                    <li><strong>Cross-Border:</strong> Multiple jurisdictions = Sequential reviews</li>
-                    <li><strong>Political Climate:</strong> Current administration's antitrust stance</li>
-                </ul>
-                
-                <p><strong>Recent Trends (2023-2024):</strong></p>
-                <ul>
-                    <li>FTC/DOJ more aggressive under current administration</li>
-                    <li>Average review time increased 40% vs. 2015-2020</li>
-                    <li>Tech deals face heightened scrutiny</li>
-                    <li>ESG considerations emerging as factor</li>
-                </ul>
-                
-                <p class='warning-box'>
-                    <i class='fas fa-exclamation-triangle'></i> <strong>Note:</strong> Timelines are estimates. Some deals clear in 30 days, others take 18+ months or are blocked entirely. Always consult with legal counsel for specific transactions.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Scripts (ORDER IS CRITICAL) -->
+    
+    <!-- Parsers XML -->
+    <script src="assets/js/form-4-parser.js"></script>
+    <script src="assets/js/form-s4-parser.js"></script>
+    <script src="assets/js/form-8k-parser.js"></script>
+    
+    <!-- M&A Client & Analytics -->
+    <script src="assets/js/sec-ma-client.js"></script>
+    <script src="assets/js/ma-analytics-engine.js"></script>
+    <script src="assets/js/ma-predictor.js"></script>
+    
+    <!-- Common Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/ma-client.js'></script>
-    <script src='assets/js/ma-analytics.js'></script>
-    <script src='assets/js/ma-ui.js'></script>
 
     <!-- Chatbot -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
