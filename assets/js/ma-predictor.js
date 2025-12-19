@@ -373,6 +373,64 @@ class MAPredictor {
     // 📄 DEAL DETAILS MODAL (avec parsing SEC)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+    // async viewDealDetails(index) {
+    //     const deal = this.state.filteredDeals[index];
+        
+    //     if (!deal) {
+    //         console.error('❌ Deal not found at index:', index);
+    //         return;
+    //     }
+
+    //     console.log('📄 Viewing deal details:', deal);
+
+    //     const modal = document.getElementById('dealDetailsModal');
+    //     const title = document.getElementById('modal-deal-title');
+    //     const body = document.getElementById('modal-deal-body');
+
+    //     if (!modal || !title || !body) {
+    //         console.error('❌ Modal elements not found');
+    //         return;
+    //     }
+
+    //     // Affiche le modal avec loader
+    //     title.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading Document...`;
+    //     body.innerHTML = `
+    //         <div style="text-align: center; padding: 60px;">
+    //             <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i>
+    //             <p style="margin-top: 20px; opacity: 0.7;">Parsing SEC document...</p>
+    //         </div>
+    //     `;
+        
+    //     modal.style.display = 'flex';
+
+    //     // Parse le document SEC
+    //     try {
+    //         const parsedData = await this.parser.parseDocument(deal.url);
+    //         const html = this.parser.generateDisplayHTML(parsedData);
+
+    //         title.innerHTML = `
+    //             <i class="fas fa-file-contract"></i> 
+    //             ${deal.formType} - ${deal.companyName || 'SEC Filing'}
+    //         `;
+    //         body.innerHTML = html;
+
+    //     } catch (error) {
+    //         console.error('❌ Error parsing document:', error);
+            
+    //         title.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error Loading Document`;
+    //         body.innerHTML = `
+    //             <div class="error-container">
+    //                 <i class="fas fa-exclamation-triangle"></i>
+    //                 <h3>Failed to Parse Document</h3>
+    //                 <p>${error.message}</p>
+    //                 <a href="${deal.url}" target="_blank" class="btn-external-link">
+    //                     <i class="fas fa-external-link-alt"></i> View Original on SEC.gov
+    //                 </a>
+    //             </div>
+    //         `;
+    //     }
+    // }
+
     async viewDealDetails(index) {
         const deal = this.state.filteredDeals[index];
         
@@ -397,16 +455,21 @@ class MAPredictor {
         body.innerHTML = `
             <div style="text-align: center; padding: 60px;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i>
-                <p style="margin-top: 20px; opacity: 0.7;">Parsing SEC document...</p>
+                <p style="margin-top: 20px; opacity: 0.7;">Parsing SEC document via Worker...</p>
             </div>
         `;
         
         modal.style.display = 'flex';
 
-        // Parse le document SEC
+        // ✅ UTILISE LE WORKER AU LIEU DU PARSER LOCAL
         try {
-            const parsedData = await this.parser.parseDocument(deal.url);
-            const html = this.parser.generateDisplayHTML(parsedData);
+            console.log('🌐 Requesting document from Worker:', deal.url);
+            
+            // Appelle le Worker pour parser le document
+            const parsedData = await this.client.getDocumentParsed(deal.url);
+
+            // Génère le HTML d'affichage
+            const html = this.generateDocumentHTML(parsedData, deal);
 
             title.innerHTML = `
                 <i class="fas fa-file-contract"></i> 
@@ -415,20 +478,114 @@ class MAPredictor {
             body.innerHTML = html;
 
         } catch (error) {
-            console.error('❌ Error parsing document:', error);
+            console.error('❌ Error loading document:', error);
             
             title.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error Loading Document`;
             body.innerHTML = `
                 <div class="error-container">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Failed to Parse Document</h3>
+                    <h3>Failed to Load Document</h3>
                     <p>${error.message}</p>
+                    <p style="margin-top: 16px; opacity: 0.7;">The Worker may be unavailable or the document format is unsupported.</p>
                     <a href="${deal.url}" target="_blank" class="btn-external-link">
                         <i class="fas fa-external-link-alt"></i> View Original on SEC.gov
                     </a>
                 </div>
             `;
         }
+    }
+
+    /**
+     * 🎨 Génère le HTML d'affichage du document parsé
+     */
+    generateDocumentHTML(data, deal) {
+        if (!data || !data.success) {
+            return `
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Parsing Failed</h3>
+                    <p>${data?.error || 'Unknown error'}</p>
+                </div>
+            `;
+        }
+
+        const { type, content } = data;
+
+        let html = `
+            <div class="sec-document-container">
+                <div class="sec-document-header">
+                    <div class="doc-type-badge">${type || deal.formType}</div>
+                    <h3>${content.companyName || deal.companyName || 'SEC Filing'}</h3>
+                    ${content.cik ? `<p class="doc-meta"><strong>CIK:</strong> ${content.cik}</p>` : ''}
+                    ${content.filingDate ? `<p class="doc-meta"><strong>Filing Date:</strong> ${this.formatDate(content.filingDate)}</p>` : ''}
+                </div>
+        `;
+
+        // Items (pour les 8-K)
+        if (content.items && content.items.length > 0) {
+            html += `
+                <div class="sec-items-section">
+                    <h4><i class="fas fa-list"></i> Items Reported</h4>
+                    <ul class="sec-items-list">
+                        ${content.items.map(item => `
+                            <li><strong>Item ${item.code || item}:</strong> ${item.name || item.description || ''}</li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Merger Info (pour les S-4)
+        if (content.mergerInfo) {
+            html += `
+                <div class="sec-merger-section">
+                    <h4><i class="fas fa-handshake"></i> Merger Information</h4>
+                    <div class="merger-grid">
+                        ${content.mergerInfo.acquirer ? `
+                            <div class="merger-item">
+                                <span class="merger-label">Acquirer:</span>
+                                <span class="merger-value">${content.mergerInfo.acquirer}</span>
+                            </div>
+                        ` : ''}
+                        ${content.mergerInfo.target ? `
+                            <div class="merger-item">
+                                <span class="merger-label">Target:</span>
+                                <span class="merger-value">${content.mergerInfo.target}</span>
+                            </div>
+                        ` : ''}
+                        ${content.mergerInfo.dealValue ? `
+                            <div class="merger-item">
+                                <span class="merger-label">Deal Value:</span>
+                                <span class="merger-value">${content.mergerInfo.dealValue}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Contenu principal
+        if (content.htmlContent) {
+            html += `
+                <div class="sec-document-content">
+                    <h4><i class="fas fa-file-alt"></i> Document Content</h4>
+                    <div class="content-body">
+                        ${content.htmlContent}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+                <div class="sec-document-footer">
+                    <a href="${deal.url}" target="_blank" class="btn-external-link">
+                        <i class="fas fa-external-link-alt"></i> View Full Document on SEC.gov
+                    </a>
+                </div>
+            </div>
+        `;
+
+        return html;
     }
 
     closeDealModal() {
