@@ -96,7 +96,7 @@ class MAClient {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /**
-     * 🚀 MAIN METHOD: Get REAL M&A deals with parsed content
+     * 🚀 Get REAL M&A deals (SERVER-SIDE PARSED - No CORS!)
      */
     async getDealComps(options = {}) {
         const {
@@ -106,73 +106,23 @@ class MAClient {
             forceRefresh = false
         } = options;
 
-        console.log(`🤝 Loading REAL M&A Deals (max ${limit})...`);
+        console.log(`🤝 Loading REAL M&A Deals (server-parsed, max ${limit})...`);
 
-        const cacheKey = `real-ma-deals-${sector || 'all'}-${year || 'all'}-${limit}`;
-        
-        if (!forceRefresh && this.isCacheValid(cacheKey)) {
-            console.log('📦 Returning cached REAL M&A deals');
-            return this.cache.get(cacheKey).data;
-        }
-
-        let allDeals = [];
-        const feedTypes = ['s4', 'defm14a', '8k'];
-        const days = year ? this.calculateDaysFromYear(year) : 365;
+        const params = {};
+        if (sector) params.sector = sector;
+        if (year) params.year = year;
+        params.limit = limit;
+        if (forceRefresh) params._t = Date.now();
 
         try {
-            for (const feedType of feedTypes) {
-                console.log(`📥 Fetching ${feedType.toUpperCase()} filings...`);
-
-                const filings = await this.getFeedFilings(feedType, { limit: 50, days });
-
-                console.log(`   ✅ Got ${filings.length} ${feedType.toUpperCase()} filings`);
-
-                for (const filing of filings) {
-                    try {
-                        const dealData = await this.parseMAFiling(filing, feedType);
-
-                        if (dealData && dealData.dealValue) {
-                            if (!sector || dealData.sector === sector) {
-                                if (!year || this.isInYear(dealData.announcementDate, year)) {
-                                    allDeals.push(dealData);
-                                }
-                            }
-                        }
-
-                        if (allDeals.length >= limit) break;
-
-                        await this.sleep(200);
-
-                    } catch (parseError) {
-                        console.warn(`⚠ Error parsing ${filing.accessionNumber}:`, parseError.message);
-                    }
-                }
-
-                if (allDeals.length >= limit) break;
-            }
-
-            allDeals.sort((a, b) => new Date(b.announcementDate) - new Date(a.announcementDate));
-            allDeals = allDeals.slice(0, limit);
-
-            const result = {
-                sector: sector || 'All Sectors',
-                year: year || 'All Years',
-                count: allDeals.length,
-                deals: allDeals,
-                averageMultiples: this.calculateAverageMultiples(allDeals),
-                lastUpdated: new Date().toISOString()
-            };
-
-            this.cache.set(cacheKey, {
-                data: result,
-                timestamp: Date.now()
-            });
-
-            console.log(`🎉 Successfully parsed ${allDeals.length} REAL M&A deals`);
-            return result;
+            // ✅ NEW: Call server-side parsing endpoint (No CORS!)
+            const data = await this.makeRequest('/api/ma/deal-comps-parsed', params);
+            
+            console.log(`✅ Loaded ${data.count} server-parsed M&A deals`);
+            return data;
 
         } catch (error) {
-            console.error('❌ Error loading M&A deals:', error);
+            console.error('❌ Error loading server-parsed deals:', error);
             throw error;
         }
     }
