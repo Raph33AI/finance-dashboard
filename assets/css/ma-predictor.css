@@ -2241,3 +2241,187 @@ body.dark-mode .empty-state h3 {
         font-size: 0.75rem;
     }
 }
+
+/* ========================================
+   💰 OFFERINGS SECTION
+   ======================================== */
+
+.sec-offerings-section {
+    margin: 24px 0;
+    padding: 24px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 16px;
+}
+
+body.dark-mode .sec-offerings-section {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.sec-offerings-section h4 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.offerings-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #667eea;
+}
+
+body.dark-mode .offerings-summary {
+    background: #1e293b;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.summary-label {
+    font-weight: 600;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.summary-value {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+.offerings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.offering-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .offering-card {
+    background: #0f172a;
+}
+
+.offering-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+body.dark-mode .offering-header {
+    border-bottom-color: #334155;
+}
+
+.offering-number {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #667eea;
+}
+
+.offering-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.badge-success {
+    background: #10b981;
+    color: white;
+}
+
+.badge-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.badge-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.badge-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.offering-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.offering-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body.dark-mode .offering-row {
+    border-bottom-color: #334155;
+}
+
+.offering-row.highlight {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+}
+
+.offering-label {
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.offering-value {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+body.dark-mode .offering-value {
+    color: white;
+}
+
+.offering-note {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .offering-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    
+    .offerings-summary {
+        grid-template-columns: 1fr;
+    }
+}

@@ -564,6 +564,99 @@ class MAPredictor {
             `;
         }
 
+        // ✅ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ✅ OFFERINGS SECTION (NOUVEAU)
+        // ✅ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        if (content.offerings && content.offerings.length > 0) {
+            html += `
+                <div class="sec-offerings-section">
+                    <h4><i class="fas fa-file-invoice-dollar"></i> Offerings (${content.offerings.length})</h4>
+                    
+                    ${content.offeringsMetadata ? `
+                        <div class="offerings-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Offerings:</span>
+                                <span class="summary-value">${content.offeringsMetadata.totalOfferings}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Max Aggregate Price:</span>
+                                <span class="summary-value">$${content.offeringsMetadata.totalMaxAggregatePrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Registration Fees:</span>
+                                <span class="summary-value">$${content.offeringsMetadata.totalRegistrationFees.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="offerings-list">
+                        ${content.offerings.map(offering => `
+                            <div class="offering-card">
+                                <div class="offering-header">
+                                    <span class="offering-number">Offering ${offering.offeringNumber}</span>
+                                    <div class="offering-badges">
+                                        ${offering.feePreviousPaid ? '<span class="badge badge-success">Fee Paid</span>' : '<span class="badge badge-warning">Fee Unpaid</span>'}
+                                        ${offering.securityType ? `<span class="badge badge-${offering.securityType.toLowerCase() === 'equity' ? 'primary' : 'secondary'}">${offering.securityType}</span>` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="offering-details">
+                                    ${offering.securityClassTitle ? `
+                                        <div class="offering-row">
+                                            <span class="offering-label">Security Class:</span>
+                                            <span class="offering-value">${offering.securityClassTitle}</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.amountRegistered ? `
+                                        <div class="offering-row">
+                                            <span class="offering-label">Amount Registered:</span>
+                                            <span class="offering-value">${offering.amountRegistered.toLocaleString()} shares</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.proposedMaxOfferingPricePerUnit ? `
+                                        <div class="offering-row">
+                                            <span class="offering-label">Price per Unit:</span>
+                                            <span class="offering-value">${offering.proposedMaxOfferingPricePerUnit}</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.maximumAggregateOfferingPrice ? `
+                                        <div class="offering-row highlight">
+                                            <span class="offering-label">Max Aggregate Price:</span>
+                                            <span class="offering-value">${offering.maximumAggregateOfferingPrice}</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.feeRate ? `
+                                        <div class="offering-row">
+                                            <span class="offering-label">Fee Rate:</span>
+                                            <span class="offering-value">${offering.feeRate}</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.amountOfRegistrationFee ? `
+                                        <div class="offering-row">
+                                            <span class="offering-label">Registration Fee:</span>
+                                            <span class="offering-value">${offering.amountOfRegistrationFee}</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${offering.offeringNote ? `
+                                        <div class="offering-note">
+                                            <strong>Note:</strong> ${offering.offeringNote}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         // Contenu principal
         if (content.htmlContent) {
             html += `
