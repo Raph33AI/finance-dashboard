@@ -7,7 +7,7 @@
 
 class MAClient {
     constructor() {
-        this.baseURL = 'https://sec-edgar-api.alphavault-workers.workers.dev'; // ⚠ REMPLACE PAR TON URL WORKER
+        this.baseURL = 'https://sec-edgar-api.raphnardone.workers.dev'; // ⚠ REMPLACE PAR TON URL WORKER
         this.cache = new Map();
         this.cacheDuration = 30 * 60 * 1000; // 30 minutes
     }
