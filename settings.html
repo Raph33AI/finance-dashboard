@@ -93,7 +93,7 @@
                 </div>
                 
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' data-tooltip="Budget">
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -101,7 +101,7 @@
                     <div class='nav-submenu'>
                         <a href='dashboard-financier.html' class='nav-link'>
                             <i class='fas fa-home'></i>
-                            <span>Budget Dashboard</span>
+                            <span>Dashboard Budget</span>
                         </a>
                         <a href='investment-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-bar'></i>
@@ -111,7 +111,7 @@
                 </div>
                 
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' data-tooltip="Simulation">
                         <i class='fas fa-calculator'></i>
                         <span>Simulation</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -136,17 +136,13 @@
                     </div>
                 </div>
                 
-                <!-- <div class='nav-section'>
+                <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Stocks">
                         <i class="fas fa-chart-line"></i>
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-database'></i>
-                            <span>Market Data</span>
-                        </a>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
@@ -155,36 +151,83 @@
                             <i class='fas fa-chart-line'></i>
                             <span>Trend Prediction</span>
                         </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
+                        <a href='forex-converter.html' class='nav-link active'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
                         </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
                         </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
                         </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Predictor</span>
                         </a>
                     </div>
-                </div> -->
+                </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
                         </a>
                     </div>
                 </div>
@@ -193,31 +236,22 @@
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
-                        <img data-user-photo 
-                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                             alt="Avatar" 
-                             class="sidebar-user-avatar">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
-                            <span data-user-plan class="sidebar-user-plan">Free</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
                         </div>
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
-                    
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
-                            <img data-user-photo 
-                                 src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                                 alt="Avatar" 
-                                 class="user-dropdown-avatar">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
                                 <h4 data-user-name class="user-dropdown-name">User</h4>
                                 <p data-user-email class="user-dropdown-email">email@example.com</p>
                             </div>
                         </div>
-                        
                         <div class="user-dropdown-divider"></div>
-                        
                         <nav class="user-dropdown-links">
                             <a href="user-profile.html" class="user-dropdown-link">
                                 <i class="fas fa-user"></i>
@@ -227,17 +261,11 @@
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
-                            <a href="#" class="user-dropdown-link">
-                                <i class="fas fa-question-circle"></i>
-                                <span>Help</span>
-                            </a>
                         </nav>
-                        
                         <div class="user-dropdown-divider"></div>
-                        
                         <button onclick="logout()" class="user-dropdown-logout">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span>Sign out</span>
+                            <span>Disconnect</span>
                         </button>
                     </div>
                 </div>
