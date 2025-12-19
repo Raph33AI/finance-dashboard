@@ -1400,3 +1400,11 @@ select:focus-visible {
     outline: 3px solid var(--ma-primary);
     outline-offset: 2px;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ANIMATIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

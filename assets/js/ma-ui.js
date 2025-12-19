@@ -2,7 +2,6 @@
  * ====================================================================
  * ALPHAVAULT AI - M&A PREDICTOR - UI CONTROLLER
  * ====================================================================
- * Gère toute l'interface utilisateur et les interactions
  */
 
 class MAUIController {
@@ -17,26 +16,14 @@ class MAUIController {
         console.log('🎯 M&A UI Controller initialized');
     }
 
-    /**
-     * 🚀 Initialise l'application
-     */
     async init() {
         console.log('🚀 Initializing M&A Predictor...');
         
         try {
-            // Charge le dashboard overview
             await this.loadDashboard();
-            
-            // Charge les alertes 8-K
             await this.loadAlerts();
-            
-            // Charge les deal comps
             await this.loadDealComps();
-            
-            // Charge les acquirers
             await this.loadAcquirers();
-            
-            // Setup event listeners
             this.setupEventListeners();
             
             console.log('✅ M&A Predictor initialized successfully');
@@ -47,18 +34,13 @@ class MAUIController {
         }
     }
 
-    /**
-     * 📊 Charge le dashboard overview
-     */
     async loadDashboard() {
         try {
             console.log('📊 Loading dashboard...');
-            
             this.showLoading('maOverviewGrid');
             
             const data = await maClient.getMADashboard();
             this.dashboardData = data;
-            
             this.renderDashboard(data);
             
             console.log('✅ Dashboard loaded:', data);
@@ -69,9 +51,6 @@ class MAUIController {
         }
     }
 
-    /**
-     * 🎨 Affiche le dashboard
-     */
     renderDashboard(data) {
         const container = document.getElementById('maOverviewGrid');
         if (!container) return;
@@ -79,55 +58,17 @@ class MAUIController {
         const stats = data.stats || {};
         
         const cards = [
-            {
-                icon: 'fas fa-bell',
-                label: 'Critical 8-K Alerts',
-                value: data.criticalAlerts || 0,
-                change: '+12%',
-                changeType: 'positive'
-            },
-            {
-                icon: 'fas fa-file-contract',
-                label: 'Recent S-4 Filings',
-                value: data.recentS4Filings || 0,
-                change: '+8%',
-                changeType: 'positive'
-            },
-            {
-                icon: 'fas fa-handshake',
-                label: 'Active Deals',
-                value: stats.activeDeals || 0,
-                change: '+5%',
-                changeType: 'positive'
-            },
-            {
-                icon: 'fas fa-dollar-sign',
-                label: 'Avg Deal Size',
-                value: stats.avgDealSize || 'N/A',
-                change: '+15%',
-                changeType: 'positive'
-            },
-            {
-                icon: 'fas fa-chart-pie',
-                label: 'Avg M&A Probability',
-                value: (stats.avgMAProbability || 45) + '%',
-                change: '+3%',
-                changeType: 'positive'
-            },
-            {
-                icon: 'fas fa-industry',
-                label: 'Top Sector',
-                value: stats.topSectors?.[0]?.sector || 'Technology',
-                change: `${stats.topSectors?.[0]?.deals || 12} deals`,
-                changeType: 'neutral'
-            }
+            { icon: 'fas fa-bell', label: 'Critical 8-K Alerts', value: data.criticalAlerts || 0, change: '+12%', changeType: 'positive' },
+            { icon: 'fas fa-file-contract', label: 'Recent S-4 Filings', value: data.recentS4Filings || 0, change: '+8%', changeType: 'positive' },
+            { icon: 'fas fa-handshake', label: 'Active Deals', value: stats.activeDeals || 0, change: '+5%', changeType: 'positive' },
+            { icon: 'fas fa-dollar-sign', label: 'Avg Deal Size', value: stats.avgDealSize || 'N/A', change: '+15%', changeType: 'positive' },
+            { icon: 'fas fa-chart-pie', label: 'Avg M&A Probability', value: (stats.avgMAProbability || 45) + '%', change: '+3%', changeType: 'positive' },
+            { icon: 'fas fa-industry', label: 'Top Sector', value: stats.topSectors?.[0]?.sector || 'Technology', change: `${stats.topSectors?.[0]?.deals || 12} deals`, changeType: 'neutral' }
         ];
 
         container.innerHTML = cards.map(card => `
             <div class='ma-overview-card'>
-                <div class='overview-icon'>
-                    <i class='${card.icon}'></i>
-                </div>
+                <div class='overview-icon'><i class='${card.icon}'></i></div>
                 <div class='overview-label'>${card.label}</div>
                 <div class='overview-value'>${card.value}</div>
                 <div class='overview-change ${card.changeType}'>${card.change}</div>
@@ -135,26 +76,16 @@ class MAUIController {
         `).join('');
     }
 
-    /**
-     * 🚨 Charge les alertes 8-K
-     */
     async loadAlerts() {
         try {
             console.log('🚨 Loading 8-K alerts...');
-            
             this.showLoading('alertsGrid');
             
             const priority = document.getElementById('alertPriorityFilter')?.value || 'all';
-            const days = document.getElementById('alertTimeFilter')?.value || '30';
-            
-            const data = await maClient.getMAAlerts({ 
-                priority: priority === 'all' ? undefined : priority,
-                limit: 50 
-            });
+            const data = await maClient.getMAAlerts({ priority: priority === 'all' ? undefined : priority, limit: 50 });
             
             this.alerts = data.alerts || [];
             this.filteredAlerts = this.alerts;
-            
             this.renderAlerts();
             
             console.log(`✅ Loaded ${this.alerts.length} alerts`);
@@ -165,9 +96,6 @@ class MAUIController {
         }
     }
 
-    /**
-     * 🎨 Affiche les alertes
-     */
     renderAlerts() {
         const container = document.getElementById('alertsGrid');
         if (!container) return;
@@ -176,9 +104,7 @@ class MAUIController {
             container.innerHTML = `
                 <div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'>
                     <i class='fas fa-inbox fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i>
-                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>
-                        No alerts found
-                    </h3>
+                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>No alerts found</h3>
                     <p>No critical M&A alerts detected with the current filters.</p>
                 </div>
             `;
@@ -188,10 +114,7 @@ class MAUIController {
         container.innerHTML = this.filteredAlerts.map(alert => {
             const priorityClass = alert.priority || 'medium';
             const indicators = alert.maIndicators || { critical: [], high: [], secondary: [] };
-            const allIndicators = [
-                ...indicators.critical.map(i => i.item),
-                ...indicators.high.map(i => i.item)
-            ];
+            const allIndicators = [...indicators.critical.map(i => i.item), ...indicators.high.map(i => i.item)];
 
             return `
                 <div class='alert-card priority-${priorityClass}'>
@@ -200,28 +123,17 @@ class MAUIController {
                             <h4>${alert.companyName || 'Unknown Company'}</h4>
                             <p>CIK: ${alert.cik || 'N/A'} • ${alert.formType || '8-K'}</p>
                         </div>
-                        <div class='alert-priority-badge ${priorityClass}'>
-                            ${priorityClass}
-                        </div>
+                        <div class='alert-priority-badge ${priorityClass}'>${priorityClass}</div>
                     </div>
-                    
                     ${allIndicators.length > 0 ? `
                         <div class='alert-indicators'>
                             <h5>Detected Items</h5>
-                            ${allIndicators.map(item => `
-                                <span class='indicator-tag'>${item.toUpperCase()}</span>
-                            `).join('')}
+                            ${allIndicators.map(item => `<span class='indicator-tag'>${item.toUpperCase()}</span>`).join('')}
                         </div>
                     ` : ''}
-                    
-                    <div class='alert-summary'>
-                        ${alert.summary || 'M&A activity detected in recent 8-K filing.'}
-                    </div>
-                    
+                    <div class='alert-summary'>${alert.summary || 'M&A activity detected in recent 8-K filing.'}</div>
                     <div class='alert-footer'>
-                        <span class='alert-date'>
-                            <i class='fas fa-calendar'></i> ${this.formatDate(alert.filedDate || alert.updated)}
-                        </span>
+                        <span class='alert-date'><i class='fas fa-calendar'></i> ${this.formatDate(alert.filedDate || alert.updated)}</span>
                         <button class='alert-view-btn' onclick='maUI.viewAlert("${alert.accessionNumber || ''}")'>
                             <i class='fas fa-external-link-alt'></i> View Filing
                         </button>
@@ -231,40 +143,23 @@ class MAUIController {
         }).join('');
     }
 
-    /**
-     * 🔍 Filtre les alertes
-     */
     filterAlerts() {
         const priorityFilter = document.getElementById('alertPriorityFilter')?.value || 'all';
-        
-        if (priorityFilter === 'all') {
-            this.filteredAlerts = this.alerts;
-        } else {
-            this.filteredAlerts = this.alerts.filter(alert => alert.priority === priorityFilter);
-        }
-        
+        this.filteredAlerts = priorityFilter === 'all' ? this.alerts : this.alerts.filter(alert => alert.priority === priorityFilter);
         this.renderAlerts();
     }
 
-    /**
-     * 👁 Affiche un alert en détail
-     */
     viewAlert(accessionNumber) {
         if (!accessionNumber) return;
-        
         const url = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&filenum=${accessionNumber}&type=8-K&dateb=&owner=exclude&count=10`;
         window.open(url, '_blank');
     }
 
-    /**
-     * 🔍 Recherche une entreprise
-     */
     async searchCompany() {
         const input = document.getElementById('companySearchInput');
         if (!input) return;
 
         const ticker = input.value.trim().toUpperCase();
-        
         if (!ticker) {
             this.showNotification('Please enter a ticker symbol', 'warning');
             return;
@@ -273,63 +168,39 @@ class MAUIController {
         console.log(`🔍 Searching for: ${ticker}`);
 
         try {
-            // Affiche le loader
             const resultContainer = document.getElementById('companyAnalysisResult');
             if (resultContainer) {
                 resultContainer.style.display = 'block';
-                resultContainer.innerHTML = `
-                    <div style='text-align: center; padding: 60px 20px;'>
-                        <div class='loading-spinner' style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div>
-                        <p style='color: var(--text-secondary);'>Analyzing ${ticker}...</p>
-                    </div>
-                `;
+                resultContainer.innerHTML = `<div style='text-align: center; padding: 60px 20px;'><div style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div><p style='color: var(--text-secondary);'>Analyzing ${ticker}...</p></div>`;
             }
 
-            // Récupère le CIK
             const cikData = await maClient.tickerToCIK(ticker);
             
             if (!cikData || !cikData.cik) {
                 throw new Error('Company not found');
             }
 
-            this.currentCompany = {
-                ticker: ticker,
-                cik: cikData.cik,
-                name: cikData.companyName
-            };
-
-            // Charge le M&A Probability Score
+            this.currentCompany = { ticker: ticker, cik: cikData.cik, name: cikData.companyName };
             await this.loadMAProbability(ticker, cikData.cik);
-            
-            // Affiche les résultats de la recherche
             this.renderCompanyAnalysis();
             
         } catch (error) {
             console.error('❌ Company search error:', error);
             this.showNotification(`Failed to find company: ${ticker}`, 'danger');
-            
             const resultContainer = document.getElementById('companyAnalysisResult');
-            if (resultContainer) {
-                resultContainer.style.display = 'none';
-            }
+            if (resultContainer) resultContainer.style.display = 'none';
         }
     }
 
-    /**
-     * 🎨 Affiche l'analyse de l'entreprise
-     */
     renderCompanyAnalysis() {
         const container = document.getElementById('companyAnalysisResult');
         if (!container || !this.currentCompany) return;
 
         const { ticker, name } = this.currentCompany;
-
         container.style.display = 'block';
         container.innerHTML = `
             <div class='company-header'>
-                <div class='company-logo'>
-                    ${ticker.substring(0, 2)}
-                </div>
+                <div class='company-logo'>${ticker.substring(0, 2)}</div>
                 <div class='company-info'>
                     <h3>${name}</h3>
                     <p>${ticker} • CIK: ${this.currentCompany.cik}</p>
@@ -341,41 +212,25 @@ class MAUIController {
         `;
     }
 
-    /**
-     * 📊 Charge le M&A Probability Score
-     */
     async loadMAProbability(ticker, cik) {
         try {
             console.log(`📊 Loading M&A Probability for ${ticker}...`);
-            
             const container = document.getElementById('probabilityScoreContainer');
             if (container) {
-                container.innerHTML = `
-                    <div style='text-align: center; padding: 60px 20px;'>
-                        <div class='loading-spinner' style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div>
-                        <p style='color: var(--text-secondary);'>Calculating M&A Probability...</p>
-                    </div>
-                `;
+                container.innerHTML = `<div style='text-align: center; padding: 60px 20px;'><div style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div><p style='color: var(--text-secondary);'>Calculating M&A Probability...</p></div>`;
             }
 
             const data = await maClient.getMAProbability(ticker, cik);
-            
             this.renderMAProbability(data);
-            
             console.log('✅ M&A Probability loaded:', data);
             
         } catch (error) {
             console.error('❌ M&A Probability error:', error);
-            
-            // Fallback: calcul local
             console.log('⚠ Using local calculation...');
             this.calculateMAProbabilityLocal(ticker, cik);
         }
     }
 
-    /**
-     * 🎨 Affiche le M&A Probability Score
-     */
     renderMAProbability(data) {
         const container = document.getElementById('probabilityScoreContainer');
         if (!container) return;
@@ -383,7 +238,6 @@ class MAUIController {
         const probability = data.probability || 0;
         const breakdown = data.breakdown || {};
         const recommendation = data.recommendation || 'Insufficient data';
-        const color = data.color || 'neutral';
 
         container.innerHTML = `
             <div class='probability-score-display'>
@@ -394,28 +248,18 @@ class MAUIController {
                             <div class='gauge-label'>M&A Probability</div>
                         </div>
                     </div>
-                    <div class='probability-recommendation'>
-                        ${recommendation}
-                    </div>
+                    <div class='probability-recommendation'>${recommendation}</div>
                 </div>
-                
                 <div class='probability-breakdown'>
-                    <h4 style='font-size: 1.2rem; font-weight: 800; background: var(--ma-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;'>
-                        Signal Breakdown
-                    </h4>
-                    ${Object.entries(breakdown).map(([signal, data]) => `
+                    <h4 style='font-size: 1.2rem; font-weight: 800; background: var(--ma-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;'>Signal Breakdown</h4>
+                    ${Object.entries(breakdown).map(([signal, d]) => `
                         <div class='breakdown-item'>
                             <div class='breakdown-header'>
                                 <span class='breakdown-name'>${this.formatSignalName(signal)}</span>
-                                <span class='breakdown-weight'>${data.weight}% weight</span>
+                                <span class='breakdown-weight'>${d.weight}% weight</span>
                             </div>
-                            <div class='breakdown-bar'>
-                                <div class='breakdown-bar-fill' style='width: ${data.contribution}%;'></div>
-                            </div>
-                            <div class='breakdown-status ${data.detected ? 'detected' : ''}'>
-                                ${data.detected ? '✓ Detected' : '○ Not detected'} 
-                                ${data.value > 0 ? `(${data.value})` : ''}
-                            </div>
+                            <div class='breakdown-bar'><div class='breakdown-bar-fill' style='width: ${d.contribution}%;'></div></div>
+                            <div class='breakdown-status ${d.detected ? 'detected' : ''}'>${d.detected ? '✓ Detected' : '○ Not detected'} ${d.value > 0 ? `(${d.value})` : ''}</div>
                         </div>
                     `).join('')}
                 </div>
@@ -423,9 +267,6 @@ class MAUIController {
         `;
     }
 
-    /**
-     * 🧮 Calcul local du M&A Probability (fallback)
-     */
     async calculateMAProbabilityLocal(ticker, cik) {
         try {
             const signals = {
@@ -438,7 +279,6 @@ class MAUIController {
             };
 
             const result = maAnalytics.calculateMAProbability(signals);
-            
             this.renderMAProbability(result);
             
         } catch (error) {
@@ -446,24 +286,17 @@ class MAUIController {
         }
     }
 
-    /**
-     * 💼 Charge les Deal Comps
-     */
     async loadDealComps() {
         try {
             console.log('💼 Loading deal comps...');
-            
             this.showLoading('dealCompsGrid');
             
             const sector = document.getElementById('sectorFilter')?.value || '';
             const year = document.getElementById('yearFilter')?.value || '';
-            
             const data = await maClient.getDealComps({ sector, year });
             
             this.dealComps = data.deals || [];
-            
             this.renderDealComps();
-            
             console.log(`✅ Loaded ${this.dealComps.length} deal comps`);
             
         } catch (error) {
@@ -472,23 +305,12 @@ class MAUIController {
         }
     }
 
-    /**
-     * 🎨 Affiche les Deal Comps
-     */
     renderDealComps() {
         const container = document.getElementById('dealCompsGrid');
         if (!container) return;
 
         if (this.dealComps.length === 0) {
-            container.innerHTML = `
-                <div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'>
-                    <i class='fas fa-database fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i>
-                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>
-                        No deal comps available
-                    </h3>
-                    <p>Try adjusting the filters or check back later for updated data.</p>
-                </div>
-            `;
+            container.innerHTML = `<div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'><i class='fas fa-database fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i><h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>No deal comps available</h3><p>Try adjusting the filters or check back later for updated data.</p></div>`;
             return;
         }
 
@@ -498,109 +320,58 @@ class MAUIController {
                     <h4>${deal.companyName || 'Unknown Company'}</h4>
                     <p>${deal.formType} • Filed: ${this.formatDate(deal.filedDate)}</p>
                 </div>
-                
                 <div class='deal-comp-metrics'>
-                    <div class='metric-item'>
-                        <div class='metric-label'>EV/Sales</div>
-                        <div class='metric-value'>${deal.evSales || 'N/A'}</div>
-                    </div>
-                    <div class='metric-item'>
-                        <div class='metric-label'>EV/EBITDA</div>
-                        <div class='metric-value'>${deal.evEbitda || 'N/A'}</div>
-                    </div>
-                    <div class='metric-item'>
-                        <div class='metric-label'>Premium</div>
-                        <div class='metric-value'>${deal.premium || 'N/A'}</div>
-                    </div>
-                    <div class='metric-item'>
-                        <div class='metric-label'>Sector</div>
-                        <div class='metric-value' style='font-size: 0.9rem;'>${deal.sector || 'Unknown'}</div>
-                    </div>
+                    <div class='metric-item'><div class='metric-label'>EV/Sales</div><div class='metric-value'>${deal.evSales || 'N/A'}</div></div>
+                    <div class='metric-item'><div class='metric-label'>EV/EBITDA</div><div class='metric-value'>${deal.evEbitda || 'N/A'}</div></div>
+                    <div class='metric-item'><div class='metric-label'>Premium</div><div class='metric-value'>${deal.premium || 'N/A'}</div></div>
+                    <div class='metric-item'><div class='metric-label'>Sector</div><div class='metric-value' style='font-size: 0.9rem;'>${deal.sector || 'Unknown'}</div></div>
                 </div>
             </div>
         `).join('');
     }
 
-    /**
-     * 🏢 Charge les Serial Acquirers
-     */
     async loadAcquirers() {
         try {
             console.log('🏢 Loading acquirers...');
-            
             this.showLoading('acquirersGrid');
-            
             const data = await maClient.getAcquirerProfiles();
-            
             this.acquirers = data.acquirers || [];
-            
             this.renderAcquirers();
-            
             console.log(`✅ Loaded ${this.acquirers.length} acquirers`);
-            
         } catch (error) {
             console.error('❌ Acquirers load error:', error);
             this.showError('Failed to load acquirer profiles');
         }
     }
 
-    /**
-     * 🎨 Affiche les Acquirers
-     */
     renderAcquirers() {
         const container = document.getElementById('acquirersGrid');
         if (!container) return;
 
         if (this.acquirers.length === 0) {
-            container.innerHTML = `
-                <div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'>
-                    <i class='fas fa-building fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i>
-                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>
-                        No acquirer profiles available
-                    </h3>
-                    <p>Acquirer profiles will be populated as data becomes available.</p>
-                </div>
-            `;
+            container.innerHTML = `<div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'><i class='fas fa-building fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i><h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>No acquirer profiles available</h3><p>Acquirer profiles will be populated as data becomes available.</p></div>`;
             return;
         }
 
         container.innerHTML = this.acquirers.map(acquirer => `
             <div class='acquirer-card'>
                 <div class='acquirer-header'>
-                    <div class='acquirer-logo'>
-                        ${acquirer.companyName ? acquirer.companyName.substring(0, 2).toUpperCase() : 'NA'}
-                    </div>
+                    <div class='acquirer-logo'>${acquirer.companyName ? acquirer.companyName.substring(0, 2).toUpperCase() : 'NA'}</div>
                     <div class='acquirer-info'>
                         <h4>${acquirer.companyName || 'Unknown Company'}</h4>
                         <p>CIK: ${acquirer.cik || 'N/A'}</p>
                     </div>
                 </div>
-                
                 <div class='acquirer-stats'>
-                    <div class='stat-row'>
-                        <span>Acquisitions</span>
-                        <strong>${acquirer.acquisitions || 0}</strong>
-                    </div>
-                    <div class='stat-row'>
-                        <span>Sectors</span>
-                        <strong>${acquirer.sectors ? acquirer.sectors.join(', ') : 'N/A'}</strong>
-                    </div>
-                    <div class='stat-row'>
-                        <span>Avg Deal Size</span>
-                        <strong>${acquirer.averageDealSize || 'N/A'}</strong>
-                    </div>
-                    <div class='stat-row'>
-                        <span>Last Acquisition</span>
-                        <strong>${acquirer.lastAcquisition || 'N/A'}</strong>
-                    </div>
+                    <div class='stat-row'><span>Acquisitions</span><strong>${acquirer.acquisitions || 0}</strong></div>
+                    <div class='stat-row'><span>Sectors</span><strong>${acquirer.sectors ? acquirer.sectors.join(', ') : 'N/A'}</strong></div>
+                    <div class='stat-row'><span>Avg Deal Size</span><strong>${acquirer.averageDealSize || 'N/A'}</strong></div>
+                    <div class='stat-row'><span>Last Acquisition</span><strong>${acquirer.lastAcquisition || 'N/A'}</strong></div>
                 </div>
             </div>
         `).join('');
     }
 
-    /**
-     * 💰 Calcule le Takeover Premium
-     */
     async calculatePremium() {
         const ticker = document.getElementById('premiumTicker')?.value.trim().toUpperCase();
         const price = parseFloat(document.getElementById('premiumPrice')?.value);
@@ -615,30 +386,16 @@ class MAUIController {
 
         try {
             const data = await maClient.calculateTakeoverPremium(ticker, price, sector);
-            
             this.renderPremiumResults(data);
-            
         } catch (error) {
             console.error('❌ Premium calculation error:', error);
-            
-            const sectorPremiums = {
-                'Technology': 35,
-                'Healthcare': 40,
-                'Financial Services': 30,
-                'Consumer': 30,
-                'Industrial': 25
-            };
-            
+            const sectorPremiums = { 'Technology': 35, 'Healthcare': 40, 'Financial Services': 30, 'Consumer': 30, 'Industrial': 25 };
             const avgPremium = sectorPremiums[sector] || 30;
             const result = maAnalytics.calculateTakeoverPremium(price, avgPremium);
-            
             this.renderPremiumResults(result);
         }
     }
 
-    /**
-     * 🎨 Affiche les résultats du Premium Calculator
-     */
     renderPremiumResults(data) {
         const container = document.getElementById('premiumResults');
         if (!container) return;
@@ -651,109 +408,59 @@ class MAUIController {
             <h4>Estimated Takeover Prices</h4>
             <div class='premium-estimate'>
                 <div class='estimate-item'>
-                    <div>
-                        <div class='estimate-label'>Conservative (Low)</div>
-                        <div class='estimate-gain'>+${potentialGain.low || '0%'} potential gain</div>
-                    </div>
+                    <div><div class='estimate-label'>Conservative (Low)</div><div class='estimate-gain'>+${potentialGain.low || '0%'} potential gain</div></div>
                     <div class='estimate-value'>$${estimates.low || '0.00'}</div>
                 </div>
-                
                 <div class='estimate-item'>
-                    <div>
-                        <div class='estimate-label'>Expected (Mid)</div>
-                        <div class='estimate-gain'>+${potentialGain.mid || '0%'} potential gain</div>
-                    </div>
+                    <div><div class='estimate-label'>Expected (Mid)</div><div class='estimate-gain'>+${potentialGain.mid || '0%'} potential gain</div></div>
                     <div class='estimate-value'>$${estimates.mid || '0.00'}</div>
                 </div>
-                
                 <div class='estimate-item'>
-                    <div>
-                        <div class='estimate-label'>Optimistic (High)</div>
-                        <div class='estimate-gain'>+${potentialGain.high || '0%'} potential gain</div>
-                    </div>
+                    <div><div class='estimate-label'>Optimistic (High)</div><div class='estimate-gain'>+${potentialGain.high || '0%'} potential gain</div></div>
                     <div class='estimate-value'>$${estimates.high || '0.00'}</div>
                 </div>
             </div>
-            
             <p style='margin-top: 20px; font-size: 0.85rem; color: var(--text-tertiary); text-align: center;'>
                 <i class='fas fa-info-circle'></i> Based on sector average premium of ${data.sectorAvgPremium || '30%'}
             </p>
         `;
     }
 
-    /**
-     * 🔄 Rafraîchit toutes les données
-     */
     async refreshData() {
         console.log('🔄 Refreshing all data...');
-        
         this.showNotification('Refreshing data...', 'info');
-        
         maClient.clearCache();
-        
-        await Promise.all([
-            this.loadDashboard(),
-            this.loadAlerts(),
-            this.loadDealComps(),
-            this.loadAcquirers()
-        ]);
-        
+        await Promise.all([this.loadDashboard(), this.loadAlerts(), this.loadDealComps(), this.loadAcquirers()]);
         this.showNotification('Data refreshed successfully', 'success');
     }
 
-    /**
-     * 🎯 Setup Event Listeners
-     */
     setupEventListeners() {
         const searchInput = document.getElementById('companySearchInput');
         if (searchInput) {
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.searchCompany();
-                }
-            });
+            searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.searchCompany(); });
         }
 
         ['premiumTicker', 'premiumPrice'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.calculatePremium();
-                    }
-                });
+                input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.calculatePremium(); });
             }
         });
     }
 
-    /**
-     * 📅 Formate une date
-     */
     formatDate(dateString) {
         if (!dateString) return 'N/A';
-        
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return dateString;
-        
         const now = new Date();
-        const diffTime = Math.abs(now - date);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+        const diffDays = Math.ceil(Math.abs(now - date) / (1000 * 60 * 60 * 24));
         if (diffDays < 1) return 'Today';
         if (diffDays === 1) return 'Yesterday';
         if (diffDays < 7) return `${diffDays} days ago`;
         if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-        
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-        });
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
-    /**
-     * 📝 Formate le nom d'un signal
-     */
     formatSignalName(signal) {
         const names = {
             unusual8K: 'Unusual 8-K Activity',
@@ -763,42 +470,18 @@ class MAUIController {
             boardChanges: 'Board Changes',
             legalCounselChanges: 'Legal Counsel Changes'
         };
-        
         return names[signal] || signal;
     }
 
-    /**
-     * ⏳ Affiche un loader
-     */
     showLoading(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
-
-        container.innerHTML = `
-            <div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px;'>
-                <div class='loading-spinner' style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div>
-                <p style='color: var(--text-secondary);'>Loading...</p>
-            </div>
-        `;
+        container.innerHTML = `<div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px;'><div style='width: 60px; height: 60px; margin: 0 auto 20px; border: 4px solid var(--glass-border); border-top-color: var(--ma-primary); border-radius: 50%; animation: spin 1s linear infinite;'></div><p style='color: var(--text-secondary);'>Loading...</p></div>`;
     }
 
-    /**
-     * ❌ Affiche une erreur
-     */
-    showError(message) {
-        console.error('Error:', message);
-    }
-
-    /**
-     * 📢 Affiche une notification
-     */
-    showNotification(message, type = 'info') {
-        console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-
-    /**
-     * 📂 Ouvre un modal
-     */
+    showError(message) { console.error('Error:', message); }
+    showNotification(message, type = 'info') { console.log(`[${type.toUpperCase()}] ${message}`); }
+    
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -807,9 +490,6 @@ class MAUIController {
         }
     }
 
-    /**
-     * ❌ Ferme un modal
-     */
     closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -819,40 +499,15 @@ class MAUIController {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🚀 INITIALISATION GLOBALE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 const maUI = new MAUIController();
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 M&A Predictor - Page loaded');
-    
-    setTimeout(() => {
-        maUI.init();
-    }, 500);
+    setTimeout(() => { maUI.init(); }, 500);
 });
 
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
-        const modalId = e.target.id;
-        maUI.closeModal(modalId);
+        maUI.closeModal(e.target.id);
     }
 });
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎨 CSS ANIMATIONS (inline)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-(function addSpinnerAnimation() {
-    if (!document.getElementById('ma-spinner-animation')) {
-        const spinnerStyle = document.createElement('style');
-        spinnerStyle.id = 'ma-spinner-animation';
-        spinnerStyle.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(spinnerStyle);
-    }
-})();
