@@ -1359,140 +1359,463 @@ body.dark-mode .ensemble-card {
 }
 
 /* ========================================
-   RECOMMENDATION SECTION
+   RECOMMENDATION SECTION - ULTRA PREMIUM
    ======================================== */
 .recommendation-section {
-    margin-bottom: 32px;
+    margin-bottom: 48px;
+    position: relative;
 }
 
+/* Titre de la section avec effet lumineux */
+.recommendation-section .section-title {
+    font-size: 2rem;
+    margin-bottom: 32px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 32px;
+    background: var(--ml-gradient);
+    border-radius: 20px;
+    color: white;
+    -webkit-text-fill-color: white;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4),
+                0 0 60px rgba(118, 75, 162, 0.3);
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4),
+                    0 0 60px rgba(118, 75, 162, 0.3);
+    }
+    50% {
+        box-shadow: 0 12px 48px rgba(102, 126, 234, 0.6),
+                    0 0 100px rgba(118, 75, 162, 0.5);
+    }
+}
+
+.recommendation-section .section-title i {
+    font-size: 2.2rem;
+    color: white;
+    -webkit-text-fill-color: white;
+    background: none;
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Carte principale avec effet 3D et fond animé */
 .recommendation-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 32px;
+    border: 2px solid transparent;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 80px rgba(102, 126, 234, 0.1);
     transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    background-clip: padding-box;
+}
+
+/* Bordure gradient animée */
+.recommendation-card {
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      linear-gradient(135deg, #667eea, #764ba2, #667eea);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-size: 100% 100%, 200% 200%;
+    animation: gradientBorder 4s ease-in-out infinite;
+}
+
+@keyframes gradientBorder {
+    0%, 100% { background-position: 0% 50%, 0% 50%; }
+    50% { background-position: 0% 50%, 100% 50%; }
+}
+
+/* Particules animées en arrière-plan */
+.recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+    animation: particlesMove 15s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes particlesMove {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(50px, 50px) rotate(360deg); }
 }
 
 .recommendation-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25),
+                0 0 120px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
+/* Header avec design premium */
 .recommendation-header {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 28px;
-    border-bottom: 1px solid var(--glass-border);
-    background: var(--ml-gradient-soft);
+    gap: 28px;
+    padding: 40px;
+    border-bottom: 2px solid transparent;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    position: relative;
+    z-index: 1;
 }
 
+/* Ligne lumineuse sous le header */
+.recommendation-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: var(--ml-gradient);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+    border-radius: 2px;
+}
+
+/* Icône avec effet holographique */
 .recommendation-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
+    width: 96px;
+    height: 96px;
+    border-radius: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 2.8rem;
     flex-shrink: 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: relative;
     transition: var(--transition-smooth);
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Effet de lueur autour de l'icône */
+.recommendation-icon::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 32px;
+    background: inherit;
+    filter: blur(20px);
+    opacity: 0.6;
+    z-index: -1;
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
 }
 
 .recommendation-card:hover .recommendation-icon {
-    transform: scale(1.1) rotate(10deg);
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
 }
 
 .recommendation-icon.strong-buy {
     background: var(--signal-strong-buy);
     color: white;
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
 }
 
 .recommendation-icon.buy {
     background: var(--signal-buy);
     color: white;
+    box-shadow: 0 12px 32px rgba(52, 211, 153, 0.5);
 }
 
 .recommendation-icon.hold {
     background: var(--signal-hold);
     color: white;
+    box-shadow: 0 12px 32px rgba(107, 114, 128, 0.5);
 }
 
 .recommendation-icon.sell {
     background: var(--signal-sell);
     color: white;
+    box-shadow: 0 12px 32px rgba(251, 191, 36, 0.5);
 }
 
 .recommendation-icon.strong-sell {
     background: var(--signal-strong-sell);
     color: white;
+    box-shadow: 0 12px 32px rgba(239, 68, 68, 0.5);
 }
 
+/* Badge de confiance */
 .recommendation-header h4 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 900;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
+    position: relative;
+    display: inline-block;
+}
+
+.recommendation-header h4::after {
+    content: 'AI-Powered';
+    position: absolute;
+    top: -20px;
+    right: -80px;
+    padding: 4px 12px;
+    background: var(--ml-gradient);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    animation: badgeBounce 2s ease-in-out infinite;
+}
+
+@keyframes badgeBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
 }
 
 .recommendation-header p {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
     margin: 0;
+    font-weight: 600;
+    line-height: 1.6;
 }
 
+/* Body avec design amélioré */
 .recommendation-body {
-    padding: 28px;
+    padding: 40px;
+    position: relative;
+    z-index: 1;
 }
 
 .recommendation-body ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: grid;
+    gap: 16px;
 }
 
 .recommendation-body li {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--glass-border);
+    padding: 20px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px) saturate(150%);
+    border: 2px solid transparent;
+    border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 0.95rem;
-    line-height: 1.6;
+    gap: 16px;
+    font-size: 1rem;
+    line-height: 1.7;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    background-clip: padding-box;
 }
 
-.recommendation-body li:last-child {
-    border-bottom: none;
+/* Bordure gradient pour les items */
+.recommendation-body li {
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
-.recommendation-body i {
-    font-size: 1.2rem;
-    color: var(--ml-primary);
+/* Effet de slide au hover */
+.recommendation-body li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--ml-gradient);
+    transform: scaleY(0);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 0 4px 4px 0;
 }
 
+.recommendation-body li:hover::before {
+    transform: scaleY(1);
+}
+
+.recommendation-body li:hover {
+    transform: translateX(8px);
+    background: var(--ml-gradient-soft);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+}
+
+/* Icônes avec effet premium */
+.recommendation-body li i {
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ml-gradient);
+    color: white;
+    border-radius: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    transition: var(--transition-smooth);
+}
+
+.recommendation-body li:hover i {
+    transform: scale(1.15) rotate(-10deg);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+/* Footer avec design amélioré */
 .recommendation-footer {
-    padding: 20px 28px;
-    background: rgba(245, 158, 11, 0.05);
-    border-top: 1px solid var(--glass-border);
+    padding: 32px 40px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 146, 60, 0.08) 100%);
+    border-top: 2px solid rgba(245, 158, 11, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+/* Ligne lumineuse au-dessus du footer */
+.recommendation-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
 }
 
 .disclaimer {
     display: flex;
-    gap: 12px;
-    font-size: 0.85rem;
+    gap: 16px;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.8;
+    font-weight: 500;
 }
 
 .disclaimer i {
     color: var(--ml-warning);
-    font-size: 1.2rem;
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 50%;
     flex-shrink: 0;
+    animation: warningPulse 2s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+}
+
+.disclaimer strong {
+    color: var(--ml-warning);
+    font-weight: 800;
+}
+
+/* Badge de score si présent */
+.recommendation-score-badge {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    padding: 16px 24px;
+    background: var(--ml-gradient);
+    color: white;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+    z-index: 2;
+    animation: scoreFloat 3s ease-in-out infinite;
+}
+
+@keyframes scoreFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+}
+
+/* Dark mode adjustments */
+body.dark-mode .recommendation-card::before {
+    background: radial-gradient(circle at 30% 50%, rgba(102, 126, 234, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(118, 75, 162, 0.25) 0%, transparent 50%);
+}
+
+body.dark-mode .recommendation-body li {
+    background-image: linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.95)), 
+                      linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4));
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recommendation-section .section-title {
+        font-size: 1.5rem;
+        padding: 12px 24px;
+    }
+    
+    .recommendation-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+    }
+    
+    .recommendation-header h4::after {
+        position: static;
+        display: block;
+        margin-top: 8px;
+    }
+    
+    .recommendation-body {
+        padding: 24px;
+    }
+    
+    .recommendation-footer {
+        padding: 24px;
+    }
+    
+    .recommendation-score-badge {
+        position: static;
+        display: inline-block;
+        margin-top: 16px;
+    }
 }
 
 /* ========================================
