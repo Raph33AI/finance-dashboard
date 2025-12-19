@@ -1,30 +1,32 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🤝 M&A PREDICTOR - USER INTERFACE (CORRIGÉ & AMÉLIORÉ)
+ * 🤝 M&A PREDICTOR - REFACTORED VERSION
  * ═══════════════════════════════════════════════════════════════════
- * Interface complète pour le M&A Predictor avec toutes les fonctionnalités
- * + Filtres de période et nombre de filings
- * + Chargement massif optimisé
+ * Interface simplifiée pour le M&A Predictor
+ * ✅ Suppression de la watchlist et de l'analyse par ticker
+ * ✅ Chargement à la demande uniquement
+ * ✅ Pagination sur la table
+ * ✅ Modal avec parsing des documents SEC
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class MAPredictor {
     constructor(config = {}) {
-        // ✅ URL CORRIGÉE
         this.workerURL = config.workerURL || 'https://sec-edgar-api.raphnardone.workers.dev';
         this.client = new SECMAClient({ workerURL: this.workerURL });
-        this.analytics = new MAAnalyticsEngine(this.client);
+        this.parser = new SECDocumentParser();
         
         this.state = {
-            currentView: 'dashboard',
-            selectedTicker: null,
-            watchlist: this.loadWatchlist(),
-            alerts: [],
-            // ✅ NOUVEAUX FILTRES
+            currentDeals: [],
+            filteredDeals: [],
+            currentPage: 1,
+            itemsPerPage: 20,
+            totalPages: 1,
             filters: {
-                period: 30, // jours (par défaut: 1 mois)
-                maxFilings: 500 // nombre de filings (par défaut: 500)
-            }
+                period: 30,
+                maxFilings: 250
+            },
+            isLoading: false
         };
 
         this.init();
@@ -38,1049 +40,432 @@ class MAPredictor {
         console.log('🤝 M&A Predictor initializing...');
         
         this.setupEventListeners();
-        await this.loadDashboard();
-        this.startAlertMonitoring();
+        this.renderEmptyState();
         
         console.log('✅ M&A Predictor ready');
     }
 
     setupEventListeners() {
-        // Search form
-        const searchForm = document.getElementById('ma-search-form');
-        if (searchForm) {
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const ticker = document.getElementById('ma-ticker-input').value.trim().toUpperCase();
-                if (ticker) this.analyzeCompany(ticker);
-            });
+        // Bouton de chargement des données
+        const loadBtn = document.getElementById('btn-load-data');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', () => this.loadData());
         }
 
-        // View switchers
-        document.querySelectorAll('[data-ma-view]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const view = e.target.dataset.maView;
-                this.switchView(view);
-            });
-        });
-
-        // Watchlist actions
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-add-watchlist]')) {
-                const ticker = e.target.dataset.addWatchlist;
-                this.addToWatchlist(ticker);
-            }
-            
-            if (e.target.matches('[data-remove-watchlist]')) {
-                const ticker = e.target.dataset.removeWatchlist;
-                this.removeFromWatchlist(ticker);
-            }
-        });
-
-        // ✅ NOUVEAUX EVENT LISTENERS POUR LES FILTRES
-        const periodSelect = document.getElementById('period-filter');
-        if (periodSelect) {
-            periodSelect.addEventListener('change', (e) => {
-                this.state.filters.period = parseInt(e.target.value);
-                this.loadDashboard();
-            });
-        }
-
-        const filingsSelect = document.getElementById('filings-count-filter');
-        if (filingsSelect) {
-            filingsSelect.addEventListener('change', (e) => {
-                this.state.filters.maxFilings = parseInt(e.target.value);
-                this.loadDashboard();
-            });
-        }
-
-        // Bouton de chargement massif
-        const bulkLoadBtn = document.getElementById('bulk-load-btn');
-        if (bulkLoadBtn) {
-            bulkLoadBtn.addEventListener('click', () => {
-                this.loadBulkFilings();
-            });
-        }
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 DASHBOARD
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    async loadDashboard() {
-        this.showLoading('ma-dashboard-container');
+        // Pagination
+        const prevBtn = document.getElementById('btn-prev-page');
+        const nextBtn = document.getElementById('btn-next-page');
         
-        try {
-            const { period, maxFilings } = this.state.filters;
+        if (prevBtn) prevBtn.addEventListener('click', () => this.changePage(-1));
+        if (nextBtn) nextBtn.addEventListener('click', () => this.changePage(1));
 
-            const [recentDeals, materialEvents, alerts] = await Promise.all([
-                this.client.getRecentDeals({ days: period, minValue: 0 }),
-                this.client.get8KAlerts(['1.01', '2.01'], period),
-                this.loadAlerts()
-            ]);
-
-            this.renderDashboard({
-                recentDeals,
-                materialEvents,
-                alerts,
-                filters: this.state.filters
-            });
-
-        } catch (error) {
-            console.error('❌ Dashboard load failed:', error);
-            this.showError('ma-dashboard-container', 'Failed to load dashboard. Please check your Worker URL.');
-        }
+        // Fermeture des modals en cliquant à l'extérieur
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeDealModal();
+                this.closeModal('filtersInfo');
+            }
+        });
     }
 
-    renderDashboard(data) {
+    renderEmptyState() {
         const container = document.getElementById('ma-dashboard-container');
         if (!container) return;
 
         container.innerHTML = `
-            <!-- ✅ FILTRES AMÉLIORÉS -->
             <div class="ma-filters-section">
                 <h2 class="section-title">
                     <i class="fas fa-filter"></i> Data Filters
+                    <button class="help-icon" onclick="maPredictor.openModal('filtersInfo')">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
                 </h2>
+                
                 <div class="filters-grid">
                     <div class="filter-group">
-                        <label for="period-filter">
-                            <i class="fas fa-calendar-alt"></i> Time Period
+                        <label>
+                            <i class="fas fa-calendar"></i> Time Period
                         </label>
-                        <select id="period-filter" class="filter-select">
-                            <option value="7" ${data.filters.period === 7 ? 'selected' : ''}>Last Week</option>
-                            <option value="30" ${data.filters.period === 30 ? 'selected' : ''}>Last Month</option>
-                            <option value="90" ${data.filters.period === 90 ? 'selected' : ''}>Last 3 Months</option>
-                            <option value="180" ${data.filters.period === 180 ? 'selected' : ''}>Last 6 Months</option>
-                            <option value="365" ${data.filters.period === 365 ? 'selected' : ''}>Last Year</option>
+                        <select id="time-period-filter" class="filter-select">
+                            <option value="7">Last Week</option>
+                            <option value="30" selected>Last Month</option>
+                            <option value="90">Last 3 Months</option>
+                            <option value="180">Last 6 Months</option>
+                            <option value="365">Last Year</option>
                         </select>
                     </div>
-
+                    
                     <div class="filter-group">
-                        <label for="filings-count-filter">
-                            <i class="fas fa-list-ol"></i> Max Filings to Load
+                        <label>
+                            <i class="fas fa-file-alt"></i> Max Filings
                         </label>
-                        <select id="filings-count-filter" class="filter-select">
-                            <option value="100" ${data.filters.maxFilings === 100 ? 'selected' : ''}>100 Filings</option>
-                            <option value="250" ${data.filters.maxFilings === 250 ? 'selected' : ''}>250 Filings</option>
-                            <option value="500" ${data.filters.maxFilings === 500 ? 'selected' : ''}>500 Filings</option>
-                            <option value="1000" ${data.filters.maxFilings === 1000 ? 'selected' : ''}>1,000 Filings</option>
-                            <option value="2000" ${data.filters.maxFilings === 2000 ? 'selected' : ''}>2,000 Filings</option>
+                        <select id="max-filings-filter" class="filter-select">
+                            <option value="100">100 filings</option>
+                            <option value="250" selected>250 filings</option>
+                            <option value="500">500 filings</option>
+                            <option value="1000">1,000 filings</option>
+                            <option value="2000">2,000 filings</option>
                         </select>
                     </div>
-
-                    <div class="filter-group">
-                        <button id="bulk-load-btn" class="btn-bulk-load">
-                            <i class="fas fa-download"></i> Bulk Load All Data
+                    
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <button id="btn-load-data" class="btn-bulk-load">
+                            <i class="fas fa-cloud-download-alt"></i>
+                            Load M&A Data
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="ma-stats-grid">
-                <div class="ma-stat-card">
-                    <div class="stat-icon">🤝</div>
-                    <div class="stat-value">${data.recentDeals.count || 0}</div>
-                    <div class="stat-label">Recent Deals (${data.filters.period}d)</div>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-search-dollar"></i>
                 </div>
-                
-                <div class="ma-stat-card">
-                    <div class="stat-icon">📋</div>
-                    <div class="stat-value">${data.materialEvents.count || 0}</div>
-                    <div class="stat-label">Material Events (${data.filters.period}d)</div>
-                </div>
-                
-                <div class="ma-stat-card">
-                    <div class="stat-icon">🚨</div>
-                    <div class="stat-value">${data.alerts.length}</div>
-                    <div class="stat-label">Active Alerts</div>
-                </div>
-                
-                <div class="ma-stat-card">
-                    <div class="stat-icon">⭐</div>
-                    <div class="stat-value">${this.state.watchlist.length}</div>
-                    <div class="stat-label">Watchlist</div>
+                <h3>No Data Loaded</h3>
+                <p>Select your filters above and click "Load M&A Data" to retrieve SEC filings.</p>
+                <div class="empty-state-features">
+                    <div class="feature-item">
+                        <i class="fas fa-file-contract"></i>
+                        <span>S-4 Merger Filings</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bell"></i>
+                        <span>8-K Material Events</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Real-Time SEC Data</span>
+                    </div>
                 </div>
             </div>
-
-            <!-- Recent Deals -->
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-handshake"></i> Recent M&A Deals
-                </h2>
-                <div class="deals-table-container">
-                    ${this.renderDealsTable(data.recentDeals.deals?.slice(0, 20) || [])}
-                </div>
-            </div>
-
-            <!-- Material Events -->
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-bell"></i> Latest Material Events
-                </h2>
-                <div class="events-list">
-                    ${this.renderEventsList(data.materialEvents.alerts?.slice(0, 20) || [])}
-                </div>
-            </div>
-
-            <!-- Watchlist -->
-            ${this.renderWatchlistSection()}
         `;
 
-        // ✅ RÉATTACHER LES EVENT LISTENERS APRÈS RENDU
+        // Réattacher les event listeners
         this.setupEventListeners();
     }
 
-    renderDealsTable(deals) {
-        if (!deals || deals.length === 0) {
-            return '<p class="no-data">No recent deals found for this period</p>';
-        }
-
-        return `
-            <table class="ma-table">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Type</th>
-                        <th>Filed Date</th>
-                        <th>Source</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${deals.map(deal => `
-                        <tr>
-                            <td><strong>${deal.companyName}</strong></td>
-                            <td><span class="badge badge-${deal.source.toLowerCase()}">${deal.dealType || deal.formType}</span></td>
-                            <td>${this.formatDate(deal.filedDate)}</td>
-                            <td><span class="badge badge-info">${deal.source}</span></td>
-                            <td>
-                                <button class="btn-icon" onclick="maPredictor.viewDealDetails('${deal.accessionNumber}', '${deal.cik}', '${deal.source}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-
-    renderEventsList(events) {
-        if (!events || events.length === 0) {
-            return '<p class="no-data">No recent events found for this period</p>';
-        }
-
-        return events.map(event => `
-            <div class="event-card">
-                <div class="event-header">
-                    <strong>${event.companyName}</strong>
-                    <span class="event-date">${this.formatDate(event.filedDate)}</span>
-                </div>
-                <div class="event-items">
-                    ${event.items?.map(item => `<span class="badge badge-warning">Item ${item}</span>`).join('') || ''}
-                </div>
-                <div class="event-flags">
-                    ${event.isMaterialAgreement ? '<span class="flag flag-agreement">🤝 Material Agreement</span>' : ''}
-                    ${event.isAcquisition ? '<span class="flag flag-acquisition">💼 Acquisition</span>' : ''}
-                    ${event.isLeadershipChange ? '<span class="flag flag-leadership">👔 Leadership Change</span>' : ''}
-                </div>
-                <p class="event-summary">${this.truncate(event.summary, 200)}</p>
-                <button class="btn-view-details" onclick="maPredictor.viewDealDetails('${event.accessionNumber}', '${event.cik}', '8-K')">
-                    View Details
-                </button>
-            </div>
-        `).join('');
-    }
-
-    renderWatchlistSection() {
-        if (this.state.watchlist.length === 0) {
-            return `
-                <div class="ma-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-star"></i> Watchlist
-                    </h2>
-                    <p class="no-data">Your watchlist is empty. Add companies to monitor their M&A activity.</p>
-                </div>
-            `;
-        }
-
-        return `
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-star"></i> Watchlist
-                </h2>
-                <div class="watchlist-grid">
-                    ${this.state.watchlist.map(ticker => `
-                        <div class="watchlist-card">
-                            <div class="watchlist-ticker">${ticker}</div>
-                            <button class="btn-remove" data-remove-watchlist="${ticker}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <button class="btn-analyze" onclick="maPredictor.analyzeCompany('${ticker}')">
-                                Analyze
-                            </button>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📥 BULK LOADING (NOUVEAU)
+    // 📊 DATA LOADING
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    async loadBulkFilings() {
-        console.log('📥 Loading bulk filings...');
-        
-        const { period, maxFilings } = this.state.filters;
-
-        // Créer une modal de progression
-        const progressModal = this.createProgressModal();
-        document.body.appendChild(progressModal);
-
-        try {
-            let loadedCount = 0;
-            const totalExpected = maxFilings;
-
-            // Charger S-4
-            this.updateProgress(progressModal, 'Loading S-4 filings...', 0);
-            const s4Data = await this.client.getS4Bulk({ days: period, max: Math.floor(maxFilings / 2) });
-            loadedCount += s4Data.count || 0;
-            this.updateProgress(progressModal, `Loaded ${loadedCount} S-4 filings...`, (loadedCount / totalExpected) * 100);
-
-            // Charger 8-K
-            this.updateProgress(progressModal, 'Loading 8-K filings...', 50);
-            const eightKData = await this.client.get8KBulk({ days: period, max: Math.floor(maxFilings / 2), items: '1.01,2.01' });
-            loadedCount += eightKData.count || 0;
-            this.updateProgress(progressModal, `Loaded ${loadedCount} total filings...`, 100);
-
-            // Succès
-            setTimeout(() => {
-                progressModal.remove();
-                this.showToast(`✅ Successfully loaded ${loadedCount} filings!`);
-                this.loadDashboard();
-            }, 1000);
-
-        } catch (error) {
-            console.error('❌ Bulk loading failed:', error);
-            progressModal.remove();
-            this.showToast('❌ Failed to load bulk data');
-        }
-    }
-
-    createProgressModal() {
-        const modal = document.createElement('div');
-        modal.className = 'progress-modal';
-        modal.innerHTML = `
-            <div class="progress-modal-content">
-                <h3><i class="fas fa-download"></i> Loading M&A Filings...</h3>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="bulk-progress-bar" style="width: 0%"></div>
-                </div>
-                <p id="bulk-progress-text">Initializing...</p>
-            </div>
-        `;
-        return modal;
-    }
-
-    updateProgress(modal, text, percentage) {
-        const progressBar = modal.querySelector('#bulk-progress-bar');
-        const progressText = modal.querySelector('#bulk-progress-text');
-        
-        if (progressBar) progressBar.style.width = `${percentage}%`;
-        if (progressText) progressText.textContent = text;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎯 COMPANY ANALYSIS
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    async analyzeCompany(ticker) {
-        console.log(`🎯 Analyzing ${ticker}...`);
-        
-        const container = document.getElementById('ma-analysis-container');
-        if (!container) {
-            console.error('Analysis container not found');
+    async loadData() {
+        if (this.state.isLoading) {
+            console.log('⚠ Already loading data...');
             return;
         }
 
-        this.showLoading('ma-analysis-container');
-        this.state.selectedTicker = ticker;
+        // Récupère les valeurs des filtres
+        const periodSelect = document.getElementById('time-period-filter');
+        const filingsSelect = document.getElementById('max-filings-filter');
+        
+        if (!periodSelect || !filingsSelect) {
+            console.error('❌ Filter elements not found');
+            return;
+        }
 
+        this.state.filters.period = parseInt(periodSelect.value);
+        this.state.filters.maxFilings = parseInt(filingsSelect.value);
+
+        console.log(`📊 Loading data: ${this.state.filters.period} days, max ${this.state.filters.maxFilings} filings`);
+        
+        this.state.isLoading = true;
+        this.showProgressModal();
+        
         try {
-            // Calculate M&A Probability Score
-            const probability = await this.analytics.calculateMAProbability(ticker);
+            // Chargement des S-4 et 8-K
+            this.updateProgress(0, 'Connecting to SEC EDGAR...');
+            
+            const [s4Data, eightKData] = await Promise.all([
+                this.loadS4Filings(),
+                this.load8KFilings()
+            ]);
 
-            // Get company M&A activity
-            const activity = await this.client.getCompanyMAActivity(probability.cik, this.state.filters.period);
+            // Combine et trie les données
+            this.state.currentDeals = [...s4Data, ...eightKData].sort((a, b) => 
+                new Date(b.filedDate) - new Date(a.filedDate)
+            );
 
-            // Render analysis
-            this.renderAnalysis({
-                ticker,
-                probability,
-                activity
+            this.state.filteredDeals = [...this.state.currentDeals];
+            this.state.totalPages = Math.ceil(this.state.filteredDeals.length / this.state.itemsPerPage);
+            this.state.currentPage = 1;
+
+            this.updateProgress(100, `Loaded ${this.state.currentDeals.length} filings!`);
+
+            setTimeout(() => {
+                this.hideProgressModal();
+                this.renderDealsTable();
+                this.showDealsSection();
+                this.showToast(`✅ Successfully loaded ${this.state.currentDeals.length} M&A filings!`);
+            }, 500);
+
+        } catch (error) {
+            console.error('❌ Data loading failed:', error);
+            this.hideProgressModal();
+            this.showToast('❌ Failed to load data. Please check your connection and try again.');
+        } finally {
+            this.state.isLoading = false;
+        }
+    }
+
+    async loadS4Filings() {
+        this.updateProgress(20, 'Loading S-4 merger filings...');
+        
+        try {
+            const response = await this.client.getRecentDeals({
+                days: this.state.filters.period,
+                minValue: 0
             });
 
-            // Switch to analysis view
-            this.switchView('analysis');
-
-        } catch (error) {
-            console.error(`❌ Analysis failed for ${ticker}:`, error);
-            this.showError('ma-analysis-container', `Failed to analyze ${ticker}: ${error.message}`);
-        }
-    }
-
-    renderAnalysis(data) {
-        const container = document.getElementById('ma-analysis-container');
-        if (!container) return;
-
-        const { ticker, probability, activity } = data;
-
-        container.innerHTML = `
-            <!-- Header -->
-            <div class="analysis-header">
-                <div class="company-info">
-                    <h1 class="company-ticker">${ticker}</h1>
-                    <p class="company-name">${probability.companyName}</p>
-                    <p class="company-cik">CIK: ${probability.cik}</p>
-                </div>
-                <button class="btn-primary" data-add-watchlist="${ticker}">
-                    <i class="fas fa-star"></i> Add to Watchlist
-                </button>
-            </div>
-
-            <!-- M&A Probability Score -->
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-line"></i> M&A Probability Score
-                </h2>
-                ${this.renderProbabilityScore(probability)}
-            </div>
-
-            <!-- Signal Breakdown -->
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-signal"></i> Signal Breakdown
-                </h2>
-                ${this.renderSignalBreakdown(probability.breakdown)}
-            </div>
-
-            <!-- Company Activity -->
-            <div class="ma-section">
-                <h2 class="section-title">
-                    <i class="fas fa-history"></i> M&A Activity History
-                </h2>
-                ${this.renderCompanyActivity(activity)}
-            </div>
-        `;
-    }
-
-    renderProbabilityScore(probability) {
-        return `
-            <div class="probability-card">
-                <div class="probability-gauge">
-                    <svg viewBox="0 0 200 120" class="gauge-svg">
-                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="20" stroke-linecap="round"/>
-                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="${probability.riskColor}" stroke-width="20" stroke-linecap="round" stroke-dasharray="${probability.probabilityScore * 2.51} 251" class="gauge-progress"/>
-                    </svg>
-                    <div class="gauge-center">
-                        <div class="gauge-score">${probability.probabilityScore}</div>
-                        <div class="gauge-label">M&A Probability</div>
-                    </div>
-                </div>
-                
-                <div class="probability-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Risk Level:</span>
-                        <span class="detail-value" style="color: ${probability.riskColor}">
-                            <strong>${probability.riskLevel}</strong>
-                        </span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Data Quality:</span>
-                        <span class="detail-value">${probability.dataQuality}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Last Updated:</span>
-                        <span class="detail-value">${this.formatDate(probability.timestamp)}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    renderSignalBreakdown(breakdown) {
-        return `
-            <div class="signals-grid">
-                ${breakdown.map(signal => `
-                    <div class="signal-card signal-${signal.status.toLowerCase()}">
-                        <div class="signal-header">
-                            <span class="signal-name">${signal.signal}</span>
-                            <span class="signal-status badge badge-${signal.status.toLowerCase()}">${signal.status}</span>
-                        </div>
-                        <div class="signal-metrics">
-                            <div class="metric">
-                                <span class="metric-label">Value</span>
-                                <span class="metric-value">${signal.value}/100</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Weight</span>
-                                <span class="metric-value">${signal.weight}%</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Contribution</span>
-                                <span class="metric-value">${signal.contribution}</span>
-                            </div>
-                        </div>
-                        <div class="signal-bar">
-                            <div class="signal-bar-fill" style="width: ${signal.value}%; background: ${this.getSignalColor(signal.status)}"></div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    renderCompanyActivity(activity) {
-        const totalEvents = (activity.s4Filings?.length || 0) + (activity.materialEvents?.length || 0);
-
-        if (totalEvents === 0) {
-            return '<p class="no-data">No M&A activity found in the selected period</p>';
-        }
-
-        return `
-            <div class="activity-summary">
-                <div class="activity-stat">
-                    <div class="stat-value">${activity.s4Filings?.length || 0}</div>
-                    <div class="stat-label">S-4 Filings</div>
-                </div>
-                <div class="activity-stat">
-                    <div class="stat-value">${activity.materialEvents?.length || 0}</div>
-                    <div class="stat-label">Material Events</div>
-                </div>
-                <div class="activity-stat">
-                    <div class="stat-value">${totalEvents}</div>
-                    <div class="stat-label">Total Activity</div>
-                </div>
-            </div>
-
-            ${activity.s4Filings?.length > 0 ? `
-                <h3 class="subsection-title">S-4 Filings</h3>
-                ${this.renderDealsTable(activity.s4Filings)}
-            ` : ''}
-
-            ${activity.materialEvents?.length > 0 ? `
-                <h3 class="subsection-title">Material Events (8-K)</h3>
-                ${this.renderEventsList(activity.materialEvents)}
-            ` : ''}
-        `;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📄 DEAL DETAILS
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    async viewDealDetails(accession, cik, source) {
-        console.log(`📄 Loading deal details: ${accession}`);
-        
-        this.showLoading('ma-deal-details-container');
-        
-        try {
-            let dealData;
+            const deals = response.deals || [];
             
-            if (source === 'S-4') {
-                dealData = await this.client.getS4ContentParsed(accession, cik);
-            } else {
-                dealData = await this.client.get8KContentParsed(accession, cik);
-            }
-
-            this.renderDealDetails(dealData, source);
-            this.switchView('deal-details');
-
-        } catch (error) {
-            console.error('❌ Failed to load deal details:', error);
-            this.showError('ma-deal-details-container', 'Failed to load deal details');
-        }
-    }
-
-    renderDealDetails(data, source) {
-        const container = document.getElementById('ma-deal-details-container');
-        if (!container) return;
-
-        const parsed = data.parsedEnhanced || data.parsed;
-
-        if (source === 'S-4') {
-            container.innerHTML = this.renderS4Details(data, parsed);
-        } else {
-            container.innerHTML = this.render8KDetails(data, parsed);
-        }
-    }
-
-    renderS4Details(data, parsed) {
-        const integrationRisk = this.analytics.calculateIntegrationRisk(parsed);
-        const timeline = this.analytics.predictRegulatoryTimeline(parsed);
-        const breakUpFee = this.analytics.analyzeBreakUpFee(parsed);
-
-        return `
-            <div class="deal-header">
-                <button class="btn-back" onclick="maPredictor.switchView('dashboard')">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <h1>S-4 Deal Details</h1>
-            </div>
-
-            <!-- Deal Overview -->
-            <div class="ma-section">
-                <h2 class="section-title">Deal Overview</h2>
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <span class="label">Accession Number:</span>
-                        <span class="value">${data.accessionNumber}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">CIK:</span>
-                        <span class="value">${data.cik}</span>
-                    </div>
-                    ${parsed?.dealStructure?.dealType ? `
-                        <div class="detail-item">
-                            <span class="label">Deal Type:</span>
-                            <span class="value">${parsed.dealStructure.dealType}</span>
-                        </div>
-                    ` : ''}
-                    ${parsed?.financialTerms?.dealValue ? `
-                        <div class="detail-item highlight">
-                            <span class="label">Deal Value:</span>
-                            <span class="value">$${parsed.financialTerms.dealValue.toLocaleString()}M</span>
-                        </div>
-                    ` : ''}
-                    ${parsed?.financialTerms?.premiumOffered ? `
-                        <div class="detail-item">
-                            <span class="label">Premium Offered:</span>
-                            <span class="value">${parsed.financialTerms.premiumOffered}%</span>
-                        </div>
-                    ` : ''}
-                    ${parsed?.financialTerms?.exchangeRatio ? `
-                        <div class="detail-item">
-                            <span class="label">Exchange Ratio:</span>
-                            <span class="value">${parsed.financialTerms.exchangeRatio}</span>
-                        </div>
-                    ` : ''}
-                    ${parsed?.dealStructure?.effectiveDate ? `
-                        <div class="detail-item">
-                            <span class="label">Expected Closing:</span>
-                            <span class="value">${parsed.dealStructure.effectiveDate}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <!-- Financial Terms -->
-            ${(parsed?.financialTerms?.breakUpFee || parsed?.synergies?.totalSynergies) ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Financial Terms</h2>
-                    <div class="details-grid">
-                        ${parsed.financialTerms.breakUpFee ? `
-                            <div class="detail-item">
-                                <span class="label">Break-Up Fee:</span>
-                                <span class="value">$${parsed.financialTerms.breakUpFee.toLocaleString()}M</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Break-Up Fee %:</span>
-                                <span class="value">${breakUpFee.feePercentage}%</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Fee Assessment:</span>
-                                <span class="value badge badge-${breakUpFee.assessment.toLowerCase()}">${breakUpFee.assessment}</span>
-                            </div>
-                        ` : ''}
-                        ${parsed.synergies?.totalSynergies ? `
-                            <div class="detail-item highlight">
-                                <span class="label">Expected Synergies:</span>
-                                <span class="value">$${parsed.synergies.totalSynergies.toLocaleString()}M</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${breakUpFee.hasBreakUpFee ? `
-                        <p class="detail-note">${breakUpFee.implications}</p>
-                    ` : ''}
-                </div>
-            ` : ''}
-
-            <!-- Regulatory -->
-            ${parsed?.regulatory?.approvalsRequired?.length > 0 ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Regulatory Approvals</h2>
-                    <div class="badges-list">
-                        ${parsed.regulatory.approvalsRequired.map(approval => `
-                            <span class="badge badge-warning">${approval.authority}</span>
-                        `).join('')}
-                    </div>
-                    <div class="timeline-card">
-                        <h3>Estimated Timeline</h3>
-                        <div class="timeline-details">
-                            <div class="timeline-item">
-                                <span class="label">Total Duration:</span>
-                                <span class="value">${timeline.totalMonths} months</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="label">Estimated Close:</span>
-                                <span class="value">${timeline.estimatedCloseDate}</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="label">Complexity:</span>
-                                <span class="value badge badge-${timeline.complexity.toLowerCase()}">${timeline.complexity}</span>
-                            </div>
-                        </div>
-                        <div class="timeline-breakdown">
-                            ${Object.entries(timeline.timelines).map(([stage, months]) => `
-                                <div class="timeline-stage">
-                                    <span>${stage}</span>
-                                    <span>${months} months</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            ` : ''}
-
-            <!-- Advisors -->
-            ${(parsed?.advisors?.allLegalCounsel?.length > 0 || parsed?.advisors?.allFinancialAdvisors?.length > 0) ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Advisors</h2>
-                    <div class="advisors-grid">
-                        ${parsed.advisors.allLegalCounsel?.length > 0 ? `
-                            <div class="advisor-category">
-                                <h3>Legal Counsel</h3>
-                                <ul>
-                                    ${parsed.advisors.allLegalCounsel.map(counsel => `<li>${counsel}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${parsed.advisors.allFinancialAdvisors?.length > 0 ? `
-                            <div class="advisor-category">
-                                <h3>Financial Advisors</h3>
-                                <ul>
-                                    ${parsed.advisors.allFinancialAdvisors.map(advisor => `<li>${advisor}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            ` : ''}
-
-            <!-- Integration Risk -->
-            <div class="ma-section">
-                <h2 class="section-title">Integration Risk Analysis</h2>
-                ${this.renderIntegrationRisk(integrationRisk)}
-            </div>
-
-            <!-- Document Link -->
-            <div class="ma-section">
-                <h2 class="section-title">Original Document</h2>
-                <a href="${data.documentURL}" target="_blank" class="btn-link">
-                    <i class="fas fa-external-link-alt"></i> View Full S-4 Filing on SEC.gov
-                </a>
-            </div>
-        `;
-    }
-
-    render8KDetails(data, parsed) {
-        return `
-            <div class="deal-header">
-                <button class="btn-back" onclick="maPredictor.switchView('dashboard')">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <h1>8-K Material Event Details</h1>
-            </div>
-
-            <!-- Event Overview -->
-            <div class="ma-section">
-                <h2 class="section-title">Event Overview</h2>
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <span class="label">Accession Number:</span>
-                        <span class="value">${data.accessionNumber}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">CIK:</span>
-                        <span class="value">${data.cik}</span>
-                    </div>
-                    ${parsed?.eventDate ? `
-                        <div class="detail-item">
-                            <span class="label">Event Date:</span>
-                            <span class="value">${parsed.eventDate}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <!-- Items -->
-            ${parsed?.items?.length > 0 ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Items Reported</h2>
-                    <div class="items-list">
-                        ${parsed.items.map(item => `
-                            <div class="item-card">
-                                <div class="item-number">Item ${item.itemNumber}</div>
-                                <div class="item-description">${item.description}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-
-            <!-- Material Agreements -->
-            ${parsed?.materialAgreements?.length > 0 ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Material Agreements</h2>
-                    <ul class="agreements-list">
-                        ${parsed.materialAgreements.map(agreement => `
-                            <li>${agreement.type || agreement}</li>
-                        `).join('')}
-                    </ul>
-                </div>
-            ` : ''}
-
-            <!-- Acquisitions -->
-            ${parsed?.acquisitions?.length > 0 ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Acquisitions</h2>
-                    ${parsed.acquisitions.map(acq => `
-                        <div class="acquisition-card">
-                            <div class="acq-type">${acq.type}</div>
-                            <div class="acq-value">$${acq.value.toLocaleString()}M ${acq.currency}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : ''}
-
-            <!-- Leadership Changes -->
-            ${parsed?.leadershipChanges?.length > 0 ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Leadership Changes</h2>
-                    <ul class="leadership-list">
-                        ${parsed.leadershipChanges.map(change => `
-                            <li><strong>${change.action}</strong> - ${change.position}${change.name ? ` (${change.name})` : ''}</li>
-                        `).join('')}
-                    </ul>
-                </div>
-            ` : ''}
-
-            <!-- Financial Results -->
-            ${parsed?.financialResults?.hasEarningsRelease ? `
-                <div class="ma-section">
-                    <h2 class="section-title">Financial Results</h2>
-                    <div class="details-grid">
-                        ${parsed.financialResults.period ? `
-                            <div class="detail-item">
-                                <span class="label">Period:</span>
-                                <span class="value">${parsed.financialResults.period}</span>
-                            </div>
-                        ` : ''}
-                        ${parsed.financialResults.revenue ? `
-                            <div class="detail-item">
-                                <span class="label">Revenue:</span>
-                                <span class="value">$${parsed.financialResults.revenue.toLocaleString()}M</span>
-                            </div>
-                        ` : ''}
-                        ${parsed.financialResults.netIncome ? `
-                            <div class="detail-item">
-                                <span class="label">Net Income:</span>
-                                <span class="value">$${parsed.financialResults.netIncome.toLocaleString()}M</span>
-                            </div>
-                        ` : ''}
-                        ${parsed.financialResults.eps ? `
-                            <div class="detail-item">
-                                <span class="label">EPS:</span>
-                                <span class="value">$${parsed.financialResults.eps.toFixed(2)}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            ` : ''}
-
-            <!-- Critical Flags -->
-            ${(parsed?.criticalFlags?.bankruptcy || parsed?.criticalFlags?.delisting || parsed?.criticalFlags?.goingConcern) ? `
-                <div class="ma-section alert-section">
-                    <h2 class="section-title">🚨 Critical Alerts</h2>
-                    ${parsed.criticalFlags.bankruptcy ? '<p class="alert-critical">⚠ BANKRUPTCY FILING</p>' : ''}
-                    ${parsed.criticalFlags.delisting ? '<p class="alert-critical">⚠ DELISTING NOTICE</p>' : ''}
-                    ${parsed.criticalFlags.goingConcern ? '<p class="alert-critical">⚠ GOING CONCERN ISSUE</p>' : ''}
-                    ${parsed.criticalFlags.materialWeakness ? '<p class="alert-warning">⚠ MATERIAL WEAKNESS DISCLOSED</p>' : ''}
-                    ${parsed.criticalFlags.restatement ? '<p class="alert-warning">⚠ FINANCIAL RESTATEMENT</p>' : ''}
-                </div>
-            ` : ''}
-
-            <!-- Document Link -->
-            <div class="ma-section">
-                <h2 class="section-title">Original Document</h2>
-                <a href="${data.documentURL}" target="_blank" class="btn-link">
-                    <i class="fas fa-external-link-alt"></i> View Full 8-K Filing on SEC.gov
-                </a>
-            </div>
-        `;
-    }
-
-    renderIntegrationRisk(risk) {
-        return `
-            <div class="risk-card">
-                <div class="risk-score">
-                    <div class="risk-value">${risk.overallRisk}</div>
-                    <div class="risk-label">${risk.riskLevel} RISK</div>
-                </div>
-                <div class="risk-breakdown">
-                    ${Object.entries(risk.risks).map(([category, value]) => `
-                        <div class="risk-item">
-                            <div class="risk-item-header">
-                                <span>${this.humanizeRiskCategory(category)}</span>
-                                <span class="risk-score-mini">${value}/100</span>
-                            </div>
-                            <div class="risk-bar">
-                                <div class="risk-bar-fill" style="width: ${value}%; background: ${this.getRiskColor(value)}"></div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🚨 ALERTS & MONITORING
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    async startAlertMonitoring() {
-        console.log('🚨 Starting alert monitoring...');
-        
-        // Check for new alerts every 5 minutes
-        setInterval(() => {
-            this.checkForAlerts();
-        }, 5 * 60 * 1000);
-
-        // Initial check
-        this.checkForAlerts();
-    }
-
-    async checkForAlerts() {
-        try {
-            const alerts = await this.client.get8KAlerts(['1.01', '2.01'], 1);
+            this.updateProgress(50, `Loaded ${deals.length} S-4 filings...`);
             
-            if (alerts.count > 0) {
-                this.state.alerts = alerts.alerts;
-                this.showAlertNotification(alerts.count);
-            }
-        } catch (error) {
-            console.error('❌ Alert check failed:', error);
-        }
-    }
+            return deals.map(deal => ({
+                ...deal,
+                formType: 'S-4',
+                source: 'S-4',
+                description: deal.dealType || 'Merger/Acquisition',
+                url: this.buildSECUrl(deal.cik, deal.accessionNumber)
+            }));
 
-    showAlertNotification(count) {
-        // Create notification
-        const notification = document.createElement('div');
-        notification.className = 'ma-notification';
-        notification.innerHTML = `
-            <div class="notification-icon">🚨</div>
-            <div class="notification-content">
-                <strong>${count} new M&A alert${count > 1 ? 's' : ''}</strong>
-                <p>Material events detected in the last 24 hours</p>
-            </div>
-            <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.remove(), 10000);
-    }
-
-    async loadAlerts() {
-        try {
-            const data = await this.client.get8KAlerts(['1.01', '2.01'], 7);
-            return data.alerts || [];
         } catch (error) {
-            console.error('Failed to load alerts:', error);
+            console.error('❌ S-4 loading failed:', error);
             return [];
         }
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ⭐ WATCHLIST MANAGEMENT
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async load8KFilings() {
+        this.updateProgress(60, 'Loading 8-K material events...');
+        
+        try {
+            const response = await this.client.get8KAlerts(
+                ['1.01', '2.01', '2.03', '5.02', '8.01'],
+                this.state.filters.period
+            );
 
-    loadWatchlist() {
-        const stored = localStorage.getItem('ma-watchlist');
-        return stored ? JSON.parse(stored) : [];
-    }
+            const alerts = response.alerts || [];
+            
+            this.updateProgress(90, `Loaded ${alerts.length} 8-K filings...`);
+            
+            return alerts.map(alert => ({
+                ...alert,
+                formType: '8-K',
+                source: '8-K',
+                description: this.get8KDescription(alert.items),
+                url: this.buildSECUrl(alert.cik, alert.accessionNumber)
+            }));
 
-    saveWatchlist() {
-        localStorage.setItem('ma-watchlist', JSON.stringify(this.state.watchlist));
-    }
-
-    addToWatchlist(ticker) {
-        if (!this.state.watchlist.includes(ticker)) {
-            this.state.watchlist.push(ticker);
-            this.saveWatchlist();
-            this.showToast(`${ticker} added to watchlist`);
-            this.loadDashboard(); // Refresh
+        } catch (error) {
+            console.error('❌ 8-K loading failed:', error);
+            return [];
         }
     }
 
-    removeFromWatchlist(ticker) {
-        this.state.watchlist = this.state.watchlist.filter(t => t !== ticker);
-        this.saveWatchlist();
-        this.showToast(`${ticker} removed from watchlist`);
-        this.loadDashboard(); // Refresh
+    buildSECUrl(cik, accession) {
+        const cleanAccession = accession.replace(/-/g, '');
+        return `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cik}&accession_number=${accession}&xbrl_type=v`;
+    }
+
+    get8KDescription(items) {
+        if (!items || items.length === 0) return 'Material Event';
+        
+        const descriptions = {
+            '1.01': 'Material Definitive Agreement',
+            '2.01': 'Completion of Acquisition/Disposition',
+            '2.03': 'Creation of Direct Financial Obligation',
+            '5.02': 'Departure/Election of Directors/Officers',
+            '8.01': 'Other Events'
+        };
+
+        return items.map(item => descriptions[item] || `Item ${item}`).join(', ');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📋 TABLE RENDERING & PAGINATION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    renderDealsTable() {
+        const tbody = document.getElementById('ma-deals-tbody');
+        const badge = document.getElementById('deals-count-badge');
+        
+        if (!tbody || !badge) {
+            console.error('❌ Table elements not found');
+            return;
+        }
+
+        tbody.innerHTML = '';
+        badge.textContent = this.state.filteredDeals.length;
+
+        const startIndex = (this.state.currentPage - 1) * this.state.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.state.itemsPerPage, this.state.filteredDeals.length);
+        
+        const pageDeals = this.state.filteredDeals.slice(startIndex, endIndex);
+
+        if (pageDeals.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 20px; opacity: 0.6;">No M&A deals found for selected filters</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        pageDeals.forEach((deal, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${this.formatDate(deal.filedDate)}</td>
+                <td>
+                    <strong>${deal.companyName || 'Unknown Company'}</strong><br>
+                    <small style="opacity: 0.7;">CIK: ${deal.cik}</small>
+                </td>
+                <td><span class="form-badge form-${deal.formType.toLowerCase()}">${deal.formType}</span></td>
+                <td>${deal.description}</td>
+                <td>
+                    <button class="btn-action" onclick="maPredictor.viewDealDetails(${startIndex + index})">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        this.updatePagination();
+    }
+
+    changePage(direction) {
+        const newPage = this.state.currentPage + direction;
+        
+        if (newPage < 1 || newPage > this.state.totalPages) {
+            return;
+        }
+
+        this.state.currentPage = newPage;
+        this.renderDealsTable();
+        
+        // Scroll to top of table
+        document.getElementById('ma-deals-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    updatePagination() {
+        const prevBtn = document.getElementById('btn-prev-page');
+        const nextBtn = document.getElementById('btn-next-page');
+        const info = document.getElementById('pagination-info');
+
+        if (!prevBtn || !nextBtn || !info) return;
+
+        prevBtn.disabled = this.state.currentPage === 1;
+        nextBtn.disabled = this.state.currentPage === this.state.totalPages;
+
+        info.textContent = `Page ${this.state.currentPage} of ${this.state.totalPages}`;
+    }
+
+    showDealsSection() {
+        const section = document.getElementById('ma-deals-section');
+        if (section) {
+            section.style.display = 'block';
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📄 DEAL DETAILS MODAL (avec parsing SEC)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async viewDealDetails(index) {
+        const deal = this.state.filteredDeals[index];
+        
+        if (!deal) {
+            console.error('❌ Deal not found at index:', index);
+            return;
+        }
+
+        console.log('📄 Viewing deal details:', deal);
+
+        const modal = document.getElementById('dealDetailsModal');
+        const title = document.getElementById('modal-deal-title');
+        const body = document.getElementById('modal-deal-body');
+
+        if (!modal || !title || !body) {
+            console.error('❌ Modal elements not found');
+            return;
+        }
+
+        // Affiche le modal avec loader
+        title.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading Document...`;
+        body.innerHTML = `
+            <div style="text-align: center; padding: 60px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i>
+                <p style="margin-top: 20px; opacity: 0.7;">Parsing SEC document...</p>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+
+        // Parse le document SEC
+        try {
+            const parsedData = await this.parser.parseDocument(deal.url);
+            const html = this.parser.generateDisplayHTML(parsedData);
+
+            title.innerHTML = `
+                <i class="fas fa-file-contract"></i> 
+                ${deal.formType} - ${deal.companyName || 'SEC Filing'}
+            `;
+            body.innerHTML = html;
+
+        } catch (error) {
+            console.error('❌ Error parsing document:', error);
+            
+            title.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error Loading Document`;
+            body.innerHTML = `
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Failed to Parse Document</h3>
+                    <p>${error.message}</p>
+                    <a href="${deal.url}" target="_blank" class="btn-external-link">
+                        <i class="fas fa-external-link-alt"></i> View Original on SEC.gov
+                    </a>
+                </div>
+            `;
+        }
+    }
+
+    closeDealModal() {
+        const modal = document.getElementById('dealDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 🎨 UI UTILITIES
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    switchView(viewName) {
-        this.state.currentView = viewName;
-        
-        document.querySelectorAll('[data-ma-view]').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.maView === viewName) {
-                btn.classList.add('active');
-            }
-        });
-
-        document.querySelectorAll('.ma-view').forEach(view => {
-            view.style.display = 'none';
-        });
-
-        const activeView = document.getElementById(`ma-${viewName}-view`);
-        if (activeView) {
-            activeView.style.display = 'block';
+    showProgressModal() {
+        const modal = document.getElementById('progressModal');
+        if (modal) {
+            modal.style.display = 'flex';
         }
     }
 
-    showLoading(containerId) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-container">
-                    <div class="spinner"></div>
-                    <p>Loading M&A data...</p>
-                </div>
-            `;
+    hideProgressModal() {
+        const modal = document.getElementById('progressModal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
 
-    showError(containerId, message) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = `
-                <div class="error-container">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>${message}</p>
-                    <button class="btn-retry" onclick="maPredictor.loadDashboard()">
-                        <i class="fas fa-redo"></i> Retry
-                    </button>
-                </div>
-            `;
+    updateProgress(percent, message) {
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('bulk-progress-text');
+
+        if (progressBar) {
+            progressBar.style.width = `${percent}%`;
+        }
+
+        if (progressText) {
+            progressText.textContent = message;
         }
     }
 
@@ -1089,7 +474,7 @@ class MAPredictor {
         toast.className = 'ma-toast';
         toast.textContent = message;
         document.body.appendChild(toast);
-        
+
         setTimeout(() => toast.classList.add('show'), 100);
         setTimeout(() => {
             toast.classList.remove('show');
@@ -1097,7 +482,6 @@ class MAPredictor {
         }, 3000);
     }
 
-    // ✅ MÉTHODES MODAL AJOUTÉES
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -1116,53 +500,36 @@ class MAPredictor {
 
     formatDate(dateString) {
         if (!dateString) return 'N/A';
+        
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        
+        if (isNaN(date.getTime())) return dateString;
+
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
-    }
-
-    truncate(text, length) {
-        if (!text) return '';
-        return text.length > length ? text.substring(0, length) + '...' : text;
-    }
-
-    getSignalColor(status) {
-        const colors = {
-            'HIGH': '#ef4444',
-            'MEDIUM': '#f59e0b',
-            'LOW': '#10b981'
-        };
-        return colors[status] || '#6b7280';
-    }
-
-    getRiskColor(value) {
-        if (value >= 70) return '#ef4444';
-        if (value >= 40) return '#f59e0b';
-        return '#10b981';
-    }
-
-    humanizeRiskCategory(category) {
-        const names = {
-            culturalMismatch: 'Cultural Alignment',
-            debtLevel: 'Debt Level',
-            synergyRealization: 'Synergy Realization',
-            regulatoryComplexity: 'Regulatory Complexity',
-            integrationTimeline: 'Integration Timeline'
-        };
-        return names[category] || category;
     }
 }
 
-// Initialize on page load
+// ═══════════════════════════════════════════════════════════════════
+// 🌐 GLOBAL INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════
+
 let maPredictor;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ✅ URL CORRIGÉE
+    console.log('🚀 Initializing M&A Predictor...');
+    
     const workerURL = 'https://sec-edgar-api.raphnardone.workers.dev';
     
-    maPredictor = new MAPredictor({ workerURL });
-    window.maPredictor = maPredictor; // Global access
+    try {
+        maPredictor = new MAPredictor({ workerURL });
+        window.maPredictor = maPredictor; // Accès global pour onclick
+        
+        console.log('✅ M&A Predictor initialized successfully');
+    } catch (error) {
+        console.error('❌ Failed to initialize M&A Predictor:', error);
+    }
 });

@@ -414,13 +414,13 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class='page-title'>
-                        <i class="fas fa-handshake"></i> M&A Predictor - Early Detection System
+                        <i class="fas fa-handshake"></i> M&A Predictor - Real-Time SEC Filings
                     </h1>
                 </div>
                 <div class='header-right'>
                     <button class='dashboard-btn' onclick='location.reload()'>
                         <i class='fas fa-sync-alt'></i>
-                        <span class='btn-text'>Refresh Data</span>
+                        <span class='btn-text'>Refresh</span>
                     </button>
                 </div>
             </header>
@@ -428,53 +428,87 @@
             <div class='container'>
         
         <!-- ========================================
-             SEARCH & ANALYSIS
+             DATA FILTERS SECTION (UNIQUE POINT D'ENTRÉE)
              ======================================== -->
-        <div class='section'>
+        <div class='section ma-filters-section'>
             <h2 class='section-title'>
-                <i class='fas fa-search'></i> Company M&A Analysis
-                <button class='info-btn' onclick='maPredictor.openModal("searchInfo")'>
-                    <i class='fas fa-info-circle'></i>
+                <i class='fas fa-filter'></i> Data Filters
+                <button class='help-icon' onclick='maPredictor.openModal("filtersInfo")'>
+                    <i class='fas fa-question-circle'></i>
                 </button>
             </h2>
             
-            <div class='ma-search-container'>
-                <form id='ma-search-form' class='search-form'>
-                    <input 
-                        type='text' 
-                        id='ma-ticker-input' 
-                        placeholder='Enter company ticker (e.g., AAPL, MSFT, TSLA)...'
-                        class='search-input'
-                    >
-                    <button type='submit' class='search-btn'>
-                        <i class='fas fa-search'></i> Analyze
+            <div class='filters-grid'>
+                <div class='filter-group'>
+                    <label>
+                        <i class='fas fa-calendar'></i> Time Period
+                    </label>
+                    <select id='time-period-filter' class='filter-select'>
+                        <option value='7'>Last Week</option>
+                        <option value='30' selected>Last Month</option>
+                        <option value='90'>Last 3 Months</option>
+                        <option value='180'>Last 6 Months</option>
+                        <option value='365'>Last Year</option>
+                    </select>
+                </div>
+                
+                <div class='filter-group'>
+                    <label>
+                        <i class='fas fa-file-alt'></i> Max Filings
+                    </label>
+                    <select id='max-filings-filter' class='filter-select'>
+                        <option value='100'>100 filings</option>
+                        <option value='250' selected>250 filings</option>
+                        <option value='500'>500 filings</option>
+                        <option value='1000'>1,000 filings</option>
+                        <option value='2000'>2,000 filings</option>
+                    </select>
+                </div>
+                
+                <div class='filter-group' style='justify-content: flex-end;'>
+                    <button id='btn-load-data' class='btn-bulk-load'>
+                        <i class='fas fa-cloud-download-alt'></i>
+                        Load M&A Data
                     </button>
-                </form>
+                </div>
             </div>
         </div>
 
         <!-- ========================================
-             DASHBOARD VIEWS
+             RECENT M&A DEALS TABLE (avec Pagination)
              ======================================== -->
-        
-        <!-- Dashboard View -->
-        <div id='ma-dashboard-view' class='ma-view'>
-            <div id='ma-dashboard-container'>
-                <!-- ✅ Filtres et contenu rendus dynamiquement par ma-predictor.js -->
+        <div id='ma-deals-section' class='section' style='display: none;'>
+            <h2 class='section-title'>
+                <i class='fas fa-handshake'></i> Recent M&A Deals
+                <span id='deals-count-badge' class='count-badge'>0</span>
+            </h2>
+            
+            <div class='table-container'>
+                <table class='ma-table'>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Company (CIK)</th>
+                            <th>Form Type</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id='ma-deals-tbody'>
+                        <!-- Rempli dynamiquement -->
+                    </tbody>
+                </table>
             </div>
-        </div>
-
-        <!-- Analysis View -->
-        <div id='ma-analysis-view' class='ma-view' style='display: none;'>
-            <div id='ma-analysis-container'>
-                <!-- Rendered by ma-predictor.js -->
-            </div>
-        </div>
-
-        <!-- Deal Details View -->
-        <div id='ma-deal-details-view' class='ma-view' style='display: none;'>
-            <div id='ma-deal-details-container'>
-                <!-- Rendered by ma-predictor.js -->
+            
+            <!-- Pagination Controls -->
+            <div class='pagination-controls' id='pagination-controls'>
+                <button id='btn-prev-page' class='pagination-btn' disabled>
+                    <i class='fas fa-chevron-left'></i> Previous
+                </button>
+                <span id='pagination-info' class='pagination-info'>Page 1 of 1</span>
+                <button id='btn-next-page' class='pagination-btn' disabled>
+                    Next <i class='fas fa-chevron-right'></i>
+                </button>
             </div>
         </div>
 
@@ -489,57 +523,76 @@
          MODALS
          ======================================== -->
     
-    <!-- Search Info Modal -->
-    <div id='searchInfo' class='modal' style='display: none;'>
+    <!-- Filters Info Modal -->
+    <div id='filtersInfo' class='modal' style='display: none;'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2><i class='fas fa-search'></i> Company M&A Analysis</h2>
-                <button class='modal-close' onclick='maPredictor.closeModal("searchInfo")'>&times;</button>
+                <h2><i class='fas fa-filter'></i> Data Filters Guide</h2>
+                <button class='modal-close' onclick='maPredictor.closeModal("filtersInfo")'>&times;</button>
             </div>
             <div class='modal-body'>
                 <p><strong>How to use the M&A Predictor:</strong></p>
                 <ol>
-                    <li>Select your desired time period (1 week to 1 year)</li>
-                    <li>Choose the maximum number of filings to analyze</li>
-                    <li>Click "Bulk Load All Data" to load all available S-4 and 8-K filings</li>
-                    <li>Enter a stock ticker symbol (e.g., AAPL, MSFT, NVDA)</li>
-                    <li>Click "Analyze" to calculate the M&A Probability Score</li>
+                    <li>Select your desired <strong>Time Period</strong> (1 week to 1 year)</li>
+                    <li>Choose the <strong>Max Filings</strong> to analyze (100 to 2,000)</li>
+                    <li>Click <strong>"Load M&A Data"</strong> to retrieve SEC filings</li>
+                    <li>Click <strong>"View Details"</strong> on any deal to see the full parsed document</li>
                 </ol>
                 
                 <p><strong>What you'll see:</strong></p>
                 <ul>
-                    <li><strong>M&A Probability Score:</strong> 0-100% likelihood of M&A activity</li>
-                    <li><strong>Signal Breakdown:</strong> Individual indicators contributing to the score</li>
-                    <li><strong>Company Activity:</strong> Recent S-4 and 8-K filings</li>
-                    <li><strong>Deal Details:</strong> Full document analysis when available</li>
+                    <li><strong>Recent M&A Deals:</strong> All S-4 and 8-K filings in your selected period</li>
+                    <li><strong>Parsed Documents:</strong> Clean, formatted SEC filing content</li>
+                    <li><strong>Company Information:</strong> CIK, filing date, document type</li>
                 </ul>
                 
                 <div class='warning-box'>
                     <i class='fas fa-exclamation-triangle'></i> 
-                    <strong>Note:</strong> This is a predictive tool based on SEC filings. Always perform your own due diligence.
+                    <strong>Note:</strong> Large datasets may take time to load. Start with shorter periods.
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Deal Details Modal -->
+    <div id='dealDetailsModal' class='modal' style='display: none;'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2 id='modal-deal-title'><i class='fas fa-file-contract'></i> Filing Details</h2>
+                <button class='modal-close' onclick='maPredictor.closeDealModal()'>&times;</button>
+            </div>
+            <div class='modal-body' id='modal-deal-body'>
+                <!-- Contenu parsé du document SEC -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id='progressModal' class='progress-modal' style='display: none;'>
+        <div class='progress-modal-content'>
+            <h3>
+                <i class='fas fa-spinner fa-spin'></i> Loading M&A Data...
+            </h3>
+            <div class='progress-bar-container'>
+                <div id='progress-bar' class='progress-bar' style='width: 0%;'></div>
+            </div>
+            <p id='bulk-progress-text'>Initializing...</p>
+        </div>
+    </div>
+
     <!-- Scripts (ORDER IS CRITICAL) -->
-    
-    <!-- Parsers XML -->
     <script src="assets/js/form-4-parser.js"></script>
     <script src="assets/js/form-s4-parser.js"></script>
     <script src="assets/js/form-8k-parser.js"></script>
-    
-    <!-- M&A Client & Analytics -->
+    <script src="assets/js/sec-document-parser.js"></script> <!-- ✅ NOUVEAU -->
     <script src="assets/js/sec-ma-client.js"></script>
     <script src="assets/js/ma-analytics-engine.js"></script>
-    <script src="assets/js/ma-predictor.js"></script>
-    
-    <!-- Common Scripts -->
+    <script src="assets/js/ma-predictor-refactored.js"></script> <!-- ✅ REMPLACE ma-predictor.js -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- User Menu Init -->
+    <!-- User Menu Init (inchangé) -->
     <script>
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
@@ -608,6 +661,4 @@
             }
         })();
     </script>
-
 </body>
-</html>
