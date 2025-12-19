@@ -288,16 +288,23 @@ class MAUIController {
 
     async loadDealComps() {
         try {
-            console.log('💼 Loading deal comps...');
+            console.log('💼 Loading REAL deal comps...');
             this.showLoading('dealCompsGrid');
             
             const sector = document.getElementById('sectorFilter')?.value || '';
             const year = document.getElementById('yearFilter')?.value || '';
-            const data = await maClient.getDealComps({ sector, year });
+            
+            // ✅ NOUVELLE MÉTHODE - Parse RÉEL
+            const data = await maClient.getDealComps({ 
+                sector: sector || null, 
+                year: year || null,
+                limit: 50,
+                forceRefresh: false
+            });
             
             this.dealComps = data.deals || [];
             this.renderDealComps();
-            console.log(`✅ Loaded ${this.dealComps.length} deal comps`);
+            console.log(`✅ Loaded ${this.dealComps.length} REAL deal comps`);
             
         } catch (error) {
             console.error('❌ Deal comps load error:', error);
@@ -310,21 +317,60 @@ class MAUIController {
         if (!container) return;
 
         if (this.dealComps.length === 0) {
-            container.innerHTML = `<div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'><i class='fas fa-database fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i><h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>No deal comps available</h3><p>Try adjusting the filters or check back later for updated data.</p></div>`;
+            container.innerHTML = `
+                <div style='grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-tertiary);'>
+                    <i class='fas fa-database fa-3x' style='opacity: 0.3; margin-bottom: 20px;'></i>
+                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 12px;'>No deal comps available</h3>
+                    <p>Try adjusting the filters or check back later for updated data.</p>
+                </div>
+            `;
             return;
         }
 
         container.innerHTML = this.dealComps.map(deal => `
             <div class='deal-comp-card'>
                 <div class='deal-comp-header'>
-                    <h4>${deal.companyName || 'Unknown Company'}</h4>
+                    <h4>${deal.targetName || deal.companyName || 'Unknown Company'}</h4>
                     <p>${deal.formType} • Filed: ${this.formatDate(deal.filedDate)}</p>
                 </div>
+                
+                <!-- ✅ NEW: Show Acquirer -->
+                <div style='margin-bottom: 12px; padding: 8px 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--ma-primary); border-radius: 6px;'>
+                    <strong style='font-size: 0.85rem; color: var(--text-secondary);'>Acquirer:</strong>
+                    <span style='font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-left: 8px;'>${deal.acquirerName || 'N/A'}</span>
+                </div>
+                
+                <!-- ✅ NEW: Show Deal Value -->
+                ${deal.dealValue ? `
+                    <div style='margin-bottom: 16px; text-align: center; padding: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 12px;'>
+                        <div style='font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;'>Deal Value</div>
+                        <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>${deal.dealValue.formatted}</div>
+                    </div>
+                ` : ''}
+                
                 <div class='deal-comp-metrics'>
-                    <div class='metric-item'><div class='metric-label'>EV/Sales</div><div class='metric-value'>${deal.evSales || 'N/A'}</div></div>
-                    <div class='metric-item'><div class='metric-label'>EV/EBITDA</div><div class='metric-value'>${deal.evEbitda || 'N/A'}</div></div>
-                    <div class='metric-item'><div class='metric-label'>Premium</div><div class='metric-value'>${deal.premium || 'N/A'}</div></div>
-                    <div class='metric-item'><div class='metric-label'>Sector</div><div class='metric-value' style='font-size: 0.9rem;'>${deal.sector || 'Unknown'}</div></div>
+                    <div class='metric-item'>
+                        <div class='metric-label'>EV/Sales</div>
+                        <div class='metric-value'>${deal.evSales ? deal.evSales + 'x' : 'N/A'}</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-label'>EV/EBITDA</div>
+                        <div class='metric-value'>${deal.evEbitda ? deal.evEbitda + 'x' : 'N/A'}</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-label'>Premium</div>
+                        <div class='metric-value'>${deal.premium ? deal.premium + '%' : 'N/A'}</div>
+                    </div>
+                    <div class='metric-item'>
+                        <div class='metric-label'>Sector</div>
+                        <div class='metric-value' style='font-size: 0.9rem;'>${deal.sector || 'Unknown'}</div>
+                    </div>
+                </div>
+                
+                <!-- ✅ NEW: Show Status & Payment Method -->
+                <div style='display: flex; gap: 8px; margin-top: 12px;'>
+                    <span style='flex: 1; padding: 6px 12px; background: rgba(139, 92, 246, 0.1); color: var(--ma-primary); border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-align: center;'>${deal.dealStatus || 'N/A'}</span>
+                    <span style='flex: 1; padding: 6px 12px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-align: center;'>${deal.paymentMethod || 'N/A'}</span>
                 </div>
             </div>
         `).join('');
