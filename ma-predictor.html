@@ -23,6 +23,154 @@
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
+    <!-- ✅ STYLES AJOUTÉS POUR LES FILTRES -->
+    <style>
+        .ma-filters-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+        
+        .ma-filters-section .section-title {
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .filter-group label {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-select {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-select:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .filter-select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .btn-bulk-load {
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-top: auto;
+        }
+        
+        .btn-bulk-load:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6);
+        }
+        
+        .progress-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .progress-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        body.dark-mode .progress-modal-content {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .progress-modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        body.dark-mode .progress-bar-container {
+            background: #334155;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+        }
+        
+        #bulk-progress-text {
+            color: #6b7280;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        
+        body.dark-mode #bulk-progress-text {
+            color: #94a3b8;
+        }
+    </style>
 </head>
 <body>
 
@@ -278,65 +426,63 @@
             </header>
             
             <div class='container'>
-                
-                <!-- ========================================
-                     SEARCH & ANALYSIS
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-search'></i> Company M&A Analysis
-                        <button class='info-btn' onclick='maPredictor.openModal("searchInfo")'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-                    </h2>
-                    
-                    <div class='ma-search-container'>
-                        <form id='ma-search-form' class='search-form'>
-                            <input 
-                                type='text' 
-                                id='ma-ticker-input' 
-                                placeholder='Enter company ticker (e.g., AAPL, MSFT, TSLA)...'
-                                class='search-input'
-                            >
-                            <button type='submit' class='search-btn'>
-                                <i class='fas fa-search'></i> Analyze
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     DASHBOARD VIEWS
-                     ======================================== -->
-                
-                <!-- Dashboard View -->
-                <div id='ma-dashboard-view' class='ma-view'>
-                    <div id='ma-dashboard-container'>
-                        <!-- Rendered by ma-predictor.js -->
-                    </div>
-                </div>
-
-                <!-- Analysis View -->
-                <div id='ma-analysis-view' class='ma-view' style='display: none;'>
-                    <div id='ma-analysis-container'>
-                        <!-- Rendered by ma-predictor.js -->
-                    </div>
-                </div>
-
-                <!-- Deal Details View -->
-                <div id='ma-deal-details-view' class='ma-view' style='display: none;'>
-                    <div id='ma-deal-details-container'>
-                        <!-- Rendered by ma-predictor.js -->
-                    </div>
-                </div>
-
-                <footer>
-                    <p>
-                        <i class='fas fa-info-circle'></i> M&A Predictor powered by SEC EDGAR real-time data
-                    </p>
-                </footer>
+        
+        <!-- ========================================
+             SEARCH & ANALYSIS
+             ======================================== -->
+        <div class='section'>
+            <h2 class='section-title'>
+                <i class='fas fa-search'></i> Company M&A Analysis
+                <button class='info-btn' onclick='maPredictor.openModal("searchInfo")'>
+                    <i class='fas fa-info-circle'></i>
+                </button>
+            </h2>
+            
+            <div class='ma-search-container'>
+                <form id='ma-search-form' class='search-form'>
+                    <input 
+                        type='text' 
+                        id='ma-ticker-input' 
+                        placeholder='Enter company ticker (e.g., AAPL, MSFT, TSLA)...'
+                        class='search-input'
+                    >
+                    <button type='submit' class='search-btn'>
+                        <i class='fas fa-search'></i> Analyze
+                    </button>
+                </form>
             </div>
         </div>
+
+        <!-- ========================================
+             DASHBOARD VIEWS
+             ======================================== -->
+        
+        <!-- Dashboard View -->
+        <div id='ma-dashboard-view' class='ma-view'>
+            <div id='ma-dashboard-container'>
+                <!-- ✅ Filtres et contenu rendus dynamiquement par ma-predictor.js -->
+            </div>
+        </div>
+
+        <!-- Analysis View -->
+        <div id='ma-analysis-view' class='ma-view' style='display: none;'>
+            <div id='ma-analysis-container'>
+                <!-- Rendered by ma-predictor.js -->
+            </div>
+        </div>
+
+        <!-- Deal Details View -->
+        <div id='ma-deal-details-view' class='ma-view' style='display: none;'>
+            <div id='ma-deal-details-container'>
+                <!-- Rendered by ma-predictor.js -->
+            </div>
+        </div>
+
+        <footer>
+            <p>
+                <i class='fas fa-info-circle'></i> M&A Predictor powered by SEC EDGAR real-time data
+            </p>
+        </footer>
     </div>
 
     <!-- ========================================
@@ -344,7 +490,7 @@
          ======================================== -->
     
     <!-- Search Info Modal -->
-    <div id='searchInfo' class='modal'>
+    <div id='searchInfo' class='modal' style='display: none;'>
         <div class='modal-content'>
             <div class='modal-header'>
                 <h2><i class='fas fa-search'></i> Company M&A Analysis</h2>
@@ -353,10 +499,11 @@
             <div class='modal-body'>
                 <p><strong>How to use the M&A Predictor:</strong></p>
                 <ol>
+                    <li>Select your desired time period (1 week to 1 year)</li>
+                    <li>Choose the maximum number of filings to analyze</li>
+                    <li>Click "Bulk Load All Data" to load all available S-4 and 8-K filings</li>
                     <li>Enter a stock ticker symbol (e.g., AAPL, MSFT, NVDA)</li>
                     <li>Click "Analyze" to calculate the M&A Probability Score</li>
-                    <li>Review signal breakdown and company M&A activity</li>
-                    <li>Explore recent deals and material events</li>
                 </ol>
                 
                 <p><strong>What you'll see:</strong></p>
@@ -390,17 +537,6 @@
     <!-- Common Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-
-    <!-- Chatbot -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
     <!-- User Menu Init -->

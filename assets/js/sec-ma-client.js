@@ -8,7 +8,7 @@
 
 class SECMAClient {
     constructor(config = {}) {
-        this.workerURL = config.workerURL || 'https://your-worker.workers.dev';
+        this.workerURL = config.workerURL || 'https://https://sec-edgar-api.raphnardone.workers.dev';
         this.cache = new Map();
         this.cacheTTL = config.cacheTTL || 300000; // 5 minutes
         this.requestQueue = [];

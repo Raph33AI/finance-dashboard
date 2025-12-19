@@ -1,13 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🤝 M&A PREDICTOR - USER INTERFACE
+ * 🤝 M&A PREDICTOR - USER INTERFACE (CORRIGÉ & AMÉLIORÉ)
  * ═══════════════════════════════════════════════════════════════════
  * Interface complète pour le M&A Predictor avec toutes les fonctionnalités
+ * + Filtres de période et nombre de filings
+ * + Chargement massif optimisé
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class MAPredictor {
     constructor(config = {}) {
+        // ✅ URL CORRIGÉE
         this.workerURL = config.workerURL || 'https://sec-edgar-api.raphnardone.workers.dev';
         this.client = new SECMAClient({ workerURL: this.workerURL });
         this.analytics = new MAAnalyticsEngine(this.client);
@@ -16,7 +19,12 @@ class MAPredictor {
             currentView: 'dashboard',
             selectedTicker: null,
             watchlist: this.loadWatchlist(),
-            alerts: []
+            alerts: [],
+            // ✅ NOUVEAUX FILTRES
+            filters: {
+                period: 30, // jours (par défaut: 1 mois)
+                maxFilings: 500 // nombre de filings (par défaut: 500)
+            }
         };
 
         this.init();
@@ -67,6 +75,31 @@ class MAPredictor {
                 this.removeFromWatchlist(ticker);
             }
         });
+
+        // ✅ NOUVEAUX EVENT LISTENERS POUR LES FILTRES
+        const periodSelect = document.getElementById('period-filter');
+        if (periodSelect) {
+            periodSelect.addEventListener('change', (e) => {
+                this.state.filters.period = parseInt(e.target.value);
+                this.loadDashboard();
+            });
+        }
+
+        const filingsSelect = document.getElementById('filings-count-filter');
+        if (filingsSelect) {
+            filingsSelect.addEventListener('change', (e) => {
+                this.state.filters.maxFilings = parseInt(e.target.value);
+                this.loadDashboard();
+            });
+        }
+
+        // Bouton de chargement massif
+        const bulkLoadBtn = document.getElementById('bulk-load-btn');
+        if (bulkLoadBtn) {
+            bulkLoadBtn.addEventListener('click', () => {
+                this.loadBulkFilings();
+            });
+        }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -77,21 +110,24 @@ class MAPredictor {
         this.showLoading('ma-dashboard-container');
         
         try {
+            const { period, maxFilings } = this.state.filters;
+
             const [recentDeals, materialEvents, alerts] = await Promise.all([
-                this.client.getRecentDeals({ days: 30 }),
-                this.client.get8KAlerts(['1.01', '2.01'], 7),
+                this.client.getRecentDeals({ days: period, minValue: 0 }),
+                this.client.get8KAlerts(['1.01', '2.01'], period),
                 this.loadAlerts()
             ]);
 
             this.renderDashboard({
                 recentDeals,
                 materialEvents,
-                alerts
+                alerts,
+                filters: this.state.filters
             });
 
         } catch (error) {
             console.error('❌ Dashboard load failed:', error);
-            this.showError('ma-dashboard-container', 'Failed to load dashboard');
+            this.showError('ma-dashboard-container', 'Failed to load dashboard. Please check your Worker URL.');
         }
     }
 
@@ -100,18 +136,58 @@ class MAPredictor {
         if (!container) return;
 
         container.innerHTML = `
+            <!-- ✅ FILTRES AMÉLIORÉS -->
+            <div class="ma-filters-section">
+                <h2 class="section-title">
+                    <i class="fas fa-filter"></i> Data Filters
+                </h2>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="period-filter">
+                            <i class="fas fa-calendar-alt"></i> Time Period
+                        </label>
+                        <select id="period-filter" class="filter-select">
+                            <option value="7" ${data.filters.period === 7 ? 'selected' : ''}>Last Week</option>
+                            <option value="30" ${data.filters.period === 30 ? 'selected' : ''}>Last Month</option>
+                            <option value="90" ${data.filters.period === 90 ? 'selected' : ''}>Last 3 Months</option>
+                            <option value="180" ${data.filters.period === 180 ? 'selected' : ''}>Last 6 Months</option>
+                            <option value="365" ${data.filters.period === 365 ? 'selected' : ''}>Last Year</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filings-count-filter">
+                            <i class="fas fa-list-ol"></i> Max Filings to Load
+                        </label>
+                        <select id="filings-count-filter" class="filter-select">
+                            <option value="100" ${data.filters.maxFilings === 100 ? 'selected' : ''}>100 Filings</option>
+                            <option value="250" ${data.filters.maxFilings === 250 ? 'selected' : ''}>250 Filings</option>
+                            <option value="500" ${data.filters.maxFilings === 500 ? 'selected' : ''}>500 Filings</option>
+                            <option value="1000" ${data.filters.maxFilings === 1000 ? 'selected' : ''}>1,000 Filings</option>
+                            <option value="2000" ${data.filters.maxFilings === 2000 ? 'selected' : ''}>2,000 Filings</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <button id="bulk-load-btn" class="btn-bulk-load">
+                            <i class="fas fa-download"></i> Bulk Load All Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Cards -->
             <div class="ma-stats-grid">
                 <div class="ma-stat-card">
                     <div class="stat-icon">🤝</div>
-                    <div class="stat-value">${data.recentDeals.count}</div>
-                    <div class="stat-label">Recent Deals (30d)</div>
+                    <div class="stat-value">${data.recentDeals.count || 0}</div>
+                    <div class="stat-label">Recent Deals (${data.filters.period}d)</div>
                 </div>
                 
                 <div class="ma-stat-card">
                     <div class="stat-icon">📋</div>
-                    <div class="stat-value">${data.materialEvents.count}</div>
-                    <div class="stat-label">Material Events (7d)</div>
+                    <div class="stat-value">${data.materialEvents.count || 0}</div>
+                    <div class="stat-label">Material Events (${data.filters.period}d)</div>
                 </div>
                 
                 <div class="ma-stat-card">
@@ -133,7 +209,7 @@ class MAPredictor {
                     <i class="fas fa-handshake"></i> Recent M&A Deals
                 </h2>
                 <div class="deals-table-container">
-                    ${this.renderDealsTable(data.recentDeals.deals.slice(0, 10))}
+                    ${this.renderDealsTable(data.recentDeals.deals?.slice(0, 20) || [])}
                 </div>
             </div>
 
@@ -143,18 +219,21 @@ class MAPredictor {
                     <i class="fas fa-bell"></i> Latest Material Events
                 </h2>
                 <div class="events-list">
-                    ${this.renderEventsList(data.materialEvents.alerts.slice(0, 10))}
+                    ${this.renderEventsList(data.materialEvents.alerts?.slice(0, 20) || [])}
                 </div>
             </div>
 
             <!-- Watchlist -->
             ${this.renderWatchlistSection()}
         `;
+
+        // ✅ RÉATTACHER LES EVENT LISTENERS APRÈS RENDU
+        this.setupEventListeners();
     }
 
     renderDealsTable(deals) {
         if (!deals || deals.length === 0) {
-            return '<p class="no-data">No recent deals found</p>';
+            return '<p class="no-data">No recent deals found for this period</p>';
         }
 
         return `
@@ -189,7 +268,7 @@ class MAPredictor {
 
     renderEventsList(events) {
         if (!events || events.length === 0) {
-            return '<p class="no-data">No recent events found</p>';
+            return '<p class="no-data">No recent events found for this period</p>';
         }
 
         return events.map(event => `
@@ -207,6 +286,9 @@ class MAPredictor {
                     ${event.isLeadershipChange ? '<span class="flag flag-leadership">👔 Leadership Change</span>' : ''}
                 </div>
                 <p class="event-summary">${this.truncate(event.summary, 200)}</p>
+                <button class="btn-view-details" onclick="maPredictor.viewDealDetails('${event.accessionNumber}', '${event.cik}', '8-K')">
+                    View Details
+                </button>
             </div>
         `).join('');
     }
@@ -246,6 +328,72 @@ class MAPredictor {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📥 BULK LOADING (NOUVEAU)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async loadBulkFilings() {
+        console.log('📥 Loading bulk filings...');
+        
+        const { period, maxFilings } = this.state.filters;
+
+        // Créer une modal de progression
+        const progressModal = this.createProgressModal();
+        document.body.appendChild(progressModal);
+
+        try {
+            let loadedCount = 0;
+            const totalExpected = maxFilings;
+
+            // Charger S-4
+            this.updateProgress(progressModal, 'Loading S-4 filings...', 0);
+            const s4Data = await this.client.getS4Bulk({ days: period, max: Math.floor(maxFilings / 2) });
+            loadedCount += s4Data.count || 0;
+            this.updateProgress(progressModal, `Loaded ${loadedCount} S-4 filings...`, (loadedCount / totalExpected) * 100);
+
+            // Charger 8-K
+            this.updateProgress(progressModal, 'Loading 8-K filings...', 50);
+            const eightKData = await this.client.get8KBulk({ days: period, max: Math.floor(maxFilings / 2), items: '1.01,2.01' });
+            loadedCount += eightKData.count || 0;
+            this.updateProgress(progressModal, `Loaded ${loadedCount} total filings...`, 100);
+
+            // Succès
+            setTimeout(() => {
+                progressModal.remove();
+                this.showToast(`✅ Successfully loaded ${loadedCount} filings!`);
+                this.loadDashboard();
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Bulk loading failed:', error);
+            progressModal.remove();
+            this.showToast('❌ Failed to load bulk data');
+        }
+    }
+
+    createProgressModal() {
+        const modal = document.createElement('div');
+        modal.className = 'progress-modal';
+        modal.innerHTML = `
+            <div class="progress-modal-content">
+                <h3><i class="fas fa-download"></i> Loading M&A Filings...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="bulk-progress-bar" style="width: 0%"></div>
+                </div>
+                <p id="bulk-progress-text">Initializing...</p>
+            </div>
+        `;
+        return modal;
+    }
+
+    updateProgress(modal, text, percentage) {
+        const progressBar = modal.querySelector('#bulk-progress-bar');
+        const progressText = modal.querySelector('#bulk-progress-text');
+        
+        if (progressBar) progressBar.style.width = `${percentage}%`;
+        if (progressText) progressText.textContent = text;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 🎯 COMPANY ANALYSIS
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -266,7 +414,7 @@ class MAPredictor {
             const probability = await this.analytics.calculateMAProbability(ticker);
 
             // Get company M&A activity
-            const activity = await this.client.getCompanyMAActivity(probability.cik, 365);
+            const activity = await this.client.getCompanyMAActivity(probability.cik, this.state.filters.period);
 
             // Render analysis
             this.renderAnalysis({
@@ -396,20 +544,20 @@ class MAPredictor {
     }
 
     renderCompanyActivity(activity) {
-        const totalEvents = activity.s4Filings.length + activity.materialEvents.length;
+        const totalEvents = (activity.s4Filings?.length || 0) + (activity.materialEvents?.length || 0);
 
         if (totalEvents === 0) {
-            return '<p class="no-data">No M&A activity found in the past 12 months</p>';
+            return '<p class="no-data">No M&A activity found in the selected period</p>';
         }
 
         return `
             <div class="activity-summary">
                 <div class="activity-stat">
-                    <div class="stat-value">${activity.s4Filings.length}</div>
+                    <div class="stat-value">${activity.s4Filings?.length || 0}</div>
                     <div class="stat-label">S-4 Filings</div>
                 </div>
                 <div class="activity-stat">
-                    <div class="stat-value">${activity.materialEvents.length}</div>
+                    <div class="stat-value">${activity.materialEvents?.length || 0}</div>
                     <div class="stat-label">Material Events</div>
                 </div>
                 <div class="activity-stat">
@@ -418,12 +566,12 @@ class MAPredictor {
                 </div>
             </div>
 
-            ${activity.s4Filings.length > 0 ? `
+            ${activity.s4Filings?.length > 0 ? `
                 <h3 class="subsection-title">S-4 Filings</h3>
                 ${this.renderDealsTable(activity.s4Filings)}
             ` : ''}
 
-            ${activity.materialEvents.length > 0 ? `
+            ${activity.materialEvents?.length > 0 ? `
                 <h3 class="subsection-title">Material Events (8-K)</h3>
                 ${this.renderEventsList(activity.materialEvents)}
             ` : ''}
@@ -949,6 +1097,23 @@ class MAPredictor {
         }, 3000);
     }
 
+    // ✅ MÉTHODES MODAL AJOUTÉES
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
     formatDate(dateString) {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
@@ -995,8 +1160,8 @@ class MAPredictor {
 let maPredictor;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ⚠ IMPORTANT: Remplacez par l'URL réelle de votre worker
-    const workerURL = 'https://your-worker.workers.dev';
+    // ✅ URL CORRIGÉE
+    const workerURL = 'https://sec-edgar-api.raphnardone.workers.dev';
     
     maPredictor = new MAPredictor({ workerURL });
     window.maPredictor = maPredictor; // Global access
