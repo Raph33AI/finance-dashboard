@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning in Finance - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/resources.css">
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Page Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR (identique aux fichiers précédents) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- Header Premium -->
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-robot"></i> 
+                            Learning Resources
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="container">
+                <div class="resource-container">
+                    
+                    <!-- Resource Header -->
+                    <div class="resource-header">
+                        <div class="resource-breadcrumb">
+                            <a href="help.html"><i class="fas fa-home"></i> Help</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>Machine Learning in Finance</span>
+                        </div>
+                        <h1 class="resource-title">Machine Learning in Finance</h1>
+                        <p class="resource-subtitle">
+                            Explore how hedge funds and quantitative firms use LSTM, Random Forest, and ensemble methods to predict market trends, optimize portfolios, and generate alpha.
+                        </p>
+                        <div class="resource-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>75 min read</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-brain"></i>
+                                <span>10+ Algorithms</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-code"></i>
+                                <span>Code Examples</span>
+                            </div>
+                            <span class="difficulty-badge expert">Expert</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Table of Contents -->
+                    <div class="table-of-contents">
+                        <h2 class="toc-title"><i class="fas fa-list"></i> Table of Contents</h2>
+                        <ul class="toc-list">
+                            <li><a href="#introduction">Introduction to ML in Finance</a></li>
+                            <li><a href="#supervised-learning">Supervised Learning</a></li>
+                            <li><a href="#lstm">LSTM Networks</a></li>
+                            <li><a href="#random-forest">Random Forest</a></li>
+                            <li><a href="#gradient-boosting">Gradient Boosting (XGBoost)</a></li>
+                            <li><a href="#ensemble-methods">Ensemble Methods</a></li>
+                            <li><a href="#feature-engineering">Feature Engineering</a></li>
+                            <li><a href="#backtesting">Backtesting & Validation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Section 1: Introduction -->
+                    <div class="content-section" id="introduction">
+                        <h2 class="section-header">
+                            <i class="fas fa-rocket"></i>
+                            Introduction to Machine Learning in Finance
+                        </h2>
+                        
+                        <p class="content-text">
+                            Machine Learning has revolutionized quantitative finance. Hedge funds like <strong>Renaissance Technologies, Two Sigma, and Citadel</strong> use ML algorithms to process billions of data points and identify patterns invisible to human analysts.
+                        </p>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Why ML Works in Finance</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Pattern Recognition:</strong> Identifies non-linear relationships in complex datasets</li>
+                                    <li><strong>Speed:</strong> Processes millions of data points in milliseconds</li>
+                                    <li><strong>Adaptability:</strong> Self-adjusts to changing market conditions</li>
+                                    <li><strong>Scale:</strong> Analyzes 1000s of stocks simultaneously</li>
+                                    <li><strong>Emotion-Free:</strong> Eliminates behavioral biases</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h3 class="subsection-header">Types of Machine Learning</h3>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Finance Applications</th>
+                                        <th>Algorithms</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Supervised Learning</strong></td>
+                                        <td>Learns from labeled data (input → output)</td>
+                                        <td>Price prediction, credit scoring, fraud detection</td>
+                                        <td>LSTM, Random Forest, XGBoost</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Unsupervised Learning</strong></td>
+                                        <td>Finds patterns in unlabeled data</td>
+                                        <td>Portfolio clustering, anomaly detection</td>
+                                        <td>K-Means, PCA, Autoencoders</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reinforcement Learning</strong></td>
+                                        <td>Learns through trial & error (rewards)</td>
+                                        <td>Algorithmic trading, portfolio optimization</td>
+                                        <td>Q-Learning, Deep Q-Network (DQN)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>The ML Overfitting Trap</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Overfitting</strong> is the #1 mistake in ML finance. A model that's too complex memorizes historical noise instead of learning true patterns.</p>
+                                <p><strong>Symptoms:</strong></p>
+                                <ul class="styled-list">
+                                    <li>95%+ accuracy on training data, 40% on live trading</li>
+                                    <li>Model performs perfectly on past data but fails forward</li>
+                                    <li>Too many features (curse of dimensionality)</li>
+                                </ul>
+                                <p><strong>Prevention:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Use cross-validation (k-fold, time-series split)</li>
+                                    <li>Regularization (L1/L2 penalties)</li>
+                                    <li>Out-of-sample testing (walk-forward validation)</li>
+                                    <li>Feature selection (remove irrelevant variables)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 2: Supervised Learning -->
+                    <div class="content-section" id="supervised-learning">
+                        <h2 class="section-header">
+                            <i class="fas fa-brain"></i>
+                            Supervised Learning Fundamentals
+                        </h2>
+                        
+                        <p class="content-text">
+                            Supervised learning is the <strong>most common ML approach in finance</strong>. The model learns from historical data (features → labels) to make predictions on new data.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Supervised Learning Framework</div>
+                            <div class="formula-content">
+                                f(X) = y
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>X (Features):</dt>
+                                <dd>Input variables (e.g., P/E ratio, volume, RSI, sentiment)</dd>
+                                <dt>y (Label):</dt>
+                                <dd>Target variable (e.g., future return, buy/sell signal)</dd>
+                                <dt>f (Model):</dt>
+                                <dd>The algorithm that learns the mapping (LSTM, Random Forest, etc.)</dd>
+                            </dl>
+                        </div>
+                        
+                        <h3 class="subsection-header">Classification vs. Regression</h3>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Task Type</th>
+                                        <th>Output</th>
+                                        <th>Finance Example</th>
+                                        <th>Metrics</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Classification</strong></td>
+                                        <td>Discrete categories</td>
+                                        <td>Predict stock direction (Up/Down/Neutral)</td>
+                                        <td>Accuracy, Precision, Recall, F1-Score</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Regression</strong></td>
+                                        <td>Continuous values</td>
+                                        <td>Predict stock price ($142.50)</td>
+                                        <td>MAE, RMSE, R² Score</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Example: Stock Direction Prediction (Classification)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Problem:</strong> Predict if a stock will go up or down tomorrow.</p>
+                                <p><strong>Features (X):</strong></p>
+                                <ul class="styled-list">
+                                    <li>RSI (14-day)</li>
+                                    <li>MACD histogram</li>
+                                    <li>Volume ratio (today/avg)</li>
+                                    <li>Sentiment score (news/social media)</li>
+                                    <li>5-day price change (%)</li>
+                                </ul>
+                                <p><strong>Label (y):</strong></p>
+                                <ul class="styled-list">
+                                    <li>1 = Stock goes up >0.5%</li>
+                                    <li>0 = Stock goes down >0.5%</li>
+                                    <li>-1 = Neutral (change < 0.5%)</li>
+                                </ul>
+                                <p><strong>Model Output:</strong> Probability distribution</p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    P(Up) = 0.72 | P(Down) = 0.15 | P(Neutral) = 0.13
+                                </div>
+                                <p><strong>Decision:</strong> Buy signal (72% confidence of upward move)</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 3: LSTM Networks -->
+                    <div class="content-section" id="lstm">
+                        <h2 class="section-header">
+                            <i class="fas fa-project-diagram"></i>
+                            LSTM Networks for Time Series
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>Long Short-Term Memory (LSTM)</strong> networks are a type of Recurrent Neural Network (RNN) designed to learn from sequential data. They're ideal for stock price prediction because they <strong>remember long-term dependencies</strong>.
+                        </p>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Why LSTM for Finance?</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Temporal Dependencies:</strong> Stock prices depend on previous prices (autocorrelation)</li>
+                                    <li><strong>Variable Sequence Length:</strong> Can process 10 days or 1000 days of history</li>
+                                    <li><strong>Non-Linear Patterns:</strong> Captures complex relationships traditional models miss</li>
+                                    <li><strong>Vanishing Gradient Solution:</strong> Solves the problem that plagued basic RNNs</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h3 class="subsection-header">LSTM Architecture</h3>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">LSTM Cell Equations</div>
+                            <div class="formula-content">
+                                Forget Gate: f_t = σ(W_f · [h_{t-1}, x_t] + b_f)
+                                <br><br>
+                                Input Gate: i_t = σ(W_i · [h_{t-1}, x_t] + b_i)
+                                <br><br>
+                                Cell State: C_t = f_t * C_{t-1} + i_t * tanh(W_C · [h_{t-1}, x_t] + b_C)
+                                <br><br>
+                                Output Gate: o_t = σ(W_o · [h_{t-1}, x_t] + b_o)
+                                <br><br>
+                                Hidden State: h_t = o_t * tanh(C_t)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>σ (Sigma):</dt>
+                                <dd>Sigmoid activation function (0 to 1)</dd>
+                                <dt>C_t:</dt>
+                                <dd>Cell state (long-term memory)</dd>
+                                <dt>h_t:</dt>
+                                <dd>Hidden state (short-term memory)</dd>
+                                <dt>W, b:</dt>
+                                <dd>Learnable weights and biases</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Python Code: LSTM Stock Price Prediction</span>
+                            </div>
+                            <div class="example-content">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang">Python</span>
+                                        <button class="copy-code-btn">Copy</button>
+                                    </div>
+                                    <pre class="code-content">
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+
+# Load stock data
+df = pd.read_csv('AAPL_historical.csv')
+prices = df['Close'].values.reshape(-1, 1)
+
+# Normalize data (0-1 range)
+scaler = MinMaxScaler()
+scaled_prices = scaler.fit_transform(prices)
+
+# Create sequences (60 days → predict day 61)
+def create_sequences(data, seq_length=60):
+    X, y = [], []
+    for i in range(seq_length, len(data)):
+        X.append(data[i-seq_length:i, 0])
+        y.append(data[i, 0])
+    return np.array(X), np.array(y)
+
+X, y = create_sequences(scaled_prices)
+X = X.reshape(X.shape[0], X.shape[1], 1)  # (samples, timesteps, features)
+
+# Split train/test (80/20)
+split = int(0.8 * len(X))
+X_train, X_test = X[:split], X[split:]
+y_train, y_test = y[:split], y[split:]
+
+# Build LSTM model
+model = Sequential([
+    LSTM(50, return_sequences=True, input_shape=(60, 1)),
+    Dropout(0.2),
+    LSTM(50, return_sequences=False),
+    Dropout(0.2),
+    Dense(25),
+    Dense(1)  # Output: predicted price
+])
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+
+# Train model
+history = model.fit(
+    X_train, y_train,
+    batch_size=32,
+    epochs=50,
+    validation_data=(X_test, y_test),
+    verbose=1
+)
+
+# Make predictions
+predictions = model.predict(X_test)
+predictions = scaler.inverse_transform(predictions)  # De-normalize
+
+print(f"Predicted Price: ${predictions[-1][0]:.2f}")
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-trophy"></i>
+                                <span>LSTM Best Practices</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Sequence Length:</strong> Use 30-60 time steps (days) for stock prediction</li>
+                                    <li><strong>Dropout:</strong> Add 0.2-0.3 dropout to prevent overfitting</li>
+                                    <li><strong>Normalization:</strong> Always scale data to 0-1 range (MinMaxScaler)</li>
+                                    <li><strong>Stationary Data:</strong> Use returns (% change) instead of raw prices</li>
+                                    <li><strong>Multi-Feature:</strong> Combine price with volume, RSI, sentiment for better accuracy</li>
+                                    <li><strong>Validation:</strong> Use walk-forward testing (not random split)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 4: Random Forest -->
+                    <div class="content-section" id="random-forest">
+                        <h2 class="section-header">
+                            <i class="fas fa-tree"></i>
+                            Random Forest for Stock Prediction
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>Random Forest</strong> is an ensemble of decision trees. It's robust, handles non-linear relationships, and <strong>works well with tabular financial data</strong> (fundamentals, ratios, indicators).
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Random Forest Algorithm</div>
+                            <div class="formula-content">
+                                Prediction = (1/N) × Σ Tree_i(X)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>N:</dt>
+                                <dd>Number of trees (typically 100-500)</dd>
+                                <dt>Tree_i:</dt>
+                                <dd>Individual decision tree trained on bootstrap sample</dd>
+                                <dt>Aggregation:</dt>
+                                <dd>Regression = Average | Classification = Majority Vote</dd>
+                            </dl>
+                        </div>
+                        
+                        <h3 class="subsection-header">How Random Forest Works</h3>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-sitemap"></i>
+                                <span>Decision Tree → Random Forest</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Step 1: Bootstrap Sampling</strong></p>
+                                <p>Randomly sample training data with replacement (each tree gets unique dataset)</p>
+                                <br>
+                                <p><strong>Step 2: Random Feature Selection</strong></p>
+                                <p>At each split, consider only √n features (prevents correlation between trees)</p>
+                                <br>
+                                <p><strong>Step 3: Build Trees</strong></p>
+                                <p>Grow deep decision trees without pruning</p>
+                                <br>
+                                <p><strong>Step 4: Aggregate Predictions</strong></p>
+                                <p>Average all tree outputs (reduces variance, increases stability)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Python Code: Random Forest Stock Classifier</span>
+                            </div>
+                            <div class="example-content">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang">Python</span>
+                                        <button class="copy-code-btn">Copy</button>
+                                    </div>
+                                    <pre class="code-content">
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Load data with features
+df = pd.read_csv('stock_features.csv')
+
+# Features
+features = [
+    'P/E', 'P/B', 'ROE', 'Debt/Equity',  # Fundamentals
+    'RSI', 'MACD', 'Volume_Ratio',        # Technical
+    'Sentiment_Score', 'Insider_Buy'      # Alternative
+]
+
+X = df[features]
+y = df['Direction']  # 1 = Up, 0 = Down
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Build Random Forest
+rf_model = RandomForestClassifier(
+    n_estimators=300,        # 300 trees
+    max_depth=15,            # Prevent overfitting
+    min_samples_split=20,
+    min_samples_leaf=10,
+    max_features='sqrt',     # √9 ≈ 3 features per split
+    random_state=42
+)
+
+# Train model
+rf_model.fit(X_train, y_train)
+
+# Predictions
+y_pred = rf_model.predict(X_test)
+y_proba = rf_model.predict_proba(X_test)[:, 1]  # Probability of Up
+
+# Evaluation
+print(classification_report(y_test, y_pred))
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# Feature Importance
+feature_importance = pd.DataFrame({
+    'Feature': features,
+    'Importance': rf_model.feature_importances_
+}).sort_values('Importance', ascending=False)
+
+print("\nTop 5 Features:")
+print(feature_importance.head())
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Importance</th>
+                                        <th>Interpretation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Sentiment_Score</strong></td>
+                                        <td>0.28</td>
+                                        <td>Most predictive (news/social sentiment)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RSI</strong></td>
+                                        <td>0.19</td>
+                                        <td>Momentum indicator critical</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Volume_Ratio</strong></td>
+                                        <td>0.15</td>
+                                        <td>Volume confirms price moves</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ROE</strong></td>
+                                        <td>0.12</td>
+                                        <td>Fundamental quality matters</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>P/E</strong></td>
+                                        <td>0.08</td>
+                                        <td>Valuation less predictive short-term</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 5: Gradient Boosting -->
+                    <div class="content-section" id="gradient-boosting">
+                        <h2 class="section-header">
+                            <i class="fas fa-rocket"></i>
+                            Gradient Boosting (XGBoost)
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>XGBoost (Extreme Gradient Boosting)</strong> is the go-to algorithm for Kaggle competitions and quantitative finance. It builds trees sequentially, each correcting errors of the previous one.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Gradient Boosting Framework</div>
+                            <div class="formula-content">
+                                F_M(x) = F_0(x) + Σ_{m=1}^M η · h_m(x)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>F_0:</dt>
+                                <dd>Initial prediction (e.g., mean of target)</dd>
+                                <dt>h_m:</dt>
+                                <dd>Weak learner (decision tree) at step m</dd>
+                                <dt>η (eta):</dt>
+                                <dd>Learning rate (0.01 - 0.3, lower = more robust)</dd>
+                                <dt>M:</dt>
+                                <dd>Number of boosting rounds (100-1000)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-chess"></i>
+                                <span>Random Forest vs. XGBoost</span>
+                            </div>
+                            <div class="box-content">
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Aspect</th>
+                                                <th>Random Forest</th>
+                                                <th>XGBoost</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Training</strong></td>
+                                                <td>Parallel (all trees independent)</td>
+                                                <td>Sequential (trees correct each other)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Speed</strong></td>
+                                                <td>Fast</td>
+                                                <td>Slower (but optimized)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Accuracy</strong></td>
+                                                <td>Good</td>
+                                                <td>Superior (usually 2-5% better)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Overfitting Risk</strong></td>
+                                                <td>Low</td>
+                                                <td>Higher (needs regularization)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Tuning Complexity</strong></td>
+                                                <td>Simple (few hyperparameters)</td>
+                                                <td>Complex (20+ parameters)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Python Code: XGBoost Stock Return Prediction</span>
+                            </div>
+                            <div class="example-content">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang">Python</span>
+                                        <button class="copy-code-btn">Copy</button>
+                                    </div>
+                                    <pre class="code-content">
+import xgboost as xgb
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+# Load features and target
+X = df[features]
+y = df['Next_Day_Return']  # Continuous target (% return)
+
+# Time-series cross-validation
+tscv = TimeSeriesSplit(n_splits=5)
+
+# XGBoost parameters
+params = {
+    'objective': 'reg:squarederror',  # Regression task
+    'max_depth': 6,                   # Tree depth
+    'learning_rate': 0.05,            # Eta (slower = better generalization)
+    'n_estimators': 500,              # Number of trees
+    'subsample': 0.8,                 # Row sampling (prevents overfitting)
+    'colsample_bytree': 0.8,          # Column sampling
+    'gamma': 1,                       # Minimum loss reduction
+    'reg_alpha': 0.1,                 # L1 regularization
+    'reg_lambda': 1,                  # L2 regularization
+    'random_state': 42
+}
+
+# Train with early stopping
+for train_idx, val_idx in tscv.split(X):
+    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+    
+    model = xgb.XGBRegressor(**params)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_val, y_val)],
+        early_stopping_rounds=50,
+        verbose=False
+    )
+    
+    # Predictions
+    y_pred = model.predict(X_val)
+    
+    # Metrics
+    rmse = np.sqrt(mean_squared_error(y_val, y_pred))
+    r2 = r2_score(y_val, y_pred)
+    
+    print(f"Fold RMSE: {rmse:.4f} | R²: {r2:.4f}")
+
+# Feature importance
+xgb.plot_importance(model, max_num_features=10)
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-cogs"></i>
+                                <span>XGBoost Hyperparameter Tuning Guide</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Start with these defaults, then tune:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>max_depth:</strong> 3-8 (deeper = more complex, higher overfitting risk)</li>
+                                    <li><strong>learning_rate:</strong> 0.01-0.1 (lower = more trees needed, but better accuracy)</li>
+                                    <li><strong>n_estimators:</strong> 100-1000 (use early stopping to find optimal)</li>
+                                    <li><strong>subsample:</strong> 0.6-0.9 (row sampling reduces overfitting)</li>
+                                    <li><strong>colsample_bytree:</strong> 0.6-0.9 (column sampling)</li>
+                                    <li><strong>gamma:</strong> 0-5 (minimum loss reduction for split)</li>
+                                    <li><strong>reg_alpha, reg_lambda:</strong> 0.1-10 (L1/L2 regularization)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 6: Ensemble Methods -->
+                    <div class="content-section" id="ensemble-methods">
+                        <h2 class="section-header">
+                            <i class="fas fa-layer-group"></i>
+                            Ensemble Methods: The AlphaVault AI Approach
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>Ensemble learning</strong> combines multiple models to achieve superior accuracy. AlphaVault AI uses a <strong>3-model ensemble</strong> (LSTM + Random Forest + XGBoost) to generate predictions.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Weighted Ensemble Formula</div>
+                            <div class="formula-content">
+                                Final_Prediction = w₁ × LSTM + w₂ × RF + w₃ × XGBoost
+                                <br><br>
+                                where: w₁ + w₂ + w₃ = 1
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Weights (w):</dt>
+                                <dd>Based on historical performance (e.g., 0.4, 0.3, 0.3)</dd>
+                                <dt>Optimization:</dt>
+                                <dd>Weights adjusted via validation set accuracy</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-calculator"></i>
+                                <span>Ensemble Example: Combining 3 Models</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Scenario:</strong> Predicting AAPL stock direction (Up/Down)</p>
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Model</th>
+                                                <th>P(Up)</th>
+                                                <th>Weight</th>
+                                                <th>Contribution</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>LSTM</strong></td>
+                                                <td>0.68</td>
+                                                <td>0.40</td>
+                                                <td>0.272</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Random Forest</strong></td>
+                                                <td>0.75</td>
+                                                <td>0.30</td>
+                                                <td>0.225</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>XGBoost</strong></td>
+                                                <td>0.71</td>
+                                                <td>0.30</td>
+                                                <td>0.213</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    Ensemble P(Up) = 0.272 + 0.225 + 0.213 = <strong>0.71 (71%)</strong>
+                                </div>
+                                <p><strong>Decision:</strong> Strong buy signal (71% confidence of upward move)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-trophy"></i>
+                                <span>Why Ensembles Outperform Single Models</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Diversity:</strong> LSTM captures temporal patterns, RF/XGBoost capture feature interactions</li>
+                                    <li><strong>Error Cancellation:</strong> Individual model errors average out</li>
+                                    <li><strong>Robustness:</strong> Less sensitive to market regime changes</li>
+                                    <li><strong>Reduced Variance:</strong> Smoother predictions, fewer false signals</li>
+                                </ul>
+                                <p><strong>Empirical Result:</strong> Ensemble improves accuracy by 5-8% vs. best single model</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 7: Feature Engineering -->
+                    <div class="content-section" id="feature-engineering">
+                        <h2 class="section-header">
+                            <i class="fas fa-wrench"></i>
+                            Feature Engineering: The Secret Sauce
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>"Features matter more than algorithms"</strong> – Andrew Ng. In finance ML, 80% of success comes from creating the right features.
+                        </p>
+                        
+                        <h3 class="subsection-header">Types of Features</h3>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Examples</th>
+                                        <th>Purpose</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Price-based</strong></td>
+                                        <td>Returns, volatility, high-low spread</td>
+                                        <td>Capture price momentum & risk</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Technical Indicators</strong></td>
+                                        <td>RSI, MACD, Bollinger Bands, ATR</td>
+                                        <td>Identify overbought/oversold conditions</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Volume-based</strong></td>
+                                        <td>Volume ratio, OBV, VWAP</td>
+                                        <td>Confirm price moves with liquidity</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fundamental</strong></td>
+                                        <td>P/E, ROE, Debt/Equity, EPS growth</td>
+                                        <td>Assess intrinsic value</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sentiment</strong></td>
+                                        <td>News sentiment, social media buzz</td>
+                                        <td>Gauge market psychology</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Alternative Data</strong></td>
+                                        <td>Insider trades, institutional flows, M&A filings</td>
+                                        <td>Capture smart money activity</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Python Code: Advanced Feature Engineering</span>
+                            </div>
+                            <div class="example-content">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang">Python</span>
+                                        <button class="copy-code-btn">Copy</button>
+                                    </div>
+                                    <pre class="code-content">
+import pandas as pd
+import numpy as np
+import ta  # Technical Analysis library
+
+def engineer_features(df):
+    """
+    Create ML features from stock OHLCV data
+    """
+    
+    # 1. PRICE-BASED FEATURES
+    df['Return_1d'] = df['Close'].pct_change()
+    df['Return_5d'] = df['Close'].pct_change(5)
+    df['Return_20d'] = df['Close'].pct_change(20)
+    df['Volatility_20d'] = df['Return_1d'].rolling(20).std()
+    df['HL_Spread'] = (df['High'] - df['Low']) / df['Close']
+    
+    # 2. TECHNICAL INDICATORS
+    df['RSI'] = ta.momentum.RSIIndicator(df['Close']).rsi()
+    df['MACD'] = ta.trend.MACD(df['Close']).macd()
+    df['MACD_Signal'] = ta.trend.MACD(df['Close']).macd_signal()
+    df['BB_Upper'] = ta.volatility.BollingerBands(df['Close']).bollinger_hband()
+    df['BB_Lower'] = ta.volatility.BollingerBands(df['Close']).bollinger_lband()
+    df['ATR'] = ta.volatility.AverageTrueRange(df['High'], df['Low'], df['Close']).average_true_range()
+    
+    # 3. VOLUME FEATURES
+    df['Volume_Ratio'] = df['Volume'] / df['Volume'].rolling(20).mean()
+    df['OBV'] = ta.volume.OnBalanceVolumeIndicator(df['Close'], df['Volume']).on_balance_volume()
+    
+    # 4. MOVING AVERAGES
+    df['SMA_20'] = df['Close'].rolling(20).mean()
+    df['SMA_50'] = df['Close'].rolling(50).mean()
+    df['EMA_12'] = df['Close'].ewm(span=12).mean()
+    df['Price_to_SMA20'] = df['Close'] / df['SMA_20']
+    
+    # 5. MOMENTUM FEATURES
+    df['Price_Momentum'] = df['Close'] - df['Close'].shift(10)
+    df['Volume_Momentum'] = df['Volume'] - df['Volume'].shift(10)
+    
+    # 6. LAGGED FEATURES (past values as features)
+    for lag in [1, 2, 3, 5, 10]:
+        df[f'Close_Lag_{lag}'] = df['Close'].shift(lag)
+        df[f'Volume_Lag_{lag}'] = df['Volume'].shift(lag)
+    
+    # 7. TARGET (Next day return)
+    df['Target_Return'] = df['Close'].shift(-1) / df['Close'] - 1
+    df['Target_Direction'] = (df['Target_Return'] > 0).astype(int)
+    
+    return df.dropna()
+
+# Apply feature engineering
+df_features = engineer_features(df)
+print(f"Total Features Created: {len(df_features.columns)}")
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Feature Engineering Pitfalls</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Look-Ahead Bias:</strong> Using future data (e.g., tomorrow's price) in features → Unrealistic accuracy</li>
+                                    <li><strong>Multicollinearity:</strong> Highly correlated features (e.g., RSI + Stochastic) → Model instability</li>
+                                    <li><strong>Too Many Features:</strong> 100+ features with 1000 samples → Overfitting (curse of dimensionality)</li>
+                                    <li><strong>Non-Stationarity:</strong> Using raw prices instead of returns → Poor generalization</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Feature selection (L1 regularization, RFE, feature importance)</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 8: Backtesting -->
+                    <div class="content-section" id="backtesting">
+                        <h2 class="section-header">
+                            <i class="fas fa-history"></i>
+                            Backtesting & Walk-Forward Validation
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>Backtesting</strong> is the process of testing a trading strategy on historical data. However, <strong>90% of backtests are overly optimistic</strong> due to common mistakes.
+                        </p>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-skull-crossbones"></i>
+                                <span>The Deadly Sins of Backtesting</span>
+                            </div>
+                            <div class="box-content">
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li><strong>Look-Ahead Bias:</strong> Using future data (e.g., end-of-day close at 9:30 AM)</li>
+                                    <li><strong>Survivorship Bias:</strong> Backtesting only on stocks still trading (ignores bankruptcies)</li>
+                                    <li><strong>Data Snooping:</strong> Testing 100 strategies, reporting only the best (p-hacking)</li>
+                                    <li><strong>Overfitting:</strong> Tuning parameters until backtest is perfect (won't work live)</li>
+                                    <li><strong>Ignoring Costs:</strong> Not accounting for commissions, slippage, spreads</li>
+                                    <li><strong>Ignoring Market Impact:</strong> Assuming you can trade $100M without moving price</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <h3 class="subsection-header">Walk-Forward Validation (The Right Way)</h3>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-forward"></i>
+                                <span>Walk-Forward Testing Protocol</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Step 1: Training Window</strong></p>
+                                <p>Train model on data from Year 1-3 (e.g., 2018-2020)</p>
+                                <br>
+                                <p><strong>Step 2: Validation Window</strong></p>
+                                <p>Test on Year 4 (2021) → Record performance</p>
+                                <br>
+                                <p><strong>Step 3: Roll Forward</strong></p>
+                                <p>Retrain on Year 2-4 (2019-2021), test on Year 5 (2022)</p>
+                                <br>
+                                <p><strong>Step 4: Repeat</strong></p>
+                                <p>Continue rolling forward until present day</p>
+                                <br>
+                                <p><strong>Step 5: Aggregate Results</strong></p>
+                                <p>Average all out-of-sample periods (realistic performance estimate)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-code"></i>
+                                <span>Python Code: Walk-Forward Backtest</span>
+                            </div>
+                            <div class="example-content">
+                                <div class="code-block">
+                                    <div class="code-header">
+                                        <span class="code-lang">Python</span>
+                                        <button class="copy-code-btn">Copy</button>
+                                    </div>
+                                    <pre class="code-content">
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+
+def walk_forward_backtest(df, features, target, train_periods=252, test_period=21):
+    """
+    Walk-forward validation for time series
+    
+    train_periods: Days in training window (252 = 1 year)
+    test_period: Days in test window (21 = 1 month)
+    """
+    
+    results = []
+    
+    for i in range(train_periods, len(df) - test_period, test_period):
+        # Define windows
+        train_start = i - train_periods
+        train_end = i
+        test_start = i
+        test_end = i + test_period
+        
+        # Split data
+        X_train = df[features].iloc[train_start:train_end]
+        y_train = df[target].iloc[train_start:train_end]
+        X_test = df[features].iloc[test_start:test_end]
+        y_test = df[target].iloc[test_start:test_end]
+        
+        # Train model
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        
+        # Predict
+        y_pred = model.predict(X_test)
+        
+        # Calculate returns (assumes 1 = Buy, 0 = Sell)
+        strategy_returns = df['Return_1d'].iloc[test_start:test_end] * y_pred
+        
+        # Store results
+        results.append({
+            'Period_Start': df.index[test_start],
+            'Period_End': df.index[test_end-1],
+            'Total_Return': strategy_returns.sum(),
+            'Sharpe_Ratio': strategy_returns.mean() / strategy_returns.std() * np.sqrt(252),
+            'Win_Rate': (y_pred == y_test).mean()
+        })
+    
+    return pd.DataFrame(results)
+
+# Run backtest
+backtest_results = walk_forward_backtest(df, features, 'Target_Direction')
+
+print(backtest_results)
+print(f"\nAverage Sharpe Ratio: {backtest_results['Sharpe_Ratio'].mean():.2f}")
+print(f"Average Win Rate: {backtest_results['Win_Rate'].mean():.2%}")
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Performance Metrics That Matter</span>
+                            </div>
+                            <div class="box-content">
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Formula</th>
+                                                <th>Good Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Sharpe Ratio</strong></td>
+                                                <td>(Return - Risk-Free Rate) / Std Dev</td>
+                                                <td>> 1.5 (excellent > 2.0)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Max Drawdown</strong></td>
+                                                <td>Largest peak-to-trough decline</td>
+                                                <td>< 20% (conservative)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Win Rate</strong></td>
+                                                <td>% of profitable trades</td>
+                                                <td>> 55% (ML strategies)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Profit Factor</strong></td>
+                                                <td>Gross Profit / Gross Loss</td>
+                                                <td>> 1.5</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Calmar Ratio</strong></td>
+                                                <td>Annual Return / Max Drawdown</td>
+                                                <td>> 1.0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="page-navigation">
+                        <a href="resources-technical-analysis.html" class="nav-button prev">
+                            <i class="fas fa-chevron-left"></i>
+                            <span>Previous: Technical Analysis</span>
+                        </a>
+                        <a href="help.html" class="nav-button next">
+                            <span>Back to Help Center</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>
