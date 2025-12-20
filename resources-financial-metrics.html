@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Metrics Glossary - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/resources.css">
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Page Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- Header Premium -->
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-graduation-cap"></i> 
+                            Learning Resources
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="container">
+                <div class="resource-container">
+                    
+                    <!-- Resource Header -->
+                    <div class="resource-header">
+                        <div class="resource-breadcrumb">
+                            <a href="help.html"><i class="fas fa-home"></i> Help</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>Financial Metrics Glossary</span>
+                        </div>
+                        <h1 class="resource-title">Financial Metrics Glossary</h1>
+                        <p class="resource-subtitle">
+                            Master the fundamental and advanced financial metrics used by Wall Street analysts to evaluate companies, assess risk, and identify investment opportunities.
+                        </p>
+                        <div class="resource-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>45 min read</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>50+ Metrics</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calculator"></i>
+                                <span>Interactive Examples</span>
+                            </div>
+                            <span class="difficulty-badge">Beginner to Advanced</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Table of Contents -->
+                    <div class="table-of-contents">
+                        <h2 class="toc-title"><i class="fas fa-list"></i> Table of Contents</h2>
+                        <ul class="toc-list">
+                            <li><a href="#valuation-metrics">Valuation Metrics</a></li>
+                            <li><a href="#profitability-metrics">Profitability Metrics</a></li>
+                            <li><a href="#liquidity-metrics">Liquidity Metrics</a></li>
+                            <li><a href="#leverage-metrics">Leverage Metrics</a></li>
+                            <li><a href="#efficiency-metrics">Efficiency Metrics</a></li>
+                            <li><a href="#growth-metrics">Growth Metrics</a></li>
+                            <li><a href="#dcf-valuation">DCF Valuation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Section 1: Valuation Metrics -->
+                    <div class="content-section" id="valuation-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-dollar-sign"></i>
+                            Valuation Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Valuation metrics help investors determine whether a stock is <strong>overvalued, undervalued, or fairly priced</strong> relative to its fundamentals. These are the most widely used metrics in equity research.
+                        </p>
+                        
+                        <!-- P/E Ratio -->
+                        <h3 class="subsection-header">1. Price-to-Earnings Ratio (P/E)</h3>
+                        
+                        <p class="content-text">
+                            The <strong>P/E ratio</strong> measures how much investors are willing to pay for each dollar of earnings. It's the most popular valuation metric on Wall Street.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">P/E Ratio Formula</div>
+                            <div class="formula-content">
+                                P/E = Market Price per Share / Earnings per Share (EPS)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Market Price per Share:</dt>
+                                <dd>Current stock price in the market</dd>
+                                <dt>EPS (Earnings per Share):</dt>
+                                <dd>Net Income / Number of Outstanding Shares</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Real-World Example: Apple Inc. (AAPL)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Scenario:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Current Stock Price: <strong>$180</strong></li>
+                                    <li>Annual EPS: <strong>$6.00</strong></li>
+                                    <li>P/E Ratio = $180 / $6.00 = <strong>30x</strong></li>
+                                </ul>
+                                <p><strong>Interpretation:</strong></p>
+                                <p>Investors are paying $30 for every $1 of Apple's earnings. Compared to the S&P 500 average P/E of ~20x, Apple trades at a <strong>premium</strong>, suggesting high growth expectations.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Industry Comparison</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>P/E benchmarks vary by industry:</strong></p>
+                                <ul>
+                                    <li><strong>Tech stocks:</strong> 25-40x (high growth)</li>
+                                    <li><strong>Financial services:</strong> 10-15x (cyclical)</li>
+                                    <li><strong>Utilities:</strong> 12-18x (stable, low growth)</li>
+                                    <li><strong>High-growth SaaS:</strong> 50-100x (future potential)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- P/B Ratio -->
+                        <h3 class="subsection-header">2. Price-to-Book Ratio (P/B)</h3>
+                        
+                        <p class="content-text">
+                            The <strong>P/B ratio</strong> compares a company's market value to its book value (net assets). It's particularly useful for evaluating <strong>banks, real estate, and asset-heavy companies</strong>.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">P/B Ratio Formula</div>
+                            <div class="formula-content">
+                                P/B = Market Cap / Total Book Value
+                                <br><br>
+                                Or: P/B = Price per Share / Book Value per Share
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Book Value:</dt>
+                                <dd>Total Assets - Total Liabilities (Shareholders' Equity)</dd>
+                                <dt>Book Value per Share:</dt>
+                                <dd>Shareholders' Equity / Number of Outstanding Shares</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-university"></i>
+                                <span>Example: Bank of America (BAC)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Data:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Stock Price: <strong>$30</strong></li>
+                                    <li>Book Value per Share: <strong>$25</strong></li>
+                                    <li>P/B Ratio = $30 / $25 = <strong>1.2x</strong></li>
+                                </ul>
+                                <p><strong>Analysis:</strong></p>
+                                <p>BAC trades at 1.2x book value. A P/B < 1.0 could indicate <strong>undervaluation</strong>, while P/B > 3.0 suggests the market values intangibles (brand, customer base) highly.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- EV/EBITDA -->
+                        <h3 class="subsection-header">3. Enterprise Value to EBITDA (EV/EBITDA)</h3>
+                        
+                        <p class="content-text">
+                            <strong>EV/EBITDA</strong> is a comprehensive valuation metric used in M&A and corporate finance. It accounts for debt and is <strong>independent of capital structure</strong>.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">EV/EBITDA Formula</div>
+                            <div class="formula-content">
+                                EV/EBITDA = Enterprise Value / EBITDA
+                                <br><br>
+                                Enterprise Value (EV) = Market Cap + Total Debt - Cash
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>EBITDA:</dt>
+                                <dd>Earnings Before Interest, Taxes, Depreciation, and Amortization</dd>
+                                <dt>Why use EV?</dt>
+                                <dd>Represents the total cost to acquire a company (equity + debt - cash)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>M&A Example: Tech Acquisition</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Company Profile:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Market Cap: <strong>$5 billion</strong></li>
+                                    <li>Total Debt: <strong>$1 billion</strong></li>
+                                    <li>Cash: <strong>$500 million</strong></li>
+                                    <li>EBITDA: <strong>$750 million</strong></li>
+                                </ul>
+                                <p><strong>Calculation:</strong></p>
+                                <p>EV = $5B + $1B - $0.5B = <strong>$5.5B</strong></p>
+                                <p>EV/EBITDA = $5.5B / $0.75B = <strong>7.3x</strong></p>
+                                <p><strong>Benchmark:</strong> Tech companies typically trade at 10-15x EV/EBITDA, suggesting this could be an attractive acquisition target.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Comparison Table -->
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Best For</th>
+                                        <th>Typical Range</th>
+                                        <th>Limitations</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>P/E Ratio</strong></td>
+                                        <td>Profitable companies with stable earnings</td>
+                                        <td>15-25x (market avg)</td>
+                                        <td>Useless for unprofitable companies</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>P/B Ratio</strong></td>
+                                        <td>Banks, real estate, asset-heavy firms</td>
+                                        <td>1-3x</td>
+                                        <td>Ignores intangible assets (brand, IP)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>EV/EBITDA</strong></td>
+                                        <td>M&A, comparing companies with different capital structures</td>
+                                        <td>8-12x</td>
+                                        <td>Ignores capex requirements</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>P/S Ratio</strong></td>
+                                        <td>High-growth, unprofitable companies (SaaS)</td>
+                                        <td>2-10x</td>
+                                        <td>Doesn't account for profitability</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 2: Profitability Metrics -->
+                    <div class="content-section" id="profitability-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-chart-pie"></i>
+                            Profitability Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Profitability metrics measure a company's ability to <strong>generate profit relative to revenue, assets, or equity</strong>. These are critical for assessing operational efficiency and management effectiveness.
+                        </p>
+                        
+                        <!-- ROE -->
+                        <h3 class="subsection-header">1. Return on Equity (ROE)</h3>
+                        
+                        <p class="content-text">
+                            <strong>ROE</strong> is Warren Buffett's favorite metric. It measures how effectively management uses shareholders' equity to generate profits.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">ROE Formula</div>
+                            <div class="formula-content">
+                                ROE = (Net Income / Shareholders' Equity) × 100%
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Net Income:</dt>
+                                <dd>Profit after all expenses, taxes, and interest</dd>
+                                <dt>Shareholders' Equity:</dt>
+                                <dd>Total Assets - Total Liabilities (book value)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-trophy"></i>
+                                <span>Blue-Chip Example: Microsoft (MSFT)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Financials:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Net Income: <strong>$72 billion</strong></li>
+                                    <li>Shareholders' Equity: <strong>$200 billion</strong></li>
+                                    <li>ROE = ($72B / $200B) × 100% = <strong>36%</strong></li>
+                                </ul>
+                                <p><strong>Interpretation:</strong></p>
+                                <p>Microsoft generates <strong>$0.36 in profit for every $1 of equity</strong>. ROE > 15% is excellent; Microsoft's 36% ROE indicates exceptional management and competitive advantages (moats).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-check-circle"></i>
+                                <span>DuPont Analysis: Breaking Down ROE</span>
+                            </div>
+                            <div class="box-content">
+                                <p>The <strong>DuPont Formula</strong> decomposes ROE into three components:</p>
+                                <div class="formula-content" style="margin-top: 1rem;">
+                                    ROE = (Net Margin) × (Asset Turnover) × (Equity Multiplier)
+                                    <br><br>
+                                    ROE = (Net Income/Revenue) × (Revenue/Assets) × (Assets/Equity)
+                                </div>
+                                <p style="margin-top: 1rem;">This reveals <strong>whether high ROE comes from operational efficiency, asset utilization, or leverage</strong>.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Gross/Operating/Net Margins -->
+                        <h3 class="subsection-header">2. Profit Margins</h3>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Three Key Margin Metrics</div>
+                            <div class="formula-content">
+                                Gross Margin = (Gross Profit / Revenue) × 100%
+                                <br><br>
+                                Operating Margin = (Operating Income / Revenue) × 100%
+                                <br><br>
+                                Net Margin = (Net Income / Revenue) × 100%
+                            </div>
+                        </div>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Gross Margin</th>
+                                        <th>Operating Margin</th>
+                                        <th>Net Margin</th>
+                                        <th>Insight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Apple (Tech)</strong></td>
+                                        <td>43%</td>
+                                        <td>30%</td>
+                                        <td>25%</td>
+                                        <td>High margins = pricing power</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Walmart (Retail)</strong></td>
+                                        <td>25%</td>
+                                        <td>4%</td>
+                                        <td>2.5%</td>
+                                        <td>Low margins = volume business</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Google (SaaS)</strong></td>
+                                        <td>56%</td>
+                                        <td>28%</td>
+                                        <td>23%</td>
+                                        <td>Software = high gross margins</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Ford (Auto)</strong></td>
+                                        <td>15%</td>
+                                        <td>6%</td>
+                                        <td>4%</td>
+                                        <td>Cyclical, capital-intensive</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 3: Liquidity Metrics -->
+                    <div class="content-section" id="liquidity-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-tint"></i>
+                            Liquidity Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Liquidity metrics assess a company's ability to <strong>meet short-term obligations</strong> without raising external capital. Critical for avoiding bankruptcy risk.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Current Ratio</div>
+                            <div class="formula-content">
+                                Current Ratio = Current Assets / Current Liabilities
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Healthy Range:</dt>
+                                <dd>1.5 - 3.0 (varies by industry)</dd>
+                                <dt>Interpretation:</dt>
+                                <dd>Ratio > 2.0 = Strong liquidity | Ratio < 1.0 = Liquidity crisis risk</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Quick Ratio (Acid Test)</div>
+                            <div class="formula-content">
+                                Quick Ratio = (Current Assets - Inventory) / Current Liabilities
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Why exclude inventory?</dt>
+                                <dd>Inventory may not convert to cash quickly in a crisis</dd>
+                                <dt>Conservative Measure:</dt>
+                                <dd>Quick Ratio > 1.0 is considered safe</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Red Flag: Liquidity Crisis</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Warning signs of impending liquidity problems:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Current Ratio < 1.0 (liabilities exceed assets)</li>
+                                    <li>Quick Ratio < 0.5 (severe cash shortage)</li>
+                                    <li>Declining cash flow from operations</li>
+                                    <li>Increasing reliance on short-term debt</li>
+                                    <li>Days Sales Outstanding (DSO) rising rapidly</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 4: Leverage Metrics -->
+                    <div class="content-section" id="leverage-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-balance-scale"></i>
+                            Leverage Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Leverage metrics measure a company's <strong>debt burden and financial risk</strong>. High leverage amplifies returns in good times but increases bankruptcy risk in downturns.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Debt-to-Equity Ratio (D/E)</div>
+                            <div class="formula-content">
+                                D/E = Total Debt / Shareholders' Equity
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Conservative:</dt>
+                                <dd>D/E < 0.5 (low leverage)</dd>
+                                <dt>Moderate:</dt>
+                                <dd>D/E = 0.5 - 1.5</dd>
+                                <dt>Aggressive:</dt>
+                                <dd>D/E > 2.0 (high financial risk)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Interest Coverage Ratio</div>
+                            <div class="formula-content">
+                                Interest Coverage = EBIT / Interest Expense
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Safe Zone:</dt>
+                                <dd>Ratio > 3.0 (can easily cover interest payments)</dd>
+                                <dt>Danger Zone:</dt>
+                                <dd>Ratio < 1.5 (financial distress risk)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-building"></i>
+                                <span>Case Study: Tesla's Debt Journey</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>2018 (High Risk Period):</strong></p>
+                                <ul class="styled-list">
+                                    <li>Total Debt: <strong>$12 billion</strong></li>
+                                    <li>Shareholders' Equity: <strong>$5 billion</strong></li>
+                                    <li>D/E Ratio = 12/5 = <strong>2.4</strong> (Highly leveraged)</li>
+                                    <li>Interest Coverage < 1.0 (couldn't cover interest from operations)</li>
+                                </ul>
+                                <p><strong>2023 (Improved):</strong></p>
+                                <ul class="styled-list">
+                                    <li>Total Debt: <strong>$5 billion</strong></li>
+                                    <li>Shareholders' Equity: <strong>$60 billion</strong></li>
+                                    <li>D/E Ratio = 5/60 = <strong>0.08</strong> (Very conservative)</li>
+                                    <li>Interest Coverage > 20x (strong financial health)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 5: Efficiency Metrics -->
+                    <div class="content-section" id="efficiency-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-cogs"></i>
+                            Efficiency Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Efficiency metrics measure how well a company <strong>utilizes its assets to generate revenue</strong>. Key for operational excellence analysis.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Asset Turnover Ratio</div>
+                            <div class="formula-content">
+                                Asset Turnover = Revenue / Total Assets
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Interpretation:</dt>
+                                <dd>Higher ratio = More efficient asset utilization</dd>
+                                <dt>Industry Variation:</dt>
+                                <dd>Retail (2-3x) vs. Capital-intensive industries (0.5-1x)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Inventory Turnover</div>
+                            <div class="formula-content">
+                                Inventory Turnover = Cost of Goods Sold / Average Inventory
+                                <br><br>
+                                Days Inventory Outstanding = 365 / Inventory Turnover
+                            </div>
+                        </div>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Inventory Turnover</th>
+                                        <th>Days Inventory</th>
+                                        <th>Insight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Amazon</strong></td>
+                                        <td>8.5x</td>
+                                        <td>43 days</td>
+                                        <td>Fast-moving inventory</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tesla</strong></td>
+                                        <td>12x</td>
+                                        <td>30 days</td>
+                                        <td>Build-to-order model</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Boeing</strong></td>
+                                        <td>1.2x</td>
+                                        <td>304 days</td>
+                                        <td>Long production cycles</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 6: Growth Metrics -->
+                    <div class="content-section" id="growth-metrics">
+                        <h2 class="section-header">
+                            <i class="fas fa-rocket"></i>
+                            Growth Metrics
+                        </h2>
+                        
+                        <p class="content-text">
+                            Growth metrics track a company's <strong>revenue, earnings, and cash flow expansion</strong> over time. Critical for identifying high-growth opportunities.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Revenue Growth Rate</div>
+                            <div class="formula-content">
+                                Revenue Growth % = [(Current Revenue - Prior Revenue) / Prior Revenue] × 100%
+                            </div>
+                        </div>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Compound Annual Growth Rate (CAGR)</div>
+                            <div class="formula-content">
+                                CAGR = [(Ending Value / Beginning Value)^(1/n)] - 1
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>n:</dt>
+                                <dd>Number of years</dd>
+                                <dt>Use Case:</dt>
+                                <dd>Smooths out volatile year-over-year growth</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>CAGR Example: Netflix Revenue (2018-2023)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Data:</strong></p>
+                                <ul class="styled-list">
+                                    <li>2018 Revenue: <strong>$15.8 billion</strong></li>
+                                    <li>2023 Revenue: <strong>$33.7 billion</strong></li>
+                                    <li>Period: <strong>5 years</strong></li>
+                                </ul>
+                                <p><strong>Calculation:</strong></p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    CAGR = [(33.7 / 15.8)^(1/5)] - 1 = 16.3% annually
+                                </div>
+                                <p>Netflix grew revenue at a <strong>16.3% compound rate</strong> over 5 years, significantly outpacing the media industry average of ~5%.</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 7: DCF Valuation -->
+                    <div class="content-section" id="dcf-valuation">
+                        <h2 class="section-header">
+                            <i class="fas fa-calculator"></i>
+                            Discounted Cash Flow (DCF) Valuation
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>DCF is the gold standard of valuation</strong> used by investment banks and private equity firms. It values a company based on its ability to generate future cash flows.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">DCF Formula</div>
+                            <div class="formula-content">
+                                Enterprise Value = Σ [FCF_t / (1 + WACC)^t] + Terminal Value
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>FCF (Free Cash Flow):</dt>
+                                <dd>Operating Cash Flow - Capital Expenditures</dd>
+                                <dt>WACC (Weighted Average Cost of Capital):</dt>
+                                <dd>Discount rate reflecting the company's cost of financing</dd>
+                                <dt>Terminal Value:</dt>
+                                <dd>Present value of all cash flows beyond the forecast period</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">WACC Calculation</div>
+                            <div class="formula-content">
+                                WACC = (E/V × Re) + (D/V × Rd × (1 - Tc))
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>E/V:</dt>
+                                <dd>Equity as % of total value</dd>
+                                <dt>Re:</dt>
+                                <dd>Cost of equity (from CAPM)</dd>
+                                <dt>D/V:</dt>
+                                <dd>Debt as % of total value</dd>
+                                <dt>Rd:</dt>
+                                <dd>Cost of debt (interest rate)</dd>
+                                <dt>Tc:</dt>
+                                <dd>Corporate tax rate</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-area"></i>
+                                <span>Full DCF Example: Valuing a Tech Company</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Step 1: Project Free Cash Flows</strong></p>
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Year</th>
+                                                <th>Revenue</th>
+                                                <th>FCF</th>
+                                                <th>PV of FCF</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>$1,000M</td>
+                                                <td>$150M</td>
+                                                <td>$136M</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>$1,200M</td>
+                                                <td>$180M</td>
+                                                <td>$149M</td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>$1,440M</td>
+                                                <td>$216M</td>
+                                                <td>$162M</td>
+                                            </tr>
+                                            <tr>
+                                                <td>4</td>
+                                                <td>$1,728M</td>
+                                                <td>$259M</td>
+                                                <td>$177M</td>
+                                            </tr>
+                                            <tr>
+                                                <td>5</td>
+                                                <td>$2,074M</td>
+                                                <td>$311M</td>
+                                                <td>$193M</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p><strong>Step 2: Calculate Terminal Value</strong></p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    Terminal Value = FCF_5 × (1 + g) / (WACC - g)
+                                    <br>
+                                    = $311M × 1.03 / (0.10 - 0.03) = $4,576M
+                                    <br><br>
+                                    PV of Terminal Value = $4,576M / (1.10)^5 = $2,842M
+                                </div>
+                                <p><strong>Step 3: Sum to Enterprise Value</strong></p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    EV = Sum of PV(FCF) + PV(Terminal Value)
+                                    <br>
+                                    = ($136 + $149 + $162 + $177 + $193) + $2,842
+                                    <br>
+                                    = <strong>$3,659M</strong>
+                                </div>
+                                <p><strong>Step 4: Calculate Equity Value</strong></p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    Equity Value = EV - Debt + Cash
+                                    <br>
+                                    = $3,659M - $500M + $200M = <strong>$3,359M</strong>
+                                    <br><br>
+                                    Price per Share = $3,359M / 100M shares = <strong>$33.59</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>DCF Sensitivity: Garbage In, Garbage Out</span>
+                            </div>
+                            <div class="box-content">
+                                <p>DCF valuations are <strong>highly sensitive to assumptions</strong>:</p>
+                                <ul class="styled-list">
+                                    <li><strong>Growth Rate:</strong> 1% change can alter valuation by 20-30%</li>
+                                    <li><strong>WACC:</strong> 0.5% change = 15% valuation swing</li>
+                                    <li><strong>Terminal Value:</strong> Often represents 60-80% of total value</li>
+                                </ul>
+                                <p><strong>Best Practice:</strong> Run sensitivity analysis with multiple scenarios (base, bull, bear cases).</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="page-navigation">
+                        <a href="help.html" class="nav-button prev">
+                            <i class="fas fa-chevron-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                        <a href="resources-technical-analysis.html" class="nav-button next">
+                            <span>Next: Technical Analysis</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>
