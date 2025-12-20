@@ -2306,12 +2306,18 @@ class ForexConverter {
         return `${year}-${month}-${day}`;
     }
 
-    extractECBTimeSeries(data) {
-        if (!data || !data.success) return [];
+    extractECBTimeSeries(historicalData) {
+        // ✅ Le Worker retourne déjà data dans le bon format
+        if (!historicalData || !historicalData.data) return [];
+        
         try {
-            const observations = economicDataClient.extractECBObservations(data.data);
-            return observations.map(obs => [obs.timestamp, obs.value]);
+            // Les données du Worker sont déjà au format { date, value, timestamp }
+            return historicalData.data.map(item => [
+                item.timestamp,
+                item.value
+            ]);
         } catch (error) {
+            console.error('Error extracting ECB time series:', error);
             return [];
         }
     }
