@@ -377,6 +377,37 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE MOVING AVERAGES -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Golden Cross Strategy (50-day MA vs 200-day MA)</h3>
+                            <canvas id="maChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS MA -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Interpret This Chart</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Signal Identification:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Golden Cross:</strong> When the blue line (50-day MA) crosses ABOVE the orange line (200-day MA) → <strong>BUY signal</strong></li>
+                                    <li><strong>Death Cross:</strong> When the blue line crosses BELOW the orange line → <strong>SELL signal</strong></li>
+                                    <li><strong>Price Above Both MAs:</strong> Strong uptrend confirmed</li>
+                                    <li><strong>Price Below Both MAs:</strong> Strong downtrend, avoid buying</li>
+                                </ul>
+                                <br>
+                                <p><strong>Actionable Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Wait for Golden Cross confirmation (min 3 days above)</li>
+                                    <li>Enter position when price pulls back to 50-day MA (support test)</li>
+                                    <li>Set stop-loss 2% below 200-day MA</li>
+                                    <li>Exit on Death Cross or 20% profit target</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-calculator"></i>
@@ -391,47 +422,6 @@
                                     = 1540 / 10 = <strong>$154</strong>
                                 </div>
                                 <p>The 10-day SMA is $154. If current price ($160) > SMA ($154), it signals an <strong>uptrend</strong>.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Exponential Moving Average -->
-                        <h3 class="subsection-header">2. Exponential Moving Average (EMA)</h3>
-                        
-                        <p class="content-text">
-                            EMA gives <strong>more weight to recent prices</strong>, making it more responsive to new information than SMA.
-                        </p>
-                        
-                        <div class="formula-block">
-                            <div class="formula-title">EMA Formula</div>
-                            <div class="formula-content">
-                                EMA = (Close - EMA_previous) × Multiplier + EMA_previous
-                                <br><br>
-                                Multiplier = 2 / (n + 1)
-                            </div>
-                            <dl class="formula-legend">
-                                <dt>Close:</dt>
-                                <dd>Current closing price</dd>
-                                <dt>EMA_previous:</dt>
-                                <dd>Previous period's EMA</dd>
-                                <dt>n:</dt>
-                                <dd>Number of periods (e.g., 12, 26, 50)</dd>
-                            </dl>
-                        </div>
-                        
-                        <!-- Golden Cross / Death Cross -->
-                        <div class="success-box">
-                            <div class="box-header">
-                                <i class="fas fa-trophy"></i>
-                                <span>Golden Cross & Death Cross</span>
-                            </div>
-                            <div class="box-content">
-                                <p><strong>Golden Cross (Bullish Signal):</strong></p>
-                                <p>50-day MA crosses ABOVE 200-day MA → Strong buy signal</p>
-                                <br>
-                                <p><strong>Death Cross (Bearish Signal):</strong></p>
-                                <p>50-day MA crosses BELOW 200-day MA → Strong sell signal</p>
-                                <br>
-                                <p><strong>Historical Accuracy:</strong> Golden crosses have preceded major bull markets (2009, 2016, 2020).</p>
                             </div>
                         </div>
                         
@@ -504,67 +494,34 @@
                             </dl>
                         </div>
                         
-                        <div class="example-card">
-                            <div class="example-header">
-                                <i class="fas fa-chart-area"></i>
-                                <span>RSI Calculation (14-day period)</span>
+                        <!-- GRAPHIQUE RSI -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: RSI Overbought/Oversold Zones (14-period)</h3>
+                            <canvas id="rsiChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS RSI -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Interpret RSI Chart</span>
                             </div>
-                            <div class="example-content">
-                                <p><strong>Step 1: Calculate gains and losses</strong></p>
-                                <div class="data-table-wrapper" style="margin: 1rem 0;">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Day</th>
-                                                <th>Close</th>
-                                                <th>Change</th>
-                                                <th>Gain</th>
-                                                <th>Loss</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>$100</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>$102</td>
-                                                <td>+$2</td>
-                                                <td>$2</td>
-                                                <td>$0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td>$101</td>
-                                                <td>-$1</td>
-                                                <td>$0</td>
-                                                <td>$1</td>
-                                            </tr>
-                                            <tr>
-                                                <td>...</td>
-                                                <td>...</td>
-                                                <td>...</td>
-                                                <td>...</td>
-                                                <td>...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <p><strong>Step 2: Calculate averages</strong></p>
-                                <div class="formula-content" style="margin: 1rem 0;">
-                                    Average Gain (14 days) = $28 / 14 = $2.00
-                                    <br>
-                                    Average Loss (14 days) = $14 / 14 = $1.00
-                                    <br><br>
-                                    RS = $2.00 / $1.00 = 2.0
-                                    <br>
-                                    RSI = 100 - [100 / (1 + 2.0)] = 100 - 33.33 = <strong>66.67</strong>
-                                </div>
-                                <p><strong>Interpretation:</strong> RSI of 66.67 indicates <strong>bullish momentum</strong> but not yet overbought (would need >70).</p>
+                            <div class="box-content">
+                                <p><strong>Zone Identification:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>RSI > 70 (Red Zone):</strong> Overbought → Potential selling opportunity or reversal down</li>
+                                    <li><strong>RSI < 30 (Green Zone):</strong> Oversold → Potential buying opportunity or reversal up</li>
+                                    <li><strong>RSI 40-60:</strong> Neutral zone, no clear signal</li>
+                                </ul>
+                                <br>
+                                <p><strong>Trading Signals:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Buy:</strong> RSI crosses above 30 (exits oversold zone with momentum)</li>
+                                    <li><strong>Sell:</strong> RSI crosses below 70 (exits overbought zone)</li>
+                                    <li><strong>Divergence (Advanced):</strong> Price makes new high but RSI doesn't → Bearish reversal coming</li>
+                                </ul>
+                                <br>
+                                <p><strong>⚠ Warning:</strong> In strong trends, RSI can stay overbought/oversold for weeks. Always combine with trend indicators (MA)!</p>
                             </div>
                         </div>
                         
@@ -594,17 +551,6 @@
                             </div>
                         </div>
                         
-                        <div class="warning-box">
-                            <div class="box-header">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>RSI Trap: Strong Trends</span>
-                            </div>
-                            <div class="box-content">
-                                <p>In <strong>strong uptrends</strong>, RSI can stay overbought (>70) for extended periods. Similarly, in <strong>downtrends</strong>, RSI can remain oversold (<30) for weeks.</p>
-                                <p><strong>Solution:</strong> Combine RSI with trend indicators (MA, MACD) to avoid counter-trend trades.</p>
-                            </div>
-                        </div>
-                        
                     </div>
                     
                     <!-- Section 3: MACD -->
@@ -626,6 +572,38 @@
                                 Signal Line = 9-period EMA of MACD Line
                                 <br><br>
                                 Histogram = MACD Line - Signal Line
+                            </div>
+                        </div>
+                        
+                        <!-- GRAPHIQUE MACD -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: MACD Crossover Strategy</h3>
+                            <canvas id="macdChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS MACD -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Read MACD Chart</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Signal Identification:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Bullish Crossover:</strong> MACD line (blue) crosses ABOVE signal line (orange) → <strong>BUY signal</strong></li>
+                                    <li><strong>Bearish Crossover:</strong> MACD line crosses BELOW signal line → <strong>SELL signal</strong></li>
+                                    <li><strong>Histogram Bars:</strong> Green bars = bullish momentum | Red bars = bearish momentum</li>
+                                    <li><strong>Zero Line:</strong> MACD above zero = uptrend | below zero = downtrend</li>
+                                </ul>
+                                <br>
+                                <p><strong>Advanced Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Strong Buy:</strong> MACD crosses above signal line + histogram turns green + MACD crosses above zero line</li>
+                                    <li><strong>Confirmation:</strong> Wait for 2-3 days of green histogram expansion</li>
+                                    <li><strong>Exit:</strong> When MACD crosses below signal line OR histogram shrinks significantly</li>
+                                </ul>
+                                <br>
+                                <p><strong>Win Rate:</strong> ~65% on trending stocks when combined with volume confirmation</p>
                             </div>
                         </div>
                         
@@ -652,28 +630,6 @@
                                     <li><strong>Bullish:</strong> Price falling, MACD rising → Potential reversal up</li>
                                     <li><strong>Bearish:</strong> Price rising, MACD falling → Potential reversal down</li>
                                 </ul>
-                            </div>
-                        </div>
-                        
-                        <div class="success-box">
-                            <div class="box-header">
-                                <i class="fas fa-trophy"></i>
-                                <span>Pro Strategy: MACD + Volume Confirmation</span>
-                            </div>
-                            <div class="box-content">
-                                <p><strong>Entry Rules:</strong></p>
-                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
-                                    <li>MACD crosses above signal line (bullish crossover)</li>
-                                    <li>Volume increases on the crossover day (confirms strength)</li>
-                                    <li>Price is above 50-day MA (trend confirmation)</li>
-                                </ol>
-                                <p><strong>Exit Rules:</strong></p>
-                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
-                                    <li>MACD crosses below signal line (bearish crossover)</li>
-                                    <li>OR price drops below 50-day MA</li>
-                                    <li>OR 15% profit target reached</li>
-                                </ol>
-                                <p><strong>Historical Win Rate:</strong> ~65% on S&P 500 stocks (2010-2023)</p>
                             </div>
                         </div>
                         
@@ -707,28 +663,37 @@
                             </dl>
                         </div>
                         
-                        <div class="example-card">
-                            <div class="example-header">
-                                <i class="fas fa-calculator"></i>
-                                <span>Bollinger Band Calculation Example</span>
+                        <!-- GRAPHIQUE BOLLINGER BANDS -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Bollinger Bands with Squeeze Pattern</h3>
+                            <canvas id="bollingerChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS BOLLINGER BANDS -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Trade Bollinger Bands</span>
                             </div>
-                            <div class="example-content">
-                                <p><strong>Given Data:</strong></p>
+                            <div class="box-content">
+                                <p><strong>Key Signals:</strong></p>
                                 <ul class="styled-list">
-                                    <li>20-day SMA (Middle Band): <strong>$150</strong></li>
-                                    <li>20-day Standard Deviation: <strong>$5</strong></li>
+                                    <li><strong>Touch Upper Band:</strong> Price overbought → Potential sell or take profit</li>
+                                    <li><strong>Touch Lower Band:</strong> Price oversold → Potential buy opportunity</li>
+                                    <li><strong>Squeeze (Bands Narrow):</strong> Low volatility → Explosive move coming soon (10-30% in 2-4 weeks)</li>
+                                    <li><strong>Breakout Above Upper Band:</strong> Strong momentum → Continue trend (don't sell immediately)</li>
                                 </ul>
-                                <div class="formula-content" style="margin: 1rem 0;">
-                                    Upper Band = $150 + (2 × $5) = <strong>$160</strong>
-                                    <br>
-                                    Lower Band = $150 - (2 × $5) = <strong>$140</strong>
-                                </div>
-                                <p><strong>Trading Signals:</strong></p>
-                                <ul class="styled-list">
-                                    <li>Price at $160 (Upper Band) → <strong>Overbought</strong>, potential sell</li>
-                                    <li>Price at $140 (Lower Band) → <strong>Oversold</strong>, potential buy</li>
-                                    <li>Price breaking above $160 → <strong>Strong breakout</strong>, momentum trade</li>
-                                </ul>
+                                <br>
+                                <p><strong>Bollinger Squeeze Strategy:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li>Identify when bands narrow to 6-month low (squeeze formation)</li>
+                                    <li>Wait for breakout (price crosses upper or lower band)</li>
+                                    <li>Confirm with 2x average volume spike</li>
+                                    <li>Enter in breakout direction with stop-loss at middle band</li>
+                                    <li>Target: Bandwidth distance projected from breakout point</li>
+                                </ol>
+                                <br>
+                                <p><strong>⚠ Warning:</strong> Don't blindly sell at upper band in strong uptrends! Combine with RSI/MACD for confirmation.</p>
                             </div>
                         </div>
                         
@@ -781,94 +746,96 @@
                             </dl>
                         </div>
                         
-                        <div class="example-card">
-                            <div class="example-header">
-                                <i class="fas fa-ruler"></i>
-                                <span>Fibonacci Example: Stock Pullback</span>
+                        <!-- GRAPHIQUE FIBONACCI -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Fibonacci Retracement Levels After Rally</h3>
+                            <canvas id="fibonacciChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS FIBONACCI -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Use Fibonacci Retracements</span>
                             </div>
-                            <div class="example-content">
-                                <p><strong>Scenario:</strong> Stock rallies from $100 (swing low) to $150 (swing high), then pulls back.</p>
-                                <p><strong>Fibonacci Retracement Levels:</strong></p>
-                                <div class="data-table-wrapper" style="margin: 1rem 0;">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Level</th>
-                                                <th>Percentage</th>
-                                                <th>Price</th>
-                                                <th>Interpretation</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>0%</td>
-                                                <td>0.0%</td>
-                                                <td>$150</td>
-                                                <td>Swing high (no retracement)</td>
-                                            </tr>
-                                            <tr>
-                                                <td>23.6%</td>
-                                                <td>23.6%</td>
-                                                <td>$138.20</td>
-                                                <td>Shallow pullback</td>
-                                            </tr>
-                                            <tr>
-                                                <td>38.2%</td>
-                                                <td>38.2%</td>
-                                                <td>$130.90</td>
-                                                <td>Moderate support</td>
-                                            </tr>
-                                            <tr>
-                                                <td>50.0%</td>
-                                                <td>50.0%</td>
-                                                <td>$125.00</td>
-                                                <td>Psychological level</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>61.8%</strong></td>
-                                                <td><strong>61.8%</strong></td>
-                                                <td><strong>$119.10</strong></td>
-                                                <td><strong>Golden ratio (strongest support)</strong></td>
-                                            </tr>
-                                            <tr>
-                                                <td>78.6%</td>
-                                                <td>78.6%</td>
-                                                <td>$110.70</td>
-                                                <td>Deep retracement</td>
-                                            </tr>
-                                            <tr>
-                                                <td>100%</td>
-                                                <td>100.0%</td>
-                                                <td>$100</td>
-                                                <td>Full retracement (trend failure)</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="box-content">
+                                <p><strong>Level Interpretation:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>23.6% (Pink):</strong> Shallow pullback → Very strong trend continuation</li>
+                                    <li><strong>38.2% (Blue):</strong> Moderate pullback → Good entry for trend continuation</li>
+                                    <li><strong>50.0% (Purple):</strong> Psychological level → Common reversal point</li>
+                                    <li><strong>61.8% (Orange - Golden Ratio):</strong> Strongest support → Prime buying zone if trend is valid</li>
+                                    <li><strong>78.6% (Red):</strong> Deep retracement → Trend weakening, risky entry</li>
+                                </ul>
+                                <br>
                                 <p><strong>Trading Strategy:</strong></p>
-                                <p>If price retraces to <strong>$119.10 (61.8%)</strong> and bounces with volume, it's a strong buy signal (uptrend continuation).</p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li>Identify strong trend (swing low to swing high)</li>
+                                    <li>Wait for price to retrace to 50-61.8% level</li>
+                                    <li>Look for bullish reversal pattern (e.g., hammer candlestick, RSI oversold)</li>
+                                    <li>Enter long with stop-loss below 78.6% level</li>
+                                    <li>Target: Original swing high + Fibonacci extension (127.2% or 161.8%)</li>
+                                </ol>
+                                <br>
+                                <p><strong>💎 Pro Tip:</strong> The 61.8% Golden Ratio is where institutions often accumulate. Combine with volume spike for confirmation!</p>
                             </div>
                         </div>
                         
-                        <div class="success-box">
-                            <div class="box-header">
-                                <i class="fas fa-crosshairs"></i>
-                                <span>Fibonacci Extension Targets</span>
-                            </div>
-                            <div class="box-content">
-                                <p>After a retracement, use <strong>Fibonacci Extensions</strong> to project profit targets:</p>
-                                <ul class="styled-list">
-                                    <li><strong>127.2%:</strong> Conservative target</li>
-                                    <li><strong>161.8%:</strong> Aggressive target (golden extension)</li>
-                                    <li><strong>261.8%:</strong> Parabolic move target</li>
-                                </ul>
-                                <p><strong>Example:</strong> If stock bounces from $119 (61.8% retracement), targets are:</p>
-                                <div class="formula-content" style="margin-top: 1rem;">
-                                    127.2% Extension = $150 + ($50 × 0.272) = <strong>$163.60</strong>
-                                    <br>
-                                    161.8% Extension = $150 + ($50 × 0.618) = <strong>$180.90</strong>
-                                </div>
-                            </div>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Level</th>
+                                        <th>Percentage</th>
+                                        <th>Price</th>
+                                        <th>Interpretation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>0%</td>
+                                        <td>0.0%</td>
+                                        <td>$150</td>
+                                        <td>Swing high (no retracement)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>23.6%</td>
+                                        <td>23.6%</td>
+                                        <td>$138.20</td>
+                                        <td>Shallow pullback</td>
+                                    </tr>
+                                    <tr>
+                                        <td>38.2%</td>
+                                        <td>38.2%</td>
+                                        <td>$130.90</td>
+                                        <td>Moderate support</td>
+                                    </tr>
+                                    <tr>
+                                        <td>50.0%</td>
+                                        <td>50.0%</td>
+                                        <td>$125.00</td>
+                                        <td>Psychological level</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>61.8%</strong></td>
+                                        <td><strong>61.8%</strong></td>
+                                        <td><strong>$119.10</strong></td>
+                                        <td><strong>Golden ratio (strongest support)</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>78.6%</td>
+                                        <td>78.6%</td>
+                                        <td>$110.70</td>
+                                        <td>Deep retracement</td>
+                                    </tr>
+                                    <tr>
+                                        <td>100%</td>
+                                        <td>100.0%</td>
+                                        <td>$100</td>
+                                        <td>Full retracement (trend failure)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         
                     </div>
@@ -883,6 +850,39 @@
                         <p class="content-text">
                             <strong>"Volume precedes price"</strong> – This Wall Street adage reflects the importance of volume in confirming trends and spotting reversals.
                         </p>
+                        
+                        <!-- GRAPHIQUE VOLUME + OBV -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Price + Volume + OBV Analysis</h3>
+                            <canvas id="volumeChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS VOLUME -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Read Volume & OBV</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Volume Interpretation (Green/Red Bars):</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Rising Price + High Green Volume:</strong> Healthy buying pressure → Trend is strong</li>
+                                    <li><strong>Rising Price + Low Volume:</strong> Weak rally → Likely to reverse (distribution phase)</li>
+                                    <li><strong>Falling Price + High Red Volume:</strong> Panic selling → Potential capitulation bottom near</li>
+                                    <li><strong>Falling Price + Low Volume:</strong> Weak selling → Bottom forming, accumulation zone</li>
+                                </ul>
+                                <br>
+                                <p><strong>OBV Divergence Signals (Purple Line):</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Bullish Divergence:</strong> Price makes lower low BUT OBV makes higher low → Smart money accumulating, reversal up likely</li>
+                                    <li><strong>Bearish Divergence:</strong> Price makes higher high BUT OBV makes lower high → Institutions distributing, reversal down likely</li>
+                                    <li><strong>OBV Trending Up:</strong> Confirms uptrend strength</li>
+                                    <li><strong>OBV Trending Down:</strong> Warns of weakness even if price stable</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Pro Strategy:</strong> Only enter trades when price direction matches OBV direction. Divergences are early warning signals!</p>
+                            </div>
+                        </div>
                         
                         <div class="info-box">
                             <div class="box-header">
@@ -899,56 +899,6 @@
                             </div>
                         </div>
                         
-                        <h3 class="subsection-header">On-Balance Volume (OBV)</h3>
-                        
-                        <div class="formula-block">
-                            <div class="formula-title">OBV Formula</div>
-                            <div class="formula-content">
-                                If Close > Close_previous: OBV = OBV_previous + Volume
-                                <br><br>
-                                If Close < Close_previous: OBV = OBV_previous - Volume
-                                <br><br>
-                                If Close = Close_previous: OBV = OBV_previous
-                            </div>
-                        </div>
-                        
-                        <div class="example-card">
-                            <div class="example-header">
-                                <i class="fas fa-chart-area"></i>
-                                <span>OBV Divergence Example</span>
-                            </div>
-                            <div class="example-content">
-                                <p><strong>Bullish Divergence (Accumulation):</strong></p>
-                                <ul class="styled-list">
-                                    <li>Stock makes lower low: $45 → $42</li>
-                                    <li>OBV makes higher low: 5M → 6M</li>
-                                    <li><strong>Signal:</strong> Smart money accumulating, price likely to reverse up</li>
-                                </ul>
-                                <br>
-                                <p><strong>Bearish Divergence (Distribution):</strong></p>
-                                <ul class="styled-list">
-                                    <li>Stock makes higher high: $55 → $58</li>
-                                    <li>OBV makes lower high: 8M → 7M</li>
-                                    <li><strong>Signal:</strong> Institutions distributing, price likely to reverse down</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <h3 class="subsection-header">Volume-Weighted Average Price (VWAP)</h3>
-                        
-                        <div class="formula-block">
-                            <div class="formula-title">VWAP Formula</div>
-                            <div class="formula-content">
-                                VWAP = Σ (Price × Volume) / Σ Volume
-                            </div>
-                            <dl class="formula-legend">
-                                <dt>Use Case:</dt>
-                                <dd>Institutional traders use VWAP as execution benchmark</dd>
-                                <dt>Interpretation:</dt>
-                                <dd>Price > VWAP = Bullish | Price < VWAP = Bearish</dd>
-                            </dl>
-                        </div>
-                        
                     </div>
                     
                     <!-- Section 7: Chart Patterns -->
@@ -961,6 +911,82 @@
                         <p class="content-text">
                             Chart patterns are <strong>visual representations of market psychology</strong>. They've worked for decades because human behavior is predictable.
                         </p>
+                        
+                        <!-- GRAPHIQUE HEAD & SHOULDERS -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Head & Shoulders Reversal Pattern</h3>
+                            <canvas id="headShouldersChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS HEAD & SHOULDERS -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Trade Head & Shoulders Pattern</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Pattern Identification:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li><strong>Left Shoulder:</strong> Rally to resistance, pullback to support (orange line = neckline)</li>
+                                    <li><strong>Head:</strong> Higher rally, pullback to neckline again</li>
+                                    <li><strong>Right Shoulder:</strong> Weaker rally (lower than head), pullback toward neckline</li>
+                                </ol>
+                                <br>
+                                <p><strong>Trading Setup:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Entry:</strong> Break below neckline (orange) with volume >2x average → SELL/SHORT signal</li>
+                                    <li><strong>Stop Loss:</strong> Above right shoulder peak (protect if pattern fails)</li>
+                                    <li><strong>Target:</strong> Neckline - Head height = Projected downside move</li>
+                                    <li><strong>Confirmation:</strong> Price stays below neckline for 2-3 days (avoid false breakouts)</li>
+                                </ul>
+                                <br>
+                                <p><strong>📊 Pattern Stats:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Reliability:</strong> 85%+ success rate when confirmed</li>
+                                    <li><strong>Avg Move:</strong> 10-15% decline from neckline break</li>
+                                    <li><strong>Time Frame:</strong> Pattern takes 3-6 months to form (longer = more reliable)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- GRAPHIQUE BULL FLAG -->
+                        <div class="chart-container" style="margin-top: 2rem;">
+                            <h3 class="chart-title">Live Example: Bull Flag Continuation Pattern</h3>
+                            <canvas id="bullFlagChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS BULL FLAG -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Trade Bull Flag Pattern</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Pattern Structure:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Flagpole:</strong> Sharp 20-40% rally in 1-3 days (strong momentum)</li>
+                                    <li><strong>Flag:</strong> Tight 5-15% consolidation for 5-15 days (profit-taking, healthy pullback)</li>
+                                    <li><strong>Trend Lines:</strong> Parallel support/resistance within flag (yellow lines)</li>
+                                </ul>
+                                <br>
+                                <p><strong>Entry Strategy:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li>Identify sharp rally + tight consolidation</li>
+                                    <li>Wait for breakout above flag resistance (upper yellow line)</li>
+                                    <li>Confirm with volume spike (>2x average)</li>
+                                    <li><strong>Entry:</strong> Buy on breakout bar close above resistance</li>
+                                    <li><strong>Stop Loss:</strong> Below flag support (lower yellow line) ~5-8%</li>
+                                    <li><strong>Target:</strong> Flagpole height added to breakout point (~20-40% upside)</li>
+                                </ol>
+                                <br>
+                                <p><strong>🏆 Success Metrics:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Win Rate:</strong> 68% (Bulkowski's Encyclopedia of Chart Patterns)</li>
+                                    <li><strong>Avg Gain:</strong> 25-35% from breakout to target</li>
+                                    <li><strong>Best Market:</strong> Strong trending markets (bull markets)</li>
+                                </ul>
+                            </div>
+                        </div>
                         
                         <h3 class="subsection-header">Continuation Patterns</h3>
                         
@@ -1038,53 +1064,6 @@
                             </table>
                         </div>
                         
-                        <div class="example-card">
-                            <div class="example-header">
-                                <i class="fas fa-mountain"></i>
-                                <span>Head & Shoulders Example</span>
-                            </div>
-                            <div class="example-content">
-                                <p><strong>Pattern Formation:</strong></p>
-                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
-                                    <li><strong>Left Shoulder:</strong> Rally to $50, pullback to $45</li>
-                                    <li><strong>Head:</strong> Rally to $55, pullback to $45 (neckline)</li>
-                                    <li><strong>Right Shoulder:</strong> Rally to $50, pullback toward $45</li>
-                                </ol>
-                                <p><strong>Trading Setup:</strong></p>
-                                <ul class="styled-list">
-                                    <li><strong>Entry:</strong> Break below neckline ($45) on high volume</li>
-                                    <li><strong>Stop Loss:</strong> Above right shoulder ($51)</li>
-                                    <li><strong>Target:</strong> Neckline - Head height = $45 - ($55-$45) = <strong>$35</strong></li>
-                                </ul>
-                                <p><strong>Risk/Reward:</strong> 6 points risk / 10 points reward = 1.67 R/R ratio</p>
-                            </div>
-                        </div>
-                        
-                        <div class="success-box">
-                            <div class="box-header">
-                                <i class="fas fa-flag-checkered"></i>
-                                <span>Bull Flag Trading Strategy</span>
-                            </div>
-                            <div class="box-content">
-                                <p><strong>Pattern Characteristics:</strong></p>
-                                <ul class="styled-list">
-                                    <li>Sharp rally (flagpole) of 20%+ in 1-3 days</li>
-                                    <li>Tight consolidation (flag) for 5-15 days</li>
-                                    <li>Declining volume during consolidation</li>
-                                    <li>Volume spike on breakout (2x+ average)</li>
-                                </ul>
-                                <br>
-                                <p><strong>Entry Rules:</strong></p>
-                                <ul class="styled-list">
-                                    <li>Buy when price breaks above flag resistance</li>
-                                    <li>Volume > 2x average</li>
-                                    <li>Stop loss below flag low</li>
-                                </ul>
-                                <p><strong>Profit Target:</strong> Add flagpole height to breakout point</p>
-                                <p><strong>Win Rate:</strong> 68% (according to Bulkowski's Encyclopedia of Chart Patterns)</p>
-                            </div>
-                        </div>
-                        
                     </div>
                     
                     <!-- Navigation -->
@@ -1136,6 +1115,575 @@
                     e.stopPropagation();
                 });
             }
+            
+            // ============================================
+            // GRAPHIQUES CHART.JS - INLINE CODE
+            // ============================================
+            
+            // Fonction pour générer des prix aléatoires avec tendance
+            function generatePriceData(days, startPrice, trend = 0.001, volatility = 0.02) {
+                const prices = [startPrice];
+                for (let i = 1; i < days; i++) {
+                    const change = (Math.random() - 0.5) * volatility + trend;
+                    prices.push(prices[i - 1] * (1 + change));
+                }
+                return prices;
+            }
+            
+            // Fonction pour calculer SMA
+            function calculateSMA(data, period) {
+                const sma = [];
+                for (let i = 0; i < data.length; i++) {
+                    if (i < period - 1) {
+                        sma.push(null);
+                    } else {
+                        const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+                        sma.push(sum / period);
+                    }
+                }
+                return sma;
+            }
+            
+            // Fonction pour calculer RSI
+            function calculateRSI(prices, period = 14) {
+                const rsi = [];
+                const gains = [];
+                const losses = [];
+                
+                for (let i = 1; i < prices.length; i++) {
+                    const change = prices[i] - prices[i - 1];
+                    gains.push(change > 0 ? change : 0);
+                    losses.push(change < 0 ? -change : 0);
+                }
+                
+                for (let i = 0; i < gains.length; i++) {
+                    if (i < period - 1) {
+                        rsi.push(null);
+                    } else {
+                        const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
+                        const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
+                        const rs = avgGain / (avgLoss || 0.0001);
+                        rsi.push(100 - (100 / (1 + rs)));
+                    }
+                }
+                
+                return [null, ...rsi];
+            }
+            
+            // Fonction pour calculer MACD
+            function calculateEMA(data, period) {
+                const k = 2 / (period + 1);
+                const ema = [data[0]];
+                for (let i = 1; i < data.length; i++) {
+                    ema.push(data[i] * k + ema[i - 1] * (1 - k));
+                }
+                return ema;
+            }
+            
+            function calculateMACD(prices) {
+                const ema12 = calculateEMA(prices, 12);
+                const ema26 = calculateEMA(prices, 26);
+                const macdLine = ema12.map((val, i) => val - ema26[i]);
+                const signalLine = calculateEMA(macdLine, 9);
+                const histogram = macdLine.map((val, i) => val - signalLine[i]);
+                return { macdLine, signalLine, histogram };
+            }
+            
+            // Fonction pour calculer Bollinger Bands
+            function calculateBollingerBands(prices, period = 20, stdDev = 2) {
+                const sma = calculateSMA(prices, period);
+                const upper = [];
+                const lower = [];
+                
+                for (let i = 0; i < prices.length; i++) {
+                    if (i < period - 1) {
+                        upper.push(null);
+                        lower.push(null);
+                    } else {
+                        const slice = prices.slice(i - period + 1, i + 1);
+                        const mean = sma[i];
+                        const variance = slice.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / period;
+                        const std = Math.sqrt(variance);
+                        upper.push(mean + stdDev * std);
+                        lower.push(mean - stdDev * std);
+                    }
+                }
+                
+                return { upper, middle: sma, lower };
+            }
+            
+            // Générer des labels de dates
+            const days = 120;
+            const labels = Array.from({ length: days }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (days - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            // ============================================
+            // GRAPHIQUE 1: MOVING AVERAGES
+            // ============================================
+            const maPrices = generatePriceData(days, 150, 0.0015, 0.015);
+            const sma50 = calculateSMA(maPrices, 50);
+            const sma200 = calculateSMA(maPrices, 200);
+            
+            new Chart(document.getElementById('maChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: maPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: '50-day SMA',
+                        data: sma50,
+                        borderColor: 'rgba(52, 211, 153, 1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: '200-day SMA',
+                        data: sma200,
+                        borderColor: 'rgba(251, 146, 60, 1)',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        fill: false,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: value => '$' + value.toFixed(2) } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 2: RSI
+            // ============================================
+            const rsiPrices = generatePriceData(days, 100, 0.001, 0.025);
+            const rsiValues = calculateRSI(rsiPrices, 14);
+            
+            new Chart(document.getElementById('rsiChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'RSI (14)',
+                        data: rsiValues,
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: { callbacks: { label: ctx => 'RSI: ' + ctx.parsed.y.toFixed(2) } },
+                        annotation: {
+                            annotations: {
+                                overbought: {
+                                    type: 'line',
+                                    yMin: 70,
+                                    yMax: 70,
+                                    borderColor: 'rgba(239, 68, 68, 0.8)',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: { content: 'Overbought (70)', enabled: true, position: 'end' }
+                                },
+                                oversold: {
+                                    type: 'line',
+                                    yMin: 30,
+                                    yMax: 30,
+                                    borderColor: 'rgba(34, 197, 94, 0.8)',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: { content: 'Oversold (30)', enabled: true, position: 'end' }
+                                },
+                                overboughtZone: {
+                                    type: 'box',
+                                    yMin: 70,
+                                    yMax: 100,
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 0
+                                },
+                                oversoldZone: {
+                                    type: 'box',
+                                    yMin: 0,
+                                    yMax: 30,
+                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                    borderWidth: 0
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { callback: value => value } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 3: MACD
+            // ============================================
+            const macdPrices = generatePriceData(days, 180, 0.0008, 0.018);
+            const macdData = calculateMACD(macdPrices);
+            
+            new Chart(document.getElementById('macdChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        type: 'line',
+                        label: 'MACD Line',
+                        data: macdData.macdLine,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y'
+                    }, {
+                        type: 'line',
+                        label: 'Signal Line',
+                        data: macdData.signalLine,
+                        borderColor: 'rgba(251, 146, 60, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y'
+                    }, {
+                        type: 'bar',
+                        label: 'Histogram',
+                        data: macdData.histogram,
+                        backgroundColor: macdData.histogram.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'),
+                        yAxisID: 'y'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        y: { position: 'left', ticks: { callback: value => value.toFixed(2) } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 4: BOLLINGER BANDS
+            // ============================================
+            const bbPrices = generatePriceData(days, 150, 0.0005, 0.02);
+            const bbData = calculateBollingerBands(bbPrices, 20, 2);
+            
+            new Chart(document.getElementById('bollingerChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: bbPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Upper Band',
+                        data: bbData.upper,
+                        borderColor: 'rgba(239, 68, 68, 0.8)',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Middle Band (SMA 20)',
+                        data: bbData.middle,
+                        borderColor: 'rgba(156, 163, 175, 0.8)',
+                        borderWidth: 1,
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Lower Band',
+                        data: bbData.lower,
+                        borderColor: 'rgba(34, 197, 94, 0.8)',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: value => '$' + value.toFixed(2) } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 5: FIBONACCI
+            // ============================================
+            const fibPrices = [];
+            const swingLow = 100;
+            const swingHigh = 150;
+            
+            // Générer rally puis retracement
+            for (let i = 0; i < 40; i++) {
+                fibPrices.push(swingLow + (swingHigh - swingLow) * (i / 40) + (Math.random() - 0.5) * 2);
+            }
+            for (let i = 0; i < 80; i++) {
+                const retrace = swingHigh - (swingHigh - swingLow) * 0.618 * (i / 80);
+                fibPrices.push(retrace + (Math.random() - 0.5) * 2);
+            }
+            
+            const fibLevels = {
+                '0%': swingHigh,
+                '23.6%': swingHigh - (swingHigh - swingLow) * 0.236,
+                '38.2%': swingHigh - (swingHigh - swingLow) * 0.382,
+                '50%': swingHigh - (swingHigh - swingLow) * 0.5,
+                '61.8%': swingHigh - (swingHigh - swingLow) * 0.618,
+                '78.6%': swingHigh - (swingHigh - swingLow) * 0.786,
+                '100%': swingLow
+            };
+            
+            new Chart(document.getElementById('fibonacciChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: fibPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, ...Object.entries(fibLevels).map(([label, value], idx) => ({
+                        label: label,
+                        data: Array(days).fill(value),
+                        borderColor: ['#ef4444', '#f97316', '#f59e0b', '#8b5cf6', '#3b82f6', '#ec4899', '#10b981'][idx],
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0
+                    }))]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: value => '$' + value.toFixed(2) } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 6: VOLUME + OBV
+            // ============================================
+            const volPrices = generatePriceData(days, 100, 0.001, 0.02);
+            const volumes = volPrices.map(() => Math.random() * 5000000 + 1000000);
+            let obv = [0];
+            for (let i = 1; i < volPrices.length; i++) {
+                if (volPrices[i] > volPrices[i - 1]) {
+                    obv.push(obv[i - 1] + volumes[i]);
+                } else if (volPrices[i] < volPrices[i - 1]) {
+                    obv.push(obv[i - 1] - volumes[i]);
+                } else {
+                    obv.push(obv[i - 1]);
+                }
+            }
+            
+            new Chart(document.getElementById('volumeChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        type: 'line',
+                        label: 'Price',
+                        data: volPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y1',
+                        tension: 0.4
+                    }, {
+                        type: 'bar',
+                        label: 'Volume',
+                        data: volumes,
+                        backgroundColor: volumes.map((v, i) => i > 0 && volPrices[i] > volPrices[i - 1] ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'),
+                        yAxisID: 'y2'
+                    }, {
+                        type: 'line',
+                        label: 'OBV',
+                        data: obv,
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y3',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        y1: { type: 'linear', position: 'left', ticks: { callback: value => '$' + value.toFixed(2) } },
+                        y2: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: value => (value / 1000000).toFixed(1) + 'M' } },
+                        y3: { type: 'linear', display: false }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 7: HEAD & SHOULDERS
+            // ============================================
+            const hsPrices = [];
+            const neckline = 145;
+            
+            // Left shoulder
+            for (let i = 0; i < 15; i++) hsPrices.push(neckline + Math.sin(i / 5) * 5 + Math.random() * 2);
+            // Head
+            for (let i = 0; i < 20; i++) hsPrices.push(neckline + Math.sin(i / 6) * 10 + Math.random() * 2);
+            // Right shoulder
+            for (let i = 0; i < 15; i++) hsPrices.push(neckline + Math.sin(i / 5) * 5 + Math.random() * 2);
+            // Breakdown
+            for (let i = 0; i < 70; i++) hsPrices.push(neckline - i * 0.3 + Math.random() * 2);
+            
+            new Chart(document.getElementById('headShouldersChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: hsPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Neckline',
+                        data: Array(days).fill(neckline),
+                        borderColor: 'rgba(251, 146, 60, 1)',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        annotation: {
+                            annotations: {
+                                leftShoulder: { type: 'label', xValue: 10, yValue: 152, content: 'Left Shoulder', font: { size: 10 }, color: 'rgba(102, 126, 234, 1)' },
+                                head: { type: 'label', xValue: 28, yValue: 157, content: 'Head', font: { size: 10 }, color: 'rgba(102, 126, 234, 1)' },
+                                rightShoulder: { type: 'label', xValue: 42, yValue: 152, content: 'Right Shoulder', font: { size: 10 }, color: 'rgba(102, 126, 234, 1)' },
+                                breakdown: { type: 'label', xValue: 60, yValue: 135, content: 'Breakdown', font: { size: 10 }, color: 'rgba(239, 68, 68, 1)' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: value => '$' + value.toFixed(2) } }
+                    }
+                }
+            });
+            
+            // ============================================
+            // GRAPHIQUE 8: BULL FLAG
+            // ============================================
+            const bfPrices = [];
+            const flagStart = 100;
+            
+            // Flagpole (sharp rally)
+            for (let i = 0; i < 10; i++) bfPrices.push(flagStart + i * 4 + Math.random() * 2);
+            // Flag (consolidation)
+            const flagTop = bfPrices[bfPrices.length - 1];
+            for (let i = 0; i < 30; i++) {
+                bfPrices.push(flagTop - i * 0.5 + Math.sin(i / 3) * 2 + Math.random() * 1.5);
+            }
+            // Breakout
+            const breakoutStart = bfPrices[bfPrices.length - 1];
+            for (let i = 0; i < 80; i++) {
+                bfPrices.push(breakoutStart + i * 0.5 + Math.random() * 2);
+            }
+            
+            // Trend lines
+            const flagSupport = Array(days).fill(null);
+            const flagResistance = Array(days).fill(null);
+            for (let i = 10; i < 40; i++) {
+                flagSupport[i] = flagTop - (i - 10) * 0.6;
+                flagResistance[i] = flagTop - (i - 10) * 0.4;
+            }
+            
+            new Chart(document.getElementById('bullFlagChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: bfPrices,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Flag Resistance',
+                        data: flagResistance,
+                        borderColor: 'rgba(251, 191, 36, 1)',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0
+                    }, {
+                        label: 'Flag Support',
+                        data: flagSupport,
+                        borderColor: 'rgba(251, 191, 36, 1)',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        annotation: {
+                            annotations: {
+                                flagpole: { type: 'label', xValue: 5, yValue: 120, content: 'Flagpole', font: { size: 10 }, color: 'rgba(34, 197, 94, 1)' },
+                                flag: { type: 'label', xValue: 25, yValue: 132, content: 'Flag', font: { size: 10 }, color: 'rgba(251, 191, 36, 1)' },
+                                breakout: { type: 'label', xValue: 50, yValue: 145, content: 'Breakout', font: { size: 10 }, color: 'rgba(34, 197, 94, 1)' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: value => '$' + value.toFixed(2) } }
+                    }
+                }
+            });
+            
         });
     </script>
     
