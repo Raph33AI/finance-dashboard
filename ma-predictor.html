@@ -23,154 +23,6 @@
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
-    <!-- ✅ STYLES AJOUTÉS POUR LES FILTRES -->
-    <style>
-        .ma-filters-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-        }
-        
-        .ma-filters-section .section-title {
-            color: white;
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-        }
-        
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .filter-group label {
-            color: white;
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .filter-select {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .filter-select:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .filter-select option {
-            background: #1e293b;
-            color: white;
-        }
-        
-        .btn-bulk-load {
-            padding: 14px 24px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-            margin-top: auto;
-        }
-        
-        .btn-bulk-load:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6);
-        }
-        
-        .progress-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-        
-        .progress-modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-        
-        body.dark-mode .progress-modal-content {
-            background: #1e293b;
-            color: white;
-        }
-        
-        .progress-modal-content h3 {
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .progress-bar-container {
-            width: 100%;
-            height: 30px;
-            background: #e5e7eb;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        
-        body.dark-mode .progress-bar-container {
-            background: #334155;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            transition: width 0.5s ease;
-        }
-        
-        #bulk-progress-text {
-            color: #6b7280;
-            font-size: 0.95rem;
-            text-align: center;
-        }
-        
-        body.dark-mode #bulk-progress-text {
-            color: #94a3b8;
-        }
-    </style>
 </head>
 <body>
 
@@ -179,7 +31,9 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar -->
+        <!-- ========================================
+             SIDEBAR
+             ======================================== -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -411,6 +265,9 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
+        <!-- ========================================
+             MAIN CONTENT
+             ======================================== -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
@@ -418,7 +275,7 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class='page-title'>
-                        </i> M&A Screening - Real-Time SEC Filings
+                        <i class='fas fa-handshake'></i> M&A Screening - Real-Time SEC Filings
                     </h1>
                 </div>
                 <div class='header-right'>
@@ -432,7 +289,7 @@
             <div class='container'>
         
         <!-- ========================================
-             DATA FILTERS SECTION (UNIQUE POINT D'ENTRÉE)
+             DATA FILTERS SECTION
              ======================================== -->
         <div class='section ma-filters-section'>
             <h2 class='section-title'>
@@ -444,7 +301,7 @@
             
             <div class='filters-grid'>
                 <div class='filter-group'>
-                    <label>
+                    <label class='filter-label'>
                         <i class='fas fa-calendar'></i> Time Period
                     </label>
                     <select id='time-period-filter' class='filter-select'>
@@ -457,7 +314,7 @@
                 </div>
                 
                 <div class='filter-group'>
-                    <label>
+                    <label class='filter-label'>
                         <i class='fas fa-file-alt'></i> Max Filings
                     </label>
                     <select id='max-filings-filter' class='filter-select'>
@@ -479,7 +336,21 @@
         </div>
 
         <!-- ========================================
-             RECENT M&A DEALS TABLE (avec Pagination)
+             ALPHY AI RECOMMENDATIONS
+             ======================================== -->
+        <div id='ai-recommendations-section' class='section' style='display: none;'>
+            <h2 class='section-title'>
+                <i class='fas fa-robot'></i> Alphy AI Top M&A Recommendations
+                <span id='recommendations-count-badge' class='count-badge'>0</span>
+            </h2>
+            
+            <div id='recommendations-container' class='recommendations-grid'>
+                <!-- Rempli dynamiquement par JavaScript -->
+            </div>
+        </div>
+
+        <!-- ========================================
+             RECENT M&A DEALS TABLE
              ======================================== -->
         <div id='ma-deals-section' class='section' style='display: none;'>
             <h2 class='section-title'>
@@ -495,11 +366,12 @@
                             <th>Company (CIK)</th>
                             <th>Form Type</th>
                             <th>Description</th>
+                            <th>AI Score</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id='ma-deals-tbody'>
-                        <!-- Rempli dynamiquement -->
+                        <!-- Rempli dynamiquement par JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -516,9 +388,16 @@
             </div>
         </div>
 
-        <footer>
+        <!-- ========================================
+             FOOTER
+             ======================================== -->
+        <footer style='text-align: center; padding: 40px 20px; opacity: 0.7;'>
             <p>
                 <i class='fas fa-info-circle'></i> M&A Predictor powered by SEC EDGAR real-time data
+            </p>
+            <p style='font-size: 0.85rem; margin-top: 10px;'>
+                Data sourced from <a href='https://www.sec.gov' target='_blank' style='color: #667eea;'>SEC.gov</a> | 
+                Scoring powered by Alphy AI
             </p>
         </footer>
     </div>
@@ -540,19 +419,31 @@
                     <li>Select your desired <strong>Time Period</strong> (1 week to 1 year)</li>
                     <li>Choose the <strong>Max Filings</strong> to analyze (100 to 2,000)</li>
                     <li>Click <strong>"Load M&A Data"</strong> to retrieve SEC filings</li>
-                    <li>Click <strong>"View Details"</strong> on any deal to see the full parsed document</li>
+                    <li>Review <strong>Alphy AI Recommendations</strong> for top merger candidates</li>
+                    <li>Click <strong>"View"</strong> on any deal to see the full parsed document</li>
                 </ol>
                 
                 <p><strong>What you'll see:</strong></p>
                 <ul>
+                    <li><strong>AI Recommendations:</strong> Top 6 deals scored by probability analysis</li>
                     <li><strong>Recent M&A Deals:</strong> All S-4 and 8-K filings in your selected period</li>
-                    <li><strong>Parsed Documents:</strong> Clean, formatted SEC filing content</li>
-                    <li><strong>Company Information:</strong> CIK, filing date, document type</li>
+                    <li><strong>AI Scores (0-100):</strong> Dynamic scoring based on 6+ factors (no random values)</li>
+                    <li><strong>Parsed Documents:</strong> Clean, formatted SEC filing content with offerings data</li>
+                </ul>
+                
+                <p><strong>AI Scoring Factors:</strong></p>
+                <ul>
+                    <li><strong>Form Type Relevance:</strong> S-4 (100), 8-K Item 2.01 (90), Item 1.01 (80)</li>
+                    <li><strong>Filing Recency:</strong> Last 7 days (100), 14 days (90), 30 days (75)</li>
+                    <li><strong>Company Activity:</strong> Multiple filings indicate active M&A strategy</li>
+                    <li><strong>Keyword Signals:</strong> "merger", "acquisition", "takeover", etc.</li>
+                    <li><strong>Filing Complexity:</strong> Detailed filings suggest significant transactions</li>
+                    <li><strong>8-K Item Relevance:</strong> Material agreements and acquisition completions</li>
                 </ul>
                 
                 <div class='warning-box'>
                     <i class='fas fa-exclamation-triangle'></i> 
-                    <strong>Note:</strong> Large datasets may take time to load. Start with shorter periods.
+                    <strong>Note:</strong> Large datasets may take 30-60 seconds to load. Start with shorter periods for faster results.
                 </div>
             </div>
         </div>
@@ -566,7 +457,7 @@
                 <button class='modal-close' onclick='maPredictor.closeDealModal()'>&times;</button>
             </div>
             <div class='modal-body' id='modal-deal-body'>
-                <!-- Contenu parsé du document SEC -->
+                <!-- Contenu parsé du document SEC (rempli dynamiquement) -->
             </div>
         </div>
     </div>
@@ -584,19 +475,29 @@
         </div>
     </div>
 
-    <!-- Scripts (ORDER IS CRITICAL) -->
+    <!-- ========================================
+         SCRIPTS (ORDER IS CRITICAL)
+         ======================================== -->
+    
+    <!-- SEC Parsers (si nécessaires) -->
     <script src="assets/js/form-4-parser.js"></script>
     <script src="assets/js/form-s4-parser.js"></script>
     <script src="assets/js/form-8k-parser.js"></script>
-    <script src="assets/js/sec-document-parser.js"></script> <!-- ✅ NOUVEAU -->
+    <script src="assets/js/sec-document-parser.js"></script>
+    
+    <!-- M&A Core Scripts -->
     <script src="assets/js/sec-ma-client.js"></script>
     <script src="assets/js/ma-analytics-engine.js"></script>
-    <script src="assets/js/ma-predictor.js"></script> <!-- ✅ REMPLACE ma-predictor.js -->
+    <script src="assets/js/ma-predictor.js"></script>
+    
+    <!-- Common Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- User Menu Init (inchangé) -->
+    <!-- ========================================
+         USER MENU INITIALIZATION
+         ======================================== -->
     <script>
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
@@ -666,3 +567,4 @@
         })();
     </script>
 </body>
+</html>
