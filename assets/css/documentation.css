@@ -1,38 +1,41 @@
 /* ============================================
-   DOCUMENTATION.CSS - Version MOBILE ULTRA-COMPACTE
-   ZÉRO débordement garanti - Tailles réduites à 200%
+   DOCUMENTATION.CSS - Version MOBILE ULTRA-MINIMALISTE
+   RÉDUCTION EXTRÊME - Zéro débordement absolu
    ============================================ */
 
-/* ✅ BOX-SIZING GLOBAL */
+/* ✅ BOX-SIZING GLOBAL + WORD-BREAK PARTOUT */
 *, *::before, *::after {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
 }
 
-/* ✅ EMPÊCHE LE DÉBORDEMENT HORIZONTAL */
+/* ✅ EMPÊCHE LE DÉBORDEMENT HORIZONTAL ABSOLU */
 html {
     overflow-x: hidden !important;
-    width: 100%;
-    max-width: 100vw;
+    width: 100% !important;
+    max-width: 100vw !important;
 }
 
 body {
     overflow-x: hidden !important;
-    width: 100%;
-    max-width: 100vw;
-    margin: 0;
-    padding: 0;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .layout-wrapper {
     overflow-x: hidden !important;
-    width: 100%;
-    max-width: 100vw;
+    width: 100% !important;
+    max-width: 100vw !important;
 }
 
 .main-content {
     overflow-x: hidden !important;
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
 }
 
 /* Variables Premium */
@@ -219,7 +222,7 @@ body {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden !important;
-    padding: 0;
+    padding: 0 !important;
 }
 
 .doc-container {
@@ -230,6 +233,7 @@ body {
     grid-template-columns: 1fr 280px;
     gap: 2rem;
     width: 100%;
+    max-width: 100%;
     overflow-x: hidden !important;
 }
 
@@ -248,8 +252,7 @@ body {
     font-size: 0.875rem;
     color: var(--text-secondary, #64748b);
     max-width: 100%;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
+    width: 100%;
 }
 
 body.dark-mode .breadcrumb {
@@ -261,7 +264,6 @@ body.dark-mode .breadcrumb {
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
-    word-break: break-word;
 }
 
 .breadcrumb a:hover {
@@ -278,7 +280,6 @@ body.dark-mode .breadcrumb {
 .breadcrumb span {
     color: var(--text-primary, #1e293b);
     font-weight: 600;
-    word-break: break-word;
 }
 
 body.dark-mode .breadcrumb span {
@@ -327,8 +328,6 @@ body.dark-mode .glass-card {
     animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 100%;
     width: 100%;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-article {
@@ -419,7 +418,6 @@ body.dark-mode .doc-updated {
     gap: 1rem;
     flex-wrap: wrap;
     max-width: 100%;
-    word-wrap: break-word;
 }
 
 .section-title:first-of-type {
@@ -472,6 +470,7 @@ body.dark-mode .doc-updated {
     padding: 1.5rem;
     margin-bottom: 2rem;
     max-width: 100%;
+    width: 100%;
 }
 
 .doc-intro p {
@@ -479,8 +478,6 @@ body.dark-mode .doc-updated {
     line-height: 1.8;
     color: var(--text-primary, #1e293b);
     margin: 0;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-intro p {
@@ -499,6 +496,7 @@ body.dark-mode .doc-intro p {
     margin-bottom: 3rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .toc-box {
@@ -535,8 +533,6 @@ body.dark-mode .toc-box {
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .toc-list a {
@@ -563,7 +559,7 @@ body.dark-mode .toc-list a {
     background-size: 100% 2px;
     background-repeat: no-repeat;
     max-width: 100%;
-    overflow-wrap: break-word;
+    width: 100%;
 }
 
 .doc-section:last-child {
@@ -577,9 +573,8 @@ body.dark-mode .toc-list a {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 1.5rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .doc-section p {
@@ -591,6 +586,7 @@ body.dark-mode .doc-section p {
     margin: 1.5rem 0;
     padding-left: 2rem;
     max-width: 100%;
+    width: 100%;
 }
 
 .doc-section li {
@@ -598,8 +594,6 @@ body.dark-mode .doc-section p {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 0.75rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section li {
@@ -621,8 +615,6 @@ body.dark-mode .doc-section strong {
     font-weight: 500;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 .doc-section a:hover {
@@ -637,8 +629,6 @@ body.dark-mode .doc-section strong {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     font-weight: 600;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section code {
@@ -650,7 +640,6 @@ body.dark-mode .doc-section code {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 2rem 0 1rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .doc-section h3 {
@@ -662,7 +651,6 @@ body.dark-mode .doc-section h3 {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 1.5rem 0 0.75rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .doc-section h4 {
@@ -716,12 +704,11 @@ body.dark-mode .step-box {
     flex: 1;
     min-width: 0;
     max-width: 100%;
+    width: 100%;
 }
 
 .step-content p {
     margin-bottom: 1rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 .step-content ul {
@@ -730,7 +717,6 @@ body.dark-mode .step-box {
 
 .step-content h4 {
     word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 /* ============================================
@@ -819,8 +805,6 @@ body.dark-mode .danger-box {
     margin: 0;
     flex: 1;
     color: var(--text-primary, #1e293b);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
     min-width: 0;
 }
 
@@ -912,6 +896,7 @@ body.dark-mode .comparison-table tbody tr:hover {
     gap: 1.5rem;
     margin: 2rem 0;
     max-width: 100%;
+    width: 100%;
 }
 
 .feature-card {
@@ -922,6 +907,7 @@ body.dark-mode .comparison-table tbody tr:hover {
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .feature-card {
@@ -948,7 +934,6 @@ body.dark-mode .feature-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .feature-card h4 {
@@ -960,7 +945,6 @@ body.dark-mode .feature-card h4 {
     color: var(--text-secondary, #64748b);
     margin: 0;
     line-height: 1.6;
-    word-wrap: break-word;
 }
 
 body.dark-mode .feature-card p {
@@ -1018,6 +1002,7 @@ body.dark-mode .feature-card p {
     color: #ffffff !important;
     overflow-x: auto;
     max-width: 100%;
+    width: 100%;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1032,7 +1017,6 @@ body.dark-mode .feature-card p {
     line-height: 1.6;
     white-space: pre-wrap;
     word-wrap: break-word;
-    overflow-wrap: break-word;
     color: #ffffff !important;
 }
 
@@ -1049,7 +1033,6 @@ body.dark-mode .feature-card p {
     padding-left: 2.5rem;
     position: relative;
     color: #ffffff !important;
-    word-wrap: break-word;
 }
 
 .numbered-steps > li::before {
@@ -1103,6 +1086,7 @@ body.dark-mode .feature-card p {
     gap: 1.5rem;
     margin: 2rem 0;
     max-width: 100%;
+    width: 100%;
 }
 
 .next-step-card {
@@ -1114,6 +1098,7 @@ body.dark-mode .feature-card p {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .next-step-card {
@@ -1140,7 +1125,6 @@ body.dark-mode .next-step-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .next-step-card h4 {
@@ -1152,7 +1136,6 @@ body.dark-mode .next-step-card h4 {
     color: var(--text-secondary, #64748b);
     margin: 0;
     line-height: 1.6;
-    word-wrap: break-word;
 }
 
 body.dark-mode .next-step-card p {
@@ -1174,6 +1157,7 @@ body.dark-mode .next-step-card p {
     background-size: 100% 2px;
     background-repeat: no-repeat;
     max-width: 100%;
+    width: 100%;
 }
 
 .cta-box {
@@ -1184,6 +1168,7 @@ body.dark-mode .next-step-card p {
     border: 1px solid rgba(102, 126, 234, 0.2);
     transition: all 0.3s ease;
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .cta-box {
@@ -1210,7 +1195,6 @@ body.dark-mode .cta-box {
     font-size: 1rem;
     color: var(--text-secondary, #64748b);
     margin: 0 0 1.5rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .cta-box p {
@@ -1243,6 +1227,7 @@ body.dark-mode .cta-box p {
 .doc-sidebar {
     position: relative;
     max-width: 100%;
+    width: 100%;
 }
 
 .sidebar-sticky {
@@ -1270,6 +1255,7 @@ body.dark-mode .cta-box p {
     border-radius: 16px;
     padding: 1rem;
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .doc-nav {
@@ -1287,8 +1273,6 @@ body.dark-mode .doc-nav {
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-nav a {
@@ -1318,6 +1302,7 @@ body.dark-mode .doc-nav a.active {
     text-align: center;
     transition: all 0.3s ease;
     max-width: 100%;
+    width: 100%;
 }
 
 body.dark-mode .help-card {
@@ -1343,7 +1328,6 @@ body.dark-mode .help-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
-    word-wrap: break-word;
 }
 
 body.dark-mode .help-card h5 {
@@ -1355,7 +1339,6 @@ body.dark-mode .help-card h5 {
     color: var(--text-secondary, #64748b);
     margin: 0 0 1rem 0;
     line-height: 1.6;
-    word-wrap: break-word;
 }
 
 body.dark-mode .help-card p {
@@ -1380,15 +1363,15 @@ body.dark-mode .help-card p {
 }
 
 /* ============================================
-   RESPONSIVE - MOBILE ULTRA-COMPACT
-   ✅ RÉDUCTION DRASTIQUE DE TOUTES LES TAILLES
+   RESPONSIVE - MOBILE ULTRA-MINIMALISTE
+   ✅ RÉDUCTION EXTRÊME - ZÉRO DÉBORDEMENT ABSOLU
    ============================================ */
 
 @media (max-width: 1024px) {
     .doc-container {
         grid-template-columns: 1fr;
         gap: 1.5rem;
-        padding: 1rem;
+        padding: 1rem 0.5rem;
     }
 
     .doc-sidebar {
@@ -1403,7 +1386,7 @@ body.dark-mode .help-card p {
         flex-direction: row;
         overflow-x: auto;
         gap: 0.5rem;
-        padding: 0.75rem;
+        padding: 0.75rem 0.5rem;
         margin-bottom: 1rem;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
@@ -1426,7 +1409,7 @@ body.dark-mode .help-card p {
     .doc-nav a {
         white-space: nowrap;
         flex-shrink: 0;
-        padding: 0.5rem 0.875rem;
+        padding: 0.5rem 0.75rem;
         font-size: 0.8125rem;
     }
 
@@ -1443,24 +1426,26 @@ body.dark-mode .help-card p {
 }
 
 @media (max-width: 768px) {
-    /* ✅ CONTAINER ULTRA-COMPACT */
+    /* ✅ FORCER CONTAINER À 0 PADDING */
     .doc-container {
-        padding: 0.5rem !important;
-        gap: 1rem;
+        padding: 0 !important;
+        gap: 0.75rem;
+        margin: 0;
     }
 
-    /* ✅ ARTICLE ULTRA-COMPACT */
+    /* ✅ ARTICLE MINIMAL */
     .doc-article {
-        padding: 1rem !important;
-        border-radius: 12px;
+        padding: 0.5rem !important;
+        border-radius: 8px;
+        margin: 0.5rem !important;
     }
 
-    /* ✅ HEADER MOBILE */
+    /* ✅ HEADER MOBILE COMPACT */
     .top-header .header-content-wrapper {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 0.75rem !important;
-        padding: 0 0.5rem;
+        gap: 0.5rem !important;
+        padding: 0.5rem !important;
     }
 
     .top-header .header-right {
@@ -1470,437 +1455,524 @@ body.dark-mode .help-card p {
     .btn-back-dashboard {
         width: 100%;
         justify-content: center;
-        padding: 0.625rem 1rem;
-        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        gap: 0.5rem;
     }
 
-    /* ✅ TITRES RÉDUITS */
+    /* ✅ TITRES ULTRA-COMPACTS */
     .page-title {
-        font-size: 1.25rem;
-        gap: 0.5rem;
-    }
-
-    .section-title {
-        font-size: 1.125rem;
-        gap: 0.5rem;
-        margin: 2rem 0 1rem 0;
-    }
-
-    /* ✅ TOC BOX COMPACT */
-    .toc-box {
-        padding: 1rem !important;
-        margin-bottom: 1.5rem;
-        border-radius: 12px;
-    }
-
-    /* ✅ STEP BOX COMPACT */
-    .step-box {
-        flex-direction: column;
-        padding: 1rem !important;
-        gap: 1rem;
-        border-radius: 12px;
-    }
-
-    .step-number {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-        align-self: flex-start;
-    }
-
-    /* ✅ INFO BOXES COMPACT */
-    .info-box,
-    .success-box,
-    .warning-box,
-    .danger-box {
-        padding: 0.875rem !important;
-        gap: 0.75rem;
-        border-radius: 10px;
-    }
-
-    .info-box i,
-    .success-box i,
-    .warning-box i,
-    .danger-box i {
-        font-size: 1.25rem;
-    }
-
-    /* ✅ CODE EXAMPLE COMPACT */
-    .code-example {
-        margin: 1rem 0;
-        border-radius: 10px;
-    }
-
-    .code-body {
-        padding: 0.75rem !important;
-        font-size: 0.75rem;
-    }
-
-    .numbered-steps > li {
-        padding-left: 2rem;
-        font-size: 0.875rem;
-    }
-
-    .numbered-steps > li::before {
-        width: 24px;
-        height: 24px;
-        font-size: 0.75rem;
-    }
-
-    /* ✅ FEATURE & NEXT STEPS COMPACT */
-    .feature-card,
-    .next-step-card {
-        padding: 1.25rem !important;
-        border-radius: 12px;
-    }
-
-    .feature-card i,
-    .next-step-card i {
-        font-size: 1.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .feature-card h4,
-    .next-step-card h4 {
-        font-size: 1rem;
-    }
-
-    .feature-card p,
-    .next-step-card p {
-        font-size: 0.875rem;
-    }
-
-    /* ✅ CTA BOX COMPACT */
-    .cta-box {
-        padding: 1.5rem !important;
-        border-radius: 12px;
-    }
-
-    .cta-box h3 {
-        font-size: 1.125rem;
-    }
-
-    .cta-box p {
-        font-size: 0.875rem;
-    }
-
-    .btn-cta {
-        padding: 0.75rem 1.5rem;
-        font-size: 0.875rem;
-    }
-
-    /* ✅ DOC INTRO COMPACT */
-    .doc-intro {
-        padding: 1rem !important;
-        border-radius: 10px;
-    }
-
-    .doc-intro p {
-        font-size: 0.9375rem;
-    }
-
-    /* ✅ TABLE COMPACT */
-    .comparison-table {
-        font-size: 0.75rem;
-    }
-
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.5rem !important;
-    }
-
-    /* ✅ META COMPACT */
-    .doc-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .doc-time,
-    .doc-updated {
-        font-size: 0.8125rem;
-    }
-
-    /* ✅ HELP CARD COMPACT */
-    .help-card {
-        padding: 1rem !important;
-        border-radius: 12px;
-    }
-
-    .help-card i {
-        font-size: 1.5rem;
-    }
-
-    .help-card h5 {
-        font-size: 0.9375rem;
-    }
-
-    .help-card p {
-        font-size: 0.8125rem;
-    }
-
-    .help-card a {
-        padding: 0.5rem 1rem;
-        font-size: 0.8125rem;
-    }
-}
-
-@media (max-width: 480px) {
-    /* ✅ CONTAINER MINI */
-    .doc-container {
-        padding: 0.25rem !important;
-        gap: 0.75rem;
-    }
-
-    /* ✅ ARTICLE MINI */
-    .doc-article {
-        padding: 0.75rem !important;
-        border-radius: 10px;
-    }
-
-    /* ✅ TITRES MINI */
-    .page-title {
-        font-size: 1.125rem;
+        font-size: 1rem !important;
         gap: 0.375rem;
     }
 
     .section-title {
-        font-size: 1rem;
+        font-size: 0.9375rem !important;
         gap: 0.375rem;
-        margin: 1.5rem 0 0.75rem 0;
+        margin: 1.25rem 0 0.75rem 0 !important;
     }
 
     .category-title,
     .toc-title {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        gap: 0.375rem;
     }
 
-    /* ✅ TOC BOX MINI */
-    .toc-box {
-        padding: 0.75rem !important;
+    /* ✅ BREADCRUMB MINIMAL */
+    .breadcrumb {
+        padding: 0.5rem 0;
+        margin-bottom: 0.5rem;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb i {
+        font-size: 0.625rem;
+    }
+
+    /* ✅ DOC META MINIMAL */
+    .doc-meta {
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .doc-time,
+    .doc-updated {
+        font-size: 0.75rem;
+        gap: 0.375rem;
+    }
+
+    /* ✅ DOC INTRO MINIMAL */
+    .doc-intro {
+        padding: 0.625rem !important;
         margin-bottom: 1rem;
+        border-radius: 8px;
+        border-left-width: 3px;
+    }
+
+    .doc-intro p {
+        font-size: 0.8125rem !important;
+        line-height: 1.5;
+    }
+
+    /* ✅ TOC BOX MINIMAL */
+    .toc-box {
+        padding: 0.625rem !important;
+        margin-bottom: 1rem;
+        border-radius: 8px;
     }
 
     .toc-list li {
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
+        margin-bottom: 0.375rem;
+        font-size: 0.8125rem;
     }
 
-    /* ✅ STEP BOX MINI */
+    .toc-list li::before {
+        margin-right: 0.375rem;
+    }
+
+    /* ✅ STEP BOX MINIMAL */
     .step-box {
-        padding: 0.75rem !important;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        flex-direction: column;
+        padding: 0.625rem !important;
+        gap: 0.625rem;
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
     }
 
     .step-number {
-        width: 32px;
-        height: 32px;
-        font-size: 0.875rem;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.875rem !important;
+        border-radius: 6px;
+        align-self: flex-start;
     }
 
     .step-content h4 {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        margin: 0 0 0.375rem 0 !important;
     }
 
-    .step-content p,
+    .step-content p {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .step-content ul {
+        margin: 0.375rem 0 0 0;
+        padding-left: 1.25rem;
+    }
+
     .step-content li {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.375rem;
     }
 
-    /* ✅ INFO BOXES MINI */
+    /* ✅ INFO BOXES MINIMAL */
     .info-box,
     .success-box,
     .warning-box,
     .danger-box {
-        padding: 0.75rem !important;
-        gap: 0.625rem;
-        margin: 1rem 0;
+        padding: 0.5rem !important;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+        border-radius: 6px;
+        border-left-width: 3px;
     }
 
     .info-box i,
     .success-box i,
     .warning-box i,
     .danger-box i {
-        font-size: 1.125rem;
+        font-size: 1rem !important;
     }
 
     .info-box p,
     .success-box p,
     .warning-box p,
     .danger-box p {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        line-height: 1.5;
     }
 
-    /* ✅ CODE EXAMPLE MINI */
+    .info-box ul,
+    .success-box ul,
+    .warning-box ul,
+    .danger-box ul {
+        margin: 0.375rem 0 0 0;
+        padding-left: 1.25rem;
+    }
+
+    .info-box li,
+    .success-box li,
+    .warning-box li,
+    .danger-box li {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ CODE EXAMPLE MINIMAL */
     .code-example {
         margin: 0.75rem 0;
+        border-radius: 8px;
     }
 
     .code-header {
-        padding: 0.5rem 0.75rem;
+        padding: 0.375rem 0.5rem !important;
     }
 
     .code-header span {
-        font-size: 0.75rem;
+        font-size: 0.6875rem;
+    }
+
+    .code-copy-btn {
+        padding: 0.25rem;
+        font-size: 0.875rem;
     }
 
     .code-body {
-        padding: 0.625rem !important;
-        font-size: 0.6875rem;
+        padding: 0.5rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    .code-body pre {
+        font-size: 0.6875rem !important;
     }
 
     .numbered-steps > li {
-        padding-left: 1.75rem;
-        font-size: 0.8125rem;
-        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        font-size: 0.75rem !important;
+        margin-bottom: 0.75rem;
     }
 
     .numbered-steps > li::before {
-        width: 22px;
-        height: 22px;
-        font-size: 0.6875rem;
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.625rem !important;
+        border-radius: 4px;
     }
 
     .numbered-steps code {
-        font-size: 0.75rem;
+        font-size: 0.6875rem !important;
+        padding: 0.125rem 0.25rem;
     }
 
-    /* ✅ FEATURE & NEXT STEPS MINI */
+    .numbered-steps ul {
+        padding-left: 1rem;
+        margin-top: 0.375rem;
+    }
+
+    .numbered-steps ul li {
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ TABLE MINIMAL */
+    .comparison-table {
+        font-size: 0.6875rem !important;
+        margin: 0.75rem 0;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.375rem 0.25rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ FEATURE GRID & NEXT STEPS MINIMAL */
+    .feature-grid,
+    .next-steps-grid {
+        gap: 0.75rem;
+        margin: 1rem 0;
+        grid-template-columns: 1fr !important;
+    }
+
     .feature-card,
     .next-step-card {
-        padding: 1rem !important;
+        padding: 0.75rem !important;
+        border-radius: 8px;
     }
 
     .feature-card i,
     .next-step-card i {
-        font-size: 1.5rem;
+        font-size: 1.375rem !important;
         margin-bottom: 0.5rem;
     }
 
     .feature-card h4,
     .next-step-card h4 {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        margin-bottom: 0.375rem;
     }
 
     .feature-card p,
     .next-step-card p {
-        font-size: 0.8125rem;
+        font-size: 0.75rem !important;
+        line-height: 1.5;
     }
 
-    /* ✅ CTA BOX MINI */
+    /* ✅ CTA BOX MINIMAL */
     .cta-box {
-        padding: 1.25rem !important;
+        padding: 1rem !important;
+        border-radius: 8px;
     }
 
     .cta-box h3 {
-        font-size: 1rem;
-    }
-
-    .cta-box p {
-        font-size: 0.8125rem;
-        margin-bottom: 1rem;
-    }
-
-    .btn-cta {
-        padding: 0.625rem 1.25rem;
-        font-size: 0.8125rem;
-        gap: 0.5rem;
-    }
-
-    /* ✅ DOC INTRO MINI */
-    .doc-intro {
-        padding: 0.875rem !important;
-    }
-
-    .doc-intro p {
-        font-size: 0.875rem;
-        line-height: 1.6;
-    }
-
-    /* ✅ TABLE MINI */
-    .comparison-table {
-        font-size: 0.6875rem;
-    }
-
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.375rem !important;
-    }
-
-    /* ✅ NAV "ON THIS PAGE" MINI */
-    .doc-nav {
-        padding: 0.5rem !important;
-        gap: 0.375rem;
-    }
-
-    .doc-nav a {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-    }
-
-    .doc-sidebar h4 {
-        font-size: 0.8125rem;
+        font-size: 0.9375rem !important;
         margin-bottom: 0.375rem;
     }
 
-    /* ✅ HELP CARD MINI */
-    .help-card {
-        padding: 0.875rem !important;
-    }
-
-    .help-card i {
-        font-size: 1.375rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .help-card h5 {
-        font-size: 0.875rem;
-    }
-
-    .help-card p {
-        font-size: 0.75rem;
+    .cta-box p {
+        font-size: 0.75rem !important;
         margin-bottom: 0.75rem;
     }
 
-    .help-card a {
-        padding: 0.5rem 0.875rem;
-        font-size: 0.75rem;
+    .btn-cta {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.75rem !important;
+        gap: 0.375rem;
+        border-radius: 6px;
     }
 
-    /* ✅ SECTIONS PARAGRAPHES MINI */
+    /* ✅ DOC NAV MINIMAL */
+    .doc-nav {
+        padding: 0.375rem !important;
+        gap: 0.25rem;
+        border-radius: 8px;
+    }
+
+    .doc-nav a {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.6875rem !important;
+        border-radius: 4px;
+    }
+
+    .doc-sidebar h4 {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.375rem;
+    }
+
+    /* ✅ HELP CARD MINIMAL */
+    .help-card {
+        padding: 0.75rem !important;
+        border-radius: 8px;
+    }
+
+    .help-card i {
+        font-size: 1.25rem !important;
+        margin-bottom: 0.375rem;
+    }
+
+    .help-card h5 {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.25rem;
+    }
+
+    .help-card p {
+        font-size: 0.6875rem !important;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .help-card a {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.6875rem !important;
+        border-radius: 4px;
+    }
+
+    /* ✅ SECTIONS PARAGRAPHES MINIMAL */
+    .doc-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+    }
+
     .doc-section p {
-        font-size: 0.875rem;
-        line-height: 1.6;
+        font-size: 0.8125rem !important;
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
     }
 
     .doc-section ul,
     .doc-section ol {
-        padding-left: 1.5rem;
+        padding-left: 1.25rem;
+        margin: 0.75rem 0;
     }
 
     .doc-section li {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.375rem;
+        line-height: 1.5;
     }
 
     .doc-section h3 {
-        font-size: 1rem;
-        margin: 1.5rem 0 0.75rem 0;
+        font-size: 0.9375rem !important;
+        margin: 1.25rem 0 0.5rem 0 !important;
     }
 
     .doc-section h4 {
-        font-size: 0.9375rem;
-        margin: 1rem 0 0.5rem 0;
+        font-size: 0.875rem !important;
+        margin: 1rem 0 0.375rem 0 !important;
     }
 
     .doc-section code {
-        font-size: 0.75rem;
-        padding: 0.1875rem 0.375rem;
+        font-size: 0.6875rem !important;
+        padding: 0.125rem 0.25rem;
     }
 
-    /* ✅ DOC FOOTER MINI */
+    /* ✅ DOC FOOTER MINIMAL */
     .doc-footer {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+    }
+
+    /* ✅ DOC HEADER MINIMAL */
+    .doc-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* ✅ CONTAINER QUASI-NUL */
+    .doc-container {
+        padding: 0 !important;
+        gap: 0.5rem;
+    }
+
+    /* ✅ ARTICLE ULTRA-MINIMAL */
+    .doc-article {
+        padding: 0.375rem !important;
+        border-radius: 6px;
+        margin: 0.375rem !important;
+    }
+
+    /* ✅ TITRES MICRO */
+    .page-title {
+        font-size: 0.875rem !important;
+        gap: 0.25rem;
+    }
+
+    .section-title {
+        font-size: 0.875rem !important;
+        gap: 0.25rem;
+        margin: 1rem 0 0.5rem 0 !important;
+    }
+
+    .category-title,
+    .toc-title {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ✅ TOUT EN 0.75rem MAX */
+    .doc-intro,
+    .toc-box,
+    .step-box,
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box,
+    .feature-card,
+    .next-step-card,
+    .help-card {
+        padding: 0.375rem !important;
+    }
+
+    /* ✅ POLICE MICRO */
+    .doc-intro p,
+    .toc-list li,
+    .step-content p,
+    .step-content li,
+    .info-box p,
+    .success-box p,
+    .warning-box p,
+    .danger-box p,
+    .doc-section p,
+    .doc-section li,
+    .feature-card p,
+    .next-step-card p,
+    .help-card p {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ TITRES MICRO */
+    .step-content h4,
+    .feature-card h4,
+    .next-step-card h4,
+    .help-card h5,
+    .doc-section h3,
+    .doc-section h4 {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ CODE MICRO */
+    .code-body,
+    .code-body pre,
+    .numbered-steps > li,
+    .numbered-steps code,
+    .doc-section code {
+        font-size: 0.625rem !important;
+    }
+
+    /* ✅ STEP NUMBER MICRO */
+    .step-number {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .numbered-steps > li::before {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.5625rem !important;
+    }
+
+    /* ✅ ICONS MICRO */
+    .feature-card i,
+    .next-step-card i {
+        font-size: 1.125rem !important;
+    }
+
+    .help-card i {
+        font-size: 1rem !important;
+    }
+
+    .info-box i,
+    .success-box i,
+    .warning-box i,
+    .danger-box i {
+        font-size: 0.875rem !important;
+    }
+
+    /* ✅ CTA MICRO */
+    .cta-box h3 {
+        font-size: 0.875rem !important;
+    }
+
+    .btn-cta {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ NAV MICRO */
+    .doc-nav a {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.625rem !important;
+    }
+
+    /* ✅ MARGES RÉDUITES */
+    .doc-section {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .section-title {
+        margin: 0.75rem 0 0.375rem 0 !important;
+    }
+
+    /* ✅ TABLE MICRO */
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.25rem 0.125rem !important;
+        font-size: 0.625rem !important;
     }
 }
 
