@@ -1,6 +1,6 @@
 /* ============================================
    DOCUMENTATION.CSS - Pages de documentation Premium 3D
-   Style identique à settings.css pour cohérence
+   Version DÉFINITIVE - PC & Mobile parfait
    ============================================ */
 
 /* Variables Premium */
@@ -165,16 +165,18 @@
 }
 
 /* ============================================
-   CONTAINER DOCUMENTATION (corrigé)
+   CONTAINER DOCUMENTATION
    ============================================ */
 
 .doc-container {
-    padding: 2rem 0 4rem;
+    padding: 2rem 1rem 4rem; /* Ajout padding horizontal */
     max-width: 1400px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 280px; /* Article à gauche, sidebar à droite */
+    grid-template-columns: 1fr 280px;
     gap: 2rem;
+    width: 100%;
+    overflow-x: hidden; /* Empêche le débordement horizontal */
 }
 
 /* ============================================
@@ -182,14 +184,17 @@
    ============================================ */
 
 .breadcrumb {
-    grid-column: 1 / -1; /* Occupe toute la largeur */
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap; /* Permet le retour à la ligne sur mobile */
     padding: 1rem 0;
     margin-bottom: 1rem;
     font-size: 0.875rem;
     color: var(--text-secondary, #64748b);
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .breadcrumb {
@@ -261,6 +266,9 @@ body.dark-mode .glass-card {
     position: relative;
     overflow: hidden;
     animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-article {
@@ -347,6 +355,7 @@ body.dark-mode .doc-updated {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .section-title:first-of-type {
@@ -374,6 +383,7 @@ body.dark-mode .doc-updated {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .category-title i,
@@ -455,6 +465,7 @@ body.dark-mode .toc-box {
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
+    word-wrap: break-word;
 }
 
 body.dark-mode .toc-list a {
@@ -493,6 +504,8 @@ body.dark-mode .toc-list a {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 1.5rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section p {
@@ -510,6 +523,7 @@ body.dark-mode .doc-section p {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 0.75rem;
+    word-wrap: break-word;
 }
 
 body.dark-mode .doc-section li {
@@ -531,6 +545,7 @@ body.dark-mode .doc-section strong {
     font-weight: 500;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
+    word-wrap: break-word;
 }
 
 .doc-section a:hover {
@@ -545,6 +560,7 @@ body.dark-mode .doc-section strong {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     font-weight: 600;
+    word-wrap: break-word;
 }
 
 body.dark-mode .doc-section code {
@@ -574,7 +590,7 @@ body.dark-mode .doc-section h4 {
 }
 
 /* ============================================
-   STEP BOX (identique à help.css)
+   STEP BOX
    ============================================ */
 
 .step-box {
@@ -586,6 +602,7 @@ body.dark-mode .doc-section h4 {
     border-radius: 16px;
     margin-bottom: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
 }
 
 body.dark-mode .step-box {
@@ -616,14 +633,20 @@ body.dark-mode .step-box {
 
 .step-content {
     flex: 1;
+    min-width: 0; /* Permet le wrap correct */
 }
 
 .step-content p {
     margin-bottom: 1rem;
+    word-wrap: break-word;
 }
 
 .step-content ul {
     margin: 0.5rem 0 0 0;
+}
+
+.step-content h4 {
+    word-wrap: break-word;
 }
 
 /* ============================================
@@ -641,6 +664,7 @@ body.dark-mode .step-box {
     border-radius: 12px;
     margin: 1.5rem 0;
     border-left: 4px solid;
+    max-width: 100%;
 }
 
 .info-box {
@@ -710,6 +734,7 @@ body.dark-mode .danger-box {
     margin: 0;
     flex: 1;
     color: var(--text-primary, #1e293b);
+    word-wrap: break-word;
 }
 
 body.dark-mode .info-box p,
@@ -738,6 +763,8 @@ body.dark-mode .danger-box p {
     background: rgba(255, 255, 255, 0.5);
     border-radius: 12px;
     overflow: hidden;
+    display: block;
+    overflow-x: auto; /* Scroll horizontal sur mobile */
 }
 
 body.dark-mode .comparison-table {
@@ -754,6 +781,7 @@ body.dark-mode .comparison-table {
     font-weight: 700;
     color: white;
     font-size: 0.9375rem;
+    white-space: nowrap;
 }
 
 .comparison-table td {
@@ -761,6 +789,7 @@ body.dark-mode .comparison-table {
     border-bottom: 1px solid rgba(102, 126, 234, 0.1);
     color: var(--text-secondary, #64748b);
     font-size: 0.9375rem;
+    white-space: nowrap;
 }
 
 body.dark-mode .comparison-table td {
@@ -846,7 +875,7 @@ body.dark-mode .feature-card p {
 }
 
 /* ============================================
-   CODE EXAMPLE
+   CODE EXAMPLE - TEXTE BLANC FORCÉ
    ============================================ */
 
 .code-example {
@@ -856,6 +885,7 @@ body.dark-mode .feature-card p {
     margin: 2rem 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     position: relative;
+    max-width: 100%;
 }
 
 .code-header {
@@ -891,8 +921,13 @@ body.dark-mode .feature-card p {
 
 .code-body {
     padding: 1.5rem;
-    color: #e2e8f0;
+    color: #ffffff !important; /* ✅ BLANC FORCÉ */
     overflow-x: auto;
+    max-width: 100%;
+}
+
+.code-body * {
+    color: #ffffff !important; /* ✅ TOUS LES ENFANTS EN BLANC */
 }
 
 .code-body pre {
@@ -902,6 +937,7 @@ body.dark-mode .feature-card p {
     line-height: 1.6;
     white-space: pre-wrap;
     word-wrap: break-word;
+    color: #ffffff !important; /* ✅ BLANC FORCÉ */
 }
 
 .numbered-steps {
@@ -916,7 +952,7 @@ body.dark-mode .feature-card p {
     margin-bottom: 1.5rem;
     padding-left: 2.5rem;
     position: relative;
-    color: #e2e8f0;
+    color: #ffffff !important; /* ✅ BLANC FORCÉ */
 }
 
 .numbered-steps > li::before {
@@ -942,13 +978,17 @@ body.dark-mode .feature-card p {
 }
 
 .numbered-steps ul li {
-    color: #cbd5e1;
+    color: #ffffff !important; /* ✅ BLANC FORCÉ */
     margin-bottom: 0.5rem;
+}
+
+.numbered-steps strong {
+    color: #ffffff !important; /* ✅ BLANC FORCÉ */
 }
 
 .numbered-steps code {
     background: rgba(102, 126, 234, 0.2);
-    color: #a78bfa;
+    color: #a78bfa !important;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
@@ -1140,6 +1180,7 @@ body.dark-mode .doc-nav {
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    word-wrap: break-word;
 }
 
 body.dark-mode .doc-nav a {
@@ -1228,14 +1269,14 @@ body.dark-mode .help-card p {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - CORRECTIONS MOBILE
    ============================================ */
 
 @media (max-width: 1024px) {
     .doc-container {
         grid-template-columns: 1fr;
         gap: 2rem;
-        padding: 1.5rem 0 3rem;
+        padding: 1.5rem 1rem 3rem; /* Padding horizontal ajouté */
     }
 
     .doc-sidebar {
@@ -1265,8 +1306,12 @@ body.dark-mode .help-card p {
 }
 
 @media (max-width: 768px) {
+    .doc-container {
+        padding: 1rem 0.75rem 2rem; /* ✅ Padding réduit */
+    }
+
     .doc-article {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem; /* ✅ Padding réduit */
     }
 
     .section-title {
@@ -1279,6 +1324,7 @@ body.dark-mode .help-card p {
 
     .step-box {
         flex-direction: column;
+        padding: 1.5rem 1rem; /* ✅ Padding réduit */
     }
 
     .step-number {
@@ -1288,26 +1334,20 @@ body.dark-mode .help-card p {
     .feature-grid,
     .next-steps-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .comparison-table {
         font-size: 0.8125rem;
-        display: block;
-        overflow-x: auto;
     }
 
     .comparison-table th,
     .comparison-table td {
-        padding: 0.75rem;
-        white-space: nowrap;
+        padding: 0.75rem 0.5rem; /* ✅ Padding réduit */
     }
 
     .toc-box {
-        padding: 1.5rem;
-    }
-
-    .doc-container {
-        padding: 1rem 0 2rem;
+        padding: 1.5rem 1rem; /* ✅ Padding réduit */
     }
 
     .top-header .header-content-wrapper {
@@ -1329,11 +1369,27 @@ body.dark-mode .help-card p {
         flex-direction: column;
         gap: 0.5rem;
     }
+
+    .code-body {
+        padding: 1rem 0.75rem; /* ✅ Padding réduit */
+    }
+
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box {
+        padding: 1rem 0.75rem; /* ✅ Padding réduit */
+    }
 }
 
 @media (max-width: 480px) {
+    .doc-container {
+        padding: 0.75rem 0.5rem 1.5rem; /* ✅ Padding minimal */
+    }
+
     .doc-article {
-        padding: 1.5rem 1rem;
+        padding: 1.25rem 0.75rem; /* ✅ Padding minimal */
+        border-radius: 16px;
     }
 
     .page-title {
@@ -1347,21 +1403,21 @@ body.dark-mode .help-card p {
     }
 
     .toc-box {
-        padding: 1.25rem;
+        padding: 1.25rem 0.75rem; /* ✅ Padding minimal */
     }
 
     .step-box {
-        padding: 1.5rem;
+        padding: 1.25rem 0.75rem; /* ✅ Padding minimal */
     }
 
     .code-body {
-        padding: 1rem;
+        padding: 0.75rem 0.5rem; /* ✅ Padding minimal */
         font-size: 0.8125rem;
     }
 
     .feature-card,
     .next-step-card {
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
     }
 
     .feature-card i,
@@ -1370,11 +1426,19 @@ body.dark-mode .help-card p {
     }
 
     .cta-box {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1rem;
     }
 
     .cta-box h3 {
         font-size: 1.25rem;
+    }
+
+    .doc-intro {
+        padding: 1rem 0.75rem; /* ✅ Padding minimal */
+    }
+
+    .doc-intro p {
+        font-size: 1rem;
     }
 }
 
