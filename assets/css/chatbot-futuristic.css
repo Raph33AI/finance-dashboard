@@ -600,7 +600,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 .message-avatar {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 50%; /* ✅ Already round */
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -608,6 +608,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     font-size: 20px;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden; /* ✅ Ensure content respects border-radius */
 }
 
 .message-avatar.bot-avatar {
@@ -620,11 +621,13 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     border: 3px solid rgba(255, 255, 255, 0.95);
 }
 
+/* ✅ CORRECTION: Photo de profil utilisateur ronde */
 .user-avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: 50%; /* ✅ Force l'image à être ronde */
 }
 
 .message-content {
@@ -1115,7 +1118,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    RESPONSIVE DESIGN - MOBILE (TABLET PORTRAIT)
    ============================================ */
 @media (max-width: 768px) {
-    /* Sidebar en overlay sur mobile */
+    /* ✅ CORRECTION: Sidebar accessible en overlay sur mobile */
     .conversations-sidebar {
         position: fixed;
         left: 0;
@@ -1124,28 +1127,33 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         z-index: 100;
         transform: translateX(-100%);
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+        opacity: 1; /* ✅ Toujours visible quand ouverte */
+        pointer-events: all; /* ✅ Toujours interactive */
     }
     
-    .conversations-sidebar.mobile-open {
+    /* ✅ CORRECTION: Classe pour ouvrir la sidebar sur mobile */
+    .conversations-sidebar.mobile-open,
+    .conversations-sidebar:not(.collapsed) {
         transform: translateX(0);
-        opacity: 1;
-        pointer-events: all;
     }
     
+    /* ✅ Bouton pour rouvrir la sidebar */
     .sidebar-reopen-btn {
         top: 120px; /* ✅ Better position */
         height: 56px;
         width: 36px;
         font-size: 16px;
+        opacity: 1 !important; /* ✅ Toujours visible sur mobile */
+        pointer-events: all !important;
+    }
+    
+    /* ✅ CORRECTION: Masquer "Real-Time Data" sur mobile */
+    .header-status {
+        display: none !important;
     }
     
     .chatbot-top-header {
         padding: 10px 12px;
-    }
-    
-    .header-status {
-        font-size: 12px;
-        padding: 6px 12px;
     }
     
     .chatbot-messages-content {
@@ -1218,16 +1226,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         padding: 8px 10px;
     }
     
-    .header-status {
-        font-size: 11px;
-        padding: 5px 10px;
-        gap: 6px;
-    }
-    
-    .status-dot {
-        width: 6px;
-        height: 6px;
-    }
+    /* ✅ CORRECTION: "Real-Time Data" déjà masqué au niveau @768px */
     
     .header-action-btn {
         width: 40px;
