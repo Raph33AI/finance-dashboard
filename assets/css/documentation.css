@@ -1,8 +1,9 @@
 /* ============================================
    DOCUMENTATION.CSS - Styles pour pages de documentation
+   Style identique à help.css et settings.css
    ============================================ */
 
-/* Variables héritées */
+/* Variables Premium */
 :root {
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -13,9 +14,70 @@
 }
 
 /* ============================================
-   PAGE TITLE avec dégradé
+   ANIMATIONS
    ============================================ */
 
+@keyframes pulse-glow {
+    0%, 100% { 
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.5));
+    }
+    50% { 
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 16px rgba(102, 126, 234, 0.8));
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   HEADER (identique à help.css)
+   ============================================ */
+
+.top-header .header-content-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 2rem !important;
+}
+
+.top-header .header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+.top-header .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin-left: auto !important;
+}
+
+/* Page Title avec dégradé */
 .page-title {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
@@ -34,6 +96,58 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Section Titles avec dégradé */
+.section-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 3rem 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-title:first-of-type {
+    margin-top: 0;
+}
+
+.section-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Category Titles avec dégradé */
+.category-title,
+.toc-title,
+.form-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-title i,
+.toc-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.375rem;
 }
 
 /* ============================================
@@ -59,6 +173,24 @@
     overflow: hidden;
 }
 
+.btn-back-dashboard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-back-dashboard:hover::before {
+    left: 100%;
+}
+
 .btn-back-dashboard:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
@@ -71,7 +203,7 @@
 .doc-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem 0;
+    padding: 2rem 0 4rem;
     display: grid;
     grid-template-columns: 1fr 280px;
     gap: 3rem;
@@ -118,22 +250,29 @@ body.dark-mode .breadcrumb span {
 }
 
 /* ============================================
-   ARTICLE DOCUMENTATION
+   ARTICLE DOCUMENTATION (Glassmorphism)
    ============================================ */
 
 .doc-article {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     border-radius: 24px;
     padding: 3rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+    overflow: hidden;
 }
 
 body.dark-mode .doc-article {
-    background: rgba(30, 41, 59, 0.7);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* ============================================
@@ -144,6 +283,10 @@ body.dark-mode .doc-article {
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .doc-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .doc-meta {
@@ -205,6 +348,7 @@ body.dark-mode .doc-intro p {
     border-radius: 16px;
     padding: 2rem;
     margin-bottom: 3rem;
+    transition: all 0.3s ease;
 }
 
 body.dark-mode .toc-box {
@@ -212,14 +356,9 @@ body.dark-mode .toc-box {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-.toc-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0 0 1rem 0;
+.toc-box:hover {
+    border-color: var(--primary-color, #667eea);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
 }
 
 .toc-list {
@@ -255,34 +394,6 @@ body.dark-mode .toc-list a {
 .toc-list a:hover {
     color: var(--primary-color, #667eea);
     padding-left: 0.5rem;
-}
-
-/* ============================================
-   SECTION TITLES avec dégradé
-   ============================================ */
-
-.section-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-size: 1.75rem;
-    font-weight: 800;
-    margin: 3rem 0 1.5rem 0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.section-title:first-of-type {
-    margin-top: 0;
-}
-
-.section-title i {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 /* ============================================
@@ -356,8 +467,30 @@ body.dark-mode .doc-section code {
     background: rgba(255, 255, 255, 0.1);
 }
 
+.doc-section h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--text-primary, #1e293b);
+    margin: 2rem 0 1rem 0;
+}
+
+body.dark-mode .doc-section h3 {
+    color: var(--text-primary, #f8fafc);
+}
+
+.doc-section h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary, #1e293b);
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+body.dark-mode .doc-section h4 {
+    color: var(--text-primary, #f8fafc);
+}
+
 /* ============================================
-   STEP BOX
+   STEP BOX (identique à help.css)
    ============================================ */
 
 .step-box {
@@ -368,7 +501,7 @@ body.dark-mode .doc-section code {
     border: 1px solid rgba(102, 126, 234, 0.1);
     border-radius: 16px;
     margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.dark-mode .step-box {
@@ -379,6 +512,7 @@ body.dark-mode .step-box {
 .step-box:hover {
     border-color: var(--primary-color, #667eea);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+    transform: translateX(4px);
 }
 
 .step-number {
@@ -398,17 +532,6 @@ body.dark-mode .step-box {
 
 .step-content {
     flex: 1;
-}
-
-.step-content h4 {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text-primary, #1e293b);
-    margin: 0 0 0.75rem 0;
-}
-
-body.dark-mode .step-content h4 {
-    color: var(--text-primary, #f8fafc);
 }
 
 .step-content p {
@@ -433,26 +556,43 @@ body.dark-mode .step-content h4 {
     padding: 1.25rem;
     border-radius: 12px;
     margin: 1.5rem 0;
+    border-left: 4px solid;
 }
 
 .info-box {
     background: rgba(59, 130, 246, 0.1);
-    border-left: 4px solid #3b82f6;
+    border-left-color: #3b82f6;
+}
+
+body.dark-mode .info-box {
+    background: rgba(59, 130, 246, 0.15);
 }
 
 .success-box {
     background: rgba(16, 185, 129, 0.1);
-    border-left: 4px solid #10b981;
+    border-left-color: #10b981;
+}
+
+body.dark-mode .success-box {
+    background: rgba(16, 185, 129, 0.15);
 }
 
 .warning-box {
     background: rgba(245, 158, 11, 0.1);
-    border-left: 4px solid #f59e0b;
+    border-left-color: #f59e0b;
+}
+
+body.dark-mode .warning-box {
+    background: rgba(245, 158, 11, 0.15);
 }
 
 .danger-box {
     background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #ef4444;
+    border-left-color: #ef4444;
+}
+
+body.dark-mode .danger-box {
+    background: rgba(239, 68, 68, 0.15);
 }
 
 .info-box i {
@@ -485,6 +625,22 @@ body.dark-mode .step-content h4 {
 .danger-box p {
     margin: 0;
     flex: 1;
+    color: var(--text-primary, #1e293b);
+}
+
+body.dark-mode .info-box p,
+body.dark-mode .success-box p,
+body.dark-mode .warning-box p,
+body.dark-mode .danger-box p {
+    color: var(--text-primary, #f8fafc);
+}
+
+.info-box ul,
+.success-box ul,
+.warning-box ul,
+.danger-box ul {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.5rem;
 }
 
 /* ============================================
@@ -520,6 +676,7 @@ body.dark-mode .comparison-table {
     padding: 1rem;
     border-bottom: 1px solid rgba(102, 126, 234, 0.1);
     color: var(--text-secondary, #64748b);
+    font-size: 0.9375rem;
 }
 
 body.dark-mode .comparison-table td {
@@ -533,6 +690,10 @@ body.dark-mode .comparison-table td {
 
 .comparison-table tbody tr:hover {
     background: rgba(102, 126, 234, 0.05);
+}
+
+body.dark-mode .comparison-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .text-success {
@@ -556,7 +717,7 @@ body.dark-mode .comparison-table td {
     border-radius: 16px;
     padding: 2rem;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.dark-mode .feature-card {
@@ -575,6 +736,7 @@ body.dark-mode .feature-card {
     color: var(--primary-color, #667eea);
     margin-bottom: 1rem;
     display: block;
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
 }
 
 .feature-card h4 {
@@ -592,6 +754,7 @@ body.dark-mode .feature-card h4 {
     font-size: 0.9375rem;
     color: var(--text-secondary, #64748b);
     margin: 0;
+    line-height: 1.6;
 }
 
 body.dark-mode .feature-card p {
@@ -608,12 +771,16 @@ body.dark-mode .feature-card p {
     overflow: hidden;
     margin: 2rem 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 .code-header {
     background: rgba(102, 126, 234, 0.1);
     padding: 0.75rem 1.25rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .code-header span {
@@ -622,9 +789,35 @@ body.dark-mode .feature-card p {
     font-weight: 600;
 }
 
+.code-copy-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.code-copy-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: white;
+}
+
 .code-body {
     padding: 1.5rem;
     color: #e2e8f0;
+    overflow-x: auto;
+}
+
+.code-body pre {
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .numbered-steps {
@@ -695,7 +888,7 @@ body.dark-mode .feature-card p {
     border-radius: 20px;
     padding: 2rem;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
 }
 
@@ -715,6 +908,7 @@ body.dark-mode .next-step-card {
     color: var(--primary-color, #667eea);
     margin-bottom: 1rem;
     display: block;
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
 }
 
 .next-step-card h4 {
@@ -732,6 +926,7 @@ body.dark-mode .next-step-card h4 {
     font-size: 0.9375rem;
     color: var(--text-secondary, #64748b);
     margin: 0;
+    line-height: 1.6;
 }
 
 body.dark-mode .next-step-card p {
@@ -748,11 +943,21 @@ body.dark-mode .next-step-card p {
     border-top: 2px solid rgba(102, 126, 234, 0.1);
 }
 
+body.dark-mode .doc-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
 .cta-box {
     text-align: center;
     padding: 3rem 2rem;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     border-radius: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .cta-box {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .cta-box h3 {
@@ -786,7 +991,7 @@ body.dark-mode .cta-box p {
     font-weight: 600;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-cta:hover {
@@ -833,7 +1038,7 @@ body.dark-mode .cta-box p {
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.dark-mode .doc-nav a {
@@ -852,6 +1057,7 @@ body.dark-mode .doc-nav a {
 body.dark-mode .doc-nav a:hover,
 body.dark-mode .doc-nav a.active {
     color: var(--text-primary, #f8fafc);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .help-card {
@@ -860,6 +1066,7 @@ body.dark-mode .doc-nav a.active {
     border-radius: 16px;
     padding: 1.5rem;
     text-align: center;
+    transition: all 0.3s ease;
 }
 
 body.dark-mode .help-card {
@@ -867,11 +1074,17 @@ body.dark-mode .help-card {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
+.help-card:hover {
+    border-color: var(--primary-color, #667eea);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
 .help-card i {
     font-size: 2rem;
     color: var(--primary-color, #667eea);
     margin-bottom: 1rem;
     display: block;
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
 }
 
 .help-card h5 {
@@ -889,6 +1102,7 @@ body.dark-mode .help-card h5 {
     font-size: 0.875rem;
     color: var(--text-secondary, #64748b);
     margin: 0 0 1rem 0;
+    line-height: 1.6;
 }
 
 body.dark-mode .help-card p {
@@ -904,7 +1118,7 @@ body.dark-mode .help-card p {
     font-weight: 600;
     font-size: 0.875rem;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .help-card a:hover {
@@ -920,6 +1134,7 @@ body.dark-mode .help-card p {
     .doc-container {
         grid-template-columns: 1fr;
         gap: 2rem;
+        padding: 1.5rem 0 3rem;
     }
 
     .doc-sidebar {
@@ -934,10 +1149,17 @@ body.dark-mode .help-card p {
         flex-direction: row;
         overflow-x: auto;
         gap: 0.75rem;
+        padding-bottom: 0.5rem;
     }
 
     .doc-nav a {
         white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .feature-grid,
+    .next-steps-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 }
 
@@ -950,8 +1172,16 @@ body.dark-mode .help-card p {
         font-size: 1.5rem;
     }
 
+    .page-title {
+        font-size: 1.5rem;
+    }
+
     .step-box {
         flex-direction: column;
+    }
+
+    .step-number {
+        align-self: flex-start;
     }
 
     .feature-grid,
@@ -960,12 +1190,38 @@ body.dark-mode .help-card p {
     }
 
     .comparison-table {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
+        display: block;
+        overflow-x: auto;
     }
 
     .comparison-table th,
     .comparison-table td {
         padding: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .toc-box {
+        padding: 1.5rem;
+    }
+
+    .doc-container {
+        padding: 1rem 0 2rem;
+    }
+
+    .top-header .header-content-wrapper {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .top-header .header-right {
+        width: 100%;
+    }
+
+    .btn-back-dashboard {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -975,15 +1231,17 @@ body.dark-mode .help-card p {
     }
 
     .page-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        gap: 0.5rem;
     }
 
     .section-title {
         font-size: 1.25rem;
+        gap: 0.5rem;
     }
 
     .toc-box {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
 
     .step-box {
@@ -992,5 +1250,56 @@ body.dark-mode .help-card p {
 
     .code-body {
         padding: 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .feature-card,
+    .next-step-card {
+        padding: 1.5rem;
+    }
+
+    .feature-card i,
+    .next-step-card i {
+        font-size: 2rem;
+    }
+
+    .cta-box {
+        padding: 2rem 1.5rem;
+    }
+
+    .cta-box h3 {
+        font-size: 1.25rem;
+    }
+}
+
+/* ============================================
+   PRINT
+   ============================================ */
+
+@media print {
+    .top-header,
+    .breadcrumb,
+    .doc-sidebar,
+    .btn-back-dashboard,
+    .btn-cta {
+        display: none !important;
+    }
+
+    .doc-container {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-article {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .step-box,
+    .feature-card,
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box {
+        break-inside: avoid;
     }
 }
