@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Management - AlphaVault AI Documentation</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/documentation.css">
+    
+    <script src="assets/js/favicon-dynamic.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    
+    <script src="assets/js/theme.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <aside class='sidebar' id='sidebar'>
+            <!-- Sidebar identique -->
+        </aside>
+        
+        <main class="main-content">
+            
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-briefcase"></i> 
+                            Portfolio Management
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="doc-container">
+                    
+                    <nav class="breadcrumb">
+                        <a href="help.html">Help</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <a href="help.html">Documentation</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Portfolio Management</span>
+                    </nav>
+                    
+                    <article class="doc-article">
+                        
+                        <div class="doc-header">
+                            <div class="doc-meta">
+                                <span class="doc-time"><i class="fas fa-clock"></i> 10 min read</span>
+                                <span class="doc-updated"><i class="fas fa-calendar"></i> Updated: January 2025</span>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-intro">
+                            <p>Learn how to build, track, and optimize your investment portfolio using AlphaVault AI's advanced tools and algorithms.</p>
+                        </div>
+                        
+                        <div class="toc-box">
+                            <h3 class="toc-title">Table of Contents</h3>
+                            <ol class="toc-list">
+                                <li><a href="#portfolio-construction">Portfolio Construction</a></li>
+                                <li><a href="#diversification">Diversification Strategies</a></li>
+                                <li><a href="#rebalancing">Rebalancing</a></li>
+                                <li><a href="#optimization">Portfolio Optimization</a></li>
+                                <li><a href="#tracking">Performance Tracking</a></li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Section 1 -->
+                        <section id="portfolio-construction" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-hammer"></i>
+                                1. Portfolio Construction
+                            </h2>
+                            
+                            <h3>Core-Satellite Strategy</h3>
+                            
+                            <p>The core-satellite approach combines passive and active investing for optimal risk-adjusted returns.</p>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-globe"></i>
+                                    <h4>Core Holdings (60-80%)</h4>
+                                    <p>Low-cost index funds, ETFs. Provides market exposure and stability.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-satellite"></i>
+                                    <h4>Satellite Holdings (20-40%)</h4>
+                                    <p>Individual stocks, sector plays. Aims to outperform the market.</p>
+                                </div>
+                            </div>
+                            
+                            <h3>Asset Allocation by Risk Profile</h3>
+                            
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>Stocks</th>
+                                        <th>Bonds</th>
+                                        <th>Cash</th>
+                                        <th>Alternative</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Conservative</td>
+                                        <td>30%</td>
+                                        <td>50%</td>
+                                        <td>15%</td>
+                                        <td>5%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Moderate</td>
+                                        <td>60%</td>
+                                        <td>30%</td>
+                                        <td>5%</td>
+                                        <td>5%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Aggressive</td>
+                                        <td>85%</td>
+                                        <td>5%</td>
+                                        <td>0%</td>
+                                        <td>10%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Very Aggressive</td>
+                                        <td>95%</td>
+                                        <td>0%</td>
+                                        <td>0%</td>
+                                        <td>5%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                <p><strong>Rule of Thumb:</strong> Stock allocation = 110 - Your Age. A 30-year-old would allocate 80% to stocks (110-30=80).</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 2 -->
+                        <section id="diversification" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-sitemap"></i>
+                                2. Diversification Strategies
+                            </h2>
+                            
+                            <h3>The 5 Dimensions of Diversification</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Asset Class Diversification</h4>
+                                    <p>Spread across stocks, bonds, real estate, commodities, and cash.</p>
+                                    <ul>
+                                        <li><strong>Stocks:</strong> Growth and dividends</li>
+                                        <li><strong>Bonds:</strong> Income and stability</li>
+                                        <li><strong>Real Estate:</strong> Inflation hedge</li>
+                                        <li><strong>Commodities:</strong> Portfolio insurance</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Sector Diversification</h4>
+                                    <p>Don't overweight any single sector. Recommended maximum: 25% per sector.</p>
+                                    <table class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sector</th>
+                                                <th>Cyclicality</th>
+                                                <th>Beta</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Technology</td>
+                                                <td>High</td>
+                                                <td>1.3-1.8</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Healthcare</td>
+                                                <td>Low</td>
+                                                <td>0.8-1.1</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Financials</td>
+                                                <td>High</td>
+                                                <td>1.1-1.4</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Consumer Staples</td>
+                                                <td>Low</td>
+                                                <td>0.6-0.9</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Energy</td>
+                                                <td>Very High</td>
+                                                <td>1.4-2.0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Geographic Diversification</h4>
+                                    <p>Reduce country-specific risk.</p>
+                                    <ul>
+                                        <li><strong>US Markets:</strong> 50-60%</li>
+                                        <li><strong>Developed International:</strong> 25-35%</li>
+                                        <li><strong>Emerging Markets:</strong> 10-15%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Market Cap Diversification</h4>
+                                    <ul>
+                                        <li><strong>Large Cap (>10B):</strong> 60% - stability</li>
+                                        <li><strong>Mid Cap (2-10B):</strong> 25% - growth potential</li>
+                                        <li><strong>Small Cap (<2B):</strong> 15% - high growth</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h4>Temporal Diversification</h4>
+                                    <p>Use Dollar-Cost Averaging (DCA) to reduce timing risk.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>DCA Example</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <p style="color: #cbd5e1;">Instead of investing $12,000 at once, invest $1,000/month for 12 months.</p>
+                                            <p style="color: #a78bfa; margin-top: 1rem;">
+                                                Benefit: Averages out market volatility<br>
+                                                Reduces risk of buying at peak
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p><strong>Over-Diversification Warning:</strong> More than 30 individual stocks provides diminishing returns. Focus on quality over quantity.</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 3 -->
+                        <section id="rebalancing" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-balance-scale"></i>
+                                3. Portfolio Rebalancing
+                            </h2>
+                            
+                            <h3>When to Rebalance</h3>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-calendar"></i>
+                                    <h4>Time-Based</h4>
+                                    <p>Rebalance quarterly or semi-annually regardless of drift.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-percent"></i>
+                                    <h4>Threshold-Based</h4>
+                                    <p>Rebalance when allocation drifts >5% from target.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>Hybrid Approach</h4>
+                                    <p>Check quarterly, rebalance if drift >5%.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-robot"></i>
+                                    <h4>AI-Triggered</h4>
+                                    <p>AlphaVault alerts when optimal rebalancing conditions are met.</p>
+                                </div>
+                            </div>
+                            
+                            <h3>Rebalancing Example</h3>
+                            
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th>Target</th>
+                                        <th>Current</th>
+                                        <th>Drift</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>US Stocks</td>
+                                        <td>60%</td>
+                                        <td>68%</td>
+                                        <td>+8%</td>
+                                        <td>Sell $8,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>International</td>
+                                        <td>25%</td>
+                                        <td>20%</td>
+                                        <td>-5%</td>
+                                        <td>Buy $5,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonds</td>
+                                        <td>15%</td>
+                                        <td>12%</td>
+                                        <td>-3%</td>
+                                        <td>Buy $3,000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="success-box">
+                                <i class="fas fa-check-circle"></i>
+                                <p><strong>Historical Data:</strong> Annual rebalancing improved returns by 0.4-0.8% annually while reducing volatility by 12% (1990-2020).</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 4 -->
+                        <section id="optimization" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-magic"></i>
+                                4. Portfolio Optimization
+                            </h2>
+                            
+                            <h3>Modern Portfolio Theory (Markowitz)</h3>
+                            
+                            <p>Our Markowitz optimizer finds the portfolio with the highest Sharpe ratio for your selected assets.</p>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Optimization Objective</span>
+                                </div>
+                                <div class="code-body">
+                                    <div class="numbered-steps">
+                                        <li><strong>Inputs:</strong>
+                                            <ul>
+                                                <li>Historical returns (3-5 years)</li>
+                                                <li>Covariance matrix (asset correlations)</li>
+                                                <li>Expected returns (AI-predicted)</li>
+                                                <li>Risk-free rate (current T-Bill rate)</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Optimization Process:</strong>
+                                            <ul>
+                                                <li>Calculate efficient frontier</li>
+                                                <li>Identify maximum Sharpe ratio point</li>
+                                                <li>Apply constraints (min/max weights)</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Output:</strong>
+                                            <ul>
+                                                <li>Optimal weight for each asset</li>
+                                                <li>Expected portfolio return</li>
+                                                <li>Expected portfolio volatility</li>
+                                                <li>Sharpe ratio</li>
+                                            </ul>
+                                        </li>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Risk Parity Approach</h3>
+                            
+                            <p>Alternative to Markowitz: equalize risk contribution instead of capital allocation.</p>
+                            
+                            <div class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                <p><strong>When to Use:</strong> Risk Parity works better in low-return environments and provides better downside protection than traditional 60/40 portfolios.</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 5 -->
+                        <section id="tracking" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-bar"></i>
+                                5. Performance Tracking
+                            </h2>
+                            
+                            <h3>Key Metrics Dashboard</h3>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <h4>Total Return</h4>
+                                    <p>Capital gains + dividends + distributions</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-percentage"></i>
+                                    <h4>Annualized Return</h4>
+                                    <p>CAGR (Compound Annual Growth Rate)</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <h4>Sharpe Ratio</h4>
+                                    <p>Risk-adjusted performance</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h4>Max Drawdown</h4>
+                                    <p>Largest peak-to-trough decline</p>
+                                </div>
+                            </div>
+                            
+                            <h3>Benchmark Comparison</h3>
+                            
+                            <p>Always compare your portfolio to relevant benchmarks:</p>
+                            
+                            <ul>
+                                <li><strong>S&P 500:</strong> Large-cap US stocks</li>
+                                <li><strong>Russell 2000:</strong> Small-cap US stocks</li>
+                                <li><strong>MSCI World:</strong> Global developed markets</li>
+                                <li><strong>60/40 Portfolio:</strong> Balanced benchmark</li>
+                            </ul>
+                            
+                            <div class="success-box">
+                                <i class="fas fa-check-circle"></i>
+                                <p><strong>AlphaVault Feature:</strong> Our platform automatically calculates alpha (excess return vs benchmark) and beta (market sensitivity) for your portfolio.</p>
+                            </div>
+                        </section>
+                        
+                        <div class="doc-footer">
+                            <div class="cta-box">
+                                <h3>Optimize Your Portfolio Now</h3>
+                                <p>Use our AI-powered tools to maximize risk-adjusted returns.</p>
+                                <a href="portfolio-optimizer.html" class="btn-cta">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Launch Optimizer
+                                </a>
+                            </div>
+                        </div>
+                        
+                    </article>
+                    
+                    <aside class="doc-sidebar">
+                        <div class="sidebar-sticky">
+                            <h4>On This Page</h4>
+                            <nav class="doc-nav">
+                                <a href="#portfolio-construction">Construction</a>
+                                <a href="#diversification">Diversification</a>
+                                <a href="#rebalancing">Rebalancing</a>
+                                <a href="#optimization">Optimization</a>
+                                <a href="#tracking">Tracking</a>
+                            </nav>
+                            
+                            <div class="help-card">
+                                <i class="fas fa-calculator"></i>
+                                <h5>Portfolio Calculator</h5>
+                                <p>Try our free asset allocation calculator.</p>
+                                <a href="#">Calculate Now</a>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/documentation.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+</body>
+</html>

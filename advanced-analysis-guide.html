@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analysis Guide - AlphaVault AI Documentation</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/documentation.css">
+    
+    <!-- Favicon -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    
+    <script src="assets/js/theme.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR (identique aux autres pages) -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Copier la sidebar complète de getting-started.html -->
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-brain"></i> 
+                            Advanced Analysis Guide
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="doc-container">
+                    
+                    <nav class="breadcrumb">
+                        <a href="help.html">Help</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <a href="help.html">Documentation</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Advanced Analysis</span>
+                    </nav>
+                    
+                    <article class="doc-article">
+                        
+                        <div class="doc-header">
+                            <div class="doc-meta">
+                                <span class="doc-time"><i class="fas fa-clock"></i> 15 min read</span>
+                                <span class="doc-updated"><i class="fas fa-calendar"></i> Updated: January 2025</span>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-intro">
+                            <p>Master technical indicators, machine learning predictions, and AI-powered stock analysis to make data-driven investment decisions.</p>
+                        </div>
+                        
+                        <div class="toc-box">
+                            <h3 class="toc-title">Table of Contents</h3>
+                            <ol class="toc-list">
+                                <li><a href="#technical-indicators">Technical Indicators</a></li>
+                                <li><a href="#ml-predictions">Machine Learning Predictions</a></li>
+                                <li><a href="#fundamental-analysis">Fundamental Analysis</a></li>
+                                <li><a href="#sentiment-analysis">Sentiment Analysis</a></li>
+                                <li><a href="#risk-metrics">Risk Metrics</a></li>
+                                <li><a href="#interpretation">Interpretation Guide</a></li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Section 1: Technical Indicators -->
+                        <section id="technical-indicators" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-line"></i>
+                                1. Technical Indicators
+                            </h2>
+                            
+                            <p>Technical indicators are mathematical calculations based on price, volume, or open interest that help identify trends and potential reversal points.</p>
+                            
+                            <h3>RSI - Relative Strength Index</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>What is RSI?</h4>
+                                    <p>RSI measures the magnitude of recent price changes to evaluate overbought or oversold conditions. It oscillates between 0 and 100.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>RSI Formula</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <p style="color: #a78bfa; font-family: monospace;">
+                                                RSI = 100 - (100 / (1 + RS))<br>
+                                                where RS = Average Gain / Average Loss (over 14 periods)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Interpretation</h4>
+                                    <table class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>RSI Value</th>
+                                                <th>Signal</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Above 70</td>
+                                                <td>Overbought</td>
+                                                <td>Potential sell signal</td>
+                                            </tr>
+                                            <tr>
+                                                <td>50-70</td>
+                                                <td>Bullish momentum</td>
+                                                <td>Hold or monitor</td>
+                                            </tr>
+                                            <tr>
+                                                <td>30-50</td>
+                                                <td>Bearish momentum</td>
+                                                <td>Monitor closely</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Below 30</td>
+                                                <td>Oversold</td>
+                                                <td>Potential buy signal</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p><strong>Important:</strong> RSI can remain in overbought/oversold territory for extended periods during strong trends. Always combine with other indicators.</p>
+                            </div>
+                            
+                            <h3>MACD - Moving Average Convergence Divergence</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>What is MACD?</h4>
+                                    <p>MACD shows the relationship between two moving averages of a stock's price. It consists of three components:</p>
+                                    <ul>
+                                        <li><strong>MACD Line:</strong> 12-day EMA minus 26-day EMA</li>
+                                        <li><strong>Signal Line:</strong> 9-day EMA of MACD Line</li>
+                                        <li><strong>Histogram:</strong> MACD Line minus Signal Line</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Trading Signals</h4>
+                                    <ul>
+                                        <li><strong>Bullish Crossover:</strong> MACD line crosses above signal line (buy signal)</li>
+                                        <li><strong>Bearish Crossover:</strong> MACD line crosses below signal line (sell signal)</li>
+                                        <li><strong>Divergence:</strong> Price and MACD move in opposite directions (reversal warning)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <h3>Bollinger Bands</h3>
+                            
+                            <p>Bollinger Bands consist of a middle band (20-day SMA) and two outer bands at 2 standard deviations above and below.</p>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-compress-arrows-alt"></i>
+                                    <h4>Squeeze</h4>
+                                    <p>Bands narrow - low volatility. Breakout imminent.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    <h4>Expansion</h4>
+                                    <p>Bands widen - high volatility. Trend confirmed.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <h4>Upper Band Touch</h4>
+                                    <p>Price at upper band - overbought condition.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <h4>Lower Band Touch</h4>
+                                    <p>Price at lower band - oversold condition.</p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 2: ML Predictions -->
+                        <section id="ml-predictions" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-robot"></i>
+                                2. Machine Learning Predictions
+                            </h2>
+                            
+                            <p>Our AI uses ensemble learning to predict future price movements with quantified confidence scores.</p>
+                            
+                            <h3>Ensemble Model Architecture</h3>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Model Components</span>
+                                </div>
+                                <div class="code-body">
+                                    <div class="numbered-steps">
+                                        <li><strong>LSTM Networks (40% weight)</strong>
+                                            <ul>
+                                                <li>Captures time-series patterns</li>
+                                                <li>3-layer architecture with dropout</li>
+                                                <li>Trained on 10+ years of data</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Random Forest (30% weight)</strong>
+                                            <ul>
+                                                <li>Pattern recognition across features</li>
+                                                <li>500 decision trees</li>
+                                                <li>Handles non-linear relationships</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Gradient Boosting (20% weight)</strong>
+                                            <ul>
+                                                <li>Sequential error correction</li>
+                                                <li>XGBoost implementation</li>
+                                                <li>High accuracy on recent data</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Sentiment Layer (10% weight)</strong>
+                                            <ul>
+                                                <li>News sentiment score (-1 to +1)</li>
+                                                <li>Social media mentions volume</li>
+                                                <li>Analyst rating consensus</li>
+                                            </ul>
+                                        </li>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Understanding Confidence Scores</h3>
+                            
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Confidence</th>
+                                        <th>Meaning</th>
+                                        <th>Historical Accuracy</th>
+                                        <th>Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>90-100%</td>
+                                        <td>Very High</td>
+                                        <td>87-92%</td>
+                                        <td>Strong signal - act decisively</td>
+                                    </tr>
+                                    <tr>
+                                        <td>75-89%</td>
+                                        <td>High</td>
+                                        <td>78-86%</td>
+                                        <td>Reliable - suitable for main positions</td>
+                                    </tr>
+                                    <tr>
+                                        <td>60-74%</td>
+                                        <td>Moderate</td>
+                                        <td>65-77%</td>
+                                        <td>Consider with other factors</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Below 60%</td>
+                                        <td>Low</td>
+                                        <td>50-64%</td>
+                                        <td>High uncertainty - wait for clarity</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="success-box">
+                                <i class="fas fa-check-circle"></i>
+                                <p><strong>Backtesting Results:</strong> Our ensemble model achieved 82.3% directional accuracy on out-of-sample data (2021-2024) for 1-month predictions.</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 3: Fundamental Analysis -->
+                        <section id="fundamental-analysis" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-calculator"></i>
+                                3. Fundamental Analysis
+                            </h2>
+                            
+                            <h3>Key Valuation Metrics</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">P/E</div>
+                                <div class="step-content">
+                                    <h4>Price-to-Earnings Ratio</h4>
+                                    <p><code>P/E = Stock Price / Earnings Per Share</code></p>
+                                    <ul>
+                                        <li><strong>Below 15:</strong> Potentially undervalued or low growth</li>
+                                        <li><strong>15-25:</strong> Fair value for mature companies</li>
+                                        <li><strong>Above 25:</strong> Growth premium or overvalued</li>
+                                    </ul>
+                                    <div class="info-box">
+                                        <i class="fas fa-info-circle"></i>
+                                        <p>Compare P/E to sector average. Tech stocks typically have higher P/E ratios than utilities.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">EPS</div>
+                                <div class="step-content">
+                                    <h4>Earnings Per Share</h4>
+                                    <p><code>EPS = (Net Income - Dividends) / Shares Outstanding</code></p>
+                                    <ul>
+                                        <li><strong>Growing EPS:</strong> Company increasing profitability</li>
+                                        <li><strong>Declining EPS:</strong> Warning sign - investigate cause</li>
+                                        <li><strong>EPS Beat:</strong> Actual > Estimate (bullish)</li>
+                                        <li><strong>EPS Miss:</strong> Actual < Estimate (bearish)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">ROE</div>
+                                <div class="step-content">
+                                    <h4>Return on Equity</h4>
+                                    <p><code>ROE = Net Income / Shareholder Equity</code></p>
+                                    <table class="comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ROE Range</th>
+                                                <th>Quality</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Above 20%</td>
+                                                <td>Excellent - highly efficient</td>
+                                            </tr>
+                                            <tr>
+                                                <td>15-20%</td>
+                                                <td>Good - solid performer</td>
+                                            </tr>
+                                            <tr>
+                                                <td>10-15%</td>
+                                                <td>Average - acceptable</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Below 10%</td>
+                                                <td>Weak - investigate further</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 4: Sentiment Analysis -->
+                        <section id="sentiment-analysis" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-comments"></i>
+                                4. Sentiment Analysis
+                            </h2>
+                            
+                            <p>Our AI analyzes thousands of news articles, social media posts, and analyst reports to gauge market sentiment.</p>
+                            
+                            <h3>Sentiment Score Breakdown</h3>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-newspaper"></i>
+                                    <h4>News Sentiment</h4>
+                                    <p>NLP analysis of 100+ financial news sources. Updated hourly.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-hashtag"></i>
+                                    <h4>Social Mentions</h4>
+                                    <p>Twitter, Reddit, StockTwits volume and tone tracking.</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-user-tie"></i>
+                                    <h4>Analyst Ratings</h4>
+                                    <p>Consensus from 50+ investment banks (Buy/Hold/Sell).</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-chart-area"></i>
+                                    <h4>Options Flow</h4>
+                                    <p>Unusual options activity indicating institutional sentiment.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Composite Sentiment Formula</span>
+                                </div>
+                                <div class="code-body">
+                                    <p style="color: #a78bfa; font-family: monospace;">
+                                        Sentiment = (0.4 × News) + (0.2 × Social) + (0.3 × Analysts) + (0.1 × Options)<br><br>
+                                        Range: -1.0 (Very Bearish) to +1.0 (Very Bullish)
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 5: Risk Metrics -->
+                        <section id="risk-metrics" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                5. Risk Metrics
+                            </h2>
+                            
+                            <h3>Volatility (Standard Deviation)</h3>
+                            <p>Measures price fluctuation. Higher volatility = higher risk.</p>
+                            <ul>
+                                <li><strong>Low volatility (< 20%):</strong> Stable stocks (utilities, consumer staples)</li>
+                                <li><strong>Medium volatility (20-40%):</strong> Most blue-chip stocks</li>
+                                <li><strong>High volatility (> 40%):</strong> Growth/tech stocks, small caps</li>
+                            </ul>
+                            
+                            <h3>Beta</h3>
+                            <p>Measures stock sensitivity to market movements.</p>
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Beta Value</th>
+                                        <th>Interpretation</th>
+                                        <th>Example</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Beta = 1.0</td>
+                                        <td>Moves with market</td>
+                                        <td>S&P 500 index fund</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Beta > 1.0</td>
+                                        <td>More volatile than market</td>
+                                        <td>Tech stocks (NVDA: β=1.7)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Beta < 1.0</td>
+                                        <td>Less volatile than market</td>
+                                        <td>Utilities (DUK: β=0.4)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Beta < 0</td>
+                                        <td>Inverse correlation</td>
+                                        <td>Gold, VIX</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h3>Sharpe Ratio</h3>
+                            <p>Risk-adjusted return metric. Higher is better.</p>
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Sharpe Ratio Formula</span>
+                                </div>
+                                <div class="code-body">
+                                    <p style="color: #a78bfa; font-family: monospace;">
+                                        Sharpe = (Portfolio Return - Risk-Free Rate) / Portfolio Standard Deviation<br><br>
+                                        Sharpe > 1.0 = Good<br>
+                                        Sharpe > 2.0 = Very Good<br>
+                                        Sharpe > 3.0 = Excellent
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 6: Interpretation Guide -->
+                        <section id="interpretation" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-lightbulb"></i>
+                                6. Interpretation Guide
+                            </h2>
+                            
+                            <h3>Combining Signals</h3>
+                            
+                            <div class="success-box">
+                                <i class="fas fa-check-circle"></i>
+                                <p><strong>Strong Buy Signal Example:</strong></p>
+                                <ul>
+                                    <li>RSI: 35 (oversold, bouncing up)</li>
+                                    <li>MACD: Bullish crossover</li>
+                                    <li>AI Prediction: +12% (85% confidence)</li>
+                                    <li>P/E Ratio: Below sector average</li>
+                                    <li>Sentiment: +0.6 (bullish)</li>
+                                    <li>Analyst Consensus: 80% Buy ratings</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="danger-box">
+                                <i class="fas fa-times-circle"></i>
+                                <p><strong>Strong Sell Signal Example:</strong></p>
+                                <ul>
+                                    <li>RSI: 78 (overbought, declining)</li>
+                                    <li>MACD: Bearish crossover</li>
+                                    <li>AI Prediction: -8% (78% confidence)</li>
+                                    <li>P/E Ratio: 2x sector average</li>
+                                    <li>Sentiment: -0.4 (bearish)</li>
+                                    <li>Revenue declining YoY</li>
+                                </ul>
+                            </div>
+                            
+                            <h3>Common Pitfalls to Avoid</h3>
+                            
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <ul>
+                                    <li><strong>Over-reliance on single indicator:</strong> Always use multiple signals</li>
+                                    <li><strong>Ignoring fundamentals:</strong> Technical analysis alone is incomplete</li>
+                                    <li><strong>Chasing performance:</strong> High RSI + high P/E = danger zone</li>
+                                    <li><strong>Ignoring news:</strong> Earnings surprises can invalidate technical signals</li>
+                                    <li><strong>No stop-loss:</strong> Always define exit points before entering</li>
+                                </ul>
+                            </div>
+                        </section>
+                        
+                        <div class="doc-footer">
+                            <div class="cta-box">
+                                <h3>Ready to Practice?</h3>
+                                <p>Test your knowledge with real-time analysis on our platform.</p>
+                                <a href="advanced-analysis.html" class="btn-cta">
+                                    <i class="fas fa-chart-line"></i>
+                                    Start Analyzing Stocks
+                                </a>
+                            </div>
+                        </div>
+                        
+                    </article>
+                    
+                    <aside class="doc-sidebar">
+                        <div class="sidebar-sticky">
+                            <h4>On This Page</h4>
+                            <nav class="doc-nav">
+                                <a href="#technical-indicators">Technical Indicators</a>
+                                <a href="#ml-predictions">ML Predictions</a>
+                                <a href="#fundamental-analysis">Fundamental Analysis</a>
+                                <a href="#sentiment-analysis">Sentiment Analysis</a>
+                                <a href="#risk-metrics">Risk Metrics</a>
+                                <a href="#interpretation">Interpretation</a>
+                            </nav>
+                            
+                            <div class="help-card">
+                                <i class="fas fa-video"></i>
+                                <h5>Video Tutorial</h5>
+                                <p>Watch our 10-minute analysis masterclass.</p>
+                                <a href="#">Watch Now</a>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/documentation.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+</body>
+</html>

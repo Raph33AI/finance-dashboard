@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - AlphaVault AI</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/documentation.css">
+    
+    <script src="assets/js/favicon-dynamic.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    
+    <script src="assets/js/theme.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <aside class='sidebar' id='sidebar'>
+            <!-- Sidebar identique -->
+        </aside>
+        
+        <main class="main-content">
+            
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-code"></i> 
+                            API Documentation
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container">
+                <div class="doc-container">
+                    
+                    <nav class="breadcrumb">
+                        <a href="help.html">Help</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <a href="help.html">Documentation</a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>API Documentation</span>
+                    </nav>
+                    
+                    <article class="doc-article">
+                        
+                        <div class="doc-header">
+                            <div class="doc-meta">
+                                <span class="doc-time"><i class="fas fa-clock"></i> 20 min read</span>
+                                <span class="doc-updated"><i class="fas fa-calendar"></i> Updated: January 2025</span>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-intro">
+                            <p>Integrate AlphaVault AI's powerful financial data and analytics into your applications using our RESTful API.</p>
+                        </div>
+                        
+                        <div class="toc-box">
+                            <h3 class="toc-title">Table of Contents</h3>
+                            <ol class="toc-list">
+                                <li><a href="#authentication">Authentication</a></li>
+                                <li><a href="#endpoints">API Endpoints</a></li>
+                                <li><a href="#rate-limits">Rate Limits</a></li>
+                                <li><a href="#examples">Code Examples</a></li>
+                                <li><a href="#webhooks">Webhooks</a></li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Section 1 -->
+                        <section id="authentication" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-key"></i>
+                                1. Authentication
+                            </h2>
+                            
+                            <h3>Getting Your API Key</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Generate API Key</h4>
+                                    <p>Navigate to <strong>Settings > API Access</strong> and click "Generate New Key".</p>
+                                    <div class="warning-box">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <p><strong>Security:</strong> Your API key is shown only once. Store it securely (use environment variables).</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Authentication Method</h4>
+                                    <p>Include your API key in the <code>Authorization</code> header of every request:</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>cURL Example</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0;">
+curl -X GET "https://api.alphavault-ai.com/v1/stocks/AAPL" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Base URL</h3>
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Production Endpoint</span>
+                                </div>
+                                <div class="code-body">
+                                    <p style="color: #a78bfa; font-family: monospace;">
+                                        https://api.alphavault-ai.com/v1/
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 2 -->
+                        <section id="endpoints" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-plug"></i>
+                                2. API Endpoints
+                            </h2>
+                            
+                            <h3>Stock Data</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">GET</div>
+                                <div class="step-content">
+                                    <h4>/stocks/{symbol}</h4>
+                                    <p>Get real-time quote and fundamental data for a stock.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Request</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0;">
+GET /v1/stocks/NVDA</pre>
+                                        </div>
+                                    </div>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Response (200 OK)</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+{
+  "symbol": "NVDA",
+  "name": "NVIDIA Corporation",
+  "price": 495.32,
+  "change": 12.45,
+  "changePercent": 2.58,
+  "volume": 42530000,
+  "marketCap": 1220000000000,
+  "peRatio": 68.5,
+  "eps": 7.23,
+  "dividendYield": 0.03,
+  "high52Week": 502.66,
+  "low52Week": 108.13,
+  "timestamp": "2025-01-15T16:00:00Z"
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">GET</div>
+                                <div class="step-content">
+                                    <h4>/stocks/{symbol}/analysis</h4>
+                                    <p>Get AI-powered analysis including predictions and technical indicators.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Request</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0;">
+GET /v1/stocks/AAPL/analysis?timeframe=1M</pre>
+                                        </div>
+                                    </div>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Response (200 OK)</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+{
+  "symbol": "AAPL",
+  "prediction": {
+    "direction": "bullish",
+    "targetPrice": 195.50,
+    "confidence": 0.83,
+    "timeframe": "1M"
+  },
+  "technicalIndicators": {
+    "rsi": 58.3,
+    "macd": {
+      "value": 1.24,
+      "signal": 0.98,
+      "histogram": 0.26
+    },
+    "bollingerBands": {
+      "upper": 192.50,
+      "middle": 185.00,
+      "lower": 177.50
+    }
+  },
+  "sentiment": {
+    "score": 0.62,
+    "newsCount": 145,
+    "socialMentions": 28400
+  }
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Portfolio Management</h3>
+                            
+                            <div class="step-box">
+                                <div class="step-number">POST</div>
+                                <div class="step-content">
+                                    <h4>/portfolios</h4>
+                                    <p>Create a new portfolio.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Request Body</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+{
+  "name": "Tech Growth Portfolio",
+  "positions": [
+    {
+      "symbol": "AAPL",
+      "quantity": 50,
+      "purchasePrice": 175.20
+    },
+    {
+      "symbol": "MSFT",
+      "quantity": 30,
+      "purchasePrice": 380.50
+    }
+  ]
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="step-box">
+                                <div class="step-number">GET</div>
+                                <div class="step-content">
+                                    <h4>/portfolios/{id}/optimize</h4>
+                                    <p>Run Markowitz optimization on a portfolio.</p>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Response (200 OK)</span>
+                                        </div>
+                                        <div class="code-body">
+                                            <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+{
+  "portfolioId": "abc123",
+  "optimization": {
+    "method": "markowitz",
+    "expectedReturn": 0.142,
+    "volatility": 0.185,
+    "sharpeRatio": 1.48,
+    "weights": {
+      "AAPL": 0.35,
+      "MSFT": 0.42,
+      "GOOGL": 0.23
+    }
+  },
+  "rebalanceActions": [
+    {
+      "symbol": "AAPL",
+      "action": "sell",
+      "shares": 10
+    },
+    {
+      "symbol": "GOOGL",
+      "action": "buy",
+      "shares": 5
+    }
+  ]
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Market Data</h3>
+                            
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Method</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>/market/indices</td>
+                                        <td>GET</td>
+                                        <td>Major market indices (S&P 500, NASDAQ, etc.)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>/market/movers</td>
+                                        <td>GET</td>
+                                        <td>Top gainers and losers</td>
+                                    </tr>
+                                    <tr>
+                                        <td>/market/sectors</td>
+                                        <td>GET</td>
+                                        <td>Sector performance</td>
+                                    </tr>
+                                    <tr>
+                                        <td>/market/calendar</td>
+                                        <td>GET</td>
+                                        <td>Earnings calendar and economic events</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+                        
+                        <!-- Section 3 -->
+                        <section id="rate-limits" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-tachometer-alt"></i>
+                                3. Rate Limits
+                            </h2>
+                            
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Plan</th>
+                                        <th>Requests/Minute</th>
+                                        <th>Requests/Day</th>
+                                        <th>Concurrent Requests</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Free</td>
+                                        <td>10</td>
+                                        <td>500</td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pro</td>
+                                        <td>60</td>
+                                        <td>10,000</td>
+                                        <td>5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Platinum</td>
+                                        <td>300</td>
+                                        <td>100,000</td>
+                                        <td>20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Enterprise</td>
+                                        <td>Custom</td>
+                                        <td>Unlimited</td>
+                                        <td>Custom</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h3>Rate Limit Headers</h3>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Response Headers</span>
+                                </div>
+                                <div class="code-body">
+                                    <pre style="color: #e2e8f0; font-family: monospace; margin: 0;">
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1642176000</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p><strong>429 Too Many Requests:</strong> If you exceed rate limits, you'll receive a 429 error. Implement exponential backoff in your code.</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 4 -->
+                        <section id="examples" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-laptop-code"></i>
+                                4. Code Examples
+                            </h2>
+                            
+                            <h3>Python</h3>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>Python - Get Stock Analysis</span>
+                                </div>
+                                <div class="code-body">
+                                    <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+import requests
+
+API_KEY = "your_api_key_here"
+BASE_URL = "https://api.alphavault-ai.com/v1"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+def get_stock_analysis(symbol):
+    url = f"{BASE_URL}/stocks/{symbol}/analysis"
+    params = {"timeframe": "1M"}
+    
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code}")
+
+# Usage
+analysis = get_stock_analysis("TSLA")
+print(f"Prediction: {analysis['prediction']['direction']}")
+print(f"Confidence: {analysis['prediction']['confidence'] * 100}%")</pre>
+                                </div>
+                            </div>
+                            
+                            <h3>JavaScript (Node.js)</h3>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>JavaScript - Create Portfolio</span>
+                                </div>
+                                <div class="code-body">
+                                    <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+const axios = require('axios');
+
+const API_KEY = 'your_api_key_here';
+const BASE_URL = 'https://api.alphavault-ai.com/v1';
+
+const createPortfolio = async (portfolioData) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/portfolios`,
+      portfolioData,
+      {
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error:', error.response.data);
+    throw error;
+  }
+};
+
+// Usage
+const portfolio = {
+  name: "My Tech Portfolio",
+  positions: [
+    { symbol: "AAPL", quantity: 10, purchasePrice: 180.50 },
+    { symbol: "MSFT", quantity: 5, purchasePrice: 385.20 }
+  ]
+};
+
+createPortfolio(portfolio)
+  .then(result => console.log('Portfolio created:', result))
+  .catch(err => console.error(err));</pre>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Section 5 -->
+                        <section id="webhooks" class="doc-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-bell"></i>
+                                5. Webhooks
+                            </h2>
+                            
+                            <p>Receive real-time notifications when events occur.</p>
+                            
+                            <h3>Supported Events</h3>
+                            
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>price.alert</h4>
+                                    <p>Stock reaches target price</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-newspaper"></i>
+                                    <h4>news.breaking</h4>
+                                    <p>Major news for watched stocks</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-balance-scale"></i>
+                                    <h4>portfolio.rebalance</h4>
+                                    <p>Rebalancing recommended</p>
+                                </div>
+                                
+                                <div class="feature-card">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h4>risk.threshold</h4>
+                                    <p>Portfolio risk exceeds limits</p>
+                                </div>
+                            </div>
+                            
+                            <h3>Webhook Payload Example</h3>
+                            
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span>POST to your endpoint</span>
+                                </div>
+                                <div class="code-body">
+                                    <pre style="color: #e2e8f0; font-family: monospace; margin: 0; font-size: 0.875rem;">
+{
+  "event": "price.alert",
+  "timestamp": "2025-01-15T14:30:00Z",
+  "data": {
+    "symbol": "TSLA",
+    "price": 250.00,
+    "targetPrice": 250.00,
+    "alertId": "alert_abc123"
+  }
+}</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                <p><strong>Security:</strong> Webhooks include an <code>X-AlphaVault-Signature</code> header for verification. Validate this signature to ensure authenticity.</p>
+                            </div>
+                        </section>
+                        
+                        <div class="doc-footer">
+                            <div class="cta-box">
+                                <h3>Need API Support?</h3>
+                                <p>Our developer team is here to help you integrate.</p>
+                                <a href="mailto:api@alphavault-ai.com" class="btn-cta">
+                                    <i class="fas fa-envelope"></i>
+                                    Contact API Team
+                                </a>
+                            </div>
+                        </div>
+                        
+                    </article>
+                    
+                    <aside class="doc-sidebar">
+                        <div class="sidebar-sticky">
+                            <h4>On This Page</h4>
+                            <nav class="doc-nav">
+                                <a href="#authentication">Authentication</a>
+                                <a href="#endpoints">Endpoints</a>
+                                <a href="#rate-limits">Rate Limits</a>
+                                <a href="#examples">Examples</a>
+                                <a href="#webhooks">Webhooks</a>
+                            </nav>
+                            
+                            <div class="help-card">
+                                <i class="fas fa-book"></i>
+                                <h5>API Reference</h5>
+                                <p>Complete endpoint documentation.</p>
+                                <a href="#">View Full Docs</a>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/documentation.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+</body>
+</html>
