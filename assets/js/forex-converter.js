@@ -38,7 +38,12 @@ class ForexConverter {
         console.log('💱 Initializing Forex Converter Pro - Wall Street Edition...');
         
         try {
+            // ✅ ÉTAPE 1 : Charger les taux actuels
             await this.loadExchangeRates();
+            
+            // ✅ ÉTAPE 2 : Charger les données historiques pour analyses
+            await this.loadHistoricalDataForAnalysis();
+            
             this.populateCurrencySelectors();
             this.setupEventListeners();
             this.convert();
@@ -96,6 +101,52 @@ class ForexConverter {
             console.error('❌ Error loading exchange rates:', error);
             // Fallback to mock data
             this.loadMockRates();
+        }
+    }
+
+    /**
+     * ========================================
+     * ✅ LOAD HISTORICAL DATA FOR ANALYSIS
+     * ========================================
+     */
+    async loadHistoricalDataForAnalysis() {
+        try {
+            console.log('📈 Loading REAL historical data from ECB...');
+            
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - 6); // 6 mois de données
+            
+            // ✅ Charger les vraies données historiques pour chaque paire majeure
+            for (const currency of MAJOR_PAIRS) {
+                try {
+                    const historicalData = await economicDataClient.getECBHistoricalExchangeRate(
+                        currency,
+                        this.formatDate(startDate),
+                        this.formatDate(endDate)
+                    );
+                    
+                    if (historicalData.success && historicalData.data && historicalData.data.length > 0) {
+                        // ✅ Convertir au format [timestamp, value]
+                        const timeSeries = historicalData.data.map(item => [
+                            item.timestamp,
+                            item.value
+                        ]);
+                        
+                        this.historicalData[currency] = timeSeries;
+                        console.log(`✅ Loaded ${timeSeries.length} real historical points for EUR/${currency}`);
+                    } else {
+                        console.warn(`⚠ No historical data for EUR/${currency}`);
+                    }
+                } catch (err) {
+                    console.warn(`⚠ Could not load historical data for ${currency}:`, err.message);
+                }
+            }
+            
+            console.log(`✅ Historical data loaded for ${Object.keys(this.historicalData).length} pairs`);
+            
+        } catch (error) {
+            console.error('❌ Error loading historical data:', error);
         }
     }
 
@@ -533,7 +584,7 @@ class ForexConverter {
      * RSI CHART
      */
     async loadRSIChart() {
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const rsiData = this.calculateRSI(data, 14);
 
         Highcharts.chart('rsiChart', {
@@ -629,7 +680,7 @@ class ForexConverter {
      * MACD CHART
      */
     async loadMACDChart() {
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const macdData = this.calculateMACD(data);
 
         Highcharts.chart('macdChart', {
@@ -706,7 +757,7 @@ class ForexConverter {
      * BOLLINGER BANDS CHART
      */
     async loadBollingerChart() {
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const bollingerData = this.calculateBollingerBands(data, 20, 2);
 
         Highcharts.chart('bollingerChart', {
@@ -798,7 +849,7 @@ class ForexConverter {
      * MOVING AVERAGES CHART
      */
     async loadMovingAveragesChart() {
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const sma20 = this.calculateSMA(data, 20);
         const sma50 = this.calculateSMA(data, 50);
         const sma100 = this.calculateSMA(data, 100);
@@ -929,7 +980,7 @@ class ForexConverter {
         const container = document.getElementById('fibonacciChart');
         if (!container) return;
 
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const fibLevels = this.calculateFibonacciLevels(data);
 
         Highcharts.chart('fibonacciChart', {
@@ -1063,7 +1114,7 @@ class ForexConverter {
         const container = document.getElementById('ichimokuChart');
         if (!container) return;
 
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const ichimoku = this.calculateIchimoku(data);
 
         Highcharts.chart('ichimokuChart', {
@@ -1228,7 +1279,7 @@ class ForexConverter {
         const container = document.getElementById('pivotPointsChart');
         if (!container) return;
 
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const pivots = this.calculatePivotPoints(data);
 
         Highcharts.chart('pivotPointsChart', {
@@ -1355,7 +1406,7 @@ class ForexConverter {
         const container = document.getElementById('adxChart');
         if (!container) return;
 
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const adxData = this.calculateADX(data, 14);
 
         Highcharts.chart('adxChart', {
@@ -1523,7 +1574,7 @@ class ForexConverter {
         const container = document.getElementById('stochasticChart');
         if (!container) return;
 
-        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const data = this.getHistoricalTimeSeriesData(this.currentTechnicalTimeframe);
         const stochastic = this.calculateStochastic(data, 14, 3, 3);
 
         Highcharts.chart('stochasticChart', {
@@ -1635,33 +1686,46 @@ class ForexConverter {
      * ========================================
      */
     
-    generateMockTimeSeriesData(timeframe) {
-        const periods = {
-            '1D': 24,
-            '1W': 7,
-            '1M': 30,
-            '3M': 90,
-            '6M': 180,
-            '1Y': 365,
-            '5Y': 365 * 5
-        };
-
-        const points = periods[timeframe] || 30;
-        const data = [];
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - points);
-
-        let baseRate = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
-        let currentPrice = baseRate;
-
-        for (let i = 0; i < points; i++) {
-            const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-            const change = (Math.random() - 0.5) * 0.02;
-            currentPrice = currentPrice * (1 + change);
-            data.push([date.getTime(), parseFloat(currentPrice.toFixed(4))]);
+    /**
+     * ========================================
+     * ✅ GET HISTORICAL TIME SERIES DATA (VRAIES DONNÉES)
+     * ========================================
+     */
+    getHistoricalTimeSeriesData(timeframe) {
+        const currency = this.currentTechnicalPair;
+        
+        // ✅ UTILISER LES VRAIES DONNÉES HISTORIQUES
+        if (this.historicalData[currency] && this.historicalData[currency].length > 0) {
+            console.log(`✅ Using REAL historical data for EUR/${currency}`);
+            
+            // ✅ Filtrer selon le timeframe demandé
+            const now = Date.now();
+            const periods = {
+                '1D': 1 * 24 * 60 * 60 * 1000,
+                '1W': 7 * 24 * 60 * 60 * 1000,
+                '1M': 30 * 24 * 60 * 60 * 1000,
+                '3M': 90 * 24 * 60 * 60 * 1000,
+                '6M': 180 * 24 * 60 * 60 * 1000,
+                '1Y': 365 * 24 * 60 * 60 * 1000,
+                '5Y': 5 * 365 * 24 * 60 * 60 * 1000
+            };
+            
+            const cutoffTime = now - (periods[timeframe] || periods['1M']);
+            
+            // Filtrer les données selon la période
+            const filteredData = this.historicalData[currency].filter(point => point[0] >= cutoffTime);
+            
+            if (filteredData.length > 0) {
+                return filteredData;
+            }
         }
-
-        return data;
+        
+        // ✅ FALLBACK : Si pas de données historiques, utiliser le taux actuel
+        console.warn(`⚠ No historical data available for EUR/${currency}, using current rate only`);
+        const currentRate = this.rates[currency]?.rate || 1.0;
+        const now = Date.now();
+        
+        return [[now, currentRate]];
     }
 
     calculateRSI(data, period = 14) {
