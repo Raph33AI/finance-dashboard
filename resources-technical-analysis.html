@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis Mastery - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/resources.css">
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Page Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR (identique au fichier précédent) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- Header Premium -->
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-chart-bar"></i> 
+                            Learning Resources
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="help.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Help</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="container">
+                <div class="resource-container">
+                    
+                    <!-- Resource Header -->
+                    <div class="resource-header">
+                        <div class="resource-breadcrumb">
+                            <a href="help.html"><i class="fas fa-home"></i> Help</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>Technical Analysis Mastery</span>
+                        </div>
+                        <h1 class="resource-title">Technical Analysis Mastery</h1>
+                        <p class="resource-subtitle">
+                            Master advanced technical indicators, chart patterns, and momentum strategies used by professional traders to identify entry/exit points and market trends.
+                        </p>
+                        <div class="resource-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>60 min read</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>30+ Indicators</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-code"></i>
+                                <span>Trading Strategies</span>
+                            </div>
+                            <span class="difficulty-badge intermediate">Intermediate</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Table of Contents -->
+                    <div class="table-of-contents">
+                        <h2 class="toc-title"><i class="fas fa-list"></i> Table of Contents</h2>
+                        <ul class="toc-list">
+                            <li><a href="#moving-averages">Moving Averages</a></li>
+                            <li><a href="#rsi">Relative Strength Index (RSI)</a></li>
+                            <li><a href="#macd">MACD</a></li>
+                            <li><a href="#bollinger-bands">Bollinger Bands</a></li>
+                            <li><a href="#fibonacci">Fibonacci Retracements</a></li>
+                            <li><a href="#volume-analysis">Volume Analysis</a></li>
+                            <li><a href="#chart-patterns">Chart Patterns</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Section 1: Moving Averages -->
+                    <div class="content-section" id="moving-averages">
+                        <h2 class="section-header">
+                            <i class="fas fa-wave-square"></i>
+                            Moving Averages (MA)
+                        </h2>
+                        
+                        <p class="content-text">
+                            Moving averages are the <strong>foundation of technical analysis</strong>. They smooth price data to identify trends and generate trading signals through crossovers.
+                        </p>
+                        
+                        <!-- Simple Moving Average -->
+                        <h3 class="subsection-header">1. Simple Moving Average (SMA)</h3>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">SMA Formula</div>
+                            <div class="formula-content">
+                                SMA = (P₁ + P₂ + P₃ + ... + Pₙ) / n
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>P:</dt>
+                                <dd>Price (typically closing price)</dd>
+                                <dt>n:</dt>
+                                <dd>Number of periods (e.g., 20, 50, 200 days)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-calculator"></i>
+                                <span>SMA Calculation Example (10-day)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Last 10 closing prices:</strong></p>
+                                <p>$150, $152, $148, $151, $154, $156, $153, $157, $159, $160</p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    SMA₁₀ = (150 + 152 + 148 + 151 + 154 + 156 + 153 + 157 + 159 + 160) / 10
+                                    <br>
+                                    = 1540 / 10 = <strong>$154</strong>
+                                </div>
+                                <p>The 10-day SMA is $154. If current price ($160) > SMA ($154), it signals an <strong>uptrend</strong>.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Exponential Moving Average -->
+                        <h3 class="subsection-header">2. Exponential Moving Average (EMA)</h3>
+                        
+                        <p class="content-text">
+                            EMA gives <strong>more weight to recent prices</strong>, making it more responsive to new information than SMA.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">EMA Formula</div>
+                            <div class="formula-content">
+                                EMA = (Close - EMA_previous) × Multiplier + EMA_previous
+                                <br><br>
+                                Multiplier = 2 / (n + 1)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Close:</dt>
+                                <dd>Current closing price</dd>
+                                <dt>EMA_previous:</dt>
+                                <dd>Previous period's EMA</dd>
+                                <dt>n:</dt>
+                                <dd>Number of periods (e.g., 12, 26, 50)</dd>
+                            </dl>
+                        </div>
+                        
+                        <!-- Golden Cross / Death Cross -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-trophy"></i>
+                                <span>Golden Cross & Death Cross</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Golden Cross (Bullish Signal):</strong></p>
+                                <p>50-day MA crosses ABOVE 200-day MA → Strong buy signal</p>
+                                <br>
+                                <p><strong>Death Cross (Bearish Signal):</strong></p>
+                                <p>50-day MA crosses BELOW 200-day MA → Strong sell signal</p>
+                                <br>
+                                <p><strong>Historical Accuracy:</strong> Golden crosses have preceded major bull markets (2009, 2016, 2020).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>MA Period</th>
+                                        <th>Type</th>
+                                        <th>Use Case</th>
+                                        <th>Trader Profile</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>9-day EMA</strong></td>
+                                        <td>Short-term</td>
+                                        <td>Day trading, scalping</td>
+                                        <td>Active traders</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>20-day SMA</strong></td>
+                                        <td>Medium-term</td>
+                                        <td>Swing trading</td>
+                                        <td>Swing traders</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>50-day SMA</strong></td>
+                                        <td>Intermediate</td>
+                                        <td>Trend confirmation</td>
+                                        <td>Position traders</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>200-day SMA</strong></td>
+                                        <td>Long-term</td>
+                                        <td>Bull/bear market definition</td>
+                                        <td>Institutional investors</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 2: RSI -->
+                    <div class="content-section" id="rsi">
+                        <h2 class="section-header">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Relative Strength Index (RSI)
+                        </h2>
+                        
+                        <p class="content-text">
+                            RSI is a <strong>momentum oscillator</strong> that measures the speed and magnitude of price changes. It identifies <strong>overbought and oversold conditions</strong>.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">RSI Formula</div>
+                            <div class="formula-content">
+                                RSI = 100 - [100 / (1 + RS)]
+                                <br><br>
+                                RS (Relative Strength) = Average Gain / Average Loss
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Average Gain:</dt>
+                                <dd>Average of n-period gains (typically 14 days)</dd>
+                                <dt>Average Loss:</dt>
+                                <dd>Average of n-period losses</dd>
+                                <dt>Range:</dt>
+                                <dd>0 to 100 (70+ = overbought, 30- = oversold)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-area"></i>
+                                <span>RSI Calculation (14-day period)</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Step 1: Calculate gains and losses</strong></p>
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Day</th>
+                                                <th>Close</th>
+                                                <th>Change</th>
+                                                <th>Gain</th>
+                                                <th>Loss</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>$100</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>$102</td>
+                                                <td>+$2</td>
+                                                <td>$2</td>
+                                                <td>$0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>$101</td>
+                                                <td>-$1</td>
+                                                <td>$0</td>
+                                                <td>$1</td>
+                                            </tr>
+                                            <tr>
+                                                <td>...</td>
+                                                <td>...</td>
+                                                <td>...</td>
+                                                <td>...</td>
+                                                <td>...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p><strong>Step 2: Calculate averages</strong></p>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    Average Gain (14 days) = $28 / 14 = $2.00
+                                    <br>
+                                    Average Loss (14 days) = $14 / 14 = $1.00
+                                    <br><br>
+                                    RS = $2.00 / $1.00 = 2.0
+                                    <br>
+                                    RSI = 100 - [100 / (1 + 2.0)] = 100 - 33.33 = <strong>66.67</strong>
+                                </div>
+                                <p><strong>Interpretation:</strong> RSI of 66.67 indicates <strong>bullish momentum</strong> but not yet overbought (would need >70).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>RSI Trading Strategies</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>1. Overbought/Oversold Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Buy Signal:</strong> RSI crosses above 30 (oversold recovery)</li>
+                                    <li><strong>Sell Signal:</strong> RSI crosses below 70 (overbought correction)</li>
+                                </ul>
+                                <br>
+                                <p><strong>2. Divergence Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Bullish Divergence:</strong> Price makes lower low, RSI makes higher low → Reversal up</li>
+                                    <li><strong>Bearish Divergence:</strong> Price makes higher high, RSI makes lower high → Reversal down</li>
+                                </ul>
+                                <br>
+                                <p><strong>3. Centerline Crossover:</strong></p>
+                                <ul class="styled-list">
+                                    <li>RSI crosses above 50 → Bullish momentum</li>
+                                    <li>RSI crosses below 50 → Bearish momentum</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <div class="box-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>RSI Trap: Strong Trends</span>
+                            </div>
+                            <div class="box-content">
+                                <p>In <strong>strong uptrends</strong>, RSI can stay overbought (>70) for extended periods. Similarly, in <strong>downtrends</strong>, RSI can remain oversold (<30) for weeks.</p>
+                                <p><strong>Solution:</strong> Combine RSI with trend indicators (MA, MACD) to avoid counter-trend trades.</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 3: MACD -->
+                    <div class="content-section" id="macd">
+                        <h2 class="section-header">
+                            <i class="fas fa-exchange-alt"></i>
+                            Moving Average Convergence Divergence (MACD)
+                        </h2>
+                        
+                        <p class="content-text">
+                            MACD is a <strong>trend-following momentum indicator</strong> that shows the relationship between two moving averages. It's one of the most reliable technical tools.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">MACD Components</div>
+                            <div class="formula-content">
+                                MACD Line = 12-period EMA - 26-period EMA
+                                <br><br>
+                                Signal Line = 9-period EMA of MACD Line
+                                <br><br>
+                                Histogram = MACD Line - Signal Line
+                            </div>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-line"></i>
+                                <span>MACD Trading Signals</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>1. MACD Crossover (Most Common Signal):</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Bullish Signal:</strong> MACD line crosses ABOVE signal line</li>
+                                    <li><strong>Bearish Signal:</strong> MACD line crosses BELOW signal line</li>
+                                </ul>
+                                <br>
+                                <p><strong>2. Zero Line Crossover:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Buy:</strong> MACD crosses above zero (uptrend confirmation)</li>
+                                    <li><strong>Sell:</strong> MACD crosses below zero (downtrend confirmation)</li>
+                                </ul>
+                                <br>
+                                <p><strong>3. Divergence:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Bullish:</strong> Price falling, MACD rising → Potential reversal up</li>
+                                    <li><strong>Bearish:</strong> Price rising, MACD falling → Potential reversal down</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-trophy"></i>
+                                <span>Pro Strategy: MACD + Volume Confirmation</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Entry Rules:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li>MACD crosses above signal line (bullish crossover)</li>
+                                    <li>Volume increases on the crossover day (confirms strength)</li>
+                                    <li>Price is above 50-day MA (trend confirmation)</li>
+                                </ol>
+                                <p><strong>Exit Rules:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li>MACD crosses below signal line (bearish crossover)</li>
+                                    <li>OR price drops below 50-day MA</li>
+                                    <li>OR 15% profit target reached</li>
+                                </ol>
+                                <p><strong>Historical Win Rate:</strong> ~65% on S&P 500 stocks (2010-2023)</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 4: Bollinger Bands -->
+                    <div class="content-section" id="bollinger-bands">
+                        <h2 class="section-header">
+                            <i class="fas fa-compress-arrows-alt"></i>
+                            Bollinger Bands
+                        </h2>
+                        
+                        <p class="content-text">
+                            Bollinger Bands measure <strong>volatility</strong> and identify extreme price levels. Created by John Bollinger in the 1980s, they adapt dynamically to market conditions.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Bollinger Bands Formula</div>
+                            <div class="formula-content">
+                                Middle Band = 20-period SMA
+                                <br><br>
+                                Upper Band = Middle Band + (2 × Standard Deviation)
+                                <br><br>
+                                Lower Band = Middle Band - (2 × Standard Deviation)
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Standard Deviation:</dt>
+                                <dd>Measures volatility over 20 periods</dd>
+                                <dt>2σ Coverage:</dt>
+                                <dd>95% of price action occurs within the bands (statistically)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-calculator"></i>
+                                <span>Bollinger Band Calculation Example</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Given Data:</strong></p>
+                                <ul class="styled-list">
+                                    <li>20-day SMA (Middle Band): <strong>$150</strong></li>
+                                    <li>20-day Standard Deviation: <strong>$5</strong></li>
+                                </ul>
+                                <div class="formula-content" style="margin: 1rem 0;">
+                                    Upper Band = $150 + (2 × $5) = <strong>$160</strong>
+                                    <br>
+                                    Lower Band = $150 - (2 × $5) = <strong>$140</strong>
+                                </div>
+                                <p><strong>Trading Signals:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Price at $160 (Upper Band) → <strong>Overbought</strong>, potential sell</li>
+                                    <li>Price at $140 (Lower Band) → <strong>Oversold</strong>, potential buy</li>
+                                    <li>Price breaking above $160 → <strong>Strong breakout</strong>, momentum trade</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-compress"></i>
+                                <span>Bollinger Squeeze Strategy</span>
+                            </div>
+                            <div class="box-content">
+                                <p>A <strong>Bollinger Squeeze</strong> occurs when bands narrow dramatically (low volatility). This precedes explosive moves.</p>
+                                <p><strong>How to Identify:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Bandwidth (Upper - Lower) reaches 6-month low</li>
+                                    <li>Bands are parallel and flat</li>
+                                    <li>Volume is declining</li>
+                                </ul>
+                                <p><strong>Trade Setup:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Wait for price to break above Upper Band (bullish) or below Lower Band (bearish)</li>
+                                    <li>Confirm with increased volume (2x average)</li>
+                                    <li>Enter in direction of breakout</li>
+                                </ul>
+                                <p><strong>Expected Move:</strong> 10-30% price move within 2-4 weeks after squeeze</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 5: Fibonacci -->
+                    <div class="content-section" id="fibonacci">
+                        <h2 class="section-header">
+                            <i class="fas fa-ruler-combined"></i>
+                            Fibonacci Retracements
+                        </h2>
+                        
+                        <p class="content-text">
+                            Fibonacci retracements identify <strong>potential support and resistance levels</strong> based on the mathematical Fibonacci sequence. Widely used by institutional traders.
+                        </p>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">Key Fibonacci Levels</div>
+                            <div class="formula-content">
+                                23.6%, 38.2%, 50.0%, 61.8%, 78.6%
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Golden Ratio (61.8%):</dt>
+                                <dd>Most important level, often acts as strong support/resistance</dd>
+                                <dt>Application:</dt>
+                                <dd>Draw from swing low to swing high (uptrend) or high to low (downtrend)</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-ruler"></i>
+                                <span>Fibonacci Example: Stock Pullback</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Scenario:</strong> Stock rallies from $100 (swing low) to $150 (swing high), then pulls back.</p>
+                                <p><strong>Fibonacci Retracement Levels:</strong></p>
+                                <div class="data-table-wrapper" style="margin: 1rem 0;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Level</th>
+                                                <th>Percentage</th>
+                                                <th>Price</th>
+                                                <th>Interpretation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>0%</td>
+                                                <td>0.0%</td>
+                                                <td>$150</td>
+                                                <td>Swing high (no retracement)</td>
+                                            </tr>
+                                            <tr>
+                                                <td>23.6%</td>
+                                                <td>23.6%</td>
+                                                <td>$138.20</td>
+                                                <td>Shallow pullback</td>
+                                            </tr>
+                                            <tr>
+                                                <td>38.2%</td>
+                                                <td>38.2%</td>
+                                                <td>$130.90</td>
+                                                <td>Moderate support</td>
+                                            </tr>
+                                            <tr>
+                                                <td>50.0%</td>
+                                                <td>50.0%</td>
+                                                <td>$125.00</td>
+                                                <td>Psychological level</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>61.8%</strong></td>
+                                                <td><strong>61.8%</strong></td>
+                                                <td><strong>$119.10</strong></td>
+                                                <td><strong>Golden ratio (strongest support)</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>78.6%</td>
+                                                <td>78.6%</td>
+                                                <td>$110.70</td>
+                                                <td>Deep retracement</td>
+                                            </tr>
+                                            <tr>
+                                                <td>100%</td>
+                                                <td>100.0%</td>
+                                                <td>$100</td>
+                                                <td>Full retracement (trend failure)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p><strong>Trading Strategy:</strong></p>
+                                <p>If price retraces to <strong>$119.10 (61.8%)</strong> and bounces with volume, it's a strong buy signal (uptrend continuation).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-crosshairs"></i>
+                                <span>Fibonacci Extension Targets</span>
+                            </div>
+                            <div class="box-content">
+                                <p>After a retracement, use <strong>Fibonacci Extensions</strong> to project profit targets:</p>
+                                <ul class="styled-list">
+                                    <li><strong>127.2%:</strong> Conservative target</li>
+                                    <li><strong>161.8%:</strong> Aggressive target (golden extension)</li>
+                                    <li><strong>261.8%:</strong> Parabolic move target</li>
+                                </ul>
+                                <p><strong>Example:</strong> If stock bounces from $119 (61.8% retracement), targets are:</p>
+                                <div class="formula-content" style="margin-top: 1rem;">
+                                    127.2% Extension = $150 + ($50 × 0.272) = <strong>$163.60</strong>
+                                    <br>
+                                    161.8% Extension = $150 + ($50 × 0.618) = <strong>$180.90</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 6: Volume Analysis -->
+                    <div class="content-section" id="volume-analysis">
+                        <h2 class="section-header">
+                            <i class="fas fa-chart-bar"></i>
+                            Volume Analysis
+                        </h2>
+                        
+                        <p class="content-text">
+                            <strong>"Volume precedes price"</strong> – This Wall Street adage reflects the importance of volume in confirming trends and spotting reversals.
+                        </p>
+                        
+                        <div class="info-box">
+                            <div class="box-header">
+                                <i class="fas fa-volume-up"></i>
+                                <span>Volume Interpretation Rules</span>
+                            </div>
+                            <div class="box-content">
+                                <ul class="styled-list">
+                                    <li><strong>Rising price + Rising volume:</strong> Healthy uptrend (strong buying)</li>
+                                    <li><strong>Rising price + Falling volume:</strong> Weak uptrend (likely reversal)</li>
+                                    <li><strong>Falling price + Rising volume:</strong> Strong downtrend (panic selling)</li>
+                                    <li><strong>Falling price + Falling volume:</strong> Weak downtrend (potential bottom)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h3 class="subsection-header">On-Balance Volume (OBV)</h3>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">OBV Formula</div>
+                            <div class="formula-content">
+                                If Close > Close_previous: OBV = OBV_previous + Volume
+                                <br><br>
+                                If Close < Close_previous: OBV = OBV_previous - Volume
+                                <br><br>
+                                If Close = Close_previous: OBV = OBV_previous
+                            </div>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-chart-area"></i>
+                                <span>OBV Divergence Example</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Bullish Divergence (Accumulation):</strong></p>
+                                <ul class="styled-list">
+                                    <li>Stock makes lower low: $45 → $42</li>
+                                    <li>OBV makes higher low: 5M → 6M</li>
+                                    <li><strong>Signal:</strong> Smart money accumulating, price likely to reverse up</li>
+                                </ul>
+                                <br>
+                                <p><strong>Bearish Divergence (Distribution):</strong></p>
+                                <ul class="styled-list">
+                                    <li>Stock makes higher high: $55 → $58</li>
+                                    <li>OBV makes lower high: 8M → 7M</li>
+                                    <li><strong>Signal:</strong> Institutions distributing, price likely to reverse down</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h3 class="subsection-header">Volume-Weighted Average Price (VWAP)</h3>
+                        
+                        <div class="formula-block">
+                            <div class="formula-title">VWAP Formula</div>
+                            <div class="formula-content">
+                                VWAP = Σ (Price × Volume) / Σ Volume
+                            </div>
+                            <dl class="formula-legend">
+                                <dt>Use Case:</dt>
+                                <dd>Institutional traders use VWAP as execution benchmark</dd>
+                                <dt>Interpretation:</dt>
+                                <dd>Price > VWAP = Bullish | Price < VWAP = Bearish</dd>
+                            </dl>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Section 7: Chart Patterns -->
+                    <div class="content-section" id="chart-patterns">
+                        <h2 class="section-header">
+                            <i class="fas fa-shapes"></i>
+                            Classic Chart Patterns
+                        </h2>
+                        
+                        <p class="content-text">
+                            Chart patterns are <strong>visual representations of market psychology</strong>. They've worked for decades because human behavior is predictable.
+                        </p>
+                        
+                        <h3 class="subsection-header">Continuation Patterns</h3>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Pattern</th>
+                                        <th>Description</th>
+                                        <th>Breakout Direction</th>
+                                        <th>Target</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Bull Flag</strong></td>
+                                        <td>Sharp rally + tight consolidation downward</td>
+                                        <td>Upward (continuation)</td>
+                                        <td>Height of flagpole</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Bear Flag</strong></td>
+                                        <td>Sharp drop + tight consolidation upward</td>
+                                        <td>Downward (continuation)</td>
+                                        <td>Height of flagpole</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Triangle</strong></td>
+                                        <td>Converging trendlines (symmetrical)</td>
+                                        <td>Direction of prevailing trend</td>
+                                        <td>Triangle height</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3 class="subsection-header">Reversal Patterns</h3>
+                        
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Pattern</th>
+                                        <th>Description</th>
+                                        <th>Signal</th>
+                                        <th>Reliability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Head & Shoulders</strong></td>
+                                        <td>Three peaks (middle highest)</td>
+                                        <td>Bearish reversal</td>
+                                        <td>85%+</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Inverse H&S</strong></td>
+                                        <td>Three troughs (middle lowest)</td>
+                                        <td>Bullish reversal</td>
+                                        <td>85%+</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Double Top</strong></td>
+                                        <td>Two peaks at same level</td>
+                                        <td>Bearish reversal</td>
+                                        <td>70%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Double Bottom</strong></td>
+                                        <td>Two troughs at same level</td>
+                                        <td>Bullish reversal</td>
+                                        <td>70%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="example-card">
+                            <div class="example-header">
+                                <i class="fas fa-mountain"></i>
+                                <span>Head & Shoulders Example</span>
+                            </div>
+                            <div class="example-content">
+                                <p><strong>Pattern Formation:</strong></p>
+                                <ol style="list-style: decimal; padding-left: 1.5rem; margin: 1rem 0;">
+                                    <li><strong>Left Shoulder:</strong> Rally to $50, pullback to $45</li>
+                                    <li><strong>Head:</strong> Rally to $55, pullback to $45 (neckline)</li>
+                                    <li><strong>Right Shoulder:</strong> Rally to $50, pullback toward $45</li>
+                                </ol>
+                                <p><strong>Trading Setup:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Entry:</strong> Break below neckline ($45) on high volume</li>
+                                    <li><strong>Stop Loss:</strong> Above right shoulder ($51)</li>
+                                    <li><strong>Target:</strong> Neckline - Head height = $45 - ($55-$45) = <strong>$35</strong></li>
+                                </ul>
+                                <p><strong>Risk/Reward:</strong> 6 points risk / 10 points reward = 1.67 R/R ratio</p>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-flag-checkered"></i>
+                                <span>Bull Flag Trading Strategy</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Pattern Characteristics:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Sharp rally (flagpole) of 20%+ in 1-3 days</li>
+                                    <li>Tight consolidation (flag) for 5-15 days</li>
+                                    <li>Declining volume during consolidation</li>
+                                    <li>Volume spike on breakout (2x+ average)</li>
+                                </ul>
+                                <br>
+                                <p><strong>Entry Rules:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Buy when price breaks above flag resistance</li>
+                                    <li>Volume > 2x average</li>
+                                    <li>Stop loss below flag low</li>
+                                </ul>
+                                <p><strong>Profit Target:</strong> Add flagpole height to breakout point</p>
+                                <p><strong>Win Rate:</strong> 68% (according to Bulkowski's Encyclopedia of Chart Patterns)</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="page-navigation">
+                        <a href="resources-financial-metrics.html" class="nav-button prev">
+                            <i class="fas fa-chevron-left"></i>
+                            <span>Previous: Financial Metrics</span>
+                        </a>
+                        <a href="resources-ml-finance.html" class="nav-button next">
+                            <span>Next: Machine Learning</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>
