@@ -381,6 +381,38 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE P/E PAR SECTEUR -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Comparison: P/E Ratios by Industry Sector</h3>
+                            <canvas id="peRatioChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS P/E -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Interpret P/E Ratios</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Sector Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>High P/E (>30x):</strong> Tech/SaaS companies → Investors pay premium for high growth expectations</li>
+                                    <li><strong>Medium P/E (15-25x):</strong> Healthcare/Consumer goods → Balanced growth and stability</li>
+                                    <li><strong>Low P/E (<15x):</strong> Financials/Energy/Utilities → Cyclical or slow-growth industries</li>
+                                </ul>
+                                <br>
+                                <p><strong>Investment Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Value Investing:</strong> Look for P/E < industry average (potential undervaluation)</li>
+                                    <li><strong>Growth Investing:</strong> Accept high P/E if revenue growth >20% annually</li>
+                                    <li><strong>Relative Valuation:</strong> Compare P/E to sector peers, not just S&P 500 average</li>
+                                    <li><strong>PEG Ratio:</strong> P/E / Growth Rate → PEG < 1.0 = attractive for growth stocks</li>
+                                </ul>
+                                <br>
+                                <p><strong>⚠ Warning:</strong> P/E is useless for unprofitable companies (negative earnings). Use P/S (Price-to-Sales) instead.</p>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-lightbulb"></i>
@@ -436,6 +468,38 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE P/B vs ROE SCATTER -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Analysis: P/B Ratio vs ROE (Quality vs Valuation)</h3>
+                            <canvas id="pbRoeChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS P/B vs ROE -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Use P/B vs ROE Chart</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Quadrant Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Top Right (High P/B, High ROE):</strong> Quality companies trading at premium → Microsoft, Apple (justified premium)</li>
+                                    <li><strong>Top Left (Low P/B, High ROE):</strong> Value opportunities → Hidden gems, undervalued quality stocks</li>
+                                    <li><strong>Bottom Right (High P/B, Low ROE):</strong> Overvalued → Avoid (paying too much for poor returns)</li>
+                                    <li><strong>Bottom Left (Low P/B, Low ROE):</strong> Value traps → Distressed companies, turnaround plays</li>
+                                </ul>
+                                <br>
+                                <p><strong>Investment Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Best Opportunities:</strong> Look for companies with ROE >15% trading at P/B <2.0 (top left quadrant)</li>
+                                    <li><strong>Quality at Any Price:</strong> ROE >25% justifies P/B up to 5-10x (exceptional companies)</li>
+                                    <li><strong>Red Flag:</strong> P/B >3.0 with ROE <10% = Bubble territory, avoid</li>
+                                </ul>
+                                <br>
+                                <p><strong>💎 Pro Tip:</strong> Banks should trade at P/B 1.0-1.5x. Tech companies at P/B 5-15x is normal (intangible assets).</p>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-university"></i>
@@ -473,6 +537,38 @@
                                 <dt>Why use EV?</dt>
                                 <dd>Represents the total cost to acquire a company (equity + debt - cash)</dd>
                             </dl>
+                        </div>
+                        
+                        <!-- GRAPHIQUE EV/EBITDA COMPARAISON -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Comparison: EV/EBITDA Multiples Across Industries</h3>
+                            <canvas id="evEbitdaChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS EV/EBITDA -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Use EV/EBITDA for M&A Analysis</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Multiple Interpretation:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Low EV/EBITDA (5-8x):</strong> Mature industries (retail, manufacturing) → Potential acquisition targets</li>
+                                    <li><strong>Medium (8-12x):</strong> Average market valuation → Fair value for stable businesses</li>
+                                    <li><strong>High (15-25x):</strong> High-growth sectors (tech, biotech) → Premium for innovation</li>
+                                    <li><strong>Very High (>25x):</strong> Either exceptional growth or overvaluation → Due diligence required</li>
+                                </ul>
+                                <br>
+                                <p><strong>M&A Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Acquisition Targets:</strong> Look for EV/EBITDA <8x in consolidating industries</li>
+                                    <li><strong>Fair Value:</strong> Compare to sector median ± 20% (accounts for company-specific factors)</li>
+                                    <li><strong>Synergy Justification:</strong> Acquirers pay 20-40% premium → Target EV/EBITDA typically 10-15x</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Pro Tip:</strong> EV/EBITDA works better than P/E for comparing companies with different capital structures (debt levels).</p>
+                            </div>
                         </div>
                         
                         <div class="example-card">
@@ -568,6 +664,38 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE ROE COMPARAISON -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Comparison: ROE Across Blue-Chip Companies</h3>
+                            <canvas id="roeChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS ROE -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Interpret ROE Levels</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>ROE Quality Tiers:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Exceptional (>20%):</strong> World-class companies with durable competitive advantages (Apple, Microsoft, Visa)</li>
+                                    <li><strong>Good (15-20%):</strong> Above-average performers, solid investment candidates</li>
+                                    <li><strong>Average (10-15%):</strong> Acceptable but unexciting, scrutinize for improvement trends</li>
+                                    <li><strong>Poor (<10%):</strong> Red flag → Capital inefficiency, potential turnaround play or avoid</li>
+                                </ul>
+                                <br>
+                                <p><strong>Investment Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Quality Screening:</strong> Filter for ROE >15% sustained over 5+ years (consistency matters)</li>
+                                    <li><strong>Competitive Moat:</strong> High ROE (>25%) indicates pricing power, brand strength, or network effects</li>
+                                    <li><strong>Capital Allocation:</strong> Compare ROE to cost of equity (CAPM) → ROE should exceed cost by 5%+</li>
+                                </ul>
+                                <br>
+                                <p><strong>⚠ Warning:</strong> High ROE from excessive leverage can be risky. Check Debt/Equity ratio!</p>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-trophy"></i>
@@ -612,6 +740,42 @@
                                 Operating Margin = (Operating Income / Revenue) × 100%
                                 <br><br>
                                 Net Margin = (Net Income / Revenue) × 100%
+                            </div>
+                        </div>
+                        
+                        <!-- GRAPHIQUE PROFIT MARGINS ÉVOLUTION -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Profit Margin Evolution Over Time</h3>
+                            <canvas id="profitMarginsChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS PROFIT MARGINS -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Analyze Margin Trends</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Margin Interpretation:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Expanding Margins:</strong> Operating leverage kicking in → Revenue growing faster than costs (bullish)</li>
+                                    <li><strong>Stable Margins:</strong> Mature business with pricing power, consistent operations</li>
+                                    <li><strong>Contracting Margins:</strong> Red flag → Increasing competition, rising costs, or pricing pressure</li>
+                                </ul>
+                                <br>
+                                <p><strong>Margin Gap Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Gross - Operating Margin:</strong> Large gap = high SG&A expenses (sales, marketing, R&D)</li>
+                                    <li><strong>Operating - Net Margin:</strong> Large gap = high interest/tax burden or non-operating losses</li>
+                                    <li><strong>Ideal Profile:</strong> All three margins expanding together = healthy growth with efficiency</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Action Items:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Buy when margins expand + revenue grows (double positive)</li>
+                                    <li>Caution when margins contract for 3+ consecutive quarters</li>
+                                    <li>Compare to industry peers (e.g., SaaS should have >70% gross margin)</li>
+                                </ul>
                             </div>
                         </div>
                         
@@ -698,6 +862,42 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE LIQUIDITY RATIOS -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Analysis: Current Ratio vs Quick Ratio</h3>
+                            <canvas id="liquidityChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS LIQUIDITY -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Assess Liquidity Health</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Ratio Interpretation:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Strong Liquidity (Current >2.0, Quick >1.5):</strong> Can survive 12+ months of revenue loss</li>
+                                    <li><strong>Adequate (Current 1.5-2.0, Quick 1.0-1.5):</strong> Comfortable but monitor quarterly</li>
+                                    <li><strong>Warning (Current 1.0-1.5, Quick 0.5-1.0):</strong> Tight cash position, vulnerable to shocks</li>
+                                    <li><strong>Critical (Current <1.0, Quick <0.5):</strong> Imminent liquidity crisis, bankruptcy risk</li>
+                                </ul>
+                                <br>
+                                <p><strong>Gap Analysis (Current - Quick Ratio):</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Small Gap (<0.5):</strong> Low inventory business (services, software) → Less liquidity risk</li>
+                                    <li><strong>Large Gap (>1.0):</strong> Inventory-heavy (retail, manufacturing) → Monitor inventory turnover</li>
+                                </ul>
+                                <br>
+                                <p><strong>🚨 Red Flags:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Declining trend in both ratios over 3+ quarters</li>
+                                    <li>Quick Ratio <0.5 + rising short-term debt</li>
+                                    <li>Current Ratio >4.0 may indicate inefficient capital use (hoarding cash)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="warning-box">
                             <div class="box-header">
                                 <i class="fas fa-exclamation-triangle"></i>
@@ -756,6 +956,44 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE LEVERAGE (TESLA CASE STUDY) -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Case Study: Tesla's Debt Reduction Journey (2018-2024)</h3>
+                            <canvas id="leverageChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS LEVERAGE -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Evaluate Leverage Risk</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>D/E Ratio Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Conservative (<0.5):</strong> Fortress balance sheet → Survives recessions easily (Berkshire Hathaway)</li>
+                                    <li><strong>Moderate (0.5-1.5):</strong> Optimal leverage → Amplifies ROE without excessive risk</li>
+                                    <li><strong>Aggressive (1.5-3.0):</strong> High risk/reward → Works in bull markets, dangerous in recessions</li>
+                                    <li><strong>Distress (>3.0):</strong> Bankruptcy risk → Avoid unless turnaround specialist</li>
+                                </ul>
+                                <br>
+                                <p><strong>Interest Coverage Insights:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>>10x:</strong> Debt is negligible, company can take on more if needed</li>
+                                    <li><strong>3-10x:</strong> Comfortable debt service, sustainable</li>
+                                    <li><strong>1.5-3x:</strong> Tight margins, vulnerable to earnings decline</li>
+                                    <li><strong><1.5x:</strong> Cannot cover interest from operations → Refinancing or asset sale needed</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Investment Strategy:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Look for D/E improving trend (deleveraging = bullish)</li>
+                                    <li>Accept high D/E (>2.0) only if Interest Coverage >5x and stable cash flows</li>
+                                    <li>Avoid companies with D/E >2.0 + negative FCF (death spiral risk)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-building"></i>
@@ -811,6 +1049,42 @@
                                 Inventory Turnover = Cost of Goods Sold / Average Inventory
                                 <br><br>
                                 Days Inventory Outstanding = 365 / Inventory Turnover
+                            </div>
+                        </div>
+                        
+                        <!-- GRAPHIQUE EFFICIENCY METRICS -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Comparison: Inventory Turnover Across Industries</h3>
+                            <canvas id="efficiencyChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS EFFICIENCY -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Analyze Inventory Efficiency</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Turnover Interpretation:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>High Turnover (>10x):</strong> Fast-moving goods, minimal waste, strong demand (Amazon, Tesla)</li>
+                                    <li><strong>Medium (5-10x):</strong> Standard retail/consumer goods efficiency</li>
+                                    <li><strong>Low (<5x):</strong> Slow-moving inventory, luxury goods, or long production cycles (Boeing, jewelry)</li>
+                                </ul>
+                                <br>
+                                <p><strong>Days Inventory Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong><30 days:</strong> Just-in-time inventory, build-to-order model (Tesla, Dell)</li>
+                                    <li><strong>30-90 days:</strong> Healthy balance between stock availability and efficiency</li>
+                                    <li><strong>>90 days:</strong> Potential obsolescence risk, overstocking, or weak demand</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Investment Insights:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Rising turnover = operational improvement (bullish)</li>
+                                    <li>Falling turnover + rising inventory = demand problem (bearish)</li>
+                                    <li>Compare to industry: Walmart (8.5x) vs. luxury brands (2-3x is normal)</li>
+                                </ul>
                             </div>
                         </div>
                         
@@ -880,6 +1154,43 @@
                             </dl>
                         </div>
                         
+                        <!-- GRAPHIQUE REVENUE GROWTH -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: Revenue Growth Trajectory (CAGR Analysis)</h3>
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS GROWTH -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Evaluate Growth Quality</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Growth Rate Tiers:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Hyper-Growth (>40% CAGR):</strong> Early-stage disruptors, high risk/reward (crypto, SaaS startups)</li>
+                                    <li><strong>High Growth (20-40% CAGR):</strong> Proven scalers, institutional favorites (FAANG during 2010s)</li>
+                                    <li><strong>Moderate Growth (10-20% CAGR):</strong> Solid performers, sustainable long-term</li>
+                                    <li><strong>Slow Growth (<10% CAGR):</strong> Mature companies, dividend focus (utilities, consumer staples)</li>
+                                </ul>
+                                <br>
+                                <p><strong>Quality Checks:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Organic vs Acquisition Growth:</strong> Organic is sustainable, M&A growth needs integration success</li>
+                                    <li><strong>Revenue + Margin Expansion:</strong> Both growing = healthy scaling (operating leverage)</li>
+                                    <li><strong>Consistency:</strong> Prefer steady 20% CAGR over volatile 10-30% swings</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Valuation Context:</strong></p>
+                                <ul class="styled-list">
+                                    <li>40% CAGR company can justify P/E 50-80x (PEG ratio <2.0)</li>
+                                    <li>20% CAGR → P/E 30-40x is fair</li>
+                                    <li>10% CAGR → P/E should be <20x</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="example-card">
                             <div class="example-header">
                                 <i class="fas fa-chart-line"></i>
@@ -945,6 +1256,76 @@
                                 <dt>Tc:</dt>
                                 <dd>Corporate tax rate</dd>
                             </dl>
+                        </div>
+                        
+                        <!-- GRAPHIQUE DCF WATERFALL -->
+                        <div class="chart-container">
+                            <h3 class="chart-title">Live Example: DCF Valuation Breakdown (Waterfall Chart)</h3>
+                            <canvas id="dcfWaterfallChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS DCF -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Build a Robust DCF Model</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>DCF Component Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>PV of FCF (Years 1-5):</strong> Typically 20-40% of total value → Near-term cash flows</li>
+                                    <li><strong>Terminal Value:</strong> Usually 60-80% of total → Long-term assumptions critical</li>
+                                    <li><strong>Debt Adjustment:</strong> Subtract net debt to get equity value</li>
+                                </ul>
+                                <br>
+                                <p><strong>Key Assumptions to Validate:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Revenue Growth:</strong> Should decline gradually to terminal growth (2-3%) → Law of large numbers</li>
+                                    <li><strong>FCF Margin:</strong> Cross-check against industry benchmarks (e.g., SaaS 20-30%)</li>
+                                    <li><strong>WACC:</strong> 8-12% for most companies (use CAPM for cost of equity)</li>
+                                    <li><strong>Terminal Growth:</strong> Never exceed GDP growth (~2-3% in developed markets)</li>
+                                </ul>
+                                <br>
+                                <p><strong>🎯 Sensitivity Analysis:</strong></p>
+                                <ul class="styled-list">
+                                    <li>Run scenarios with WACC ±1% and terminal growth ±0.5%</li>
+                                    <li>If valuation swings >30% → Model too sensitive, refine assumptions</li>
+                                    <li>Compare to market cap: >30% difference suggests mispricing or bad assumptions</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- GRAPHIQUE DCF SENSITIVITY -->
+                        <div class="chart-container" style="margin-top: 2rem;">
+                            <h3 class="chart-title">DCF Sensitivity Analysis: Valuation Impact of Key Assumptions</h3>
+                            <canvas id="dcfSensitivityChart"></canvas>
+                        </div>
+                        
+                        <!-- RECOMMANDATIONS SENSITIVITY -->
+                        <div class="success-box">
+                            <div class="box-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>How to Read Sensitivity Analysis</span>
+                            </div>
+                            <div class="box-content">
+                                <p><strong>Assumption Impact Ranking:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Terminal Growth (+1%):</strong> Most sensitive → Small change = big impact on valuation</li>
+                                    <li><strong>WACC (-0.5%):</strong> High impact → Lower discount rate = higher present value</li>
+                                    <li><strong>FCF Margin (+5%):</strong> Moderate impact → Operational improvements matter</li>
+                                    <li><strong>Revenue Growth (+10%):</strong> Least sensitive → Growth already priced in baseline</li>
+                                </ul>
+                                <br>
+                                <p><strong>Investment Decision Framework:</strong></p>
+                                <ul class="styled-list">
+                                    <li><strong>Base Case ($3,659M):</strong> Use conservative assumptions → Fair value estimate</li>
+                                    <li><strong>Upside Scenarios:</strong> If 2-3 positive assumptions hit → $4,200-4,500M valuation</li>
+                                    <li><strong>Downside Scenarios:</strong> If assumptions miss → $3,000-3,200M valuation</li>
+                                    <li><strong>Margin of Safety:</strong> Buy at >20% discount to base case ($2,900M or less)</li>
+                                </ul>
+                                <br>
+                                <p><strong>💡 Pro Tip:</strong> Never rely on a single DCF. Run 3 scenarios (bull/base/bear) and probability-weight them!</p>
+                            </div>
                         </div>
                         
                         <div class="example-card">
@@ -1092,6 +1473,537 @@
                     e.stopPropagation();
                 });
             }
+            
+            // ============================================
+            // GRAPHIQUES CHART.JS - FINANCIAL METRICS
+            // ============================================
+            
+            // GRAPHIQUE 1: P/E RATIO PAR SECTEUR
+            new Chart(document.getElementById('peRatioChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Tech', 'Healthcare', 'Financials', 'Energy', 'Utilities', 'Consumer', 'Industrial', 'Real Estate'],
+                    datasets: [{
+                        label: 'P/E Ratio',
+                        data: [32, 22, 12, 10, 16, 20, 18, 25],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(52, 211, 153, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(251, 191, 36, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(236, 72, 153, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(52, 211, 153, 1)',
+                            'rgba(251, 146, 60, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(251, 191, 36, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(236, 72, 153, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            callbacks: { 
+                                label: ctx => 'P/E Ratio: ' + ctx.parsed.y + 'x' 
+                            } 
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'P/E Multiple (x)' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 2: P/B vs ROE SCATTER
+            const companies = [
+                {name: 'Microsoft', pb: 12, roe: 36, size: 25},
+                {name: 'Apple', pb: 45, roe: 147, size: 30},
+                {name: 'Google', pb: 6, roe: 29, size: 25},
+                {name: 'Amazon', pb: 8, roe: 21, size: 25},
+                {name: 'Tesla', pb: 14, roe: 23, size: 20},
+                {name: 'JPMorgan', pb: 1.5, roe: 15, size: 20},
+                {name: 'ExxonMobil', pb: 1.8, roe: 12, size: 18},
+                {name: 'Walmart', pb: 4.5, roe: 16, size: 22},
+                {name: 'Coca-Cola', pb: 10, roe: 40, size: 20},
+                {name: 'Netflix', pb: 7, roe: 25, size: 18}
+            ];
+            
+            new Chart(document.getElementById('pbRoeChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Companies',
+                        data: companies.map(c => ({x: c.roe, y: c.pb, r: c.size})),
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const company = companies[ctx.dataIndex];
+                                    return [
+                                        company.name,
+                                        'ROE: ' + company.roe + '%',
+                                        'P/B: ' + company.pb + 'x'
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'ROE (%)' },
+                            min: 0,
+                            max: 50
+                        },
+                        y: { 
+                            title: { display: true, text: 'P/B Ratio (x)' },
+                            min: 0,
+                            max: 50
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 3: EV/EBITDA PAR INDUSTRIE
+            new Chart(document.getElementById('evEbitdaChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['SaaS', 'Biotech', 'E-commerce', 'Semiconductors', 'Telecom', 'Retail', 'Manufacturing', 'Utilities'],
+                    datasets: [{
+                        label: 'EV/EBITDA Multiple',
+                        data: [22, 18, 14, 16, 8, 7, 9, 10],
+                        backgroundColor: 'rgba(52, 211, 153, 0.7)',
+                        borderColor: 'rgba(52, 211, 153, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => 'EV/EBITDA: ' + ctx.parsed.x + 'x' } }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'EV/EBITDA Multiple (x)' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 4: ROE COMPARAISON
+            new Chart(document.getElementById('roeChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Apple', 'Microsoft', 'Coca-Cola', 'Visa', 'Walmart', 'Ford', 'AT&T', 'Industry Avg'],
+                    datasets: [{
+                        label: 'Return on Equity (%)',
+                        data: [147, 36, 40, 38, 16, 12, 8, 15],
+                        backgroundColor: companies => {
+                            return companies.dataIndex === 7 ? 'rgba(156, 163, 175, 0.7)' : 
+                                   companies.parsed.y > 20 ? 'rgba(34, 197, 94, 0.7)' : 
+                                   companies.parsed.y > 15 ? 'rgba(251, 191, 36, 0.7)' : 
+                                   'rgba(239, 68, 68, 0.7)';
+                        },
+                        borderColor: companies => {
+                            return companies.dataIndex === 7 ? 'rgba(156, 163, 175, 1)' : 
+                                   companies.parsed.y > 20 ? 'rgba(34, 197, 94, 1)' : 
+                                   companies.parsed.y > 15 ? 'rgba(251, 191, 36, 1)' : 
+                                   'rgba(239, 68, 68, 1)';
+                        },
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => 'ROE: ' + ctx.parsed.y + '%' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'ROE (%)' },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 5: PROFIT MARGINS ÉVOLUTION
+            const quarters = ['Q1 2022', 'Q2 2022', 'Q3 2022', 'Q4 2022', 'Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023'];
+            const grossMargins = [42, 42.5, 43, 43.5, 44, 44.5, 45, 45.5];
+            const opMargins = [28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5];
+            const netMargins = [23, 23.5, 24, 24.5, 25, 25.5, 26, 26.5];
+            
+            new Chart(document.getElementById('profitMarginsChart'), {
+                type: 'line',
+                data: {
+                    labels: quarters,
+                    datasets: [{
+                        label: 'Gross Margin',
+                        data: grossMargins,
+                        borderColor: 'rgba(52, 211, 153, 1)',
+                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Operating Margin',
+                        data: opMargins,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Net Margin',
+                        data: netMargins,
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 50,
+                            title: { display: true, text: 'Margin (%)' },
+                            ticks: { callback: value => value + '%' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 6: LIQUIDITY RATIOS
+            const companies2 = ['Apple', 'Tesla', 'Amazon', 'Walmart', 'Ford', 'Boeing'];
+            const currentRatios = [1.1, 1.7, 1.0, 0.8, 1.2, 1.3];
+            const quickRatios = [0.9, 1.4, 0.8, 0.3, 0.9, 0.6];
+            
+            new Chart(document.getElementById('liquidityChart'), {
+                type: 'bar',
+                data: {
+                    labels: companies2,
+                    datasets: [{
+                        label: 'Current Ratio',
+                        data: currentRatios,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Quick Ratio',
+                        data: quickRatios,
+                        backgroundColor: 'rgba(251, 146, 60, 0.7)',
+                        borderColor: 'rgba(251, 146, 60, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 2.0,
+                            title: { display: true, text: 'Ratio' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 7: LEVERAGE (TESLA CASE)
+            const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024'];
+            const deRatio = [2.4, 2.1, 1.5, 0.8, 0.3, 0.08, 0.05];
+            const intCoverage = [0.5, 1.2, 3.5, 8.5, 15.0, 22.0, 30.0];
+            
+            new Chart(document.getElementById('leverageChart'), {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'D/E Ratio',
+                        data: deRatio,
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 3,
+                        yAxisID: 'y',
+                        tension: 0.4
+                    }, {
+                        label: 'Interest Coverage',
+                        data: intCoverage,
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderWidth: 3,
+                        yAxisID: 'y1',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { 
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'D/E Ratio' },
+                            min: 0,
+                            max: 3
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Interest Coverage (x)' },
+                            min: 0,
+                            max: 35,
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 8: INVENTORY TURNOVER
+            new Chart(document.getElementById('efficiencyChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Tesla', 'Amazon', 'Walmart', 'Target', 'Costco', 'Best Buy', 'Boeing', 'Ford'],
+                    datasets: [{
+                        label: 'Inventory Turnover (x)',
+                        data: [12, 8.5, 8.3, 6.2, 11.5, 5.8, 1.2, 4.5],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(52, 211, 153, 0.7)',
+                            'rgba(52, 211, 153, 0.7)',
+                            'rgba(251, 191, 36, 0.7)',
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(251, 191, 36, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(251, 146, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(52, 211, 153, 1)',
+                            'rgba(52, 211, 153, 1)',
+                            'rgba(251, 191, 36, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(251, 191, 36, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(251, 146, 60, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => 'Turnover: ' + ctx.parsed.y + 'x (' + Math.round(365/ctx.parsed.y) + ' days)' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Inventory Turnover (x)' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 9: REVENUE GROWTH (CAGR)
+            const years2 = ['2018', '2019', '2020', '2021', '2022', '2023'];
+            const revenue = [15.8, 20.2, 25.0, 29.7, 31.6, 33.7].map(v => v * 1000);
+            
+            new Chart(document.getElementById('growthChart'), {
+                type: 'line',
+                data: {
+                    labels: years2,
+                    datasets: [{
+                        label: 'Revenue ($M)',
+                        data: revenue,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => 'Revenue: $' + (ctx.parsed.y / 1000).toFixed(1) + 'B'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: false,
+                            title: { display: true, text: 'Revenue ($M)' },
+                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 10: DCF WATERFALL
+            new Chart(document.getElementById('dcfWaterfallChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1 FCF', 'Year 2 FCF', 'Year 3 FCF', 'Year 4 FCF', 'Year 5 FCF', 'Terminal Value', 'Enterprise Value', '- Debt', '+ Cash', 'Equity Value'],
+                    datasets: [{
+                        label: 'Value ($M)',
+                        data: [136, 149, 162, 177, 193, 2842, 3659, -500, 200, 3359],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(52, 211, 153, 0.7)',
+                            'rgba(34, 197, 94, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(52, 211, 153, 1)',
+                            'rgba(34, 197, 94, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(0) + 'M' } }
+                    },
+                    scales: {
+                        y: { 
+                            title: { display: true, text: 'Value ($M)' },
+                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
+                        }
+                    }
+                }
+            });
+            
+            // GRAPHIQUE 11: DCF SENSITIVITY
+            new Chart(document.getElementById('dcfSensitivityChart'), {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Base Case', 
+                        'Terminal Growth +1%', 
+                        'WACC -0.5%', 
+                        'FCF Margin +5%', 
+                        'Revenue Growth +10%'
+                    ],
+                    datasets: [{
+                        label: 'Enterprise Value ($M)',
+                        data: [3659, 4450, 4120, 3890, 3780],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(52, 211, 153, 0.7)',
+                            'rgba(251, 191, 36, 0.7)',
+                            'rgba(59, 130, 246, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(52, 211, 153, 1)',
+                            'rgba(251, 191, 36, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const baseValue = 3659;
+                                    const change = ((ctx.parsed.x - baseValue) / baseValue * 100).toFixed(1);
+                                    return [
+                                        'EV: $' + ctx.parsed.x.toFixed(0) + 'M',
+                                        'Change: ' + (change > 0 ? '+' : '') + change + '%'
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: false,
+                            min: 3500,
+                            max: 4600,
+                            title: { display: true, text: 'Enterprise Value ($M)' },
+                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
+                        }
+                    }
+                }
+            });
+            
         });
     </script>
     
