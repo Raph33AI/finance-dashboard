@@ -328,174 +328,6 @@
                     <!-- Help Content -->
                     <div class="help-content glass-card">
                         
-                        <!-- TAB: FAQ -->
-                        <div class="help-tab active" id="tab-faq">
-                            <h2 class="section-title">
-                                <i class="fas fa-question-circle"></i>
-                                Frequently Asked Questions
-                            </h2>
-                            
-                            <div class="search-faq">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="faqSearch" placeholder="Search your question...">
-                            </div>
-                            
-                            <!-- FAQ Categories -->
-                            <div class="faq-category">
-                                <h3 class="category-title"><i class="fas fa-robot"></i> AI & Algorithms</h3>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>How does the Trend Prediction algorithm work?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>Our Trend Prediction system uses a <strong>multi-ensemble machine learning approach</strong> combining:</p>
-                                        <ul>
-                                            <li><strong>LSTM Networks</strong> (Long Short-Term Memory) for time series analysis</li>
-                                            <li><strong>Random Forest</strong> for pattern recognition</li>
-                                            <li><strong>Gradient Boosting</strong> for enhanced accuracy</li>
-                                            <li><strong>Sentiment Analysis</strong> from news and social media</li>
-                                        </ul>
-                                        <p>Each model is trained on 5+ years of historical data and weighted based on past performance. The ensemble approach reduces overfitting and improves reliability.</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>What is Monte Carlo simulation and how is it used?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p><strong>Monte Carlo simulation</strong> is a statistical technique that runs thousands of random scenarios to predict portfolio outcomes.</p>
-                                        <p><strong>How we use it:</strong></p>
-                                        <ul>
-                                            <li>Simulates 50,000+ possible market scenarios</li>
-                                            <li>Uses historical volatility and returns</li>
-                                            <li>Accounts for correlations between assets</li>
-                                            <li>Provides probability distributions of returns</li>
-                                        </ul>
-                                        <p>This helps you understand <strong>risk ranges</strong> rather than single predictions.</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>How does Alphy AI understand financial questions?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>Alphy AI is powered by <strong>Google Gemini Pro</strong> with a custom financial layer:</p>
-                                        <ul>
-                                            <li><strong>NLP Engine</strong>: Understands context and intent</li>
-                                            <li><strong>Financial Knowledge Base</strong>: Pre-trained on 1000+ financial documents</li>
-                                            <li><strong>Real-time Data Integration</strong>: Connects to live market APIs</li>
-                                            <li><strong>Chart Generation</strong>: Automatically creates visualizations</li>
-                                        </ul>
-                                        <p>It can analyze stocks, explain concepts, and provide actionable insights in conversational language.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="faq-category">
-                                <h3 class="category-title"><i class="fas fa-database"></i> Data & Sources</h3>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>What are your data sources?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>We aggregate data from <strong>institutional-grade providers</strong>:</p>
-                                        <ul>
-                                            <li><strong>Market Data</strong>: Twelve Data, FinnHub</li>
-                                            <li><strong>Insider Trading</strong>: SEC EDGAR (Form 4 filings)</li>
-                                            <li><strong>M&A Data</strong>: SEC filings (S-4, 8-K, DEFM14A)</li>
-                                            <li><strong>News & Sentiment</strong>: NewsAPI - Bloomberg, Financial Times, CNBC...</li>
-                                            <li><strong>Economic Data</strong>: FRED (Federal Reserve)</li>
-                                        </ul>
-                                        <p>All data is <strong>validated, cleaned, and updated in real-time</strong>.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="faq-category">
-                                <h3 class="category-title"><i class="fas fa-chart-line"></i> Features & Tools</h3>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>How does the Insider Flow Tracker work?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>The Insider Flow Tracker monitors <strong>SEC Form 4 filings</strong> in real-time:</p>
-                                        <ul>
-                                            <li>Detects <strong>C-suite transactions</strong> (CEO, CFO, directors)</li>
-                                            <li>Calculates <strong>Cluster Score</strong> (unusual buying/selling activity)</li>
-                                            <li>Tracks <strong>transaction value</strong> and timing</li>
-                                            <li>Flags <strong>anomalies</strong> (e.g., 10x normal volume)</li>
-                                        </ul>
-                                        <p><strong>Why it matters:</strong> Insiders often buy before positive news (and sell before negative news).</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>What is the M&A Screening tool?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>Our <strong>M&A Predictor</strong> identifies companies likely to be acquired:</p>
-                                        <ul>
-                                            <li><strong>Analyzes SEC filings</strong>: S-4, 8-K, proxy statements</li>
-                                            <li><strong>Fundamental filters</strong>: Undervalued stocks, high cash, low debt</li>
-                                            <li><strong>Industry trends</strong>: Sector consolidation patterns</li>
-                                            <li><strong>Ownership changes</strong>: Activist investors, stake increases</li>
-                                        </ul>
-                                        <p>It assigns a <strong>Probability Score (0-100%)</strong> for acquisition likelihood.</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>How are prediction confidence scores calculated?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <p>Confidence scores reflect <strong>model certainty</strong> based on:</p>
-                                        <ul>
-                                            <li><strong>Historical Accuracy</strong>: Backtested performance (last 3 years)</li>
-                                            <li><strong>Data Quality</strong>: Completeness and freshness</li>
-                                            <li><strong>Volatility</strong>: Lower volatility = higher confidence</li>
-                                            <li><strong>Model Agreement</strong>: Consensus across ensemble models</li>
-                                        </ul>
-                                        <p><strong>Example:</strong> 85% confidence means the model was correct 85% of the time in similar past scenarios.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="faq-category">
-                                <h3 class="category-title"><i class="fas fa-shield-alt"></i> Security & Privacy</h3>
-                                
-                                <div class="faq-item">
-                                    <button class="faq-question">
-                                        <span>How is my data protected?</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <div class="faq-answer">
-                                        <ul>
-                                            <li><strong>Firebase Authentication</strong>: Industry-standard OAuth 2.0</li>
-                                            <li><strong>End-to-End Encryption</strong>: All data in transit (TLS 1.3)</li>
-                                            <li><strong>Firestore Security Rules</strong>: User-isolated data access</li>
-                                            <li><strong>No Third-Party Sharing</strong>: Your data is never sold</li>
-                                            <li><strong>GDPR Compliant</strong>: Right to export/delete data</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        
                         <!-- TAB: Contact -->
                         <div class="help-tab" id="tab-contact">
                             <h2 class="section-title">
@@ -759,6 +591,174 @@
                                         <i class="fas fa-cog"></i>
                                         Manage in Settings
                                     </a>
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <!-- TAB: FAQ -->
+                        <div class="help-tab active" id="tab-faq">
+                            <h2 class="section-title">
+                                <i class="fas fa-question-circle"></i>
+                                Frequently Asked Questions
+                            </h2>
+                            
+                            <div class="search-faq">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="faqSearch" placeholder="Search your question...">
+                            </div>
+                            
+                            <!-- FAQ Categories -->
+                            <div class="faq-category">
+                                <h3 class="category-title"><i class="fas fa-robot"></i> AI & Algorithms</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does the Trend Prediction algorithm work?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Our Trend Prediction system uses a <strong>multi-ensemble machine learning approach</strong> combining:</p>
+                                        <ul>
+                                            <li><strong>LSTM Networks</strong> (Long Short-Term Memory) for time series analysis</li>
+                                            <li><strong>Random Forest</strong> for pattern recognition</li>
+                                            <li><strong>Gradient Boosting</strong> for enhanced accuracy</li>
+                                            <li><strong>Sentiment Analysis</strong> from news and social media</li>
+                                        </ul>
+                                        <p>Each model is trained on 5+ years of historical data and weighted based on past performance. The ensemble approach reduces overfitting and improves reliability.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What is Monte Carlo simulation and how is it used?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p><strong>Monte Carlo simulation</strong> is a statistical technique that runs thousands of random scenarios to predict portfolio outcomes.</p>
+                                        <p><strong>How we use it:</strong></p>
+                                        <ul>
+                                            <li>Simulates 50,000+ possible market scenarios</li>
+                                            <li>Uses historical volatility and returns</li>
+                                            <li>Accounts for correlations between assets</li>
+                                            <li>Provides probability distributions of returns</li>
+                                        </ul>
+                                        <p>This helps you understand <strong>risk ranges</strong> rather than single predictions.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does Alphy AI understand financial questions?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Alphy AI is powered by <strong>Google Gemini Pro</strong> with a custom financial layer:</p>
+                                        <ul>
+                                            <li><strong>NLP Engine</strong>: Understands context and intent</li>
+                                            <li><strong>Financial Knowledge Base</strong>: Pre-trained on 1000+ financial documents</li>
+                                            <li><strong>Real-time Data Integration</strong>: Connects to live market APIs</li>
+                                            <li><strong>Chart Generation</strong>: Automatically creates visualizations</li>
+                                        </ul>
+                                        <p>It can analyze stocks, explain concepts, and provide actionable insights in conversational language.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3 class="category-title"><i class="fas fa-database"></i> Data & Sources</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What are your data sources?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>We aggregate data from <strong>institutional-grade providers</strong>:</p>
+                                        <ul>
+                                            <li><strong>Market Data</strong>: Twelve Data, FinnHub</li>
+                                            <li><strong>Insider Trading</strong>: SEC EDGAR (Form 4 filings)</li>
+                                            <li><strong>M&A Data</strong>: SEC filings (S-4, 8-K, DEFM14A)</li>
+                                            <li><strong>News & Sentiment</strong>: NewsAPI - Bloomberg, Financial Times, CNBC...</li>
+                                            <li><strong>Economic Data</strong>: FRED (Federal Reserve)</li>
+                                        </ul>
+                                        <p>All data is <strong>validated, cleaned, and updated in real-time</strong>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3 class="category-title"><i class="fas fa-chart-line"></i> Features & Tools</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does the Insider Flow Tracker work?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>The Insider Flow Tracker monitors <strong>SEC Form 4 filings</strong> in real-time:</p>
+                                        <ul>
+                                            <li>Detects <strong>C-suite transactions</strong> (CEO, CFO, directors)</li>
+                                            <li>Calculates <strong>Cluster Score</strong> (unusual buying/selling activity)</li>
+                                            <li>Tracks <strong>transaction value</strong> and timing</li>
+                                            <li>Flags <strong>anomalies</strong> (e.g., 10x normal volume)</li>
+                                        </ul>
+                                        <p><strong>Why it matters:</strong> Insiders often buy before positive news (and sell before negative news).</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What is the M&A Screening tool?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Our <strong>M&A Predictor</strong> identifies companies likely to be acquired:</p>
+                                        <ul>
+                                            <li><strong>Analyzes SEC filings</strong>: S-4, 8-K, proxy statements</li>
+                                            <li><strong>Fundamental filters</strong>: Undervalued stocks, high cash, low debt</li>
+                                            <li><strong>Industry trends</strong>: Sector consolidation patterns</li>
+                                            <li><strong>Ownership changes</strong>: Activist investors, stake increases</li>
+                                        </ul>
+                                        <p>It assigns a <strong>Probability Score (0-100%)</strong> for acquisition likelihood.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How are prediction confidence scores calculated?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Confidence scores reflect <strong>model certainty</strong> based on:</p>
+                                        <ul>
+                                            <li><strong>Historical Accuracy</strong>: Backtested performance (last 3 years)</li>
+                                            <li><strong>Data Quality</strong>: Completeness and freshness</li>
+                                            <li><strong>Volatility</strong>: Lower volatility = higher confidence</li>
+                                            <li><strong>Model Agreement</strong>: Consensus across ensemble models</li>
+                                        </ul>
+                                        <p><strong>Example:</strong> 85% confidence means the model was correct 85% of the time in similar past scenarios.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3 class="category-title"><i class="fas fa-shield-alt"></i> Security & Privacy</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How is my data protected?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <ul>
+                                            <li><strong>Firebase Authentication</strong>: Industry-standard OAuth 2.0</li>
+                                            <li><strong>End-to-End Encryption</strong>: All data in transit (TLS 1.3)</li>
+                                            <li><strong>Firestore Security Rules</strong>: User-isolated data access</li>
+                                            <li><strong>No Third-Party Sharing</strong>: Your data is never sold</li>
+                                            <li><strong>GDPR Compliant</strong>: Right to export/delete data</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                             
