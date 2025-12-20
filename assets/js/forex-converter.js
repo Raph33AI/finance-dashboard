@@ -1764,7 +1764,7 @@ class ForexConverter {
         
         // ✅ UTILISER LES VRAIES DONNÉES HISTORIQUES
         if (this.historicalData[currency] && this.historicalData[currency].length > 0) {
-            console.log(`✅ Using REAL historical data for EUR/${currency}`);
+            console.log(`✅ Using REAL historical data for EUR/${currency} (${this.historicalData[currency].length} points)`);
             
             // ✅ Filtrer selon le timeframe demandé
             const now = Date.now();
@@ -1783,7 +1783,13 @@ class ForexConverter {
             // Filtrer les données selon la période
             const filteredData = this.historicalData[currency].filter(point => point[0] >= cutoffTime);
             
+            console.log(`📊 Filtered to ${filteredData.length} points for timeframe ${timeframe}`);
+            
             if (filteredData.length > 0) {
+                // ✅ VÉRIFICATION : Format des données correct ?
+                const samplePoint = filteredData[0];
+                console.log(`📄 Sample data point:`, samplePoint, `(timestamp: ${samplePoint[0]}, value: ${samplePoint[1]})`);
+                
                 return filteredData;
             }
         }
@@ -1836,24 +1842,46 @@ class ForexConverter {
     }
 
     calculateMACD(data) {
+        // ✅ VÉRIFICATION : Assez de données pour MACD (26 + 9 = 35 minimum)
+        if (!data || data.length < 35) {
+            console.warn(`⚠ Not enough data for MACD: need 35, got ${data?.length || 0}`);
+            return { macd: [], signal: [], histogram: [] };
+        }
+        
         const ema12 = this.calculateEMAValues(data, 12);
         const ema26 = this.calculateEMAValues(data, 26);
+        
+        // ✅ VÉRIFICATION : Les EMAs ont été calculés ?
+        if (ema12.length === 0 || ema26.length === 0) {
+            console.error('❌ Failed to calculate EMAs for MACD');
+            return { macd: [], signal: [], histogram: [] };
+        }
         
         const macd = [];
         const signal = [];
         const histogram = [];
 
-        for (let i = 0; i < ema12.length; i++) {
-            if (ema26[i]) {
+        // ✅ CALCUL MACD (EMA12 - EMA26)
+        const minLength = Math.min(ema12.length, ema26.length);
+        for (let i = 0; i < minLength; i++) {
+            if (ema12[i] && ema26[i] && ema12[i][0] === ema26[i][0]) {
                 const macdValue = ema12[i][1] - ema26[i][1];
                 macd.push([ema12[i][0], parseFloat(macdValue.toFixed(4))]);
             }
         }
 
+        // ✅ VÉRIFICATION : Assez de données pour Signal (9 minimum)
+        if (macd.length < 9) {
+            console.warn(`⚠ Not enough MACD data for Signal line: need 9, got ${macd.length}`);
+            return { macd, signal: [], histogram: [] };
+        }
+
+        // ✅ CALCUL SIGNAL LINE (EMA 9 du MACD)
         const signalLine = this.calculateEMAValues(macd, 9);
         
+        // ✅ CALCUL HISTOGRAM (MACD - Signal)
         for (let i = 0; i < macd.length; i++) {
-            if (signalLine[i]) {
+            if (signalLine[i] && macd[i][0] === signalLine[i][0]) {
                 signal.push(signalLine[i]);
                 const histValue = macd[i][1] - signalLine[i][1];
                 histogram.push([macd[i][0], parseFloat(histValue.toFixed(4))]);
@@ -1864,14 +1892,35 @@ class ForexConverter {
     }
 
     calculateBollingerBands(data, period = 20, stdDev = 2) {
+        // ✅ VÉRIFICATION : Assez de données ?
+        if (!data || data.length < period) {
+            console.warn(`⚠ Not enough data for Bollinger Bands: need ${period}, got ${data?.length || 0}`);
+            return { upper: [], middle: [], lower: [], bands: [] };
+        }
+        
         const sma = this.calculateSMAValues(data, period);
+        
+        if (sma.length === 0) {
+            console.error('❌ Failed to calculate SMA for Bollinger Bands');
+            return { upper: [], middle: [], lower: [], bands: [] };
+        }
+        
         const upper = [];
         const middle = [];
         const lower = [];
         const bands = [];
 
         for (let i = 0; i < sma.length; i++) {
-            const slice = data.slice(i, i + period);
+            const dataIndex = i + period - 1;
+            
+            // ✅ VÉRIFICATION : Index valide ?
+            if (dataIndex >= data.length) break;
+            
+            const slice = data.slice(i, dataIndex + 1);
+            
+            // ✅ VÉRIFICATION : Slice valide ?
+            if (slice.length !== period) continue;
+            
             const mean = sma[i][1];
             
             const variance = slice.reduce((sum, point) => {
@@ -1899,9 +1948,23 @@ class ForexConverter {
     calculateSMAValues(data, period) {
         const sma = [];
         
+        // ✅ VÉRIFICATION : Assez de données ?
+        if (!data || data.length < period) {
+            console.warn(`⚠ Not enough data for SMA(${period}): need ${period}, got ${data?.length || 0}`);
+            return [];
+        }
+        
         for (let i = period - 1; i < data.length; i++) {
             const slice = data.slice(i - period + 1, i + 1);
-            const sum = slice.reduce((acc, point) => acc + point[1], 0);
+            
+            // ✅ VÉRIFICATION : Tous les points ont une valeur ?
+            const validSlice = slice.filter(point => point && point[1] !== undefined);
+            if (validSlice.length !== period) {
+                console.warn(`⚠ Invalid data in SMA calculation at index ${i}`);
+                continue;
+            }
+            
+            const sum = validSlice.reduce((acc, point) => acc + point[1], 0);
             const avg = sum / period;
             sma.push([data[i][0], parseFloat(avg.toFixed(4))]);
         }
@@ -1915,16 +1978,36 @@ class ForexConverter {
 
     calculateEMAValues(data, period) {
         const ema = [];
+        
+        // ✅ VÉRIFICATION : Assez de données ?
+        if (!data || data.length < period) {
+            console.warn(`⚠ Not enough data for EMA(${period}): need ${period}, got ${data?.length || 0}`);
+            return [];
+        }
+        
         const multiplier = 2 / (period + 1);
 
         // First EMA is SMA
         const firstSlice = data.slice(0, period);
         const firstSum = firstSlice.reduce((acc, point) => acc + point[1], 0);
         const firstEMA = firstSum / period;
-        ema.push([data[period - 1][0], parseFloat(firstEMA.toFixed(4))]);
+        
+        // ✅ VÉRIFICATION : data[period - 1] existe ?
+        if (data[period - 1] && data[period - 1][0] !== undefined) {
+            ema.push([data[period - 1][0], parseFloat(firstEMA.toFixed(4))]);
+        } else {
+            console.error(`❌ Invalid data format at index ${period - 1}:`, data[period - 1]);
+            return [];
+        }
 
         // Calculate rest
         for (let i = period; i < data.length; i++) {
+            // ✅ VÉRIFICATION : data[i] existe et a le bon format ?
+            if (!data[i] || data[i][1] === undefined || ema.length === 0) {
+                console.warn(`⚠ Skipping invalid data at index ${i}`);
+                continue;
+            }
+            
             const newEMA = (data[i][1] - ema[ema.length - 1][1]) * multiplier + ema[ema.length - 1][1];
             ema.push([data[i][0], parseFloat(newEMA.toFixed(4))]);
         }
