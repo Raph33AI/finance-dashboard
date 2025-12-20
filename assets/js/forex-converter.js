@@ -90,17 +90,37 @@ class ForexConverter {
      */
     async loadExchangeRates() {
         try {
+            console.log('📡 Fetching REAL ECB exchange rates...');
+            
             const ratesData = await economicDataClient.getECBAllExchangeRates();
             
-            if (ratesData.success && ratesData.rates) {
+            if (ratesData.success && ratesData.rates && Object.keys(ratesData.rates).length > 0) {
                 this.rates = ratesData.rates;
-                console.log(`📊 Loaded ${Object.keys(this.rates).length} exchange rates`);
+                console.log(`✅ Loaded ${Object.keys(this.rates).length} REAL exchange rates from ECB`);
+                console.log('📊 Sample EUR/USD rate:', this.rates['USD']);
+                return;
+            } else {
+                throw new Error('ECB API returned no data');
             }
             
         } catch (error) {
-            console.error('❌ Error loading exchange rates:', error);
-            // Fallback to mock data
-            this.loadMockRates();
+            console.error('❌ Error loading ECB rates:', error);
+            
+            // ✅ AFFICHER UNE ERREUR CLAIRE À L'UTILISATEUR
+            this.showError(`
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444;"></i>
+                    <h3>⚠ Impossible de charger les taux de change réels</h3>
+                    <p>L'API de la Banque Centrale Européenne est actuellement inaccessible.</p>
+                    <p><strong>Erreur:</strong> ${error.message}</p>
+                    <button onclick="location.reload()" class="dashboard-btn" style="margin-top: 20px;">
+                        <i class="fas fa-sync"></i> Réessayer
+                    </button>
+                </div>
+            `);
+            
+            // ❌ PAS DE MOCK DATA
+            this.rates = {};
         }
     }
 
@@ -150,30 +170,6 @@ class ForexConverter {
         }
     }
 
-    loadMockRates() {
-        const mockRates = {
-            'USD': { rate: 1.0850, date: new Date().toISOString().split('T')[0] },
-            'GBP': { rate: 0.8520, date: new Date().toISOString().split('T')[0] },
-            'JPY': { rate: 161.45, date: new Date().toISOString().split('T')[0] },
-            'CHF': { rate: 0.9380, date: new Date().toISOString().split('T')[0] },
-            'CAD': { rate: 1.5120, date: new Date().toISOString().split('T')[0] },
-            'AUD': { rate: 1.6450, date: new Date().toISOString().split('T')[0] },
-            'CNY': { rate: 7.8520, date: new Date().toISOString().split('T')[0] }
-        };
-        
-        this.currencies.forEach(curr => {
-            if (!mockRates[curr]) {
-                mockRates[curr] = { 
-                    rate: 1 + Math.random() * 10, 
-                    date: new Date().toISOString().split('T')[0] 
-                };
-            }
-        });
-        
-        this.rates = mockRates;
-        console.log('⚠ Using mock exchange rates');
-    }
-
     /**
      * ========================================
      * MAJOR PAIRS DISPLAY
@@ -183,15 +179,31 @@ class ForexConverter {
         const grid = document.getElementById('majorPairsGrid');
         if (!grid) return;
 
+        if (Object.keys(this.rates).length === 0) {
+            grid.innerHTML = `
+                <div class="error-message" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444;"></i>
+                    <h3>Données indisponibles</h3>
+                    <p>Impossible de charger les taux de change depuis l'API ECB.</p>
+                </div>
+            `;
+            return;
+        }
+
         const majorPairsHTML = MAJOR_PAIRS.map(currency => {
             const data = this.rates[currency];
             if (!data) return '';
 
-            const change24h = (Math.random() - 0.5) * 2; // Mock data
+            // ✅ CALCUL RÉEL DU CHANGE 24H
+            const change24h = this.calculateRealChange24h(currency);
             const changeClass = change24h >= 0 ? 'positive' : 'negative';
             const changeIcon = change24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-            const volatility = (Math.random() * 0.8 + 0.2).toFixed(2);
-            const spread = (Math.random() * 0.0005 + 0.0001).toFixed(4);
+            
+            // ✅ CALCUL RÉEL DE LA VOLATILITÉ
+            const volatility = this.calculateRealVolatility(currency);
+            
+            // ✅ SPREAD : Estimation réaliste basée sur la liquidité
+            const spread = this.estimateSpread(currency);
 
             return `
                 <div class='major-pair-card' onclick='forexConverter.selectPair("${currency}")'>
@@ -203,7 +215,7 @@ class ForexConverter {
                         </div>
                         <div class='pair-change ${changeClass}'>
                             <i class='fas ${changeIcon}'></i>
-                            ${Math.abs(change24h).toFixed(2)}%
+                            ${change24h !== null ? Math.abs(change24h).toFixed(2) + '%' : 'N/A'}
                         </div>
                     </div>
                     
@@ -216,7 +228,7 @@ class ForexConverter {
                         </div>
                         <div class='pair-stat'>
                             <span class='stat-label'>Volatility</span>
-                            <span class='stat-value'>${volatility}%</span>
+                            <span class='stat-value'>${volatility !== null ? volatility.toFixed(2) + '%' : 'N/A'}</span>
                         </div>
                     </div>
                     
@@ -228,6 +240,62 @@ class ForexConverter {
         }).join('');
 
         grid.innerHTML = majorPairsHTML;
+    }
+
+    /**
+     * ✅ CALCUL RÉEL DU CHANGEMENT 24H
+     */
+    calculateRealChange24h(currency) {
+        const historical = this.historicalData[currency];
+        if (!historical || historical.length < 2) return null;
+        
+        const latestPrice = historical[historical.length - 1][1];
+        const price24hAgo = historical[historical.length - 2][1]; // Approximation (dernier point disponible)
+        
+        const change = ((latestPrice - price24hAgo) / price24hAgo) * 100;
+        return change;
+    }
+
+    /**
+     * ✅ CALCUL RÉEL DE LA VOLATILITÉ (ATR approximatif)
+     */
+    calculateRealVolatility(currency) {
+        const historical = this.historicalData[currency];
+        if (!historical || historical.length < 14) return null;
+        
+        // Calcul simplifié de l'ATR (Average True Range)
+        const last14 = historical.slice(-14);
+        const ranges = [];
+        
+        for (let i = 1; i < last14.length; i++) {
+            const range = Math.abs(last14[i][1] - last14[i-1][1]);
+            ranges.push(range);
+        }
+        
+        const avgRange = ranges.reduce((a, b) => a + b, 0) / ranges.length;
+        const currentPrice = historical[historical.length - 1][1];
+        const volatility = (avgRange / currentPrice) * 100;
+        
+        return volatility;
+    }
+
+    /**
+     * ✅ ESTIMATION RÉALISTE DU SPREAD
+     */
+    estimateSpread(currency) {
+        // Spreads typiques pour les paires majeures (en pips)
+        const spreads = {
+            'USD': 0.0001, // 1 pip
+            'GBP': 0.0002, // 2 pips
+            'JPY': 0.02,   // 2 pips (échelle différente)
+            'CHF': 0.0002,
+            'CAD': 0.0002,
+            'AUD': 0.0002,
+            'NZD': 0.0003,
+            'CNY': 0.0005
+        };
+        
+        return (spreads[currency] || 0.0003).toFixed(4);
     }
 
     selectPair(currency) {
@@ -2388,6 +2456,18 @@ class ForexConverter {
 
     showError(message) {
         console.error('💥 Error:', message);
+        
+        // ✅ Afficher dans l'interface
+        const container = document.querySelector('.container');
+        if (container) {
+            container.innerHTML = `
+                <div class="section">
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 30px; text-align: center;">
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
     }
 }
 
