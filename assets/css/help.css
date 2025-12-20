@@ -838,7 +838,7 @@ body.dark-mode .btn-secondary {
 }
 
 /* ============================================
-   DOCUMENTATION GRID
+   DOCUMENTATION GRID - RESPONSIVE CORRIGÉ
    ============================================ */
 
 .docs-grid {
@@ -846,6 +846,22 @@ body.dark-mode .btn-secondary {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
+}
+
+/* Responsive pour tablettes */
+@media (max-width: 1024px) {
+    .docs-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+}
+
+/* Responsive pour smartphones */
+@media (max-width: 768px) {
+    .docs-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }
 
 .doc-card {
@@ -856,6 +872,9 @@ body.dark-mode .btn-secondary {
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
 }
 
 body.dark-mode .doc-card {
@@ -882,6 +901,7 @@ body.dark-mode .doc-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
+    line-height: 1.4;
 }
 
 body.dark-mode .doc-card h3 {
@@ -893,6 +913,7 @@ body.dark-mode .doc-card h3 {
     color: var(--text-secondary, #64748b);
     margin: 0 0 1rem 0;
     line-height: 1.6;
+    flex-grow: 1;
 }
 
 body.dark-mode .doc-card p {
@@ -909,6 +930,8 @@ body.dark-mode .doc-card p {
     border-radius: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    align-self: flex-start;
+    margin-top: auto;
 }
 
 /* ============================================
@@ -1195,3 +1218,84 @@ body.dark-mode .toast-message {
     .newsletter-signup .btn-secondary {
         width: 100%;
     }
+
+    .top-header .header-content-wrapper {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .top-header .header-right {
+        width: 100%;
+    }
+
+    .btn-back-dashboard {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Corrections spécifiques pour la section documentation */
+    .doc-card {
+        padding: 1.5rem;
+        min-height: auto;
+    }
+
+    .doc-card i {
+        font-size: 2rem;
+    }
+
+    .doc-card h3 {
+        font-size: 1rem;
+    }
+
+    .doc-card p {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title,
+    .page-title {
+        font-size: 1.5rem;
+        gap: 0.5rem;
+    }
+    
+    .category-title {
+        font-size: 1.125rem;
+    }
+
+    .toast-container {
+        top: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+
+    .toast {
+        min-width: auto;
+    }
+
+    .doc-card {
+        padding: 1.25rem;
+    }
+}
+
+/* ============================================
+   PRINT
+   ============================================ */
+
+@media print {
+    .sidebar,
+    .top-header,
+    .help-nav,
+    .contact-form {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+    
+    .help-container {
+        grid-template-columns: 1fr;
+    }
+}
