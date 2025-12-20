@@ -2,7 +2,7 @@
    HELP.CSS - Page d'aide Premium 3D
    ============================================ */
 
-/* Variables Premium (héritées de settings.css) */
+/* Variables Premium */
 :root {
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -44,7 +44,7 @@
     }
     to {
         opacity: 1;
-        max-height: 1000px;
+        max-height: 2000px;
         transform: translateY(0);
     }
 }
@@ -55,19 +55,133 @@
     100% { background-position: 0% 50%; }
 }
 
+@keyframes slideInRight {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
 /* ============================================
-   HEADER
+   HEADER CORRECTIONS
    ============================================ */
 
-.help-icon-pulse {
+.top-header .header-content-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 2rem !important;
+}
+
+.top-header .header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+.top-header .header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin-left: auto !important;
+}
+
+/* Titre page avec dégradé */
+.page-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     animation: pulse-glow 3s ease-in-out infinite;
 }
 
-.section-icon-glow {
-    color: var(--primary-color, #667eea);
-    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+/* Section titles avec dégradé */
+.section-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 2rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     animation: pulse-glow 3s ease-in-out infinite;
 }
+
+/* Category titles avec dégradé */
+.category-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.375rem;
+}
+
+/* Form title avec dégradé */
+.form-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+}
+
+/* ============================================
+   BOUTON BACK TO DASHBOARD
+   ============================================ */
 
 .btn-back-dashboard {
     padding: 0.75rem 1.5rem;
@@ -273,20 +387,6 @@ body.dark-mode .help-nav-item.active {
     overflow: hidden;
 }
 
-.help-content h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--text-primary, #1e293b);
-    margin: 0 0 2rem 0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-body.dark-mode .help-content h2 {
-    color: var(--text-primary, #f8fafc);
-}
-
 .help-tab {
     display: none;
     animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -356,25 +456,6 @@ body.dark-mode .search-faq input:focus {
     margin-bottom: 0;
 }
 
-.faq-category h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary, #1e293b);
-    margin: 0 0 1.5rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-body.dark-mode .faq-category h3 {
-    color: var(--text-primary, #f8fafc);
-}
-
-.faq-category h3 i {
-    color: var(--primary-color, #667eea);
-    font-size: 1.375rem;
-}
-
 /* ============================================
    FAQ ITEMS (ACCORDÉON)
    ============================================ */
@@ -442,7 +523,7 @@ body.dark-mode .faq-question {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 1000px;
+    max-height: 2000px;
     opacity: 1;
     padding: 0 1.5rem 1.5rem;
     animation: slideDown 0.4s ease;
@@ -486,6 +567,39 @@ body.dark-mode .faq-answer li {
 
 body.dark-mode .faq-answer strong {
     color: var(--text-primary, #f8fafc);
+}
+
+/* Message no results */
+.no-results-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    margin-top: 2rem;
+}
+
+.no-results-message i {
+    font-size: 3rem;
+    color: var(--text-tertiary, #94a3b8);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-results-message p {
+    font-size: 1rem;
+    color: var(--text-secondary, #64748b);
+    margin: 0 0 0.5rem 0;
+}
+
+.no-results-message a {
+    color: var(--primary-color, #667eea);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.no-results-message a:hover {
+    text-decoration: underline;
 }
 
 /* ============================================
@@ -587,17 +701,6 @@ body.dark-mode .contact-card p {
 /* ============================================
    CONTACT FORM
    ============================================ */
-
-.contact-form h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary, #1e293b);
-    margin: 0 0 1.5rem 0;
-}
-
-body.dark-mode .contact-form h3 {
-    color: var(--text-primary, #f8fafc);
-}
 
 .form-row {
     display: grid;
@@ -818,25 +921,6 @@ body.dark-mode .doc-card p {
 
 .resources-section:last-child {
     margin-bottom: 0;
-}
-
-.resources-section h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary, #1e293b);
-    margin: 0 0 1.5rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-body.dark-mode .resources-section h3 {
-    color: var(--text-primary, #f8fafc);
-}
-
-.resources-section h3 i {
-    color: var(--primary-color, #667eea);
-    font-size: 1.375rem;
 }
 
 .resource-list {
@@ -1111,35 +1195,3 @@ body.dark-mode .toast-message {
     .newsletter-signup .btn-secondary {
         width: 100%;
     }
-}
-
-@media (max-width: 480px) {
-    .help-content h2 {
-        font-size: 1.5rem;
-    }
-    
-    .faq-category h3 {
-        font-size: 1.125rem;
-    }
-}
-
-/* ============================================
-   PRINT
-   ============================================ */
-
-@media print {
-    .sidebar,
-    .top-header,
-    .help-nav,
-    .contact-form {
-        display: none !important;
-    }
-    
-    .main-content {
-        margin-left: 0 !important;
-    }
-    
-    .help-container {
-        grid-template-columns: 1fr;
-    }
-}

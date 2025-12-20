@@ -10,15 +10,15 @@ let currentUserData = null;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initialisation de la page d'aide...');
+    console.log('Initialisation de la page d\'aide...');
     
     initializeEventListeners();
-    console.log('✅ Page d'aide initialisée');
+    console.log('Page d\'aide initialisée');
 });
 
 window.addEventListener('userDataLoaded', function(e) {
     currentUserData = e.detail;
-    console.log('✅ Données utilisateur reçues:', currentUserData);
+    console.log('Données utilisateur reçues:', currentUserData);
     prefillContactForm();
 });
 
@@ -30,24 +30,27 @@ function initializeEventListeners() {
     // Navigation entre tabs
     const tabButtons = document.querySelectorAll('.help-nav-item');
     tabButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            switchTab(button.dataset.tab);
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
         });
     });
     
     // Accordéon FAQ
     const faqQuestions = document.querySelectorAll('.faq-question');
     faqQuestions.forEach(function(question) {
-        question.addEventListener('click', function() {
-            toggleFaqItem(question.parentElement);
+        question.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleFaqItem(this.parentElement);
         });
     });
     
     // Recherche FAQ
     const searchInput = document.getElementById('faqSearch');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            filterFaq(searchInput.value);
+        searchInput.addEventListener('input', function(e) {
+            filterFaq(e.target.value);
         });
     }
     
@@ -69,6 +72,8 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
+    console.log('Changement vers tab:', tabName);
+    
     // Désactiver tous les boutons et tabs
     document.querySelectorAll('.help-nav-item').forEach(function(btn) {
         btn.classList.remove('active');
@@ -77,18 +82,19 @@ function switchTab(tabName) {
         tab.classList.remove('active');
     });
     
-    // Activer le bouton et le tab sélectionnés
-    const activeNavBtn = document.querySelector('[data-tab="' + tabName + '"]');
+    // Activer le bouton sélectionné
+    const activeNavBtn = document.querySelector('.help-nav-item[data-tab="' + tabName + '"]');
     if (activeNavBtn) {
         activeNavBtn.classList.add('active');
     }
     
+    // Activer le tab sélectionné
     const activeTab = document.getElementById('tab-' + tabName);
     if (activeTab) {
         activeTab.classList.add('active');
     }
     
-    console.log('📑 Onglet changé:', tabName);
+    console.log('Onglet changé:', tabName);
 }
 
 // ============================================
@@ -147,17 +153,19 @@ function filterFaq(searchTerm) {
         const noResultsMsg = document.createElement('div');
         noResultsMsg.id = 'noFaqResults';
         noResultsMsg.className = 'no-results-message';
-        noResultsMsg.innerHTML = `
-            <i class="fas fa-search"></i>
-            <p>No results found for "<strong>${searchTerm}</strong>"</p>
-            <p>Try different keywords or <a href="#tab-contact" onclick="switchTab('contact')">contact support</a></p>
-        `;
+        
+        const escapedTerm = searchTerm.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        noResultsMsg.innerHTML = 
+            '<i class="fas fa-search"></i>' +
+            '<p>No results found for "<strong>' + escapedTerm + '</strong>"</p>' +
+            '<p>Try different keywords or <a href="#" onclick="switchTab(\'contact\'); return false;">contact support</a></p>';
         
         const faqContainer = document.querySelector('#tab-faq');
         faqContainer.appendChild(noResultsMsg);
     }
     
-    console.log('🔍 Recherche FAQ:', searchTerm, '→', visibleCount, 'résultats');
+    console.log('Recherche FAQ:', searchTerm, '→', visibleCount, 'résultats');
 }
 
 // ============================================
@@ -178,7 +186,7 @@ function prefillContactForm() {
         emailInput.value = currentUserData.email;
     }
     
-    console.log('✅ Formulaire pré-rempli avec les données utilisateur');
+    console.log('Formulaire pré-rempli avec les données utilisateur');
 }
 
 async function handleContactSubmit(e) {
@@ -215,27 +223,27 @@ async function handleContactSubmit(e) {
         showToast('info', 'Sending...', 'Your message is being sent');
         
         // Construire l'email mailto
-        const subject = encodeURIComponent(`[${formData.category.toUpperCase()}] ${formData.subject}`);
+        const subject = encodeURIComponent('[' + formData.category.toUpperCase() + '] ' + formData.subject);
         const body = encodeURIComponent(
-            `Name: ${formData.name}\n` +
-            `Email: ${formData.email}\n` +
-            `Category: ${formData.category}\n` +
-            `User ID: ${formData.userId}\n\n` +
-            `Message:\n${formData.message}\n\n` +
-            `---\n` +
-            `Sent from AlphaVault AI Help Center on ${new Date().toLocaleString()}`
+            'Name: ' + formData.name + '\n' +
+            'Email: ' + formData.email + '\n' +
+            'Category: ' + formData.category + '\n' +
+            'User ID: ' + formData.userId + '\n\n' +
+            'Message:\n' + formData.message + '\n\n' +
+            '---\n' +
+            'Sent from AlphaVault AI Help Center on ' + new Date().toLocaleString()
         );
         
         // Ouvrir le client email
-        window.location.href = `mailto:support@alphavault-ai.com?subject=${subject}&body=${body}`;
+        window.location.href = 'mailto:support@alphavault-ai.com?subject=' + subject + '&body=' + body;
         
         // Optionnel: Sauvegarder dans Firestore
         if (currentUserData && typeof firebaseDb !== 'undefined') {
             try {
                 await firebaseDb.collection('support_tickets').add(formData);
-                console.log('✅ Ticket sauvegardé dans Firestore');
+                console.log('Ticket sauvegardé dans Firestore');
             } catch (firestoreError) {
-                console.warn('⚠ Impossible de sauvegarder dans Firestore:', firestoreError);
+                console.warn('Impossible de sauvegarder dans Firestore:', firestoreError);
             }
         }
         
@@ -243,10 +251,13 @@ async function handleContactSubmit(e) {
         
         // Réinitialiser le formulaire
         form.reset();
-        updateCharCounter({ target: document.getElementById('contactMessage') });
+        const charCountSpan = document.getElementById('charCount');
+        if (charCountSpan) {
+            charCountSpan.textContent = '0';
+        }
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'envoi:', error);
+        console.error('Erreur lors de l\'envoi:', error);
         showToast('error', 'Error', 'Unable to send your message. Please email us directly at support@alphavault-ai.com');
     }
 }
@@ -282,7 +293,7 @@ function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
     if (!toastContainer) {
-        console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+        console.log('[' + type.toUpperCase() + '] ' + title + ': ' + message);
         return;
     }
     
@@ -302,15 +313,14 @@ function showToast(type, title, message) {
             break;
     }
     
-    toast.innerHTML = `
-        <div class="toast-icon">
-            <i class="fas ${iconClass}"></i>
-        </div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-    `;
+    toast.innerHTML = 
+        '<div class="toast-icon">' +
+            '<i class="fas ' + iconClass + '"></i>' +
+        '</div>' +
+        '<div class="toast-content">' +
+            '<div class="toast-title">' + title + '</div>' +
+            '<div class="toast-message">' + message + '</div>' +
+        '</div>';
     
     toastContainer.appendChild(toast);
     
@@ -330,4 +340,4 @@ function removeToast(toast) {
     }, 300);
 }
 
-console.log('✅ Script help.js chargé avec succès');
+console.log('Script help.js chargé avec succès');
