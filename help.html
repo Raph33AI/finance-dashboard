@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/help.css">
+    
+    <!-- ✅ FAVICON DYNAMIQUE -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Page Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    
+    <!-- ⚡ THEME SCRIPT -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR (même structure que settings.html) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link active">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- Header Premium -->
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1>
+                            <i class="fas fa-question-circle help-icon-pulse"></i> 
+                            Help & Support
+                        </h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="dashboard-financier.html" class="btn-back-dashboard">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to dashboard</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="container">
+                <div class="help-container">
+                    
+                    <!-- Help Navigation -->
+                    <div class="help-nav glass-nav">
+                        <button class="help-nav-item active" data-tab="faq">
+                            <i class="fas fa-question-circle"></i>
+                            <span>FAQ</span>
+                        </button>
+                        <button class="help-nav-item" data-tab="contact">
+                            <i class="fas fa-envelope"></i>
+                            <span>Contact</span>
+                        </button>
+                        <button class="help-nav-item" data-tab="docs">
+                            <i class="fas fa-book"></i>
+                            <span>Documentation</span>
+                        </button>
+                        <button class="help-nav-item" data-tab="resources">
+                            <i class="fas fa-link"></i>
+                            <span>Resources</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Help Content -->
+                    <div class="help-content glass-card">
+                        
+                        <!-- TAB: FAQ -->
+                        <div class="help-tab active" id="tab-faq">
+                            <h2>
+                                <i class="fas fa-question-circle section-icon-glow"></i>
+                                Frequently Asked Questions
+                            </h2>
+                            
+                            <div class="search-faq">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="faqSearch" placeholder="Search your question...">
+                            </div>
+                            
+                            <!-- FAQ Categories -->
+                            <div class="faq-category">
+                                <h3><i class="fas fa-robot"></i> AI & Algorithms</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does the Trend Prediction algorithm work?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Our Trend Prediction system uses a <strong>multi-ensemble machine learning approach</strong> combining:</p>
+                                        <ul>
+                                            <li><strong>LSTM Networks</strong> (Long Short-Term Memory) for time series analysis</li>
+                                            <li><strong>Random Forest</strong> for pattern recognition</li>
+                                            <li><strong>Gradient Boosting</strong> for enhanced accuracy</li>
+                                            <li><strong>Sentiment Analysis</strong> from news and social media</li>
+                                        </ul>
+                                        <p>Each model is trained on 10+ years of historical data and weighted based on past performance. The ensemble approach reduces overfitting and improves reliability.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What is Monte Carlo simulation and how is it used?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p><strong>Monte Carlo simulation</strong> is a statistical technique that runs thousands of random scenarios to predict portfolio outcomes.</p>
+                                        <p><strong>How we use it:</strong></p>
+                                        <ul>
+                                            <li>Simulates 10,000+ possible market scenarios</li>
+                                            <li>Uses historical volatility and returns</li>
+                                            <li>Accounts for correlations between assets</li>
+                                            <li>Provides probability distributions of returns</li>
+                                        </ul>
+                                        <p>This helps you understand <strong>risk ranges</strong> rather than single predictions.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does Alphy AI understand financial questions?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Alphy AI is powered by <strong>Google Gemini Pro</strong> with a custom financial layer:</p>
+                                        <ul>
+                                            <li><strong>NLP Engine</strong>: Understands context and intent</li>
+                                            <li><strong>Financial Knowledge Base</strong>: Pre-trained on 10M+ financial documents</li>
+                                            <li><strong>Real-time Data Integration</strong>: Connects to live market APIs</li>
+                                            <li><strong>Chart Generation</strong>: Automatically creates visualizations</li>
+                                        </ul>
+                                        <p>It can analyze stocks, explain concepts, and provide actionable insights in conversational language.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3><i class="fas fa-database"></i> Data & Sources</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What are your data sources?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>We aggregate data from <strong>institutional-grade providers</strong>:</p>
+                                        <ul>
+                                            <li><strong>Market Data</strong>: Twelve Data, Alpha Vantage, Yahoo Finance</li>
+                                            <li><strong>Fundamentals</strong>: Financial Modeling Prep, Polygon.io</li>
+                                            <li><strong>Insider Trading</strong>: SEC EDGAR (Form 4 filings)</li>
+                                            <li><strong>M&A Data</strong>: SEC filings (S-4, 8-K, DEFM14A)</li>
+                                            <li><strong>News & Sentiment</strong>: NewsAPI, Twitter API, Reddit</li>
+                                            <li><strong>Economic Data</strong>: FRED (Federal Reserve)</li>
+                                        </ul>
+                                        <p>All data is <strong>validated, cleaned, and updated in real-time</strong>.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How often is data updated?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <ul>
+                                            <li><strong>Real-time</strong>: Stock prices, forex rates (15-min delay for free tier)</li>
+                                            <li><strong>Daily</strong>: Fundamentals, insider trades, news sentiment</li>
+                                            <li><strong>Weekly</strong>: Analyst ratings, IPO filings</li>
+                                            <li><strong>Monthly</strong>: Economic indicators (GDP, CPI, unemployment)</li>
+                                        </ul>
+                                        <p><strong>Premium users</strong> get real-time access to all data streams.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3><i class="fas fa-chart-line"></i> Features & Tools</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How does the Insider Flow Tracker work?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>The Insider Flow Tracker monitors <strong>SEC Form 4 filings</strong> in real-time:</p>
+                                        <ul>
+                                            <li>Detects <strong>C-suite transactions</strong> (CEO, CFO, directors)</li>
+                                            <li>Calculates <strong>Cluster Score</strong> (unusual buying/selling activity)</li>
+                                            <li>Tracks <strong>transaction value</strong> and timing</li>
+                                            <li>Flags <strong>anomalies</strong> (e.g., 10x normal volume)</li>
+                                        </ul>
+                                        <p><strong>Why it matters:</strong> Insiders often buy before positive news (and sell before negative news).</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>What is the M&A Screening tool?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Our <strong>M&A Predictor</strong> identifies companies likely to be acquired:</p>
+                                        <ul>
+                                            <li><strong>Analyzes SEC filings</strong>: S-4, 8-K, proxy statements</li>
+                                            <li><strong>Fundamental filters</strong>: Undervalued stocks, high cash, low debt</li>
+                                            <li><strong>Industry trends</strong>: Sector consolidation patterns</li>
+                                            <li><strong>Ownership changes</strong>: Activist investors, stake increases</li>
+                                        </ul>
+                                        <p>It assigns a <strong>Probability Score (0-100%)</strong> for acquisition likelihood.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How are prediction confidence scores calculated?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>Confidence scores reflect <strong>model certainty</strong> based on:</p>
+                                        <ul>
+                                            <li><strong>Historical Accuracy</strong>: Backtested performance (last 3 years)</li>
+                                            <li><strong>Data Quality</strong>: Completeness and freshness</li>
+                                            <li><strong>Volatility</strong>: Lower volatility = higher confidence</li>
+                                            <li><strong>Model Agreement</strong>: Consensus across ensemble models</li>
+                                        </ul>
+                                        <p><strong>Example:</strong> 85% confidence means the model was correct 85% of the time in similar past scenarios.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-category">
+                                <h3><i class="fas fa-shield-alt"></i> Security & Privacy</h3>
+                                
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        <span>How is my data protected?</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <ul>
+                                            <li><strong>Firebase Authentication</strong>: Industry-standard OAuth 2.0</li>
+                                            <li><strong>End-to-End Encryption</strong>: All data in transit (TLS 1.3)</li>
+                                            <li><strong>Firestore Security Rules</strong>: User-isolated data access</li>
+                                            <li><strong>No Third-Party Sharing</strong>: Your data is never sold</li>
+                                            <li><strong>GDPR Compliant</strong>: Right to export/delete data</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- TAB: Contact -->
+                        <div class="help-tab" id="tab-contact">
+                            <h2>
+                                <i class="fas fa-envelope section-icon-glow"></i>
+                                Contact Support
+                            </h2>
+                            
+                            <div class="contact-intro">
+                                <p>Our support team is here to help you 24/7. Expect a response within <strong>24 hours</strong> (priority support for Premium users).</p>
+                            </div>
+                            
+                            <div class="contact-methods">
+                                <div class="contact-card">
+                                    <i class="fas fa-envelope"></i>
+                                    <h3>Email Support</h3>
+                                    <p>General inquiries and technical support</p>
+                                    <a href="mailto:support@alphavault-ai.com" class="contact-link">
+                                        support@alphavault-ai.com
+                                    </a>
+                                </div>
+                                
+                                <div class="contact-card">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <h3>Security Issues</h3>
+                                    <p>Report vulnerabilities (24h response)</p>
+                                    <a href="mailto:security@alphavault-ai.com" class="contact-link">
+                                        security@alphavault-ai.com
+                                    </a>
+                                </div>
+                                
+                                <div class="contact-card">
+                                    <i class="fas fa-briefcase"></i>
+                                    <h3>Business & Partnerships</h3>
+                                    <p>Enterprise solutions and integrations</p>
+                                    <a href="mailto:info@alphavault-ai.com" class="contact-link">
+                                        info@alphavault-ai.com
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Form -->
+                            <form class="contact-form glass-section" id="contactForm">
+                                <h3>Send us a message</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="contactName">
+                                            <i class="fas fa-user"></i>
+                                            Your Name
+                                        </label>
+                                        <input type="text" id="contactName" required placeholder="John Doe">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="contactEmail">
+                                            <i class="fas fa-envelope"></i>
+                                            Email Address
+                                        </label>
+                                        <input type="email" id="contactEmail" required placeholder="john@example.com">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="contactCategory">
+                                        <i class="fas fa-tag"></i>
+                                        Category
+                                    </label>
+                                    <select id="contactCategory" required>
+                                        <option value="">Select a category...</option>
+                                        <option value="technical">Technical Issue</option>
+                                        <option value="billing">Billing & Payments</option>
+                                        <option value="feature">Feature Request</option>
+                                        <option value="data">Data Accuracy</option>
+                                        <option value="account">Account Management</option>
+                                        <option value="other">General Question</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="contactSubject">
+                                        <i class="fas fa-heading"></i>
+                                        Subject
+                                    </label>
+                                    <input type="text" id="contactSubject" required placeholder="Briefly describe your issue">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="contactMessage">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Message
+                                    </label>
+                                    <textarea id="contactMessage" rows="6" required placeholder="Describe your issue or question in detail..."></textarea>
+                                    <div class="char-counter">
+                                        <span id="charCount">0</span> / 1000 characters
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="reset" class="btn-secondary">
+                                        <i class="fas fa-redo"></i>
+                                        Reset
+                                    </button>
+                                    <button type="submit" class="btn-submit">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Send Message
+                                    </button>
+                                </div>
+                            </form>
+                            
+                        </div>
+                        
+                        <!-- TAB: Documentation -->
+                        <div class="help-tab" id="tab-docs">
+                            <h2>
+                                <i class="fas fa-book section-icon-glow"></i>
+                                Documentation
+                            </h2>
+                            
+                            <div class="docs-grid">
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-rocket"></i>
+                                    <h3>Getting Started</h3>
+                                    <p>Learn the basics and set up your first analysis</p>
+                                    <span class="doc-badge">5 min read</span>
+                                </a>
+                                
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Advanced Analysis Guide</h3>
+                                    <p>Master technical indicators and ML predictions</p>
+                                    <span class="doc-badge">15 min read</span>
+                                </a>
+                                
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-briefcase"></i>
+                                    <h3>Portfolio Management</h3>
+                                    <p>Optimize risk and maximize returns</p>
+                                    <span class="doc-badge">10 min read</span>
+                                </a>
+                                
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-code"></i>
+                                    <h3>API Documentation</h3>
+                                    <p>Integrate AlphaVault into your applications</p>
+                                    <span class="doc-badge">20 min read</span>
+                                </a>
+                                
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <h3>Security Best Practices</h3>
+                                    <p>Protect your account and data</p>
+                                    <span class="doc-badge">8 min read</span>
+                                </a>
+                                
+                                <a href="#" class="doc-card">
+                                    <i class="fas fa-question-circle"></i>
+                                    <h3>Troubleshooting</h3>
+                                    <p>Common issues and quick fixes</p>
+                                    <span class="doc-badge">12 min read</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Resources -->
+                        <div class="help-tab" id="tab-resources">
+                            <h2>
+                                <i class="fas fa-link section-icon-glow"></i>
+                                Quick Resources
+                            </h2>
+                            
+                            <div class="resources-section">
+                                <h3><i class="fas fa-video"></i> Video Tutorials</h3>
+                                <div class="resource-list">
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-play-circle"></i>
+                                        <div>
+                                            <strong>Platform Overview (5:30)</strong>
+                                            <p>Complete walkthrough of AlphaVault AI features</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-play-circle"></i>
+                                        <div>
+                                            <strong>Monte Carlo Explained (8:15)</strong>
+                                            <p>How to use simulation for portfolio analysis</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-play-circle"></i>
+                                        <div>
+                                            <strong>AI Chat Tutorial (4:45)</strong>
+                                            <p>Get the most out of Alphy AI</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="resources-section">
+                                <h3><i class="fas fa-book-open"></i> Learning Center</h3>
+                                <div class="resource-list">
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <div>
+                                            <strong>Financial Metrics Glossary</strong>
+                                            <p>Understand P/E, EPS, ROE, and more</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <div>
+                                            <strong>Technical Analysis Basics</strong>
+                                            <p>RSI, MACD, Bollinger Bands explained</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="resource-item">
+                                        <i class="fas fa-robot"></i>
+                                        <div>
+                                            <strong>Machine Learning in Finance</strong>
+                                            <p>How AI predicts market trends</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="resources-section">
+                                <h3><i class="fas fa-external-link-alt"></i> External Resources</h3>
+                                <div class="resource-list">
+                                    <a href="https://www.sec.gov/edgar" target="_blank" class="resource-item">
+                                        <i class="fas fa-building"></i>
+                                        <div>
+                                            <strong>SEC EDGAR Database</strong>
+                                            <p>Official source for company filings</p>
+                                        </div>
+                                    </a>
+                                    <a href="https://fred.stlouisfed.org" target="_blank" class="resource-item">
+                                        <i class="fas fa-chart-area"></i>
+                                        <div>
+                                            <strong>FRED Economic Data</strong>
+                                            <p>Federal Reserve economic indicators</p>
+                                        </div>
+                                    </a>
+                                    <a href="https://www.investopedia.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-book"></i>
+                                        <div>
+                                            <strong>Investopedia</strong>
+                                            <p>Financial education and definitions</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="resources-section">
+                                <h3><i class="fas fa-bullhorn"></i> Stay Updated</h3>
+                                <div class="newsletter-signup">
+                                    <i class="fas fa-envelope-open-text"></i>
+                                    <div>
+                                        <h4>Weekly Market Intelligence</h4>
+                                        <p>Get AI-powered insights delivered every Monday</p>
+                                    </div>
+                                    <a href="settings.html" class="btn-secondary">
+                                        <i class="fas fa-cog"></i>
+                                        Manage in Settings
+                                    </a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/help.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>
