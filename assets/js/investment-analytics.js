@@ -3492,29 +3492,38 @@
             if (!firebase || !firebase.auth || !firebase.auth().currentUser) {
                 console.warn('⚠ No user authenticated, saving to localStorage only');
                 this.saveAllocationsToLocalStorage();
-                return allocation.id; // Retourner l'ID local
+                return allocation.id;
             }
             
             try {
                 const user = firebase.auth().currentUser;
                 const db = firebase.firestore();
                 
-                // Préparer les données (sans l'ID pour Firestore)
+                // 🔧 CORRECTION : Vérifier si c'est un ID local OU si le document n'existe pas dans Firestore
+                const isLocalId = !allocation.id || 
+                                allocation.id.toString().startsWith('local_') || 
+                                allocation.id === 'null' || 
+                                allocation.id === 'undefined';
+                
+                console.log(`💾 Saving allocation "${allocation.name}"...`);
+                console.log(`   Current ID: ${allocation.id}`);
+                console.log(`   Is Local ID: ${isLocalId}`);
+                
+                // Préparer les données (sans l'ID)
                 const allocationData = {
                     name: allocation.name,
-                    linkedSimulation: allocation.linkedSimulation,
-                    assets: allocation.assets,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    linkedSimulation: allocation.linkedSimulation || null,
+                    assets: allocation.assets || []
                 };
                 
-                let docId = allocation.id;
-                
-                // 🔧 CORRECTION : Différencier ID local vs ID Firestore
-                const isLocalId = !allocation.id || allocation.id.startsWith('local_');
+                let docId;
                 
                 if (isLocalId) {
-                    // C'est un nouvel enregistrement → CREATE
+                    // ✅ CRÉATION d'un NOUVEAU document
                     allocationData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    allocationData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+                    
+                    console.log('   Action: CREATE (new document)');
                     
                     const docRef = await db.collection('users')
                         .doc(user.uid)
@@ -3522,28 +3531,40 @@
                         .add(allocationData);
                     
                     docId = docRef.id;
-                    allocation.id = docId; // Mettre à jour l'ID dans l'objet
                     
                     console.log(`✅ Allocation "${allocation.name}" CREATED in Firestore with ID: ${docId}`);
+                    
                 } else {
-                    // C'est une mise à jour → UPDATE
+                    // ✅ MISE À JOUR d'un document EXISTANT
+                    allocationData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+                    // Ne pas modifier createdAt lors d'un update
+                    
+                    console.log(`   Action: UPDATE (existing document: ${allocation.id})`);
+                    
                     await db.collection('users')
                         .doc(user.uid)
                         .collection('allocations')
                         .doc(allocation.id)
-                        .update(allocationData);
+                        .set(allocationData, { merge: true }); // ⚠ Utiliser .set() avec merge au lieu de .update()
                     
-                    console.log(`✅ Allocation "${allocation.name}" UPDATED in Firestore (ID: ${allocation.id})`);
+                    docId = allocation.id;
+                    
+                    console.log(`✅ Allocation "${allocation.name}" UPDATED in Firestore (ID: ${docId})`);
                 }
                 
-                // Mettre à jour l'allocation dans le tableau local
+                // Mettre à jour l'ID dans l'objet allocation
+                allocation.id = docId;
+                
+                // Mettre à jour dans le tableau local
                 const index = this.allocations.findIndex(a => 
-                    a.id === allocation.id || (isLocalId && a.name === allocation.name)
+                    a.id === docId || 
+                    (isLocalId && a.name === allocation.name)
                 );
                 
                 if (index !== -1) {
                     this.allocations[index].id = docId;
                     this.allocations[index].updatedAt = new Date().toISOString();
+                    console.log(`   Updated allocation in local array at index ${index}`);
                 }
                 
                 // Backup to localStorage
@@ -3553,11 +3574,11 @@
                 
             } catch (error) {
                 console.error('❌ Error saving allocation to Firestore:', error);
-                console.error('Error details:', {
-                    code: error.code,
-                    message: error.message,
-                    allocation: allocation.name
-                });
+                console.error('   Error code:', error.code);
+                console.error('   Error message:', error.message);
+                console.error('   Allocation name:', allocation.name);
+                console.error('   Allocation ID:', allocation.id);
+                
                 this.showNotification('Failed to save to cloud: ' + error.message, 'error');
                 return null;
             }
@@ -4252,11 +4273,9 @@
                 newAssets = [];
             }
             
-            // Créer l'objet allocation avec ID local temporaire
-            const localId = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            
+            // Créer l'allocation avec ID local temporaire
             const newAllocation = {
-                id: localId,
+                id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 name: name,
                 linkedSimulation: linkedSim || null,
                 assets: newAssets,
@@ -4264,24 +4283,30 @@
                 updatedAt: new Date().toISOString()
             };
             
-            console.log(`📝 Creating new allocation "${name}" with local ID: ${localId}`);
+            console.log(`📝 Creating new allocation "${name}"...`);
             
-            // 🔧 CORRECTION : Ajouter au tableau TEMPORAIREMENT
-            this.allocations.push(newAllocation);
+            // ⚠ NE PAS ajouter au tableau avant la sauvegarde Firestore
+            // On laisse saveAllocationToCloud gérer ça
             
-            // Sauvegarder dans Firestore et récupérer l'ID définitif
+            // Sauvegarder dans Firestore et récupérer l'ID Firestore
             const firestoreId = await this.saveAllocationToCloud(newAllocation);
             
-            if (firestoreId && firestoreId !== localId) {
-                // Remplacer l'ID local par l'ID Firestore dans le tableau
-                const index = this.allocations.findIndex(a => a.id === localId);
-                if (index !== -1) {
-                    this.allocations[index].id = firestoreId;
-                    newAllocation.id = firestoreId;
+            if (firestoreId) {
+                // L'ID a été mis à jour par saveAllocationToCloud
+                newAllocation.id = firestoreId;
+                
+                // Ajouter au tableau local APRÈS sauvegarde réussie
+                const exists = this.allocations.find(a => a.id === firestoreId);
+                if (!exists) {
+                    this.allocations.push(newAllocation);
                 }
-                console.log(`✅ Local ID replaced with Firestore ID: ${firestoreId}`);
-            } else if (!firestoreId) {
-                console.warn('⚠ Firestore save failed, keeping local ID');
+                
+                console.log(`✅ Allocation "${name}" created with Firestore ID: ${firestoreId}`);
+                
+            } else {
+                console.error('❌ Failed to save to Firestore, allocation not created');
+                this.showNotification('Failed to create allocation', 'error');
+                return;
             }
             
             // Définir comme allocation courante
@@ -4302,9 +4327,7 @@
             this.createAllCharts();
             
             this.closeCreateAllocationModal();
-            this.showNotification(`✅ Allocation "${name}" created and saved to cloud`, 'success');
-            
-            console.log(`✅ New allocation "${name}" created successfully (Final ID: ${newAllocation.id})`);
+            this.showNotification(`✅ Allocation "${name}" created and saved`, 'success');
         },
         
         loadAllocation: function(allocationId) {
