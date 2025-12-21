@@ -1223,31 +1223,52 @@
     <script src='assets/js/chatbot-ai-engine.js'></script>
     <script src='assets/js/chatbot-ui.js'></script>
     
-    <!-- Chatbot Initialization -->
+    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Initializing chatbot FinanceGPT...');
+        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        if (typeof ChatbotConfig === 'undefined') {
-            console.error('ChatbotConfig not defined!');
-            return;
-        }
+        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
+        const initChatbotWhenReady = () => {
+            // Vérifier si l'accès a été refusé
+            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            
+            if (accessDenied) {
+                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
+                return;
+            }
+            
+            // Vérifier que ChatbotConfig est chargé
+            if (typeof ChatbotConfig === 'undefined') {
+                console.error('❌ ChatbotConfig non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
+                return;
+            }
+            
+            console.log('✅ ChatbotConfig chargé');
+            
+            // Vérifier que ChatbotUI est disponible
+            if (typeof ChatbotUI === 'undefined') {
+                console.error('❌ ChatbotUI non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
+                return;
+            }
+            
+            console.log('✅ ChatbotUI chargé');
+            
+            // Initialisation du chatbot
+            try {
+                window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+                console.error('📋 Détails:', error.message);
+            }
+        };
         
-        console.log('ChatbotConfig loaded');
-        
-        if (typeof ChatbotUI === 'undefined') {
-            console.error('ChatbotUI not defined!');
-            return;
-        }
-        
-        console.log('ChatbotUI loaded');
-        
-        try {
-            window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('Chatbot FinanceGPT initialized successfully');
-        } catch (error) {
-            console.error('Error initializing chatbot:', error);
-        }
+        // Attendre un peu pour laisser access-control.js faire son travail
+        setTimeout(initChatbotWhenReady, 500);
     });
     </script>
     
