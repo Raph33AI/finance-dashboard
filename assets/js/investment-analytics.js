@@ -4445,26 +4445,57 @@
                 return;
             }
             
+            console.log(`📋 Duplicating current allocation "${this.currentAllocation.name}" as "${trimmedName}"...`);
+            
+            // Créer la copie avec un nouvel ID local
             const duplicated = {
-                id: null,
+                id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 name: trimmedName,
                 linkedSimulation: this.currentAllocation.linkedSimulation,
-                assets: JSON.parse(JSON.stringify(this.currentAllocation.assets)),
+                assets: JSON.parse(JSON.stringify(this.currentAllocation.assets)), // Deep copy
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
             
-            this.allocations.push(duplicated);
+            console.log(`   New local ID: ${duplicated.id}`);
             
-            this.saveAllocationToCloud(duplicated).then(() => {
-                this.renderAllocationsList();
-                this.showNotification(`✅ Allocation duplicated as "${trimmedName}"`, 'success');
+            // Sauvegarder dans Firestore
+            this.saveAllocationToCloud(duplicated).then(firestoreId => {
+                if (firestoreId) {
+                    duplicated.id = firestoreId;
+                    
+                    // Ajouter au tableau local
+                    const exists = this.allocations.find(a => a.id === firestoreId);
+                    if (!exists) {
+                        this.allocations.push(duplicated);
+                    }
+                    
+                    // Update UI
+                    this.renderAllocationsList();
+                    this.showNotification(`✅ Allocation duplicated as "${trimmedName}"`, 'success');
+                    
+                    console.log(`✅ Duplication completed with Firestore ID: ${firestoreId}`);
+                } else {
+                    console.error('❌ Failed to save duplicated allocation to Firestore');
+                    this.showNotification('Duplication failed', 'error');
+                }
             });
         },
         
         duplicateAllocation: function(allocationId) {
+            // 🔧 Validation de l'ID
+            if (!allocationId || allocationId === 'null' || allocationId === 'undefined') {
+                console.error('❌ Invalid allocation ID for duplication:', allocationId);
+                this.showNotification('Cannot duplicate: invalid allocation ID', 'error');
+                return;
+            }
+            
             const alloc = this.allocations.find(a => a.id === allocationId);
-            if (!alloc) return;
+            if (!alloc) {
+                console.error(`❌ Allocation not found with ID: ${allocationId}`);
+                this.showNotification('Allocation not found', 'error');
+                return;
+            }
             
             const newName = prompt('Enter name for duplicated allocation:', alloc.name + ' (Copy)');
             
@@ -4479,58 +4510,119 @@
                 return;
             }
             
+            console.log(`📋 Duplicating allocation "${alloc.name}" as "${trimmedName}"...`);
+            
+            // Créer la copie avec un nouvel ID local
             const duplicated = {
-                id: null,
+                id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 name: trimmedName,
                 linkedSimulation: alloc.linkedSimulation,
-                assets: JSON.parse(JSON.stringify(alloc.assets)),
+                assets: JSON.parse(JSON.stringify(alloc.assets)), // Deep copy
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
             
-            this.allocations.push(duplicated);
+            console.log(`   New local ID: ${duplicated.id}`);
             
-            this.saveAllocationToCloud(duplicated).then(() => {
-                this.renderAllocationsList();
-                this.showNotification(`✅ Allocation duplicated as "${trimmedName}"`, 'success');
+            // Sauvegarder dans Firestore et obtenir l'ID Firestore
+            this.saveAllocationToCloud(duplicated).then(firestoreId => {
+                if (firestoreId) {
+                    duplicated.id = firestoreId;
+                    
+                    // Ajouter au tableau local
+                    const exists = this.allocations.find(a => a.id === firestoreId);
+                    if (!exists) {
+                        this.allocations.push(duplicated);
+                    }
+                    
+                    // Update UI
+                    this.renderAllocationsList();
+                    this.showNotification(`✅ Allocation duplicated as "${trimmedName}"`, 'success');
+                    
+                    console.log(`✅ Duplication completed with Firestore ID: ${firestoreId}`);
+                } else {
+                    console.error('❌ Failed to save duplicated allocation to Firestore');
+                    this.showNotification('Duplication failed', 'error');
+                }
             });
         },
         
         deleteAllocation: async function(allocationId) {
-            const alloc = this.allocations.find(a => a.id === allocationId);
-            if (!alloc) return;
-            
-            if (!confirm(`Delete allocation "${alloc.name}"?`)) {
+            // 🔧 Validation de l'ID
+            if (!allocationId || allocationId === 'null' || allocationId === 'undefined') {
+                console.error('❌ Invalid allocation ID for deletion:', allocationId);
+                this.showNotification('Cannot delete: invalid allocation ID', 'error');
                 return;
             }
             
+            const alloc = this.allocations.find(a => a.id === allocationId);
+            if (!alloc) {
+                console.error(`❌ Allocation not found with ID: ${allocationId}`);
+                this.showNotification('Allocation not found', 'error');
+                return;
+            }
+            
+            if (!confirm(`Delete allocation "${alloc.name}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            
+            // Ne pas supprimer l'allocation active
             if (alloc.id === this.currentAllocation.id) {
                 alert('Cannot delete the active allocation. Please load another allocation first.');
                 return;
             }
             
-            this.allocations = this.allocations.filter(a => a.id !== allocationId);
+            console.log(`🗑 Deleting allocation "${alloc.name}"...`);
+            console.log(`   ID: ${allocationId}`);
             
-            if (firebase && firebase.auth && firebase.auth().currentUser && alloc.id) {
+            // 🔧 CORRECTION : Vérifier si c'est un ID local ou Firestore
+            const isLocalId = allocationId.toString().startsWith('local_');
+            console.log(`   Is Local ID: ${isLocalId}`);
+            
+            // Supprimer du tableau local IMMÉDIATEMENT
+            this.allocations = this.allocations.filter(a => a.id !== allocationId);
+            console.log(`✅ Removed from local array (${this.allocations.length} remaining)`);
+            
+            // Supprimer de Firestore SEULEMENT si c'est un ID Firestore valide
+            if (!isLocalId && firebase && firebase.auth && firebase.auth().currentUser) {
                 try {
                     const user = firebase.auth().currentUser;
                     const db = firebase.firestore();
                     
+                    console.log(`   Action: DELETE from Firestore (ID: ${allocationId})`);
+                    
                     await db.collection('users')
                         .doc(user.uid)
                         .collection('allocations')
-                        .doc(alloc.id)
+                        .doc(allocationId)
                         .delete();
                     
                     console.log(`✅ Allocation "${alloc.name}" deleted from Firestore`);
+                    
                 } catch (error) {
-                    console.error('Error deleting from Firestore:', error);
+                    console.error('❌ Error deleting from Firestore:', error);
+                    console.error('   Error code:', error.code);
+                    console.error('   Error message:', error.message);
+                    
+                    // Même si Firestore échoue, on garde la suppression locale
+                    this.showNotification('Deleted locally, but cloud deletion failed', 'warning');
+                }
+            } else {
+                if (isLocalId) {
+                    console.log(`   Action: SKIP Firestore deletion (local ID)`);
+                } else {
+                    console.log(`   Action: SKIP Firestore deletion (no authentication)`);
                 }
             }
             
+            // Backup to localStorage
             this.saveAllocationsToLocalStorage();
+            
+            // Update UI
             this.renderAllocationsList();
-            this.showNotification(`Allocation "${alloc.name}" deleted`, 'info');
+            this.showNotification(`Allocation "${alloc.name}" deleted`, 'success');
+            
+            console.log(`✅ Deletion completed for "${alloc.name}"`);
         },
         
         refreshAllocationsList: async function() {
