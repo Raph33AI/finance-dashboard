@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Investment Analytics</title>
+    <title>Investment Analytics - AlphaVault AI</title>
     
     <!-- Highcharts + Extensions -->
     <script src='https://code.highcharts.com/stock/highstock.js'></script>
@@ -31,7 +31,8 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/dashboard.css'>
     <link rel='stylesheet' href='assets/css/investment-analytics.css'>
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    
+    <!-- ✅ FAVICON DYNAMIQUE -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- ✅ FIREBASE SDK -->
@@ -45,7 +46,7 @@
     <!-- ✅ AUTH GUARD -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
+    <!-- ✅ ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
     
 </head>
@@ -61,12 +62,13 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation -->
+        <!-- ========================================
+             SIDEBAR NAVIGATION
+             ======================================== -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -75,22 +77,16 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
                                   stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Flèche -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
@@ -98,15 +94,11 @@
                                   stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
@@ -114,8 +106,6 @@
             
             <!-- Navigation -->
             <nav class="sidebar-nav">
-                
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -180,7 +170,7 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
@@ -205,37 +195,16 @@
                             <i class='fas fa-handshake'></i>
                             <span>M&A Screening</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -249,10 +218,10 @@
                         <span>Economic Data</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
@@ -269,7 +238,6 @@
                     </div>
                 </div>
 
-                <!-- ✨ NOUVELLE SECTION NEWS -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="News & Analysis">
                         <i class="fas fa-newspaper"></i>
@@ -293,10 +261,9 @@
                 </div>
             </nav>
             
-            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
+            <!-- Sidebar Footer - Menu Utilisateur -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
-                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
@@ -309,7 +276,6 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
@@ -348,10 +314,11 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
-        <!-- Main Content -->
+        <!-- ========================================
+             MAIN CONTENT
+             ======================================== -->
         <div class='main-content'>
             <!-- Header -->
             <header class='top-header'>
@@ -359,21 +326,116 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1 id='pageTitle'></i> Investment Performance Analytics</h1>
+                    <h1 id='pageTitle'><i class='fas fa-chart-bar'></i> Investment Performance Analytics</h1>
                 </div>
             </header>
             
             <div class='container'>
                 
-                <!-- ========== ASSET ALLOCATION CONFIGURATION ========== -->
+                <!-- ========================================
+                     🆕 ALLOCATION SELECTOR + MANAGER
+                     ======================================== -->
+                <section class='analytics-section allocation-selector-section'>
+                    <div class='section-header'>
+                        <h2><i class='fas fa-layer-group'></i> Asset Allocation Simulations</h2>
+                        <div class='header-actions'>
+                            <button class='btn-primary' onclick='InvestmentAnalytics.openCreateAllocationModal()'>
+                                <i class='fas fa-plus'></i> New Allocation
+                            </button>
+                            <button class='btn-secondary' onclick='InvestmentAnalytics.openCompareAllocationsModal()'>
+                                <i class='fas fa-balance-scale'></i> Compare Allocations
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class='allocation-manager-grid'>
+                        <!-- Current Allocation Card -->
+                        <div class='current-allocation-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-star'></i> Active Allocation</h3>
+                                <span class='allocation-badge' id='allocationStatus'>Saved</span>
+                            </div>
+                            <div class='card-body'>
+                                <div class='allocation-info'>
+                                    <div class='info-row'>
+                                        <span class='label'>Name:</span>
+                                        <span class='value' id='currentAllocationName'>Default</span>
+                                    </div>
+                                    <div class='info-row'>
+                                        <span class='label'>Linked Simulation:</span>
+                                        <span class='value' id='currentLinkedSimulation'>---</span>
+                                    </div>
+                                    <div class='info-row'>
+                                        <span class='label'>Total Allocated:</span>
+                                        <span class='value' id='currentTotalAllocation'>0%</span>
+                                    </div>
+                                    <div class='info-row'>
+                                        <span class='label'>Assets:</span>
+                                        <span class='value' id='currentAssetCount'>0</span>
+                                    </div>
+                                    <div class='info-row'>
+                                        <span class='label'>Last Updated:</span>
+                                        <span class='value' id='currentLastUpdate'>---</span>
+                                    </div>
+                                </div>
+                                <div class='card-actions'>
+                                    <button class='btn-icon' onclick='InvestmentAnalytics.saveCurrentAllocation()' title='Save to Cloud'>
+                                        <i class='fas fa-cloud-upload-alt'></i>
+                                    </button>
+                                    <button class='btn-icon' onclick='InvestmentAnalytics.renameCurrentAllocation()' title='Rename'>
+                                        <i class='fas fa-edit'></i>
+                                    </button>
+                                    <button class='btn-icon' onclick='InvestmentAnalytics.duplicateCurrentAllocation()' title='Duplicate'>
+                                        <i class='fas fa-copy'></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Allocations List -->
+                        <div class='allocations-list-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-list'></i> Your Allocations</h3>
+                                <button class='btn-icon' onclick='InvestmentAnalytics.refreshAllocationsList()'>
+                                    <i class='fas fa-sync-alt'></i>
+                                </button>
+                            </div>
+                            <div class='card-body'>
+                                <div class='allocations-list' id='allocationsList'>
+                                    <div class='allocations-empty'>
+                                        <i class='fas fa-inbox'></i>
+                                        <p>No saved allocations yet</p>
+                                        <button class='btn-sm btn-primary' onclick='InvestmentAnalytics.openCreateAllocationModal()'>
+                                            Create First Allocation
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ========================================
+                     🆕 ASSET CONFIGURATION (WITH % / CURRENCY TOGGLE)
+                     ======================================== -->
                 <section class='analytics-section asset-config-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-sliders-h'></i> Portfolio Configuration</h2>
                         <div class='header-actions'>
-                            <button class='btn-icon' onclick='InvestmentAnalytics.saveAssets()' title='Save configuration'>
+                            <!-- Toggle % / Currency -->
+                            <div class='allocation-mode-toggle'>
+                                <button class='mode-btn active' data-mode='percent' onclick='InvestmentAnalytics.setAllocationMode("percent")'>
+                                    <i class='fas fa-percentage'></i> Percent
+                                </button>
+                                <button class='mode-btn' data-mode='currency' onclick='InvestmentAnalytics.setAllocationMode("currency")'>
+                                    <i class='fas fa-euro-sign'></i> Currency
+                                </button>
+                            </div>
+                            
+                            <button class='btn-icon' onclick='InvestmentAnalytics.saveCurrentAllocation()' title='Save'>
                                 <i class='fas fa-save'></i>
                             </button>
-                            <button class='btn-icon' onclick='InvestmentAnalytics.resetAssets()' title='Reset to default'>
+                            <button class='btn-icon' onclick='InvestmentAnalytics.resetAssets()' title='Reset'>
                                 <i class='fas fa-redo'></i>
                             </button>
                         </div>
@@ -381,19 +443,21 @@
                     
                     <div class='info-box'>
                         <i class='fas fa-info-circle'></i>
-                        <p><strong>Configure your portfolio allocation:</strong> Define which assets compose your monthly investment. Total allocation must equal 100%.</p>
+                        <p id='allocationModeInfo'>
+                            <strong>Percent Mode:</strong> Define allocation as percentage of total monthly investment. Total must equal 100%.
+                        </p>
                     </div>
                     
                     <div class='portfolio-summary'>
                         <div class='summary-item'>
-                            <div class='summary-label'>Total Monthly Investment</div>
+                            <div class='summary-label'>Monthly Investment</div>
                             <div class='summary-value' id='totalMonthlyInvestment'>€0</div>
                             <div class='summary-hint'>From Budget Dashboard</div>
                         </div>
                         <div class='summary-item'>
                             <div class='summary-label'>Total Allocated</div>
-                            <div class='summary-value' id='totalAllocatedPercent'>0%</div>
-                            <div class='summary-hint' id='allocationStatus'>Add assets below</div>
+                            <div class='summary-value' id='totalAllocatedDisplay'>0%</div>
+                            <div class='summary-hint' id='allocationStatusHint'>Add assets below</div>
                         </div>
                         <div class='summary-item'>
                             <div class='summary-label'>Number of Assets</div>
@@ -416,7 +480,9 @@
                     </div>
                 </section>
                 
-                <!-- KPI Dashboard -->
+                <!-- ========================================
+                     KPI DASHBOARD
+                     ======================================== -->
                 <section class='analytics-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-tachometer-alt'></i> Key Performance Indicators</h2>
@@ -435,7 +501,9 @@
                     </div>
                 </section>
                 
-                <!-- Performance Charts -->
+                <!-- ========================================
+                     PERFORMANCE CHARTS
+                     ======================================== -->
                 <section class='analytics-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-chart-area'></i> Performance Analysis</h2>
@@ -473,7 +541,9 @@
                     </div>
                 </section>
                 
-                <!-- Risk Analysis -->
+                <!-- ========================================
+                     RISK ANALYSIS
+                     ======================================== -->
                 <section class='analytics-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-shield-alt'></i> Risk Analysis</h2>
@@ -519,7 +589,9 @@
                     </div>
                 </section>
                 
-                <!-- Correlation Matrix -->
+                <!-- ========================================
+                     CORRELATION MATRIX
+                     ======================================== -->
                 <section class='analytics-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-project-diagram'></i> Correlation Matrix</h2>
@@ -532,11 +604,11 @@
                     <div class='correlation-container'>
                         <div id='chartCorrelationMatrix' class='chart-container-large'></div>
                     </div>
-                    
-                    <div class='correlation-insights' id='correlationInsights'></div>
                 </section>
                 
-                <!-- Advanced Metrics -->
+                <!-- ========================================
+                     ADVANCED METRICS
+                     ======================================== -->
                 <section class='analytics-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-chart-line'></i> Advanced Metrics</h2>
@@ -565,111 +637,279 @@
                     </div>
                 </section>
                 
-                <!-- AI RECOMMENDATIONS SECTION -->
-                <section class='analytics-section ai-section'>
+                <!-- ========================================
+                     🆕 ADVANCED AI OPTIMIZATION
+                     ======================================== -->
+                <section class='analytics-section ai-optimization-section'>
                     <div class='section-header'>
-                        <h2><i class='fas fa-brain'></i> Alphy AI - Recommendations</h2>
-                        <button class='btn-primary' onclick='InvestmentAnalytics.runAIAnalysis()'>
-                            <i class='fas fa-robot'></i> Run AI Analysis
+                        <h2><i class='fas fa-brain'></i> Alphy AI - Advanced Portfolio Optimization</h2>
+                        <button class='btn-primary btn-large' onclick='InvestmentAnalytics.runAdvancedAIOptimization()'>
+                            <i class='fas fa-rocket'></i> Run Advanced AI Analysis
                         </button>
                     </div>
                     
-                    <div class='ai-loading hidden' id='aiLoading'>
-                        <div class='loading-spinner'></div>
-                        <p>AI models are analyzing your portfolio...</p>
-                        <div class='loading-progress'>
-                            <div class='progress-bar' id='aiProgress'></div>
+                    <!-- AI Loading -->
+                    <div class='ai-loading hidden' id='aiAdvancedLoading'>
+                        <div class='loading-content'>
+                            <div class='loading-spinner-large'></div>
+                            <h3 id='aiLoadingTitle'>Analyzing Portfolio...</h3>
+                            <p id='aiLoadingSubtitle'>This may take up to 30 seconds</p>
+                            <div class='loading-progress'>
+                                <div class='progress-bar' id='aiAdvancedProgress'></div>
+                            </div>
+                            <div class='loading-steps' id='aiLoadingSteps'>
+                                <div class='step'><i class='fas fa-spinner fa-spin'></i> Analyzing your risk profile...</div>
+                                <div class='step'><i class='fas fa-clock'></i> Computing efficient frontier...</div>
+                                <div class='step'><i class='fas fa-clock'></i> Generating optimized strategies...</div>
+                                <div class='step'><i class='fas fa-clock'></i> Running historical backtest...</div>
+                                <div class='step'><i class='fas fa-clock'></i> Analyzing diversification...</div>
+                                <div class='step'><i class='fas fa-clock'></i> Generating personalized recommendations...</div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class='ai-models-grid' id='aiModelsGrid'>
-                        <div class='ai-model-card'>
-                            <div class='model-header'>
-                                <div class='model-icon optimizer'>
-                                    <i class='fas fa-cogs'></i>
+                    <!-- AI Results -->
+                    <div class='ai-results-container hidden' id='aiAdvancedResults'>
+                        
+                        <!-- Risk Profile -->
+                        <div class='ai-result-card'>
+                            <div class='card-header'>
+                                <div class='card-icon risk-profile'>
+                                    <i class='fas fa-user-shield'></i>
                                 </div>
-                                <div class='model-info'>
-                                    <h3>Portfolio Optimizer</h3>
-                                    <span class='model-badge'>Markowitz</span>
+                                <div class='card-title'>
+                                    <h3>Your Risk Profile</h3>
+                                    <span class='card-badge' id='riskProfileBadge'>Calculating...</span>
                                 </div>
                             </div>
-                            <div class='model-content'>
-                                <p class='model-description'>Allocation optimization based on efficient frontier</p>
-                                <div id='aiOptimizerResults' class='model-results empty'>
-                                    Click "Run AI Analysis" to generate results
-                                </div>
+                            <div class='card-body' id='riskProfileBody'>
+                                <!-- Will be filled by AI -->
                             </div>
                         </div>
                         
-                        <div class='ai-model-card'>
-                            <div class='model-header'>
-                                <div class='model-icon predictor'>
+                        <!-- Efficient Frontier -->
+                        <div class='ai-result-card full-width'>
+                            <div class='card-header'>
+                                <div class='card-icon optimizer'>
                                     <i class='fas fa-chart-line'></i>
                                 </div>
-                                <div class='model-info'>
-                                    <h3>LSTM Predictor</h3>
-                                    <span class='model-badge'>Deep Learning</span>
+                                <div class='card-title'>
+                                    <h3>Efficient Frontier Analysis</h3>
+                                    <span class='card-subtitle'>Optimal Risk-Return Combinations</span>
                                 </div>
                             </div>
-                            <div class='model-content'>
-                                <p class='model-description'>Future returns prediction via neural network</p>
-                                <div id='aiLSTMResults' class='model-results empty'>
-                                    Click "Run AI Analysis" to generate results
-                                </div>
+                            <div class='card-body'>
+                                <div id='chartEfficientFrontier' class='chart-container-large'></div>
+                                <div class='frontier-insights' id='frontierInsights'></div>
                             </div>
                         </div>
                         
-                        <div class='ai-model-card'>
-                            <div class='model-header'>
-                                <div class='model-icon risk'>
-                                    <i class='fas fa-exclamation-triangle'></i>
+                        <!-- Recommended Strategies -->
+                        <div class='strategies-grid' id='strategiesGrid'>
+                            <!-- Conservative Strategy -->
+                            <div class='strategy-card conservative'>
+                                <div class='strategy-header'>
+                                    <i class='fas fa-shield-alt'></i>
+                                    <h4>Conservative</h4>
+                                    <span class='strategy-score' id='conservativeScore'>--</span>
                                 </div>
-                                <div class='model-info'>
-                                    <h3>Risk Analyzer</h3>
-                                    <span class='model-badge'>Monte Carlo</span>
+                                <div class='strategy-body' id='conservativeBody'>
+                                    <!-- AI fills this -->
                                 </div>
+                                <button class='btn-strategy' onclick='InvestmentAnalytics.applyStrategy("conservative")'>
+                                    Apply This Strategy
+                                </button>
                             </div>
-                            <div class='model-content'>
-                                <p class='model-description'>Scenario simulation and probabilistic analysis</p>
-                                <div id='aiRiskResults' class='model-results empty'>
-                                    Click "Run AI Analysis" to generate results
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class='ai-model-card'>
-                            <div class='model-header'>
-                                <div class='model-icon rebalancer'>
+                            
+                            <!-- Balanced Strategy -->
+                            <div class='strategy-card balanced'>
+                                <div class='strategy-header'>
                                     <i class='fas fa-balance-scale'></i>
+                                    <h4>Balanced</h4>
+                                    <span class='strategy-score' id='balancedScore'>--</span>
                                 </div>
-                                <div class='model-info'>
-                                    <h3>Smart Rebalancer</h3>
-                                    <span class='model-badge'>ML</span>
+                                <div class='strategy-body' id='balancedBody'>
+                                    <!-- AI fills this -->
+                                </div>
+                                <button class='btn-strategy' onclick='InvestmentAnalytics.applyStrategy("balanced")'>
+                                    Apply This Strategy
+                                </button>
+                            </div>
+                            
+                            <!-- Aggressive Strategy -->
+                            <div class='strategy-card aggressive'>
+                                <div class='strategy-header'>
+                                    <i class='fas fa-rocket'></i>
+                                    <h4>Aggressive</h4>
+                                    <span class='strategy-score' id='aggressiveScore'>--</span>
+                                </div>
+                                <div class='strategy-body' id='aggressiveBody'>
+                                    <!-- AI fills this -->
+                                </div>
+                                <button class='btn-strategy' onclick='InvestmentAnalytics.applyStrategy("aggressive")'>
+                                    Apply This Strategy
+                                </button>
+                            </div>
+                            
+                            <!-- AI Custom Strategy -->
+                            <div class='strategy-card custom'>
+                                <div class='strategy-header'>
+                                    <i class='fas fa-brain'></i>
+                                    <h4>AI Custom</h4>
+                                    <span class='strategy-score' id='customScore'>--</span>
+                                </div>
+                                <div class='strategy-body' id='customBody'>
+                                    <!-- AI fills this -->
+                                </div>
+                                <button class='btn-strategy' onclick='InvestmentAnalytics.applyStrategy("custom")'>
+                                    Apply This Strategy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Backtest Results -->
+                        <div class='ai-result-card full-width'>
+                            <div class='card-header'>
+                                <div class='card-icon backtest'>
+                                    <i class='fas fa-history'></i>
+                                </div>
+                                <div class='card-title'>
+                                    <h3>Backtest Results</h3>
+                                    <span class='card-subtitle'>Historical Performance Simulation</span>
                                 </div>
                             </div>
-                            <div class='model-content'>
-                                <p class='model-description'>Intelligent rebalancing recommendations</p>
-                                <div id='aiRebalancerResults' class='model-results empty'>
-                                    Click "Run AI Analysis" to generate results
+                            <div class='card-body'>
+                                <div id='chartBacktest' class='chart-container-large'></div>
+                                <div class='backtest-metrics' id='backtestMetrics'></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Diversification Score -->
+                        <div class='ai-result-card'>
+                            <div class='card-header'>
+                                <div class='card-icon diversification'>
+                                    <i class='fas fa-project-diagram'></i>
+                                </div>
+                                <div class='card-title'>
+                                    <h3>Diversification Analysis</h3>
+                                    <span class='card-badge' id='diversificationScore'>--/100</span>
+                                </div>
+                            </div>
+                            <div class='card-body' id='diversificationBody'>
+                                <!-- AI fills this -->
+                            </div>
+                        </div>
+                        
+                        <!-- AI Recommendations -->
+                        <div class='ai-result-card full-width'>
+                            <div class='card-header'>
+                                <div class='card-icon recommendations'>
+                                    <i class='fas fa-lightbulb'></i>
+                                </div>
+                                <div class='card-title'>
+                                    <h3>Personalized Recommendations</h3>
+                                    <span class='card-subtitle'>Actionable Insights</span>
+                                </div>
+                            </div>
+                            <div class='card-body'>
+                                <div class='recommendations-advanced' id='recommendationsAdvanced'>
+                                    <!-- AI fills this -->
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class='ai-recommendations' id='aiRecommendations'>
-                        <h3><i class='fas fa-lightbulb'></i> Consolidated Recommendations</h3>
-                        <div class='recommendations-list' id='recommendationsList'></div>
                     </div>
                 </section>
                 
                 <footer>
-                    <p>Investment Performance Analytics | Data synchronized with Budget Dashboard</p>
+                    <p>Investment Performance Analytics | Data synchronized with Budget Dashboard | Powered by AlphaVault AI</p>
                 </footer>
             </div>
         </div>
     </div>
     
-    <!-- ADD ASSET MODAL -->
+    <!-- ========================================
+         🆕 MODALS
+         ======================================== -->
+    
+    <!-- Create Allocation Modal -->
+    <div class='modal' id='modalCreateAllocation'>
+        <div class='modal-content modal-medium'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-plus-circle'></i> Create New Asset Allocation</h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeCreateAllocationModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label for='newAllocationName'>Allocation Name</label>
+                    <input type='text' id='newAllocationName' placeholder='e.g., Aggressive Growth 2025'>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='linkedSimulationSelect'>Link to Budget Simulation (Optional)</label>
+                    <select id='linkedSimulationSelect'>
+                        <option value=''>-- None --</option>
+                        <!-- Will be filled dynamically -->
+                    </select>
+                    <small class='form-hint'>Link this allocation to a specific budget scenario</small>
+                </div>
+                
+                <div class='form-group'>
+                    <label>Start From</label>
+                    <div class='radio-group'>
+                        <label>
+                            <input type='radio' name='startFrom' value='scratch' checked>
+                            <span>Blank allocation</span>
+                        </label>
+                        <label>
+                            <input type='radio' name='startFrom' value='current'>
+                            <span>Copy current allocation</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-secondary' onclick='InvestmentAnalytics.closeCreateAllocationModal()'>Cancel</button>
+                <button class='btn-primary' onclick='InvestmentAnalytics.createNewAllocation()'>
+                    <i class='fas fa-check'></i> Create
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Compare Allocations Modal -->
+    <div class='modal' id='modalCompareAllocations'>
+        <div class='modal-content modal-xlarge'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-balance-scale'></i> Compare Asset Allocations</h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeCompareAllocationsModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <div class='compare-selector'>
+                    <h4>Select Allocations to Compare (2-4)</h4>
+                    <div class='allocations-checkboxes' id='compareCheckboxes'>
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+                
+                <button class='btn-primary' onclick='InvestmentAnalytics.runComparison()' style='margin-top: 20px;'>
+                    <i class='fas fa-chart-bar'></i> Compare Selected
+                </button>
+                
+                <div class='comparison-results hidden' id='comparisonResults'>
+                    <!-- Comparison charts and tables -->
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-secondary' onclick='InvestmentAnalytics.closeCompareAllocationsModal()'>Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Asset Modal -->
     <div class='modal' id='modalAddAsset'>
         <div class='modal-content modal-medium'>
             <div class='modal-header'>
@@ -703,9 +943,9 @@
                 </div>
                 
                 <div class='form-group'>
-                    <label for='assetAllocation'>Allocation (%)</label>
-                    <input type='number' id='assetAllocation' min='0' max='100' step='0.1' placeholder='0.0'>
-                    <small class='form-hint'>Percentage of your monthly investment</small>
+                    <label for='assetAllocation'>Allocation (% or EUR)</label>
+                    <input type='number' id='assetAllocation' min='0' step='0.1' placeholder='0.0'>
+                    <small class='form-hint'>Percentage of monthly investment or absolute EUR amount</small>
                 </div>
             </div>
             <div class='modal-footer'>
@@ -717,7 +957,7 @@
         </div>
     </div>
     
-    <!-- EDIT ASSET MODAL -->
+    <!-- Edit Asset Modal -->
     <div class='modal' id='modalEditAsset'>
         <div class='modal-content modal-medium'>
             <div class='modal-header'>
@@ -753,8 +993,8 @@
                 </div>
                 
                 <div class='form-group'>
-                    <label for='editAssetAllocation'>Allocation (%)</label>
-                    <input type='number' id='editAssetAllocation' min='0' max='100' step='0.1'>
+                    <label for='editAssetAllocation'>Allocation (% or EUR)</label>
+                    <input type='number' id='editAssetAllocation' min='0' step='0.1'>
                 </div>
             </div>
             <div class='modal-footer'>
@@ -766,34 +1006,18 @@
         </div>
     </div>
     
-    <!-- RECOMMENDATION DETAILS MODAL -->
-    <div class='modal' id='modalRecommendationDetails'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-lightbulb'></i> <span id='recDetailTitle'>Recommendation Details</span></h2>
-                <button class='modal-close' onclick='InvestmentAnalytics.closeRecommendationModal()'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body' id='recDetailBody'>
-                <!-- Will be filled dynamically -->
-            </div>
-            <div class='modal-footer'>
-                <button class='btn-primary' onclick='InvestmentAnalytics.closeRecommendationModal()'>Close</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Scripts -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ AJOUT CRITIQUE : SimulationManager AVANT investment-analytics.js -->
+    <!-- ✅ SimulationManager AVANT investment-analytics.js -->
     <script src='assets/js/simulation-manager.js'></script>
     
-    <!-- ✅ Investment Analytics Script (CORRIGÉ) -->
+    <!-- ✅ Investment Analytics Script (ULTRA-ADVANCED VERSION) -->
     <script src='assets/js/investment-analytics.js'></script>
+    
+    <!-- Particles Background -->
     <script src="assets/js/chatbot-particles.js"></script>
 </body>
 </html>
