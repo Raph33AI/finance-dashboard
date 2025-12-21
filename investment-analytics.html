@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Investment Analytics</title>
+    <title>Investment Analytics - AlphaVault AI</title>
     
     <!-- Highcharts + Extensions -->
     <script src='https://code.highcharts.com/stock/highstock.js'></script>
@@ -31,7 +31,8 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/dashboard.css'>
     <link rel='stylesheet' href='assets/css/investment-analytics.css'>
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    
+    <!-- ✅ FAVICON DYNAMIQUE -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- ✅ FIREBASE SDK -->
@@ -45,7 +46,7 @@
     <!-- ✅ AUTH GUARD -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
+    <!-- ✅ ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
     
 </head>
@@ -115,7 +116,6 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -180,7 +180,7 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
@@ -205,27 +205,7 @@
                             <i class='fas fa-handshake'></i>
                             <span>M&A Screening</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
                 <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
@@ -235,7 +215,7 @@
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -249,10 +229,10 @@
                         <span>Economic Data</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
@@ -348,7 +328,6 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- Main Content -->
@@ -359,18 +338,27 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1 id='pageTitle'></i> Investment Performance Analytics</h1>
+                    <h1 id='pageTitle'><i class="fas fa-chart-pie"></i> Investment Performance Analytics</h1>
                 </div>
             </header>
             
             <div class='container'>
+                
+                <!-- ========== ✅ NOUVEAU : SCENARIOS SELECTOR ========== -->
+                <section class='analytics-section scenarios-selector-section'>
+                    <div id='scenariosSelector'>
+                        <!-- Will be injected by JS -->
+                    </div>
+                </section>
                 
                 <!-- ========== ASSET ALLOCATION CONFIGURATION ========== -->
                 <section class='analytics-section asset-config-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-sliders-h'></i> Portfolio Configuration</h2>
                         <div class='header-actions'>
-                            <button class='btn-icon' onclick='InvestmentAnalytics.saveAssets()' title='Save configuration'>
+                            <!-- ✅ NOUVEAU : Mode Toggle -->
+                            <div id='allocationModeToggle'></div>
+                            <button class='btn-icon' onclick='InvestmentAnalytics.saveAllocationScenarios()' title='Save configuration'>
                                 <i class='fas fa-save'></i>
                             </button>
                             <button class='btn-icon' onclick='InvestmentAnalytics.resetAssets()' title='Reset to default'>
@@ -381,7 +369,7 @@
                     
                     <div class='info-box'>
                         <i class='fas fa-info-circle'></i>
-                        <p><strong>Configure your portfolio allocation:</strong> Define which assets compose your monthly investment. Total allocation must equal 100%.</p>
+                        <p><strong>Configure your portfolio allocation:</strong> Define which assets compose your monthly investment. You can use <strong>Percentage (%)</strong> or <strong>Currency (EUR)</strong> mode.</p>
                     </div>
                     
                     <div class='portfolio-summary'>
@@ -412,6 +400,32 @@
                         
                         <div class='assets-list' id='assetsList'>
                             <!-- Assets will be injected here -->
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ========== ✅ NOUVEAU : SCENARIO COMPARISON ========== -->
+                <section class='analytics-section scenario-comparison-section' id='scenarioComparisonSection' style='display:none;'>
+                    <div class='section-header'>
+                        <h2><i class='fas fa-balance-scale'></i> Scenario Comparison</h2>
+                        <button class='btn-secondary' onclick='InvestmentAnalytics.hideScenarioComparison()'>
+                            <i class='fas fa-times'></i> Close Comparison
+                        </button>
+                    </div>
+                    
+                    <div class='comparison-grid' id='comparisonGrid'>
+                        <!-- Will be filled by JS -->
+                    </div>
+                    
+                    <div class='comparison-charts'>
+                        <div class='chart-card'>
+                            <h3 class='chart-title'>Allocations Comparison</h3>
+                            <div id='chartScenarioComparison' class='chart-container'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <h3 class='chart-title'>Risk-Return Profile</h3>
+                            <div id='chartRiskReturnComparison' class='chart-container'></div>
                         </div>
                     </div>
                 </section>
@@ -532,8 +546,6 @@
                     <div class='correlation-container'>
                         <div id='chartCorrelationMatrix' class='chart-container-large'></div>
                     </div>
-                    
-                    <div class='correlation-insights' id='correlationInsights'></div>
                 </section>
                 
                 <!-- Advanced Metrics -->
@@ -565,10 +577,68 @@
                     </div>
                 </section>
                 
-                <!-- AI RECOMMENDATIONS SECTION -->
+                <!-- ========== ✅ NOUVEAU : EFFICIENT FRONTIER & ADVANCED AI ========== -->
+                <section class='analytics-section ai-advanced-section'>
+                    <div class='section-header'>
+                        <h2><i class='fas fa-brain'></i> Advanced AI - Modern Portfolio Theory</h2>
+                        <button class='btn-primary' onclick='InvestmentAnalytics.runAdvancedAI()'>
+                            <i class='fas fa-magic'></i> Run Advanced AI Analysis
+                        </button>
+                    </div>
+                    
+                    <div class='advanced-ai-grid'>
+                        <!-- Efficient Frontier -->
+                        <div class='ai-advanced-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-chart-scatter'></i> Efficient Frontier</h3>
+                                <span class='badge-premium'>Markowitz</span>
+                            </div>
+                            <div class='card-content'>
+                                <div id='chartEfficientFrontier' class='chart-container-large'></div>
+                                <div id='efficientFrontierResults' class='ai-results'></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Risk Parity -->
+                        <div class='ai-advanced-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-balance-scale-right'></i> Risk Parity</h3>
+                                <span class='badge-premium'>Equal Risk</span>
+                            </div>
+                            <div class='card-content'>
+                                <div id='riskParityResults' class='ai-results'></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Black-Litterman -->
+                        <div class='ai-advanced-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-flask'></i> Black-Litterman Model</h3>
+                                <span class='badge-premium'>Bayesian</span>
+                            </div>
+                            <div class='card-content'>
+                                <div id='blackLittermanResults' class='ai-results'></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stress Testing -->
+                        <div class='ai-advanced-card'>
+                            <div class='card-header'>
+                                <h3><i class='fas fa-exclamation-triangle'></i> Stress Testing</h3>
+                                <span class='badge-premium'>Scenarios</span>
+                            </div>
+                            <div class='card-content'>
+                                <div id='stressTestResults' class='ai-results'></div>
+                                <div id='chartStressTest' class='chart-container'></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- AI RECOMMENDATIONS SECTION (Original) -->
                 <section class='analytics-section ai-section'>
                     <div class='section-header'>
-                        <h2><i class='fas fa-brain'></i> Alphy AI - Recommendations</h2>
+                        <h2><i class='fas fa-robot'></i> Alphy AI - Standard Recommendations</h2>
                         <button class='btn-primary' onclick='InvestmentAnalytics.runAIAnalysis()'>
                             <i class='fas fa-robot'></i> Run AI Analysis
                         </button>
@@ -663,11 +733,13 @@
                 </section>
                 
                 <footer>
-                    <p>Investment Performance Analytics | Data synchronized with Budget Dashboard</p>
+                    <p>Investment Performance Analytics | Data synchronized with Budget Dashboard | <span id='lastUpdate'></span></p>
                 </footer>
             </div>
         </div>
     </div>
+    
+    <!-- ========== MODALS ========== -->
     
     <!-- ADD ASSET MODAL -->
     <div class='modal' id='modalAddAsset'>
@@ -766,6 +838,40 @@
         </div>
     </div>
     
+    <!-- ✅ NOUVEAU : CREATE SCENARIO MODAL -->
+    <div class='modal' id='modalCreateScenario'>
+        <!-- Will be created by JS -->
+    </div>
+    
+    <!-- ✅ NOUVEAU : SCENARIOS MANAGEMENT MODAL -->
+    <div class='modal' id='modalScenarios'>
+        <!-- Will be created by JS -->
+    </div>
+    
+    <!-- ✅ NOUVEAU : COMPARE SCENARIOS MODAL -->
+    <div class='modal' id='modalCompare'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-balance-scale'></i> Compare Scenarios</h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeCompareModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label>Select scenarios to compare (2-4):</label>
+                    <div id='compareScenariosList' class='compare-scenarios-list'></div>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-secondary' onclick='InvestmentAnalytics.closeCompareModal()'>Cancel</button>
+                <button class='btn-primary' onclick='InvestmentAnalytics.compareSelectedScenarios()'>
+                    <i class='fas fa-chart-bar'></i> Compare
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- RECOMMENDATION DETAILS MODAL -->
     <div class='modal' id='modalRecommendationDetails'>
         <div class='modal-content modal-large'>
@@ -792,7 +898,7 @@
     <!-- ✅ AJOUT CRITIQUE : SimulationManager AVANT investment-analytics.js -->
     <script src='assets/js/simulation-manager.js'></script>
     
-    <!-- ✅ Investment Analytics Script (CORRIGÉ) -->
+    <!-- ✅ Investment Analytics Script (VERSION MULTI-SCENARIOS) -->
     <script src='assets/js/investment-analytics.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
 </body>
