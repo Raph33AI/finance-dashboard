@@ -140,20 +140,51 @@ class IPOIntelligenceDashboard {
         });
     }
 
+    // /**
+    //  * ═══════════════════════════════════════════════════════════════════
+    //  * 🛡 FILTRAGE STRICT DES FORMS IPO VALIDES
+    //  * ═══════════════════════════════════════════════════════════════════
+    //  */
+    // isValidIPOForm(formType) {
+    //     if (!formType) return false;
+        
+    //     // Nettoyer le formType (supprimer espaces, convertir en majuscules)
+    //     const cleanForm = formType.trim().toUpperCase();
+        
+    //     // Vérifier si c'est un form IPO valide
+    //     const validForms = ['S-1', 'S-1/A', 'F-1', 'F-1/A'];
+    //     const isValid = validForms.some(validForm => cleanForm === validForm);
+        
+    //     if (!isValid) {
+    //         console.log(`❌ Form exclu: ${formType} (non-IPO)`);
+    //     }
+        
+    //     return isValid;
+    // }
+
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * 🛡 FILTRAGE STRICT DES FORMS IPO VALIDES
+     * 🛡 FILTRAGE STRICT DES FORMS IPO VALIDES (SÉCURITÉ SUPPLÉMENTAIRE)
      * ═══════════════════════════════════════════════════════════════════
      */
     isValidIPOForm(formType) {
         if (!formType) return false;
         
-        // Nettoyer le formType (supprimer espaces, convertir en majuscules)
+        // Nettoyer le formType
         const cleanForm = formType.trim().toUpperCase();
         
-        // Vérifier si c'est un form IPO valide
+        // Liste stricte des forms IPO valides
         const validForms = ['S-1', 'S-1/A', 'F-1', 'F-1/A'];
-        const isValid = validForms.some(validForm => cleanForm === validForm);
+        
+        // Normaliser : S-1MEF, S-1/A-1, etc. → S-1/A
+        let normalizedForm = cleanForm;
+        if (cleanForm.startsWith('S-1') && cleanForm !== 'S-1') {
+            normalizedForm = 'S-1/A';
+        } else if (cleanForm.startsWith('F-1') && cleanForm !== 'F-1') {
+            normalizedForm = 'F-1/A';
+        }
+        
+        const isValid = validForms.includes(normalizedForm);
         
         if (!isValid) {
             console.log(`❌ Form exclu: ${formType} (non-IPO)`);
