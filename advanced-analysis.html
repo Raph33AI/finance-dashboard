@@ -1210,27 +1210,92 @@
     <script src="assets/js/dark-mode.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/sidebar.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
     <script src='assets/js/advanced-analysis.js'></script>
     <script src='assets/js/portfolio-manager.js'></script>
     <!-- ❌ watchlist-manager.js SUPPRIMÉ (fichier manquant) -->
     
-    <!-- Chatbot Scripts -->
-    <script src='assets/js/chatbot-config.js'></script>
-    <script src='assets/js/chatbot-gemini.js'></script>
-    <script src='assets/js/chatbot-analytics.js'></script>
-    <script src='assets/js/chatbot-charts.js'></script>
-    <script src='assets/js/chatbot-ai-engine.js'></script>
-    <script src='assets/js/chatbot-ui.js'></script>
+        <!-- User Menu Fix -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                    } else {
+                        freshDropdown.classList.add('active');
+                    }
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                console.log('✅ User menu initialized!');
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
     
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
+    <!-- CHATBOT IA FINANCIER -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Scripts du chatbot -->
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- Initialisation du chatbot -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
             
             if (accessDenied) {
@@ -1238,69 +1303,29 @@
                 return;
             }
             
-            // Vérifier que ChatbotConfig est chargé
             if (typeof ChatbotConfig === 'undefined') {
                 console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
                 return;
             }
             
             console.log('✅ ChatbotConfig chargé');
             
-            // Vérifier que ChatbotUI est disponible
             if (typeof ChatbotUI === 'undefined') {
                 console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
                 return;
             }
             
             console.log('✅ ChatbotUI chargé');
             
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
                 console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
-    });
-    </script>
-    
-    <!-- User Menu Initialization -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Force initializing user menu...');
-        
-        const trigger = document.getElementById('sidebarUserTrigger');
-        const dropdown = document.getElementById('sidebarUserDropdown');
-        
-        if (trigger && dropdown) {
-            console.log('User menu elements found');
-            
-            console.log('Adding click event to trigger...');
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('User menu clicked!');
-                dropdown.classList.toggle('active');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
-            
-            console.log('User menu initialized successfully!');
-        } else {
-            console.error('User menu elements not found!');
-        }
     });
     </script>
 
