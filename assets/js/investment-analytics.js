@@ -3547,7 +3547,7 @@
         initializeCurrentAllocation: function() {
             const lastUsedId = localStorage.getItem('lastUsedAllocationId');
             
-            if (lastUsedId && this.allocations.length > 0) {
+            if (lastUsedId && lastUsedId !== 'null' && this.allocations.length > 0) {
                 const found = this.allocations.find(a => a.id === lastUsedId);
                 if (found) {
                     this.currentAllocation = JSON.parse(JSON.stringify(found));
@@ -3559,8 +3559,9 @@
             if (this.allocations.length > 0) {
                 this.currentAllocation = JSON.parse(JSON.stringify(this.allocations[0]));
             } else {
+                // 🔧 CORRECTION : Générer un ID local unique si pas d'ID Firestore
                 this.currentAllocation = {
-                    id: null,
+                    id: 'local_' + Date.now(), // ID local temporaire
                     name: 'Default',
                     linkedSimulation: null,
                     assets: this.getDefaultAssets(),
@@ -3568,6 +3569,8 @@
                     updatedAt: new Date().toISOString()
                 };
             }
+            
+            console.log(`📊 Current allocation initialized: "${this.currentAllocation.name}" (ID: ${this.currentAllocation.id})`);
         },
         
         getDefaultAssets: function() {
@@ -4035,7 +4038,6 @@
                     </div>
                 `;
                 
-                // Add event listener for create button
                 const createBtn = container.querySelector('#btnCreateFirstAllocation');
                 if (createBtn) {
                     createBtn.addEventListener('click', () => this.openCreateAllocationModal());
@@ -4045,6 +4047,12 @@
             
             const self = this;
             container.innerHTML = this.allocations.map(alloc => {
+                // 🔧 CORRECTION : S'assurer que chaque allocation a un ID valide
+                if (!alloc.id || alloc.id === 'null') {
+                    alloc.id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    console.warn(`⚠ Allocation "${alloc.name}" had no ID, assigned: ${alloc.id}`);
+                }
+                
                 const isActive = alloc.id === self.currentAllocation.id;
                 const total = alloc.assets.reduce((sum, a) => sum + a.allocation, 0);
                 
@@ -4072,11 +4080,12 @@
                 `;
             }).join('');
             
-            // 🔧 Add event listeners for all buttons
+            // 🔧 CORRECTION : Event listeners avec meilleure gestion des IDs
             container.querySelectorAll('.btn-load-alloc').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const allocId = btn.dataset.allocationId;
+                    console.log(`🔄 Loading allocation with ID: ${allocId}`);
                     self.loadAllocation(allocId);
                 });
             });
@@ -4085,6 +4094,7 @@
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const allocId = btn.dataset.allocationId;
+                    console.log(`📋 Duplicating allocation with ID: ${allocId}`);
                     self.duplicateAllocation(allocId);
                 });
             });
@@ -4093,9 +4103,12 @@
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const allocId = btn.dataset.allocationId;
+                    console.log(`🗑 Deleting allocation with ID: ${allocId}`);
                     self.deleteAllocation(allocId);
                 });
             });
+            
+            console.log(`✅ Rendered ${this.allocations.length} allocations with event listeners`);
         },
 
         // ========================================
@@ -4106,20 +4119,82 @@
             const modal = document.getElementById('modalCreateAllocation');
             if (!modal) return;
             
+            // 🔧 CORRECTION : Charger les simulations disponibles
             const select = document.getElementById('linkedSimulationSelect');
-            if (select && window.SimulationManager) {
-                const simulations = window.SimulationManager.simulations || [];
+            if (select) {
                 select.innerHTML = '<option value="">-- None --</option>';
-                simulations.forEach(sim => {
-                    select.innerHTML += `<option value="${sim.name}">${sim.name}</option>`;
-                });
+                
+                // Vérifier si SimulationManager existe et a des simulations
+                if (window.SimulationManager) {
+                    console.log('📊 SimulationManager found, loading simulations...');
+                    
+                    // Forcer le chargement des simulations si nécessaire
+                    if (!window.SimulationManager.simulations || window.SimulationManager.simulations.length === 0) {
+                        console.log('📥 SimulationManager has no simulations loaded, attempting to load...');
+                        
+                        // Si SimulationManager a une méthode loadSimulations
+                        if (typeof window.SimulationManager.loadSimulations === 'function') {
+                            window.SimulationManager.loadSimulations().then(() => {
+                                this.populateSimulationsSelect(select);
+                            }).catch(err => {
+                                console.error('❌ Error loading simulations:', err);
+                            });
+                        } else {
+                            // Sinon essayer de charger depuis localStorage
+                            const savedSims = localStorage.getItem('savedSimulations');
+                            if (savedSims) {
+                                try {
+                                    const simulations = JSON.parse(savedSims);
+                                    console.log(`✅ Loaded ${simulations.length} simulations from localStorage`);
+                                    simulations.forEach(sim => {
+                                        select.innerHTML += `<option value="${sim.name}">${sim.name}</option>`;
+                                    });
+                                } catch (e) {
+                                    console.error('❌ Error parsing saved simulations:', e);
+                                }
+                            } else {
+                                console.warn('⚠ No simulations found in localStorage');
+                            }
+                        }
+                    } else {
+                        this.populateSimulationsSelect(select);
+                    }
+                } else {
+                    console.warn('⚠ SimulationManager not found - simulations dropdown will be empty');
+                }
             }
             
-            document.getElementById('newAllocationName').value = '';
+            // Reset form
+            const nameInput = document.getElementById('newAllocationName');
+            if (nameInput) nameInput.value = '';
+            
             const scratchRadio = document.querySelector('input[name="startFrom"][value="scratch"]');
             if (scratchRadio) scratchRadio.checked = true;
             
             modal.classList.add('active');
+            console.log('✅ Create allocation modal opened');
+        },
+
+        populateSimulationsSelect: function(selectElement) {
+            if (!selectElement) return;
+            
+            const simulations = window.SimulationManager.simulations || [];
+            
+            console.log(`📊 Populating simulations dropdown with ${simulations.length} simulations`);
+            
+            if (simulations.length === 0) {
+                console.warn('⚠ No simulations available to link');
+                return;
+            }
+            
+            simulations.forEach(sim => {
+                const option = document.createElement('option');
+                option.value = sim.name;
+                option.textContent = sim.name;
+                selectElement.appendChild(option);
+            });
+            
+            console.log(`✅ Added ${simulations.length} simulations to dropdown`);
         },
         
         closeCreateAllocationModal: function() {
@@ -4149,8 +4224,11 @@
                 newAssets = [];
             }
             
+            // 🔧 CORRECTION : Générer un ID local unique AVANT sauvegarde
+            const localId = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
             const newAllocation = {
-                id: null,
+                id: localId, // ID temporaire local
                 name: name,
                 linkedSimulation: linkedSim || null,
                 assets: newAssets,
@@ -4158,15 +4236,30 @@
                 updatedAt: new Date().toISOString()
             };
             
+            console.log(`📝 Creating new allocation "${name}" with local ID: ${localId}`);
+            
+            // Ajouter à la liste AVANT sauvegarde pour éviter les doublons
             this.allocations.push(newAllocation);
             
-            const savedId = await this.saveAllocationToCloud(newAllocation);
-            if (savedId) {
-                newAllocation.id = savedId;
+            // Sauvegarder et récupérer l'ID Firestore
+            const firestoreId = await this.saveAllocationToCloud(newAllocation);
+            if (firestoreId && firestoreId !== localId) {
+                // Remplacer l'ID local par l'ID Firestore
+                newAllocation.id = firestoreId;
+                console.log(`✅ Firestore ID assigned: ${firestoreId}`);
             }
             
+            // Charger cette nouvelle allocation comme active
             this.currentAllocation = JSON.parse(JSON.stringify(newAllocation));
             
+            // Sauvegarder l'ID comme dernière utilisée
+            try {
+                localStorage.setItem('lastUsedAllocationId', newAllocation.id);
+            } catch (e) {
+                console.warn('Could not save last used allocation ID');
+            }
+            
+            // Update UI
             this.updateAllocationInfo();
             this.renderAllocationsList();
             this.renderAssetsList();
@@ -4175,12 +4268,24 @@
             
             this.closeCreateAllocationModal();
             this.showNotification(`✅ Allocation "${name}" created`, 'success');
+            
+            console.log(`✅ New allocation "${name}" created successfully (ID: ${newAllocation.id})`);
         },
         
         loadAllocation: function(allocationId) {
+            // 🔧 CORRECTION : Gérer le cas où allocationId est la string "null" ou undefined
+            if (!allocationId || allocationId === 'null' || allocationId === 'undefined') {
+                console.error('❌ Invalid allocation ID:', allocationId);
+                this.showNotification('Cannot load allocation: invalid ID', 'error');
+                return;
+            }
+            
             const alloc = this.allocations.find(a => a.id === allocationId);
+            
             if (!alloc) {
-                console.error('Allocation not found:', allocationId);
+                console.error(`❌ Allocation not found with ID: ${allocationId}`);
+                console.log('Available allocations:', this.allocations.map(a => ({ id: a.id, name: a.name })));
+                this.showNotification('Allocation not found', 'error');
                 return;
             }
             
@@ -4198,6 +4303,7 @@
             this.updatePortfolioSummary();
             this.createAllCharts();
             
+            console.log(`✅ Loaded allocation "${alloc.name}" (ID: ${allocationId})`);
             this.showNotification(`✅ Loaded allocation "${alloc.name}"`, 'success');
         },
         
