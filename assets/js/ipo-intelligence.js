@@ -54,9 +54,9 @@ class IPOIntelligenceDashboard {
                 moderate: 0.75
             },
             dataLoading: {
-                initialLimit: 1000,
-                batchSize: 500,
-                maxIPOs: 5000,
+                initialLimit: 4000,      // ✅ AUGMENTÉ : 4000 au lieu de 1000
+                batchSize: 1000,         // ✅ AUGMENTÉ : 1000 au lieu de 500
+                maxIPOs: 10000,          // ✅ Maximum absolu
                 autoLoadMore: true,
                 cacheDuration: 3600000
             }
