@@ -306,15 +306,124 @@
             
             <div class='container'>
                 
+            <!-- ✅ PANNEAU DE CONFIGURATION (NOUVEAU) -->
+            <div class='data-loader-panel' id='dataLoaderPanel'>
+                <div class='loader-panel-content'>
+                    <div class='loader-panel-header'>
+                        <div class='loader-icon'>
+                            <i class='fas fa-sliders-h'></i>
+                        </div>
+                        <h2 class='loader-title gradient-title'>Configure IPO Data Analysis</h2>
+                        <p class='loader-subtitle'>Select your preferences before loading IPO data from SEC EDGAR</p>
+                    </div>
+                    
+                    <div class='loader-panel-body'>
+                        <div class='loader-config-grid'>
+                            <!-- Time Period -->
+                            <div class='loader-config-group'>
+                                <label class='loader-label'>
+                                    <i class='fas fa-calendar-alt'></i>
+                                    Time Period
+                                </label>
+                                <select id='timePeriodSelect' class='loader-select'>
+                                    <option value='7'>Last 7 days</option>
+                                    <option value='30' selected>Last 30 days</option>
+                                    <option value='90'>Last 3 months</option>
+                                    <option value='180'>Last 6 months</option>
+                                    <option value='365'>Last 12 months</option>
+                                    <option value='730'>Last 24 months</option>
+                                    <option value='9999'>All available</option>
+                                </select>
+                                <small class='loader-hint'>
+                                    <i class='fas fa-info-circle'></i>
+                                    Filter IPOs by filing date
+                                </small>
+                            </div>
+                            
+                            <!-- Filing Count -->
+                            <div class='loader-config-group'>
+                                <label class='loader-label'>
+                                    <i class='fas fa-file-alt'></i>
+                                    Number of Filings
+                                </label>
+                                <select id='filingCountSelect' class='loader-select'>
+                                    <option value='50'>50 filings</option>
+                                    <option value='100'>100 filings</option>
+                                    <option value='250'>250 filings</option>
+                                    <option value='500'>500 filings</option>
+                                    <option value='1000' selected>1,000 filings</option>
+                                    <option value='2000'>2,000 filings</option>
+                                    <option value='4000'>4,000 filings (max)</option>
+                                </select>
+                                <small class='loader-hint'>
+                                    <i class='fas fa-info-circle'></i>
+                                    Maximum filings to retrieve per feed (S-1 + F-1)
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Info -->
+                        <div class='loader-preview'>
+                            <div class='loader-preview-item'>
+                                <i class='fas fa-database'></i>
+                                <div class='loader-preview-content'>
+                                    <span class='loader-preview-label'>Data Source</span>
+                                    <span class='loader-preview-value'>SEC EDGAR (S-1 + F-1 feeds)</span>
+                                </div>
+                            </div>
+                            <div class='loader-preview-item'>
+                                <i class='fas fa-filter'></i>
+                                <div class='loader-preview-content'>
+                                    <span class='loader-preview-label'>Forms Included</span>
+                                    <span class='loader-preview-value'>S-1, S-1/A, F-1, F-1/A, F-10, F-1MEF</span>
+                                </div>
+                            </div>
+                            <div class='loader-preview-item'>
+                                <i class='fas fa-clock'></i>
+                                <div class='loader-preview-content'>
+                                    <span class='loader-preview-label'>Estimated Load Time</span>
+                                    <span class='loader-preview-value' id='estimatedTime'>~5 seconds</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analyze Button -->
+                        <button class='loader-analyze-btn' id='analyzeBtn'>
+                            <i class='fas fa-rocket'></i>
+                            <span>Analyze IPOs</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ✅ DASHBOARD (CACHÉ PAR DÉFAUT) -->
+            <div class='dashboard-content' id='dashboardContent' style='display: none;'>
+                
+                <!-- Dataset Info Bar -->
+                <div class='dataset-info-bar' id='datasetInfoBar'>
+                    <div class='dataset-info-item'>
+                        <i class='fas fa-database'></i>
+                        <span id='datasetInfo'>No data loaded</span>
+                    </div>
+                    <button class='dataset-reconfigure-btn' id='reconfigureBtn'>
+                        <i class='fas fa-cog'></i>
+                        <span>Reconfigure</span>
+                    </button>
+                </div>
+                
                 <!-- Toolbar -->
                 <div class='dashboard-toolbar'>
                     <div class='toolbar-left'>
                         <span class='dashboard-subtitle'>
-                            <i class='fas fa-database'></i>
+                            <i class='fas fa-shield-alt'></i>
                             Real-time IPO data from SEC EDGAR
                         </span>
                     </div>
                     <div class='toolbar-right'>
+                        <button class='dashboard-btn-sm' id='refreshData'>
+                            <i class='fas fa-sync-alt'></i>
+                            <span>Refresh</span>
+                        </button>
                         <button class='dashboard-btn-sm' id='viewFilters'>
                             <i class='fas fa-filter'></i>
                             <span>Filters</span>
