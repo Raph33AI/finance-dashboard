@@ -1734,5 +1734,32 @@
         })();
     </script>
 
+    <!-- ============================================
+     CHATBOT INITIALIZATION
+     ============================================ -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            if (accessDenied) {
+                console.log('⚠ Access denied - chatbot skipped');
+                return;
+            }
+            
+            if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') {
+                console.log('⏳ Chatbot dependencies not ready...');
+                return;
+            }
+            
+            try {
+                window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                console.log('🎉 Chatbot initialized successfully');
+            } catch (error) {
+                console.error('❌ Chatbot initialization error:', error);
+            }
+        }, 500);
+    });
+    </script>
+
 </body>
 </html>
