@@ -1,59 +1,52 @@
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT PAGE - GLASSMORPHISM PREMIUM + CODES PROMO
-   AlphaVault AI - VERSION FOND BLANC CASSÉ PROFESSIONNEL
-   ✅ AVEC PLAN BASIC + PRO + PLATINUM
+   CHECKOUT PAGE - VERSION SIMPLIFIÉE & PERFORMANTE
+   AlphaVault AI - Inspiré du Forex Converter Design
+   ✅ Dégradés discrets + Glassmorphism léger + Performance optimale
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-    --checkout-primary: #3B82F6;
-    --checkout-secondary: #8B5CF6;
+    --checkout-primary: #3b82f6;
+    --checkout-secondary: #8b5cf6;
+    --checkout-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --checkout-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     --checkout-success: #10b981;
     --checkout-danger: #ef4444;
     --checkout-warning: #f59e0b;
     --checkout-bg-light: #f8fafc;
-    --checkout-bg-dark: #0f172a;
-    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
-    --shadow-premium: 0 20px 60px rgba(59, 130, 246, 0.15);
+    --glass-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
 }
 
 body.dark-mode {
-    --glass-bg: rgba(15, 23, 42, 0.9);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(15, 23, 42, 0.95);
+    --glass-border: rgba(100, 116, 139, 0.3);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ OPTIMISATIONS PERFORMANCES
+   ✅ OPTIMISATIONS GLOBALES
    ═══════════════════════════════════════════════════════════════ */
-
-/* GPU Acceleration pour les éléments critiques */
-.checkout-page,
-.checkout-container,
-.plan-option,
-.btn-checkout-submit,
-.spinner {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-perspective: 1000px;
-    perspective: 1000px;
-}
-
-/* Optimiser les rendus */
 * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CONTAINER - FOND BLANC CASSÉ PROFESSIONNEL
+   CHECKOUT CONTAINER - FOND BLANC CASSÉ PROFESSIONNEL (SIMPLIFIÉ)
    ═══════════════════════════════════════════════════════════════ */
-
 .checkout-page {
     min-height: 100vh;
-    /* ✅✅✅ FOND BLANC CASSÉ ÉLÉGANT ET PROFESSIONNEL */
+    /* ✅ Fond fixe sans animation (performance) */
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-    background-size: 400% 400%;
-    animation: subtleGradientFlow 20s ease infinite;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -61,98 +54,33 @@ body.dark-mode {
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
-/* ✅ Animation très subtile pour le fond */
-@keyframes subtleGradientFlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-/* ✅ Particules discrètes gris-bleu */
-.checkout-page::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: particlesFloat 20s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: transform;
-}
-
-@keyframes particlesFloat {
-    0% { transform: translateY(0) translateZ(0); }
-    100% { transform: translateY(-50px) translateZ(0); }
-}
+/* ✅ Particules supprimées pour performance */
 
 .checkout-container {
     max-width: 900px;
     width: 100%;
     background: var(--glass-bg);
-    backdrop-filter: blur(40px) saturate(180%);
-    border-radius: 32px;
-    border: 2px solid var(--glass-border);
-    box-shadow: 
-        var(--shadow-premium),
-        0 0 80px rgba(139, 92, 246, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     padding: 60px;
     position: relative;
     z-index: 1;
-    animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-style: preserve-3d;
     margin: 20px auto;
-    /* ✅ GPU Acceleration */
-    will-change: transform, opacity;
+    transition: var(--transition-smooth);
 }
 
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95) translateZ(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1) translateZ(0);
-    }
-}
-
-.checkout-container::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
-    border-radius: 32px;
-    opacity: 0;
-    z-index: -1;
-    transition: opacity 0.4s ease;
-    /* ✅ GPU Acceleration */
-    will-change: opacity;
-}
-
-.checkout-container:hover::before {
-    opacity: 0.1;
+.checkout-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT HEADER
    ═══════════════════════════════════════════════════════════════ */
-
 .checkout-header {
     text-align: center;
     margin-bottom: 50px;
@@ -174,7 +102,7 @@ body.dark-mode {
 .checkout-logo-text {
     font-size: 1.8rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
+    background: var(--checkout-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -203,9 +131,8 @@ body.dark-mode .checkout-subtitle {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PLAN SELECTOR
+   PLAN SELECTOR - DÉGRADÉS BLEU/VIOLET DISCRETS
    ═══════════════════════════════════════════════════════════════ */
-
 .plan-selector {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -214,24 +141,23 @@ body.dark-mode .checkout-subtitle {
 }
 
 .plan-option {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(20px);
-    border: 3px solid transparent;
-    border-radius: 20px;
+    /* ✅ Dégradé bleu/violet DISCRET en arrière-plan */
+    background: var(--checkout-gradient-soft);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius);
     padding: 32px 24px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
 }
 
 body.dark-mode .plan-option {
-    background: rgba(30, 41, 59, 0.6);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
+/* ✅ Barre supérieure avec dégradé (effet subtil) */
 .plan-option::before {
     content: '';
     position: absolute;
@@ -239,39 +165,35 @@ body.dark-mode .plan-option {
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--checkout-primary), var(--checkout-secondary));
-    transform: scaleX(0) translateZ(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-    will-change: transform;
-}
-
-.plan-option:hover::before {
-    transform: scaleX(1) translateZ(0);
+    background: var(--checkout-gradient);
+    opacity: 0;
+    transition: var(--transition-smooth);
 }
 
 .plan-option:hover {
-    transform: translateY(-8px) scale(1.02) translateZ(0);
-    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.2);
+    border-color: var(--checkout-primary);
+}
+
+.plan-option:hover::before {
+    opacity: 1;
 }
 
 .plan-option.selected {
     border-color: var(--checkout-primary);
-    background: rgba(59, 130, 246, 0.1);
-    transform: scale(1.05) translateZ(0);
-    box-shadow: 
-        0 20px 60px rgba(59, 130, 246, 0.3),
-        0 0 0 4px rgba(59, 130, 246, 0.1);
+    /* ✅ Dégradé plus visible pour le plan sélectionné */
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.3);
 }
 
 .plan-option.selected::before {
-    transform: scaleX(1) translateZ(0);
+    opacity: 1;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ PLAN BADGES - BASIC + PRO + PLATINUM
+   PLAN BADGES - DÉGRADÉS SELON LE PLAN
    ═══════════════════════════════════════════════════════════════ */
-
 .plan-badge {
     display: inline-block;
     color: white;
@@ -282,24 +204,22 @@ body.dark-mode .plan-option {
     padding: 6px 14px;
     border-radius: 20px;
     margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ✅ PLAN BASIC - Bleu clair / Cyan */
+/* ✅ PLAN BASIC - Cyan/Bleu clair */
 .plan-badge.basic {
     background: linear-gradient(135deg, #06b6d4, #0891b2);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
 }
 
-/* ✅ PLAN PRO - Orange / Rouge (style par défaut) */
+/* ✅ PLAN PRO - Orange/Rouge */
 .plan-badge.pro {
     background: linear-gradient(135deg, #f59e0b, #ef4444);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
-/* ✅ PLAN PLATINUM - Violet / Indigo */
+/* ✅ PLAN PLATINUM - Violet/Indigo */
 .plan-badge.platinum {
     background: linear-gradient(135deg, #8B5CF6, #6366f1);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
 }
 
 .plan-name {
@@ -329,7 +249,7 @@ body.dark-mode .plan-name {
 .plan-price .amount {
     font-size: 3rem;
     font-weight: 900;
-    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
+    background: var(--checkout-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -368,23 +288,20 @@ body.dark-mode .plan-features li {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ SECTION CODE PROMO
+   SECTION CODE PROMO
    ═══════════════════════════════════════════════════════════════ */
-
 .promo-section {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+    background: var(--checkout-gradient-soft);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius);
     padding: 32px;
     margin-bottom: 30px;
     border: 2px dashed rgba(139, 92, 246, 0.3);
-    transition: all 0.3s ease;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
+    transition: var(--transition-smooth);
 }
 
 body.dark-mode .promo-section {
-    background: rgba(30, 41, 59, 0.4);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
 .promo-section:hover {
@@ -426,10 +343,8 @@ body.dark-mode .promo-title {
     font-weight: 600;
     text-transform: uppercase;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
     outline: none;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 body.dark-mode .promo-input {
@@ -441,7 +356,7 @@ body.dark-mode .promo-input {
 .promo-input:focus {
     border-color: var(--checkout-secondary);
     box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
 }
 
 .promo-input::placeholder {
@@ -458,22 +373,20 @@ body.dark-mode .promo-input {
     font-size: 1rem;
     font-weight: 800;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
     display: flex;
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 .btn-apply-promo:hover {
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
 .btn-apply-promo:active {
-    transform: translateY(0) translateZ(0);
+    transform: translateY(0);
 }
 
 .btn-apply-promo:disabled {
@@ -491,18 +404,6 @@ body.dark-mode .promo-input {
     display: flex;
     align-items: center;
     gap: 10px;
-    animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px) translateZ(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) translateZ(0);
-    }
 }
 
 .promo-message.success {
@@ -530,7 +431,6 @@ body.dark-mode .promo-input {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
     border: 2px solid rgba(16, 185, 129, 0.3);
     border-radius: 12px;
-    animation: slideDown 0.3s ease;
 }
 
 .promo-badge-success {
@@ -554,7 +454,7 @@ body.dark-mode .promo-input {
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
 }
 
 .btn-remove-promo:hover {
@@ -563,22 +463,19 @@ body.dark-mode .promo-input {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ RÉCAPITULATIF DES PRIX
+   RÉCAPITULATIF DES PRIX
    ═══════════════════════════════════════════════════════════════ */
-
 .price-summary {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+    background: var(--checkout-gradient-soft);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius);
     padding: 32px;
     margin-bottom: 30px;
     border: 2px solid rgba(59, 130, 246, 0.2);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 body.dark-mode .price-summary {
-    background: rgba(30, 41, 59, 0.5);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
 .summary-row {
@@ -663,7 +560,7 @@ body.dark-mode .summary-label-total {
 .summary-value-total {
     font-size: 2rem;
     font-weight: 900;
-    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
+    background: var(--checkout-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -682,14 +579,6 @@ body.dark-mode .summary-label-total {
     font-size: 1.1rem;
     font-weight: 800;
     color: #d97706;
-    animation: pulse 2s ease-in-out infinite;
-    /* ✅ GPU Acceleration */
-    will-change: transform;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1) translateZ(0); }
-    50% { transform: scale(1.02) translateZ(0); }
 }
 
 .free-access-badge i {
@@ -699,7 +588,8 @@ body.dark-mode .summary-label-total {
 /* Badge pour accès trial 14 jours */
 #trialAccessBadge {
     background: linear-gradient(135deg, #10b981, #059669) !important;
-    color: white;
+    color: white !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
     padding: 16px 24px;
     border-radius: 16px;
     margin-top: 16px;
@@ -710,25 +600,21 @@ body.dark-mode .summary-label-total {
     font-weight: 700;
     font-size: 0.95rem;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    animation: pulse 2s ease-in-out infinite;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT FORM
    ═══════════════════════════════════════════════════════════════ */
-
 .checkout-form {
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+    background: var(--checkout-gradient-soft);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius);
     padding: 40px;
     margin-bottom: 30px;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 body.dark-mode .checkout-form {
-    background: rgba(30, 41, 59, 0.5);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
 .form-section-title {
@@ -776,11 +662,9 @@ body.dark-mode .form-label {
     font-size: 1rem;
     font-weight: 500;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
     outline: none;
     box-sizing: border-box;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 body.dark-mode .form-input {
@@ -792,7 +676,7 @@ body.dark-mode .form-input {
 .form-input:focus {
     border-color: var(--checkout-primary);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
 }
 
 #card-element {
@@ -800,9 +684,7 @@ body.dark-mode .form-input {
     border: 2px solid rgba(203, 213, 225, 0.5);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.2s ease;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
+    transition: var(--transition-smooth);
 }
 
 body.dark-mode #card-element {
@@ -830,33 +712,26 @@ body.dark-mode #card-element {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ BOUTON SUBMIT - VERSION FINALE (Bouton 100% FIXE)
+   BOUTON SUBMIT - VERSION OPTIMISÉE & STABLE
    ═══════════════════════════════════════════════════════════════ */
-
 .btn-checkout-submit {
     width: 100%;
     padding: 20px;
     font-size: 1.2rem;
     font-weight: 800;
     color: white;
-    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
+    background: var(--checkout-gradient);
     border: none;
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 
-        0 10px 30px rgba(59, 130, 246, 0.4),
-        0 0 0 0 rgba(59, 130, 246, 0.5);
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    /* ✅ EMPÊCHER TOUTE ROTATION DU BOUTON */
-    transform-style: flat;
-    /* ✅ GPU Acceleration */
-    will-change: transform, box-shadow;
 }
 
 .btn-checkout-submit::before {
@@ -872,40 +747,33 @@ body.dark-mode #card-element {
     transition: width 0.4s ease, height 0.4s ease;
 }
 
-.btn-checkout-submit:hover::before {
+.btn-checkout-submit:hover:not(.loading):not(:disabled)::before {
     width: 400px;
     height: 400px;
 }
 
-/* Effet hover UNIQUEMENT si pas en loading */
-.btn-checkout-submit:hover:not(.loading) {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 
-        0 20px 50px rgba(59, 130, 246, 0.5),
-        0 0 0 8px rgba(59, 130, 246, 0.1);
+.btn-checkout-submit:hover:not(.loading):not(:disabled) {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(59, 130, 246, 0.5);
 }
 
-.btn-checkout-submit:active:not(.loading) {
-    transform: translateY(-2px) scale(0.98);
+.btn-checkout-submit:active:not(.loading):not(:disabled) {
+    transform: translateY(-2px);
 }
 
-/* ✅ ÉTAT LOADING - BOUTON STRICTEMENT IMMOBILE */
+/* État loading */
 .btn-checkout-submit.loading {
     cursor: wait;
     pointer-events: none;
     opacity: 0.8;
-    /* ✅ FORCER LE BOUTON À RESTER FIXE */
-    transform: none !important;
-    animation: none !important;
 }
 
 .btn-checkout-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none !important;
 }
 
-/* Conteneur du texte du bouton */
+/* Texte du bouton */
 .btn-checkout-submit .btn-text {
     display: flex;
     align-items: center;
@@ -914,21 +782,17 @@ body.dark-mode #card-element {
     transition: opacity 0.3s ease;
     position: relative;
     z-index: 2;
-    /* ✅ AUCUNE TRANSFORMATION */
-    transform: none;
 }
 
-/* Masquer le texte pendant le chargement */
 .btn-checkout-submit.loading .btn-text {
     opacity: 0;
 }
 
-/* ✅ SPINNER - VERSION CORRIGÉE AVEC CENTRAGE ABSOLU */
+/* Spinner */
 .btn-checkout-submit .spinner {
     position: absolute;
     width: 24px;
     height: 24px;
-    /* ✅ CENTRAGE SANS TRANSFORM (pour éviter conflits) */
     top: calc(50% - 12px);
     left: calc(50% - 12px);
     border: 3px solid rgba(255, 255, 255, 0.3);
@@ -936,32 +800,21 @@ body.dark-mode #card-element {
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s ease;
-    /* ✅ Animation appliquée UNIQUEMENT au spinner */
     animation: spinnerRotate 1s linear infinite;
-    /* ✅ Forcer l'isolation du spinner */
-    will-change: transform;
-    transform-origin: center center;
 }
 
-/* Afficher le spinner pendant le chargement */
 .btn-checkout-submit.loading .spinner {
     opacity: 1;
 }
 
-/* ✅ KEYFRAME DÉDIÉE POUR LE SPINNER (nom unique) */
 @keyframes spinnerRotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
    TRUST SIGNALS
    ═══════════════════════════════════════════════════════════════ */
-
 .trust-signals {
     display: flex;
     align-items: center;
@@ -999,32 +852,21 @@ body.dark-mode .trust-item {
 /* ═══════════════════════════════════════════════════════════════
    UTILITAIRES
    ═══════════════════════════════════════════════════════════════ */
-
 .hidden {
     display: none !important;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-* {
-    box-sizing: border-box;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════ */
-
 @media (max-width: 768px) {
     .checkout-page {
         padding: 20px 10px;
-        align-items: flex-start;
     }
     
     .checkout-container {
         padding: 40px 24px;
-        border-radius: 20px;
+        border-radius: var(--border-radius);
         margin: 10px auto;
     }
 
@@ -1118,4 +960,24 @@ html {
     .checkout-form {
         padding: 20px 12px;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITÉ
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid var(--checkout-primary);
+    outline-offset: 2px;
 }
