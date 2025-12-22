@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Real Estate & Tax Simulator - AlphaVault AI</title>
+    
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/export-data.js'></script>
+    
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
+    <link rel='stylesheet' href='assets/css/real-estate-simulator.css'>
+    
+    <script src="assets/js/favicon-dynamic.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+</head>
+<body>
+
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+                <!-- Sidebar -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                        <a href='real-estate-tax-simulator.html' class='nav-link active'>
+                            <i class='fas fa-building'></i>
+                            <span>Real Estate Simulator</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title'>
+                        <i class='fas fa-building'></i> Real Estate & Tax Simulator
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' id='btnNewSimulation'>
+                        <i class='fas fa-plus'></i>
+                        <span class='btn-text'>New Simulation</span>
+                    </button>
+                    <button class='dashboard-btn dashboard-btn-export' id='btnExport'>
+                        <i class='fas fa-file-excel'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+
+                <!-- ========================================
+                     CURRENT SIMULATION INFO CARD
+                     ======================================== -->
+                <div class='simulation-info-card'>
+                    <div class='info-row'>
+                        <div class='info-item'>
+                            <label><i class='fas fa-tag'></i> Simulation Name:</label>
+                            <span id='currentSimulationName'>New Simulation</span>
+                            <button class='btn-icon-sm' id='btnRenameSimulation' title='Rename'>
+                                <i class='fas fa-edit'></i>
+                            </button>
+                        </div>
+                        <div class='info-item'>
+                            <label><i class='fas fa-globe'></i> Country:</label>
+                            <span id='currentCountry'>---</span>
+                        </div>
+                        <div class='info-item'>
+                            <label><i class='fas fa-home'></i> Property Type:</label>
+                            <span id='currentPropertyType'>---</span>
+                        </div>
+                        <div class='info-item'>
+                            <label><i class='fas fa-clock'></i> Last Updated:</label>
+                            <span id='lastUpdate'>---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     KPIs SUMMARY
+                     ======================================== -->
+                <div class='kpis-grid' id='kpisGrid'>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon primary'>
+                            <i class='fas fa-money-bill-wave'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Purchase Price</div>
+                            <div class='kpi-value' id='kpiPurchasePrice'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon success'>
+                            <i class='fas fa-piggy-bank'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Down Payment</div>
+                            <div class='kpi-value' id='kpiDownPayment'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon warning'>
+                            <i class='fas fa-calendar-alt'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Monthly Payment</div>
+                            <div class='kpi-value' id='kpiMonthlyPayment'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon info'>
+                            <i class='fas fa-percent'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Net Yield</div>
+                            <div class='kpi-value' id='kpiNetYield'>0%</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon purple'>
+                            <i class='fas fa-coins'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Total Cost (Fees Included)</div>
+                            <div class='kpi-value' id='kpiTotalCost'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon danger'>
+                            <i class='fas fa-chart-line'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Debt Ratio</div>
+                            <div class='kpi-value' id='kpiDebtRatio'>0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     MAIN SIMULATION FORM
+                     ======================================== -->
+                <div class='section'>
+                    <div class='section-header'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-cogs'></i> Property & Financing Details
+                        </h2>
+                    </div>
+                    <div class='section-body'>
+                        
+                        <!-- Row 1: Country & Property Type -->
+                        <div class='form-row'>
+                            <div class='form-group'>
+                                <label for='selectCountry'>
+                                    <i class='fas fa-globe-europe'></i>
+                                    Country
+                                    <span class='required'>*</span>
+                                </label>
+                                <select id='selectCountry' class='form-control'>
+                                    <option value=''>-- Select Country --</option>
+                                    <option value='france'>🇫🇷 France</option>
+                                    <option value='uk'>🇬🇧 United Kingdom</option>
+                                    <option value='usa'>🇺🇸 United States</option>
+                                    <option value='spain'>🇪🇸 Spain</option>
+                                    <option value='portugal'>🇵🇹 Portugal</option>
+                                    <option value='germany'>🇩🇪 Germany</option>
+                                    <option value='switzerland'>🇨🇭 Switzerland</option>
+                                    <option value='italy'>🇮🇹 Italy</option>
+                                    <option value='belgium'>🇧🇪 Belgium</option>
+                                    <option value='netherlands'>🇳🇱 Netherlands</option>
+                                </select>
+                                <small class='hint'>Tax rules vary significantly by country</small>
+                            </div>
+                            
+                            <div class='form-group'>
+                                <label for='selectPropertyType'>
+                                    <i class='fas fa-building'></i>
+                                    Property Type
+                                    <span class='required'>*</span>
+                                </label>
+                                <select id='selectPropertyType' class='form-control'>
+                                    <option value=''>-- Select Type --</option>
+                                    <option value='primary'>🏠 Primary Residence</option>
+                                    <option value='secondary'>🏖 Secondary Residence</option>
+                                    <option value='rental'>💰 Rental Investment</option>
+                                </select>
+                                <small class='hint'>Tax benefits differ by property type</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Purchase Price & Down Payment -->
+                        <div class='form-row'>
+                            <div class='form-group'>
+                                <label for='inputPurchasePrice'>
+                                    <i class='fas fa-tag'></i>
+                                    Purchase Price
+                                    <span class='required'>*</span>
+                                </label>
+                                <input type='number' id='inputPurchasePrice' class='form-control' placeholder='300000' min='0' step='1000'>
+                                <small class='hint'>Total property price (excluding fees)</small>
+                            </div>
+                            
+                            <div class='form-group'>
+                                <label for='inputDownPayment'>
+                                    <i class='fas fa-wallet'></i>
+                                    Down Payment
+                                    <span class='required'>*</span>
+                                </label>
+                                <input type='number' id='inputDownPayment' class='form-control' placeholder='60000' min='0' step='1000'>
+                                <small class='hint'>Your personal contribution (typically 10-30%)</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Interest Rate & Loan Duration -->
+                        <div class='form-row'>
+                            <div class='form-group'>
+                                <label for='inputInterestRate'>
+                                    <i class='fas fa-percent'></i>
+                                    Interest Rate (Annual %)
+                                    <span class='required'>*</span>
+                                </label>
+                                <input type='number' id='inputInterestRate' class='form-control' placeholder='3.5' min='0' max='15' step='0.1'>
+                                <small class='hint'>Current market rate for mortgages</small>
+                            </div>
+                            
+                            <div class='form-group'>
+                                <label for='selectLoanDuration'>
+                                    <i class='fas fa-calendar-check'></i>
+                                    Loan Duration
+                                    <span class='required'>*</span>
+                                </label>
+                                <select id='selectLoanDuration' class='form-control'>
+                                    <option value=''>-- Select Duration --</option>
+                                    <option value='10'>10 years</option>
+                                    <option value='15'>15 years</option>
+                                    <option value='20'>20 years</option>
+                                    <option value='25'>25 years</option>
+                                    <option value='30'>30 years</option>
+                                </select>
+                                <small class='hint'>Mortgage repayment period</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Monthly Salary & City -->
+                        <div class='form-row'>
+                            <div class='form-group'>
+                                <label for='inputMonthlySalary'>
+                                    <i class='fas fa-euro-sign'></i>
+                                    Monthly Net Salary
+                                </label>
+                                <input type='number' id='inputMonthlySalary' class='form-control' placeholder='Auto-loaded from Budget' readonly>
+                                <small class='hint'>
+                                    <i class='fas fa-info-circle'></i>
+                                    Loaded from Budget Dashboard 
+                                    <button class='btn-link' id='btnLoadFromBudget'>
+                                        <i class='fas fa-sync-alt'></i> Reload
+                                    </button>
+                                </small>
+                            </div>
+                            
+                            <div class='form-group'>
+                                <label for='inputCity'>
+                                    <i class='fas fa-map-marker-alt'></i>
+                                    City / Region
+                                </label>
+                                <input type='text' id='inputCity' class='form-control' placeholder='Paris, London, New York...'>
+                                <small class='hint'>Some cities have specific tax benefits</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Rental Income (Only if Rental Investment) -->
+                        <div id='rentalIncomeSection' class='form-section' style='display: none;'>
+                            <h3 class='subsection-title'>
+                                <i class='fas fa-money-bill-wave'></i>
+                                Rental Income Details
+                            </h3>
+                            
+                            <div class='form-row'>
+                                <div class='form-group'>
+                                    <label for='inputMonthlyRent'>
+                                        <i class='fas fa-hand-holding-usd'></i>
+                                        Monthly Rent
+                                    </label>
+                                    <input type='number' id='inputMonthlyRent' class='form-control' placeholder='1500' min='0' step='50'>
+                                    <small class='hint'>Expected monthly rental income</small>
+                                </div>
+                                
+                                <div class='form-group'>
+                                    <label for='inputOccupancyRate'>
+                                        <i class='fas fa-percentage'></i>
+                                        Occupancy Rate (%)
+                                    </label>
+                                    <input type='number' id='inputOccupancyRate' class='form-control' placeholder='90' min='0' max='100' step='5'>
+                                    <small class='hint'>Average occupancy throughout the year</small>
+                                </div>
+                            </div>
+                            
+                            <div class='form-row'>
+                                <div class='form-group'>
+                                    <label for='inputMonthlyCharges'>
+                                        <i class='fas fa-tools'></i>
+                                        Monthly Charges & Maintenance
+                                    </label>
+                                    <input type='number' id='inputMonthlyCharges' class='form-control' placeholder='200' min='0' step='10'>
+                                    <small class='hint'>Property management, repairs, insurance...</small>
+                                </div>
+                                
+                                <div class='form-group'>
+                                    <label for='inputVacancyProvision'>
+                                        <i class='fas fa-exclamation-triangle'></i>
+                                        Vacancy Provision (months/year)
+                                    </label>
+                                    <input type='number' id='inputVacancyProvision' class='form-control' placeholder='1' min='0' max='12' step='0.5'>
+                                    <small class='hint'>Expected vacancy period per year</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class='form-actions'>
+                            <button class='btn btn-primary btn-lg' id='btnCalculate'>
+                                <i class='fas fa-calculator'></i>
+                                Calculate Results
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     BORROWING CAPACITY SECTION
+                     ======================================== -->
+                <div class='section' id='borrowingCapacitySection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-piggy-bank'></i> Borrowing Capacity Analysis
+                    </h2>
+                    
+                    <div class='capacity-grid'>
+                        <div class='capacity-card'>
+                            <div class='capacity-icon'>
+                                <i class='fas fa-hand-holding-usd'></i>
+                            </div>
+                            <div class='capacity-content'>
+                                <h4>Maximum Borrowing Capacity</h4>
+                                <div class='capacity-value' id='maxBorrowingCapacity'>€0</div>
+                                <small>Based on 33% debt ratio</small>
+                            </div>
+                        </div>
+                        
+                        <div class='capacity-card'>
+                            <div class='capacity-icon'>
+                                <i class='fas fa-percentage'></i>
+                            </div>
+                            <div class='capacity-content'>
+                                <h4>Your Debt Ratio</h4>
+                                <div class='capacity-value' id='yourDebtRatio'>0%</div>
+                                <small id='debtRatioStatus'>Healthy</small>
+                            </div>
+                        </div>
+                        
+                        <div class='capacity-card'>
+                            <div class='capacity-icon'>
+                                <i class='fas fa-euro-sign'></i>
+                            </div>
+                            <div class='capacity-content'>
+                                <h4>Remaining Monthly Budget</h4>
+                                <div class='capacity-value' id='remainingBudget'>€0</div>
+                                <small>After mortgage payment</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class='capacity-bar-section'>
+                        <h4>Debt Ratio Visualization</h4>
+                        <div class='debt-ratio-bar'>
+                            <div class='debt-ratio-fill' id='debtRatioFill' style='width: 0%'></div>
+                            <div class='debt-ratio-markers'>
+                                <span class='marker' style='left: 33%;'>33% (Recommended Max)</span>
+                                <span class='marker' style='left: 40%;'>40% (Warning)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     TAX & FEES BREAKDOWN
+                     ======================================== -->
+                <div class='section' id='taxFeesSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-file-invoice-dollar'></i> Tax & Fees Breakdown
+                        <span class='country-badge' id='countryBadge'></span>
+                    </h2>
+                    
+                    <div class='tax-grid' id='taxGrid'>
+                        <!-- Dynamically populated by JS -->
+                    </div>
+                    
+                    <div class='tax-summary'>
+                        <div class='tax-summary-item'>
+                            <span>Total Acquisition Fees:</span>
+                            <strong id='totalAcquisitionFees'>€0</strong>
+                        </div>
+                        <div class='tax-summary-item'>
+                            <span>Annual Recurring Taxes:</span>
+                            <strong id='annualTaxes'>€0</strong>
+                        </div>
+                        <div class='tax-summary-item total'>
+                            <span>Total Cost (Property + Fees):</span>
+                            <strong id='totalCostWithFees'>€0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     FINANCIAL RESULTS
+                     ======================================== -->
+                <div class='section' id='financialResultsSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-bar'></i> Financial Results & Projections
+                    </h2>
+                    
+                    <div class='results-grid'>
+                        <div class='result-card'>
+                            <h4><i class='fas fa-calendar'></i> Monthly Payment Breakdown</h4>
+                            <div class='breakdown-list'>
+                                <div class='breakdown-item'>
+                                    <span>Principal + Interest:</span>
+                                    <strong id='monthlyPrincipalInterest'>€0</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Property Tax (Monthly):</span>
+                                    <strong id='monthlyPropertyTax'>€0</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Insurance:</span>
+                                    <strong id='monthlyInsurance'>€0</strong>
+                                </div>
+                                <div class='breakdown-item total'>
+                                    <span>Total Monthly Payment:</span>
+                                    <strong id='totalMonthlyPayment'>€0</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class='result-card' id='rentalResultCard' style='display: none;'>
+                            <h4><i class='fas fa-coins'></i> Rental Investment Analysis</h4>
+                            <div class='breakdown-list'>
+                                <div class='breakdown-item'>
+                                    <span>Gross Monthly Rent:</span>
+                                    <strong id='grossMonthlyRent'>€0</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Charges & Vacancy:</span>
+                                    <strong id='rentalCharges' class='text-danger'>€0</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Net Rental Income:</span>
+                                    <strong id='netRentalIncome'>€0</strong>
+                                </div>
+                                <div class='breakdown-item total'>
+                                    <span>Monthly Cashflow:</span>
+                                    <strong id='monthlyCashflow'>€0</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class='result-card'>
+                            <h4><i class='fas fa-chart-line'></i> Investment Metrics</h4>
+                            <div class='breakdown-list'>
+                                <div class='breakdown-item'>
+                                    <span>Gross Yield:</span>
+                                    <strong id='grossYield'>0%</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Net Yield:</span>
+                                    <strong id='netYield'>0%</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Total Interest Paid:</span>
+                                    <strong id='totalInterest'>€0</strong>
+                                </div>
+                                <div class='breakdown-item'>
+                                    <span>Total Amount Paid:</span>
+                                    <strong id='totalAmountPaid'>€0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     CHARTS
+                     ======================================== -->
+                <div class='section' id='chartsSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-area'></i> Visual Analytics
+                    </h2>
+                    
+                    <!-- Amortization Schedule Chart -->
+                    <div class='chart-container'>
+                        <h3 class='chart-title'>
+                            <i class='fas fa-calendar-alt'></i>
+                            Loan Amortization Schedule
+                        </h3>
+                        <div id='amortizationChart' class='chart'></div>
+                    </div>
+                    
+                    <!-- Wealth Evolution Chart -->
+                    <div class='chart-container'>
+                        <h3 class='chart-title'>
+                            <i class='fas fa-chart-line'></i>
+                            Net Wealth Evolution (10/20/30 Years)
+                        </h3>
+                        <div id='wealthEvolutionChart' class='chart'></div>
+                    </div>
+                    
+                    <!-- Rental Cashflow Chart (if rental) -->
+                    <div class='chart-container' id='cashflowChartContainer' style='display: none;'>
+                        <h3 class='chart-title'>
+                            <i class='fas fa-money-bill-trend-up'></i>
+                            Annual Cashflow Projection
+                        </h3>
+                        <div id='cashflowChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     COMPARISON TABLE (MULTI-COUNTRY)
+                     ======================================== -->
+                <div class='section' id='comparisonSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-globe'></i> Multi-Country Comparison
+                        <button class='btn btn-secondary btn-sm' id='btnRunComparison'>
+                            <i class='fas fa-sync-alt'></i> Run Comparison
+                        </button>
+                    </h2>
+                    
+                    <div class='comparison-table-wrapper'>
+                        <table class='comparison-table' id='comparisonTable'>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>France 🇫🇷</th>
+                                    <th>UK 🇬🇧</th>
+                                    <th>USA 🇺🇸</th>
+                                    <th>Spain 🇪🇸</th>
+                                    <th>Portugal 🇵🇹</th>
+                                </tr>
+                            </thead>
+                            <tbody id='comparisonTableBody'>
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class='comparison-chart-container'>
+                        <div id='comparisonChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SAVED SIMULATIONS
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-save'></i> Saved Simulations
+                        <button class='btn btn-secondary btn-sm' id='btnRefreshSimulations'>
+                            <i class='fas fa-sync-alt'></i> Refresh
+                        </button>
+                    </h2>
+                    
+                    <div id='savedSimulationsList' class='simulations-grid'>
+                        <div class='simulations-empty'>
+                            <i class='fas fa-inbox'></i>
+                            <p>No saved simulations yet</p>
+                            <small>Fill the form above and click "Save Simulation"</small>
+                        </div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-info-circle'></i> 
+                        Real Estate & Tax Simulator - Tax rules are for informational purposes only. Consult a professional tax advisor.
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALS
+         ======================================== -->
+    
+    <!-- Modal: Save Simulation -->
+    <div id='modalSaveSimulation' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-save'></i> Save Simulation</h2>
+                <button class='modal-close' onclick='RealEstateSimulator.closeModal("modalSaveSimulation")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label for='simulationName'>
+                        <i class='fas fa-tag'></i>
+                        Simulation Name
+                        <span class='required'>*</span>
+                    </label>
+                    <input type='text' id='simulationName' class='form-control' placeholder='e.g., Paris Apartment Investment'>
+                    <small class='hint'>Choose a descriptive name for easy identification</small>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='simulationNotes'>
+                        <i class='fas fa-sticky-note'></i>
+                        Notes (Optional)
+                    </label>
+                    <textarea id='simulationNotes' class='form-control' rows='4' placeholder='Add any notes or comments...'></textarea>
+                </div>
+                
+                <div class='modal-actions'>
+                    <button class='btn btn-secondary' onclick='RealEstateSimulator.closeModal("modalSaveSimulation")'>
+                        Cancel
+                    </button>
+                    <button class='btn btn-primary' id='btnConfirmSave'>
+                        <i class='fas fa-save'></i>
+                        Save Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Simulation Details -->
+    <div id='modalSimulationDetails' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-info-circle'></i> Simulation Details</h2>
+                <button class='modal-close' onclick='RealEstateSimulator.closeModal("modalSimulationDetails")'>&times;</button>
+            </div>
+            <div class='modal-body' id='simulationDetailsContent'>
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Tax Information -->
+    <div id='modalTaxInfo' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-university'></i> Tax Information by Country</h2>
+                <button class='modal-close' onclick='RealEstateSimulator.closeModal("modalTaxInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Understanding Real Estate Taxes Across Countries:</strong></p>
+                <p>Tax regulations vary significantly between countries. Here's what you need to know:</p>
+                
+                <h4><i class='fas fa-flag'></i> France 🇫🇷</h4>
+                <ul>
+                    <li><strong>Notary Fees:</strong> 7-8% of purchase price (includes registration tax)</li>
+                    <li><strong>Property Tax (Taxe Foncière):</strong> ~€15-€50 per sqm/year</li>
+                    <li><strong>Capital Gains Tax:</strong> 19% + 17.2% social charges (36.2% total)</li>
+                    <li><strong>Exemptions:</strong> Primary residence exempt from capital gains</li>
+                    <li><strong>Rental Income Tax:</strong> Marginal rate (up to 45%) or Micro-BIC (50% deduction)</li>
+                    <li><strong>Wealth Tax (IFI):</strong> Applies above €1.3M real estate portfolio</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> United Kingdom 🇬🇧</h4>
+                <ul>
+                    <li><strong>Stamp Duty Land Tax (SDLT):</strong>
+                        <ul>
+                            <li>0% up to £250,000</li>
+                            <li>5% from £250,001 to £925,000</li>
+                            <li>10% from £925,001 to £1.5M</li>
+                            <li>12% above £1.5M</li>
+                            <li>+3% surcharge for additional properties</li>
+                        </ul>
+                    </li>
+                    <li><strong>Council Tax:</strong> £1,000-£3,000/year (varies by band)</li>
+                    <li><strong>Capital Gains Tax:</strong> 18% (basic rate) or 28% (higher rate)</li>
+                    <li><strong>Rental Income Tax:</strong> Marginal rate (20-45%)</li>
+                    <li><strong>Mortgage Interest Relief:</strong> Limited to 20% tax credit</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> United States 🇺🇸</h4>
+                <ul>
+                    <li><strong>Title Insurance & Closing Costs:</strong> 2-5% of purchase price</li>
+                    <li><strong>Property Tax:</strong> 0.5-2.5% of property value/year (varies by state)</li>
+                    <li><strong>Capital Gains Tax:</strong>
+                        <ul>
+                            <li>0%, 15%, or 20% (federal) based on income</li>
+                            <li>Primary residence: $250k/$500k exclusion (single/married)</li>
+                            <li>Plus state taxes (0-13.3% in CA)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Rental Income Tax:</strong> Federal (10-37%) + State (0-13.3%)</li>
+                    <li><strong>Deductions:</strong> Mortgage interest, property tax, depreciation (27.5 years)</li>
+                    <li><strong>1031 Exchange:</strong> Defer capital gains by reinvesting in similar property</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Spain 🇪🇸</h4>
+                <ul>
+                    <li><strong>Transfer Tax (ITP):</strong> 6-10% (varies by region)</li>
+                    <li><strong>Notary & Registration Fees:</strong> 1-2%</li>
+                    <li><strong>Property Tax (IBI):</strong> 0.4-1.1% of cadastral value/year</li>
+                    <li><strong>Capital Gains Tax:</strong> 19-26% (progressive)</li>
+                    <li><strong>Rental Income Tax:</strong>
+                        <ul>
+                            <li>Residents: 19-26% (progressive)</li>
+                            <li>Non-residents: 24% (EU) or 19% (non-EU)</li>
+                            <li>60% deduction if long-term rental</li>
+                        </ul>
+                    </li>
+                    <li><strong>Non-Resident Tax:</strong> 2% of cadastral value/year (imputed income)</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Portugal 🇵🇹</h4>
+                <ul>
+                    <li><strong>Property Transfer Tax (IMT):</strong>
+                        <ul>
+                            <li>0% up to €92,407 (primary residence)</li>
+                            <li>Up to 8% for secondary/investment properties</li>
+                        </ul>
+                    </li>
+                    <li><strong>Stamp Duty:</strong> 0.8% of purchase price</li>
+                    <li><strong>Notary & Registration:</strong> ~€1,500-€3,000</li>
+                    <li><strong>Property Tax (IMI):</strong> 0.3-0.8% of fiscal value/year</li>
+                    <li><strong>Capital Gains Tax:</strong> 50% of gain taxed at marginal rate (up to 48%)</li>
+                    <li><strong>Rental Income Tax:</strong>
+                        <ul>
+                            <li>Option 1: 28% flat rate</li>
+                            <li>Option 2: Marginal rate (up to 48%)</li>
+                        </ul>
+                    </li>
+                    <li><strong>NHR Regime:</strong> 10-year tax exemption for new residents</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Germany 🇩🇪</h4>
+                <ul>
+                    <li><strong>Property Transfer Tax (Grunderwerbsteuer):</strong> 3.5-6.5% (varies by state)</li>
+                    <li><strong>Notary & Registration:</strong> 1.5-2% of purchase price</li>
+                    <li><strong>Property Tax (Grundsteuer):</strong> €200-€600/year (varies)</li>
+                    <li><strong>Capital Gains Tax:</strong>
+                        <ul>
+                            <li>Exempt if held >10 years</li>
+                            <li>Otherwise: Marginal rate (up to 45%) + solidarity surcharge (5.5%)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Rental Income Tax:</strong> Marginal rate (14-45%)</li>
+                    <li><strong>Deductions:</strong> Maintenance, management fees, depreciation (2%/year over 50 years)</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Switzerland 🇨🇭</h4>
+                <ul>
+                    <li><strong>Property Transfer Tax:</strong> 1-3% (varies by canton)</li>
+                    <li><strong>Notary Fees:</strong> 0.5-1.5%</li>
+                    <li><strong>Property Tax:</strong> 0.1-0.3% of property value/year</li>
+                    <li><strong>Capital Gains Tax:</strong> 10-50% (varies by canton & holding period)</li>
+                    <li><strong>Rental Income Tax:</strong> Federal (0.77-11.5%) + Cantonal (varies)</li>
+                    <li><strong>Wealth Tax:</strong> 0.3-1% on net assets (varies by canton)</li>
+                    <li><strong>Imputed Rental Value:</strong> Taxed even if owner-occupied</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Italy 🇮🇹</h4>
+                <ul>
+                    <li><strong>Registration Tax:</strong>
+                        <ul>
+                            <li>Primary residence: 2% (min €1,000)</li>
+                            <li>Secondary/Investment: 9%</li>
+                        </ul>
+                    </li>
+                    <li><strong>Notary Fees:</strong> 1-2.5%</li>
+                    <li><strong>Property Tax (IMU):</strong> 0.4-1.06% of cadastral value/year (exempt for primary residence)</li>
+                    <li><strong>Capital Gains Tax:</strong> 26% (exempt if primary residence held >5 years)</li>
+                    <li><strong>Rental Income Tax:</strong>
+                        <ul>
+                            <li>Option 1: 21% flat rate (Cedolare Secca)</li>
+                            <li>Option 2: Marginal rate (23-43%)</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Belgium 🇧🇪</h4>
+                <ul>
+                    <li><strong>Registration Duty:</strong>
+                        <ul>
+                            <li>Flanders: 3% (primary), 12% (secondary)</li>
+                            <li>Wallonia: 12.5%</li>
+                            <li>Brussels: 12.5%</li>
+                        </ul>
+                    </li>
+                    <li><strong>Notary Fees:</strong> ~€3,000-€8,000</li>
+                    <li><strong>Property Tax (Précompte immobilier):</strong> €500-€2,000/year</li>
+                    <li><strong>Capital Gains Tax:</strong> Generally exempt if not habitual seller</li>
+                    <li><strong>Rental Income Tax:</strong> Marginal rate (25-50%)</li>
+                    <li><strong>Bonus:</strong> Mortgage interest deductible in Flanders (diminishing)</li>
+                </ul>
+                
+                <h4><i class='fas fa-flag'></i> Netherlands 🇳🇱</h4>
+                <ul>
+                    <li><strong>Transfer Tax:</strong>
+                        <ul>
+                            <li>Primary residence (first-time buyers <35): 0%</li>
+                            <li>Primary residence (others): 2%</li>
+                            <li>Investment properties: 10.4%</li>
+                        </ul>
+                    </li>
+                    <li><strong>Notary Fees:</strong> €1,500-€2,500</li>
+                    <li><strong>Property Tax (OZB):</strong> 0.1-0.3% of WOZ value/year</li>
+                    <li><strong>Capital Gains Tax:</strong> Not applicable (included in wealth tax)</li>
+                    <li><strong>Box 3 Wealth Tax:</strong> ~1.2% on net assets >€57,000</li>
+                    <li><strong>Rental Income Tax:</strong> 49.5% marginal rate</li>
+                    <li><strong>Mortgage Interest Relief:</strong> Deductible for primary residence (max 30 years)</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> 
+                    <strong>Important Disclaimer:</strong> 
+                    Tax laws change frequently and vary based on individual circumstances. This information is for general guidance only. 
+                    Always consult with a qualified tax advisor or real estate attorney in the country where you're purchasing property.
+                </p>
+                
+                <h4><i class='fas fa-lightbulb'></i> Tax Optimization Strategies:</h4>
+                <ul>
+                    <li><strong>Holding Company:</strong> Consider buying through a company for tax benefits (consult professional)</li>
+                    <li><strong>Primary Residence Exemption:</strong> Many countries offer capital gains exemption</li>
+                    <li><strong>1031 Exchange (USA):</strong> Defer taxes by reinvesting in similar property</li>
+                    <li><strong>Depreciation:</strong> Deduct property depreciation against rental income (USA, Germany)</li>
+                    <li><strong>Mortgage Interest Deduction:</strong> Available in many countries for primary residence</li>
+                    <li><strong>Long-Term Holding:</strong> Reduced/exempt capital gains after 10+ years (Germany, Italy)</li>
+                    <li><strong>Rental Deductions:</strong> Maintenance, management fees, insurance, property tax</li>
+                    <li><strong>Special Regimes:</strong> NHR in Portugal, Beckham Law in Spain for expats</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Comparison Help -->
+    <div id='modalComparisonHelp' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-question-circle'></i> Multi-Country Comparison</h2>
+                <button class='modal-close' onclick='RealEstateSimulator.closeModal("modalComparisonHelp")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>How to Use Multi-Country Comparison:</strong></p>
+                <ol>
+                    <li>Fill out the simulation form with your property details</li>
+                    <li>Click "Calculate Results" to compute for the selected country</li>
+                    <li>Scroll to the "Multi-Country Comparison" section</li>
+                    <li>Click "Run Comparison" to see the same property analyzed across 5 major countries</li>
+                </ol>
+                
+                <p><strong>What's Compared:</strong></p>
+                <ul>
+                    <li>Total acquisition costs (property + fees)</li>
+                    <li>Monthly mortgage payment</li>
+                    <li>Annual property taxes</li>
+                    <li>Net rental yield (if investment property)</li>
+                    <li>Capital gains tax on sale after 10 years</li>
+                    <li>Total cost of ownership over 10 years</li>
+                </ul>
+                
+                <p><strong>Best Use Cases:</strong></p>
+                <ul>
+                    <li>International investors deciding where to invest</li>
+                    <li>Expats comparing relocation destinations</li>
+                    <li>Portfolio diversification across countries</li>
+                    <li>Understanding tax implications before purchase</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-info-circle'></i>
+                    The comparison uses average tax rates and may not reflect specific regional variations or special tax regimes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/real-estate-simulator.js'></script>
+
+    <!-- Chatbot -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- User Menu Init -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                console.log('✅ Adding click event to trigger...');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('👆 User menu trigger clicked!');
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                        console.log('🔽 Closing dropdown');
+                    } else {
+                        freshDropdown.classList.add('active');
+                        console.log('🔼 Opening dropdown');
+                    }
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                console.log('✅ User menu initialized successfully!');
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
+
+</body>
+</html>
