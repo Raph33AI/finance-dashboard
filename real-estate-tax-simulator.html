@@ -554,11 +554,22 @@
                             </div>
                         </div>
 
-                        <!-- Calculate Button -->
+                        <!-- Calculate & Save Buttons -->
                         <div class='form-actions'>
                             <button class='btn btn-primary btn-lg' id='btnCalculate'>
                                 <i class='fas fa-calculator'></i>
                                 Calculate Results
+                            </button>
+                            
+                            <!-- ✨ NOUVEAU : Save Simulation Button -->
+                            <button class='btn btn-success btn-lg' id='btnSaveSimulation' disabled>
+                                <i class='fas fa-save'></i>
+                                Save Simulation
+                            </button>
+                            
+                            <button class='btn btn-secondary btn-lg' id='btnNewSimulation'>
+                                <i class='fas fa-plus'></i>
+                                New Simulation
                             </button>
                         </div>
 
@@ -945,23 +956,54 @@
                 </div>
 
                 <!-- ========================================
-                     SAVED SIMULATIONS
-                     ======================================== -->
+                    MY SIMULATIONS (✨ SECTION AMÉLIORÉE)
+                    ======================================== -->
                 <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-save'></i> Saved Simulations
-                        <button class='btn btn-secondary btn-sm' id='btnRefreshSimulations'>
-                            <i class='fas fa-sync-alt'></i> Refresh
-                        </button>
-                    </h2>
+                    <div class='section-header' style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;'>
+                        <h2 class='section-title' style='margin: 0;'>
+                            <i class='fas fa-layer-group'></i> My Real Estate Simulations
+                        </h2>
+                        <div class='header-actions' style='display: flex; gap: 12px;'>
+                            <!-- ✨ NOUVEAU : Add Property Manually -->
+                            <button class='btn btn-primary btn-sm' id='btnAddProperty'>
+                                <i class='fas fa-plus-circle'></i>
+                                <span class='btn-text'>Add Property</span>
+                            </button>
+                            
+                            <!-- ✨ NOUVEAU : Rent vs Buy Analysis -->
+                            <button class='btn btn-secondary btn-sm' id='btnRentVsBuy'>
+                                <i class='fas fa-balance-scale'></i>
+                                <span class='btn-text'>Rent vs Buy</span>
+                            </button>
+                            
+                            <!-- ✨ NOUVEAU : Compare Simulations -->
+                            <button class='btn btn-secondary btn-sm' id='btnCompareSimulations'>
+                                <i class='fas fa-chart-bar'></i>
+                                <span class='btn-text'>Compare</span>
+                            </button>
+                            
+                            <!-- Refresh Button -->
+                            <button class='btn btn-secondary btn-sm' id='btnRefreshSimulations'>
+                                <i class='fas fa-sync-alt'></i>
+                                <span class='btn-text'>Refresh</span>
+                            </button>
+                        </div>
+                    </div>
                     
-                    <div id='savedSimulationsList' class='simulations-grid'>
+                    <!-- ✨ NOUVEAU : Simulations List (nouveau ID pour le JS) -->
+                    <div id='simulationsList' class='simulations-list'>
                         <div class='simulations-empty'>
                             <i class='fas fa-inbox'></i>
                             <p>No saved simulations yet</p>
-                            <small>Fill the form above and click "Save Simulation"</small>
+                            <button class='btn-sm btn-primary' onclick='document.getElementById("btnCalculate").scrollIntoView({behavior: "smooth"})'>
+                                <i class='fas fa-calculator'></i>
+                                Create First Simulation
+                            </button>
                         </div>
                     </div>
+                    
+                    <!-- ✨ FALLBACK : Ancien ID pour compatibilité -->
+                    <div id='savedSimulationsList' style='display: none;'></div>
                 </div>
 
                 <footer>
