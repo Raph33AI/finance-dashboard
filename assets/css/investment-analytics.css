@@ -6,7 +6,6 @@
  * Performance optimisée • Animations élégantes • Design moderne
  * ✅ MODALS 100% PRÉSERVÉES • Responsive PC & Mobile Parfait
  * ✅ CORRECTIONS FINALES: Charts responsive, Icônes gradient, Alignements
- * ✅ CORRECTIONS COULEURS: Asset Allocation, Risk Profile, Recommendations
  */
 
 /* ========================================
@@ -24,19 +23,13 @@
     --ml-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     --ml-gradient-animated: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     
-    /* ✨ Asset Allocation Colors - Palette étendue */
+    /* ✨ Asset Allocation Colors */
     --asset-equity-color: #2563eb;
     --asset-bonds-color: #10b981;
     --asset-crypto-color: #f59e0b;
     --asset-commodities-color: #8b5cf6;
     --asset-real-estate-color: #06b6d4;
     --asset-cash-color: #64748b;
-    --asset-alternative-1: #ec4899;
-    --asset-alternative-2: #14b8a6;
-    --asset-alternative-3: #f97316;
-    --asset-alternative-4: #6366f1;
-    --asset-alternative-5: #84cc16;
-    --asset-alternative-6: #ef4444;
     
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
@@ -747,108 +740,6 @@ body.dark-mode .chart-card {
     width: 100% !important;
 }
 
-/* ✅ CORRECTION: Couleurs Asset Allocation - Forcer des couleurs différentes */
-.highcharts-series-0 .highcharts-point {
-    fill: var(--asset-equity-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(1) {
-    fill: var(--asset-equity-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(2) {
-    fill: var(--asset-bonds-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(3) {
-    fill: var(--asset-crypto-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(4) {
-    fill: var(--asset-commodities-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(5) {
-    fill: var(--asset-real-estate-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(6) {
-    fill: var(--asset-cash-color) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(7) {
-    fill: var(--asset-alternative-1) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(8) {
-    fill: var(--asset-alternative-2) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(9) {
-    fill: var(--asset-alternative-3) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(10) {
-    fill: var(--asset-alternative-4) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(11) {
-    fill: var(--asset-alternative-5) !important;
-}
-
-.highcharts-series-0 .highcharts-point:nth-child(12) {
-    fill: var(--asset-alternative-6) !important;
-}
-
-/* Couleurs pour les légendes Highcharts */
-.highcharts-legend-item:nth-child(1) .highcharts-point {
-    fill: var(--asset-equity-color) !important;
-}
-
-.highcharts-legend-item:nth-child(2) .highcharts-point {
-    fill: var(--asset-bonds-color) !important;
-}
-
-.highcharts-legend-item:nth-child(3) .highcharts-point {
-    fill: var(--asset-crypto-color) !important;
-}
-
-.highcharts-legend-item:nth-child(4) .highcharts-point {
-    fill: var(--asset-commodities-color) !important;
-}
-
-.highcharts-legend-item:nth-child(5) .highcharts-point {
-    fill: var(--asset-real-estate-color) !important;
-}
-
-.highcharts-legend-item:nth-child(6) .highcharts-point {
-    fill: var(--asset-cash-color) !important;
-}
-
-.highcharts-legend-item:nth-child(7) .highcharts-point {
-    fill: var(--asset-alternative-1) !important;
-}
-
-.highcharts-legend-item:nth-child(8) .highcharts-point {
-    fill: var(--asset-alternative-2) !important;
-}
-
-.highcharts-legend-item:nth-child(9) .highcharts-point {
-    fill: var(--asset-alternative-3) !important;
-}
-
-.highcharts-legend-item:nth-child(10) .highcharts-point {
-    fill: var(--asset-alternative-4) !important;
-}
-
-.highcharts-legend-item:nth-child(11) .highcharts-point {
-    fill: var(--asset-alternative-5) !important;
-}
-
-.highcharts-legend-item:nth-child(12) .highcharts-point {
-    fill: var(--asset-alternative-6) !important;
-}
-
 /* ========================================
    RISK METRICS TABLE
    ======================================== */
@@ -1366,29 +1257,28 @@ body.dark-mode .ai-result-card .card-header {
     text-transform: uppercase;
 }
 
-/* ✅ CORRECTION: Risk Profile Badge toujours blanc */
-.card-badge.risk-low,
-.card-badge.risk-medium,
-.card-badge.risk-high,
-.card-badge.risk-very-high {
+.card-badge.risk-low {
+    background: var(--ml-success);
     color: white !important;
     -webkit-text-fill-color: white !important;
 }
 
-.card-badge.risk-low {
-    background: var(--ml-success);
-}
-
 .card-badge.risk-medium {
     background: var(--ml-warning);
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 .card-badge.risk-high {
     background: var(--ml-danger);
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 .card-badge.risk-very-high {
     background: #dc2626;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 .model-description {
@@ -1502,23 +1392,22 @@ body.dark-mode .result-item {
     gap: 15px;
 }
 
-/* ✅ CORRECTION: Recommendations avec texte noir */
 .recommendation-item {
     display: flex;
     align-items: flex-start;
     gap: 15px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-left: 4px solid var(--ml-primary);
+    background: rgba(255, 255, 255, 0.95)
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 4px solid white;
     border-radius: 12px;
     transition: var(--transition-smooth);
 }
 
 .recommendation-item:hover {
     transform: translateX(6px);
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .recommendation-item.priority-high {
@@ -1542,7 +1431,7 @@ body.dark-mode .result-item {
     justify-content: center;
     font-size: 1.2rem;
     flex-shrink: 0;
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     transition: var(--transition-smooth);
 }
 
@@ -1572,13 +1461,13 @@ body.dark-mode .result-item {
 .recommendation-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #1e293b
     margin-bottom: 8px;
 }
 
 .recommendation-description {
     font-size: 0.9rem;
-    color: #475569;
+    color: #475569
     line-height: 1.6;
     margin-bottom: 10px;
 }
@@ -1586,8 +1475,8 @@ body.dark-mode .result-item {
 .recommendation-action {
     display: inline-block;
     padding: 6px 15px;
-    background: var(--ml-gradient);
-    color: white;
+    background: white;
+    color: var(--ml-primary);
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -1685,15 +1574,17 @@ body.dark-mode .risk-score-bar {
     animation: shimmer 2s infinite;
 }
 
-/* ✅ CORRECTION: Score diversification en blanc */
-.risk-score-value,
-.diversification-rating {
+.risk-score-value {
     font-size: 1.5rem;
     font-weight: 800;
     text-align: center;
+    background: var(--ml-gradient);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
     color: white !important;
     background: none !important;
-    -webkit-text-fill-color: white !important;
 }
 
 .risk-description {
@@ -2085,6 +1976,19 @@ body.dark-mode .diversification-bar {
     height: 100%;
     border-radius: 12px;
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.diversification-rating {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    background: var(--ml-gradient);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
+    color: white !important;
+    background: none !important;
 }
 
 .diversification-insights {
@@ -3759,6 +3663,6 @@ select:focus-visible {
 /**
  * ====================================================================
  * FIN DU FICHIER - ALPHAVAULT AI INVESTMENT ANALYTICS PRO
- * VERSION FINALE ULTIME - 100% PC & MOBILE + COULEURS CORRIGÉES
+ * VERSION FINALE - 100% PC & MOBILE RESPONSIVE
  * ====================================================================
  */
