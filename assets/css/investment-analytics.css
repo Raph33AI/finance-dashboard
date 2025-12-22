@@ -5,7 +5,6 @@
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
  * Performance optimisée • Animations élégantes • Design moderne
  * ✅ MODALS 100% PRÉSERVÉES • Responsive PC & Mobile Parfait
- * ✅ CORRECTIONS FINALES: Charts responsive, Icônes gradient, Alignements
  */
 
 /* ========================================
@@ -22,14 +21,6 @@
     --ml-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --ml-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     --ml-gradient-animated: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    
-    /* ✨ Asset Allocation Colors */
-    --asset-equity-color: #2563eb;
-    --asset-bonds-color: #10b981;
-    --asset-crypto-color: #f59e0b;
-    --asset-commodities-color: #8b5cf6;
-    --asset-real-estate-color: #06b6d4;
-    --asset-cash-color: #64748b;
     
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
@@ -277,21 +268,6 @@ body.dark-mode {
     border-color: var(--ml-primary);
     transform: translateY(-3px);
     box-shadow: var(--glow-primary);
-}
-
-/* ✅ CORRECTION: Icônes en dégradé sur boutons Active Allocation */
-.btn-icon i,
-.manager-header .btn-primary i {
-    background: var(--ml-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.btn-icon:hover i,
-.manager-header .btn-primary:hover i {
-    background: none;
-    -webkit-text-fill-color: white;
 }
 
 body.dark-mode .btn-icon {
@@ -667,7 +643,7 @@ body.dark-mode .period-btn:hover {
 }
 
 /* ========================================
-   CHARTS GRID & CONTAINERS
+   CHARTS GRID
    ======================================== */
 .charts-grid {
     display: grid;
@@ -699,8 +675,6 @@ body.dark-mode .chart-card {
 .chart-container-large {
     min-height: 400px;
     position: relative;
-    width: 100%;
-    max-width: 100%;
 }
 
 .chart-container-large {
@@ -716,8 +690,6 @@ body.dark-mode .chart-card {
     backdrop-filter: blur(20px) saturate(180%);
     padding: 16px;
     border: 1px solid var(--glass-border);
-    width: 100%;
-    max-width: 100%;
 }
 
 .chart-wrapper:hover {
@@ -727,17 +699,6 @@ body.dark-mode .chart-card {
 
 .chart {
     min-height: 400px;
-    width: 100%;
-    max-width: 100%;
-}
-
-/* ✅ CORRECTION: Charts responsive sur mobile */
-.highcharts-container {
-    width: 100% !important;
-}
-
-.highcharts-root {
-    width: 100% !important;
 }
 
 /* ========================================
@@ -770,8 +731,6 @@ body.dark-mode .chart-card {
     background: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     transition: var(--transition-smooth);
-    width: 100%;
-    max-width: 100%;
 }
 
 .table-responsive:hover {
@@ -787,7 +746,6 @@ body.dark-mode .table-responsive {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
-    min-width: 600px;
 }
 
 .metrics-table thead {
@@ -1149,25 +1107,12 @@ body.dark-mode .ai-result-card {
     box-shadow: 0 12px 28px rgba(102, 126, 234, 0.25);
 }
 
-.model-header {
+.model-header,
+.ai-result-card .card-header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
-}
-
-/* ✅ CORRECTION: Alignement titres AI à gauche après icônes */
-.ai-result-card .card-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-body.dark-mode .ai-result-card .card-header {
-    border-bottom-color: #334155;
 }
 
 .model-icon,
@@ -1219,30 +1164,12 @@ body.dark-mode .ai-result-card .card-header {
     background: linear-gradient(135deg, #ec4899, #db2777);
 }
 
-.model-info,
-.card-title {
-    flex: 1;
-}
-
 .model-info h3,
 .card-title h3 {
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin: 0 0 5px 0;
-    text-align: left;
-    background: var(--ml-gradient);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradientShift 3s ease infinite;
-}
-
-.card-subtitle {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    text-align: left;
+    margin-bottom: 5px;
 }
 
 .model-badge,
@@ -1511,6 +1438,36 @@ body.dark-mode .result-item {
 
 .ai-result-card.full-width {
     grid-column: 1 / -1;
+}
+
+.ai-result-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+body.dark-mode .ai-result-card .card-header {
+    border-bottom-color: #334155;
+}
+
+.card-title h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    background: var(--ml-gradient);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 5px 0;
+    animation: gradientShift 3s ease infinite;
+}
+
+.card-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* Risk Profile */
@@ -2119,25 +2076,11 @@ body.dark-mode .benchmark-selector select {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.asset-config-section .btn-icon i,
-.allocation-selector-section .btn-icon i {
-    background: var(--ml-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
 .asset-config-section .btn-icon:hover,
 .allocation-selector-section .btn-icon:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
-}
-
-.asset-config-section .btn-icon:hover i,
-.allocation-selector-section .btn-icon:hover i {
-    background: none;
-    -webkit-text-fill-color: white;
 }
 
 .allocation-selector-section .btn-primary {
@@ -2147,23 +2090,11 @@ body.dark-mode .benchmark-selector select {
     font-weight: 700;
 }
 
-.allocation-selector-section .btn-primary i {
-    background: var(--ml-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
 .allocation-selector-section .btn-primary:hover {
     background: #FFD700;
     color: #333;
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
-}
-
-.allocation-selector-section .btn-primary:hover i {
-    background: none;
-    -webkit-text-fill-color: #333;
 }
 
 .allocation-selector-section .btn-secondary {
@@ -2320,27 +2251,27 @@ body.dark-mode .asset-item {
 }
 
 .asset-item.equity {
-    border-left-color: var(--asset-equity-color);
+    border-left-color: #2563eb;
 }
 
 .asset-item.bonds {
-    border-left-color: var(--asset-bonds-color);
+    border-left-color: #10b981;
 }
 
 .asset-item.crypto {
-    border-left-color: var(--asset-crypto-color);
+    border-left-color: #f59e0b;
 }
 
 .asset-item.commodities {
-    border-left-color: var(--asset-commodities-color);
+    border-left-color: #8b5cf6;
 }
 
 .asset-item.real-estate {
-    border-left-color: var(--asset-real-estate-color);
+    border-left-color: #06b6d4;
 }
 
 .asset-item.cash {
-    border-left-color: var(--asset-cash-color);
+    border-left-color: #64748b;
 }
 
 .asset-info {
@@ -2368,27 +2299,27 @@ body.dark-mode .asset-item {
 }
 
 .asset-icon.equity {
-    background: linear-gradient(135deg, var(--asset-equity-color), #1d4ed8);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
 .asset-icon.bonds {
-    background: linear-gradient(135deg, var(--asset-bonds-color), #059669);
+    background: linear-gradient(135deg, #10b981, #059669);
 }
 
 .asset-icon.crypto {
-    background: linear-gradient(135deg, var(--asset-crypto-color), #d97706);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
 .asset-icon.commodities {
-    background: linear-gradient(135deg, var(--asset-commodities-color), #7c3aed);
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
 }
 
 .asset-icon.real-estate {
-    background: linear-gradient(135deg, var(--asset-real-estate-color), #0891b2);
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
 }
 
 .asset-icon.cash {
-    background: linear-gradient(135deg, var(--asset-cash-color), #475569);
+    background: linear-gradient(135deg, #64748b, #475569);
 }
 
 .asset-details {
@@ -3298,8 +3229,6 @@ body.dark-mode .comparison-table tbody tr.total-row {
 
 .btn-primary i {
     font-size: 16px;
-    background: none;
-    -webkit-text-fill-color: white;
 }
 
 .btn-large {
@@ -3384,7 +3313,7 @@ body.dark-mode .section-header h2 {
 }
 
 /* ========================================
-   RESPONSIVE DESIGN - CORRECTIONS FINALES
+   RESPONSIVE DESIGN
    ======================================== */
 @media (max-width: 1200px) {
     .charts-grid {
@@ -3450,39 +3379,6 @@ body.dark-mode .section-header h2 {
         font-size: 0.85rem;
     }
     
-    /* ✅ CORRECTION FINALE: Charts responsive mobile */
-    .charts-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .chart-card {
-        padding: 15px;
-    }
-    
-    .chart-wrapper {
-        padding: 10px;
-        overflow-x: auto;
-    }
-    
-    .chart-container,
-    .chart-container-large,
-    .chart {
-        min-height: 300px;
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .highcharts-container,
-    .highcharts-container svg {
-        max-width: 100% !important;
-    }
-    
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
     .modal-content,
     .modal-info-content {
         width: 95%;
@@ -3521,14 +3417,6 @@ body.dark-mode .section-header h2 {
     .ai-models-grid {
         grid-template-columns: 1fr;
     }
-    
-    .risk-metrics-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .diversification-breakdown {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 480px) {
@@ -3539,8 +3427,18 @@ body.dark-mode .section-header h2 {
         padding: 16px;
     }
     
-    .kpi-value {
+    .kpi-value,
+    .pair-rate,
+    .rate-value {
         font-size: 1.6rem;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .risk-metrics-grid {
+        grid-template-columns: 1fr;
     }
     
     .diversification-breakdown {
@@ -3550,18 +3448,6 @@ body.dark-mode .section-header h2 {
     .allocations-checkboxes {
         grid-template-columns: 1fr;
     }
-    
-    .model-icon,
-    .card-icon {
-        width: 45px;
-        height: 45px;
-        font-size: 1.1rem;
-    }
-    
-    .chart-container,
-    .chart-container-large {
-        min-height: 250px;
-    }
 }
 
 /* ========================================
@@ -3569,39 +3455,33 @@ body.dark-mode .section-header h2 {
    ======================================== */
 .modal-content::-webkit-scrollbar,
 .modal-info-content::-webkit-scrollbar,
-.allocations-list::-webkit-scrollbar,
-.table-responsive::-webkit-scrollbar {
+.allocations-list::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
 }
 
 .modal-content::-webkit-scrollbar-track,
 .modal-info-content::-webkit-scrollbar-track,
-.allocations-list::-webkit-scrollbar-track,
-.table-responsive::-webkit-scrollbar-track {
+.allocations-list::-webkit-scrollbar-track {
     background: rgba(100, 116, 139, 0.1);
     border-radius: 4px;
 }
 
 body.dark-mode .modal-content::-webkit-scrollbar-track,
 body.dark-mode .modal-info-content::-webkit-scrollbar-track,
-body.dark-mode .allocations-list::-webkit-scrollbar-track,
-body.dark-mode .table-responsive::-webkit-scrollbar-track {
+body.dark-mode .allocations-list::-webkit-scrollbar-track {
     background: #334155;
 }
 
 .modal-content::-webkit-scrollbar-thumb,
 .modal-info-content::-webkit-scrollbar-thumb,
-.allocations-list::-webkit-scrollbar-thumb,
-.table-responsive::-webkit-scrollbar-thumb {
+.allocations-list::-webkit-scrollbar-thumb {
     background: var(--ml-gradient);
     border-radius: 4px;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover,
 .modal-info-content::-webkit-scrollbar-thumb:hover,
-.allocations-list::-webkit-scrollbar-thumb:hover,
-.table-responsive::-webkit-scrollbar-thumb:hover {
+.allocations-list::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
 }
 
@@ -3651,6 +3531,5 @@ select:focus-visible {
 /**
  * ====================================================================
  * FIN DU FICHIER - ALPHAVAULT AI INVESTMENT ANALYTICS PRO
- * VERSION FINALE - 100% PC & MOBILE RESPONSIVE
  * ====================================================================
  */
