@@ -2190,3 +2190,871 @@ body.dark-mode .help-card p {
         border: 2px solid rgba(102, 126, 234, 0.4);
     }
 }
+
+/* ============================================
+   MOBILE RESPONSIVE FIX - ULTRA-AGRESSIF
+   À AJOUTER À LA FIN DU FICHIER
+   Priorité maximale avec sélecteurs spécifiques
+   ============================================ */
+
+/* ============================================
+   GLOBAL RESET MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+    
+    /* FORCE WIDTH 100% - ANTI-DÉBORDEMENT ABSOLU */
+    html,
+    body,
+    body.dark-mode,
+    .layout-wrapper,
+    .main-content,
+    .container,
+    .doc-container,
+    .doc-article,
+    article.doc-article,
+    .doc-section,
+    section.doc-section {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* CONTAINER PRINCIPAL - PADDING MINIMAL */
+    .container .doc-container,
+    .doc-container {
+        padding: 0.5rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        margin: 0 !important;
+        gap: 0.75rem !important;
+        grid-template-columns: 1fr !important;
+        display: grid !important;
+    }
+
+    /* ARTICLE - PADDING COMPACT */
+    .doc-container .doc-article,
+    article.doc-article,
+    .doc-article {
+        padding: 0.75rem !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        margin: 0 !important;
+        border-radius: 12px !important;
+        max-width: 100% !important;
+    }
+
+    /* HEADER MOBILE - STACK VERTICAL */
+    .top-header .header-content-wrapper {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
+        padding: 0.5rem !important;
+        width: 100% !important;
+    }
+
+    .top-header .header-left {
+        width: 100% !important;
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+    }
+
+    .top-header .header-right {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    /* BOUTON BACK - FULL WIDTH */
+    .btn-back-dashboard,
+    a.btn-back-dashboard,
+    .header-right .btn-back-dashboard {
+        width: 100% !important;
+        padding: 0.625rem 1rem !important;
+        font-size: 0.8125rem !important;
+        justify-content: center !important;
+        display: flex !important;
+    }
+
+    /* TITRES - TAILLE RÉDUITE */
+    .page-title,
+    h1.page-title {
+        font-size: 1.125rem !important;
+        gap: 0.375rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .section-title,
+    h2.section-title,
+    .doc-section .section-title {
+        font-size: 1rem !important;
+        gap: 0.375rem !important;
+        margin: 1.25rem 0 0.75rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .category-title,
+    .toc-title,
+    h3.category-title,
+    h3.toc-title {
+        font-size: 0.875rem !important;
+        gap: 0.375rem !important;
+        line-height: 1.3 !important;
+    }
+
+    /* BREADCRUMB - COMPACT */
+    .breadcrumb,
+    nav.breadcrumb {
+        padding: 0.375rem 0 !important;
+        font-size: 0.6875rem !important;
+        gap: 0.375rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    .breadcrumb i {
+        font-size: 0.5625rem !important;
+    }
+
+    /* DOC META - STACK */
+    .doc-meta,
+    .doc-header .doc-meta {
+        flex-direction: column !important;
+        gap: 0.375rem !important;
+        align-items: flex-start !important;
+    }
+
+    .doc-time,
+    .doc-updated,
+    .doc-meta .doc-time,
+    .doc-meta .doc-updated {
+        font-size: 0.6875rem !important;
+    }
+
+    /* DOC INTRO - COMPACT */
+    .doc-intro,
+    .doc-article .doc-intro {
+        padding: 0.625rem !important;
+        margin-bottom: 0.75rem !important;
+        border-radius: 8px !important;
+    }
+
+    .doc-intro p {
+        font-size: 0.8125rem !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+    }
+
+    /* TOC BOX - COMPACT */
+    .toc-box,
+    .doc-article .toc-box {
+        padding: 0.75rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 10px !important;
+    }
+
+    .toc-list {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .toc-list li {
+        margin-bottom: 0.375rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .toc-list a {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.75rem !important;
+        gap: 0.5rem !important;
+        display: flex !important;
+    }
+
+    .toc-list a::before {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.625rem !important;
+        min-width: 20px !important;
+    }
+
+    /* STEP BOX - STACK VERTICAL */
+    .step-box,
+    .doc-section .step-box {
+        flex-direction: column !important;
+        padding: 0.75rem !important;
+        gap: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
+        border-radius: 10px !important;
+        display: flex !important;
+    }
+
+    .step-number,
+    .step-box .step-number {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.875rem !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+        min-width: 32px !important;
+    }
+
+    .step-content,
+    .step-box .step-content {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .step-content h4 {
+        font-size: 0.8125rem !important;
+        margin: 0 0 0.375rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .step-content p {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .step-content ul,
+    .step-content ol {
+        padding-left: 1rem !important;
+        margin: 0.375rem 0 0 0 !important;
+    }
+
+    .step-content li {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.25rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* INFO BOXES - COMPACT */
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box,
+    .doc-section .info-box,
+    .doc-section .success-box,
+    .doc-section .warning-box,
+    .doc-section .danger-box {
+        padding: 0.625rem !important;
+        gap: 0.5rem !important;
+        margin: 0.75rem 0 !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: flex-start !important;
+    }
+
+    .info-box i,
+    .success-box i,
+    .warning-box i,
+    .danger-box i {
+        font-size: 1rem !important;
+        flex-shrink: 0 !important;
+        min-width: 1rem !important;
+    }
+
+    .info-box p,
+    .success-box p,
+    .warning-box p,
+    .danger-box p {
+        font-size: 0.75rem !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+    }
+
+    .info-box ul,
+    .success-box ul,
+    .warning-box ul,
+    .danger-box ul {
+        padding-left: 1rem !important;
+        margin: 0.375rem 0 0 0 !important;
+    }
+
+    .info-box li,
+    .success-box li,
+    .warning-box li,
+    .danger-box li {
+        font-size: 0.6875rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* CODE EXAMPLE - COMPACT */
+    .code-example,
+    .doc-section .code-example {
+        margin: 0.75rem 0 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    .code-header,
+    .code-example .code-header {
+        padding: 0.375rem 0.5rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+    }
+
+    .code-header span {
+        font-size: 0.6875rem !important;
+    }
+
+    .code-copy-btn,
+    .code-header .code-copy-btn {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .code-body,
+    .code-example .code-body {
+        padding: 0.625rem !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .code-body pre {
+        font-size: 0.6875rem !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+    }
+
+    .numbered-steps,
+    .code-body .numbered-steps {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .numbered-steps > li {
+        padding-left: 1.5rem !important;
+        font-size: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .numbered-steps > li::before {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.625rem !important;
+        min-width: 18px !important;
+    }
+
+    .numbered-steps code {
+        font-size: 0.6875rem !important;
+        padding: 0.125rem 0.25rem !important;
+    }
+
+    .numbered-steps ul,
+    .numbered-steps ol {
+        padding-left: 1rem !important;
+        margin-top: 0.375rem !important;
+    }
+
+    .numbered-steps ul li,
+    .numbered-steps ol li {
+        font-size: 0.6875rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* TABLES - SCROLL HORIZONTAL */
+    .comparison-table,
+    .data-table,
+    .doc-section .comparison-table,
+    .doc-section .data-table {
+        font-size: 0.6875rem !important;
+        margin: 0.75rem 0 !important;
+        display: block !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .data-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin: 0.75rem 0 !important;
+        border-radius: 10px !important;
+    }
+
+    .comparison-table th,
+    .comparison-table td,
+    .data-table th,
+    .data-table td {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.6875rem !important;
+        white-space: nowrap !important;
+    }
+
+    /* FEATURE GRID - 1 COLONNE */
+    .feature-grid,
+    .next-steps-grid,
+    .doc-section .feature-grid,
+    .doc-section .next-steps-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+        margin: 1rem 0 !important;
+        display: grid !important;
+    }
+
+    .feature-card,
+    .next-step-card,
+    .feature-grid .feature-card,
+    .next-steps-grid .next-step-card,
+    a.next-step-card {
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+        text-align: center !important;
+    }
+
+    .feature-card i,
+    .next-step-card i {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+        display: block !important;
+    }
+
+    .feature-card h4,
+    .next-step-card h4 {
+        font-size: 0.8125rem !important;
+        margin: 0 0 0.25rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .feature-card p,
+    .next-step-card p {
+        font-size: 0.6875rem !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+    }
+
+    /* CTA BOX - COMPACT */
+    .cta-box,
+    .doc-footer .cta-box {
+        padding: 1rem 0.75rem !important;
+        border-radius: 12px !important;
+        text-align: center !important;
+    }
+
+    .cta-box h3 {
+        font-size: 0.9375rem !important;
+        margin: 0 0 0.375rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .cta-box p {
+        font-size: 0.75rem !important;
+        margin: 0 0 0.75rem 0 !important;
+        line-height: 1.4 !important;
+    }
+
+    .btn-cta,
+    a.btn-cta,
+    .cta-box .btn-cta {
+        padding: 0.625rem 1rem !important;
+        font-size: 0.75rem !important;
+        gap: 0.375rem !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    /* HELP CARD - COMPACT */
+    .help-card,
+    .doc-sidebar .help-card {
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+        text-align: center !important;
+    }
+
+    .help-card i {
+        font-size: 1.25rem !important;
+        margin-bottom: 0.5rem !important;
+        display: block !important;
+    }
+
+    .help-card h5 {
+        font-size: 0.8125rem !important;
+        margin: 0 0 0.25rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .help-card p {
+        font-size: 0.6875rem !important;
+        margin: 0 0 0.5rem 0 !important;
+        line-height: 1.4 !important;
+    }
+
+    .help-card a {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.6875rem !important;
+        border-radius: 6px !important;
+        display: inline-block !important;
+    }
+
+    /* DOC SECTIONS - COMPACT */
+    .doc-section,
+    section.doc-section,
+    .doc-article .doc-section {
+        margin-bottom: 1.25rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    .doc-section p {
+        font-size: 0.75rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .doc-section ul,
+    .doc-section ol {
+        padding-left: 1rem !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    .doc-section li {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.375rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .doc-section h3 {
+        font-size: 0.9375rem !important;
+        margin: 1.25rem 0 0.5rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .doc-section h4 {
+        font-size: 0.8125rem !important;
+        margin: 1rem 0 0.375rem 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    .doc-section code {
+        font-size: 0.6875rem !important;
+        padding: 0.125rem 0.25rem !important;
+    }
+
+    .doc-section a {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    /* DOC HEADER - COMPACT */
+    .doc-header,
+    .doc-article .doc-header {
+        margin-bottom: 1rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    /* DOC FOOTER - COMPACT */
+    .doc-footer,
+    .doc-article .doc-footer {
+        margin-top: 1.5rem !important;
+        padding-top: 1rem !important;
+    }
+
+    /* DOC NAV - HORIZONTAL SCROLL */
+    .doc-nav,
+    .doc-sidebar .doc-nav {
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0.375rem !important;
+        gap: 0.25rem !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        scrollbar-width: thin !important;
+    }
+
+    .doc-nav a {
+        padding: 0.375rem 0.625rem !important;
+        font-size: 0.6875rem !important;
+        border-radius: 6px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        display: block !important;
+    }
+
+    /* DOC SIDEBAR - ORDER FIRST */
+    .doc-sidebar,
+    aside.doc-sidebar {
+        order: -1 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .sidebar-sticky,
+    .doc-sidebar .sidebar-sticky {
+        position: static !important;
+    }
+
+    .doc-sidebar h4 {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* IMAGES & MEDIA - RESPONSIVE */
+    img,
+    .doc-article img,
+    .doc-section img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* LONG WORDS - BREAK */
+    p, li, td, th, span, div, a {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+    }
+}
+
+/* ============================================
+   SMALL MOBILE (480px et moins)
+   ============================================ */
+@media (max-width: 480px) {
+    
+    .doc-container {
+        padding: 0.375rem !important;
+    }
+
+    .doc-article,
+    article.doc-article {
+        padding: 0.5rem !important;
+        border-radius: 8px !important;
+    }
+
+    .page-title,
+    h1.page-title {
+        font-size: 0.9375rem !important;
+    }
+
+    .section-title,
+    h2.section-title {
+        font-size: 0.875rem !important;
+        margin: 1rem 0 0.5rem 0 !important;
+    }
+
+    .category-title,
+    .toc-title {
+        font-size: 0.8125rem !important;
+    }
+
+    .breadcrumb {
+        font-size: 0.625rem !important;
+    }
+
+    .breadcrumb i {
+        font-size: 0.5rem !important;
+    }
+
+    .doc-time,
+    .doc-updated {
+        font-size: 0.625rem !important;
+    }
+
+    .doc-intro {
+        padding: 0.5rem !important;
+    }
+
+    .doc-intro p {
+        font-size: 0.75rem !important;
+    }
+
+    .toc-box {
+        padding: 0.625rem !important;
+    }
+
+    .toc-list a {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    .toc-list a::before {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.5625rem !important;
+    }
+
+    .step-box {
+        padding: 0.625rem !important;
+    }
+
+    .step-number {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8125rem !important;
+    }
+
+    .step-content h4 {
+        font-size: 0.75rem !important;
+    }
+
+    .step-content p {
+        font-size: 0.6875rem !important;
+    }
+
+    .step-content li {
+        font-size: 0.6875rem !important;
+    }
+
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box {
+        padding: 0.5rem !important;
+    }
+
+    .info-box i,
+    .success-box i,
+    .warning-box i,
+    .danger-box i {
+        font-size: 0.875rem !important;
+    }
+
+    .info-box p,
+    .success-box p,
+    .warning-box p,
+    .danger-box p {
+        font-size: 0.6875rem !important;
+    }
+
+    .info-box li,
+    .success-box li,
+    .warning-box li,
+    .danger-box li {
+        font-size: 0.625rem !important;
+    }
+
+    .code-header {
+        padding: 0.25rem 0.375rem !important;
+    }
+
+    .code-header span {
+        font-size: 0.625rem !important;
+    }
+
+    .code-copy-btn {
+        padding: 0.125rem 0.25rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    .code-body {
+        padding: 0.5rem !important;
+    }
+
+    .code-body pre {
+        font-size: 0.625rem !important;
+    }
+
+    .numbered-steps > li {
+        padding-left: 1.25rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    .numbered-steps > li::before {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 0.5625rem !important;
+    }
+
+    .numbered-steps code {
+        font-size: 0.625rem !important;
+    }
+
+    .numbered-steps ul li {
+        font-size: 0.625rem !important;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.625rem !important;
+    }
+
+    .feature-card,
+    .next-step-card {
+        padding: 0.625rem !important;
+    }
+
+    .feature-card i,
+    .next-step-card i {
+        font-size: 1.25rem !important;
+    }
+
+    .feature-card h4,
+    .next-step-card h4 {
+        font-size: 0.75rem !important;
+    }
+
+    .feature-card p,
+    .next-step-card p {
+        font-size: 0.625rem !important;
+    }
+
+    .cta-box {
+        padding: 0.75rem 0.625rem !important;
+    }
+
+    .cta-box h3 {
+        font-size: 0.875rem !important;
+    }
+
+    .cta-box p {
+        font-size: 0.6875rem !important;
+    }
+
+    .btn-cta {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    .help-card {
+        padding: 0.625rem !important;
+    }
+
+    .help-card i {
+        font-size: 1.125rem !important;
+    }
+
+    .help-card h5 {
+        font-size: 0.75rem !important;
+    }
+
+    .help-card p {
+        font-size: 0.625rem !important;
+    }
+
+    .help-card a {
+        padding: 0.25rem 0.625rem !important;
+        font-size: 0.625rem !important;
+    }
+
+    .doc-section p {
+        font-size: 0.6875rem !important;
+    }
+
+    .doc-section li {
+        font-size: 0.6875rem !important;
+    }
+
+    .doc-section h3 {
+        font-size: 0.875rem !important;
+    }
+
+    .doc-section h4 {
+        font-size: 0.75rem !important;
+    }
+
+    .doc-section code {
+        font-size: 0.625rem !important;
+    }
+
+    .doc-nav a {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.625rem !important;
+    }
+
+    .btn-back-dashboard {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.6875rem !important;
+    }
+}
