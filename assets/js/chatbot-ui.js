@@ -1,6 +1,944 @@
+// // ============================================
+// // CHATBOT UI v2.1 - PREMIUM INTERFACE
+// // ✅ NOUVEAU v2.1: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
+// // ✅ v2.0: AVEC SAUVEGARDE/RESTAURATION DES GRAPHIQUES
+// // ============================================
+
+// class ChatbotUI {
+//     constructor(config) {
+//         this.config = config;
+//         this.engine = null;
+//         this.charts = null;
+//         this.suggestions = null;
+        
+//         // UI Elements (will be initialized)
+//         this.elements = {};
+        
+//         // State
+//         this.isOpen = false;
+//         this.isTyping = false;
+//         this.messageCount = 0;
+        
+//         // Storage des messages et graphiques
+//         this.conversationHistory = [];
+//         this.conversationKey = 'alphyai_conversation';
+//         this.chartsDataKey = 'alphyai_charts_data';
+        
+//         // Debounce timer
+//         this.inputDebounceTimer = null;
+        
+//         // Initialize
+//         this.init();
+//     }
+
+//     // ============================================
+//     // USER PROFILE PHOTO MANAGEMENT (NEW v2.1 - LOGIQUE LANDING.JS)
+//     // ============================================
+    
+//     /**
+//      * Récupère la photo de profil de l'utilisateur Firebase
+//      * UTILISE EXACTEMENT LA MÊME LOGIQUE QUE LANDING.JS
+//      * @returns {string} URL de la photo ou avatar par défaut
+//      */
+//     getUserProfilePhoto() {
+//         try {
+//             console.log('Getting user profile photo...');
+            
+//             // Vérifier si Firebase Auth est disponible
+//             if (typeof firebase === 'undefined' || !firebase.auth) {
+//                 console.warn('Firebase Auth not available');
+//                 return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+//             }
+            
+//             // Récupérer l'utilisateur actuel
+//             const user = firebase.auth().currentUser;
+            
+//             if (!user) {
+//                 console.warn('No user logged in');
+//                 return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+//             }
+            
+//             console.log('User found:', user.email);
+            
+//             // MÊME LOGIQUE QUE LANDING.JS
+//             const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+//             console.log('Display name:', displayName);
+            
+//             // Si photoURL existe, l'utiliser (priorité 1)
+//             if (user.photoURL) {
+//                 console.log('Using Firebase photoURL:', user.photoURL);
+//                 return user.photoURL;
+//             }
+            
+//             // Sinon, générer un avatar avec ui-avatars.com (MÊMES PARAMÈTRES QUE LANDING.JS)
+//             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=128`;
+//             console.log('Generated avatar URL:', avatarUrl);
+//             return avatarUrl;
+            
+//         } catch (error) {
+//             console.error('Error getting user profile photo:', error);
+//             return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+//         }
+//     }
+
+//     /**
+//      * Génère le HTML de l'avatar utilisateur avec photo
+//      * @returns {string} HTML de l'avatar
+//      */
+//     getUserAvatarHTML() {
+//         const photoURL = this.getUserProfilePhoto();
+//         return `<img src="${photoURL}" 
+//                      alt="User Avatar" 
+//                      class="user-avatar-img"
+//                      onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';"
+//                      style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+//     }
+
+//     // ============================================
+//     // INITIALIZATION
+//     // ============================================
+//     async init() {
+//         try {
+//             console.log('🎨 Création de l\'interface UI v2.1...');
+            
+//             // Create UI structure
+//             this.createUI();
+            
+//             // Wait for DOM insertion
+//             await new Promise(resolve => setTimeout(resolve, 100));
+            
+//             // Get element references
+//             this.cacheElements();
+            
+//             // Attach event listeners
+//             this.attachEventListeners();
+            
+//             // Initialize components
+//             await this.initializeComponents();
+            
+//             // Restaurer la conversation sauvegardée
+//             await this.restoreConversation();
+            
+//             // Show welcome message (seulement si aucune conversation restaurée)
+//             if (this.conversationHistory.length === 0) {
+//                 this.showWelcomeMessage();
+//                 this.showInitialSuggestions();
+//             }
+            
+//             console.log('✅ Chatbot UI v2.1 initialized successfully');
+            
+//         } catch (error) {
+//             console.error('❌ UI initialization error:', error);
+//         }
+//     }
+
+//     // ============================================
+//     // CREATE UI STRUCTURE
+//     // ============================================
+//     createUI() {
+//         const container = document.createElement('div');
+//         container.className = 'chatbot-container';
+//         container.innerHTML = `
+//             <!-- Toggle Button -->
+//             <button class="chatbot-toggle-btn" id="chatbot-toggle" aria-label="Toggle chatbot">
+//                 🤖
+//             </button>
+            
+//             <!-- Chatbot Widget -->
+//             <div class="chatbot-widget hidden" id="chatbot-widget">
+//                 <!-- Header -->
+//                 <div class="chatbot-header">
+//                     <div class="chatbot-header-content">
+//                         <div class="chatbot-avatar">
+//                             ${this.config.ui.botAvatar}
+//                         </div>
+//                         <div class="chatbot-title-section">
+//                             <h3 class="chatbot-title">Alphy - Financial AI Assistant</h3>
+//                             <div class="chatbot-status">
+//                                 <span class="status-indicator"></span>
+//                                 <span>Online</span>
+//                             </div>
+//                         </div>
+//                     </div>
+//                     <div class="chatbot-header-actions">
+//                         <button class="chatbot-header-btn" id="clear-chat" aria-label="Clear chat" title="Clear chat">
+//                             🗑
+//                         </button>
+//                         <button class="chatbot-header-btn" id="minimize-chat" aria-label="Minimize" title="Minimize">
+//                             ➖
+//                         </button>
+//                     </div>
+//                 </div>
+                
+//                 <!-- Messages Container -->
+//                 <div class="chatbot-messages" id="chatbot-messages">
+//                     <!-- Messages will be added here -->
+//                 </div>
+                
+//                 <!-- Suggestions -->
+//                 <div class="chatbot-suggestions" id="chatbot-suggestions">
+//                     <!-- Suggestions will be added here -->
+//                 </div>
+                
+//                 <!-- Input Area -->
+//                 <div class="chatbot-input-area">
+//                     <div class="chatbot-input-container">
+//                         <div class="chatbot-input-wrapper">
+//                             <textarea 
+//                                 class="chatbot-input" 
+//                                 id="chatbot-input" 
+//                                 placeholder="${this.config.ui.placeholderText}"
+//                                 rows="1"
+//                                 maxlength="${this.config.behavior.maxMessageLength}"
+//                             ></textarea>
+//                         </div>
+//                         <button class="chatbot-send-btn" id="chatbot-send" aria-label="Send message">
+//                             ➤
+//                         </button>
+//                     </div>
+//                 </div>
+//             </div>
+//         `;
+        
+//         document.body.appendChild(container);
+//         console.log('✅ UI structure created');
+//     }
+
+//     // ============================================
+//     // CACHE DOM ELEMENTS
+//     // ============================================
+//     cacheElements() {
+//         console.log('📦 Caching DOM elements...');
+        
+//         this.elements = {
+//             container: document.querySelector('.chatbot-container'),
+//             toggleBtn: document.getElementById('chatbot-toggle'),
+//             widget: document.getElementById('chatbot-widget'),
+//             messages: document.getElementById('chatbot-messages'),
+//             suggestions: document.getElementById('chatbot-suggestions'),
+//             input: document.getElementById('chatbot-input'),
+//             sendBtn: document.getElementById('chatbot-send'),
+//             clearBtn: document.getElementById('clear-chat'),
+//             minimizeBtn: document.getElementById('minimize-chat')
+//         };
+        
+//         // Verify all elements
+//         let missingElements = [];
+//         for (const [key, element] of Object.entries(this.elements)) {
+//             if (!element) {
+//                 missingElements.push(key);
+//                 console.error(`❌ Element missing: ${key}`);
+//             } else {
+//                 console.log(`✅ Element cached: ${key}`);
+//             }
+//         }
+        
+//         if (missingElements.length > 0) {
+//             console.error('❌ Missing elements:', missingElements);
+//         } else {
+//             console.log('✅ All elements cached successfully');
+//         }
+//     }
+
+//     // ============================================
+//     // ATTACH EVENT LISTENERS
+//     // ============================================
+//     attachEventListeners() {
+//         console.log('🔗 Attaching event listeners...');
+        
+//         // Toggle button
+//         if (this.elements.toggleBtn) {
+//             const newToggleBtn = this.elements.toggleBtn.cloneNode(true);
+//             this.elements.toggleBtn.parentNode.replaceChild(newToggleBtn, this.elements.toggleBtn);
+//             this.elements.toggleBtn = newToggleBtn;
+            
+//             this.elements.toggleBtn.addEventListener('click', (e) => {
+//                 console.log('🖱 TOGGLE BUTTON CLICKED!');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.toggleChat();
+//             }, { capture: true, passive: false });
+            
+//             console.log('✅ Toggle button listener attached');
+//         }
+        
+//         // Minimize button
+//         if (this.elements.minimizeBtn) {
+//             const newMinimizeBtn = this.elements.minimizeBtn.cloneNode(true);
+//             this.elements.minimizeBtn.parentNode.replaceChild(newMinimizeBtn, this.elements.minimizeBtn);
+//             this.elements.minimizeBtn = newMinimizeBtn;
+            
+//             this.elements.minimizeBtn.addEventListener('click', (e) => {
+//                 console.log('🖱 MINIMIZE CLICKED');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.toggleChat();
+//             }, { capture: true, passive: false });
+            
+//             console.log('✅ Minimize button listener attached');
+//         }
+        
+//         // Clear button
+//         if (this.elements.clearBtn) {
+//             const newClearBtn = this.elements.clearBtn.cloneNode(true);
+//             this.elements.clearBtn.parentNode.replaceChild(newClearBtn, this.elements.clearBtn);
+//             this.elements.clearBtn = newClearBtn;
+            
+//             this.elements.clearBtn.addEventListener('click', (e) => {
+//                 console.log('🖱 CLEAR CLICKED');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.clearChat();
+//             }, { capture: true, passive: false });
+            
+//             console.log('✅ Clear button listener attached');
+//         }
+        
+//         // Send button
+//         if (this.elements.sendBtn) {
+//             this.elements.sendBtn.addEventListener('click', (e) => {
+//                 console.log('🖱 SEND CLICKED');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.sendMessage();
+//             });
+//             console.log('✅ Send button listener attached');
+//         }
+        
+//         // Input field
+//         if (this.elements.input) {
+//             this.elements.input.addEventListener('keydown', (e) => {
+//                 if (e.key === 'Enter' && !e.shiftKey) {
+//                     e.preventDefault();
+//                     this.sendMessage();
+//                 }
+//             });
+            
+//             this.elements.input.addEventListener('input', () => {
+//                 this.autoResizeTextarea();
+//             });
+//             console.log('✅ Input listeners attached');
+//         }
+        
+//         // Suggestions delegation
+//         if (this.elements.suggestions) {
+//             this.elements.suggestions.addEventListener('click', (e) => {
+//                 if (e.target.classList.contains('suggestion-chip')) {
+//                     console.log('🖱 SUGGESTION CLICKED');
+//                     this.onSuggestionClick(e.target.textContent);
+//                 }
+//             });
+//             console.log('✅ Suggestions listener attached');
+//         }
+        
+//         console.log('✅ All event listeners attached');
+//     }
+
+//     // ============================================
+//     // INITIALIZE COMPONENTS
+//     // ============================================
+//     async initializeComponents() {
+//         console.log('🔧 Initializing components...');
+        
+//         // Initialize engine
+//         if (typeof FinancialChatbotEngine !== 'undefined') {
+//             this.engine = new FinancialChatbotEngine(this.config);
+//             console.log('✅ Engine initialized');
+//         } else {
+//             console.warn('⚠ FinancialChatbotEngine not available');
+//         }
+        
+//         // Initialize charts
+//         if (typeof ChatbotCharts !== 'undefined') {
+//             this.charts = new ChatbotCharts(this.config);
+//             console.log('✅ Charts initialized');
+//         } else {
+//             console.warn('⚠ ChatbotCharts not available');
+//         }
+        
+//         // Initialize suggestions
+//         if (typeof ChatbotSuggestions !== 'undefined') {
+//             this.suggestions = new ChatbotSuggestions(this.config);
+//             console.log('✅ Suggestions initialized');
+//         } else {
+//             console.warn('⚠ ChatbotSuggestions not available');
+//         }
+//     }
+
+//     // ============================================
+//     // TOGGLE CHAT
+//     // ============================================
+//     toggleChat() {
+//         console.log('🔄 toggleChat() called');
+//         console.log('Current isOpen:', this.isOpen);
+        
+//         if (!this.elements.widget) {
+//             console.error('❌ Widget element not found!');
+//             return;
+//         }
+        
+//         this.isOpen = !this.isOpen;
+//         console.log('New isOpen:', this.isOpen);
+        
+//         if (this.isOpen) {
+//             console.log('📂 Opening chatbot...');
+//             this.elements.widget.style.display = 'flex';
+//             this.elements.widget.classList.remove('hidden');
+//             this.elements.widget.classList.add('chatbot-open');
+            
+//             setTimeout(() => {
+//                 this.elements.widget.classList.add('bounce-in');
+//             }, 10);
+            
+//             setTimeout(() => {
+//                 if (this.elements.input) {
+//                     this.elements.input.focus();
+//                 }
+//             }, 300);
+            
+//             console.log('✅ Chatbot opened');
+            
+//         } else {
+//             console.log('📁 Closing chatbot...');
+//             this.elements.widget.classList.remove('bounce-in');
+//             this.elements.widget.classList.remove('chatbot-open');
+            
+//             setTimeout(() => {
+//                 this.elements.widget.classList.add('hidden');
+//                 this.elements.widget.style.display = '';
+//             }, 300);
+            
+//             console.log('✅ Chatbot closed');
+//         }
+        
+//         return true;
+//     }
+
+//     // ============================================
+//     // SEND MESSAGE
+//     // ============================================
+//     async sendMessage() {
+//         const message = this.elements.input.value.trim();
+        
+//         if (!message || this.isTyping) return;
+        
+//         console.log('📤 Sending message:', message);
+        
+//         // Clear input
+//         this.elements.input.value = '';
+//         this.autoResizeTextarea();
+        
+//         // Add user message to UI
+//         this.addMessage('user', message);
+        
+//         // Clear suggestions
+//         this.clearSuggestions();
+        
+//         // Show typing indicator
+//         this.showTypingIndicator();
+        
+//         try {
+//             // Process message through engine
+//             const response = await this.engine.processMessage(message);
+            
+//             // Hide typing indicator
+//             this.hideTypingIndicator();
+            
+//             // Add AI response to UI
+//             this.addMessage('bot', response.text, response.chartRequests);
+            
+//             // Generate charts if requested
+//             if (response.chartRequests && response.chartRequests.length > 0) {
+//                 await this.generateCharts(response.chartRequests);
+//             }
+            
+//             // Show contextual suggestions
+//             if (response.suggestions && response.suggestions.length > 0) {
+//                 this.showSuggestions(response.suggestions);
+//             } else if (this.suggestions) {
+//                 const contextualSuggestions = this.suggestions.getContextualSuggestions(
+//                     response.intent,
+//                     response.entities,
+//                     response
+//                 );
+//                 this.showSuggestions(contextualSuggestions);
+//             }
+            
+//         } catch (error) {
+//             console.error('Message processing error:', error);
+//             this.hideTypingIndicator();
+//             this.addMessage('bot', '⚠ Sorry, I encountered an error. Please try again.');
+//         }
+//     }
+
+//     // ============================================
+//     // ADD MESSAGE (WITH USER PROFILE PHOTO - v2.1)
+//     // ============================================
+//     addMessage(type, content, chartRequests = null) {
+//         const messageDiv = document.createElement('div');
+//         messageDiv.className = `message ${type}-message fade-in`;
+        
+//         const avatar = document.createElement('div');
+//         avatar.className = `message-avatar ${type}-avatar`;
+        
+//         // NEW v2.1: User profile photo for user messages (LOGIQUE LANDING.JS)
+//         if (type === 'user') {
+//             avatar.innerHTML = this.getUserAvatarHTML();
+//         } else {
+//             avatar.textContent = this.config.ui.botAvatar;
+//         }
+        
+//         const contentDiv = document.createElement('div');
+//         contentDiv.className = 'message-content';
+        
+//         const bubble = document.createElement('div');
+//         bubble.className = 'message-bubble';
+        
+//         const text = document.createElement('div');
+//         text.className = 'message-text';
+//         text.innerHTML = this.formatMessage(content);
+        
+//         bubble.appendChild(text);
+        
+//         if (this.config.ui.showTimestamps) {
+//             const time = document.createElement('span');
+//             time.className = 'message-time';
+//             time.textContent = new Date().toLocaleTimeString('en-US', { 
+//                 hour: '2-digit', 
+//                 minute: '2-digit' 
+//             });
+//             bubble.appendChild(time);
+//         }
+        
+//         contentDiv.appendChild(bubble);
+//         messageDiv.appendChild(avatar);
+//         messageDiv.appendChild(contentDiv);
+        
+//         this.elements.messages.appendChild(messageDiv);
+//         this.scrollToBottom();
+        
+//         this.messageCount++;
+        
+//         // Sauvegarder dans l'historique
+//         this.conversationHistory.push({
+//             type: type,
+//             content: content,
+//             timestamp: Date.now(),
+//             chartRequests: chartRequests || null
+//         });
+        
+//         this.saveConversation();
+//     }
+
+//     // ============================================
+//     // FORMAT MESSAGE
+//     // ============================================
+//     formatMessage(text) {
+//         let formatted = text
+//             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+//             .replace(/\*(.+?)\*/g, '<em>$1</em>')
+//             .replace(/`(.+?)`/g, '<code>$1</code>')
+//             .replace(/\n/g, '<br>');
+        
+//         return formatted;
+//     }
+
+//     // ============================================
+//     // TYPING INDICATOR
+//     // ============================================
+//     showTypingIndicator() {
+//         this.isTyping = true;
+        
+//         const typingDiv = document.createElement('div');
+//         typingDiv.className = 'message bot-message fade-in';
+//         typingDiv.id = 'typing-indicator';
+        
+//         const avatar = document.createElement('div');
+//         avatar.className = 'message-avatar bot-avatar';
+//         avatar.textContent = this.config.ui.botAvatar;
+        
+//         const contentDiv = document.createElement('div');
+//         contentDiv.className = 'message-content';
+        
+//         const bubble = document.createElement('div');
+//         bubble.className = 'message-bubble';
+        
+//         const indicator = document.createElement('div');
+//         indicator.className = 'typing-indicator';
+//         indicator.innerHTML = `
+//             <span class="typing-dot"></span>
+//             <span class="typing-dot"></span>
+//             <span class="typing-dot"></span>
+//         `;
+        
+//         bubble.appendChild(indicator);
+//         contentDiv.appendChild(bubble);
+//         typingDiv.appendChild(avatar);
+//         typingDiv.appendChild(contentDiv);
+        
+//         this.elements.messages.appendChild(typingDiv);
+//         this.scrollToBottom();
+//     }
+
+//     hideTypingIndicator() {
+//         this.isTyping = false;
+//         const indicator = document.getElementById('typing-indicator');
+//         if (indicator) {
+//             indicator.remove();
+//         }
+//     }
+
+//     // ============================================
+//     // SUGGESTIONS
+//     // ============================================
+//     showSuggestions(suggestions) {
+//         this.clearSuggestions();
+        
+//         suggestions.forEach(suggestion => {
+//             const chip = document.createElement('button');
+//             chip.className = 'suggestion-chip';
+//             chip.textContent = suggestion;
+//             this.elements.suggestions.appendChild(chip);
+//         });
+//     }
+
+//     showInitialSuggestions() {
+//         if (this.suggestions) {
+//             const initial = this.suggestions.getInitialSuggestions();
+//             this.showSuggestions(initial);
+//         }
+//     }
+
+//     clearSuggestions() {
+//         this.elements.suggestions.innerHTML = '';
+//     }
+
+//     onSuggestionClick(suggestion) {
+//         this.elements.input.value = suggestion;
+//         this.sendMessage();
+        
+//         if (this.suggestions) {
+//             this.suggestions.onSuggestionClicked(suggestion);
+//         }
+//     }
+
+//     // ============================================
+//     // CHARTS (AVEC SAUVEGARDE DES MÉTADONNÉES)
+//     // ============================================
+//     async generateCharts(chartRequests) {
+//         for (const request of chartRequests) {
+//             const chartContainer = document.createElement('div');
+//             chartContainer.className = 'chart-message';
+            
+//             const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//             chartContainer.setAttribute('data-chart-container', chartId);
+            
+//             this.elements.messages.appendChild(chartContainer);
+            
+//             if (this.charts) {
+//                 const createdChartId = await this.charts.createChart(request, chartContainer);
+                
+//                 this.charts.chartDataStore.set(createdChartId, {
+//                     chartRequest: request,
+//                     containerId: chartId
+//                 });
+//             }
+            
+//             this.scrollToBottom();
+//         }
+        
+//         this.saveChartsData();
+//     }
+
+//     // ============================================
+//     // WELCOME MESSAGE
+//     // ============================================
+//     showWelcomeMessage() {
+//         setTimeout(() => {
+//             this.addMessage('bot', this.config.ui.welcomeMessage);
+//         }, 500);
+//     }
+
+//     // ============================================
+//     // CLEAR CHAT (AVEC NETTOYAGE COMPLET)
+//     // ============================================
+//     clearChat() {
+//         if (confirm('Clear all messages?')) {
+//             // Nettoyer le DOM
+//             this.elements.messages.innerHTML = '';
+//             this.messageCount = 0;
+            
+//             // Nettoyer l'historique
+//             this.conversationHistory = [];
+            
+//             // Nettoyer le localStorage
+//             localStorage.removeItem(this.conversationKey);
+//             localStorage.removeItem(this.chartsDataKey);
+            
+//             // Nettoyer l'engine
+//             if (this.engine) {
+//                 this.engine.clearHistory();
+//             }
+            
+//             // Détruire tous les graphiques
+//             if (this.charts) {
+//                 this.charts.destroyAllCharts();
+//                 this.charts.chartDataStore.clear();
+//             }
+            
+//             console.log('✅ Chat cleared completely');
+            
+//             // Afficher le message de bienvenue
+//             this.showWelcomeMessage();
+//             this.showInitialSuggestions();
+//         }
+//     }
+
+//     // ════════════════════════════════════════════════════════════
+//     // SAUVEGARDE & RESTAURATION
+//     // ════════════════════════════════════════════════════════════
+
+//     /**
+//      * Sauvegarde la conversation dans localStorage
+//      */
+//     saveConversation() {
+//         try {
+//             const data = {
+//                 history: this.conversationHistory,
+//                 timestamp: Date.now(),
+//                 version: '2.1'
+//             };
+            
+//             localStorage.setItem(this.conversationKey, JSON.stringify(data));
+//             console.log(`💾 Conversation saved (${this.conversationHistory.length} messages)`);
+            
+//         } catch (error) {
+//             console.error('❌ Error saving conversation:', error);
+//         }
+//     }
+
+//     /**
+//      * Sauvegarde les données des graphiques
+//      */
+//     saveChartsData() {
+//         if (!this.charts) return;
+        
+//         try {
+//             const chartsData = this.charts.exportChartsData();
+//             localStorage.setItem(this.chartsDataKey, JSON.stringify(chartsData));
+//             console.log(`💾 Charts data saved (${Object.keys(chartsData).length} charts)`);
+            
+//         } catch (error) {
+//             console.error('❌ Error saving charts data:', error);
+//         }
+//     }
+
+//     /**
+//      * Restaure la conversation depuis localStorage
+//      */
+//     async restoreConversation() {
+//         try {
+//             console.log('🔄 Attempting to restore conversation...');
+            
+//             const savedData = localStorage.getItem(this.conversationKey);
+            
+//             if (!savedData) {
+//                 console.log('ℹ No saved conversation found');
+//                 return;
+//             }
+            
+//             const data = JSON.parse(savedData);
+            
+//             if (!data.history || !Array.isArray(data.history)) {
+//                 console.warn('⚠ Invalid conversation data');
+//                 return;
+//             }
+            
+//             console.log(`📥 Restoring ${data.history.length} messages...`);
+            
+//             // Restaurer les messages
+//             for (const msg of data.history) {
+//                 await this.restoreMessage(msg);
+//             }
+            
+//             // Restaurer les graphiques
+//             await this.restoreCharts();
+            
+//             console.log('✅ Conversation restored successfully');
+            
+//         } catch (error) {
+//             console.error('❌ Error restoring conversation:', error);
+//             localStorage.removeItem(this.conversationKey);
+//             localStorage.removeItem(this.chartsDataKey);
+//         }
+//     }
+
+//     /**
+//      * Restaure un message individuel (WITH USER PHOTO - v2.1)
+//      */
+//     async restoreMessage(msg) {
+//         const messageDiv = document.createElement('div');
+//         messageDiv.className = `message ${msg.type}-message`;
+        
+//         const avatar = document.createElement('div');
+//         avatar.className = `message-avatar ${msg.type}-avatar`;
+        
+//         // NEW v2.1: User profile photo for user messages (LOGIQUE LANDING.JS)
+//         if (msg.type === 'user') {
+//             avatar.innerHTML = this.getUserAvatarHTML();
+//         } else {
+//             avatar.textContent = this.config.ui.botAvatar;
+//         }
+        
+//         const contentDiv = document.createElement('div');
+//         contentDiv.className = 'message-content';
+        
+//         const bubble = document.createElement('div');
+//         bubble.className = 'message-bubble';
+        
+//         const text = document.createElement('div');
+//         text.className = 'message-text';
+//         text.innerHTML = this.formatMessage(msg.content);
+        
+//         bubble.appendChild(text);
+        
+//         if (this.config.ui.showTimestamps && msg.timestamp) {
+//             const time = document.createElement('span');
+//             time.className = 'message-time';
+//             const date = new Date(msg.timestamp);
+//             time.textContent = date.toLocaleTimeString('en-US', { 
+//                 hour: '2-digit', 
+//                 minute: '2-digit' 
+//             });
+//             bubble.appendChild(time);
+//         }
+        
+//         contentDiv.appendChild(bubble);
+//         messageDiv.appendChild(avatar);
+//         messageDiv.appendChild(contentDiv);
+        
+//         this.elements.messages.appendChild(messageDiv);
+        
+//         // Restaurer l'historique
+//         this.conversationHistory.push(msg);
+//         this.messageCount++;
+//     }
+
+//     /**
+//      * Restaure tous les graphiques
+//      */
+//     async restoreCharts() {
+//         if (!this.charts) {
+//             console.warn('⚠ Charts component not available');
+//             return;
+//         }
+        
+//         try {
+//             console.log('📊 Attempting to restore charts...');
+            
+//             const savedChartsData = localStorage.getItem(this.chartsDataKey);
+            
+//             if (!savedChartsData) {
+//                 console.log('ℹ No saved charts data found');
+//                 return;
+//             }
+            
+//             const chartsData = JSON.parse(savedChartsData);
+            
+//             this.charts.importChartsData(chartsData);
+            
+//             console.log(`📥 Imported data for ${Object.keys(chartsData).length} charts`);
+            
+//             for (const msg of this.conversationHistory) {
+//                 if (msg.chartRequests && msg.chartRequests.length > 0) {
+//                     await this.restoreChartsForMessage(msg.chartRequests);
+//                 }
+//             }
+            
+//             console.log('✅ Charts restored successfully');
+            
+//         } catch (error) {
+//             console.error('❌ Error restoring charts:', error);
+//         }
+//     }
+
+//     /**
+//      * Restaure les graphiques d'un message spécifique
+//      */
+//     async restoreChartsForMessage(chartRequests) {
+//         for (const request of chartRequests) {
+//             const chartContainer = document.createElement('div');
+//             chartContainer.className = 'chart-message';
+            
+//             const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+//             chartContainer.setAttribute('data-chart-container', chartId);
+            
+//             this.elements.messages.appendChild(chartContainer);
+            
+//             if (this.charts) {
+//                 try {
+//                     await this.charts.createChart(request, chartContainer);
+//                     console.log(`✅ Chart restored: ${request.type}`);
+//                 } catch (error) {
+//                     console.error(`❌ Failed to restore chart:`, error);
+//                 }
+//             }
+//         }
+        
+//         this.scrollToBottom();
+//     }
+
+//     // ============================================
+//     // AUTO-RESIZE TEXTAREA
+//     // ============================================
+//     autoResizeTextarea() {
+//         const textarea = this.elements.input;
+//         textarea.style.height = 'auto';
+//         textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+//     }
+
+//     // ============================================
+//     // SCROLL TO BOTTOM
+//     // ============================================
+//     scrollToBottom() {
+//         setTimeout(() => {
+//             this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
+//         }, 100);
+//     }
+
+//     // ============================================
+//     // DESTROY
+//     // ============================================
+//     destroy() {
+//         // Sauvegarder avant destruction
+//         this.saveConversation();
+//         this.saveChartsData();
+        
+//         // Nettoyer les graphiques
+//         if (this.charts) {
+//             this.charts.destroyAllCharts();
+//         }
+        
+//         // Supprimer le container
+//         if (this.elements.container) {
+//             this.elements.container.remove();
+//         }
+//     }
+// }
+
+// // ============================================
+// // EXPORT
+// // ============================================
+// if (typeof module !== 'undefined' && module.exports) {
+//     module.exports = ChatbotUI;
+// }
+
+// console.log('✅ ChatbotUI v2.1 loaded - With User Photo + Conversation Persistence!');
+
 // ============================================
-// CHATBOT UI v2.1 - PREMIUM INTERFACE
-// ✅ NOUVEAU v2.1: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
+// CHATBOT UI v2.2 - PREMIUM INTERFACE
+// ✅ NOUVEAU v2.2: INTÉGRATION RATE LIMITING
+// ✅ v2.1: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
 // ✅ v2.0: AVEC SAUVEGARDE/RESTAURATION DES GRAPHIQUES
 // ============================================
 
@@ -32,7 +970,7 @@ class ChatbotUI {
     }
 
     // ============================================
-    // USER PROFILE PHOTO MANAGEMENT (NEW v2.1 - LOGIQUE LANDING.JS)
+    // USER PROFILE PHOTO MANAGEMENT (v2.1 - LOGIQUE LANDING.JS)
     // ============================================
     
     /**
@@ -99,7 +1037,7 @@ class ChatbotUI {
     // ============================================
     async init() {
         try {
-            console.log('🎨 Création de l\'interface UI v2.1...');
+            console.log('🎨 Création de l\'interface UI v2.2...');
             
             // Create UI structure
             this.createUI();
@@ -125,7 +1063,7 @@ class ChatbotUI {
                 this.showInitialSuggestions();
             }
             
-            console.log('✅ Chatbot UI v2.1 initialized successfully');
+            console.log('✅ Chatbot UI v2.2 initialized successfully WITH RATE LIMITING!');
             
         } catch (error) {
             console.error('❌ UI initialization error:', error);
@@ -415,7 +1353,7 @@ class ChatbotUI {
     }
 
     // ============================================
-    // SEND MESSAGE
+    // SEND MESSAGE (✅ AVEC RATE LIMITING v2.2)
     // ============================================
     async sendMessage() {
         const message = this.elements.input.value.trim();
@@ -423,6 +1361,34 @@ class ChatbotUI {
         if (!message || this.isTyping) return;
         
         console.log('📤 Sending message:', message);
+        
+        // ✅ VÉRIFICATION DU QUOTA CHATBOT (RATE LIMITING)
+        if (typeof window.canUseChatbot === 'function') {
+            const quotaCheck = await window.canUseChatbot();
+            
+            if (!quotaCheck.allowed) {
+                console.warn('⛔ Chatbot quota exceeded:', quotaCheck.reason);
+                
+                // Afficher la modale d'erreur
+                if (typeof window.showQuotaModal === 'function') {
+                    window.showQuotaModal('chatbot', quotaCheck);
+                }
+                
+                // Afficher un message dans le chatbot
+                this.addMessage('bot', `⛔ **Daily Limit Reached**\n\n${quotaCheck.message}\n\nYou have used **${quotaCheck.current}/${quotaCheck.limit}** messages today.`);
+                
+                return; // BLOQUER L'ENVOI
+            }
+            
+            console.log(`✅ Chatbot quota OK. Remaining: ${quotaCheck.remaining === -1 ? 'Unlimited' : quotaCheck.remaining}`);
+            
+            // Afficher le quota restant dans la console (optionnel)
+            if (quotaCheck.remaining !== -1 && quotaCheck.remaining <= 2) {
+                console.warn(`⚠ Low quota: ${quotaCheck.remaining} messages remaining today`);
+            }
+        } else {
+            console.warn('⚠ Rate limiting not available (access-control.js not loaded)');
+        }
         
         // Clear input
         this.elements.input.value = '';
@@ -706,7 +1672,7 @@ class ChatbotUI {
             const data = {
                 history: this.conversationHistory,
                 timestamp: Date.now(),
-                version: '2.1'
+                version: '2.2'
             };
             
             localStorage.setItem(this.conversationKey, JSON.stringify(data));
@@ -933,4 +1899,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotUI;
 }
 
-console.log('✅ ChatbotUI v2.1 loaded - With User Photo + Conversation Persistence!');
+console.log('✅ ChatbotUI v2.2 loaded - WITH RATE LIMITING + User Photo + Conversation Persistence!');
