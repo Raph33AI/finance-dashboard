@@ -4848,10 +4848,23 @@
         // ========================================
         
         runAdvancedAIOptimization: async function() {
+            // ✅ CORRECTION : Utiliser les données historiques complètes (comme les KPIs)
+            const now = new Date();
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            
+            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
+            if (currentMonthIndex === -1) {
+                currentMonthIndex = this.financialData.length - 1;
+            }
+            
+            // Données historiques complètes (jusqu'au mois actuel)
+            const allHistoricalData = this.financialData.slice(0, currentMonthIndex + 1);
+            
+            // Données filtrées pour les autres analyses (Efficient Frontier, etc.)
             const filteredData = this.getFilteredData();
             
-            if (filteredData.length < 12) {
-                this.showNotification('Need at least 12 months of data for AI optimization', 'warning');
+            if (allHistoricalData.length < 12) {
+                this.showNotification('Need at least 12 months of historical data for AI optimization', 'warning');
                 return;
             }
             
@@ -4867,10 +4880,12 @@
             if (resultsEl) resultsEl.classList.add('hidden');
             
             try {
+                // ✅ STEP 1 : Risk Profile sur données historiques complètes
                 this.updateAILoadingStep(0, 'Analyzing your risk profile...');
-                await this.analyzeRiskProfile(filteredData);
+                await this.analyzeRiskProfile(allHistoricalData);
                 await this.delay(1000);
                 
+                // ✅ STEP 2-6 : Autres analyses sur données filtrées
                 this.updateAILoadingStep(1, 'Computing efficient frontier...');
                 await this.calculateEfficientFrontier(filteredData);
                 await this.delay(1500);
