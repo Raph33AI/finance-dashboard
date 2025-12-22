@@ -4863,9 +4863,15 @@
             // Données filtrées pour les autres analyses (Efficient Frontier, etc.)
             const filteredData = this.getFilteredData();
             
-            if (allHistoricalData.length < 12) {
-                this.showNotification('Need at least 12 months of historical data for AI optimization', 'warning');
+            // ✅ CORRECTION : Accepter n'importe quel nombre de mois (minimum 2 pour avoir au moins 1 retour)
+            if (allHistoricalData.length < 2) {
+                this.showNotification('Need at least 2 months of data for AI optimization', 'warning');
                 return;
+            }
+
+            // Avertissement si peu de données (mais continuer quand même)
+            if (allHistoricalData.length < 6) {
+                console.warn(`⚠ AI Optimization with only ${allHistoricalData.length} months - results may be less accurate`);
             }
             
             if (this.currentAllocation.assets.length < 2) {
@@ -4910,6 +4916,13 @@
                 if (resultsEl) resultsEl.classList.remove('hidden');
                 
                 this.displayAdvancedAIResults();
+
+                // ✅ Log informatif sur la qualité de l'analyse
+                const dataQuality = allHistoricalData.length >= 24 ? 'Excellent' :
+                                    allHistoricalData.length >= 12 ? 'Good' :
+                                    allHistoricalData.length >= 6 ? 'Acceptable' : 'Limited';
+
+                console.log(`📊 AI Optimization completed with ${allHistoricalData.length} months of data (Quality: ${dataQuality})`);
                 
                 this.showNotification('✅ Advanced AI optimization completed!', 'success');
                 
@@ -6784,9 +6797,13 @@
         createRollingVolatilityChart: function(data) {
             const categories = [];
             const volatilities = [];
-            const window = Math.min(12, Math.floor(data.length / 3));
-            
-            if (data.length < window) return;
+            // ✅ Fenêtre adaptive : minimum 2 mois, maximum 12 mois
+            const window = Math.max(2, Math.min(12, Math.floor(data.length / 2)));
+
+            if (data.length < window) {
+                console.warn('⚠ Not enough data for rolling volatility chart');
+                return;
+            }
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
@@ -7042,10 +7059,14 @@
         createRollingSharpeChart: function(data) {
             const categories = [];
             const sharpeRatios = [];
-            const window = Math.min(12, Math.floor(data.length / 2));
+            // ✅ Fenêtre adaptive : minimum 3 mois pour Sharpe, maximum 12 mois
+            const window = Math.max(3, Math.min(12, Math.floor(data.length / 2)));
             const riskFreeRate = 2;
-            
-            if (data.length < window) return;
+
+            if (data.length < window) {
+                console.warn(`⚠ Need at least ${window} months for rolling Sharpe ratio`);
+                return;
+            }
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
@@ -7174,10 +7195,14 @@
         createSortinoChart: function(data) {
             const categories = [];
             const sortinoRatios = [];
-            const window = Math.min(12, Math.floor(data.length / 2));
+            // ✅ Fenêtre adaptive : minimum 3 mois pour Sortino, maximum 12 mois
+            const window = Math.max(3, Math.min(12, Math.floor(data.length / 2)));
             const riskFreeRate = 2;
-            
-            if (data.length < window) return;
+
+            if (data.length < window) {
+                console.warn(`⚠ Need at least ${window} months for Sortino ratio`);
+                return;
+            }
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
@@ -7249,10 +7274,13 @@
         createCalmarChart: function(data) {
             const categories = [];
             const calmarRatios = [];
-            const window = Math.min(36, data.length);
-            
-            if (data.length < window) {
-                console.warn('⚠ Not enough data for Calmar ratio (need at least 36 months)');
+            // ✅ Calmar adaptatif : 36 mois recommandé, mais accepte minimum 6 mois
+            const minWindow = 6;
+            const idealWindow = 36;
+            const window = Math.max(minWindow, Math.min(idealWindow, data.length));
+
+            if (data.length < minWindow) {
+                console.warn(`⚠ Need at least ${minWindow} months for Calmar ratio`);
                 
                 // Créer un graphique vide avec message
                 if (this.charts.calmar) this.charts.calmar.destroy();
@@ -7261,13 +7289,18 @@
                 this.charts.calmar = Highcharts.chart('chartCalmar', {
                     chart: { type: 'column', backgroundColor: colors.background, height: 450 },
                     title: { text: 'Calmar Ratio - Insufficient Data', style: { color: colors.title } },
-                    subtitle: { text: 'Need at least 36 months of data', style: { color: colors.subtitle } },
+                    subtitle: { text: `Need at least ${minWindow} months of data`, style: { color: colors.subtitle } },
                     xAxis: { categories: [], labels: { style: { color: colors.text } } },
                     yAxis: { title: { text: 'Calmar Ratio', style: { color: colors.text } } },
                     series: [{ name: 'Calmar', data: [] }],
                     credits: { enabled: false }
                 });
                 return;
+            }
+
+            // Message informatif si moins de 36 mois
+            if (data.length < idealWindow) {
+                console.warn(`⚠ Calmar ratio calculated on ${data.length} months (recommended: ${idealWindow} months)`);
             }
             
             for (let i = window; i < data.length; i++) {
