@@ -29,13 +29,17 @@ const ACCESS_LEVELS = {
         requiresExplicitActivation: true,
         pages: [
             'dashboard-financier.html',
+            'real-estate-tax-simulator.html',
             'monte-carlo.html',
+            'economic-dashboard.html',
             'portfolio-optimizer.html'
         ],
         features: [
             'portfolio-tracking',
+            'real-estate',
             'basic-data',
             'monte-carlo-basic',
+            'macro-economic',
             'portfolio-optimization-basic'
         ]
     },
@@ -47,13 +51,17 @@ const ACCESS_LEVELS = {
         requiresActiveSubscription: true,
         pages: [
             'dashboard-financier.html',
+            'real-estate-tax-simulator.html',
             'monte-carlo.html',
+            'economic-dashboard.html',
             'portfolio-optimizer.html'
         ],
         features: [
             'portfolio-tracking',
+            'real-estate',
             'basic-data',
             'monte-carlo-basic',
+            'macro-economic',
             'portfolio-optimization-basic'
         ]
     },
@@ -68,20 +76,31 @@ const ACCESS_LEVELS = {
             'monte-carlo.html',
             'portfolio-optimizer.html',
             'investments-analytics.html',
+            'real-estate-tax-simulator.html',
             'risk-parity.html',
             'scenario-analysis.html',
-            'market-data.html',
+            'advanced-analysis.html',
             'trend-prediction.html',
-            'market-intelligence.html'
+            'forex-converter.html',
+            'news-terminal.html',
+            'economic-dashboard.html',
+            'inflation-calculator.html',
+            'chatbot-fullpage.html'
         ],
         features: [
             'all-basic',
+            'portfolio-tracking',
             'advanced-analytics',
+            'real-estate',
             'risk-parity',
             'scenario-analysis',
             'real-time-data',
             'trend-prediction',
-            'market-intelligence'
+            'forex',
+            'market-intelligence',
+            'macro-economic',
+            'inflation',
+            'chatbot'
         ]
     },
     
@@ -95,20 +114,31 @@ const ACCESS_LEVELS = {
             'monte-carlo.html',
             'portfolio-optimizer.html',
             'investments-analytics.html',
+            'real-estate-tax-simulator.html',
             'risk-parity.html',
             'scenario-analysis.html',
-            'market-data.html',
+            'advanced-analysis.html',
             'trend-prediction.html',
-            'market-intelligence.html'
+            'forex-converter.html',
+            'news-terminal.html',
+            'economic-dashboard.html',
+            'inflation-calculator.html',
+            'chatbot-fullpage.html'
         ],
         features: [
             'all-basic',
+            'portfolio-tracking',
             'advanced-analytics',
+            'real-estate',
             'risk-parity',
             'scenario-analysis',
             'real-time-data',
             'trend-prediction',
-            'market-intelligence'
+            'forex',
+            'market-intelligence',
+            'macro-economic',
+            'inflation',
+            'chatbot'
         ]
     },
     
@@ -161,30 +191,45 @@ const PAGE_CATEGORIES = {
     
     authenticated_only: [
         'settings.html',
-        'user-profile.html'
+        'user-profile.html',
+        'help.html',
+        'advanced-analysis-guide.html',
+        'gettings-started.html',
+        'resources-financial-metrics.html',
+        'resources-ml-finance.html',
+        'resources-technical-analysis.html',
+        'troubleshooting.html'
     ],
     
     basic: [
         'dashboard-financier.html',
+        'real-estate-tax-simulator.html',
         'monte-carlo.html',
+        'economic-dashboard.html',
         'portfolio-optimizer.html'
     ],
     
     pro: [
+        'dashboard-financier.html',
+        'monte-carlo.html',
+        'portfolio-optimizer.html',
         'investments-analytics.html',
+        'real-estate-tax-simulator.html',
         'risk-parity.html',
         'scenario-analysis.html',
-        'market-data.html',
+        'advanced-analysis.html',
         'trend-prediction.html',
-        'market-intelligence.html'
+        'forex-converter.html',
+        'news-terminal.html',
+        'economic-dashboard.html',
+        'inflation-calculator.html',
+        'chatbot-fullpage.html'
     ],
     
     platinum: [
         'advanced-analysis.html',
-        'analyst-coverage.html',
         'chatbot-fullpage.html',
-        'company-insights.html',
-        'earnings-estimates.html'
+        'company-insights.html'
     ],
     
     demo: [
@@ -418,58 +463,65 @@ function showUpgradeModal(currentPlan, reason) {
     
     const messages = {
         no_subscription: {
-            title: '🚀 Welcome to AlphaVault AI!',
+            title: 'Welcome to AlphaVault AI!',
             description: 'You need to choose a subscription plan to access our premium features. Start with a 14-day free trial!',
-            icon: '🎯',
+            // icon: '🎯',
+            icon: '',
             suggestedPlan: 'Pro',
             ctaText: 'Choose Your Plan',
             ctaColor: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
             urgent: true
         },
         basic_required: {
-            title: '🔒 Basic Plan Required',
+            title: 'Basic Plan Required',
             description: 'This page requires at least a Basic subscription plan.',
-            icon: '📊',
+            // icon: '📊',
+            icon: ' ',
             suggestedPlan: 'Basic',
             ctaText: 'Upgrade to Basic',
             ctaColor: 'linear-gradient(135deg, #10b981, #059669)'
         },
         pro_required: {
-            title: '🔒 Pro Feature',
+            title: 'Pro Feature',
             description: 'This page requires the Pro or Platinum plan.',
-            icon: '👑',
+            // icon: '👑',
+            icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'Upgrade to Pro',
             ctaColor: 'linear-gradient(135deg, #3b82f6, #2563eb)'
         },
         platinum_required: {
-            title: '💎 Platinum Exclusive',
+            title: 'Platinum Exclusive',
             description: 'This page is exclusively available with the Platinum plan.',
-            icon: '💎',
+            // icon: '💎',
+            icon: ' ',
             suggestedPlan: 'Platinum',
             ctaText: 'Upgrade to Platinum',
             ctaColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
         },
         expired: {
-            title: '⏰ Subscription Expired',
+            title: 'Subscription Expired',
             description: 'Your subscription has expired. Renew now to regain access to premium features.',
-            icon: '⏰',
+            // icon: '⏰',
+            icon: ' ',
             suggestedPlan: currentPlan,
             ctaText: 'Renew Subscription',
             ctaColor: 'linear-gradient(135deg, #f59e0b, #d97706)'
         },
         trial_expired: {
-            title: '⏰ Trial Expired',
+            title: 'Trial Expired',
             description: 'Your 14-day free trial has ended. Upgrade now to continue enjoying premium features!',
-            icon: '⏰',
+            // icon: '⏰',
+            icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'Subscribe Now',
             ctaColor: 'linear-gradient(135deg, #ef4444, #dc2626)'
         },
         insufficient: {
-            title: '🔒 Premium Access Required',
+            title: 'Premium Access Required',
             description: 'Upgrade your plan to access this premium feature.',
-            icon: '🔐',
+            // icon: '🔐',
+            icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'View Plans',
             ctaColor: 'linear-gradient(135deg, #3b82f6, #8b5cf6)'
@@ -1116,27 +1168,30 @@ async function getUsageStats() {
 function showQuotaModal(type, quotaInfo) {
     const messages = {
         chatbot: {
-            title: '💬 Chatbot Limit Reached',
+            title: 'Chatbot Limit Reached',
             description: 'You have used all your chatbot messages for today (' + quotaInfo.limit + ' messages).',
-            icon: '🤖',
+            // icon: '🤖',
+            icon: ' ',
             upgradeText: 'Upgrade to Pro for unlimited chatbot access!',
             upgradeTarget: 'pro'
         },
         api: {
-            title: '🔌 API Limit Reached',
+            title: 'API Limit Reached',
             description: quotaInfo.reason === 'rate_limit_exceeded' 
                 ? 'You have exceeded the rate limit. Please wait ' + quotaInfo.retryAfter + ' seconds.'
                 : 'You have used all your API requests for today (' + quotaInfo.limit + ' requests).',
-            icon: '⏱',
+            // icon: '⏱',
+            icon: ' ',
             upgradeText: quotaInfo.upgradeRequired === 'platinum' 
                 ? 'Upgrade to Platinum for higher API limits!' 
                 : 'Upgrade to Pro for API access!',
             upgradeTarget: quotaInfo.upgradeRequired || 'pro'
         },
         api_disabled: {
-            title: '🔒 API Access Required',
+            title: 'API Access Required',
             description: 'API access is only available for Pro and Platinum plans.',
-            icon: '🚀',
+            // icon: '🚀',
+            icon: ' ',
             upgradeText: 'Upgrade to Pro to unlock API access!',
             upgradeTarget: 'pro'
         }
