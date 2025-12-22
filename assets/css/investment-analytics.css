@@ -3666,3 +3666,35 @@ select:focus-visible {
  * VERSION FINALE - 100% PC & MOBILE RESPONSIVE
  * ====================================================================
  */
+
+ /* ========================================
+   DATA QUALITY BADGE
+   ======================================== */
+
+.data-quality-badge {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(241, 245, 249, 0.8);
+    border-radius: 12px;
+    transition: var(--transition-smooth);
+}
+
+body.dark-mode .data-quality-badge {
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.data-quality-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.data-quality-badge p {
+    margin: 8px 0 0 0;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+body.dark-mode .data-quality-badge p {
+    color: #94a3b8;
+}

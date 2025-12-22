@@ -7384,30 +7384,191 @@
             console.log(`✅ Calmar chart created with ${calmarRatios.length} data points`);
         },
         
+        // ========================================
+        // DETAILED RISK METRICS TABLE
+        // ========================================
+
         displayRiskMetricsTable: function() {
-            const metrics = this.calculateMetrics();
+            // ✅ CORRECTION : Utiliser les données historiques complètes (comme KPIs et Risk Profile)
+            const now = new Date();
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+            
+            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
+            if (currentMonthIndex === -1) {
+                currentMonthIndex = this.financialData.length - 1;
+            }
+            
+            // Données historiques complètes (jusqu'au mois actuel)
+            const allHistoricalData = this.financialData.slice(0, currentMonthIndex + 1);
+            
+            // Calculer les métriques sur les données historiques complètes
+            const metrics = this.calculateMetrics(allHistoricalData);
+            
+            // Déterminer la qualité des données
+            const dataLength = allHistoricalData.length;
+            const dataQuality = dataLength >= 24 ? 'Excellent' :
+                                dataLength >= 12 ? 'Good' :
+                                dataLength >= 6 ? 'Acceptable' : 'Limited';
+            
+            const dataQualityColor = dataLength >= 24 ? '#10b981' :
+                                    dataLength >= 12 ? '#3b82f6' :
+                                    dataLength >= 6 ? '#f59e0b' : '#ef4444';
+            
+            console.log(`📊 Risk Metrics Table calculated on ${dataLength} historical months (Quality: ${dataQuality})`);
+            
+            // Construire le tableau de données
             const tableData = [
-                { metric: 'Annualized Volatility', value: `${metrics.volatility.toFixed(2)}%`, interpretation: metrics.volatility < 10 ? 'Low risk' : 'Moderate', benchmark: '< 15%' },
-                { metric: 'Sharpe Ratio', value: metrics.sharpeRatio.toFixed(2), interpretation: this.interpretSharpe(metrics.sharpeRatio), benchmark: '> 1.0' },
-                { metric: 'Sortino Ratio', value: metrics.sortinoRatio.toFixed(2), interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : 'Good', benchmark: '> 1.0' },
-                { metric: 'Max Drawdown', value: `-${metrics.maxDrawdown.toFixed(2)}%`, interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : 'Good', benchmark: '< 20%' },
-                { metric: 'Calmar Ratio', value: metrics.calmarRatio.toFixed(2), interpretation: metrics.calmarRatio > 1 ? 'Good' : 'Low', benchmark: '> 1.0' },
-                { metric: 'VaR 95%', value: `${Math.abs(metrics.var95).toFixed(2)}%`, interpretation: 'Max probable loss', benchmark: 'Contextual' },
-                { metric: 'CVaR 95%', value: `${Math.abs(metrics.cvar95).toFixed(2)}%`, interpretation: 'Average loss', benchmark: 'Contextual' },
-                { metric: 'Win Rate', value: `${metrics.winRate.toFixed(1)}%`, interpretation: metrics.winRate > 60 ? 'Excellent' : 'Good', benchmark: '> 50%' }
+                { 
+                    metric: 'Annualized Volatility', 
+                    value: `${metrics.volatility.toFixed(2)}%`, 
+                    interpretation: metrics.volatility < 10 ? 'Low risk' : metrics.volatility < 20 ? 'Moderate risk' : 'High risk', 
+                    benchmark: '< 15%',
+                    class: metrics.volatility < 10 ? 'metric-good' : metrics.volatility < 20 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Sharpe Ratio', 
+                    value: metrics.sharpeRatio.toFixed(2), 
+                    interpretation: this.interpretSharpe(metrics.sharpeRatio), 
+                    benchmark: '> 1.0',
+                    class: metrics.sharpeRatio > 1 ? 'metric-good' : metrics.sharpeRatio > 0 ? '' : 'metric-bad'
+                },
+                { 
+                    metric: 'Sortino Ratio', 
+                    value: metrics.sortinoRatio.toFixed(2), 
+                    interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : metrics.sortinoRatio > 1 ? 'Good' : 'Acceptable', 
+                    benchmark: '> 1.0',
+                    class: metrics.sortinoRatio > 2 ? 'metric-good' : metrics.sortinoRatio > 1 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Maximum Drawdown', 
+                    value: `-${metrics.maxDrawdown.toFixed(2)}%`, 
+                    interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : metrics.maxDrawdown < 20 ? 'Good' : 'High', 
+                    benchmark: '< 20%',
+                    class: metrics.maxDrawdown < 10 ? 'metric-good' : metrics.maxDrawdown < 20 ? '' : 'metric-bad'
+                },
+                { 
+                    metric: 'Calmar Ratio', 
+                    value: metrics.calmarRatio.toFixed(2), 
+                    interpretation: metrics.calmarRatio > 1 ? 'Good' : metrics.calmarRatio > 0.5 ? 'Acceptable' : 'Low', 
+                    benchmark: '> 1.0',
+                    class: metrics.calmarRatio > 1 ? 'metric-good' : metrics.calmarRatio > 0.5 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Value at Risk (95%)', 
+                    value: `${Math.abs(metrics.var95).toFixed(2)}%`, 
+                    interpretation: 'Max probable monthly loss', 
+                    benchmark: 'Contextual',
+                    class: Math.abs(metrics.var95) < 5 ? 'metric-good' : Math.abs(metrics.var95) < 10 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Conditional VaR (95%)', 
+                    value: `${Math.abs(metrics.cvar95).toFixed(2)}%`, 
+                    interpretation: 'Average loss in worst scenarios', 
+                    benchmark: 'Contextual',
+                    class: Math.abs(metrics.cvar95) < 7 ? 'metric-good' : Math.abs(metrics.cvar95) < 12 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Win Rate', 
+                    value: `${metrics.winRate.toFixed(1)}%`, 
+                    interpretation: metrics.winRate >= 60 ? 'Excellent' : metrics.winRate >= 50 ? 'Good' : 'Needs improvement', 
+                    benchmark: '> 50%',
+                    class: metrics.winRate >= 60 ? 'metric-good' : metrics.winRate >= 50 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Average Win', 
+                    value: `${metrics.averageWin.toFixed(2)}%`, 
+                    interpretation: 'Avg gain per positive month', 
+                    benchmark: 'Positive',
+                    class: metrics.averageWin > 5 ? 'metric-good' : metrics.averageWin > 0 ? '' : 'metric-bad'
+                },
+                { 
+                    metric: 'Average Loss', 
+                    value: `-${metrics.averageLoss.toFixed(2)}%`, 
+                    interpretation: 'Avg loss per negative month', 
+                    benchmark: 'Minimize',
+                    class: metrics.averageLoss < 3 ? 'metric-good' : metrics.averageLoss < 5 ? '' : 'metric-warning'
+                },
+                { 
+                    metric: 'Profit Factor', 
+                    value: metrics.profitFactor.toFixed(2), 
+                    interpretation: metrics.profitFactor > 2 ? 'Excellent' : metrics.profitFactor > 1 ? 'Profitable' : 'Losing', 
+                    benchmark: '> 1.5',
+                    class: metrics.profitFactor > 2 ? 'metric-good' : metrics.profitFactor > 1 ? '' : 'metric-bad'
+                },
+                { 
+                    metric: 'Annualized Return', 
+                    value: `${metrics.annualizedReturn.toFixed(2)}%`, 
+                    interpretation: metrics.annualizedReturn > 10 ? 'Excellent' : metrics.annualizedReturn > 5 ? 'Good' : 'Low', 
+                    benchmark: '> 7%',
+                    class: metrics.annualizedReturn > 10 ? 'metric-good' : metrics.annualizedReturn > 5 ? '' : 'metric-warning'
+                }
             ];
             
+            // Construire le HTML de la table
             const tbody = document.querySelector('#riskMetricsTable tbody');
             if (tbody) {
                 tbody.innerHTML = tableData.map(row => `
                     <tr>
                         <td><strong>${row.metric}</strong></td>
-                        <td class='metric-good'>${row.value}</td>
+                        <td class='${row.class}'>${row.value}</td>
                         <td>${row.interpretation}</td>
                         <td>${row.benchmark}</td>
                     </tr>
                 `).join('');
             }
+            
+            // Ajouter un badge de qualité des données au-dessus du tableau
+            const tableContainer = document.getElementById('riskMetricsTable');
+            if (tableContainer && tableContainer.parentElement) {
+                // Supprimer l'ancien badge s'il existe
+                const oldBadge = tableContainer.parentElement.querySelector('.data-quality-badge');
+                if (oldBadge) oldBadge.remove();
+                
+                // Créer le nouveau badge
+                const badge = document.createElement('div');
+                badge.className = 'data-quality-badge';
+                badge.style.cssText = `
+                    text-align: center;
+                    margin-bottom: 16px;
+                    padding: 12px;
+                    background: rgba(241, 245, 249, 0.8);
+                    border-radius: 12px;
+                    border-left: 4px solid ${dataQualityColor};
+                `;
+                
+                badge.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;'>
+                        <span style='color: #64748b; font-weight: 600; font-size: 0.9rem;'>
+                            <i class='fas fa-database'></i> Data Quality:
+                        </span>
+                        <span style='display: inline-block; padding: 6px 16px; background: ${dataQualityColor}; color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 700;'>
+                            ${dataQuality}
+                        </span>
+                        <span style='color: #475569; font-weight: 600; font-size: 0.9rem;'>
+                            ${dataLength} months of historical data
+                        </span>
+                    </div>
+                    <p style='color: #64748b; font-size: 0.8rem; margin: 8px 0 0 0; font-style: italic;'>
+                        ${dataLength >= 24 ? '✅ Highly reliable analysis with extensive historical data' :
+                        dataLength >= 12 ? '✓ Good analysis with sufficient historical data' :
+                        dataLength >= 6 ? '⚠ Acceptable analysis - more data recommended for better accuracy' :
+                        '⚠ Limited analysis - results may vary with more historical data'}
+                    </p>
+                `;
+                
+                // Insérer le badge avant le tableau
+                tableContainer.parentElement.insertBefore(badge, tableContainer);
+            }
+            
+            // Ajouter le style dark mode pour le badge
+            if (document.body.classList.contains('dark-mode')) {
+                const badge = tableContainer?.parentElement?.querySelector('.data-quality-badge');
+                if (badge) {
+                    badge.style.background = 'rgba(30, 41, 59, 0.8)';
+                }
+            }
+            
+            console.log('✅ Risk Metrics Table displayed with complete historical data');
         },
 
         // ========================================
