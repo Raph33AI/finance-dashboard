@@ -2077,6 +2077,8 @@
             }, 3000);
         }
     };
+
+    // ========== FIN DU FICHIER ==========
     
     // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -2090,29 +2092,37 @@
     
 })();
 
-// Notification animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
+// ========== 🔧 CORRECTION : Notification animations (variable unique) ==========
+(function addNotificationStyles() {
+    const notificationStyle = document.createElement('style');
+    notificationStyle.id = 'real-estate-notification-styles';
+    notificationStyle.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
-    }
+    `;
     
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
+    // Éviter les doublons
+    if (!document.getElementById('real-estate-notification-styles')) {
+        document.head.appendChild(notificationStyle);
     }
-`;
-document.head.appendChild(style);
+})();
+    
