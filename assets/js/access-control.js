@@ -1,11 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL SYSTEM - AlphaVault AI
-   VERSION 4.2 - MODALE DÉDIÉE POUR UTILISATEURS SANS PLAN
-   Redirection automatique vers checkout.html
-   + BLOCAGE CHATBOT SI ACCÈS REFUSÉ
+   VERSION 4.3 - TRIAL RATE LIMITING CORRECTION
+   Trial = Pro rate limits (6/min, 200/day)
    ═══════════════════════════════════════════════════════════════ */
 
-console.log('🔐 Access Control System v4.2 initialized');
+console.log('🔐 Access Control System v4.3 initialized');
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION DES PLANS ET ACCÈS
@@ -131,14 +130,14 @@ const ACCESS_LEVELS = {
         features: ['all']
     },
     
-    // TRIAL (14 jours gratuits)
+    // ✅✅✅ TRIAL (14 jours gratuits) - ACCÈS COMPLET MAIS RATE LIMITING PRO
     trial: {
         name: 'Trial',
-        level: 1,
+        level: 2, // ✅ Niveau 2 pour accès à toutes les pages
         requiresActiveSubscription: false,
         requiresTrialValidation: true,
-        pages: ['all'],
-        features: ['all']
+        pages: ['all'], // ✅ Accès à TOUTES les pages pendant le trial
+        features: ['all'] // ✅ Accès à TOUTES les fonctionnalités
     }
 };
 
@@ -206,7 +205,7 @@ async function checkPageAccess(pageName) {
         // 1 - VÉRIFIER SI PAGE PUBLIQUE
         if (PAGE_CATEGORIES.public.includes(pageName)) {
             console.log('🌐 Public page - access granted');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
+            sessionStorage.removeItem('accessDenied');
             return true;
         }
         
@@ -250,17 +249,17 @@ async function checkPageAccess(pageName) {
             subscriptionStatus = 'none';
         }
         
-        // 5 - PAGES ACCESSIBLES UNIQUEMENT AUX UTILISATEURS AUTHENTIFIÉS (SANS ABONNEMENT REQUIS)
+        // 5 - PAGES ACCESSIBLES UNIQUEMENT AUX UTILISATEURS AUTHENTIFIÉS
         if (PAGE_CATEGORIES.authenticated_only.includes(pageName)) {
             console.log('✅ Access granted (Authenticated-only page)');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
+            sessionStorage.removeItem('accessDenied');
             return true;
         }
         
-        // 6 - PAGES DE DÉMO (ACCESSIBLES SANS ABONNEMENT)
+        // 6 - PAGES DE DÉMO
         if (PAGE_CATEGORIES.demo.includes(pageName)) {
             console.log('✅ Access granted (Demo page)');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
+            sessionStorage.removeItem('accessDenied');
             return true;
         }
         
@@ -273,9 +272,7 @@ async function checkPageAccess(pageName) {
             return false;
         }
         
-        // 8 - GESTION DES CODES PROMO ET STATUT TRIAL
-        
-        // VÉRIFIER SI L'UTILISATEUR EST EN TRIAL
+        // ✅✅✅ 8 - GESTION DU TRIAL (PRIORITÉ ABSOLUE)
         if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
@@ -285,16 +282,13 @@ async function checkPageAccess(pageName) {
             if (now < expirationDate) {
                 const daysLeft = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
                 console.log('✅ Trial still active (expires in ' + daysLeft + ' days)');
+                console.log('🎁 TRIAL MODE ACTIVATED - Full page access with Pro rate limits');
                 
-                if (userPlan === 'platinum') {
-                    userPlan = 'trial';
-                    ACCESS_LEVELS.trial.level = 2;
-                } else {
-                    userPlan = 'trial';
-                    ACCESS_LEVELS.trial.level = 1;
-                }
+                // ✅ Toujours niveau 2 pour accès complet
+                userPlan = 'trial';
+                ACCESS_LEVELS.trial.level = 2;
                 
-                console.log('🎁 Trial mode activated: ' + userPlan + ' (level ' + ACCESS_LEVELS.trial.level + ')');
+                console.log('🔑 Effective access level: TRIAL (level 2 - all pages, Pro rate limits)');
                 
             } else {
                 console.warn('⏰ Trial expired on ' + expirationDate.toLocaleDateString());
@@ -302,7 +296,7 @@ async function checkPageAccess(pageName) {
                 return false;
             }
         }
-        // Gestion des codes promo FREE
+        // 9 - Gestion des codes promo FREE
         else if (promoCode === 'FREEPRO') {
             userPlan = 'freepro';
             console.log('🎁 Promo code applied: FREEPRO - Plan upgraded to: freepro');
@@ -311,7 +305,7 @@ async function checkPageAccess(pageName) {
             console.log('🎁 Promo code applied: FREEPLATINUM - Plan upgraded to: freeplatinum');
         }
         
-        // 9 - VÉRIFIER LE STATUT D'ABONNEMENT (selon le plan)
+        // 10 - VÉRIFIER LE STATUT D'ABONNEMENT
         const planConfig = ACCESS_LEVELS[userPlan];
         
         if (!planConfig) {
@@ -338,28 +332,14 @@ async function checkPageAccess(pageName) {
         
         console.log('🔑 Effective access level: ' + userPlan + ' (level ' + planConfig.level + ')');
         
-        // 10 - VÉRIFIER L'ACCÈS À LA PAGE (LOGIQUE HIÉRARCHIQUE)
-        
-        // PLATINUM / FREEPLATINUM / TRIAL (niveau 2) = Accès à TOUTES les pages
-        if (userPlan === 'platinum' || userPlan === 'freeplatinum' || (userPlan === 'trial' && planConfig.level === 2)) {
-            console.log('✅ Access granted (Full access)');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
-            return true;
-        }
-        
-        // TRIAL (niveau 1) = Accès Pro
-        if (userPlan === 'trial' && planConfig.level === 1) {
-            console.log('✅ Access granted (Trial - Pro level)');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
-            return true;
-        }
+        // 11 - VÉRIFIER L'ACCÈS À LA PAGE
         
         // Vérifier si la page est dans la liste d'accès du plan
         const allowedPages = planConfig.pages || [];
         
         if (allowedPages.includes('all') || allowedPages.includes(pageName)) {
             console.log('✅ Access granted (Page in ' + userPlan + ' access list)');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
+            sessionStorage.removeItem('accessDenied');
             return true;
         }
         
@@ -368,7 +348,7 @@ async function checkPageAccess(pageName) {
         
         if (planConfig.level >= pageLevel) {
             console.log('✅ Access granted (Level ' + planConfig.level + ' >= required ' + pageLevel + ')');
-            sessionStorage.removeItem('accessDenied'); // ✅ NETTOYER LE FLAG
+            sessionStorage.removeItem('accessDenied');
             return true;
         }
         
@@ -419,27 +399,23 @@ function getPageRequiredLevel(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ MODALE D'UPGRADE DÉDIÉE (DESIGN PREMIUM)
+// MODALE D'UPGRADE
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason) {
     reason = reason || 'insufficient';
     
-    // ✅ MARQUER L'ACCÈS COMME REFUSÉ POUR BLOQUER LE CHATBOT
     sessionStorage.setItem('accessDenied', 'true');
     
     console.log('🔔 Showing upgrade modal for plan: ' + currentPlan + ' | Reason: ' + reason);
     
-    // Supprimer toute modale existante
     const existingModal = document.getElementById('upgrade-modal-overlay');
     if (existingModal) {
         existingModal.remove();
     }
     
-    // Bloquer le contenu de la page
     hidePageContent();
     
-    // ✅ Messages personnalisés selon la raison
     const messages = {
         no_subscription: {
             title: '🚀 Welcome to AlphaVault AI!',
@@ -502,12 +478,10 @@ function showUpgradeModal(currentPlan, reason) {
     
     const msg = messages[reason] || messages.insufficient;
     
-    // Affichage du plan actuel
     const currentPlanDisplay = (currentPlan === 'none' || currentPlan === 'free') 
         ? 'No Active Plan' 
         : '' + currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1) + '';
     
-    // ✅ Création de la modale avec design premium
     const modal = document.createElement('div');
     modal.id = 'upgrade-modal-overlay';
     modal.style.cssText = `
@@ -615,19 +589,16 @@ function showUpgradeModal(currentPlan, reason) {
     
     document.body.appendChild(modal);
     
-    // Animation d'apparition
     setTimeout(function() {
         modal.style.opacity = '1';
         document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
     }, 10);
     
-    // ✅ ÉVÉNEMENT : BOUTON UPGRADE (REDIRECTION VERS CHECKOUT)
     document.getElementById('btn-upgrade-now').addEventListener('click', function() {
         console.log('🛒 Redirecting to checkout page...');
         window.location.href = 'checkout.html';
     });
     
-    // ✅ ÉVÉNEMENT : BOUTON GO BACK (REDIRECTION VERS INDEX)
     document.getElementById('btn-cancel-modal').addEventListener('click', function() {
         console.log('🔙 User cancelled - redirecting to public page...');
         modal.style.opacity = '0';
@@ -637,7 +608,6 @@ function showUpgradeModal(currentPlan, reason) {
         }, 300);
     });
     
-    // Effet shake si l'utilisateur clique en dehors de la modale
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             const content = document.getElementById('upgrade-modal-content');
@@ -648,7 +618,6 @@ function showUpgradeModal(currentPlan, reason) {
         }
     });
     
-    // Effets hover sur le bouton upgrade
     const upgradeBtn = document.getElementById('btn-upgrade-now');
     upgradeBtn.addEventListener('mouseenter', function() {
         upgradeBtn.style.transform = 'scale(1.05) translateY(-2px)';
@@ -659,7 +628,6 @@ function showUpgradeModal(currentPlan, reason) {
         upgradeBtn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)';
     });
     
-    // Effets hover sur le bouton cancel
     const cancelBtn = document.getElementById('btn-cancel-modal');
     cancelBtn.addEventListener('mouseenter', function() {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.3)';
@@ -668,10 +636,6 @@ function showUpgradeModal(currentPlan, reason) {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     });
 }
-
-// ═══════════════════════════════════════════════════════════════
-// BLOQUER LE CONTENU DE LA PAGE
-// ═══════════════════════════════════════════════════════════════
 
 function hidePageContent() {
     if (!document.getElementById('page-content-blocker')) {
@@ -684,23 +648,12 @@ function hidePageContent() {
     document.body.style.overflow = 'hidden';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// REDIRECTION VERS LOGIN
-// ═══════════════════════════════════════════════════════════════
-
 function redirectToLogin() {
     console.log('🔄 Redirecting to login...');
-    
-    // ✅ MARQUER L'ACCÈS COMME REFUSÉ
     sessionStorage.setItem('accessDenied', 'true');
-    
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
     window.location.href = 'index.html#login';
 }
-
-// ═══════════════════════════════════════════════════════════════
-// INITIALISATION AU CHARGEMENT DE LA PAGE
-// ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -729,10 +682,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// ═══════════════════════════════════════════════════════════════
-// ANIMATIONS CSS
-// ═══════════════════════════════════════════════════════════════
-
 const style = document.createElement('style');
 style.textContent = `
     @keyframes shake {
@@ -747,10 +696,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-// ═══════════════════════════════════════════════════════════════
-// FONCTION HELPER : VÉRIFIER SI L'UTILISATEUR A UNE FEATURE
-// ═══════════════════════════════════════════════════════════════
 
 async function hasFeature(featureName) {
     const user = firebase.auth().currentUser;
@@ -771,7 +716,6 @@ async function hasFeature(featureName) {
         const promoCode = (userData.promoCode || '').toUpperCase();
         const trialEndsAt = userData.trialEndsAt || null;
         
-        // ✅ Bloquer free + inactive
         if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
             return false;
         }
@@ -780,7 +724,6 @@ async function hasFeature(featureName) {
             return false;
         }
         
-        // Vérifier si trial actif
         if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
@@ -818,39 +761,27 @@ async function hasFeature(featureName) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// API PUBLIQUE
-// ═══════════════════════════════════════════════════════════════
-
 window.hasFeature = hasFeature;
 window.checkPageAccess = checkPageAccess;
 window.ACCESS_LEVELS = ACCESS_LEVELS;
 window.PAGE_CATEGORIES = PAGE_CATEGORIES;
 window.getPageRequiredLevel = getPageRequiredLevel;
 
-// ═══════════════════════════════════════════════════════════════
-// LOGS DE DÉMARRAGE
-// ═══════════════════════════════════════════════════════════════
-
-console.log('✅ Access Control System v4.2 ready');
+console.log('✅ Access Control System v4.3 ready');
 console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
-// console.log('🎟 Promo codes supported: FREEPRO, FREEPLATINUM, FREE14DAYS, TRIAL14, TRYITFREE');
 console.log('⏰ Trial expiration check: enabled');
 console.log('🛒 Upgrade redirects to: checkout.html');
 console.log('🚫 Plan "free" with "inactive" status: BLOCKED');
 console.log('✨ Dedicated modal for users without subscription: ENABLED');
 console.log('🤖 Chatbot blocking on access denied: ENABLED');
+console.log('🎁 Trial: Full page access + PRO rate limits (6/min, 200/day)');
 
 // ═══════════════════════════════════════════════════════════════
-//  RATE LIMITING SYSTEM - AlphaVault AI
-//  VERSION 1.0 - GESTION DES QUOTAS CHATBOT & API
+//  RATE LIMITING SYSTEM - VERSION 1.1
+//  ✅ TRIAL = PRO RATE LIMITS (6/min, 200/day)
 // ═══════════════════════════════════════════════════════════════
 
-console.log('⏱ Rate Limiting System v1.0 initialized');
-
-// ═══════════════════════════════════════════════════════════════
-// CONFIGURATION DES LIMITES PAR PLAN
-// ═══════════════════════════════════════════════════════════════
+console.log('⏱ Rate Limiting System v1.1 initialized');
 
 const RATE_LIMITS = {
     none: {
@@ -869,7 +800,7 @@ const RATE_LIMITS = {
     },
     
     pro: {
-        chatbot: { dailyLimit: -1, enabled: true }, // -1 = illimité
+        chatbot: { dailyLimit: -1, enabled: true },
         api: { enabled: true, perMinute: 6, dailyLimit: 200 }
     },
     
@@ -888,15 +819,12 @@ const RATE_LIMITS = {
         api: { enabled: true, perMinute: 8, dailyLimit: 400 }
     },
     
+    // ✅✅✅ CORRECTION : TRIAL = PRO RATE LIMITS
     trial: {
-        chatbot: { dailyLimit: -1, enabled: true },
-        api: { enabled: true, perMinute: 8, dailyLimit: 400 } // Accès complet pendant trial
+        chatbot: { dailyLimit: -1, enabled: true }, // Chatbot illimité
+        api: { enabled: true, perMinute: 6, dailyLimit: 200 } // ✅ MÊME QUE PRO (pas Platinum)
     }
 };
-
-// ═══════════════════════════════════════════════════════════════
-// RÉCUPÉRER LE PLAN EFFECTIF DE L'UTILISATEUR
-// ═══════════════════════════════════════════════════════════════
 
 async function getEffectiveUserPlan() {
     const user = firebase.auth().currentUser;
@@ -921,23 +849,21 @@ async function getEffectiveUserPlan() {
         const promoCode = (userData.promoCode || '').toUpperCase();
         const trialEndsAt = userData.trialEndsAt || null;
         
-        // Bloquer free + inactive
         if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
             userPlan = 'none';
         }
         
-        // Vérifier trial
         if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
             
             if (now < expirationDate) {
                 userPlan = 'trial';
+                console.log('🎁 Trial mode - Pro rate limits applied (6/min, 200/day)');
             } else {
                 userPlan = 'none';
             }
         }
-        // Vérifier promo codes
         else if (promoCode === 'FREEPRO') {
             userPlan = 'freepro';
         } else if (promoCode === 'FREEPLATINUM') {
@@ -954,17 +880,12 @@ async function getEffectiveUserPlan() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// VÉRIFIER ET INCRÉMENTER LE QUOTA CHATBOT
-// ═══════════════════════════════════════════════════════════════
-
 async function canUseChatbot() {
     const userInfo = await getEffectiveUserPlan();
     const { plan, limits, userId } = userInfo;
     
     console.log('🤖 Checking chatbot quota for plan: ' + plan);
     
-    // Vérifier si le chatbot est activé pour ce plan
     if (!limits.chatbot.enabled) {
         console.warn('⛔ Chatbot disabled for plan: ' + plan);
         return {
@@ -975,15 +896,13 @@ async function canUseChatbot() {
         };
     }
     
-    // Si illimité
     if (limits.chatbot.dailyLimit === -1) {
         console.log('✅ Unlimited chatbot access');
         return { allowed: true, remaining: -1 };
     }
     
-    // Vérifier le quota journalier
     try {
-        const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
         const usageRef = firebase.firestore()
             .collection('usage')
             .doc(userId)
@@ -1012,7 +931,6 @@ async function canUseChatbot() {
             };
         }
         
-        // Incrémenter le compteur
         await usageRef.set({
             count: currentCount + 1,
             lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1039,19 +957,14 @@ async function canUseChatbot() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// VÉRIFIER ET INCRÉMENTER LE QUOTA API
-// ═══════════════════════════════════════════════════════════════
-
 async function canUseAPI(apiName) {
-    apiName = apiName || 'general'; // 'finnhub', 'twelvedata', ou 'general'
+    apiName = apiName || 'general';
     
     const userInfo = await getEffectiveUserPlan();
     const { plan, limits, userId } = userInfo;
     
     console.log('🔌 Checking API quota for plan: ' + plan + ' | API: ' + apiName);
     
-    // Vérifier si l'API est activée pour ce plan
     if (!limits.api.enabled) {
         console.warn('⛔ API access disabled for plan: ' + plan);
         return {
@@ -1064,15 +977,14 @@ async function canUseAPI(apiName) {
     
     try {
         const now = new Date();
-        const today = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        const currentMinute = now.toISOString().substring(0, 16); // Format: YYYY-MM-DDTHH:mm
+        const today = now.toISOString().split('T')[0];
+        const currentMinute = now.toISOString().substring(0, 16);
         
         const usageRef = firebase.firestore()
             .collection('usage')
             .doc(userId)
             .collection('api');
         
-        // Vérifier limite par minute
         const minuteDoc = await usageRef.doc('minute_' + currentMinute).get();
         let minuteCount = 0;
         
@@ -1090,7 +1002,6 @@ async function canUseAPI(apiName) {
             };
         }
         
-        // Vérifier limite journalière
         const dayDoc = await usageRef.doc('day_' + today).get();
         let dayCount = 0;
         
@@ -1112,7 +1023,6 @@ async function canUseAPI(apiName) {
             };
         }
         
-        // Incrémenter les compteurs
         await usageRef.doc('minute_' + currentMinute).set({
             count: minuteCount + 1,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1151,10 +1061,6 @@ async function canUseAPI(apiName) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RÉCUPÉRER LES STATS D'UTILISATION ACTUELLES
-// ═══════════════════════════════════════════════════════════════
-
 async function getUsageStats() {
     const userInfo = await getEffectiveUserPlan();
     const { plan, limits, userId } = userInfo;
@@ -1166,7 +1072,6 @@ async function getUsageStats() {
     try {
         const today = new Date().toISOString().split('T')[0];
         
-        // Stats chatbot
         const chatbotDoc = await firebase.firestore()
             .collection('usage')
             .doc(userId)
@@ -1176,7 +1081,6 @@ async function getUsageStats() {
         
         const chatbotCount = chatbotDoc.exists ? (chatbotDoc.data().count || 0) : 0;
         
-        // Stats API
         const apiDoc = await firebase.firestore()
             .collection('usage')
             .doc(userId)
@@ -1209,13 +1113,7 @@ async function getUsageStats() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'ERREUR DE QUOTA
-// ═══════════════════════════════════════════════════════════════
-
 function showQuotaModal(type, quotaInfo) {
-    // type: 'chatbot' ou 'api'
-    
     const messages = {
         chatbot: {
             title: '💬 Chatbot Limit Reached',
@@ -1247,7 +1145,6 @@ function showQuotaModal(type, quotaInfo) {
     const msgType = quotaInfo.reason === 'api_disabled' ? 'api_disabled' : type;
     const msg = messages[msgType] || messages.chatbot;
     
-    // Supprimer toute modale existante
     const existingModal = document.getElementById('quota-modal-overlay');
     if (existingModal) {
         existingModal.remove();
@@ -1358,16 +1255,13 @@ function showQuotaModal(type, quotaInfo) {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// API PUBLIQUE - RATE LIMITING
-// ═══════════════════════════════════════════════════════════════
-
 window.canUseChatbot = canUseChatbot;
 window.canUseAPI = canUseAPI;
 window.getUsageStats = getUsageStats;
 window.showQuotaModal = showQuotaModal;
 window.RATE_LIMITS = RATE_LIMITS;
 
-console.log('✅ Rate Limiting System ready');
-console.log('📊 Chatbot limits: Free/Basic=5/day, Pro/Platinum=unlimited');
-console.log('🔌 API limits: Free/Basic=disabled, Pro=6/min+200/day, Platinum=8/min+400/day');
+console.log('✅ Rate Limiting System v1.1 ready');
+console.log('📊 Chatbot limits: Free/Basic=5/day, Pro/Trial/Platinum=unlimited');
+console.log('🔌 API limits: Free/Basic=disabled, Pro/Trial=6/min+200/day, Platinum=8/min+400/day');
+console.log('🎁 Trial users get PRO rate limits (not Platinum)');
