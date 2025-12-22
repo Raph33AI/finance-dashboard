@@ -1,11 +1,9 @@
 /* ==============================================
    REAL-ESTATE-SIMULATOR.JS - VERSION PORTFOLIO MANAGER
-   ✅ Gestion complète du parc immobilier
-   ✅ Auto-sauvegarde de toutes les simulations
-   ✅ Input salaire manuel (plus de chargement auto)
-   ✅ Tracking temps de remboursement
-   ✅ Calculs d'équité et valeur actuelle
-   ✅ Dashboard professionnel de portfolio
+   ✅ Sauvegarde MANUELLE uniquement (bouton "Save")
+   ✅ Ajout manuel de propriétés au portfolio
+   ✅ Graphiques Louer vs Acheter
+   ✅ Dashboard professionnel de simulations
    ============================================== */
 
 (function() {
@@ -35,8 +33,9 @@
         },
         
         savedSimulations: [],
-        portfolio: [], // Nouveau : liste des biens immobiliers
+        portfolio: [],
         isDarkMode: false,
+        unsavedChanges: false, // ✨ NOUVEAU
         
         charts: {
             amortization: null,
@@ -44,7 +43,8 @@
             cashflow: null,
             comparison: null,
             portfolioDistribution: null,
-            portfolioValue: null
+            portfolioValue: null,
+            rentVsBuy: null // ✨ NOUVEAU
         },
         
         // ========== TAX RULES BY COUNTRY ==========
@@ -61,7 +61,8 @@
                 primaryResidenceExemption: true,
                 wealthTaxThreshold: 1300000,
                 wealthTaxRate: 0.005,
-                annualAppreciationRate: 0.03, // 3% par an
+                annualAppreciationRate: 0.03,
+                averageRentYield: 0.04, // ✨ NOUVEAU
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -90,6 +91,7 @@
                 primaryResidenceExemption: true,
                 mortgageInterestRelief: 0.20,
                 annualAppreciationRate: 0.04,
+                averageRentYield: 0.045,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -113,6 +115,7 @@
                 primaryResidenceExclusionSingle: 250000,
                 primaryResidenceExclusionMarried: 500000,
                 annualAppreciationRate: 0.045,
+                averageRentYield: 0.05,
                 depreciation: {
                     enabled: true,
                     period: 27.5,
@@ -145,6 +148,7 @@
                 rentalDeduction: 0.60,
                 primaryResidenceExemption: true,
                 annualAppreciationRate: 0.035,
+                averageRentYield: 0.042,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -173,6 +177,7 @@
                 rentalIncomeTaxMarginal: 0.48,
                 primaryResidenceExemption: false,
                 annualAppreciationRate: 0.05,
+                averageRentYield: 0.048,
                 nhrRegime: {
                     enabled: true,
                     duration: 10,
@@ -200,6 +205,7 @@
                 rentalIncomeTaxRate: 0.42,
                 capitalGainsExemption: 10,
                 annualAppreciationRate: 0.03,
+                averageRentYield: 0.038,
                 depreciation: {
                     enabled: true,
                     period: 50,
@@ -231,6 +237,7 @@
                 wealthTax: 0.005,
                 imputedRentalValue: true,
                 annualAppreciationRate: 0.025,
+                averageRentYield: 0.035,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -257,6 +264,7 @@
                 primaryResidenceExemption: true,
                 primaryResidencePropertyTaxExempt: true,
                 annualAppreciationRate: 0.02,
+                averageRentYield: 0.04,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -282,6 +290,7 @@
                 primaryResidenceExemption: true,
                 mortgageInterestDeduction: 0.40,
                 annualAppreciationRate: 0.03,
+                averageRentYield: 0.043,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -309,6 +318,7 @@
                 mortgageInterestDeduction: 0.495,
                 primaryResidenceExemption: true,
                 annualAppreciationRate: 0.055,
+                averageRentYield: 0.046,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -328,12 +338,13 @@
                 this.detectDarkMode();
                 await this.waitForAuth();
                 await this.loadSavedSimulations();
-                await this.buildPortfolioFromSimulations(); // Nouveau
+                await this.buildPortfolioFromSimulations();
                 
                 this.setupEventListeners();
                 this.updateLastUpdate();
                 this.setupDarkModeListener();
-                this.renderPortfolioDashboard(); // Nouveau
+                this.renderSimulationsList(); // ✨ NOUVEAU NOM
+                this.renderPortfolioDashboard();
                 
                 console.log('✅ Real Estate Portfolio Manager initialized successfully');
                 console.log(`📊 Portfolio: ${this.portfolio.length} properties`);
@@ -413,6 +424,8 @@
                 countrySelect.addEventListener('change', function() {
                     self.currentSimulation.country = this.value;
                     self.updateCurrentInfo();
+                    self.unsavedChanges = true;
+                    self.updateSaveButtonState();
                 });
             }
             
@@ -421,15 +434,35 @@
                     self.currentSimulation.propertyType = this.value;
                     self.updateCurrentInfo();
                     self.toggleRentalSection(this.value === 'rental');
+                    self.unsavedChanges = true;
+                    self.updateSaveButtonState();
                 });
             }
             
-            // Calculate Button (auto-save après calcul)
+            // ✨ NOUVEAU : Calculate Button (PLUS d'auto-save)
             const btnCalculate = document.getElementById('btnCalculate');
             if (btnCalculate) {
                 btnCalculate.addEventListener('click', function(e) {
                     e.preventDefault();
                     self.calculateResults();
+                });
+            }
+            
+            // ✨ NOUVEAU : Save Simulation Button
+            const btnSave = document.getElementById('btnSaveSimulation');
+            if (btnSave) {
+                btnSave.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    self.saveSimulation();
+                });
+            }
+            
+            // ✨ NOUVEAU : Add Property Manually
+            const btnAddProperty = document.getElementById('btnAddProperty');
+            if (btnAddProperty) {
+                btnAddProperty.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    self.openAddPropertyModal();
                 });
             }
             
@@ -442,12 +475,30 @@
                 });
             }
             
+            // ✨ NOUVEAU : Rent vs Buy Comparison
+            const btnRentVsBuy = document.getElementById('btnRentVsBuy');
+            if (btnRentVsBuy) {
+                btnRentVsBuy.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    self.openRentVsBuyModal();
+                });
+            }
+            
             // Run Comparison
             const btnComparison = document.getElementById('btnRunComparison');
             if (btnComparison) {
                 btnComparison.addEventListener('click', function(e) {
                     e.preventDefault();
                     self.runMultiCountryComparison();
+                });
+            }
+            
+            // ✨ NOUVEAU : Compare Simulations
+            const btnCompareSimulations = document.getElementById('btnCompareSimulations');
+            if (btnCompareSimulations) {
+                btnCompareSimulations.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    self.openCompareSimulationsModal();
                 });
             }
             
@@ -523,7 +574,27 @@
             }
         },
         
-        // ========== ✨ NOUVEAU : AUTO-SAVE APRÈS CALCUL ==========
+        // ✨ NOUVEAU : Update Save Button State
+        updateSaveButtonState: function() {
+            const btnSave = document.getElementById('btnSaveSimulation');
+            if (!btnSave) return;
+            
+            if (this.unsavedChanges && this.currentSimulation.results) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fas fa-save"></i> Save Simulation';
+                btnSave.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            } else if (!this.currentSimulation.results) {
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<i class="fas fa-save"></i> Calculate First';
+                btnSave.style.background = '#6c757d';
+            } else {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fas fa-check"></i> Saved';
+                btnSave.style.background = '#6c757d';
+            }
+        },
+        
+        // ========== ✨ NOUVEAU : CALCULATE (SANS AUTO-SAVE) ==========
         
         calculateResults: function() {
             console.log('🧮 Calculating results...');
@@ -597,8 +668,9 @@
             const results = this.performCalculations();
             this.currentSimulation.results = results;
             
-            // ✨ AUTO-SAVE SIMULATION
-            this.autoSaveSimulation();
+            // ✅ PLUS D'AUTO-SAVE ICI !
+            this.unsavedChanges = true;
+            this.updateSaveButtonState();
             
             // Update UI
             this.updateKPIs(results);
@@ -614,21 +686,32 @@
             document.getElementById('chartsSection').style.display = 'block';
             document.getElementById('comparisonSection').style.display = 'block';
             
-            this.showNotification('✅ Calculation completed and saved!', 'success');
+            this.showNotification('✅ Calculation completed! Click "Save" to store this simulation.', 'success');
             this.updateLastUpdate();
         },
         
-        // ✨ NOUVEAU : AUTO-SAVE
-        autoSaveSimulation: async function() {
-            console.log('💾 Auto-saving simulation...');
+        // ✨ NOUVEAU : SAVE SIMULATION (MANUEL)
+        saveSimulation: async function() {
+            if (!this.currentSimulation.results) {
+                alert('Please calculate results first');
+                return;
+            }
+            
+            console.log('💾 Manually saving simulation...');
             
             const now = new Date();
             const rules = this.taxRules[this.currentSimulation.country];
             
-            // Générer un nom automatique
-            const autoName = `${rules.name} ${this.formatPropertyType(this.currentSimulation.propertyType)} - ${this.currentSimulation.city || 'Unknown'} - ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+            // Demander un nom personnalisé
+            let customName = prompt('Enter a name for this simulation:', 
+                `${rules.name} ${this.formatPropertyType(this.currentSimulation.propertyType)} - ${this.currentSimulation.city || 'Unknown'}`);
             
-            this.currentSimulation.name = autoName;
+            if (!customName) {
+                console.log('❌ Save cancelled by user');
+                return;
+            }
+            
+            this.currentSimulation.name = customName.trim();
             this.currentSimulation.purchaseDate = this.currentSimulation.purchaseDate || now.toISOString();
             this.currentSimulation.updatedAt = now.toISOString();
             
@@ -656,18 +739,638 @@
             }
             
             this.saveToLocalStorage();
-            this.renderSavedSimulations();
+            this.renderSimulationsList(); // ✨ NOUVEAU NOM
             
-            // ✨ Rebuild portfolio
+            // Rebuild portfolio
             await this.buildPortfolioFromSimulations();
             this.renderPortfolioDashboard();
             
             this.updateCurrentInfo();
+            this.unsavedChanges = false;
+            this.updateSaveButtonState();
             
-            console.log(`✅ Simulation auto-saved: "${autoName}"`);
+            this.showNotification(`✅ Simulation "${customName}" saved successfully!`, 'success');
+            console.log(`✅ Simulation saved: "${customName}"`);
         },
         
-        // ========== PORTFOLIO MANAGEMENT ==========
+        // ✨ NOUVEAU : OPEN ADD PROPERTY MODAL
+        openAddPropertyModal: function() {
+            const modalHTML = `
+                <div id='addPropertyModal' class='modal-overlay' onclick='if(event.target === this) RealEstateSimulator.closeAddPropertyModal()'>
+                    <div class='modal-content' style='max-width: 600px;'>
+                        <div class='modal-header'>
+                            <h2><i class='fas fa-plus-circle'></i> Add Property Manually</h2>
+                            <button class='btn-close' onclick='RealEstateSimulator.closeAddPropertyModal()'>
+                                <i class='fas fa-times'></i>
+                            </button>
+                        </div>
+                        
+                        <div class='modal-body'>
+                            <form id='addPropertyForm'>
+                                <div class='form-group'>
+                                    <label>Property Name *</label>
+                                    <input type='text' id='propName' class='form-control' placeholder='e.g., Paris Apartment' required>
+                                </div>
+                                
+                                <div class='form-row'>
+                                    <div class='form-group'>
+                                        <label>Country *</label>
+                                        <select id='propCountry' class='form-control' required>
+                                            <option value=''>Select...</option>
+                                            <option value='france'>🇫🇷 France</option>
+                                            <option value='uk'>🇬🇧 UK</option>
+                                            <option value='usa'>🇺🇸 USA</option>
+                                            <option value='spain'>🇪🇸 Spain</option>
+                                            <option value='portugal'>🇵🇹 Portugal</option>
+                                            <option value='germany'>🇩🇪 Germany</option>
+                                            <option value='switzerland'>🇨🇭 Switzerland</option>
+                                            <option value='italy'>🇮🇹 Italy</option>
+                                            <option value='belgium'>🇧🇪 Belgium</option>
+                                            <option value='netherlands'>🇳🇱 Netherlands</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class='form-group'>
+                                        <label>Property Type *</label>
+                                        <select id='propType' class='form-control' required>
+                                            <option value=''>Select...</option>
+                                            <option value='primary'>🏠 Primary</option>
+                                            <option value='secondary'>🏖 Secondary</option>
+                                            <option value='rental'>💰 Rental</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class='form-group'>
+                                    <label>City</label>
+                                    <input type='text' id='propCity' class='form-control' placeholder='e.g., Paris'>
+                                </div>
+                                
+                                <div class='form-row'>
+                                    <div class='form-group'>
+                                        <label>Purchase Price *</label>
+                                        <input type='number' id='propPrice' class='form-control' placeholder='300000' required>
+                                    </div>
+                                    
+                                    <div class='form-group'>
+                                        <label>Purchase Date *</label>
+                                        <input type='date' id='propDate' class='form-control' required>
+                                    </div>
+                                </div>
+                                
+                                <div class='form-row'>
+                                    <div class='form-group'>
+                                        <label>Down Payment *</label>
+                                        <input type='number' id='propDown' class='form-control' placeholder='60000' required>
+                                    </div>
+                                    
+                                    <div class='form-group'>
+                                        <label>Interest Rate (%) *</label>
+                                        <input type='number' step='0.01' id='propRate' class='form-control' placeholder='3.5' required>
+                                    </div>
+                                </div>
+                                
+                                <div class='form-row'>
+                                    <div class='form-group'>
+                                        <label>Loan Duration (years) *</label>
+                                        <input type='number' id='propDuration' class='form-control' placeholder='25' required>
+                                    </div>
+                                    
+                                    <div class='form-group'>
+                                        <label>Payments Made (months)</label>
+                                        <input type='number' id='propPaymentsMade' class='form-control' placeholder='0' value='0'>
+                                        <small class='form-help'>How many monthly payments already made?</small>
+                                    </div>
+                                </div>
+                                
+                                <div class='form-actions'>
+                                    <button type='button' class='btn-secondary' onclick='RealEstateSimulator.closeAddPropertyModal()'>
+                                        Cancel
+                                    </button>
+                                    <button type='submit' class='btn-primary'>
+                                        <i class='fas fa-plus'></i> Add Property
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            const form = document.getElementById('addPropertyForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitAddProperty();
+            });
+        },
+        
+        closeAddPropertyModal: function() {
+            const modal = document.getElementById('addPropertyModal');
+            if (modal) modal.remove();
+        },
+        
+        submitAddProperty: async function() {
+            const name = document.getElementById('propName').value.trim();
+            const country = document.getElementById('propCountry').value;
+            const propertyType = document.getElementById('propType').value;
+            const city = document.getElementById('propCity').value.trim();
+            const purchasePrice = parseFloat(document.getElementById('propPrice').value);
+            const purchaseDate = document.getElementById('propDate').value;
+            const downPayment = parseFloat(document.getElementById('propDown').value);
+            const interestRate = parseFloat(document.getElementById('propRate').value);
+            const loanDuration = parseInt(document.getElementById('propDuration').value);
+            const paymentsMade = parseInt(document.getElementById('propPaymentsMade').value) || 0;
+            
+            if (!name || !country || !propertyType || !purchasePrice || !purchaseDate || !downPayment || !interestRate || !loanDuration) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Create a simulation object
+            const simulation = {
+                id: 'local_' + Date.now(),
+                name: name,
+                country: country,
+                propertyType: propertyType,
+                city: city,
+                purchasePrice: purchasePrice,
+                downPayment: downPayment,
+                interestRate: interestRate,
+                loanDuration: loanDuration,
+                monthlySalary: 0, // Not needed for manual entry
+                monthlyRent: 0,
+                occupancyRate: 90,
+                monthlyCharges: 0,
+                vacancyProvision: 1,
+                purchaseDate: new Date(purchaseDate).toISOString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                paymentsMade: paymentsMade, // ✨ NOUVEAU
+                results: null
+            };
+            
+            // Calculate basic results
+            const loanAmount = purchasePrice - downPayment;
+            const monthlyRate = interestRate / 100 / 12;
+            const totalMonths = loanDuration * 12;
+            
+            let monthlyPayment = 0;
+            if (loanAmount > 0 && monthlyRate > 0) {
+                monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+            }
+            
+            // Calculate remaining balance after X payments
+            let remainingBalance = loanAmount;
+            for (let i = 0; i < paymentsMade; i++) {
+                const interestPayment = remainingBalance * monthlyRate;
+                const principalPayment = monthlyPayment - interestPayment;
+                remainingBalance = Math.max(0, remainingBalance - principalPayment);
+            }
+            
+            simulation.results = {
+                loanAmount: loanAmount,
+                monthlyPayment: monthlyPayment,
+                totalMonthlyPayment: monthlyPayment,
+                remainingBalance: remainingBalance,
+                paymentsMade: paymentsMade,
+                paymentsRemaining: totalMonths - paymentsMade
+            };
+            
+            // Save
+            const savedId = await this.saveToFirestore(simulation);
+            if (savedId) {
+                simulation.id = savedId;
+            }
+            
+            this.savedSimulations.push(simulation);
+            this.saveToLocalStorage();
+            this.renderSimulationsList();
+            
+            await this.buildPortfolioFromSimulations();
+            this.renderPortfolioDashboard();
+            
+            this.closeAddPropertyModal();
+            this.showNotification(`✅ Property "${name}" added successfully!`, 'success');
+        },
+        
+        // ✨ NOUVEAU : RENT VS BUY MODAL
+        openRentVsBuyModal: function() {
+            if (!this.currentSimulation.results) {
+                alert('Please calculate a simulation first');
+                return;
+            }
+            
+            const rules = this.taxRules[this.currentSimulation.country];
+            const estimatedRent = this.currentSimulation.purchasePrice * (rules.averageRentYield || 0.04) / 12;
+            
+            const modalHTML = `
+                <div id='rentVsBuyModal' class='modal-overlay' onclick='if(event.target === this) RealEstateSimulator.closeRentVsBuyModal()'>
+                    <div class='modal-content' style='max-width: 1200px;'>
+                        <div class='modal-header'>
+                            <h2><i class='fas fa-balance-scale'></i> Rent vs Buy Analysis</h2>
+                            <button class='btn-close' onclick='RealEstateSimulator.closeRentVsBuyModal()'>
+                                <i class='fas fa-times'></i>
+                            </button>
+                        </div>
+                        
+                        <div class='modal-body'>
+                            <div class='form-group'>
+                                <label>Monthly Rent (Estimated: ${this.formatCurrency(estimatedRent, rules.currencySymbol)})</label>
+                                <input type='number' id='rentAmount' class='form-control' value='${estimatedRent.toFixed(0)}' placeholder='Enter monthly rent'>
+                            </div>
+                            
+                            <div class='form-group'>
+                                <label>Analysis Period (years)</label>
+                                <input type='number' id='analysisPeriod' class='form-control' value='30' min='5' max='50'>
+                            </div>
+                            
+                            <button class='btn-primary' onclick='RealEstateSimulator.calculateRentVsBuy()'>
+                                <i class='fas fa-calculator'></i> Run Analysis
+                            </button>
+                            
+                            <div id='rentVsBuyResults' style='margin-top: 24px;'></div>
+                            <div id='rentVsBuyChart' style='margin-top: 24px; min-height: 400px;'></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        },
+        
+        closeRentVsBuyModal: function() {
+            const modal = document.getElementById('rentVsBuyModal');
+            if (modal) modal.remove();
+        },
+        
+        calculateRentVsBuy: function() {
+            const rentAmount = parseFloat(document.getElementById('rentAmount').value);
+            const period = parseInt(document.getElementById('analysisPeriod').value);
+            
+            if (!rentAmount || rentAmount <= 0 || !period || period < 5) {
+                alert('Please enter valid rent amount and period');
+                return;
+            }
+            
+            const sim = this.currentSimulation;
+            const rules = this.taxRules[sim.country];
+            const results = sim.results;
+            
+            // Buy scenario
+            const buyData = {
+                years: [],
+                totalCost: [],
+                equity: [],
+                netWealth: []
+            };
+            
+            // Rent scenario
+            const rentData = {
+                years: [],
+                totalCost: [],
+                savings: [],
+                netWealth: []
+            };
+            
+            const downPaymentInvested = sim.downPayment + results.totalAcquisitionFees;
+            const investmentReturn = 0.07; // 7% annual return assumption
+            
+            let propertyValue = sim.purchasePrice;
+            let loanBalance = results.loanAmount;
+            let buyTotalCost = downPaymentInvested;
+            
+            let rentTotalCost = 0;
+            let rentSavings = downPaymentInvested; // Initial capital invested
+            
+            const appreciationRate = rules.annualAppreciationRate || 0.03;
+            const rentInflation = 0.025; // 2.5% annual rent increase
+            let currentRent = rentAmount;
+            
+            for (let year = 0; year <= period; year++) {
+                buyData.years.push(year);
+                rentData.years.push(year);
+                
+                if (year > 0) {
+                    // Buy scenario
+                    propertyValue *= (1 + appreciationRate);
+                    
+                    const annualMortgage = results.monthlyPayment * 12;
+                    const annualPropertyTax = results.annualPropertyTax || 0;
+                    const annualInsurance = results.annualInsurance || 0;
+                    const annualMaintenance = sim.purchasePrice * 0.01;
+                    
+                    buyTotalCost += annualMortgage + annualPropertyTax + annualInsurance + annualMaintenance;
+                    
+                    const annualPrincipal = annualMortgage - (loanBalance * (sim.interestRate / 100));
+                    loanBalance = Math.max(0, loanBalance - annualPrincipal);
+                    
+                    // Rent scenario
+                    currentRent *= (1 + rentInflation);
+                    const annualRent = currentRent * 12;
+                    rentTotalCost += annualRent;
+                    
+                    const monthlySavings = results.monthlyPayment - currentRent;
+                    if (monthlySavings > 0) {
+                        rentSavings += monthlySavings * 12;
+                    }
+                    rentSavings *= (1 + investmentReturn);
+                }
+                
+                const buyEquity = propertyValue - loanBalance;
+                const buyNetWealth = buyEquity - buyTotalCost;
+                
+                const rentNetWealth = rentSavings - rentTotalCost;
+                
+                buyData.totalCost.push(buyTotalCost);
+                buyData.equity.push(buyEquity);
+                buyData.netWealth.push(buyNetWealth);
+                
+                rentData.totalCost.push(rentTotalCost);
+                rentData.savings.push(rentSavings);
+                rentData.netWealth.push(rentNetWealth);
+            }
+            
+            // Display results
+            const breakEvenYear = buyData.netWealth.findIndex((val, i) => val > rentData.netWealth[i]);
+            
+            const resultsHTML = `
+                <div class='rent-vs-buy-results'>
+                    <div class='result-card'>
+                        <h3>Buy Scenario (${period} years)</h3>
+                        <div class='result-metric'>
+                            <label>Total Cost:</label>
+                            <strong>${this.formatCurrency(buyData.totalCost[period], rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Property Value:</label>
+                            <strong>${this.formatCurrency(propertyValue, rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Equity:</label>
+                            <strong class='text-success'>${this.formatCurrency(buyData.equity[period], rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Net Wealth:</label>
+                            <strong class='text-success'>${this.formatCurrency(buyData.netWealth[period], rules.currencySymbol)}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class='result-card'>
+                        <h3>Rent Scenario (${period} years)</h3>
+                        <div class='result-metric'>
+                            <label>Total Rent Paid:</label>
+                            <strong>${this.formatCurrency(rentData.totalCost[period], rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Invested Savings:</label>
+                            <strong>${this.formatCurrency(rentData.savings[period], rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Net Wealth:</label>
+                            <strong class='${rentData.netWealth[period] > 0 ? 'text-success' : 'text-danger'}'>${this.formatCurrency(rentData.netWealth[period], rules.currencySymbol)}</strong>
+                        </div>
+                        <div class='result-metric'>
+                            <label>Difference:</label>
+                            <strong class='${buyData.netWealth[period] > rentData.netWealth[period] ? 'text-success' : 'text-danger'}'>
+                                ${this.formatCurrency(buyData.netWealth[period] - rentData.netWealth[period], rules.currencySymbol)}
+                            </strong>
+                        </div>
+                    </div>
+                    
+                    <div class='result-card' style='grid-column: span 2;'>
+                        <h3>Recommendation</h3>
+                        <div class='recommendation'>
+                            ${buyData.netWealth[period] > rentData.netWealth[period] 
+                                ? `<div class='recommendation-buy'><i class='fas fa-home'></i> <strong>BUYING IS BETTER</strong><br/>You'll be ${this.formatCurrency(buyData.netWealth[period] - rentData.netWealth[period], rules.currencySymbol)} wealthier after ${period} years${breakEvenYear > 0 ? ` (break-even at year ${breakEvenYear})` : ''}</div>`
+                                : `<div class='recommendation-rent'><i class='fas fa-key'></i> <strong>RENTING IS BETTER</strong><br/>You'll save ${this.formatCurrency(rentData.netWealth[period] - buyData.netWealth[period], rules.currencySymbol)} after ${period} years by renting and investing</div>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('rentVsBuyResults').innerHTML = resultsHTML;
+            
+            // Create chart
+            this.createRentVsBuyChart(buyData, rentData, rules);
+        },
+        
+        createRentVsBuyChart: function(buyData, rentData, rules) {
+            const container = document.getElementById('rentVsBuyChart');
+            if (!container) return;
+            
+            const chartColors = this.getChartColors();
+            
+            if (this.charts.rentVsBuy) {
+                this.charts.rentVsBuy.destroy();
+            }
+            
+            this.charts.rentVsBuy = Highcharts.chart('rentVsBuyChart', {
+                chart: {
+                    type: 'line',
+                    backgroundColor: 'transparent',
+                    style: { fontFamily: 'Inter, sans-serif' }
+                },
+                title: {
+                    text: 'Net Wealth Evolution: Buy vs Rent',
+                    style: { color: chartColors.title }
+                },
+                xAxis: {
+                    categories: buyData.years.map(y => 'Year ' + y),
+                    labels: { style: { color: chartColors.text } },
+                    gridLineColor: chartColors.gridLine,
+                    lineColor: chartColors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Net Wealth', style: { color: chartColors.title } },
+                    labels: { 
+                        style: { color: chartColors.text },
+                        formatter: function() {
+                            return rules.currencySymbol + ' ' + (this.value / 1000).toFixed(0) + 'k';
+                        }
+                    },
+                    gridLineColor: chartColors.gridLine
+                },
+                tooltip: {
+                    shared: true,
+                    backgroundColor: chartColors.tooltipBg,
+                    borderColor: chartColors.tooltipBorder,
+                    style: { color: chartColors.text },
+                    valuePrefix: rules.currencySymbol
+                },
+                plotOptions: {
+                    line: {
+                        lineWidth: 3,
+                        marker: { enabled: false }
+                    }
+                },
+                series: [{
+                    name: 'Buy Net Wealth',
+                    data: buyData.netWealth,
+                    color: '#10b981'
+                }, {
+                    name: 'Rent Net Wealth',
+                    data: rentData.netWealth,
+                    color: '#3b82f6'
+                }, {
+                    name: 'Buy Equity',
+                    data: buyData.equity,
+                    color: '#8b5cf6',
+                    dashStyle: 'Dash'
+                }, {
+                    name: 'Rent Savings',
+                    data: rentData.savings,
+                    color: '#f59e0b',
+                    dashStyle: 'Dash'
+                }],
+                credits: { enabled: false },
+                legend: {
+                    itemStyle: { color: chartColors.text }
+                }
+            });
+        },
+        
+        // ✨ NOUVEAU : COMPARE SIMULATIONS MODAL
+        openCompareSimulationsModal: function() {
+            if (this.savedSimulations.length < 2) {
+                alert('You need at least 2 saved simulations to compare');
+                return;
+            }
+            
+            const modalHTML = `
+                <div id='compareSimulationsModal' class='modal-overlay' onclick='if(event.target === this) RealEstateSimulator.closeCompareSimulationsModal()'>
+                    <div class='modal-content' style='max-width: 1400px;'>
+                        <div class='modal-header'>
+                            <h2><i class='fas fa-balance-scale'></i> Compare Simulations</h2>
+                            <button class='btn-close' onclick='RealEstateSimulator.closeCompareSimulationsModal()'>
+                                <i class='fas fa-times'></i>
+                            </button>
+                        </div>
+                        
+                        <div class='modal-body'>
+                            <div class='form-row'>
+                                <div class='form-group'>
+                                    <label>Select Simulation 1</label>
+                                    <select id='compareSim1' class='form-control'>
+                                        <option value=''>Choose...</option>
+                                        ${this.savedSimulations.map(s => `<option value='${s.id}'>${this.escapeHtml(s.name)}</option>`).join('')}
+                                    </select>
+                                </div>
+                                
+                                <div class='form-group'>
+                                    <label>Select Simulation 2</label>
+                                    <select id='compareSim2' class='form-control'>
+                                        <option value=''>Choose...</option>
+                                        ${this.savedSimulations.map(s => `<option value='${s.id}'>${this.escapeHtml(s.name)}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class='btn-primary' onclick='RealEstateSimulator.runSimulationComparison()'>
+                                <i class='fas fa-chart-bar'></i> Compare
+                            </button>
+                            
+                            <div id='comparisonResults' style='margin-top: 24px;'></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        },
+        
+        closeCompareSimulationsModal: function() {
+            const modal = document.getElementById('compareSimulationsModal');
+            if (modal) modal.remove();
+        },
+        
+        runSimulationComparison: function() {
+            const sim1Id = document.getElementById('compareSim1').value;
+            const sim2Id = document.getElementById('compareSim2').value;
+            
+            if (!sim1Id || !sim2Id) {
+                alert('Please select 2 simulations');
+                return;
+            }
+            
+            if (sim1Id === sim2Id) {
+                alert('Please select different simulations');
+                return;
+            }
+            
+            const sim1 = this.savedSimulations.find(s => s.id === sim1Id);
+            const sim2 = this.savedSimulations.find(s => s.id === sim2Id);
+            
+            if (!sim1 || !sim2) {
+                alert('Simulations not found');
+                return;
+            }
+            
+            const rules1 = this.taxRules[sim1.country];
+            const rules2 = this.taxRules[sim2.country];
+            
+            const compareHTML = `
+                <div class='comparison-grid'>
+                    <div class='comparison-card'>
+                        <h3>${rules1.flag} ${this.escapeHtml(sim1.name)}</h3>
+                        <div class='comparison-metrics'>
+                            <div class='metric'>
+                                <label>Purchase Price</label>
+                                <strong>${this.formatCurrency(sim1.purchasePrice, rules1.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Monthly Payment</label>
+                                <strong>${this.formatCurrency(sim1.results?.totalMonthlyPayment || 0, rules1.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Total Cost</label>
+                                <strong>${this.formatCurrency(sim1.results?.totalCost || 0, rules1.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Net Yield</label>
+                                <strong>${(sim1.results?.netYield || 0).toFixed(2)}%</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Debt Ratio</label>
+                                <strong>${(sim1.results?.debtRatio || 0).toFixed(1)}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class='comparison-card'>
+                        <h3>${rules2.flag} ${this.escapeHtml(sim2.name)}</h3>
+                        <div class='comparison-metrics'>
+                            <div class='metric'>
+                                <label>Purchase Price</label>
+                                <strong>${this.formatCurrency(sim2.purchasePrice, rules2.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Monthly Payment</label>
+                                <strong>${this.formatCurrency(sim2.results?.totalMonthlyPayment || 0, rules2.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Total Cost</label>
+                                <strong>${this.formatCurrency(sim2.results?.totalCost || 0, rules2.currencySymbol)}</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Net Yield</label>
+                                <strong>${(sim2.results?.netYield || 0).toFixed(2)}%</strong>
+                            </div>
+                            <div class='metric'>
+                                <label>Debt Ratio</label>
+                                <strong>${(sim2.results?.debtRatio || 0).toFixed(1)}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('comparisonResults').innerHTML = compareHTML;
+        },
+        
+        // ========== PORTFOLIO MANAGEMENT (unchanged) ==========
         
         buildPortfolioFromSimulations: async function() {
             console.log('🏠 Building portfolio from simulations...');
@@ -676,16 +1379,13 @@
                 const purchaseDate = new Date(sim.purchaseDate || sim.createdAt);
                 const now = new Date();
                 
-                // Calculer le nombre de mois depuis l'achat
                 const monthsSincePurchase = (now.getFullYear() - purchaseDate.getFullYear()) * 12 + (now.getMonth() - purchaseDate.getMonth());
                 
-                // Calculer la valeur actuelle avec appréciation
                 const rules = this.taxRules[sim.country];
                 const appreciationRate = rules.annualAppreciationRate || 0.03;
                 const yearsSincePurchase = monthsSincePurchase / 12;
                 const currentValue = sim.purchasePrice * Math.pow(1 + appreciationRate, yearsSincePurchase);
                 
-                // Calculer le capital restant dû
                 const loanAmount = sim.purchasePrice - sim.downPayment;
                 const monthlyRate = sim.interestRate / 100 / 12;
                 const totalMonths = sim.loanDuration * 12;
@@ -695,15 +1395,16 @@
                     monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
                 }
                 
-                // Calculer le capital restant après X mois
                 let remainingBalance = loanAmount;
-                for (let i = 0; i < Math.min(monthsSincePurchase, totalMonths); i++) {
+                const effectivePayments = sim.paymentsMade || Math.min(monthsSincePurchase, totalMonths);
+                
+                for (let i = 0; i < effectivePayments; i++) {
                     const interestPayment = remainingBalance * monthlyRate;
                     const principalPayment = monthlyPayment - interestPayment;
                     remainingBalance = Math.max(0, remainingBalance - principalPayment);
                 }
                 
-                const monthsRemaining = Math.max(0, totalMonths - monthsSincePurchase);
+                const monthsRemaining = Math.max(0, totalMonths - effectivePayments);
                 const equity = currentValue - remainingBalance;
                 const status = remainingBalance <= 0 ? 'paid_off' : 'active';
                 
@@ -732,7 +1433,6 @@
         renderPortfolioDashboard: function() {
             console.log('📊 Rendering portfolio dashboard...');
             
-            // Calculer les stats globales
             const totalValue = this.portfolio.reduce((sum, prop) => sum + prop.currentValue, 0);
             const totalEquity = this.portfolio.reduce((sum, prop) => sum + prop.equity, 0);
             const totalDebt = this.portfolio.reduce((sum, prop) => sum + prop.remainingBalance, 0);
@@ -741,7 +1441,6 @@
             const activeProperties = this.portfolio.filter(p => p.status === 'active').length;
             const paidOffProperties = this.portfolio.filter(p => p.status === 'paid_off').length;
             
-            // Update KPIs
             const kpiTotalValue = document.getElementById('portfolioTotalValue');
             const kpiTotalEquity = document.getElementById('portfolioTotalEquity');
             const kpiTotalDebt = document.getElementById('portfolioTotalDebt');
@@ -756,10 +1455,7 @@
             if (kpiMonthlyPayment) kpiMonthlyPayment.textContent = this.formatCurrency(totalMonthlyPayment, '€');
             if (kpiPaidOff) kpiPaidOff.textContent = paidOffProperties;
             
-            // Render properties list
             this.renderPortfolioProperties();
-            
-            // Render charts
             this.createPortfolioCharts();
         },
         
@@ -767,12 +1463,10 @@
             const container = document.getElementById('portfolioPropertiesList');
             if (!container) return;
             
-            // Get filter values
             const filterCountry = document.getElementById('filterCountry')?.value || 'all';
             const filterType = document.getElementById('filterPropertyType')?.value || 'all';
             const filterStatus = document.getElementById('filterStatus')?.value || 'all';
             
-            // Filter portfolio
             let filtered = this.portfolio;
             
             if (filterCountry !== 'all') {
@@ -792,7 +1486,7 @@
                     <div class='portfolio-empty'>
                         <i class='fas fa-home'></i>
                         <p>No properties found</p>
-                        <small>Create a simulation to add properties to your portfolio</small>
+                        <small>Create a simulation or add properties manually</small>
                     </div>
                 `;
                 return;
@@ -918,7 +1612,6 @@
             const container = document.getElementById('portfolioDistributionChart');
             if (!container || this.portfolio.length === 0) return;
             
-            // Group by country
             const byCountry = {};
             this.portfolio.forEach(prop => {
                 if (!byCountry[prop.country]) {
@@ -981,7 +1674,6 @@
             const container = document.getElementById('portfolioValueChart');
             if (!container || this.portfolio.length === 0) return;
             
-            // Sort by purchase date
             const sorted = [...this.portfolio].sort((a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate));
             
             const categories = sorted.map(p => {
@@ -1057,7 +1749,6 @@
             if (!prop) return;
             
             alert(`Property Details:\n\n${JSON.stringify(prop, null, 2)}`);
-            // TODO: Create a detailed modal
         },
         
         // ========== CALCULATIONS (unchanged from original) ==========
@@ -1070,7 +1761,6 @@
             
             const results = {};
             
-            // Loan calculations
             const loanAmount = sim.purchasePrice - sim.downPayment;
             const monthlyRate = sim.interestRate / 100 / 12;
             const numberOfPayments = sim.loanDuration * 12;
@@ -1088,7 +1778,6 @@
             results.totalAmountPaid = monthlyPayment * numberOfPayments;
             results.totalInterest = results.totalAmountPaid - loanAmount;
             
-            // Tax & fees
             let notaryFees = 0;
             let transferTax = 0;
             let stampDuty = 0;
@@ -1154,7 +1843,6 @@
             results.totalAcquisitionFees = notaryFees + transferTax + stampDuty + closingCosts + registrationFees;
             results.totalCost = sim.purchasePrice + results.totalAcquisitionFees;
             
-            // Annual property tax
             let annualPropertyTax = 0;
             if (sim.country === 'uk') {
                 annualPropertyTax = rules.councilTax;
@@ -1165,14 +1853,11 @@
             results.annualPropertyTax = annualPropertyTax;
             results.monthlyPropertyTax = annualPropertyTax / 12;
             
-            // Insurance
             results.annualInsurance = sim.purchasePrice * 0.003;
             results.monthlyInsurance = results.annualInsurance / 12;
             
-            // Total monthly payment
             results.totalMonthlyPayment = monthlyPayment + results.monthlyPropertyTax + results.monthlyInsurance;
             
-            // Borrowing capacity
             const maxDebtRatio = 0.33;
             const maxMonthlyPayment = sim.monthlySalary * maxDebtRatio;
             
@@ -1185,10 +1870,9 @@
             
             results.maxBorrowingCapacity = maxBorrowingCapacity;
             results.maxMonthlyPayment = maxMonthlyPayment;
-            results.debtRatio = (results.totalMonthlyPayment / sim.monthlySalary) * 100;
+            results.debtRatio = sim.monthlySalary > 0 ? (results.totalMonthlyPayment / sim.monthlySalary) * 100 : 0;
             results.remainingBudget = sim.monthlySalary - results.totalMonthlyPayment;
             
-            // Rental calculations
             if (isRental) {
                 const grossAnnualRent = sim.monthlyRent * 12;
                 const adjustedRent = grossAnnualRent * (sim.occupancyRate / 100);
@@ -1220,10 +1904,7 @@
                 results.monthlyCashflow = 0;
             }
             
-            // Wealth evolution
             results.wealthEvolution = this.calculateWealthEvolution(sim, results);
-            
-            // Amortization schedule
             results.amortizationSchedule = this.calculateAmortizationSchedule(loanAmount, monthlyRate, numberOfPayments, monthlyPayment);
             
             return results;
@@ -1853,6 +2534,7 @@
                     monthlyCharges: simulation.monthlyCharges,
                     vacancyProvision: simulation.vacancyProvision,
                     purchaseDate: simulation.purchaseDate,
+                    paymentsMade: simulation.paymentsMade || 0, // ✨ NOUVEAU
                     notes: simulation.notes || '',
                     results: simulation.results
                 };
@@ -1936,6 +2618,7 @@
                                 monthlyCharges: data.monthlyCharges,
                                 vacancyProvision: data.vacancyProvision,
                                 purchaseDate: data.purchaseDate,
+                                paymentsMade: data.paymentsMade || 0, // ✨ NOUVEAU
                                 notes: data.notes,
                                 results: data.results,
                                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
@@ -1968,19 +2651,25 @@
                 }
             }
             
-            this.renderSavedSimulations();
+            this.renderSimulationsList(); // ✨ NOUVEAU NOM
         },
         
-        renderSavedSimulations: function() {
-            const container = document.getElementById('savedSimulationsList');
-            if (!container) return;
+        // ✨ NOUVEAU : RENDER SIMULATIONS LIST (style amélioré)
+        renderSimulationsList: function() {
+            const container = document.getElementById('simulationsList'); // ✨ NOUVEAU ID
+            if (!container) {
+                // Fallback to old ID
+                return this.renderSavedSimulations();
+            }
             
             if (this.savedSimulations.length === 0) {
                 container.innerHTML = `
                     <div class='simulations-empty'>
                         <i class='fas fa-inbox'></i>
                         <p>No saved simulations yet</p>
-                        <small>Fill the form above and click "Calculate" to create simulations</small>
+                        <button class='btn-sm btn-primary' onclick='RealEstateSimulator.newSimulation()'>
+                            Create First Simulation
+                        </button>
                     </div>
                 `;
                 return;
@@ -1989,47 +2678,57 @@
             container.innerHTML = this.savedSimulations.map(sim => {
                 const rules = this.taxRules[sim.country];
                 const date = new Date(sim.updatedAt || sim.createdAt);
+                const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                 
                 return `
-                    <div class='simulation-card' data-sim-id='${sim.id}'>
-                        <div class='sim-header'>
-                            <h4>${this.escapeHtml(sim.name)}</h4>
-                            <span class='sim-country'>${rules.flag} ${rules.name}</span>
-                        </div>
-                        <div class='sim-body'>
-                            <div class='sim-info'>
+                    <div class='simulation-item' data-sim-id='${sim.id}'>
+                        <div class='simulation-info'>
+                            <div class='simulation-header'>
+                                <h4>${this.escapeHtml(sim.name)}</h4>
+                                <span class='simulation-badge'>${rules.flag} ${rules.name}</span>
+                            </div>
+                            <div class='simulation-details'>
                                 <span><i class='fas fa-home'></i> ${this.formatPropertyType(sim.propertyType)}</span>
                                 <span><i class='fas fa-tag'></i> ${this.formatCurrency(sim.purchasePrice, rules.currencySymbol)}</span>
-                                <span><i class='fas fa-percent'></i> ${sim.interestRate}% / ${sim.loanDuration}y</span>
+                                <span><i class='fas fa-calendar'></i> ${dateStr}</span>
                             </div>
-                            <div class='sim-metrics'>
-                                <div class='sim-metric'>
-                                    <small>Monthly Payment</small>
+                            <div class='simulation-metrics'>
+                                <div class='metric'>
+                                    <small>Monthly</small>
                                     <strong>${this.formatCurrency(sim.results?.totalMonthlyPayment || 0, rules.currencySymbol)}</strong>
                                 </div>
-                                <div class='sim-metric'>
-                                    <small>Net Yield</small>
+                                <div class='metric'>
+                                    <small>Yield</small>
                                     <strong>${(sim.results?.netYield || 0).toFixed(2)}%</strong>
+                                </div>
+                                <div class='metric'>
+                                    <small>Rate</small>
+                                    <strong>${sim.interestRate}%</strong>
                                 </div>
                             </div>
                         </div>
-                        <div class='sim-footer'>
-                            <small><i class='fas fa-clock'></i> ${date.toLocaleDateString()}</small>
-                            <div class='sim-actions'>
-                                <button class='btn-icon-sm' onclick='RealEstateSimulator.loadSimulation("${sim.id}")' title='Load'>
-                                    <i class='fas fa-upload'></i>
-                                </button>
-                                <button class='btn-icon-sm' onclick='RealEstateSimulator.duplicateSimulation("${sim.id}")' title='Duplicate'>
-                                    <i class='fas fa-copy'></i>
-                                </button>
-                                <button class='btn-icon-sm' onclick='RealEstateSimulator.deleteSimulation("${sim.id}")' title='Delete'>
-                                    <i class='fas fa-trash'></i>
-                                </button>
-                            </div>
+                        <div class='simulation-actions'>
+                            <button class='btn-icon' onclick='RealEstateSimulator.loadSimulation("${sim.id}")' title='Load'>
+                                <i class='fas fa-upload'></i>
+                            </button>
+                            <button class='btn-icon' onclick='RealEstateSimulator.duplicateSimulation("${sim.id}")' title='Duplicate'>
+                                <i class='fas fa-copy'></i>
+                            </button>
+                            <button class='btn-icon btn-danger' onclick='RealEstateSimulator.deleteSimulation("${sim.id}")' title='Delete'>
+                                <i class='fas fa-trash'></i>
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
+        },
+        
+        // Ancien render (fallback)
+        renderSavedSimulations: function() {
+            const container = document.getElementById('savedSimulationsList');
+            if (!container) return;
+            
+            this.renderSimulationsList();
         },
         
         loadSimulation: function(simId) {
@@ -2061,6 +2760,8 @@
             }
             
             this.updateCurrentInfo();
+            this.unsavedChanges = false;
+            this.updateSaveButtonState();
             
             if (sim.results) {
                 this.updateKPIs(sim.results);
@@ -2090,7 +2791,7 @@
             
             this.savedSimulations.push(duplicate);
             this.saveToLocalStorage();
-            this.renderSavedSimulations();
+            this.renderSimulationsList();
             this.buildPortfolioFromSimulations();
             this.renderPortfolioDashboard();
             this.showNotification(`✅ Simulation duplicated as "${duplicate.name}"`, 'success');
@@ -2125,59 +2826,65 @@
             }
             
             this.saveToLocalStorage();
-            this.renderSavedSimulations();
+            this.renderSimulationsList();
             this.buildPortfolioFromSimulations();
             this.renderPortfolioDashboard();
             this.showNotification(`Simulation "${sim.name}" deleted`, 'success');
         },
         
         newSimulation: function() {
-            if (confirm('Create a new simulation? Current inputs will be cleared.')) {
-                this.currentSimulation = {
-                    id: null,
-                    name: '',
-                    country: null,
-                    propertyType: null,
-                    purchasePrice: 0,
-                    downPayment: 0,
-                    interestRate: 0,
-                    loanDuration: 0,
-                    monthlySalary: 0,
-                    city: '',
-                    monthlyRent: 0,
-                    occupancyRate: 90,
-                    monthlyCharges: 0,
-                    vacancyProvision: 1,
-                    purchaseDate: null,
-                    createdAt: null,
-                    updatedAt: null,
-                    results: null
-                };
-                
-                document.getElementById('selectCountry').value = '';
-                document.getElementById('selectPropertyType').value = '';
-                document.getElementById('inputPurchasePrice').value = '';
-                document.getElementById('inputDownPayment').value = '';
-                document.getElementById('inputInterestRate').value = '';
-                document.getElementById('selectLoanDuration').value = '';
-                document.getElementById('inputMonthlySalary').value = '';
-                document.getElementById('inputCity').value = '';
-                document.getElementById('inputMonthlyRent').value = '';
-                document.getElementById('inputOccupancyRate').value = '90';
-                document.getElementById('inputMonthlyCharges').value = '';
-                document.getElementById('inputVacancyProvision').value = '1';
-                
-                this.toggleRentalSection(false);
-                this.updateCurrentInfo();
-                
-                document.getElementById('borrowingCapacitySection').style.display = 'none';
-                document.getElementById('taxFeesSection').style.display = 'none';
-                document.getElementById('financialResultsSection').style.display = 'none';
-                document.getElementById('chartsSection').style.display = 'none';
-                document.getElementById('comparisonSection').style.display = 'none';
-                
-                this.showNotification('✅ New simulation created', 'success');
+            if (this.unsavedChanges) {
+                if (!confirm('You have unsaved changes. Create a new simulation anyway?')) {
+                    return;
+                }
             }
+            
+            this.currentSimulation = {
+                id: null,
+                name: '',
+                country: null,
+                propertyType: null,
+                purchasePrice: 0,
+                downPayment: 0,
+                interestRate: 0,
+                loanDuration: 0,
+                monthlySalary: 0,
+                city: '',
+                monthlyRent: 0,
+                occupancyRate: 90,
+                monthlyCharges: 0,
+                vacancyProvision: 1,
+                purchaseDate: null,
+                createdAt: null,
+                updatedAt: null,
+                results: null
+            };
+            
+            document.getElementById('selectCountry').value = '';
+            document.getElementById('selectPropertyType').value = '';
+            document.getElementById('inputPurchasePrice').value = '';
+            document.getElementById('inputDownPayment').value = '';
+            document.getElementById('inputInterestRate').value = '';
+            document.getElementById('selectLoanDuration').value = '';
+            document.getElementById('inputMonthlySalary').value = '';
+            document.getElementById('inputCity').value = '';
+            document.getElementById('inputMonthlyRent').value = '';
+            document.getElementById('inputOccupancyRate').value = '90';
+            document.getElementById('inputMonthlyCharges').value = '';
+            document.getElementById('inputVacancyProvision').value = '1';
+            
+            this.toggleRentalSection(false);
+            this.updateCurrentInfo();
+            this.unsavedChanges = false;
+            this.updateSaveButtonState();
+            
+            document.getElementById('borrowingCapacitySection').style.display = 'none';
+            document.getElementById('taxFeesSection').style.display = 'none';
+            document.getElementById('financialResultsSection').style.display = 'none';
+            document.getElementById('chartsSection').style.display = 'none';
+            document.getElementById('comparisonSection').style.display = 'none';
+            
+            this.showNotification('✅ New simulation created', 'success');
         },
         
         // ========== EXPORT ==========
@@ -2284,6 +2991,344 @@
                 transform: translateX(400px);
                 opacity: 0;
             }
+        }
+        
+        /* ✨ NOUVEAU : MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+        }
+        
+        body.dark-mode .modal-content {
+            background: #1e293b;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 32px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        body.dark-mode .modal-header {
+            border-bottom-color: #334155;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        
+        .modal-body {
+            padding: 32px;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.2s;
+        }
+        
+        .btn-close:hover {
+            color: #ef4444;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        
+        body.dark-mode .form-group label {
+            color: #ffffff;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        body.dark-mode .form-control {
+            background: #0f172a;
+            border-color: #334155;
+            color: #ffffff;
+        }
+        
+        .form-help {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* ✨ NOUVEAU : SIMULATION ITEM STYLES */
+        .simulation-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .simulation-item {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .simulation-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .simulation-info {
+            flex: 1;
+        }
+        
+        .simulation-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .simulation-header h4 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+        
+        .simulation-badge {
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .simulation-details {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .simulation-details i {
+            margin-right: 4px;
+        }
+        
+        .simulation-metrics {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .simulation-metrics .metric {
+            text-align: left;
+        }
+        
+        .simulation-metrics .metric small {
+            display: block;
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        
+        .simulation-metrics .metric strong {
+            display: block;
+            font-size: 1rem;
+            color: #10b981;
+        }
+        
+        .simulation-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* ✨ NOUVEAU : RENT VS BUY RESULTS */
+        .rent-vs-buy-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        body.dark-mode .result-card {
+            background: #0f172a;
+            border-color: #334155;
+        }
+        
+        .result-card h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+        }
+        
+        .result-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        body.dark-mode .result-metric {
+            border-bottom-color: #334155;
+        }
+        
+        .result-metric:last-child {
+            border-bottom: none;
+        }
+        
+        .result-metric label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        
+        .result-metric strong {
+            font-size: 1.125rem;
+        }
+        
+        .recommendation {
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 1.125rem;
+        }
+        
+        .recommendation-buy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+        }
+        
+        .recommendation-rent {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+        }
+        
+        /* ✨ NOUVEAU : COMPARISON GRID */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+        
+        .comparison-card {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        
+        body.dark-mode .comparison-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .comparison-card h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+        }
+        
+        .comparison-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .comparison-metrics .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        body.dark-mode .comparison-metrics .metric {
+            background: #0f172a;
         }
     `;
     
