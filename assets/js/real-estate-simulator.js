@@ -1,11 +1,11 @@
 /* ==============================================
-   REAL-ESTATE-SIMULATOR.JS - VERSION CORRIGÉE
-   ✅ Multi-Pays avec Fiscalité Complète
-   ✅ Calcul Capacité d'Emprunt depuis Budget Dashboard
-   ✅ Sauvegarde Firebase Cloud
-   ✅ Comparaison Multi-Pays
-   ✅ Charts Highcharts Premium
-   🔧 CORRECTIONS : Event Listeners + Salary Loading
+   REAL-ESTATE-SIMULATOR.JS - VERSION PORTFOLIO MANAGER
+   ✅ Gestion complète du parc immobilier
+   ✅ Auto-sauvegarde de toutes les simulations
+   ✅ Input salaire manuel (plus de chargement auto)
+   ✅ Tracking temps de remboursement
+   ✅ Calculs d'équité et valeur actuelle
+   ✅ Dashboard professionnel de portfolio
    ============================================== */
 
 (function() {
@@ -15,7 +15,7 @@
         // ========== STATE VARIABLES ==========
         currentSimulation: {
             id: null,
-            name: 'New Simulation',
+            name: '',
             country: null,
             propertyType: null,
             purchasePrice: 0,
@@ -28,19 +28,23 @@
             occupancyRate: 90,
             monthlyCharges: 0,
             vacancyProvision: 1,
+            purchaseDate: null,
             createdAt: null,
             updatedAt: null,
             results: null
         },
         
         savedSimulations: [],
+        portfolio: [], // Nouveau : liste des biens immobiliers
         isDarkMode: false,
         
         charts: {
             amortization: null,
             wealthEvolution: null,
             cashflow: null,
-            comparison: null
+            comparison: null,
+            portfolioDistribution: null,
+            portfolioValue: null
         },
         
         // ========== TAX RULES BY COUNTRY ==========
@@ -57,6 +61,7 @@
                 primaryResidenceExemption: true,
                 wealthTaxThreshold: 1300000,
                 wealthTaxRate: 0.005,
+                annualAppreciationRate: 0.03, // 3% par an
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -84,6 +89,7 @@
                 rentalIncomeTaxRate: 0.40,
                 primaryResidenceExemption: true,
                 mortgageInterestRelief: 0.20,
+                annualAppreciationRate: 0.04,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -106,6 +112,7 @@
                 primaryResidenceExemption: true,
                 primaryResidenceExclusionSingle: 250000,
                 primaryResidenceExclusionMarried: 500000,
+                annualAppreciationRate: 0.045,
                 depreciation: {
                     enabled: true,
                     period: 27.5,
@@ -137,6 +144,7 @@
                 nonResidentTax: 0.24,
                 rentalDeduction: 0.60,
                 primaryResidenceExemption: true,
+                annualAppreciationRate: 0.035,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -164,6 +172,7 @@
                 rentalIncomeTaxFlat: 0.28,
                 rentalIncomeTaxMarginal: 0.48,
                 primaryResidenceExemption: false,
+                annualAppreciationRate: 0.05,
                 nhrRegime: {
                     enabled: true,
                     duration: 10,
@@ -190,6 +199,7 @@
                 solidaritySurcharge: 0.055,
                 rentalIncomeTaxRate: 0.42,
                 capitalGainsExemption: 10,
+                annualAppreciationRate: 0.03,
                 depreciation: {
                     enabled: true,
                     period: 50,
@@ -220,6 +230,7 @@
                 cantonalIncomeTax: 0.10,
                 wealthTax: 0.005,
                 imputedRentalValue: true,
+                annualAppreciationRate: 0.025,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -245,6 +256,7 @@
                 rentalIncomeTaxMarginal: 0.35,
                 primaryResidenceExemption: true,
                 primaryResidencePropertyTaxExempt: true,
+                annualAppreciationRate: 0.02,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
@@ -269,6 +281,7 @@
                 rentalIncomeTaxRate: 0.40,
                 primaryResidenceExemption: true,
                 mortgageInterestDeduction: 0.40,
+                annualAppreciationRate: 0.03,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -295,6 +308,7 @@
                 rentalIncomeTaxRate: 0.495,
                 mortgageInterestDeduction: 0.495,
                 primaryResidenceExemption: true,
+                annualAppreciationRate: 0.055,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -308,20 +322,22 @@
         // ========== INITIALIZATION ==========
         
         init: async function() {
-            console.log('🏠 Real Estate Simulator - Initializing...');
+            console.log('🏠 Real Estate Portfolio Manager - Initializing...');
             
             try {
                 this.detectDarkMode();
                 await this.waitForAuth();
                 await this.loadSavedSimulations();
-                await this.loadMonthlySalaryFromBudget();
+                await this.buildPortfolioFromSimulations(); // Nouveau
                 
                 this.setupEventListeners();
                 this.updateLastUpdate();
                 this.setupDarkModeListener();
+                this.renderPortfolioDashboard(); // Nouveau
                 
-                console.log('✅ Real Estate Simulator initialized successfully');
-                console.log(`📊 Loaded ${this.savedSimulations.length} saved simulations`);
+                console.log('✅ Real Estate Portfolio Manager initialized successfully');
+                console.log(`📊 Portfolio: ${this.portfolio.length} properties`);
+                console.log(`📋 Simulations: ${this.savedSimulations.length} records`);
                 
             } catch (error) {
                 console.error('❌ Init error:', error);
@@ -374,13 +390,7 @@
         
         updateLastUpdate: function() {
             const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            const formatted = `${month}/${day}/${year} ${hours}:${minutes}`;
+            const formatted = now.toLocaleDateString('en-US') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
             const elem = document.getElementById('lastUpdate');
             if (elem) {
@@ -388,279 +398,100 @@
             }
         },
         
-        // ========== 🔧 CORRECTION : LOAD MONTHLY SALARY FROM BUDGET DASHBOARD ==========
-        
-        loadMonthlySalaryFromBudget: async function() {
-            console.log('💰 Loading monthly salary from Budget Dashboard...');
-            
-            const salaryInput = document.getElementById('inputMonthlySalary');
-            
-            try {
-                let avgMonthlyIncome = 0;
-                let loadedFromCloud = false;
-                
-                // 🔧 MÉTHODE 1 : Essayer de charger depuis Firestore directement
-                if (firebase && firebase.auth && firebase.auth().currentUser) {
-                    const user = firebase.auth().currentUser;
-                    const db = firebase.firestore();
-                    
-                    console.log('🔄 Attempting to load from Firestore...');
-                    
-                    try {
-                        // Essayer de charger toutes les simulations budget
-                        const snapshot = await db.collection('users')
-                            .doc(user.uid)
-                            .collection('budgetSimulations')
-                            .orderBy('updatedAt', 'desc')
-                            .limit(1)
-                            .get();
-                        
-                        if (!snapshot.empty) {
-                            const doc = snapshot.docs[0];
-                            const data = doc.data();
-                            
-                            console.log('✅ Found budget simulation in Firestore:', doc.id);
-                            
-                            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-                                // Calculer le revenu mensuel moyen
-                                const totalIncome = data.data.reduce((sum, row) => {
-                                    const salary = parseFloat(row.salary) || 0;
-                                    const otherIncome = parseFloat(row.otherIncome) || 0;
-                                    return sum + salary + otherIncome;
-                                }, 0);
-                                
-                                avgMonthlyIncome = totalIncome / data.data.length;
-                                loadedFromCloud = true;
-                                
-                                console.log(`✅ Calculated average monthly income from Firestore: €${avgMonthlyIncome.toFixed(2)}`);
-                            }
-                        } else {
-                            console.warn('⚠ No budget simulations found in Firestore');
-                        }
-                    } catch (firestoreError) {
-                        console.error('❌ Firestore query error:', firestoreError);
-                    }
-                }
-                
-                // 🔧 MÉTHODE 2 : Si pas trouvé dans Firestore, essayer SimulationManager
-                if (!loadedFromCloud && window.SimulationManager) {
-                    console.log('🔄 Trying SimulationManager...');
-                    
-                    try {
-                        const currentSimName = window.SimulationManager.getCurrentSimulationName() || 'default';
-                        console.log(`   Loading simulation "${currentSimName}"...`);
-                        
-                        const budgetData = await window.SimulationManager.loadSimulation(currentSimName);
-                        
-                        if (budgetData && budgetData.data && Array.isArray(budgetData.data) && budgetData.data.length > 0) {
-                            const totalIncome = budgetData.data.reduce((sum, row) => {
-                                const salary = parseFloat(row.salary) || 0;
-                                const otherIncome = parseFloat(row.otherIncome) || 0;
-                                return sum + salary + otherIncome;
-                            }, 0);
-                            
-                            avgMonthlyIncome = totalIncome / budgetData.data.length;
-                            loadedFromCloud = true;
-                            
-                            console.log(`✅ Loaded from SimulationManager: €${avgMonthlyIncome.toFixed(2)}`);
-                        }
-                    } catch (smError) {
-                        console.error('❌ SimulationManager error:', smError);
-                    }
-                }
-                
-                // 🔧 MÉTHODE 3 : Fallback vers localStorage
-                if (!loadedFromCloud) {
-                    console.log('🔄 Trying localStorage...');
-                    
-                    const saved = localStorage.getItem('financialDataDynamic');
-                    if (saved) {
-                        try {
-                            const data = JSON.parse(saved);
-                            if (Array.isArray(data) && data.length > 0) {
-                                const totalIncome = data.reduce((sum, row) => {
-                                    const salary = parseFloat(row.salary) || 0;
-                                    const otherIncome = parseFloat(row.otherIncome) || 0;
-                                    return sum + salary + otherIncome;
-                                }, 0);
-                                
-                                avgMonthlyIncome = totalIncome / data.length;
-                                console.log(`✅ Loaded from localStorage: €${avgMonthlyIncome.toFixed(2)}`);
-                            }
-                        } catch (parseError) {
-                            console.error('❌ Error parsing localStorage:', parseError);
-                        }
-                    }
-                }
-                
-                // 🔧 Mettre à jour l'input
-                if (avgMonthlyIncome > 0) {
-                    this.currentSimulation.monthlySalary = avgMonthlyIncome;
-                    
-                    if (salaryInput) {
-                        salaryInput.value = avgMonthlyIncome.toFixed(2);
-                    }
-                    
-                    console.log(`✅ Final monthly salary set: €${avgMonthlyIncome.toFixed(2)}`);
-                    this.showNotification(`✅ Monthly salary loaded: €${avgMonthlyIncome.toFixed(2)}`, 'success');
-                } else {
-                    console.warn('⚠ No budget data found. User must enter salary manually.');
-                    this.showNotification('⚠ No salary data found. Please enter manually or fill Budget Dashboard first.', 'warning');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error loading salary from budget:', error);
-                this.showNotification('Error loading salary from budget', 'error');
-            }
-        },
-        
-        // ========== 🔧 CORRECTION : EVENT LISTENERS ==========
+        // ========== EVENT LISTENERS ==========
         
         setupEventListeners: function() {
             console.log('🔧 Setting up event listeners...');
             
             const self = this;
             
-            // 🔧 Country & Property Type change
+            // Country & Property Type change
             const countrySelect = document.getElementById('selectCountry');
             const propertyTypeSelect = document.getElementById('selectPropertyType');
             
             if (countrySelect) {
                 countrySelect.addEventListener('change', function() {
-                    console.log('📍 Country changed to:', this.value);
                     self.currentSimulation.country = this.value;
                     self.updateCurrentInfo();
                 });
-            } else {
-                console.error('❌ Element #selectCountry not found!');
             }
             
             if (propertyTypeSelect) {
                 propertyTypeSelect.addEventListener('change', function() {
-                    console.log('🏠 Property type changed to:', this.value);
                     self.currentSimulation.propertyType = this.value;
                     self.updateCurrentInfo();
                     self.toggleRentalSection(this.value === 'rental');
                 });
-            } else {
-                console.error('❌ Element #selectPropertyType not found!');
             }
             
-            // 🔧 Calculate Button
+            // Calculate Button (auto-save après calcul)
             const btnCalculate = document.getElementById('btnCalculate');
             if (btnCalculate) {
                 btnCalculate.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('🧮 Calculate button clicked!');
                     self.calculateResults();
                 });
-                console.log('✅ Calculate button listener attached');
-            } else {
-                console.error('❌ Element #btnCalculate not found!');
             }
             
-            // 🔧 Save Simulation Button (top header)
-            const btnSave = document.getElementById('btnSaveSimulation');
-            if (btnSave) {
-                btnSave.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('💾 Save button clicked!');
-                    self.openSaveModal();
-                });
-                console.log('✅ Save button listener attached');
-            } else {
-                console.warn('⚠ Element #btnSaveSimulation not found (may not exist on this page)');
-            }
-            
-            // 🔧 Confirm Save (inside modal)
-            const btnConfirmSave = document.getElementById('btnConfirmSave');
-            if (btnConfirmSave) {
-                btnConfirmSave.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('✅ Confirm save clicked!');
-                    self.saveSimulation();
-                });
-                console.log('✅ Confirm save button listener attached');
-            } else {
-                console.warn('⚠ Element #btnConfirmSave not found');
-            }
-            
-            // 🔧 New Simulation
+            // New Simulation
             const btnNew = document.getElementById('btnNewSimulation');
             if (btnNew) {
                 btnNew.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('📄 New simulation button clicked!');
                     self.newSimulation();
                 });
-                console.log('✅ New simulation button listener attached');
-            } else {
-                console.warn('⚠ Element #btnNewSimulation not found');
             }
             
-            // 🔧 Rename Simulation
-            const btnRename = document.getElementById('btnRenameSimulation');
-            if (btnRename) {
-                btnRename.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('✏ Rename button clicked!');
-                    self.renameSimulation();
-                });
-                console.log('✅ Rename button listener attached');
-            } else {
-                console.warn('⚠ Element #btnRenameSimulation not found');
-            }
-            
-            // 🔧 Reload Salary
-            const btnLoadBudget = document.getElementById('btnLoadFromBudget');
-            if (btnLoadBudget) {
-                btnLoadBudget.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('🔄 Reload salary button clicked!');
-                    self.loadMonthlySalaryFromBudget();
-                });
-                console.log('✅ Reload salary button listener attached');
-            } else {
-                console.warn('⚠ Element #btnLoadFromBudget not found');
-            }
-            
-            // 🔧 Run Comparison
+            // Run Comparison
             const btnComparison = document.getElementById('btnRunComparison');
             if (btnComparison) {
                 btnComparison.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('🌍 Run comparison button clicked!');
                     self.runMultiCountryComparison();
                 });
-                console.log('✅ Run comparison button listener attached');
-            } else {
-                console.warn('⚠ Element #btnRunComparison not found');
             }
             
-            // 🔧 Refresh Simulations
+            // Refresh Simulations
             const btnRefresh = document.getElementById('btnRefreshSimulations');
             if (btnRefresh) {
                 btnRefresh.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('🔄 Refresh simulations button clicked!');
                     self.loadSavedSimulations();
+                    self.buildPortfolioFromSimulations();
+                    self.renderPortfolioDashboard();
                 });
-                console.log('✅ Refresh simulations button listener attached');
-            } else {
-                console.warn('⚠ Element #btnRefreshSimulations not found');
             }
             
-            // 🔧 Export
+            // Export
             const btnExport = document.getElementById('btnExport');
             if (btnExport) {
                 btnExport.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('📤 Export button clicked!');
                     self.exportToExcel();
                 });
-                console.log('✅ Export button listener attached');
-            } else {
-                console.warn('⚠ Element #btnExport not found');
+            }
+            
+            // Portfolio Filters
+            const filterCountry = document.getElementById('filterCountry');
+            const filterType = document.getElementById('filterPropertyType');
+            const filterStatus = document.getElementById('filterStatus');
+            
+            if (filterCountry) {
+                filterCountry.addEventListener('change', function() {
+                    self.renderPortfolioProperties();
+                });
+            }
+            
+            if (filterType) {
+                filterType.addEventListener('change', function() {
+                    self.renderPortfolioProperties();
+                });
+            }
+            
+            if (filterStatus) {
+                filterStatus.addEventListener('change', function() {
+                    self.renderPortfolioProperties();
+                });
             }
             
             console.log('✅ All event listeners setup complete!');
@@ -670,7 +501,6 @@
             const section = document.getElementById('rentalIncomeSection');
             if (section) {
                 section.style.display = show ? 'block' : 'none';
-                console.log(`🏘 Rental section ${show ? 'shown' : 'hidden'}`);
             }
         },
         
@@ -693,7 +523,7 @@
             }
         },
         
-        // ========== CALCULATE RESULTS ==========
+        // ========== ✨ NOUVEAU : AUTO-SAVE APRÈS CALCUL ==========
         
         calculateResults: function() {
             console.log('🧮 Calculating results...');
@@ -708,15 +538,10 @@
             const monthlySalary = parseFloat(document.getElementById('inputMonthlySalary').value) || 0;
             const city = document.getElementById('inputCity').value.trim();
             
-            // Rental inputs
             const monthlyRent = parseFloat(document.getElementById('inputMonthlyRent')?.value) || 0;
             const occupancyRate = parseFloat(document.getElementById('inputOccupancyRate')?.value) || 90;
             const monthlyCharges = parseFloat(document.getElementById('inputMonthlyCharges')?.value) || 0;
             const vacancyProvision = parseFloat(document.getElementById('inputVacancyProvision')?.value) || 1;
-            
-            console.log('📊 Input values:', {
-                country, propertyType, purchasePrice, downPayment, interestRate, loanDuration, monthlySalary
-            });
             
             // Validation
             if (!country) {
@@ -750,7 +575,7 @@
             }
             
             if (monthlySalary <= 0) {
-                alert('Please enter your monthly salary or load it from Budget Dashboard');
+                alert('Please enter your monthly salary');
                 return;
             }
             
@@ -772,7 +597,8 @@
             const results = this.performCalculations();
             this.currentSimulation.results = results;
             
-            console.log('✅ Calculations completed:', results);
+            // ✨ AUTO-SAVE SIMULATION
+            this.autoSaveSimulation();
             
             // Update UI
             this.updateKPIs(results);
@@ -788,9 +614,453 @@
             document.getElementById('chartsSection').style.display = 'block';
             document.getElementById('comparisonSection').style.display = 'block';
             
-            this.showNotification('✅ Calculation completed successfully!', 'success');
+            this.showNotification('✅ Calculation completed and saved!', 'success');
             this.updateLastUpdate();
         },
+        
+        // ✨ NOUVEAU : AUTO-SAVE
+        autoSaveSimulation: async function() {
+            console.log('💾 Auto-saving simulation...');
+            
+            const now = new Date();
+            const rules = this.taxRules[this.currentSimulation.country];
+            
+            // Générer un nom automatique
+            const autoName = `${rules.name} ${this.formatPropertyType(this.currentSimulation.propertyType)} - ${this.currentSimulation.city || 'Unknown'} - ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+            
+            this.currentSimulation.name = autoName;
+            this.currentSimulation.purchaseDate = this.currentSimulation.purchaseDate || now.toISOString();
+            this.currentSimulation.updatedAt = now.toISOString();
+            
+            if (!this.currentSimulation.createdAt) {
+                this.currentSimulation.createdAt = now.toISOString();
+            }
+            
+            if (!this.currentSimulation.id) {
+                this.currentSimulation.id = 'local_' + Date.now();
+            }
+            
+            // Save to Firestore
+            const savedId = await this.saveToFirestore(this.currentSimulation);
+            
+            if (savedId) {
+                this.currentSimulation.id = savedId;
+            }
+            
+            // Update local array
+            const index = this.savedSimulations.findIndex(s => s.id === this.currentSimulation.id);
+            if (index !== -1) {
+                this.savedSimulations[index] = JSON.parse(JSON.stringify(this.currentSimulation));
+            } else {
+                this.savedSimulations.push(JSON.parse(JSON.stringify(this.currentSimulation)));
+            }
+            
+            this.saveToLocalStorage();
+            this.renderSavedSimulations();
+            
+            // ✨ Rebuild portfolio
+            await this.buildPortfolioFromSimulations();
+            this.renderPortfolioDashboard();
+            
+            this.updateCurrentInfo();
+            
+            console.log(`✅ Simulation auto-saved: "${autoName}"`);
+        },
+        
+        // ========== PORTFOLIO MANAGEMENT ==========
+        
+        buildPortfolioFromSimulations: async function() {
+            console.log('🏠 Building portfolio from simulations...');
+            
+            this.portfolio = this.savedSimulations.map(sim => {
+                const purchaseDate = new Date(sim.purchaseDate || sim.createdAt);
+                const now = new Date();
+                
+                // Calculer le nombre de mois depuis l'achat
+                const monthsSincePurchase = (now.getFullYear() - purchaseDate.getFullYear()) * 12 + (now.getMonth() - purchaseDate.getMonth());
+                
+                // Calculer la valeur actuelle avec appréciation
+                const rules = this.taxRules[sim.country];
+                const appreciationRate = rules.annualAppreciationRate || 0.03;
+                const yearsSincePurchase = monthsSincePurchase / 12;
+                const currentValue = sim.purchasePrice * Math.pow(1 + appreciationRate, yearsSincePurchase);
+                
+                // Calculer le capital restant dû
+                const loanAmount = sim.purchasePrice - sim.downPayment;
+                const monthlyRate = sim.interestRate / 100 / 12;
+                const totalMonths = sim.loanDuration * 12;
+                
+                let monthlyPayment = 0;
+                if (loanAmount > 0 && monthlyRate > 0) {
+                    monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+                }
+                
+                // Calculer le capital restant après X mois
+                let remainingBalance = loanAmount;
+                for (let i = 0; i < Math.min(monthsSincePurchase, totalMonths); i++) {
+                    const interestPayment = remainingBalance * monthlyRate;
+                    const principalPayment = monthlyPayment - interestPayment;
+                    remainingBalance = Math.max(0, remainingBalance - principalPayment);
+                }
+                
+                const monthsRemaining = Math.max(0, totalMonths - monthsSincePurchase);
+                const equity = currentValue - remainingBalance;
+                const status = remainingBalance <= 0 ? 'paid_off' : 'active';
+                
+                return {
+                    id: sim.id,
+                    name: sim.name,
+                    country: sim.country,
+                    propertyType: sim.propertyType,
+                    city: sim.city,
+                    purchasePrice: sim.purchasePrice,
+                    purchaseDate: sim.purchaseDate || sim.createdAt,
+                    loanDuration: sim.loanDuration,
+                    currentValue: currentValue,
+                    remainingBalance: remainingBalance,
+                    equity: equity,
+                    monthsRemaining: monthsRemaining,
+                    monthlyPayment: monthlyPayment,
+                    status: status,
+                    results: sim.results
+                };
+            });
+            
+            console.log(`✅ Portfolio built: ${this.portfolio.length} properties`);
+        },
+        
+        renderPortfolioDashboard: function() {
+            console.log('📊 Rendering portfolio dashboard...');
+            
+            // Calculer les stats globales
+            const totalValue = this.portfolio.reduce((sum, prop) => sum + prop.currentValue, 0);
+            const totalEquity = this.portfolio.reduce((sum, prop) => sum + prop.equity, 0);
+            const totalDebt = this.portfolio.reduce((sum, prop) => sum + prop.remainingBalance, 0);
+            const totalMonthlyPayment = this.portfolio.reduce((sum, prop) => sum + (prop.status === 'active' ? prop.monthlyPayment : 0), 0);
+            
+            const activeProperties = this.portfolio.filter(p => p.status === 'active').length;
+            const paidOffProperties = this.portfolio.filter(p => p.status === 'paid_off').length;
+            
+            // Update KPIs
+            const kpiTotalValue = document.getElementById('portfolioTotalValue');
+            const kpiTotalEquity = document.getElementById('portfolioTotalEquity');
+            const kpiTotalDebt = document.getElementById('portfolioTotalDebt');
+            const kpiActiveProperties = document.getElementById('portfolioActiveProperties');
+            const kpiMonthlyPayment = document.getElementById('portfolioMonthlyPayment');
+            const kpiPaidOff = document.getElementById('portfolioPaidOff');
+            
+            if (kpiTotalValue) kpiTotalValue.textContent = this.formatCurrency(totalValue, '€');
+            if (kpiTotalEquity) kpiTotalEquity.textContent = this.formatCurrency(totalEquity, '€');
+            if (kpiTotalDebt) kpiTotalDebt.textContent = this.formatCurrency(totalDebt, '€');
+            if (kpiActiveProperties) kpiActiveProperties.textContent = activeProperties;
+            if (kpiMonthlyPayment) kpiMonthlyPayment.textContent = this.formatCurrency(totalMonthlyPayment, '€');
+            if (kpiPaidOff) kpiPaidOff.textContent = paidOffProperties;
+            
+            // Render properties list
+            this.renderPortfolioProperties();
+            
+            // Render charts
+            this.createPortfolioCharts();
+        },
+        
+        renderPortfolioProperties: function() {
+            const container = document.getElementById('portfolioPropertiesList');
+            if (!container) return;
+            
+            // Get filter values
+            const filterCountry = document.getElementById('filterCountry')?.value || 'all';
+            const filterType = document.getElementById('filterPropertyType')?.value || 'all';
+            const filterStatus = document.getElementById('filterStatus')?.value || 'all';
+            
+            // Filter portfolio
+            let filtered = this.portfolio;
+            
+            if (filterCountry !== 'all') {
+                filtered = filtered.filter(p => p.country === filterCountry);
+            }
+            
+            if (filterType !== 'all') {
+                filtered = filtered.filter(p => p.propertyType === filterType);
+            }
+            
+            if (filterStatus !== 'all') {
+                filtered = filtered.filter(p => p.status === filterStatus);
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class='portfolio-empty'>
+                        <i class='fas fa-home'></i>
+                        <p>No properties found</p>
+                        <small>Create a simulation to add properties to your portfolio</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(prop => {
+                const rules = this.taxRules[prop.country];
+                const purchaseDate = new Date(prop.purchaseDate);
+                const monthsSincePurchase = Math.floor((Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+                const yearsSincePurchase = Math.floor(monthsSincePurchase / 12);
+                const remainingYears = Math.floor(prop.monthsRemaining / 12);
+                const remainingMonths = prop.monthsRemaining % 12;
+                
+                const appreciation = ((prop.currentValue - prop.purchasePrice) / prop.purchasePrice * 100).toFixed(1);
+                const ltv = prop.remainingBalance > 0 ? (prop.remainingBalance / prop.currentValue * 100).toFixed(1) : 0;
+                
+                return `
+                    <div class='property-card ${prop.status}'>
+                        <div class='property-header'>
+                            <div class='property-title'>
+                                <h3>${this.escapeHtml(prop.name)}</h3>
+                                <span class='property-country'>${rules.flag} ${rules.name}</span>
+                            </div>
+                            <div class='property-status ${prop.status}'>
+                                ${prop.status === 'active' ? '<i class="fas fa-clock"></i> Active' : '<i class="fas fa-check-circle"></i> Paid Off'}
+                            </div>
+                        </div>
+                        
+                        <div class='property-body'>
+                            <div class='property-main-stats'>
+                                <div class='stat'>
+                                    <label><i class='fas fa-tag'></i> Purchase Price</label>
+                                    <strong>${this.formatCurrency(prop.purchasePrice, rules.currencySymbol)}</strong>
+                                </div>
+                                <div class='stat'>
+                                    <label><i class='fas fa-chart-line'></i> Current Value</label>
+                                    <strong>${this.formatCurrency(prop.currentValue, rules.currencySymbol)}</strong>
+                                    <small class='appreciation'>+${appreciation}%</small>
+                                </div>
+                                <div class='stat'>
+                                    <label><i class='fas fa-piggy-bank'></i> Equity</label>
+                                    <strong class='text-success'>${this.formatCurrency(prop.equity, rules.currencySymbol)}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class='property-timeline'>
+                                <div class='timeline-item'>
+                                    <i class='fas fa-calendar-check'></i>
+                                    <div>
+                                        <label>Purchased</label>
+                                        <span>${purchaseDate.toLocaleDateString('en-US')}</span>
+                                        <small>${yearsSincePurchase} years ago</small>
+                                    </div>
+                                </div>
+                                
+                                ${prop.status === 'active' ? `
+                                <div class='timeline-item'>
+                                    <i class='fas fa-hourglass-half'></i>
+                                    <div>
+                                        <label>Remaining</label>
+                                        <span>${remainingYears}y ${remainingMonths}m</span>
+                                        <small>Out of ${prop.loanDuration} years</small>
+                                    </div>
+                                </div>
+                                
+                                <div class='timeline-item'>
+                                    <i class='fas fa-euro-sign'></i>
+                                    <div>
+                                        <label>Monthly Payment</label>
+                                        <strong>${this.formatCurrency(prop.monthlyPayment, rules.currencySymbol)}</strong>
+                                    </div>
+                                </div>
+                                ` : `
+                                <div class='timeline-item text-success'>
+                                    <i class='fas fa-check-circle'></i>
+                                    <div>
+                                        <label>Status</label>
+                                        <span>Fully Paid</span>
+                                    </div>
+                                </div>
+                                `}
+                            </div>
+                            
+                            ${prop.status === 'active' ? `
+                            <div class='property-progress'>
+                                <div class='progress-header'>
+                                    <span>Loan Repayment Progress</span>
+                                    <span>${((prop.loanDuration * 12 - prop.monthsRemaining) / (prop.loanDuration * 12) * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class='progress-bar'>
+                                    <div class='progress-fill' style='width: ${((prop.loanDuration * 12 - prop.monthsRemaining) / (prop.loanDuration * 12) * 100)}%'></div>
+                                </div>
+                                <div class='progress-footer'>
+                                    <small>Remaining: ${this.formatCurrency(prop.remainingBalance, rules.currencySymbol)}</small>
+                                    <small>LTV: ${ltv}%</small>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class='property-actions'>
+                            <button class='btn-icon' onclick='RealEstateSimulator.loadSimulation("${prop.id}")' title='Load Simulation'>
+                                <i class='fas fa-upload'></i> Load
+                            </button>
+                            <button class='btn-icon' onclick='RealEstateSimulator.viewPropertyDetails("${prop.id}")' title='View Details'>
+                                <i class='fas fa-eye'></i> Details
+                            </button>
+                            <button class='btn-icon btn-danger' onclick='RealEstateSimulator.deleteSimulation("${prop.id}")' title='Delete'>
+                                <i class='fas fa-trash'></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        },
+        
+        createPortfolioCharts: function() {
+            this.createPortfolioDistributionChart();
+            this.createPortfolioValueChart();
+        },
+        
+        createPortfolioDistributionChart: function() {
+            const container = document.getElementById('portfolioDistributionChart');
+            if (!container || this.portfolio.length === 0) return;
+            
+            // Group by country
+            const byCountry = {};
+            this.portfolio.forEach(prop => {
+                if (!byCountry[prop.country]) {
+                    byCountry[prop.country] = 0;
+                }
+                byCountry[prop.country] += prop.currentValue;
+            });
+            
+            const data = Object.keys(byCountry).map(country => {
+                const rules = this.taxRules[country];
+                return {
+                    name: `${rules.flag} ${rules.name}`,
+                    y: byCountry[country]
+                };
+            });
+            
+            const chartColors = this.getChartColors();
+            
+            if (this.charts.portfolioDistribution) {
+                this.charts.portfolioDistribution.destroy();
+            }
+            
+            this.charts.portfolioDistribution = Highcharts.chart('portfolioDistributionChart', {
+                chart: {
+                    type: 'pie',
+                    backgroundColor: 'transparent',
+                    style: { fontFamily: 'Inter, sans-serif' }
+                },
+                title: {
+                    text: 'Portfolio Distribution by Country',
+                    style: { color: chartColors.title }
+                },
+                tooltip: {
+                    backgroundColor: chartColors.tooltipBg,
+                    borderColor: chartColors.tooltipBorder,
+                    style: { color: chartColors.text },
+                    pointFormat: '<b>{point.percentage:.1f}%</b><br/>€{point.y:,.0f}'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                            style: { color: chartColors.text }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Value',
+                    colorByPoint: true,
+                    data: data
+                }],
+                credits: { enabled: false }
+            });
+        },
+        
+        createPortfolioValueChart: function() {
+            const container = document.getElementById('portfolioValueChart');
+            if (!container || this.portfolio.length === 0) return;
+            
+            // Sort by purchase date
+            const sorted = [...this.portfolio].sort((a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate));
+            
+            const categories = sorted.map(p => {
+                const date = new Date(p.purchaseDate);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            });
+            
+            const purchaseData = sorted.map(p => p.purchasePrice);
+            const currentData = sorted.map(p => p.currentValue);
+            const equityData = sorted.map(p => p.equity);
+            
+            const chartColors = this.getChartColors();
+            
+            if (this.charts.portfolioValue) {
+                this.charts.portfolioValue.destroy();
+            }
+            
+            this.charts.portfolioValue = Highcharts.chart('portfolioValueChart', {
+                chart: {
+                    type: 'column',
+                    backgroundColor: 'transparent',
+                    style: { fontFamily: 'Inter, sans-serif' }
+                },
+                title: {
+                    text: 'Property Values Evolution',
+                    style: { color: chartColors.title }
+                },
+                xAxis: {
+                    categories: categories,
+                    labels: { style: { color: chartColors.text } },
+                    gridLineColor: chartColors.gridLine,
+                    lineColor: chartColors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Value (€)', style: { color: chartColors.title } },
+                    labels: { style: { color: chartColors.text } },
+                    gridLineColor: chartColors.gridLine
+                },
+                tooltip: {
+                    shared: true,
+                    backgroundColor: chartColors.tooltipBg,
+                    borderColor: chartColors.tooltipBorder,
+                    style: { color: chartColors.text },
+                    valuePrefix: '€'
+                },
+                plotOptions: {
+                    column: {
+                        borderRadius: 8
+                    }
+                },
+                series: [{
+                    name: 'Purchase Price',
+                    data: purchaseData,
+                    color: '#6c757d'
+                }, {
+                    name: 'Current Value',
+                    data: currentData,
+                    color: '#3b82f6'
+                }, {
+                    name: 'Equity',
+                    data: equityData,
+                    color: '#10b981'
+                }],
+                credits: { enabled: false },
+                legend: {
+                    itemStyle: { color: chartColors.text }
+                }
+            });
+        },
+        
+        viewPropertyDetails: function(propId) {
+            const prop = this.portfolio.find(p => p.id === propId);
+            if (!prop) return;
+            
+            alert(`Property Details:\n\n${JSON.stringify(prop, null, 2)}`);
+            // TODO: Create a detailed modal
+        },
+        
+        // ========== CALCULATIONS (unchanged from original) ==========
         
         performCalculations: function() {
             const sim = this.currentSimulation;
@@ -800,7 +1070,7 @@
             
             const results = {};
             
-            // ========== LOAN CALCULATIONS ==========
+            // Loan calculations
             const loanAmount = sim.purchasePrice - sim.downPayment;
             const monthlyRate = sim.interestRate / 100 / 12;
             const numberOfPayments = sim.loanDuration * 12;
@@ -818,7 +1088,7 @@
             results.totalAmountPaid = monthlyPayment * numberOfPayments;
             results.totalInterest = results.totalAmountPaid - loanAmount;
             
-            // ========== TAX & FEES CALCULATIONS ==========
+            // Tax & fees
             let notaryFees = 0;
             let transferTax = 0;
             let stampDuty = 0;
@@ -829,7 +1099,6 @@
                 case 'france':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     break;
-                    
                 case 'uk':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     stampDuty = rules.stampDuty(sim.purchasePrice);
@@ -837,47 +1106,39 @@
                         stampDuty += sim.purchasePrice * rules.additionalPropertySurcharge;
                     }
                     break;
-                    
                 case 'usa':
                     closingCosts = sim.purchasePrice * rules.closingCosts;
                     break;
-                    
                 case 'spain':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.transferTax;
                     registrationFees = sim.purchasePrice * rules.registrationFees;
                     break;
-                    
                 case 'portugal':
                     notaryFees = rules.notaryFees;
                     transferTax = rules.transferTax(sim.purchasePrice, isPrimary);
                     stampDuty = sim.purchasePrice * rules.stampDuty;
                     registrationFees = rules.registrationFees;
                     break;
-                    
                 case 'germany':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.transferTax;
                     registrationFees = sim.purchasePrice * rules.registrationFees;
                     break;
-                    
                 case 'switzerland':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.transferTax;
                     registrationFees = sim.purchasePrice * rules.registrationFees;
                     break;
-                    
                 case 'italy':
                     notaryFees = sim.purchasePrice * rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.registrationTax(isPrimary);
                     transferTax = Math.max(transferTax, rules.minimumRegistrationTax);
                     break;
-                    
                 case 'belgium':
                     notaryFees = rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.registrationDuty('flanders', isPrimary);
                     break;
-                    
                 case 'netherlands':
                     notaryFees = rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.transferTax(isPrimary, 30);
@@ -890,7 +1151,6 @@
             results.stampDuty = stampDuty;
             results.closingCosts = closingCosts;
             results.registrationFees = registrationFees;
-            
             results.totalAcquisitionFees = notaryFees + transferTax + stampDuty + closingCosts + registrationFees;
             results.totalCost = sim.purchasePrice + results.totalAcquisitionFees;
             
@@ -912,7 +1172,7 @@
             // Total monthly payment
             results.totalMonthlyPayment = monthlyPayment + results.monthlyPropertyTax + results.monthlyInsurance;
             
-            // ========== BORROWING CAPACITY ==========
+            // Borrowing capacity
             const maxDebtRatio = 0.33;
             const maxMonthlyPayment = sim.monthlySalary * maxDebtRatio;
             
@@ -928,7 +1188,7 @@
             results.debtRatio = (results.totalMonthlyPayment / sim.monthlySalary) * 100;
             results.remainingBudget = sim.monthlySalary - results.totalMonthlyPayment;
             
-            // ========== RENTAL INVESTMENT CALCULATIONS ==========
+            // Rental calculations
             if (isRental) {
                 const grossAnnualRent = sim.monthlyRent * 12;
                 const adjustedRent = grossAnnualRent * (sim.occupancyRate / 100);
@@ -953,7 +1213,6 @@
                 results.rentalTax = rentalTax;
                 results.netRentAfterTax = results.netAnnualRent - rentalTax - annualPropertyTax;
                 results.netYield = (results.netRentAfterTax / sim.purchasePrice) * 100;
-                
                 results.monthlyCashflow = (results.netRentAfterTax / 12) - monthlyPayment;
             } else {
                 results.grossYield = 0;
@@ -961,10 +1220,10 @@
                 results.monthlyCashflow = 0;
             }
             
-            // ========== WEALTH EVOLUTION ==========
+            // Wealth evolution
             results.wealthEvolution = this.calculateWealthEvolution(sim, results);
             
-            // ========== AMORTIZATION SCHEDULE ==========
+            // Amortization schedule
             results.amortizationSchedule = this.calculateAmortizationSchedule(loanAmount, monthlyRate, numberOfPayments, monthlyPayment);
             
             return results;
@@ -993,7 +1252,7 @@
         
         calculateWealthEvolution: function(sim, results) {
             const evolution = [];
-            const appreciationRate = 0.03;
+            const appreciationRate = this.taxRules[sim.country].annualAppreciationRate || 0.03;
             const isRental = sim.propertyType === 'rental';
             
             let propertyValue = sim.purchasePrice;
@@ -1028,7 +1287,7 @@
             return evolution;
         },
         
-        // ========== UPDATE UI ==========
+        // ========== UPDATE UI (unchanged from original) ==========
         
         updateKPIs: function(results) {
             const sim = this.currentSimulation;
@@ -1411,6 +1670,7 @@
             if (this.currentSimulation.results) {
                 this.createCharts(this.currentSimulation.results);
             }
+            this.createPortfolioCharts();
         },
         
         getChartColors: function() {
@@ -1566,73 +1826,6 @@
         
         // ========== SAVE/LOAD SIMULATIONS ==========
         
-        openSaveModal: function() {
-            console.log('💾 Opening save modal...');
-            
-            if (!this.currentSimulation.results) {
-                alert('Please calculate results first');
-                return;
-            }
-            
-            const modal = document.getElementById('modalSaveSimulation');
-            if (modal) {
-                const nameInput = document.getElementById('simulationName');
-                if (nameInput) {
-                    nameInput.value = this.currentSimulation.name !== 'New Simulation' ? 
-                                     this.currentSimulation.name : 
-                                     `${this.taxRules[this.currentSimulation.country].name} ${this.currentSimulation.propertyType} ${new Date().toLocaleDateString()}`;
-                }
-                
-                modal.classList.add('active');
-                console.log('✅ Save modal opened');
-            } else {
-                console.error('❌ Modal #modalSaveSimulation not found!');
-            }
-        },
-        
-        saveSimulation: async function() {
-            console.log('💾 Saving simulation...');
-            
-            const name = document.getElementById('simulationName').value.trim();
-            const notes = document.getElementById('simulationNotes').value.trim();
-            
-            if (!name) {
-                alert('Please enter a simulation name');
-                return;
-            }
-            
-            this.currentSimulation.name = name;
-            this.currentSimulation.notes = notes;
-            this.currentSimulation.updatedAt = new Date().toISOString();
-            
-            if (!this.currentSimulation.createdAt) {
-                this.currentSimulation.createdAt = this.currentSimulation.updatedAt;
-            }
-            
-            if (!this.currentSimulation.id) {
-                this.currentSimulation.id = 'local_' + Date.now();
-            }
-            
-            const savedId = await this.saveToFirestore(this.currentSimulation);
-            
-            if (savedId) {
-                this.currentSimulation.id = savedId;
-            }
-            
-            const index = this.savedSimulations.findIndex(s => s.id === this.currentSimulation.id);
-            if (index !== -1) {
-                this.savedSimulations[index] = JSON.parse(JSON.stringify(this.currentSimulation));
-            } else {
-                this.savedSimulations.push(JSON.parse(JSON.stringify(this.currentSimulation)));
-            }
-            
-            this.saveToLocalStorage();
-            this.renderSavedSimulations();
-            this.closeModal('modalSaveSimulation');
-            this.showNotification(`✅ Simulation "${name}" saved successfully!`, 'success');
-            this.updateCurrentInfo();
-        },
-        
         saveToFirestore: async function(simulation) {
             if (!firebase || !firebase.auth || !firebase.auth().currentUser) {
                 console.warn('⚠ No user authenticated, saving to localStorage only');
@@ -1659,6 +1852,7 @@
                     occupancyRate: simulation.occupancyRate,
                     monthlyCharges: simulation.monthlyCharges,
                     vacancyProvision: simulation.vacancyProvision,
+                    purchaseDate: simulation.purchaseDate,
                     notes: simulation.notes || '',
                     results: simulation.results
                 };
@@ -1741,6 +1935,7 @@
                                 occupancyRate: data.occupancyRate,
                                 monthlyCharges: data.monthlyCharges,
                                 vacancyProvision: data.vacancyProvision,
+                                purchaseDate: data.purchaseDate,
                                 notes: data.notes,
                                 results: data.results,
                                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
@@ -1785,13 +1980,12 @@
                     <div class='simulations-empty'>
                         <i class='fas fa-inbox'></i>
                         <p>No saved simulations yet</p>
-                        <small>Fill the form above and click "Save Simulation"</small>
+                        <small>Fill the form above and click "Calculate" to create simulations</small>
                     </div>
                 `;
                 return;
             }
             
-            const self = this;
             container.innerHTML = this.savedSimulations.map(sim => {
                 const rules = this.taxRules[sim.country];
                 const date = new Date(sim.updatedAt || sim.createdAt);
@@ -1897,6 +2091,8 @@
             this.savedSimulations.push(duplicate);
             this.saveToLocalStorage();
             this.renderSavedSimulations();
+            this.buildPortfolioFromSimulations();
+            this.renderPortfolioDashboard();
             this.showNotification(`✅ Simulation duplicated as "${duplicate.name}"`, 'success');
         },
         
@@ -1930,14 +2126,16 @@
             
             this.saveToLocalStorage();
             this.renderSavedSimulations();
+            this.buildPortfolioFromSimulations();
+            this.renderPortfolioDashboard();
             this.showNotification(`Simulation "${sim.name}" deleted`, 'success');
         },
         
         newSimulation: function() {
-            if (confirm('Create a new simulation? Any unsaved changes will be lost.')) {
+            if (confirm('Create a new simulation? Current inputs will be cleared.')) {
                 this.currentSimulation = {
                     id: null,
-                    name: 'New Simulation',
+                    name: '',
                     country: null,
                     propertyType: null,
                     purchasePrice: 0,
@@ -1950,6 +2148,7 @@
                     occupancyRate: 90,
                     monthlyCharges: 0,
                     vacancyProvision: 1,
+                    purchaseDate: null,
                     createdAt: null,
                     updatedAt: null,
                     results: null
@@ -1961,6 +2160,7 @@
                 document.getElementById('inputDownPayment').value = '';
                 document.getElementById('inputInterestRate').value = '';
                 document.getElementById('selectLoanDuration').value = '';
+                document.getElementById('inputMonthlySalary').value = '';
                 document.getElementById('inputCity').value = '';
                 document.getElementById('inputMonthlyRent').value = '';
                 document.getElementById('inputOccupancyRate').value = '90';
@@ -1976,30 +2176,15 @@
                 document.getElementById('chartsSection').style.display = 'none';
                 document.getElementById('comparisonSection').style.display = 'none';
                 
-                // Reload salary
-                this.loadMonthlySalaryFromBudget();
-                
                 this.showNotification('✅ New simulation created', 'success');
             }
-        },
-        
-        renameSimulation: function() {
-            const newName = prompt('Enter new name for this simulation:', this.currentSimulation.name);
-            
-            if (!newName || newName.trim() === '') {
-                return;
-            }
-            
-            this.currentSimulation.name = newName.trim();
-            document.getElementById('currentSimulationName').textContent = newName.trim();
-            this.showNotification('✅ Simulation renamed', 'success');
         },
         
         // ========== EXPORT ==========
         
         exportToExcel: function() {
-            if (!this.currentSimulation.results) {
-                alert('Please calculate results first');
+            if (this.portfolio.length === 0) {
+                alert('No properties to export');
                 return;
             }
             
@@ -2032,22 +2217,6 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         },
         
-        closeModal: function(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('active');
-                console.log(`✅ Modal ${modalId} closed`);
-            }
-        },
-        
-        openModal: function(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('active');
-                console.log(`✅ Modal ${modalId} opened`);
-            }
-        },
-        
         showNotification: function(message, type = 'info') {
             console.log(`[${type.toUpperCase()}] ${message}`);
             
@@ -2078,8 +2247,6 @@
         }
     };
 
-    // ========== FIN DU FICHIER ==========
-    
     // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => RealEstateSimulator.init());
@@ -2092,11 +2259,11 @@
     
 })();
 
-// ========== 🔧 CORRECTION : Notification animations (variable unique) ==========
+// Notification animations
 (function addNotificationStyles() {
-    const notificationStyle = document.createElement('style');
-    notificationStyle.id = 'real-estate-notification-styles';
-    notificationStyle.textContent = `
+    const style = document.createElement('style');
+    style.id = 'real-estate-notification-styles';
+    style.textContent = `
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -2120,9 +2287,7 @@
         }
     `;
     
-    // Éviter les doublons
     if (!document.getElementById('real-estate-notification-styles')) {
-        document.head.appendChild(notificationStyle);
+        document.head.appendChild(style);
     }
 })();
-    

@@ -282,10 +282,6 @@
                     </h1>
                 </div>
                 <div class='header-right'>
-                    <button class='dashboard-btn' id='btnNewSimulation'>
-                        <i class='fas fa-plus'></i>
-                        <span class='btn-text'>New Simulation</span>
-                    </button>
                     <button class='dashboard-btn dashboard-btn-export' id='btnExport'>
                         <i class='fas fa-file-excel'></i>
                         <span class='btn-text'>Export</span>
@@ -493,13 +489,10 @@
                                     <i class='fas fa-euro-sign'></i>
                                     Monthly Net Salary
                                 </label>
-                                <input type='number' id='inputMonthlySalary' class='form-control' placeholder='Auto-loaded from Budget' readonly>
+                                <input type='number' id='inputMonthlySalary' class='form-control' placeholder='Enter your monthly salary' min='0' step='100'>
                                 <small class='hint'>
                                     <i class='fas fa-info-circle'></i>
-                                    Loaded from Budget Dashboard 
-                                    <button class='btn-link' id='btnLoadFromBudget'>
-                                        <i class='fas fa-sync-alt'></i> Reload
-                                    </button>
+                                    Enter your monthly net salary manually
                                 </small>
                             </div>
                             
@@ -804,6 +797,154 @@
                 </div>
 
                 <!-- ========================================
+                    MY REAL ESTATE PORTFOLIO
+                    ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-building'></i> My Real Estate Portfolio
+                    </h2>
+                    
+                    <!-- Portfolio KPIs -->
+                    <div class='portfolio-kpis-grid'>
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon primary'>
+                                <i class='fas fa-home'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Total Portfolio Value</div>
+                                <div class='portfolio-kpi-value' id='portfolioTotalValue'>€0</div>
+                            </div>
+                        </div>
+                        
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon success'>
+                                <i class='fas fa-piggy-bank'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Total Equity</div>
+                                <div class='portfolio-kpi-value' id='portfolioTotalEquity'>€0</div>
+                            </div>
+                        </div>
+                        
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon warning'>
+                                <i class='fas fa-hand-holding-usd'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Total Debt</div>
+                                <div class='portfolio-kpi-value' id='portfolioTotalDebt'>€0</div>
+                            </div>
+                        </div>
+                        
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon info'>
+                                <i class='fas fa-chart-line'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Active Properties</div>
+                                <div class='portfolio-kpi-value' id='portfolioActiveProperties'>0</div>
+                            </div>
+                        </div>
+                        
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon purple'>
+                                <i class='fas fa-euro-sign'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Monthly Payments</div>
+                                <div class='portfolio-kpi-value' id='portfolioMonthlyPayment'>€0</div>
+                            </div>
+                        </div>
+                        
+                        <div class='portfolio-kpi-card'>
+                            <div class='portfolio-kpi-icon danger'>
+                                <i class='fas fa-check-circle'></i>
+                            </div>
+                            <div class='portfolio-kpi-content'>
+                                <div class='portfolio-kpi-label'>Paid Off</div>
+                                <div class='portfolio-kpi-value' id='portfolioPaidOff'>0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Portfolio Filters -->
+                    <div class='portfolio-filters'>
+                        <div class='filter-group'>
+                            <label for='filterCountry'>
+                                <i class='fas fa-globe'></i> Country
+                            </label>
+                            <select id='filterCountry' class='form-control'>
+                                <option value='all'>All Countries</option>
+                                <option value='france'>🇫🇷 France</option>
+                                <option value='uk'>🇬🇧 United Kingdom</option>
+                                <option value='usa'>🇺🇸 United States</option>
+                                <option value='spain'>🇪🇸 Spain</option>
+                                <option value='portugal'>🇵🇹 Portugal</option>
+                                <option value='germany'>🇩🇪 Germany</option>
+                                <option value='switzerland'>🇨🇭 Switzerland</option>
+                                <option value='italy'>🇮🇹 Italy</option>
+                                <option value='belgium'>🇧🇪 Belgium</option>
+                                <option value='netherlands'>🇳🇱 Netherlands</option>
+                            </select>
+                        </div>
+                        
+                        <div class='filter-group'>
+                            <label for='filterPropertyType'>
+                                <i class='fas fa-building'></i> Type
+                            </label>
+                            <select id='filterPropertyType' class='form-control'>
+                                <option value='all'>All Types</option>
+                                <option value='primary'>🏠 Primary Residence</option>
+                                <option value='secondary'>🏖 Secondary Residence</option>
+                                <option value='rental'>💰 Rental Investment</option>
+                            </select>
+                        </div>
+                        
+                        <div class='filter-group'>
+                            <label for='filterStatus'>
+                                <i class='fas fa-check-circle'></i> Status
+                            </label>
+                            <select id='filterStatus' class='form-control'>
+                                <option value='all'>All</option>
+                                <option value='active'>Active</option>
+                                <option value='paid_off'>Paid Off</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Portfolio Charts -->
+                    <div class='portfolio-charts-grid'>
+                        <div class='chart-container'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-pie'></i>
+                                Portfolio Distribution by Country
+                            </h3>
+                            <div id='portfolioDistributionChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-container'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-bar'></i>
+                                Property Values Evolution
+                            </h3>
+                            <div id='portfolioValueChart' class='chart'></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Properties List -->
+                    <h3 class='subsection-title'>
+                        <i class='fas fa-home'></i> Properties
+                    </h3>
+                    <div id='portfolioPropertiesList' class='portfolio-properties-grid'>
+                        <div class='portfolio-empty'>
+                            <i class='fas fa-home'></i>
+                            <p>No properties in your portfolio yet</p>
+                            <small>Create a simulation to start building your portfolio</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
                      SAVED SIMULATIONS
                      ======================================== -->
                 <div class='section'>
@@ -836,45 +977,6 @@
     <!-- ========================================
          MODALS
          ======================================== -->
-    
-    <!-- Modal: Save Simulation -->
-    <div id='modalSaveSimulation' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-save'></i> Save Simulation</h2>
-                <button class='modal-close' onclick='RealEstateSimulator.closeModal("modalSaveSimulation")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <div class='form-group'>
-                    <label for='simulationName'>
-                        <i class='fas fa-tag'></i>
-                        Simulation Name
-                        <span class='required'>*</span>
-                    </label>
-                    <input type='text' id='simulationName' class='form-control' placeholder='e.g., Paris Apartment Investment'>
-                    <small class='hint'>Choose a descriptive name for easy identification</small>
-                </div>
-                
-                <div class='form-group'>
-                    <label for='simulationNotes'>
-                        <i class='fas fa-sticky-note'></i>
-                        Notes (Optional)
-                    </label>
-                    <textarea id='simulationNotes' class='form-control' rows='4' placeholder='Add any notes or comments...'></textarea>
-                </div>
-                
-                <div class='modal-actions'>
-                    <button class='btn btn-secondary' onclick='RealEstateSimulator.closeModal("modalSaveSimulation")'>
-                        Cancel
-                    </button>
-                    <button class='btn btn-primary' id='btnConfirmSave'>
-                        <i class='fas fa-save'></i>
-                        Save Simulation
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal: Simulation Details -->
     <div id='modalSimulationDetails' class='modal'>
