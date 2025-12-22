@@ -1,11 +1,11 @@
 /* ==============================================
-   REAL-ESTATE-SIMULATOR.JS - VERSION ULTRA-AVANCÉE
+   REAL-ESTATE-SIMULATOR.JS - VERSION CORRIGÉE
    ✅ Multi-Pays avec Fiscalité Complète
    ✅ Calcul Capacité d'Emprunt depuis Budget Dashboard
    ✅ Sauvegarde Firebase Cloud
    ✅ Comparaison Multi-Pays
    ✅ Charts Highcharts Premium
-   ✅ Support Résidence Principale/Secondaire/Investissement Locatif
+   🔧 CORRECTIONS : Event Listeners + Salary Loading
    ============================================== */
 
 (function() {
@@ -50,16 +50,16 @@
                 flag: '🇫🇷',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 0.075, // 7.5%
-                propertyTaxRate: 0.015, // 1.5% of purchase price annually
-                capitalGainsTax: 0.362, // 36.2% (19% + 17.2% social charges)
-                rentalIncomeTaxRate: 0.30, // Average marginal rate
+                notaryFees: 0.075,
+                propertyTaxRate: 0.015,
+                capitalGainsTax: 0.362,
+                rentalIncomeTaxRate: 0.30,
                 primaryResidenceExemption: true,
                 wealthTaxThreshold: 1300000,
                 wealthTaxRate: 0.005,
                 deductions: {
                     rentalCharges: true,
-                    mortgageInterest: false, // No longer deductible in France
+                    mortgageInterest: false,
                     propertyTax: true,
                     managementFees: true
                 },
@@ -70,24 +70,23 @@
                 flag: '🇬🇧',
                 currency: 'GBP',
                 currencySymbol: '£',
-                notaryFees: 0.015, // Solicitor fees ~1.5%
+                notaryFees: 0.015,
                 stampDuty: function(price) {
-                    // SDLT calculator
                     if (price <= 250000) return 0;
                     if (price <= 925000) return (price - 250000) * 0.05;
                     if (price <= 1500000) return 33750 + (price - 925000) * 0.10;
                     return 91250 + (price - 1500000) * 0.12;
                 },
-                additionalPropertySurcharge: 0.03, // +3% for buy-to-let/second homes
-                councilTax: 2000, // Average annual (in GBP)
-                propertyTaxRate: 0, // Council tax is fixed, not percentage
-                capitalGainsTax: 0.28, // 28% for property (higher rate)
-                rentalIncomeTaxRate: 0.40, // 40% higher rate band
+                additionalPropertySurcharge: 0.03,
+                councilTax: 2000,
+                propertyTaxRate: 0,
+                capitalGainsTax: 0.28,
+                rentalIncomeTaxRate: 0.40,
                 primaryResidenceExemption: true,
-                mortgageInterestRelief: 0.20, // Limited to 20% tax credit
+                mortgageInterestRelief: 0.20,
                 deductions: {
                     rentalCharges: true,
-                    mortgageInterest: true, // But limited to 20% credit
+                    mortgageInterest: true,
                     propertyTax: true,
                     managementFees: true
                 },
@@ -98,18 +97,18 @@
                 flag: '🇺🇸',
                 currency: 'USD',
                 currencySymbol: '$',
-                notaryFees: 0, // No notary in USA
-                closingCosts: 0.035, // 3.5% average (title insurance, attorney, etc.)
-                propertyTaxRate: 0.012, // 1.2% average (varies by state: 0.3% HI to 2.5% NJ)
-                capitalGainsTax: 0.20, // 20% federal long-term (plus state)
-                stateTaxRate: 0.05, // Average state tax 5%
-                rentalIncomeTaxRate: 0.24, // 24% federal bracket
+                notaryFees: 0,
+                closingCosts: 0.035,
+                propertyTaxRate: 0.012,
+                capitalGainsTax: 0.20,
+                stateTaxRate: 0.05,
+                rentalIncomeTaxRate: 0.24,
                 primaryResidenceExemption: true,
                 primaryResidenceExclusionSingle: 250000,
                 primaryResidenceExclusionMarried: 500000,
                 depreciation: {
                     enabled: true,
-                    period: 27.5, // years for residential property
+                    period: 27.5,
                     rate: 1 / 27.5
                 },
                 deductions: {
@@ -121,7 +120,7 @@
                     insurance: true,
                     repairs: true
                 },
-                exchange1031: true, // Can defer capital gains
+                exchange1031: true,
                 notes: 'Property tax varies widely by state. Mortgage interest fully deductible for rentals.'
             },
             spain: {
@@ -129,21 +128,21 @@
                 flag: '🇪🇸',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 0.015, // 1.5%
-                transferTax: 0.08, // ITP 8% average (6-10% depending on region)
-                registrationFees: 0.005, // 0.5%
-                propertyTaxRate: 0.008, // IBI 0.8% of cadastral value
-                capitalGainsTax: 0.23, // 19-26% progressive (average 23%)
-                rentalIncomeTaxRate: 0.21, // 19-26% progressive
-                nonResidentTax: 0.24, // 24% for EU non-residents
-                rentalDeduction: 0.60, // 60% deduction for long-term rentals
+                notaryFees: 0.015,
+                transferTax: 0.08,
+                registrationFees: 0.005,
+                propertyTaxRate: 0.008,
+                capitalGainsTax: 0.23,
+                rentalIncomeTaxRate: 0.21,
+                nonResidentTax: 0.24,
+                rentalDeduction: 0.60,
                 primaryResidenceExemption: true,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: false,
                     propertyTax: true,
                     managementFees: true,
-                    longTermRental: 0.60 // 60% deduction
+                    longTermRental: 0.60
                 },
                 notes: 'Transfer tax (ITP) varies by region: Catalonia 10%, Madrid 6%, Andalusia 8%'
             },
@@ -152,23 +151,22 @@
                 flag: '🇵🇹',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 2000, // Fixed ~€2000
+                notaryFees: 2000,
                 transferTax: function(price, isPrimary) {
-                    // IMT calculator
                     if (isPrimary && price <= 92407) return 0;
                     if (price <= 550000) return price * 0.06;
                     return price * 0.08;
                 },
-                stampDuty: 0.008, // 0.8%
-                registrationFees: 500, // Fixed ~€500
-                propertyTaxRate: 0.005, // IMI 0.3-0.8% average 0.5%
-                capitalGainsTax: 0.24, // 50% of gain taxed at 48% marginal = ~24% effective
-                rentalIncomeTaxFlat: 0.28, // Option 1: 28% flat
-                rentalIncomeTaxMarginal: 0.48, // Option 2: Up to 48%
+                stampDuty: 0.008,
+                registrationFees: 500,
+                propertyTaxRate: 0.005,
+                capitalGainsTax: 0.24,
+                rentalIncomeTaxFlat: 0.28,
+                rentalIncomeTaxMarginal: 0.48,
                 primaryResidenceExemption: false,
                 nhrRegime: {
                     enabled: true,
-                    duration: 10, // 10 years
+                    duration: 10,
                     exemptions: ['foreign income', 'pensions']
                 },
                 deductions: {
@@ -184,18 +182,18 @@
                 flag: '🇩🇪',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 0.015, // 1.5%
-                transferTax: 0.05, // Grunderwerbsteuer 3.5-6.5% (average 5%)
-                registrationFees: 0.005, // 0.5%
-                propertyTaxRate: 0.003, // Grundsteuer ~0.3% (varies)
-                capitalGainsTax: 0.45, // Marginal rate up to 45% + 5.5% solidarity
-                solidaritySurcharge: 0.055, // 5.5% on income tax
-                rentalIncomeTaxRate: 0.42, // 42% marginal rate
-                capitalGainsExemption: 10, // Exempt if held >10 years
+                notaryFees: 0.015,
+                transferTax: 0.05,
+                registrationFees: 0.005,
+                propertyTaxRate: 0.003,
+                capitalGainsTax: 0.45,
+                solidaritySurcharge: 0.055,
+                rentalIncomeTaxRate: 0.42,
+                capitalGainsExemption: 10,
                 depreciation: {
                     enabled: true,
-                    period: 50, // years
-                    rate: 0.02 // 2% per year
+                    period: 50,
+                    rate: 0.02
                 },
                 primaryResidenceExemption: false,
                 deductions: {
@@ -213,15 +211,15 @@
                 flag: '🇨🇭',
                 currency: 'CHF',
                 currencySymbol: 'CHF',
-                notaryFees: 0.01, // 1%
-                transferTax: 0.02, // 1-3% depending on canton (average 2%)
-                registrationFees: 0.005, // 0.5%
-                propertyTaxRate: 0.002, // 0.1-0.3% average 0.2%
-                capitalGainsTax: 0.30, // 10-50% depending on canton & holding (average 30%)
-                federalIncomeTax: 0.085, // 0.77-11.5% progressive (average 8.5%)
-                cantonalIncomeTax: 0.10, // Varies by canton (average 10%)
-                wealthTax: 0.005, // 0.3-1% on net assets (average 0.5%)
-                imputedRentalValue: true, // Taxed even if owner-occupied
+                notaryFees: 0.01,
+                transferTax: 0.02,
+                registrationFees: 0.005,
+                propertyTaxRate: 0.002,
+                capitalGainsTax: 0.30,
+                federalIncomeTax: 0.085,
+                cantonalIncomeTax: 0.10,
+                wealthTax: 0.005,
+                imputedRentalValue: true,
                 deductions: {
                     rentalCharges: true,
                     mortgageInterest: true,
@@ -236,15 +234,15 @@
                 flag: '🇮🇹',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 0.02, // 1-2.5% average 2%
+                notaryFees: 0.02,
                 registrationTax: function(isPrimary) {
-                    return isPrimary ? 0.02 : 0.09; // 2% primary, 9% secondary
+                    return isPrimary ? 0.02 : 0.09;
                 },
-                minimumRegistrationTax: 1000, // Minimum €1000
-                propertyTaxRate: 0.008, // IMU 0.4-1.06% (average 0.8%, exempt for primary)
-                capitalGainsTax: 0.26, // 26% (exempt if primary held >5 years)
-                rentalIncomeTaxFlat: 0.21, // Cedolare Secca 21%
-                rentalIncomeTaxMarginal: 0.35, // Progressive 23-43% (average 35%)
+                minimumRegistrationTax: 1000,
+                propertyTaxRate: 0.008,
+                capitalGainsTax: 0.26,
+                rentalIncomeTaxFlat: 0.21,
+                rentalIncomeTaxMarginal: 0.35,
                 primaryResidenceExemption: true,
                 primaryResidencePropertyTaxExempt: true,
                 deductions: {
@@ -260,20 +258,20 @@
                 flag: '🇧🇪',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 5000, // Fixed ~€5000
+                notaryFees: 5000,
                 registrationDuty: function(region, isPrimary) {
-                    if (region === 'flanders' && isPrimary) return 0.03; // 3%
-                    if (region === 'flanders') return 0.12; // 12%
-                    return 0.125; // 12.5% Wallonia/Brussels
+                    if (region === 'flanders' && isPrimary) return 0.03;
+                    if (region === 'flanders') return 0.12;
+                    return 0.125;
                 },
-                propertyTaxRate: 0.01, // Précompte immobilier ~1%
-                capitalGainsTax: 0, // Exempt if not habitual seller
-                rentalIncomeTaxRate: 0.40, // Marginal rate 25-50% (average 40%)
+                propertyTaxRate: 0.01,
+                capitalGainsTax: 0,
+                rentalIncomeTaxRate: 0.40,
                 primaryResidenceExemption: true,
-                mortgageInterestDeduction: 0.40, // Deductible in Flanders (being phased out)
+                mortgageInterestDeduction: 0.40,
                 deductions: {
                     rentalCharges: true,
-                    mortgageInterest: true, // Only in Flanders, limited
+                    mortgageInterest: true,
                     propertyTax: true,
                     managementFees: true
                 },
@@ -284,22 +282,22 @@
                 flag: '🇳🇱',
                 currency: 'EUR',
                 currencySymbol: '€',
-                notaryFees: 2000, // Fixed ~€2000
+                notaryFees: 2000,
                 transferTax: function(isPrimary, age) {
-                    if (isPrimary && age < 35) return 0; // Exempt for first-time buyers <35
-                    if (isPrimary) return 0.02; // 2%
-                    return 0.104; // 10.4% for investment
+                    if (isPrimary && age < 35) return 0;
+                    if (isPrimary) return 0.02;
+                    return 0.104;
                 },
-                registrationFees: 500, // Fixed ~€500
-                propertyTaxRate: 0.002, // OZB 0.1-0.3% of WOZ value (average 0.2%)
-                capitalGainsTax: 0, // Not applicable (Box 3 wealth tax instead)
-                box3WealthTax: 0.012, // ~1.2% on net assets >€57,000
-                rentalIncomeTaxRate: 0.495, // 49.5% marginal rate (Box 1)
-                mortgageInterestDeduction: 0.495, // Fully deductible for primary residence
+                registrationFees: 500,
+                propertyTaxRate: 0.002,
+                capitalGainsTax: 0,
+                box3WealthTax: 0.012,
+                rentalIncomeTaxRate: 0.495,
+                mortgageInterestDeduction: 0.495,
                 primaryResidenceExemption: true,
                 deductions: {
                     rentalCharges: true,
-                    mortgageInterest: true, // Only for primary residence
+                    mortgageInterest: true,
                     propertyTax: false,
                     managementFees: true
                 },
@@ -390,155 +388,289 @@
             }
         },
         
-        // ========== LOAD MONTHLY SALARY FROM BUDGET DASHBOARD ==========
+        // ========== 🔧 CORRECTION : LOAD MONTHLY SALARY FROM BUDGET DASHBOARD ==========
         
         loadMonthlySalaryFromBudget: async function() {
             console.log('💰 Loading monthly salary from Budget Dashboard...');
             
+            const salaryInput = document.getElementById('inputMonthlySalary');
+            
             try {
-                // Try to load from SimulationManager (Budget Dashboard)
-                if (window.SimulationManager) {
-                    const currentSimName = window.SimulationManager.getCurrentSimulationName() || 'default';
-                    console.log(`🔄 Loading simulation "${currentSimName}" from Budget Dashboard...`);
+                let avgMonthlyIncome = 0;
+                let loadedFromCloud = false;
+                
+                // 🔧 MÉTHODE 1 : Essayer de charger depuis Firestore directement
+                if (firebase && firebase.auth && firebase.auth().currentUser) {
+                    const user = firebase.auth().currentUser;
+                    const db = firebase.firestore();
                     
-                    const budgetData = await window.SimulationManager.loadSimulation(currentSimName);
+                    console.log('🔄 Attempting to load from Firestore...');
                     
-                    if (budgetData && budgetData.data && Array.isArray(budgetData.data) && budgetData.data.length > 0) {
-                        // Calculate average monthly net income
-                        const totalIncome = budgetData.data.reduce((sum, row) => {
-                            const salary = parseFloat(row.salary) || 0;
-                            const otherIncome = parseFloat(row.otherIncome) || 0;
-                            return sum + salary + otherIncome;
-                        }, 0);
+                    try {
+                        // Essayer de charger toutes les simulations budget
+                        const snapshot = await db.collection('users')
+                            .doc(user.uid)
+                            .collection('budgetSimulations')
+                            .orderBy('updatedAt', 'desc')
+                            .limit(1)
+                            .get();
                         
-                        const avgMonthlyIncome = totalIncome / budgetData.data.length;
-                        
-                        this.currentSimulation.monthlySalary = avgMonthlyIncome;
-                        
-                        const salaryInput = document.getElementById('inputMonthlySalary');
-                        if (salaryInput) {
-                            salaryInput.value = avgMonthlyIncome.toFixed(2);
+                        if (!snapshot.empty) {
+                            const doc = snapshot.docs[0];
+                            const data = doc.data();
+                            
+                            console.log('✅ Found budget simulation in Firestore:', doc.id);
+                            
+                            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                                // Calculer le revenu mensuel moyen
+                                const totalIncome = data.data.reduce((sum, row) => {
+                                    const salary = parseFloat(row.salary) || 0;
+                                    const otherIncome = parseFloat(row.otherIncome) || 0;
+                                    return sum + salary + otherIncome;
+                                }, 0);
+                                
+                                avgMonthlyIncome = totalIncome / data.data.length;
+                                loadedFromCloud = true;
+                                
+                                console.log(`✅ Calculated average monthly income from Firestore: €${avgMonthlyIncome.toFixed(2)}`);
+                            }
+                        } else {
+                            console.warn('⚠ No budget simulations found in Firestore');
                         }
-                        
-                        console.log(`✅ Loaded average monthly income: €${avgMonthlyIncome.toFixed(2)}`);
-                        return;
+                    } catch (firestoreError) {
+                        console.error('❌ Firestore query error:', firestoreError);
                     }
                 }
                 
-                // Fallback to localStorage
-                const saved = localStorage.getItem('financialDataDynamic');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (Array.isArray(data) && data.length > 0) {
-                        const totalIncome = data.reduce((sum, row) => {
-                            const salary = parseFloat(row.salary) || 0;
-                            const otherIncome = parseFloat(row.otherIncome) || 0;
-                            return sum + salary + otherIncome;
-                        }, 0);
+                // 🔧 MÉTHODE 2 : Si pas trouvé dans Firestore, essayer SimulationManager
+                if (!loadedFromCloud && window.SimulationManager) {
+                    console.log('🔄 Trying SimulationManager...');
+                    
+                    try {
+                        const currentSimName = window.SimulationManager.getCurrentSimulationName() || 'default';
+                        console.log(`   Loading simulation "${currentSimName}"...`);
                         
-                        const avgMonthlyIncome = totalIncome / data.length;
-                        this.currentSimulation.monthlySalary = avgMonthlyIncome;
+                        const budgetData = await window.SimulationManager.loadSimulation(currentSimName);
                         
-                        const salaryInput = document.getElementById('inputMonthlySalary');
-                        if (salaryInput) {
-                            salaryInput.value = avgMonthlyIncome.toFixed(2);
+                        if (budgetData && budgetData.data && Array.isArray(budgetData.data) && budgetData.data.length > 0) {
+                            const totalIncome = budgetData.data.reduce((sum, row) => {
+                                const salary = parseFloat(row.salary) || 0;
+                                const otherIncome = parseFloat(row.otherIncome) || 0;
+                                return sum + salary + otherIncome;
+                            }, 0);
+                            
+                            avgMonthlyIncome = totalIncome / budgetData.data.length;
+                            loadedFromCloud = true;
+                            
+                            console.log(`✅ Loaded from SimulationManager: €${avgMonthlyIncome.toFixed(2)}`);
                         }
-                        
-                        console.log(`✅ Loaded from localStorage: €${avgMonthlyIncome.toFixed(2)}`);
-                        return;
+                    } catch (smError) {
+                        console.error('❌ SimulationManager error:', smError);
                     }
                 }
                 
-                console.warn('⚠ No budget data found. User must enter salary manually.');
+                // 🔧 MÉTHODE 3 : Fallback vers localStorage
+                if (!loadedFromCloud) {
+                    console.log('🔄 Trying localStorage...');
+                    
+                    const saved = localStorage.getItem('financialDataDynamic');
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            if (Array.isArray(data) && data.length > 0) {
+                                const totalIncome = data.reduce((sum, row) => {
+                                    const salary = parseFloat(row.salary) || 0;
+                                    const otherIncome = parseFloat(row.otherIncome) || 0;
+                                    return sum + salary + otherIncome;
+                                }, 0);
+                                
+                                avgMonthlyIncome = totalIncome / data.length;
+                                console.log(`✅ Loaded from localStorage: €${avgMonthlyIncome.toFixed(2)}`);
+                            }
+                        } catch (parseError) {
+                            console.error('❌ Error parsing localStorage:', parseError);
+                        }
+                    }
+                }
+                
+                // 🔧 Mettre à jour l'input
+                if (avgMonthlyIncome > 0) {
+                    this.currentSimulation.monthlySalary = avgMonthlyIncome;
+                    
+                    if (salaryInput) {
+                        salaryInput.value = avgMonthlyIncome.toFixed(2);
+                    }
+                    
+                    console.log(`✅ Final monthly salary set: €${avgMonthlyIncome.toFixed(2)}`);
+                    this.showNotification(`✅ Monthly salary loaded: €${avgMonthlyIncome.toFixed(2)}`, 'success');
+                } else {
+                    console.warn('⚠ No budget data found. User must enter salary manually.');
+                    this.showNotification('⚠ No salary data found. Please enter manually or fill Budget Dashboard first.', 'warning');
+                }
                 
             } catch (error) {
                 console.error('❌ Error loading salary from budget:', error);
+                this.showNotification('Error loading salary from budget', 'error');
             }
         },
         
-        // ========== EVENT LISTENERS ==========
+        // ========== 🔧 CORRECTION : EVENT LISTENERS ==========
         
         setupEventListeners: function() {
+            console.log('🔧 Setting up event listeners...');
+            
             const self = this;
             
-            // Country & Property Type change
+            // 🔧 Country & Property Type change
             const countrySelect = document.getElementById('selectCountry');
             const propertyTypeSelect = document.getElementById('selectPropertyType');
             
             if (countrySelect) {
                 countrySelect.addEventListener('change', function() {
+                    console.log('📍 Country changed to:', this.value);
                     self.currentSimulation.country = this.value;
                     self.updateCurrentInfo();
                 });
+            } else {
+                console.error('❌ Element #selectCountry not found!');
             }
             
             if (propertyTypeSelect) {
                 propertyTypeSelect.addEventListener('change', function() {
+                    console.log('🏠 Property type changed to:', this.value);
                     self.currentSimulation.propertyType = this.value;
                     self.updateCurrentInfo();
                     self.toggleRentalSection(this.value === 'rental');
                 });
+            } else {
+                console.error('❌ Element #selectPropertyType not found!');
             }
             
-            // Calculate Button
+            // 🔧 Calculate Button
             const btnCalculate = document.getElementById('btnCalculate');
             if (btnCalculate) {
-                btnCalculate.addEventListener('click', () => this.calculateResults());
+                btnCalculate.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🧮 Calculate button clicked!');
+                    self.calculateResults();
+                });
+                console.log('✅ Calculate button listener attached');
+            } else {
+                console.error('❌ Element #btnCalculate not found!');
             }
             
-            // Save Simulation Button
+            // 🔧 Save Simulation Button (top header)
             const btnSave = document.getElementById('btnSaveSimulation');
             if (btnSave) {
-                btnSave.addEventListener('click', () => this.openSaveModal());
+                btnSave.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('💾 Save button clicked!');
+                    self.openSaveModal();
+                });
+                console.log('✅ Save button listener attached');
+            } else {
+                console.warn('⚠ Element #btnSaveSimulation not found (may not exist on this page)');
             }
             
-            // Confirm Save
+            // 🔧 Confirm Save (inside modal)
             const btnConfirmSave = document.getElementById('btnConfirmSave');
             if (btnConfirmSave) {
-                btnConfirmSave.addEventListener('click', () => this.saveSimulation());
+                btnConfirmSave.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('✅ Confirm save clicked!');
+                    self.saveSimulation();
+                });
+                console.log('✅ Confirm save button listener attached');
+            } else {
+                console.warn('⚠ Element #btnConfirmSave not found');
             }
             
-            // New Simulation
+            // 🔧 New Simulation
             const btnNew = document.getElementById('btnNewSimulation');
             if (btnNew) {
-                btnNew.addEventListener('click', () => this.newSimulation());
+                btnNew.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('📄 New simulation button clicked!');
+                    self.newSimulation();
+                });
+                console.log('✅ New simulation button listener attached');
+            } else {
+                console.warn('⚠ Element #btnNewSimulation not found');
             }
             
-            // Rename Simulation
+            // 🔧 Rename Simulation
             const btnRename = document.getElementById('btnRenameSimulation');
             if (btnRename) {
-                btnRename.addEventListener('click', () => this.renameSimulation());
+                btnRename.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('✏ Rename button clicked!');
+                    self.renameSimulation();
+                });
+                console.log('✅ Rename button listener attached');
+            } else {
+                console.warn('⚠ Element #btnRenameSimulation not found');
             }
             
-            // Reload Salary
+            // 🔧 Reload Salary
             const btnLoadBudget = document.getElementById('btnLoadFromBudget');
             if (btnLoadBudget) {
-                btnLoadBudget.addEventListener('click', () => this.loadMonthlySalaryFromBudget());
+                btnLoadBudget.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔄 Reload salary button clicked!');
+                    self.loadMonthlySalaryFromBudget();
+                });
+                console.log('✅ Reload salary button listener attached');
+            } else {
+                console.warn('⚠ Element #btnLoadFromBudget not found');
             }
             
-            // Run Comparison
+            // 🔧 Run Comparison
             const btnComparison = document.getElementById('btnRunComparison');
             if (btnComparison) {
-                btnComparison.addEventListener('click', () => this.runMultiCountryComparison());
+                btnComparison.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🌍 Run comparison button clicked!');
+                    self.runMultiCountryComparison();
+                });
+                console.log('✅ Run comparison button listener attached');
+            } else {
+                console.warn('⚠ Element #btnRunComparison not found');
             }
             
-            // Refresh Simulations
+            // 🔧 Refresh Simulations
             const btnRefresh = document.getElementById('btnRefreshSimulations');
             if (btnRefresh) {
-                btnRefresh.addEventListener('click', () => this.loadSavedSimulations());
+                btnRefresh.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔄 Refresh simulations button clicked!');
+                    self.loadSavedSimulations();
+                });
+                console.log('✅ Refresh simulations button listener attached');
+            } else {
+                console.warn('⚠ Element #btnRefreshSimulations not found');
             }
             
-            // Export
+            // 🔧 Export
             const btnExport = document.getElementById('btnExport');
             if (btnExport) {
-                btnExport.addEventListener('click', () => this.exportToExcel());
+                btnExport.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('📤 Export button clicked!');
+                    self.exportToExcel();
+                });
+                console.log('✅ Export button listener attached');
+            } else {
+                console.warn('⚠ Element #btnExport not found');
             }
+            
+            console.log('✅ All event listeners setup complete!');
         },
         
         toggleRentalSection: function(show) {
             const section = document.getElementById('rentalIncomeSection');
             if (section) {
                 section.style.display = show ? 'block' : 'none';
+                console.log(`🏘 Rental section ${show ? 'shown' : 'hidden'}`);
             }
         },
         
@@ -581,6 +713,10 @@
             const occupancyRate = parseFloat(document.getElementById('inputOccupancyRate')?.value) || 90;
             const monthlyCharges = parseFloat(document.getElementById('inputMonthlyCharges')?.value) || 0;
             const vacancyProvision = parseFloat(document.getElementById('inputVacancyProvision')?.value) || 1;
+            
+            console.log('📊 Input values:', {
+                country, propertyType, purchasePrice, downPayment, interestRate, loanDuration, monthlySalary
+            });
             
             // Validation
             if (!country) {
@@ -636,6 +772,8 @@
             const results = this.performCalculations();
             this.currentSimulation.results = results;
             
+            console.log('✅ Calculations completed:', results);
+            
             // Update UI
             this.updateKPIs(results);
             this.updateBorrowingCapacity(results);
@@ -667,7 +805,6 @@
             const monthlyRate = sim.interestRate / 100 / 12;
             const numberOfPayments = sim.loanDuration * 12;
             
-            // Monthly mortgage payment (principal + interest)
             let monthlyPayment = 0;
             if (loanAmount > 0 && monthlyRate > 0) {
                 monthlyPayment = loanAmount * 
@@ -678,8 +815,6 @@
             results.loanAmount = loanAmount;
             results.monthlyPayment = monthlyPayment;
             results.numberOfPayments = numberOfPayments;
-            
-            // Total interest and amount paid
             results.totalAmountPaid = monthlyPayment * numberOfPayments;
             results.totalInterest = results.totalAmountPaid - loanAmount;
             
@@ -714,10 +849,10 @@
                     break;
                     
                 case 'portugal':
-                    notaryFees = rules.notaryFees; // Fixed
+                    notaryFees = rules.notaryFees;
                     transferTax = rules.transferTax(sim.purchasePrice, isPrimary);
                     stampDuty = sim.purchasePrice * rules.stampDuty;
-                    registrationFees = rules.registrationFees; // Fixed
+                    registrationFees = rules.registrationFees;
                     break;
                     
                 case 'germany':
@@ -739,14 +874,14 @@
                     break;
                     
                 case 'belgium':
-                    notaryFees = rules.notaryFees; // Fixed
+                    notaryFees = rules.notaryFees;
                     transferTax = sim.purchasePrice * rules.registrationDuty('flanders', isPrimary);
                     break;
                     
                 case 'netherlands':
-                    notaryFees = rules.notaryFees; // Fixed
-                    transferTax = sim.purchasePrice * rules.transferTax(isPrimary, 30); // Assume age 30
-                    registrationFees = rules.registrationFees; // Fixed
+                    notaryFees = rules.notaryFees;
+                    transferTax = sim.purchasePrice * rules.transferTax(isPrimary, 30);
+                    registrationFees = rules.registrationFees;
                     break;
             }
             
@@ -770,7 +905,7 @@
             results.annualPropertyTax = annualPropertyTax;
             results.monthlyPropertyTax = annualPropertyTax / 12;
             
-            // Insurance (estimate 0.3% annually)
+            // Insurance
             results.annualInsurance = sim.purchasePrice * 0.003;
             results.monthlyInsurance = results.annualInsurance / 12;
             
@@ -778,10 +913,9 @@
             results.totalMonthlyPayment = monthlyPayment + results.monthlyPropertyTax + results.monthlyInsurance;
             
             // ========== BORROWING CAPACITY ==========
-            const maxDebtRatio = 0.33; // 33% max
+            const maxDebtRatio = 0.33;
             const maxMonthlyPayment = sim.monthlySalary * maxDebtRatio;
             
-            // Calculate max borrowing capacity
             let maxBorrowingCapacity = 0;
             if (monthlyRate > 0) {
                 maxBorrowingCapacity = maxMonthlyPayment * 
@@ -807,12 +941,11 @@
                 
                 results.grossYield = (grossAnnualRent / sim.purchasePrice) * 100;
                 
-                // Net yield after taxes
                 let rentalTax = 0;
                 if (sim.country === 'spain' && rules.rentalDeduction) {
                     rentalTax = results.netAnnualRent * (1 - rules.rentalDeduction) * rules.rentalIncomeTaxRate;
                 } else if (sim.country === 'portugal') {
-                    rentalTax = results.netAnnualRent * rules.rentalIncomeTaxFlat; // Use flat rate
+                    rentalTax = results.netAnnualRent * rules.rentalIncomeTaxFlat;
                 } else {
                     rentalTax = results.netAnnualRent * (rules.rentalIncomeTaxRate || 0.30);
                 }
@@ -834,7 +967,6 @@
             // ========== AMORTIZATION SCHEDULE ==========
             results.amortizationSchedule = this.calculateAmortizationSchedule(loanAmount, monthlyRate, numberOfPayments, monthlyPayment);
             
-            console.log('✅ Calculations completed:', results);
             return results;
         },
         
@@ -861,7 +993,7 @@
         
         calculateWealthEvolution: function(sim, results) {
             const evolution = [];
-            const appreciationRate = 0.03; // 3% annual property appreciation
+            const appreciationRate = 0.03;
             const isRental = sim.propertyType === 'rental';
             
             let propertyValue = sim.purchasePrice;
@@ -872,7 +1004,6 @@
                 if (year > 0) {
                     propertyValue *= (1 + appreciationRate);
                     
-                    // Reduce loan balance
                     const annualPrincipal = results.monthlyPayment * 12 - (loanBalance * (sim.interestRate / 100));
                     loanBalance = Math.max(0, loanBalance - annualPrincipal);
                     
@@ -1031,7 +1162,6 @@
             document.getElementById('monthlyInsurance').textContent = this.formatCurrency(results.monthlyInsurance, rules.currencySymbol);
             document.getElementById('totalMonthlyPayment').textContent = this.formatCurrency(results.totalMonthlyPayment, rules.currencySymbol);
             
-            // Rental section
             const rentalCard = document.getElementById('rentalResultCard');
             if (rentalCard) {
                 rentalCard.style.display = isRental ? 'block' : 'none';
@@ -1051,13 +1181,11 @@
                 }
             }
             
-            // Investment metrics
             document.getElementById('grossYield').textContent = results.grossYield.toFixed(2) + '%';
             document.getElementById('netYield').textContent = results.netYield.toFixed(2) + '%';
             document.getElementById('totalInterest').textContent = this.formatCurrency(results.totalInterest, rules.currencySymbol);
             document.getElementById('totalAmountPaid').textContent = this.formatCurrency(results.totalAmountPaid, rules.currencySymbol);
             
-            // Cashflow chart visibility
             const cashflowContainer = document.getElementById('cashflowChartContainer');
             if (cashflowContainer) {
                 cashflowContainer.style.display = isRental ? 'block' : 'none';
@@ -1336,6 +1464,8 @@
             
             this.displayComparison(comparisonData);
             this.createComparisonChart(comparisonData);
+            
+            this.showNotification('✅ Multi-country comparison completed!', 'success');
         },
         
         displayComparison: function(data) {
@@ -1437,6 +1567,8 @@
         // ========== SAVE/LOAD SIMULATIONS ==========
         
         openSaveModal: function() {
+            console.log('💾 Opening save modal...');
+            
             if (!this.currentSimulation.results) {
                 alert('Please calculate results first');
                 return;
@@ -1452,10 +1584,15 @@
                 }
                 
                 modal.classList.add('active');
+                console.log('✅ Save modal opened');
+            } else {
+                console.error('❌ Modal #modalSaveSimulation not found!');
             }
         },
         
         saveSimulation: async function() {
+            console.log('💾 Saving simulation...');
+            
             const name = document.getElementById('simulationName').value.trim();
             const notes = document.getElementById('simulationNotes').value.trim();
             
@@ -1476,14 +1613,12 @@
                 this.currentSimulation.id = 'local_' + Date.now();
             }
             
-            // Save to Firestore
             const savedId = await this.saveToFirestore(this.currentSimulation);
             
             if (savedId) {
                 this.currentSimulation.id = savedId;
             }
             
-            // Update local array
             const index = this.savedSimulations.findIndex(s => s.id === this.currentSimulation.id);
             if (index !== -1) {
                 this.savedSimulations[index] = JSON.parse(JSON.stringify(this.currentSimulation));
@@ -1712,7 +1847,6 @@
             
             this.currentSimulation = JSON.parse(JSON.stringify(sim));
             
-            // Populate form
             document.getElementById('selectCountry').value = sim.country;
             document.getElementById('selectPropertyType').value = sim.propertyType;
             document.getElementById('inputPurchasePrice').value = sim.purchasePrice;
@@ -1774,10 +1908,8 @@
                 return;
             }
             
-            // Remove from local array
             this.savedSimulations = this.savedSimulations.filter(s => s.id !== simId);
             
-            // Delete from Firestore
             const isLocalId = simId.toString().startsWith('local_');
             if (!isLocalId && firebase && firebase.auth && firebase.auth().currentUser) {
                 try {
@@ -1823,7 +1955,6 @@
                     results: null
                 };
                 
-                // Reset form
                 document.getElementById('selectCountry').value = '';
                 document.getElementById('selectPropertyType').value = '';
                 document.getElementById('inputPurchasePrice').value = '';
@@ -1839,12 +1970,14 @@
                 this.toggleRentalSection(false);
                 this.updateCurrentInfo();
                 
-                // Hide result sections
                 document.getElementById('borrowingCapacitySection').style.display = 'none';
                 document.getElementById('taxFeesSection').style.display = 'none';
                 document.getElementById('financialResultsSection').style.display = 'none';
                 document.getElementById('chartsSection').style.display = 'none';
                 document.getElementById('comparisonSection').style.display = 'none';
+                
+                // Reload salary
+                this.loadMonthlySalaryFromBudget();
                 
                 this.showNotification('✅ New simulation created', 'success');
             }
@@ -1903,6 +2036,7 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
+                console.log(`✅ Modal ${modalId} closed`);
             }
         },
         
@@ -1910,13 +2044,13 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.add('active');
+                console.log(`✅ Modal ${modalId} opened`);
             }
         },
         
         showNotification: function(message, type = 'info') {
             console.log(`[${type.toUpperCase()}] ${message}`);
             
-            // Create notification element
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
@@ -1932,6 +2066,7 @@
                 z-index: 10000;
                 font-weight: 600;
                 animation: slideIn 0.3s ease;
+                max-width: 400px;
             `;
             
             document.body.appendChild(notification);
