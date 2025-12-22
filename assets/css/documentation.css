@@ -1,6 +1,6 @@
 /* ============================================
-   DOCUMENTATION.CSS - Version Premium Responsive
-   Design ultra-professionnel PC & Mobile 100% fonctionnel
+   DOCUMENTATION.CSS - Version Ultra-Compacte Mobile
+   Design ultra-professionnel PC & Mobile sans débordement
    Basé sur la référence resources.css
    ============================================ */
 
@@ -1375,510 +1375,718 @@ body.dark-mode .help-card p {
 }
 
 /* ============================================
-   RESPONSIVE DESIGN - MOBILE
+   RESPONSIVE DESIGN - MOBILE (768px)
+   ✅ RÉDUCTION ULTRA-COMPACTE
    ============================================ */
 
 @media (max-width: 768px) {
+    /* ✅ PADDING CONTAINER MINIMAL (CLEF ANTI-DÉBORDEMENT) */
     .doc-container {
-        padding: 1rem 0.75rem 2rem;
-        gap: 1rem;
+        padding: 0.75rem 0.5rem 1.5rem 0.5rem !important;
+        gap: 0.75rem;
     }
 
+    /* ✅ ARTICLE COMPACT */
     .doc-article {
-        padding: 1.5rem 1.25rem;
-        border-radius: 20px;
+        padding: 1rem 0.75rem !important;
+        border-radius: 12px;
+        margin: 0;
     }
 
-    /* Header mobile */
+    /* ✅ HEADER MOBILE STACK */
     .top-header .header-content-wrapper {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
-        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+        padding: 0.5rem !important;
     }
 
     .top-header .header-right {
         width: 100%;
     }
 
+    /* ✅ BOUTON BACK FULL WIDTH */
     .btn-back-dashboard {
         width: 100%;
         justify-content: center;
-        padding: 0.75rem 1.25rem;
-        font-size: 0.875rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
     }
 
-    /* Titres */
+    /* ✅ TITRES RÉDUITS */
     .page-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem !important;
         gap: 0.5rem;
     }
 
     .section-title {
-        font-size: 1.375rem;
-        gap: 0.75rem;
-        margin: 2rem 0 1rem 0;
+        font-size: 1.125rem !important;
+        gap: 0.5rem;
+        margin: 1.5rem 0 1rem 0 !important;
     }
 
     .category-title,
     .toc-title {
-        font-size: 1rem;
+        font-size: 0.9375rem !important;
+        gap: 0.5rem;
     }
 
-    /* Breadcrumb */
+    /* ✅ BREADCRUMB COMPACT */
     .breadcrumb {
-        padding: 0.75rem 0;
-        font-size: 0.8125rem;
-    }
-
-    /* Doc intro */
-    .doc-intro {
-        padding: 1.25rem;
-    }
-
-    .doc-intro p {
-        font-size: 1rem;
-    }
-
-    /* TOC */
-    .toc-box {
-        padding: 1.5rem;
-    }
-
-    /* Step box */
-    .step-box {
-        flex-direction: column;
-        padding: 1.5rem;
-        gap: 1rem;
-    }
-
-    .step-number {
-        width: 40px;
-        height: 40px;
-        font-size: 1.125rem;
-    }
-
-    .step-content h4 {
-        font-size: 1rem;
-    }
-
-    .step-content p {
-        font-size: 0.9375rem;
-    }
-
-    /* Info boxes */
-    .info-box,
-    .success-box,
-    .warning-box,
-    .danger-box {
-        padding: 1rem;
-        gap: 0.75rem;
-    }
-
-    .info-box i,
-    .success-box i,
-    .warning-box i,
-    .danger-box i {
-        font-size: 1.25rem;
-    }
-
-    .info-box p,
-    .success-box p,
-    .warning-box p,
-    .danger-box p {
-        font-size: 0.9375rem;
-    }
-
-    /* Code */
-    .code-example {
-        margin: 1rem 0;
-    }
-
-    .code-header {
-        padding: 0.625rem 1rem;
-    }
-
-    .code-header span {
-        font-size: 0.8125rem;
-    }
-
-    .code-body {
-        padding: 1.25rem;
-    }
-
-    .code-body pre {
-        font-size: 0.8125rem;
-    }
-
-    .numbered-steps > li {
-        padding-left: 2rem;
-        font-size: 0.9375rem;
-    }
-
-    .numbered-steps > li::before {
-        width: 24px;
-        height: 24px;
+        padding: 0.5rem 0;
         font-size: 0.75rem;
+        gap: 0.5rem;
     }
 
-    /* Tables */
-    .data-table-wrapper {
-        margin: 1.5rem 0;
+    .breadcrumb i {
+        font-size: 0.625rem;
     }
 
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-    }
-
-    /* Grids */
-    .feature-grid,
-    .next-steps-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .feature-card,
-    .next-step-card {
-        padding: 1.5rem;
-    }
-
-    .feature-card i,
-    .next-step-card i {
-        font-size: 2rem;
-    }
-
-    .feature-card h4,
-    .next-step-card h4 {
-        font-size: 1rem;
-    }
-
-    .feature-card p,
-    .next-step-card p {
-        font-size: 0.875rem;
-    }
-
-    /* CTA */
-    .cta-box {
-        padding: 2rem 1.5rem;
-    }
-
-    .cta-box h3 {
-        font-size: 1.25rem;
-    }
-
-    .cta-box p {
-        font-size: 0.9375rem;
-    }
-
-    .btn-cta {
-        padding: 0.875rem 1.75rem;
-        font-size: 0.875rem;
-    }
-
-    /* Help card */
-    .help-card {
-        padding: 1.25rem;
-    }
-
-    .help-card i {
-        font-size: 1.75rem;
-    }
-
-    .help-card h5 {
-        font-size: 0.9375rem;
-    }
-
-    .help-card p {
-        font-size: 0.8125rem;
-    }
-
-    .help-card a {
-        padding: 0.5rem 1rem;
-        font-size: 0.8125rem;
-    }
-
-    /* Sections */
-    .doc-section {
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-    }
-
-    .doc-section p {
-        font-size: 0.9375rem;
-    }
-
-    .doc-section li {
-        font-size: 0.9375rem;
-    }
-
-    .doc-section h3 {
-        font-size: 1.125rem;
-    }
-
-    .doc-section h4 {
-        font-size: 1rem;
-    }
-
-    .doc-section code {
-        font-size: 0.8125rem;
-    }
-
-    /* Footer */
-    .doc-footer {
-        margin-top: 3rem;
-        padding-top: 1.5rem;
-    }
-
-    /* Doc meta */
+    /* ✅ DOC META STACK */
     .doc-meta {
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .doc-time,
     .doc-updated {
-        font-size: 0.8125rem;
-    }
-}
-
-/* ============================================
-   RESPONSIVE DESIGN - SMALL MOBILE
-   ============================================ */
-
-@media (max-width: 480px) {
-    .doc-container {
-        padding: 0.75rem 0.5rem 1.5rem;
-    }
-
-    .doc-article {
-        padding: 1.25rem 1rem;
-        border-radius: 16px;
-    }
-
-    /* Titres */
-    .page-title {
-        font-size: 1.25rem;
-    }
-
-    .section-title {
-        font-size: 1.125rem;
-        margin: 1.5rem 0 0.75rem 0;
-    }
-
-    .category-title,
-    .toc-title {
-        font-size: 0.9375rem;
-    }
-
-    /* Breadcrumb */
-    .breadcrumb {
         font-size: 0.75rem;
-        gap: 0.5rem;
     }
 
-    /* Doc intro */
+    /* ✅ DOC INTRO COMPACT */
     .doc-intro {
-        padding: 1rem;
+        padding: 0.75rem !important;
+        margin-bottom: 1rem;
+        border-radius: 8px;
     }
 
     .doc-intro p {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        line-height: 1.6;
     }
 
-    /* TOC */
+    /* ✅ TOC BOX COMPACT */
     .toc-box {
-        padding: 1.25rem 1rem;
+        padding: 1rem 0.75rem !important;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
     }
 
     .toc-list li {
-        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
     }
 
-    /* Step box */
+    .toc-list a {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        gap: 0.75rem;
+    }
+
+    .toc-list a::before {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6875rem;
+    }
+
+    /* ✅ STEP BOX STACK */
     .step-box {
-        padding: 1.25rem 1rem;
+        flex-direction: column;
+        padding: 1rem 0.75rem !important;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
     }
 
     .step-number {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1rem !important;
+        border-radius: 8px;
     }
 
     .step-content h4 {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        margin: 0 0 0.5rem 0 !important;
     }
 
     .step-content p {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
     }
 
-    /* Info boxes */
+    .step-content ul {
+        padding-left: 1.25rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .step-content li {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.375rem;
+    }
+
+    /* ✅ INFO BOXES COMPACT */
     .info-box,
     .success-box,
     .warning-box,
     .danger-box {
-        padding: 0.875rem;
+        padding: 0.75rem !important;
+        gap: 0.625rem;
+        margin: 1rem 0;
+        border-radius: 8px;
     }
 
     .info-box i,
     .success-box i,
     .warning-box i,
     .danger-box i {
-        font-size: 1.125rem;
+        font-size: 1.125rem !important;
     }
 
     .info-box p,
     .success-box p,
     .warning-box p,
     .danger-box p {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        line-height: 1.6;
     }
 
-    /* Code */
+    .info-box ul,
+    .success-box ul,
+    .warning-box ul,
+    .danger-box ul {
+        padding-left: 1.25rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .info-box li,
+    .success-box li,
+    .warning-box li,
+    .danger-box li {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ CODE COMPACT */
+    .code-example {
+        margin: 1rem 0;
+        border-radius: 8px;
+    }
+
     .code-header {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.75rem !important;
     }
 
     .code-header span {
         font-size: 0.75rem;
     }
 
+    .code-copy-btn {
+        padding: 0.375rem;
+        font-size: 0.875rem;
+    }
+
     .code-body {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem !important;
     }
 
     .code-body pre {
-        font-size: 0.75rem;
+        font-size: 0.75rem !important;
+        line-height: 1.5;
     }
 
     .numbered-steps > li {
         padding-left: 1.75rem;
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        margin-bottom: 1rem;
     }
 
     .numbered-steps > li::before {
-        width: 20px;
-        height: 20px;
-        font-size: 0.6875rem;
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 0.6875rem !important;
+        border-radius: 6px;
     }
 
     .numbered-steps code {
-        font-size: 0.75rem;
+        font-size: 0.75rem !important;
+        padding: 0.125rem 0.375rem;
     }
 
-    /* Tables */
+    .numbered-steps ul {
+        padding-left: 1.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .numbered-steps ul li {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ TABLES SCROLL */
+    .data-table-wrapper {
+        margin: 1rem 0;
+        border-radius: 12px;
+    }
+
     .comparison-table th,
     .comparison-table td {
-        padding: 0.625rem 0.75rem;
-        font-size: 0.8125rem;
+        padding: 0.625rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap;
     }
 
-    /* Cards */
+    /* ✅ GRIDS 1 COLONNE */
+    .feature-grid,
+    .next-steps-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
     .feature-card,
     .next-step-card {
-        padding: 1.25rem 1rem;
+        padding: 1rem 0.75rem !important;
+        border-radius: 12px;
     }
 
     .feature-card i,
     .next-step-card i {
-        font-size: 1.75rem;
+        font-size: 1.75rem !important;
+        margin-bottom: 0.75rem;
     }
 
     .feature-card h4,
     .next-step-card h4 {
-        font-size: 0.9375rem;
+        font-size: 0.875rem !important;
+        margin-bottom: 0.375rem;
     }
 
     .feature-card p,
     .next-step-card p {
-        font-size: 0.8125rem;
+        font-size: 0.75rem !important;
+        line-height: 1.5;
     }
 
-    /* CTA */
+    /* ✅ CTA BOX COMPACT */
     .cta-box {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1rem !important;
+        border-radius: 12px;
     }
 
     .cta-box h3 {
-        font-size: 1.125rem;
+        font-size: 1rem !important;
+        margin-bottom: 0.5rem;
     }
 
     .cta-box p {
-        font-size: 0.875rem;
+        font-size: 0.8125rem !important;
+        margin-bottom: 1rem;
     }
 
     .btn-cta {
-        padding: 0.75rem 1.5rem;
-        font-size: 0.8125rem;
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.8125rem !important;
+        gap: 0.5rem;
+        border-radius: 8px;
     }
 
-    /* Help card */
+    /* ✅ HELP CARD COMPACT */
     .help-card {
-        padding: 1rem;
+        padding: 1rem 0.75rem !important;
+        border-radius: 12px;
     }
 
     .help-card i {
-        font-size: 1.5rem;
+        font-size: 1.5rem !important;
+        margin-bottom: 0.625rem;
     }
 
     .help-card h5 {
-        font-size: 0.875rem;
+        font-size: 0.875rem !important;
+        margin-bottom: 0.375rem;
     }
 
     .help-card p {
-        font-size: 0.75rem;
+        font-size: 0.75rem !important;
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
     }
 
     .help-card a {
-        padding: 0.5rem 0.875rem;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px;
+    }
+
+    /* ✅ DOC SECTIONS COMPACT */
+    .doc-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .doc-section p {
+        font-size: 0.8125rem !important;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .doc-section ul,
+    .doc-section ol {
+        padding-left: 1.25rem;
+        margin: 1rem 0;
+    }
+
+    .doc-section li {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.5rem;
+        line-height: 1.6;
+    }
+
+    .doc-section h3 {
+        font-size: 1rem !important;
+        margin: 1.5rem 0 0.75rem 0 !important;
+    }
+
+    .doc-section h4 {
+        font-size: 0.875rem !important;
+        margin: 1.25rem 0 0.5rem 0 !important;
+    }
+
+    .doc-section code {
+        font-size: 0.75rem !important;
+        padding: 0.125rem 0.375rem;
+    }
+
+    /* ✅ DOC FOOTER COMPACT */
+    .doc-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+    }
+
+    /* ✅ DOC HEADER COMPACT */
+    .doc-header {
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+    }
+
+    /* ✅ DOC NAV HORIZONTAL SCROLL */
+    .doc-nav {
+        padding: 0.5rem !important;
+        gap: 0.375rem;
+        border-radius: 12px;
+    }
+
+    .doc-nav a {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px;
+    }
+
+    .doc-sidebar h4 {
+        font-size: 0.8125rem !important;
+        margin-bottom: 0.625rem;
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - SMALL MOBILE (480px)
+   ✅ RÉDUCTION MAXIMALE
+   ============================================ */
+
+@media (max-width: 480px) {
+    /* ✅ PADDING ULTRA-MINIMAL */
+    .doc-container {
+        padding: 0.5rem 0.375rem 1rem 0.375rem !important;
+        gap: 0.5rem;
+    }
+
+    /* ✅ ARTICLE ULTRA-COMPACT */
+    .doc-article {
+        padding: 0.75rem 0.5rem !important;
+        border-radius: 10px;
+    }
+
+    /* ✅ TITRES MICRO */
+    .page-title {
+        font-size: 1rem !important;
+        gap: 0.375rem;
+    }
+
+    .section-title {
+        font-size: 0.9375rem !important;
+        gap: 0.375rem;
+        margin: 1rem 0 0.75rem 0 !important;
+    }
+
+    .category-title,
+    .toc-title {
+        font-size: 0.875rem !important;
+    }
+
+    /* ✅ BREADCRUMB MICRO */
+    .breadcrumb {
+        font-size: 0.6875rem;
+        gap: 0.375rem;
+        padding: 0.375rem 0;
+    }
+
+    .breadcrumb i {
+        font-size: 0.5625rem;
+    }
+
+    /* ✅ DOC META MICRO */
+    .doc-time,
+    .doc-updated {
+        font-size: 0.6875rem;
+    }
+
+    /* ✅ DOC INTRO MICRO */
+    .doc-intro {
+        padding: 0.625rem !important;
+        border-radius: 6px;
+    }
+
+    .doc-intro p {
+        font-size: 0.8125rem !important;
+    }
+
+    /* ✅ TOC BOX MICRO */
+    .toc-box {
+        padding: 0.75rem 0.5rem !important;
+        border-radius: 10px;
+    }
+
+    .toc-list a {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .toc-list a::before {
+        width: 20px;
+        height: 20px;
+        font-size: 0.625rem;
+    }
+
+    /* ✅ STEP BOX MICRO */
+    .step-box {
+        padding: 0.75rem 0.5rem !important;
+        gap: 0.5rem;
+        border-radius: 8px;
+    }
+
+    .step-number {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.875rem !important;
+        border-radius: 6px;
+    }
+
+    .step-content h4 {
+        font-size: 0.8125rem !important;
+    }
+
+    .step-content p {
+        font-size: 0.75rem !important;
+    }
+
+    .step-content li {
+        font-size: 0.75rem !important;
+    }
+
+    /* ✅ INFO BOXES MICRO */
+    .info-box,
+    .success-box,
+    .warning-box,
+    .danger-box {
+        padding: 0.625rem !important;
+        gap: 0.5rem;
+        border-radius: 6px;
+    }
+
+    .info-box i,
+    .success-box i,
+    .warning-box i,
+    .danger-box i {
+        font-size: 1rem !important;
+    }
+
+    .info-box p,
+    .success-box p,
+    .warning-box p,
+    .danger-box p {
+        font-size: 0.75rem !important;
+    }
+
+    .info-box li,
+    .success-box li,
+    .warning-box li,
+    .danger-box li {
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ CODE MICRO */
+    .code-header {
+        padding: 0.375rem 0.5rem !important;
+    }
+
+    .code-header span {
+        font-size: 0.6875rem;
+    }
+
+    .code-copy-btn {
+        padding: 0.25rem;
         font-size: 0.75rem;
     }
 
-    /* Sections */
+    .code-body {
+        padding: 0.625rem !important;
+    }
+
+    .code-body pre {
+        font-size: 0.6875rem !important;
+    }
+
+    .numbered-steps > li {
+        padding-left: 1.5rem;
+        font-size: 0.75rem !important;
+    }
+
+    .numbered-steps > li::before {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.625rem !important;
+    }
+
+    .numbered-steps code {
+        font-size: 0.6875rem !important;
+    }
+
+    .numbered-steps ul li {
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ TABLES MICRO */
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.5rem 0.5rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ CARDS MICRO */
+    .feature-card,
+    .next-step-card {
+        padding: 0.75rem 0.5rem !important;
+        border-radius: 10px;
+    }
+
+    .feature-card i,
+    .next-step-card i {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-card h4,
+    .next-step-card h4 {
+        font-size: 0.8125rem !important;
+    }
+
+    .feature-card p,
+    .next-step-card p {
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ CTA BOX MICRO */
+    .cta-box {
+        padding: 1rem 0.75rem !important;
+        border-radius: 10px;
+    }
+
+    .cta-box h3 {
+        font-size: 0.9375rem !important;
+    }
+
+    .cta-box p {
+        font-size: 0.75rem !important;
+    }
+
+    .btn-cta {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px;
+    }
+
+    /* ✅ HELP CARD MICRO */
+    .help-card {
+        padding: 0.75rem 0.5rem !important;
+        border-radius: 10px;
+    }
+
+    .help-card i {
+        font-size: 1.25rem !important;
+    }
+
+    .help-card h5 {
+        font-size: 0.8125rem !important;
+    }
+
+    .help-card p {
+        font-size: 0.6875rem !important;
+    }
+
+    .help-card a {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ DOC SECTIONS MICRO */
     .doc-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         padding-bottom: 1rem;
     }
 
     .doc-section p {
-        font-size: 0.875rem;
+        font-size: 0.75rem !important;
     }
 
     .doc-section li {
-        font-size: 0.875rem;
+        font-size: 0.75rem !important;
     }
 
     .doc-section h3 {
-        font-size: 1rem;
+        font-size: 0.9375rem !important;
+        margin: 1.25rem 0 0.5rem 0 !important;
     }
 
     .doc-section h4 {
-        font-size: 0.9375rem;
+        font-size: 0.8125rem !important;
+        margin: 1rem 0 0.375rem 0 !important;
     }
 
     .doc-section code {
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ DOC NAV MICRO */
+    .doc-nav a {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.6875rem !important;
+    }
+
+    /* ✅ BOUTON BACK MICRO */
+    .btn-back-dashboard {
+        padding: 0.5rem 0.875rem;
         font-size: 0.75rem;
     }
 
-    /* Footer */
+    /* ✅ DOC FOOTER MICRO */
     .doc-footer {
-        margin-top: 2rem;
+        margin-top: 1.5rem;
         padding-top: 1rem;
     }
 
-    /* Nav */
-    .doc-nav a {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-    }
-
-    /* Bouton back */
-    .btn-back-dashboard {
-        padding: 0.625rem 1rem;
-        font-size: 0.8125rem;
+    .doc-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
     }
 }
 
