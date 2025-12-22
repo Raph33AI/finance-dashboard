@@ -958,104 +958,32 @@ async function getEffectiveUserPlan() {
 // VÉRIFIER ET INCRÉMENTER LE QUOTA CHATBOT
 // ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-// VÉRIFIER ET INCRÉMENTER LE QUOTA CHATBOT (VERSION CORRIGÉE)
-// ═══════════════════════════════════════════════════════════════
-
 async function canUseChatbot() {
+    const userInfo = await getEffectiveUserPlan();
+    const { plan, limits, userId } = userInfo;
+    
+    console.log('🤖 Checking chatbot quota for plan: ' + plan);
+    
+    // Vérifier si le chatbot est activé pour ce plan
+    if (!limits.chatbot.enabled) {
+        console.warn('⛔ Chatbot disabled for plan: ' + plan);
+        return {
+            allowed: false,
+            reason: 'chatbot_disabled',
+            message: 'Chatbot access requires a paid subscription plan.',
+            upgradeRequired: 'basic'
+        };
+    }
+    
+    // Si illimité
+    if (limits.chatbot.dailyLimit === -1) {
+        console.log('✅ Unlimited chatbot access');
+        return { allowed: true, remaining: -1 };
+    }
+    
+    // Vérifier le quota journalier
     try {
-        console.log('🤖 [CHATBOT QUOTA] Starting verification...');
-        
-        // ✅ VÉRIFICATION 1: Firebase Auth disponible
-        if (typeof firebase === 'undefined' || !firebase.auth) {
-            console.error('❌ Firebase Auth not available');
-            return {
-                allowed: false,
-                reason: 'firebase_unavailable',
-                message: 'Authentication system not available. Please refresh the page.',
-                current: 0,
-                limit: 0,
-                upgradeRequired: 'basic'
-            };
-        }
-        
-        // ✅ VÉRIFICATION 2: Utilisateur connecté
-        const user = firebase.auth().currentUser;
-        
-        if (!user) {
-            console.error('❌ User not logged in');
-            return {
-                allowed: false,
-                reason: 'not_authenticated',
-                message: 'Please log in to use the chatbot.',
-                current: 0,
-                limit: 0,
-                upgradeRequired: 'basic'
-            };
-        }
-        
-        console.log('✅ User authenticated:', user.email);
-        
-        // ✅ VÉRIFICATION 3: Récupérer le plan utilisateur
-        const userInfo = await getEffectiveUserPlan();
-        const { plan, limits, userId } = userInfo;
-        
-        if (!userId) {
-            console.error('❌ User ID not found');
-            return {
-                allowed: false,
-                reason: 'user_id_missing',
-                message: 'User ID not found. Please log out and log back in.',
-                current: 0,
-                limit: 0,
-                upgradeRequired: 'basic'
-            };
-        }
-        
-        console.log('📊 User plan:', plan);
-        console.log('📊 Chatbot limits:', limits.chatbot);
-        
-        // ✅ VÉRIFICATION 4: Chatbot activé pour ce plan
-        if (!limits || !limits.chatbot || !limits.chatbot.enabled) {
-            console.warn('⛔ Chatbot disabled for plan:', plan);
-            return {
-                allowed: false,
-                reason: 'chatbot_disabled',
-                message: 'Chatbot access requires a paid subscription plan. Upgrade to Basic or higher.',
-                current: 0,
-                limit: 0,
-                upgradeRequired: 'basic'
-            };
-        }
-        
-        // ✅ VÉRIFICATION 5: Accès illimité
-        if (limits.chatbot.dailyLimit === -1) {
-            console.log('✅ Unlimited chatbot access for plan:', plan);
-            return { 
-                allowed: true, 
-                remaining: -1,
-                current: 0,
-                limit: -1
-            };
-        }
-        
-        // ✅ VÉRIFICATION 6: Firestore disponible
-        if (!firebase.firestore) {
-            console.error('❌ Firestore not available');
-            return {
-                allowed: false,
-                reason: 'firestore_unavailable',
-                message: 'Database not available. Please refresh the page.',
-                current: 0,
-                limit: limits.chatbot.dailyLimit,
-                upgradeRequired: 'pro'
-            };
-        }
-        
-        // ✅ VÉRIFICATION 7: Quota journalier
         const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        console.log('📅 Today:', today);
-        
         const usageRef = firebase.firestore()
             .collection('usage')
             .doc(userId)
@@ -1067,68 +995,46 @@ async function canUseChatbot() {
         let currentCount = 0;
         
         if (usageDoc.exists) {
-            const data = usageDoc.data();
-            currentCount = data?.count || 0;
-            console.log('📊 Existing usage found:', currentCount);
-        } else {
-            console.log('📊 No usage found for today (first message)');
+            currentCount = usageDoc.data().count || 0;
         }
         
-        const dailyLimit = limits.chatbot.dailyLimit;
+        console.log('📊 Chatbot usage today: ' + currentCount + '/' + limits.chatbot.dailyLimit);
         
-        console.log(`📊 Chatbot usage today: ${currentCount}/${dailyLimit}`);
-        
-        // ✅ VÉRIFICATION 8: Limite atteinte
-        if (currentCount >= dailyLimit) {
+        if (currentCount >= limits.chatbot.dailyLimit) {
             console.warn('⛔ Daily chatbot limit reached');
             return {
                 allowed: false,
                 reason: 'daily_limit_reached',
-                message: `You have reached your daily chatbot limit (${dailyLimit} messages). Upgrade to Pro for unlimited access.`,
+                message: 'You have reached your daily chatbot limit (' + limits.chatbot.dailyLimit + ' messages). Upgrade to Pro for unlimited access.',
                 current: currentCount,
-                limit: dailyLimit,
+                limit: limits.chatbot.dailyLimit,
                 upgradeRequired: 'pro'
             };
         }
         
-        // ✅ INCRÉMENTER LE COMPTEUR
-        console.log('✅ Incrementing usage counter...');
-        
+        // Incrémenter le compteur
         await usageRef.set({
             count: currentCount + 1,
             lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
             plan: plan
         }, { merge: true });
         
-        const remaining = dailyLimit - (currentCount + 1);
-        
-        console.log(`✅ Chatbot message allowed. Remaining: ${remaining}/${dailyLimit}`);
+        const remaining = limits.chatbot.dailyLimit - (currentCount + 1);
+        console.log('✅ Chatbot message allowed. Remaining: ' + remaining);
         
         return {
             allowed: true,
             remaining: remaining,
             current: currentCount + 1,
-            limit: dailyLimit
+            limit: limits.chatbot.dailyLimit
         };
         
     } catch (error) {
-        console.error('❌ Error in canUseChatbot():', error);
-        console.error('Error details:', {
-            name: error.name,
-            message: error.message,
-            code: error.code,
-            stack: error.stack
-        });
-        
-        // Retourner une erreur avec les bonnes propriétés
+        console.error('❌ Error checking chatbot quota:', error);
         return {
             allowed: false,
             reason: 'error',
-            message: `Error checking quota: ${error.message || 'Unknown error'}. Please try again or contact support.`,
-            current: 0,
-            limit: 0,
-            upgradeRequired: 'pro',
-            errorDetails: error.message
+            message: 'Error checking quota. Please try again.'
         };
     }
 }
