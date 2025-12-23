@@ -467,35 +467,36 @@ body.dark-mode .btn-secondary:hover {
 }
 
 /* ============================================
-   📋 TABLE - ULTRA OPTIMISÉE AVEC STICKY HEADER
+   📋 TABLE - STICKY HEADER FIX
    ============================================ */
+.table-wrapper {
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .table-wrapper {
+    background: rgba(15, 23, 42, 0.05);
+}
+
 .table-container {
     overflow-x: auto;
     overflow-y: auto;
     max-height: 600px;
-    /* ✅ IMPORTANT : Retirer border-radius pour que sticky fonctionne */
-    border-radius: 0;
     box-shadow: 
         0 12px 40px var(--glass-shadow),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 2px solid var(--glass-border);
-    backdrop-filter: blur(5px);
     animation: fadeInUp 0.4s ease-out 0.2s backwards;
     position: relative;
-    /* ✅ Isolation du stacking context */
-    isolation: isolate;
-}
-
-/* Wrapper pour border-radius */
-.table-wrapper {
-    border-radius: 20px;
-    overflow: hidden;
+    background: var(--background-primary);
 }
 
 .data-table {
     width: 100%;
-    border-collapse: separate;  /* ✅ CORRECTION */
-    border-spacing: 0;          /* ✅ Pour garder l'apparence */
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.85em;
     position: relative;
 }
@@ -505,7 +506,6 @@ body.dark-mode .btn-secondary:hover {
     color: white !important;
 }
 
-/* ✅ Bordures ajustées pour border-collapse: separate */
 .data-table thead th {
     position: sticky;
     top: 0;
@@ -516,7 +516,7 @@ body.dark-mode .btn-secondary:hover {
     font-weight: 800 !important;
     white-space: nowrap;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);  /* ✅ AJOUTER */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -524,16 +524,6 @@ body.dark-mode .btn-secondary:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Retirer la bordure droite de la dernière colonne */
-.data-table thead th:last-child {
-    border-right: none;
-}
-
-.data-table tbody td:last-child {
-    border-right: none;
-}
-
-/* ✅ Première colonne STICKY à gauche ET en haut */
 .data-table thead th:first-child {
     position: sticky;
     left: 0;
@@ -544,6 +534,10 @@ body.dark-mode .btn-secondary:hover {
         2px 0 8px rgba(102, 126, 234, 0.3),
         0 2px 4px rgba(0, 0, 0, 0.1);
     color: white !important;
+}
+
+.data-table thead th:last-child {
+    border-right: none;
 }
 
 body.dark-mode .data-table thead th {
@@ -582,7 +576,10 @@ body.dark-mode .data-table tbody tr:nth-child(even) {
     font-weight: 500;
 }
 
-/* ✅ Première colonne TD aussi sticky */
+.data-table td:last-child {
+    border-right: none;
+}
+
 .data-table tbody td:first-child {
     position: sticky;
     left: 0;
