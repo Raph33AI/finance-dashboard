@@ -2208,3 +2208,69 @@ body.dark-mode .post-detail-stat {
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTION FINALE - SEARCH BAR GRADIENT BORDER
+   ════════════════════════════════════════════════════════════════ */
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Wrapper avec bordure dégradée */
+.search-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100% !important;
+    padding: 14px 16px 14px 48px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    z-index: 0 !important;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.search-input::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
+.search-input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* Dark mode */
+body.dark-mode .search-input {
+    background: rgba(15, 23, 42, 0.6) !important;
+}
