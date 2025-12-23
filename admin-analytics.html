@@ -242,9 +242,7 @@
                     </button>
                 </div>
 
-                <!-- ========================================
-                     SECTION: DASHBOARD (MENU PRINCIPAL)
-                     ======================================== -->
+                <!-- REMPLACER LA SECTION DASHBOARD EXISTANTE PAR CECI -->
                 <div id="dashboard" class="tab-section active" data-section-content="dashboard">
                     <div class="section">
                         <h2 class='section-title'>
@@ -290,6 +288,18 @@
                                 <div class="dashboard-stat-change">Last 7 days</div>
                             </div>
                             
+                            <!-- Monthly Signups (🆕 AJOUTÉ) -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Monthly Signups</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="monthly-signups">0</div>
+                                <div class="dashboard-stat-change">Last 30 days</div>
+                            </div>
+                            
                             <!-- Total Revenue -->
                             <div class="dashboard-stat-card">
                                 <div class="dashboard-stat-header">
@@ -324,6 +334,66 @@
                                 </div>
                                 <div class="dashboard-stat-value" id="total-visits">0</div>
                                 <div class="dashboard-stat-change" id="visits-change">+0 today</div>
+                            </div>
+                            
+                            <!-- 🆕 Unique Visitors -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white;">
+                                        <i class="fas fa-user-friends"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Unique Visitors</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="unique-visitors">0</div>
+                                <div class="dashboard-stat-change">Anonymous: <span id="anonymous-visits">0</span></div>
+                            </div>
+                            
+                            <!-- 🆕 Total Simulations -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Simulations</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-simulations">0</div>
+                                <div class="dashboard-stat-change">Avg: <span id="avg-simulations">0</span>/user</div>
+                            </div>
+                            
+                            <!-- 🆕 Email Verified -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-envelope-open-text"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Email Verified</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="email-verified-users">0</div>
+                                <div class="dashboard-stat-change">Rate: <span id="active-rate">0%</span></div>
+                            </div>
+                            
+                            <!-- 🆕 Average LTV -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Avg LTV</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="avg-ltv">$0</div>
+                                <div class="dashboard-stat-change">Max: <span id="max-ltv">$0</span></div>
+                            </div>
+                            
+                            <!-- 🆕 Active Subscriptions -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Active Subscriptions</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="active-subscriptions">0</div>
+                                <div class="dashboard-stat-change">ARPU: <span id="arpu">$0</span></div>
                             </div>
                         </div>
                         
@@ -361,6 +431,31 @@
                                     Monthly Revenue (12 Months)
                                 </h4>
                                 <canvas id="revenue-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 🆕 Statistiques supplémentaires -->
+                        <div class="kpis-grid" style="margin-top: 32px;">
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Avg Visits/Day</div>
+                                    <div class="kpi-value" id="avg-visits-per-day">0</div>
+                                    <div class="kpi-sublabel">Last 7 days</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Total Activity</div>
+                                    <div class="kpi-value" id="total-activity">0</div>
+                                    <div class="kpi-sublabel">All actions</div>
+                                </div>
                             </div>
                         </div>
                     </div>

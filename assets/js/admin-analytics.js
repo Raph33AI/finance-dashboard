@@ -191,7 +191,7 @@ class AdminAnalyticsPro {
         this.currentSection = sectionName;
         
         // Update active tab
-        document.querySelectorAll('.section-tab, [data-section]').forEach(btn => {
+        document.querySelectorAll('.section-tab, .main-tab, [data-section]').forEach(btn => {
             if (btn.dataset.section === sectionName) {
                 btn.classList.add('active');
             } else {
@@ -200,7 +200,7 @@ class AdminAnalyticsPro {
         });
         
         // Show target section, hide others
-        document.querySelectorAll('.analytics-section, [data-section-content]').forEach(section => {
+        document.querySelectorAll('.analytics-section, .tab-section, [data-section-content]').forEach(section => {
             const sectionId = section.id || section.dataset.sectionContent;
             
             if (sectionId === sectionName || section.id === `${sectionName}-section`) {
@@ -2235,13 +2235,57 @@ class AdminAnalyticsPro {
                     ]);
                     break;
                 
+                // 🆕 CLOUDFLARE EXPORT
+                case 'cloudflare':
+                    if (!this.cloudflareData || !this.cloudflareData.overview) {
+                        alert('⚠ No Cloudflare data available to export.');
+                        console.warn('⚠ No Cloudflare data to export');
+                        return;
+                    }
+                    filename = 'cloudflare_analytics';
+                    headers = ['Metric', 'Value'];
+                    const overview = this.cloudflareData.overview;
+                    data = [
+                        ['Total Requests', overview.totalRequests || 0],
+                        ['Total Bytes', overview.totalBytes || 0],
+                        ['Cached Requests', overview.totalCachedRequests || 0],
+                        ['Cache Hit Rate', (overview.cacheHitRate || 0) + '%'],
+                        ['Total Pageviews', overview.totalPageViews || 0],
+                        ['Total Uniques', overview.totalUniques || 0],
+                        ['Total Threats', overview.totalThreats || 0]
+                    ];
+                    break;
+                
+                // 🆕 STRIPE EXPORT
+                case 'stripe':
+                    if (!this.stripeData) {
+                        alert('⚠ No Stripe data available to export.');
+                        console.warn('⚠ No Stripe data to export');
+                        return;
+                    }
+                    filename = 'stripe_analytics';
+                    headers = ['Metric', 'Value'];
+                    data = [
+                        ['Total Customers', this.stripeData.customers?.total || 0],
+                        ['Customers with Subscription', this.stripeData.customers?.withSubscription || 0],
+                        ['Active Subscriptions', this.stripeData.subscriptions?.active || 0],
+                        ['Trialing Subscriptions', this.stripeData.subscriptions?.trialing || 0],
+                        ['Canceled Subscriptions', this.stripeData.subscriptions?.canceled || 0],
+                        ['MRR (cents)', this.stripeData.revenue?.mrr || 0],
+                        ['ARR (cents)', this.stripeData.revenue?.arr || 0],
+                        ['Total Revenue (cents)', this.stripeData.revenue?.total || 0]
+                    ];
+                    break;
+                
                 default:
-                    console.warn('Unknown export type:', type);
+                    console.warn('⚠ Unknown export type:', type);
+                    alert(`⚠ Export type "${type}" is not supported.`);
                     return;
             }
             
             if (data.length === 0) {
-                console.warn(`No data to export for ${type}`);
+                console.warn(`⚠ No data to export for ${type}`);
+                alert(`⚠ No data available to export for "${type}".`);
                 return;
             }
             
@@ -2249,9 +2293,11 @@ class AdminAnalyticsPro {
             this.downloadCSV(csvContent, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
             
             console.log(`✅ Export ${type} successful (${data.length} rows)`);
+            alert(`✅ Successfully exported ${data.length} rows to ${filename}.csv`);
             
         } catch (error) {
             console.error(`❌ Error exporting ${type}:`, error);
+            alert(`❌ Error exporting ${type}: ${error.message}`);
         }
     }
 
