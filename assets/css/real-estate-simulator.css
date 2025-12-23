@@ -403,6 +403,7 @@ body.dark-mode {
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: var(--transition-smooth);
+    max-width: 100%;
 }
 
 .form-control:focus {
@@ -477,7 +478,20 @@ body.dark-mode {
     flex-wrap: wrap;
 }
 
-.btn {
+/* ========================================
+   BUTTONS - UNIFORM PREMIUM DESIGN
+   ======================================== */
+.btn,
+button[class*="btn"],
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info,
+.btn-cancel,
+.btn-compare,
+.btn-add {
     padding: 14px 32px;
     font-size: 1rem;
     font-weight: 700;
@@ -487,12 +501,16 @@ body.dark-mode {
     transition: var(--transition-smooth);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-.btn::before {
+.btn::before,
+button[class*="btn"]::before {
     content: '';
     position: absolute;
     top: 0;
@@ -503,10 +521,12 @@ body.dark-mode {
     transition: left 0.5s ease;
 }
 
-.btn:hover::before {
+.btn:hover::before,
+button[class*="btn"]:hover::before {
     left: 100%;
 }
 
+/* Primary Button */
 .btn-primary {
     background: var(--re-gradient);
     color: white;
@@ -523,34 +543,42 @@ body.dark-mode {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.btn-secondary {
+/* Secondary/Cancel Button */
+.btn-secondary,
+.btn-cancel {
     background: linear-gradient(135deg, #6c757d, #495057);
     color: white;
     box-shadow: 0 8px 24px rgba(108, 117, 125, 0.3);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover,
+.btn-cancel:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 36px rgba(108, 117, 125, 0.5);
     background: linear-gradient(135deg, #5a6268, #3d4348);
 }
 
-.btn-secondary:active {
+.btn-secondary:active,
+.btn-cancel:active {
     transform: translateY(0);
 }
 
-.btn-success {
+/* Success/Add Property Button */
+.btn-success,
+.btn-add {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
 }
 
-.btn-success:hover {
+.btn-success:hover,
+.btn-add:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 36px rgba(16, 185, 129, 0.6);
 }
 
-.btn-success:active {
+.btn-success:active,
+.btn-add:active {
     transform: translateY(0);
 }
 
@@ -565,6 +593,7 @@ body.dark-mode {
     transform: none;
 }
 
+/* Danger Button */
 .btn-danger {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
@@ -580,6 +609,42 @@ body.dark-mode {
     transform: translateY(0);
 }
 
+/* Info/Compare Button */
+.btn-info,
+.btn-compare {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+.btn-info:hover,
+.btn-compare:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.6);
+}
+
+.btn-info:active,
+.btn-compare:active {
+    transform: translateY(0);
+}
+
+/* Warning Button */
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(245, 158, 11, 0.6);
+}
+
+.btn-warning:active {
+    transform: translateY(0);
+}
+
+/* Button Sizes */
 .btn-lg {
     padding: 16px 40px;
     font-size: 1.1rem;
@@ -976,6 +1041,7 @@ body.dark-mode {
     margin-bottom: 32px;
     border-radius: 12px;
     border: 2px solid var(--glass-border);
+    max-width: 100%;
 }
 
 .comparison-table {
@@ -1306,6 +1372,12 @@ body.dark-mode .sim-footer {
 .modal-body {
     padding: 32px;
     overflow-x: hidden;
+    max-width: 100%;
+}
+
+.modal-body * {
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-body p {
@@ -2042,27 +2114,36 @@ body.dark-mode .property-actions {
         font-size: 0.9rem;
     }
     
-    /* ✅ MODAL - MOBILE RESPONSIVE */
+    /* ✅ MODAL - MOBILE RESPONSIVE (AFFICHAGE VERTICAL COMPLET) */
     .modal.active {
-        padding: 10px;
+        padding: 0;
         align-items: flex-start;
     }
     
     .modal-content {
         width: 100%;
         max-width: 100%;
-        margin: 10px auto;
-        max-height: 95vh;
+        min-height: 100vh;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
         overflow-x: hidden;
+        overflow-y: auto;
     }
     
     .modal-header {
         padding: 16px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--glass-bg);
+        backdrop-filter: blur(40px) saturate(180%);
     }
     
     .modal-header h2 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         gap: 8px;
+        flex-wrap: wrap;
     }
     
     .modal-close {
@@ -2072,40 +2153,122 @@ body.dark-mode .property-actions {
     }
     
     .modal-body {
-        padding: 20px;
+        padding: 16px;
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    .modal-body > * {
+        max-width: 100%;
         overflow-x: hidden;
     }
     
-    /* ✅ MODAL TABLES - PREVENT HORIZONTAL SCROLL */
+    /* ✅ FORM DANS LES MODALS - AFFICHAGE VERTICAL */
+    .modal-body .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-body .form-group {
+        width: 100%;
+    }
+    
+    .modal-body .form-control {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.95rem;
+    }
+    
+    /* ✅ MODAL TABLES - AFFICHAGE VERTICAL & SCROLLABLE */
     .modal-body .comparison-table-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 -16px;
+        padding: 0 16px;
     }
     
     .modal-body .comparison-table {
-        min-width: auto;
-        font-size: 0.8rem;
+        min-width: 100%;
+        font-size: 0.75rem;
+        display: table;
     }
     
     .modal-body .comparison-table th,
     .modal-body .comparison-table td {
-        padding: 8px 10px;
-        font-size: 0.8rem;
+        padding: 8px 6px;
+        font-size: 0.75rem;
         white-space: normal;
         word-wrap: break-word;
+        min-width: 80px;
     }
     
-    /* ✅ MODAL ACTIONS - FULL WIDTH BUTTONS */
+    .modal-body .comparison-table th {
+        font-size: 0.7rem;
+    }
+    
+    /* ✅ RESULTS CARDS DANS MODALS - AFFICHAGE VERTICAL */
+    .modal-body .results-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-body .result-card {
+        padding: 16px;
+    }
+    
+    .modal-body .result-card h4 {
+        font-size: 1rem;
+    }
+    
+    .modal-body .breakdown-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px 0;
+    }
+    
+    .modal-body .breakdown-item span,
+    .modal-body .breakdown-item strong {
+        font-size: 0.9rem;
+    }
+    
+    /* ✅ MODAL ACTIONS - AFFICHAGE VERTICAL (TOUS LES BOUTONS) */
     .modal-actions {
         flex-direction: column;
         gap: 10px;
+        width: 100%;
     }
     
-    .modal-actions .btn {
+    .modal-actions .btn,
+    .modal-actions .btn-primary,
+    .modal-actions .btn-secondary,
+    .modal-actions .btn-success,
+    .modal-actions .btn-danger,
+    .modal-actions .btn-cancel,
+    .modal-actions .btn-compare,
+    .modal-actions .btn-add,
+    .modal-actions button {
         width: 100%;
         justify-content: center;
+        margin: 0;
+        padding: 14px 24px;
+        font-size: 0.95rem;
     }
     
+    /* ✅ CHARTS DANS MODALS */
+    .modal-body .chart-container {
+        margin-bottom: 20px;
+        overflow-x: hidden;
+    }
+    
+    .modal-body .chart {
+        min-height: 250px;
+        max-width: 100%;
+    }
+    
+    /* Tables générales */
     .comparison-table {
         font-size: 0.85rem;
     }
@@ -2175,7 +2338,8 @@ body.dark-mode .property-actions {
         flex-direction: column;
     }
     
-    .form-actions .btn {
+    .form-actions .btn,
+    .form-actions button {
         width: 100%;
     }
 }
@@ -2275,6 +2439,14 @@ body.dark-mode .property-actions {
     
     .sim-country {
         align-self: flex-end;
+    }
+    
+    /* Modal Tables Extra Small */
+    .modal-body .comparison-table th,
+    .modal-body .comparison-table td {
+        padding: 6px 4px;
+        font-size: 0.7rem;
+        min-width: 70px;
     }
 }
 
