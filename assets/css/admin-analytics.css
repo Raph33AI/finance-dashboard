@@ -1,9 +1,14 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - ADMIN ANALYTICS PRO v3.0 - STYLES COMPLETS
+ * ALPHAVAULT AI - ADMIN ANALYTICS PRO v3.1 - STYLES COMPLETS
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
- * Nouvelles fonctionnalités: ML Predictions, Stripe Metrics, Export CSV
+ * Nouvelles fonctionnalités: 
+ * - ML Predictions
+ * - Stripe Metrics
+ * - Non-Customer Visitors
+ * - Potential Customers Lead Scoring
+ * - Export CSV
  */
 
 /* ========================================
@@ -27,6 +32,12 @@
     --ml-brain: linear-gradient(135deg, #ec4899, #8b5cf6);
     --ml-success: #10b981;
     --ml-danger: #ef4444;
+    
+    /* Visitors & Leads */
+    --visitor-orange: linear-gradient(135deg, #f97316, #ea580c);
+    --lead-hot: linear-gradient(135deg, #10b981, #059669);
+    --lead-warm: linear-gradient(135deg, #f59e0b, #d97706);
+    --lead-cold: linear-gradient(135deg, #6366f1, #4f46e5);
     
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
@@ -142,6 +153,12 @@ body.dark-mode {
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
 }
 
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ========================================
    GRADIENT TITLES
    ======================================== */
@@ -192,12 +209,18 @@ body.dark-mode {
 }
 
 /* ========================================
-   ML PREDICTIONS SECTION
+   SECTIONS SPACING
    ======================================== */
-.ml-predictions-section {
+.ml-predictions-section,
+.stats-section,
+.visitors-section,
+.potential-section {
     margin-bottom: 40px;
 }
 
+/* ========================================
+   ML PREDICTIONS SECTION
+   ======================================== */
 .predictions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -321,10 +344,6 @@ body.dark-mode {
 /* ========================================
    STATS SECTION
    ======================================== */
-.stats-section {
-    margin-bottom: 40px;
-}
-
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -376,6 +395,44 @@ body.dark-mode {
 .stat-card.stripe-card:hover {
     border-color: var(--stripe-purple);
     box-shadow: 0 16px 48px rgba(99, 91, 255, 0.4);
+}
+
+/* Visitor Card Variant */
+.stat-card.visitor-card::before {
+    background: var(--visitor-orange);
+}
+
+.stat-card.visitor-card:hover {
+    border-color: #f97316;
+    box-shadow: 0 16px 48px rgba(249, 115, 22, 0.4);
+}
+
+/* Lead Cards Variants */
+.stat-card.lead-card.hot::before {
+    background: var(--lead-hot);
+}
+
+.stat-card.lead-card.hot:hover {
+    border-color: #10b981;
+    box-shadow: 0 16px 48px rgba(16, 185, 129, 0.4);
+}
+
+.stat-card.lead-card.warm::before {
+    background: var(--lead-warm);
+}
+
+.stat-card.lead-card.warm:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 16px 48px rgba(245, 158, 11, 0.4);
+}
+
+.stat-card.lead-card.cold::before {
+    background: var(--lead-cold);
+}
+
+.stat-card.lead-card.cold:hover {
+    border-color: #6366f1;
+    box-shadow: 0 16px 48px rgba(99, 102, 241, 0.4);
 }
 
 .stat-icon {
@@ -478,6 +535,10 @@ body.dark-mode {
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
+}
+
+.chart-card.full-width {
+    grid-column: 1 / -1;
 }
 
 .chart-card::before {
@@ -706,6 +767,47 @@ tbody tr:last-child td {
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
+/* 🆕 LEAD CATEGORY BADGES */
+.lead-category-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.lead-hot {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 2px solid #10b981;
+}
+
+.lead-warm {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 2px solid #f59e0b;
+}
+
+.lead-cold {
+    background: rgba(99, 102, 241, 0.15);
+    color: #6366f1;
+    border: 2px solid #6366f1;
+}
+
+/* ========================================
+   CONVERSION ROW HIGHLIGHT
+   ======================================== */
+.conversion-row {
+    background: rgba(139, 92, 246, 0.05) !important;
+    font-weight: 800;
+}
+
+.conversion-row td {
+    color: var(--admin-secondary) !important;
+}
+
 /* ========================================
    RESPONSIVE
    ======================================== */
@@ -758,6 +860,16 @@ tbody tr:last-child td {
     .table-card {
         padding: 20px;
     }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .btn-export-sm {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -767,14 +879,12 @@ tbody tr:last-child td {
         text-align: center;
     }
     
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    .page-title {
+        font-size: 1.2rem;
     }
-    
-    .btn-export-sm {
-        width: 100%;
+
+    .section-title {
+        font-size: 1.1rem;
     }
 }
 
@@ -850,8 +960,38 @@ body.dark-mode tbody tr:hover {
 .stat-card:nth-child(3),
 .prediction-card:nth-child(3) { animation-delay: 0.3s; }
 .stat-card:nth-child(4) { animation-delay: 0.4s; }
+.stat-card:nth-child(5) { animation-delay: 0.5s; }
+.stat-card:nth-child(6) { animation-delay: 0.6s; }
 
 .chart-card,
 .table-card {
     animation: slideInFromTop 0.6s ease-out;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.text-hot {
+    color: #10b981;
+    font-weight: 800;
+}
+
+.text-warm {
+    color: #f59e0b;
+    font-weight: 800;
+}
+
+.text-cold {
+    color: #6366f1;
+    font-weight: 800;
+}
+
+.text-danger {
+    color: #ef4444;
+    font-weight: 800;
+}
+
+.text-success {
+    color: #10b981;
+    font-weight: 800;
 }

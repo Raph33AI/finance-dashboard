@@ -273,7 +273,7 @@
                     </button>
                     <h1 class="page-title">
                         <i class="fas fa-shield-alt"></i>
-                        Admin Analytics
+                        Admin Analytics Pro v3.1
                     </h1>
                 </div>
                 <div class="header-right">
@@ -317,7 +317,7 @@
                     <div class="section-header">
                         <h2 class="section-title">
                             <i class="fas fa-database"></i>
-                            Firebase Analytics
+                            Firebase Analytics Overview
                         </h2>
                     </div>
                     <div class="stats-grid">
@@ -362,6 +362,28 @@
                                 <h3 id="total-revenue">$0</h3>
                                 <p>Revenus Totaux</p>
                                 <span class="stat-change positive" id="revenue-change">+$0 ce mois</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="active-users">0</h3>
+                                <p>Utilisateurs Actifs</p>
+                                <span class="stat-change">7 derniers jours</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="monthly-signups">0</h3>
+                                <p>Inscriptions Mensuelles</p>
+                                <span class="stat-change">30 derniers jours</span>
                             </div>
                         </div>
                     </div>
@@ -423,14 +445,202 @@
                                 <span class="stat-badge">Stripe MRR</span>
                             </div>
                         </div>
+
+                        <div class="stat-card stripe-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="stripe-total-revenue">$0</h3>
+                                <p>Total Stripe Revenue</p>
+                                <span class="stat-badge">All-Time</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card stripe-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="arr">$0</h3>
+                                <p>Annual Recurring Revenue</p>
+                                <span class="stat-badge">ARR Projection</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Graphiques -->
+                <!-- 🆕 SECTION VISITEURS NON-CLIENTS -->
+                <section class="stats-section visitors-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-user-secret"></i>
+                            Non-Customer Visitors Analytics
+                        </h2>
+                        <button class="btn-export-sm" id="exportVisitorsBtn" title="Exporter les visiteurs">
+                            <i class="fas fa-file-csv"></i>
+                            Export Visitors
+                        </button>
+                    </div>
+                    
+                    <!-- KPIs Visiteurs -->
+                    <div class="stats-grid">
+                        <div class="stat-card visitor-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-non-customers">0</h3>
+                                <p>Visiteurs Uniques Non-Clients</p>
+                                <span class="stat-badge">Tracked by IP/Session</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card visitor-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #fb923c, #f97316);">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-anonymous-visits">0</h3>
+                                <p>Visites Anonymes Totales</p>
+                                <span class="stat-badge">Anonymous Sessions</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card visitor-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #fdba74, #fb923c);">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="unique-visitors">0</h3>
+                                <p>Visiteurs Uniques (Tous)</p>
+                                <span class="stat-badge">Including Registered</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphique Pays Visiteurs Non-Clients -->
+                    <div class="chart-card" style="margin-top: 24px;">
+                        <div class="chart-header">
+                            <h2><i class="fas fa-map-marked-alt"></i> Top 10 Pays - Visiteurs Non-Clients</h2>
+                        </div>
+                        <canvas id="non-customer-countries-chart"></canvas>
+                    </div>
+
+                    <!-- Tableau Visiteurs Non-Clients -->
+                    <div class="table-card" style="margin-top: 24px;">
+                        <div class="table-header">
+                            <h2><i class="fas fa-list"></i> Top 50 Visiteurs Non-Clients</h2>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="non-customer-visitors-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Pays</th>
+                                        <th>Visites</th>
+                                        <th>Pages Uniques</th>
+                                        <th>Appareils</th>
+                                        <th>Dernière Visite</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="non-customer-visitors-body">
+                                    <tr><td colspan="6" class="loading">Chargement...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🆕 SECTION POTENTIELS CLIENTS -->
+                <section class="stats-section potential-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-bullseye"></i>
+                            Potential Customers Lead Scoring
+                        </h2>
+                        <button class="btn-export-sm" id="exportPotentialBtn" title="Exporter les potentiels clients">
+                            <i class="fas fa-file-csv"></i>
+                            Export Leads
+                        </button>
+                    </div>
+                    
+                    <!-- KPIs Leads -->
+                    <div class="stats-grid">
+                        <div class="stat-card lead-card hot">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="hot-leads">0</h3>
+                                <p>Hot Leads</p>
+                                <span class="stat-badge success">Score ≥ 70</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card lead-card warm">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-temperature-high"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="warm-leads">0</h3>
+                                <p>Warm Leads</p>
+                                <span class="stat-badge warning">Score ≥ 50</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card lead-card cold">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                                <i class="fas fa-snowflake"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="cold-leads">0</h3>
+                                <p>Cold Leads</p>
+                                <span class="stat-badge">Score ≥ 30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphique Distribution Scores -->
+                    <div class="chart-card" style="margin-top: 24px;">
+                        <div class="chart-header">
+                            <h2><i class="fas fa-chart-bar"></i> Distribution des Scores de Potentiel</h2>
+                        </div>
+                        <canvas id="potential-customers-chart"></canvas>
+                    </div>
+
+                    <!-- Tableau Potentiels Clients -->
+                    <div class="table-card" style="margin-top: 24px;">
+                        <div class="table-header">
+                            <h2><i class="fas fa-medal"></i> Top 50 Potentiels Clients (Scored)</h2>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="potential-customers-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>IP</th>
+                                        <th>Pays</th>
+                                        <th>Visites</th>
+                                        <th>Pages Uniques</th>
+                                        <th>Score</th>
+                                        <th>Catégorie</th>
+                                        <th>Dernière Visite</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="potential-customers-body">
+                                    <tr><td colspan="8" class="loading">Chargement...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Graphiques Firebase -->
                 <section class="charts-section">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h2><i class="fas fa-chart-area"></i> Inscriptions par Jour (30 derniers jours)</h2>
+                            <h2><i class="fas fa-chart-area"></i> Inscriptions par Jour (90 derniers jours)</h2>
                         </div>
                         <canvas id="registrations-chart"></canvas>
                     </div>
@@ -446,14 +656,14 @@
                 <section class="charts-section">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h2><i class="fas fa-chart-line"></i> Visites par Jour (30 derniers jours)</h2>
+                            <h2><i class="fas fa-chart-line"></i> Visites par Jour (90 derniers jours)</h2>
                         </div>
                         <canvas id="visits-chart"></canvas>
                     </div>
 
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h2><i class="fas fa-chart-bar"></i> Pages les Plus Visitées</h2>
+                            <h2><i class="fas fa-chart-bar"></i> Pages les Plus Visitées (Top 10)</h2>
                         </div>
                         <canvas id="pages-chart"></canvas>
                     </div>
@@ -478,20 +688,29 @@
                 <section class="charts-section">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h2><i class="fas fa-mobile-alt"></i> Répartition par Appareil</h2>
+                            <h2><i class="fas fa-layer-group"></i> Analyse de Cohortes (12 mois)</h2>
                         </div>
-                        <canvas id="device-chart"></canvas>
+                        <canvas id="cohort-chart"></canvas>
                     </div>
 
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h2><i class="fas fa-globe"></i> Top 10 Pays</h2>
+                            <h2><i class="fas fa-mobile-alt"></i> Répartition par Appareil</h2>
+                        </div>
+                        <canvas id="device-chart"></canvas>
+                    </div>
+                </section>
+
+                <section class="charts-section">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h2><i class="fas fa-globe"></i> Top 10 Pays (Toutes Visites)</h2>
                         </div>
                         <canvas id="geography-chart"></canvas>
                     </div>
                 </section>
 
-                <!-- Tableaux -->
+                <!-- Tableaux Firebase -->
                 <section class="tables-section">
                     <div class="table-card">
                         <div class="table-header">
@@ -543,7 +762,7 @@
                 <section class="tables-section">
                     <div class="table-card">
                         <div class="table-header">
-                            <h2><i class="fas fa-history"></i> Activité Récente</h2>
+                            <h2><i class="fas fa-history"></i> Activité Récente (20 dernières)</h2>
                         </div>
                         <div class="table-wrapper">
                             <table id="activity-table">
@@ -618,10 +837,37 @@
                     e.stopPropagation();
                 });
             }
+
+            // Event listeners pour nouveaux boutons export
+            const exportVisitorsBtn = document.getElementById('exportVisitorsBtn');
+            if (exportVisitorsBtn) {
+                exportVisitorsBtn.addEventListener('click', () => {
+                    if (window.adminAnalytics) {
+                        window.adminAnalytics.exportData('non-customers');
+                    }
+                });
+            }
+
+            const exportPotentialBtn = document.getElementById('exportPotentialBtn');
+            if (exportPotentialBtn) {
+                exportPotentialBtn.addEventListener('click', () => {
+                    if (window.adminAnalytics) {
+                        window.adminAnalytics.exportData('potential-customers');
+                    }
+                });
+            }
         });
     </script>
     
     <!-- Script Analytics Admin -->
     <script src="assets/js/admin-analytics.js"></script>
+    
+    <!-- Exposer l'instance pour les boutons d'export -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // L'instance sera créée automatiquement par admin-analytics.js
+            // et exposée via window.financialChatbot si besoin
+        });
+    </script>
 </body>
 </html>
