@@ -314,6 +314,21 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- ===== SECTION ADMIN (VISIBLE UNIQUEMENT POUR L'ADMIN) ===== -->
+                <div class='nav-section' id='adminSection' style='display: none;'>
+                    <button class="nav-folder" data-tooltip="Admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='admin-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Analytics Dashboard</span>
+                        </a>
+                    </div>
+                </div>
             </nav>
             
             <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
@@ -794,6 +809,9 @@
     <!-- Dashboard Script -->
     <script src='assets/js/dashboard.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
+    <!-- Admin Visibility (affiche le menu admin si connecté) -->
+    <script src="assets/js/admin-visibility.js"></script>
+</body>
     
 </body>
 </html>
