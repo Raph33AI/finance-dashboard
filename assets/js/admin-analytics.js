@@ -1,11 +1,12 @@
 // ========================================
-// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v3.1
+// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v3.2
 // ✅ Stripe API Integration
+// ✅ Cloudflare Analytics Integration (NEW!)
 // ✅ IP Geolocation
 // ✅ CSV Export
 // ✅ Email Alerts
 // ✅ ML Predictions
-// ✅ Non-Customer Visitors Tracking
+// ✅ Non-Customer Visitors Tracking (Cloudflare)
 // ✅ Potential Customers Analysis
 // ========================================
 
@@ -20,14 +21,15 @@ class AdminAnalyticsPro {
         this.auth = firebase.auth();
         this.charts = {};
         this.stripeData = null;
+        this.cloudflareData = null; // 🆕 Cloudflare analytics
         this.allUsersData = [];
         this.allVisitsData = [];
         this.allPaymentsData = [];
         this.allActivityData = [];
-        this.nonCustomerVisitors = []; // 🆕 Visiteurs non-clients
-        this.potentialCustomers = []; // 🆕 Potentiels clients
+        this.nonCustomerVisitors = []; // 🆕 Non-customer visitors (Cloudflare)
+        this.potentialCustomers = []; // 🆕 Potential customers
         
-        // 🎯 Seuils d'alerte
+        // 🎯 Alert thresholds
         this.alertThresholds = {
             mrrDropPercent: 10,
             churnRatePercent: 5,
@@ -39,24 +41,24 @@ class AdminAnalyticsPro {
     }
 
     async init() {
-        console.log('🔐 Initialisation Admin Analytics PRO v3.1...');
+        console.log('🔐 Initializing Admin Analytics PRO v3.2...');
         
         this.auth.onAuthStateChanged(async (user) => {
             if (!user) {
-                console.log('❌ Non authentifié - redirection...');
-                alert('⛔ Vous devez être connecté pour accéder à cette page.');
+                console.log('❌ Not authenticated - redirecting...');
+                alert('⛔ You must be logged in to access this page.');
                 window.location.href = 'login.html';
                 return;
             }
 
             if (user.email !== ADMIN_EMAIL) {
-                console.log('⛔ Accès refusé pour:', user.email);
-                alert(`⛔ ACCÈS INTERDIT\n\nCette page est réservée aux administrateurs.`);
+                console.log('⛔ Access denied for:', user.email);
+                alert(`⛔ ACCESS DENIED\n\nThis page is reserved for administrators only.`);
                 window.location.href = 'index.html';
                 return;
             }
 
-            console.log('✅ Admin authentifié:', user.email);
+            console.log('✅ Admin authenticated:', user.email);
             
             const displays = document.querySelectorAll('[data-admin-email]');
             displays.forEach(el => el.textContent = user.email);
@@ -84,6 +86,9 @@ class AdminAnalyticsPro {
         const exportVisitorsBtn = document.getElementById('exportVisitorsBtn');
         if (exportVisitorsBtn) exportVisitorsBtn.addEventListener('click', () => this.exportData('non-customers'));
         
+        const exportPotentialBtn = document.getElementById('exportPotentialBtn');
+        if (exportPotentialBtn) exportPotentialBtn.addEventListener('click', () => this.exportData('potential-customers'));
+        
         const refreshBtn = document.getElementById('refreshDataBtn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', async () => {
@@ -97,11 +102,11 @@ class AdminAnalyticsPro {
     }
 
     async loadAllData() {
-        console.log('📊 Chargement de TOUTES les données analytics (historique complet)...');
+        console.log('📊 Loading ALL analytics data (complete history)...');
         
         try {
             await Promise.all([
-                // KPIs Principaux
+                // Main KPIs
                 this.loadUsersStats(),
                 this.loadVisitsStats(),
                 this.loadRevenueStats(),
@@ -110,50 +115,53 @@ class AdminAnalyticsPro {
                 // Stripe API
                 this.loadStripeMetrics(),
                 
-                // Graphiques
+                // 🆕 Cloudflare Analytics (NEW!)
+                this.loadCloudflareAnalytics(),
+                
+                // Charts
                 this.loadRegistrationsChart(),
                 this.loadPlansChart(),
                 this.loadVisitsChart(),
-                this.loadPagesChart(),
+                this.loadPagesChart(), // 🆕 Will use Cloudflare data
                 this.loadRevenueChart(),
                 this.loadChurnChart(),
                 this.loadCohortChart(),
-                this.loadDeviceChart(),
-                this.loadGeographyChart(),
+                this.loadDeviceChart(), // 🆕 Will use Cloudflare data
+                this.loadGeographyChart(), // 🆕 Will use Cloudflare data
                 
-                // Tableaux
+                // Tables
                 this.loadRecentUsers(),
                 this.loadRecentActivity(),
                 this.loadTopUsers(),
                 this.loadUserSimulations(),
                 
-                // Analytics Avancés
+                // Advanced Analytics
                 this.loadConversionFunnel(),
                 this.loadLTVAnalysis(),
                 
                 // ML
                 this.loadMLPredictions(),
                 
-                // 🆕 VISITEURS NON-CLIENTS
+                // 🆕 NON-CUSTOMER VISITORS (CLOUDFLARE)
                 this.loadNonCustomerVisitors(),
                 this.loadPotentialCustomers()
             ]);
             
-            console.log('✅ Toutes les données chargées avec succès');
+            console.log('✅ All data loaded successfully');
             await this.checkAlerts();
             
         } catch (error) {
-            console.error('❌ Erreur lors du chargement:', error);
+            console.error('❌ Error loading data:', error);
         }
     }
 
     // ========================================
-    // 📈 KPIs PRINCIPAUX
+    // 📈 MAIN KPIs
     // ========================================
     
     async loadUsersStats() {
         try {
-            // 🔥 TOUT L'HISTORIQUE (plus de limit)
+            // 🔥 COMPLETE HISTORY (no limit)
             const usersSnapshot = await this.db.collection('users').get();
             const totalUsers = usersSnapshot.size;
             
@@ -194,7 +202,7 @@ class AdminAnalyticsPro {
             });
             
             this.updateStat('total-users', totalUsers);
-            this.updateStat('users-change', `+${weekUsers} cette semaine`);
+            this.updateStat('users-change', `+${weekUsers} this week`);
             this.updateStat('premium-users', premiumUsers);
             
             const conversionRate = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : 0;
@@ -204,13 +212,13 @@ class AdminAnalyticsPro {
             this.updateStat('monthly-signups', monthUsers);
             
         } catch (error) {
-            console.error('Erreur stats users:', error);
+            console.error('Error loading users stats:', error);
         }
     }
 
     async loadVisitsStats() {
         try {
-            // 🔥 TOUT L'HISTORIQUE
+            // 🔥 COMPLETE HISTORY
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             const totalVisits = visitsSnapshot.size;
             
@@ -250,19 +258,19 @@ class AdminAnalyticsPro {
             });
             
             this.updateStat('total-visits', totalVisits.toLocaleString());
-            this.updateStat('visits-change', `+${todayVisits} aujourd'hui`);
+            this.updateStat('visits-change', `+${todayVisits} today`);
             this.updateStat('week-visits', weekVisits.toLocaleString());
             this.updateStat('unique-visitors', uniqueVisitors.size.toLocaleString());
             this.updateStat('anonymous-visits', anonymousVisits.toLocaleString());
             
         } catch (error) {
-            console.error('Erreur stats visits:', error);
+            console.error('Error loading visits stats:', error);
         }
     }
 
     async loadRevenueStats() {
         try {
-            // 🔥 TOUT L'HISTORIQUE
+            // 🔥 COMPLETE HISTORY
             const paymentsSnapshot = await this.db.collection('payments').get();
             
             let totalRevenue = 0;
@@ -306,7 +314,7 @@ class AdminAnalyticsPro {
             const arr = mrr * 12;
             
             this.updateStat('total-revenue', `$${totalRevenue.toFixed(0)}`);
-            this.updateStat('revenue-change', `+$${monthRevenue.toFixed(0)} ce mois`);
+            this.updateStat('revenue-change', `+$${monthRevenue.toFixed(0)} this month`);
             this.updateStat('mrr', `$${mrr.toFixed(0)}`);
             this.updateStat('arr', `$${arr.toFixed(0)}`);
             this.updateStat('active-subscriptions', activeSubscriptions);
@@ -314,13 +322,13 @@ class AdminAnalyticsPro {
             this.currentMRR = mrr;
             
         } catch (error) {
-            console.error('Erreur stats revenue:', error);
+            console.error('Error loading revenue stats:', error);
         }
     }
 
     async loadEngagementStats() {
         try {
-            // 🔥 TOUT L'HISTORIQUE (pas de limit)
+            // 🔥 COMPLETE HISTORY (no limit)
             const activitySnapshot = await this.db.collection('analytics_activity').get();
             
             const weekAgo = new Date();
@@ -356,7 +364,7 @@ class AdminAnalyticsPro {
             this.updateStat('avg-actions', avgActionsPerUser);
             
         } catch (error) {
-            console.error('Erreur stats engagement:', error);
+            console.error('Error loading engagement stats:', error);
         }
     }
 
@@ -366,7 +374,7 @@ class AdminAnalyticsPro {
     
     async loadStripeMetrics() {
         try {
-            console.log('💳 Chargement des métriques Stripe en temps réel...');
+            console.log('💳 Loading Stripe metrics in real-time...');
             
             const response = await fetch(`${WORKER_URL}/stripe-analytics`, {
                 method: 'GET',
@@ -376,14 +384,14 @@ class AdminAnalyticsPro {
             });
             
             if (!response.ok) {
-                console.warn('⚠ Impossible de charger les données Stripe, utilisation des données Firebase');
+                console.warn('⚠ Unable to load Stripe data, using Firebase data');
                 return;
             }
             
             const stripeData = await response.json();
             this.stripeData = stripeData;
             
-            console.log('✅ Données Stripe chargées:', stripeData);
+            console.log('✅ Stripe data loaded:', stripeData);
             
             if (stripeData.customers) {
                 this.updateStat('stripe-customers', stripeData.customers.total || 0);
@@ -404,7 +412,7 @@ class AdminAnalyticsPro {
             }
             
         } catch (error) {
-            console.error('❌ Erreur Stripe metrics:', error);
+            console.error('❌ Error loading Stripe metrics:', error);
         }
     }
 
@@ -419,7 +427,7 @@ class AdminAnalyticsPro {
         this.createChart('stripe-revenue-chart', 'line', {
             labels: labels,
             datasets: [{
-                label: 'Revenus Stripe Réels ($)',
+                label: 'Real Stripe Revenue ($)',
                 data: data,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -430,12 +438,53 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📊 GRAPHIQUES AVANCÉS
+    // 🆕 CLOUDFLARE ANALYTICS INTEGRATION
+    // ========================================
+    
+    async loadCloudflareAnalytics() {
+        try {
+            console.log('☁ Loading Cloudflare Analytics...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-analytics?days=30`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Unable to load Cloudflare analytics');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.warn('⚠ Cloudflare analytics returned error:', result.error);
+                return;
+            }
+            
+            this.cloudflareData = result.data;
+            
+            console.log('✅ Cloudflare analytics loaded:', this.cloudflareData);
+            
+            // Update stats with Cloudflare data
+            if (this.cloudflareData.overview) {
+                const overview = this.cloudflareData.overview;
+                console.log('📊 Cloudflare overview:', overview);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare analytics:', error);
+        }
+    }
+
+    // ========================================
+    // 📊 ADVANCED CHARTS
     // ========================================
     
     async loadRegistrationsChart() {
         try {
-            // 🔥 TOUT L'HISTORIQUE
             const usersSnapshot = await this.db.collection('users').get();
             
             const daysCounts = {};
@@ -468,7 +517,7 @@ class AdminAnalyticsPro {
             this.createChart('registrations-chart', 'line', {
                 labels: labels,
                 datasets: [{
-                    label: 'Inscriptions (90 derniers jours)',
+                    label: 'Registrations (last 90 days)',
                     data: data,
                     borderColor: 'rgb(102, 126, 234)',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
@@ -478,7 +527,7 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart inscriptions:', error);
+            console.error('Error loading registrations chart:', error);
         }
     }
 
@@ -516,13 +565,12 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart plans:', error);
+            console.error('Error loading plans chart:', error);
         }
     }
 
     async loadVisitsChart() {
         try {
-            // 🔥 TOUT L'HISTORIQUE
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             
             const daysCounts = {};
@@ -555,7 +603,7 @@ class AdminAnalyticsPro {
             this.createChart('visits-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Visites quotidiennes (90 derniers jours)',
+                    label: 'Daily visits (last 90 days)',
                     data: data,
                     backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderRadius: 8
@@ -563,13 +611,12 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart visits:', error);
+            console.error('Error loading visits chart:', error);
         }
     }
 
     async loadRevenueChart() {
         try {
-            // 🔥 TOUT L'HISTORIQUE
             const paymentsSnapshot = await this.db.collection('payments').get();
             
             const monthsRevenue = {};
@@ -602,7 +649,7 @@ class AdminAnalyticsPro {
             this.createChart('revenue-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Revenus ($)',
+                    label: 'Revenue ($)',
                     data: data,
                     backgroundColor: 'rgba(67, 233, 123, 0.8)',
                     borderRadius: 8
@@ -610,7 +657,7 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart revenue:', error);
+            console.error('Error loading revenue chart:', error);
         }
     }
 
@@ -660,7 +707,7 @@ class AdminAnalyticsPro {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Nouveaux',
+                        label: 'New',
                         data: Object.values(monthlyData).map(d => d.new),
                         borderColor: 'rgb(16, 185, 129)',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -679,7 +726,7 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart churn:', error);
+            console.error('Error loading churn chart:', error);
         }
     }
 
@@ -733,7 +780,7 @@ class AdminAnalyticsPro {
                         backgroundColor: 'rgba(99, 102, 241, 0.6)'
                     },
                     {
-                        label: 'Actifs',
+                        label: 'Active',
                         data: sortedCohorts.map(key => cohorts[key].active),
                         backgroundColor: 'rgba(16, 185, 129, 0.6)'
                     },
@@ -751,11 +798,75 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart cohort:', error);
+            console.error('Error loading cohort chart:', error);
         }
     }
 
+    // 🆕 CLOUDFLARE-POWERED PAGES CHART
     async loadPagesChart() {
+        try {
+            console.log('📄 Loading pages from Cloudflare...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-pages`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare pages endpoint error, falling back to Firebase');
+                return this.loadPagesChartFirebase();
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.pages || result.pages.length === 0) {
+                console.warn('⚠ No Cloudflare pages data, falling back to Firebase');
+                return this.loadPagesChartFirebase();
+            }
+            
+            const sortedPages = result.pages
+                .sort((a, b) => b.requests - a.requests)
+                .slice(0, 10);
+            
+            const labels = sortedPages.map(p => {
+                let pageName = p.path || '/';
+                if (pageName.includes('.html')) {
+                    pageName = pageName.replace('.html', '');
+                }
+                if (pageName === '/') {
+                    pageName = 'Home';
+                }
+                return pageName;
+            });
+            
+            const data = sortedPages.map(p => p.requests);
+            
+            this.createChart('pages-chart', 'bar', {
+                labels: labels,
+                datasets: [{
+                    label: 'Page Views (Cloudflare)',
+                    data: data,
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false
+            });
+            
+            console.log('✅ Pages chart loaded from Cloudflare');
+            
+        } catch (error) {
+            console.error('Error loading Cloudflare pages:', error);
+            return this.loadPagesChartFirebase();
+        }
+    }
+
+    // Fallback: Firebase pages chart
+    async loadPagesChartFirebase() {
         try {
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             
@@ -776,8 +887,6 @@ class AdminAnalyticsPro {
                 pagesCounts[pageName] = (pagesCounts[pageName] || 0) + 1;
             });
             
-            console.log('📄 Pages trackées:', pagesCounts);
-            
             const sortedPages = Object.entries(pagesCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
@@ -788,7 +897,7 @@ class AdminAnalyticsPro {
             this.createChart('pages-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Vues',
+                    label: 'Page Views (Firebase)',
                     data: data,
                     backgroundColor: 'rgba(139, 92, 246, 0.8)',
                     borderRadius: 8
@@ -800,11 +909,71 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart pages:', error);
+            console.error('Error loading Firebase pages:', error);
         }
     }
 
+    // 🆕 CLOUDFLARE-POWERED DEVICE CHART
     async loadDeviceChart() {
+        try {
+            console.log('📱 Loading devices from Cloudflare...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-devices`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare devices endpoint error, falling back to Firebase');
+                return this.loadDeviceChartFirebase();
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.devices || result.devices.length === 0) {
+                console.warn('⚠ No Cloudflare devices data, falling back to Firebase');
+                return this.loadDeviceChartFirebase();
+            }
+            
+            const deviceMap = {
+                mobile: 0,
+                tablet: 0,
+                desktop: 0
+            };
+            
+            result.devices.forEach(device => {
+                const type = (device.type || 'desktop').toLowerCase();
+                if (deviceMap.hasOwnProperty(type)) {
+                    deviceMap[type] += device.requests;
+                } else {
+                    deviceMap['desktop'] += device.requests;
+                }
+            });
+            
+            this.createChart('device-chart', 'doughnut', {
+                labels: ['Mobile', 'Tablet', 'Desktop'],
+                datasets: [{
+                    data: [deviceMap.mobile, deviceMap.tablet, deviceMap.desktop],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)'
+                    ]
+                }]
+            });
+            
+            console.log('✅ Device chart loaded from Cloudflare');
+            
+        } catch (error) {
+            console.error('Error loading Cloudflare devices:', error);
+            return this.loadDeviceChartFirebase();
+        }
+    }
+
+    // Fallback: Firebase device chart
+    async loadDeviceChartFirebase() {
         try {
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             
@@ -840,55 +1009,72 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart devices:', error);
+            console.error('Error loading Firebase devices:', error);
         }
     }
 
+    // 🆕 CLOUDFLARE-POWERED GEOGRAPHY CHART
     async loadGeographyChart() {
         try {
-            console.log('🌍 Chargement de la géographie avec géolocalisation IP...');
+            console.log('🌍 Loading geography from Cloudflare...');
             
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
-            const countries = {};
-            const countryCache = {}; // Cache local pour éviter les requêtes répétées
-            
-            for (const doc of visitsSnapshot.docs) {
-                const data = doc.data();
-                let country = data.country;
-                
-                // 🔥 FIX: Gérer les undefined proprement
-                if (!country || country === 'undefined' || country === 'Unknown') {
-                    if (data.ip && data.ip !== 'unknown') {
-                        // Vérifier le cache local
-                        if (countryCache[data.ip]) {
-                            country = countryCache[data.ip];
-                        } else {
-                            // Géolocaliser l'IP
-                            country = await this.getCountryFromIP(data.ip);
-                            
-                            if (country && country !== 'Unknown') {
-                                countryCache[data.ip] = country;
-                                
-                                // Sauvegarder dans Firestore
-                                try {
-                                    await this.db.collection('analytics_visits').doc(doc.id).update({
-                                        country: country
-                                    });
-                                } catch (updateError) {
-                                    console.warn('Erreur update country:', updateError);
-                                }
-                            }
-                        }
-                    }
+            const response = await fetch(`${WORKER_URL}/cloudflare-geo`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
                 }
-                
-                // Valeur par défaut si toujours undefined
-                country = country || 'Unknown';
-                
-                countries[country] = (countries[country] || 0) + 1;
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare geo endpoint error, falling back to Firebase');
+                return this.loadGeographyChartFirebase();
             }
             
-            console.log('🗺 Pays détectés:', countries);
+            const result = await response.json();
+            
+            if (!result.success || !result.countries || result.countries.length === 0) {
+                console.warn('⚠ No Cloudflare geo data, falling back to Firebase');
+                return this.loadGeographyChartFirebase();
+            }
+            
+            const sortedCountries = result.countries
+                .sort((a, b) => b.requests - a.requests)
+                .slice(0, 10);
+            
+            const labels = sortedCountries.map(c => c.country || 'Unknown');
+            const data = sortedCountries.map(c => c.requests);
+            
+            this.createChart('geography-chart', 'bar', {
+                labels: labels,
+                datasets: [{
+                    label: 'Visits by Country (Cloudflare)',
+                    data: data,
+                    backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y'
+            });
+            
+            console.log('✅ Geography chart loaded from Cloudflare');
+            
+        } catch (error) {
+            console.error('Error loading Cloudflare geo:', error);
+            return this.loadGeographyChartFirebase();
+        }
+    }
+
+    // Fallback: Firebase geography chart
+    async loadGeographyChartFirebase() {
+        try {
+            const visitsSnapshot = await this.db.collection('analytics_visits').get();
+            const countries = {};
+            
+            visitsSnapshot.forEach(doc => {
+                const data = doc.data();
+                const country = data.country || 'Unknown';
+                countries[country] = (countries[country] || 0) + 1;
+            });
             
             const sortedCountries = Object.entries(countries)
                 .sort((a, b) => b[1] - a[1])
@@ -900,7 +1086,7 @@ class AdminAnalyticsPro {
             this.createChart('geography-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Visites par pays',
+                    label: 'Visits by Country (Firebase)',
                     data: data,
                     backgroundColor: 'rgba(245, 158, 11, 0.8)',
                     borderRadius: 8
@@ -910,29 +1096,12 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur chart geography:', error);
-        }
-    }
-
-    async getCountryFromIP(ip) {
-        try {
-            // Service gratuit ipapi.co (30k requêtes/mois)
-            const response = await fetch(`https://ipapi.co/${ip}/json/`);
-            
-            if (response.ok) {
-                const geoData = await response.json();
-                return geoData.country_name || 'Unknown';
-            }
-            
-            return 'Unknown';
-        } catch (error) {
-            console.warn('⚠ Erreur géolocalisation IP:', error);
-            return 'Unknown';
+            console.error('Error loading Firebase geo:', error);
         }
     }
 
     // ========================================
-    // 📋 TABLEAUX AVANCÉS
+    // 📋 ADVANCED TABLES
     // ========================================
     
     async loadRecentUsers() {
@@ -951,7 +1120,7 @@ class AdminAnalyticsPro {
                 const data = doc.data();
                 const row = document.createElement('tr');
                 
-                const createdAt = data.createdAt ? data.createdAt.toDate().toLocaleDateString('fr-FR') : 'N/A';
+                const createdAt = data.createdAt ? data.createdAt.toDate().toLocaleDateString('en-US') : 'N/A';
                 const plan = data.plan || 'basic';
                 
                 row.innerHTML = `
@@ -965,13 +1134,12 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur recent users:', error);
+            console.error('Error loading recent users:', error);
         }
     }
 
     async loadRecentActivity() {
         try {
-            // 🔥 FIX: Récupérer TOUT sans limit, puis trier en JavaScript
             const activitySnapshot = await this.db.collection('analytics_activity').get();
             
             const tbody = document.getElementById('recent-activity-body');
@@ -979,12 +1147,10 @@ class AdminAnalyticsPro {
             
             tbody.innerHTML = '';
             
-            // 🔥 FIX: Convertir en array et trier
             const activities = [];
             
             activitySnapshot.forEach(doc => {
                 const data = doc.data();
-                // 🔥 FIX: Gérer les documents sans timestamp
                 if (data.timestamp) {
                     activities.push({
                         id: doc.id,
@@ -994,21 +1160,19 @@ class AdminAnalyticsPro {
                 }
             });
             
-            // Trier par date décroissante
             activities.sort((a, b) => b.timestampDate - a.timestampDate);
             
-            // Prendre les 20 premières
             const recentActivities = activities.slice(0, 20);
             
             if (recentActivities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Aucune activité récente</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No recent activity</td></tr>';
                 return;
             }
             
             recentActivities.forEach(activity => {
                 const row = document.createElement('tr');
                 
-                const timestamp = activity.timestampDate.toLocaleString('fr-FR');
+                const timestamp = activity.timestampDate.toLocaleString('en-US');
                 
                 row.innerHTML = `
                     <td>${activity.userId ? activity.userId.substring(0, 8) + '...' : 'Anonymous'}</td>
@@ -1020,13 +1184,13 @@ class AdminAnalyticsPro {
                 tbody.appendChild(row);
             });
             
-            console.log(`✅ ${recentActivities.length} activités affichées`);
+            console.log(`✅ ${recentActivities.length} activities displayed`);
             
         } catch (error) {
-            console.error('Erreur recent activity:', error);
+            console.error('Error loading recent activity:', error);
             const tbody = document.getElementById('recent-activity-body');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erreur de chargement</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Loading error</td></tr>';
             }
         }
     }
@@ -1073,7 +1237,7 @@ class AdminAnalyticsPro {
             });
             
         } catch (error) {
-            console.error('Erreur top users:', error);
+            console.error('Error loading top users:', error);
         }
     }
 
@@ -1103,7 +1267,7 @@ class AdminAnalyticsPro {
             this.updateStat('avg-simulations', avgSimulations);
             
         } catch (error) {
-            console.error('Erreur simulations:', error);
+            console.error('Error loading simulations:', error);
         }
     }
 
@@ -1130,34 +1294,34 @@ class AdminAnalyticsPro {
             
             tbody.innerHTML = `
                 <tr>
-                    <td>Inscriptions</td>
+                    <td>Registrations</td>
                     <td>${registered}</td>
                     <td>100%</td>
                 </tr>
                 <tr>
-                    <td>Email Vérifié</td>
+                    <td>Email Verified</td>
                     <td>${emailVerified}</td>
                     <td>${((emailVerified / registered) * 100).toFixed(1)}%</td>
                 </tr>
                 <tr>
-                    <td>Première Connexion</td>
+                    <td>First Login</td>
                     <td>${firstLogin}</td>
                     <td>${((firstLogin / registered) * 100).toFixed(1)}%</td>
                 </tr>
                 <tr>
-                    <td>Trial Démarré</td>
+                    <td>Trial Started</td>
                     <td>${trialStarted}</td>
                     <td>${((trialStarted / registered) * 100).toFixed(1)}%</td>
                 </tr>
                 <tr class="conversion-row">
-                    <td><strong>Conversion Payante</strong></td>
+                    <td><strong>Paid Conversion</strong></td>
                     <td><strong>${converted}</strong></td>
                     <td><strong>${((converted / registered) * 100).toFixed(1)}%</strong></td>
                 </tr>
             `;
             
         } catch (error) {
-            console.error('Erreur funnel:', error);
+            console.error('Error loading funnel:', error);
         }
     }
 
@@ -1186,24 +1350,76 @@ class AdminAnalyticsPro {
             this.updateStat('max-ltv', `$${maxLTV}`);
             
         } catch (error) {
-            console.error('Erreur LTV:', error);
+            console.error('Error loading LTV:', error);
         }
     }
 
     // ========================================
-    // 🆕 VISITEURS NON-CLIENTS (NOUVELLE SECTION)
+    // 🆕 NON-CUSTOMER VISITORS (CLOUDFLARE)
     // ========================================
     
     async loadNonCustomerVisitors() {
         try {
-            console.log('👥 Chargement des visiteurs non-clients...');
+            console.log('👥 Loading non-customer visitors from Cloudflare...');
             
-            // Récupérer tous les IDs utilisateurs clients
+            const response = await fetch(`${WORKER_URL}/cloudflare-visitors?days=30`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Unable to load Cloudflare visitors, using Firebase fallback');
+                return this.loadNonCustomerVisitorsFirebase();
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.visitors) {
+                console.warn('⚠ No Cloudflare visitors data, using Firebase fallback');
+                return this.loadNonCustomerVisitorsFirebase();
+            }
+            
+            this.nonCustomerVisitors = result.visitors.map(visitor => ({
+                id: visitor.ip,
+                ip: visitor.ip,
+                country: visitor.country || 'Unknown',
+                visits: visitor.requests,
+                pages: [],
+                devices: [],
+                firstVisit: null,
+                lastVisit: null
+            }));
+            
+            console.log(`✅ ${this.nonCustomerVisitors.length} non-customer visitors loaded from Cloudflare`);
+            console.log(`📊 Total requests: ${result.stats?.totalRequests || 0}`);
+            
+            // Update UI stats
+            this.updateStat('total-non-customers', this.nonCustomerVisitors.length);
+            this.updateStat('total-anonymous-visits', result.stats?.totalRequests || 0);
+            
+            // Display table
+            this.displayNonCustomerVisitors();
+            
+            // Create charts
+            this.createNonCustomerCharts();
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare visitors:', error);
+            return this.loadNonCustomerVisitorsFirebase();
+        }
+    }
+
+    // Fallback: Firebase non-customer visitors
+    async loadNonCustomerVisitorsFirebase() {
+        try {
+            console.log('👥 Loading non-customer visitors from Firebase (fallback)...');
+            
             const usersSnapshot = await this.db.collection('users').get();
             const customerIds = new Set();
             usersSnapshot.forEach(doc => customerIds.add(doc.id));
             
-            // Récupérer toutes les visites
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             
             const anonymousVisitors = {};
@@ -1212,13 +1428,11 @@ class AdminAnalyticsPro {
             visitsSnapshot.forEach(doc => {
                 const data = doc.data();
                 
-                // Visiteur non-client = pas de userId OU userId non dans la liste clients
                 const isNonCustomer = !data.userId || !customerIds.has(data.userId);
                 
                 if (isNonCustomer) {
                     totalAnonymousVisits++;
                     
-                    // Identifier par IP ou sessionId
                     const visitorId = data.sessionId || data.ip || 'unknown';
                     
                     if (!anonymousVisitors[visitorId]) {
@@ -1242,7 +1456,6 @@ class AdminAnalyticsPro {
                     if (data.userAgent) visitor.devices.add(this.detectDevice(data.userAgent));
                     if (data.referrer) visitor.sources.add(data.referrer);
                     
-                    // Update first/last visit
                     if (data.timestamp) {
                         const visitDate = data.timestamp.toDate();
                         if (!visitor.firstVisit || visitDate < visitor.firstVisit) {
@@ -1255,7 +1468,6 @@ class AdminAnalyticsPro {
                 }
             });
             
-            // Convertir Set en Array
             Object.values(anonymousVisitors).forEach(visitor => {
                 visitor.devices = Array.from(visitor.devices);
                 visitor.sources = Array.from(visitor.sources);
@@ -1263,21 +1475,17 @@ class AdminAnalyticsPro {
             
             this.nonCustomerVisitors = Object.values(anonymousVisitors);
             
-            console.log(`✅ ${this.nonCustomerVisitors.length} visiteurs non-clients détectés`);
-            console.log(`📊 Total: ${totalAnonymousVisits} visites anonymes`);
+            console.log(`✅ ${this.nonCustomerVisitors.length} non-customer visitors detected (Firebase)`);
+            console.log(`📊 Total: ${totalAnonymousVisits} anonymous visits`);
             
-            // Afficher dans l'UI
             this.updateStat('total-non-customers', this.nonCustomerVisitors.length);
             this.updateStat('total-anonymous-visits', totalAnonymousVisits);
             
-            // Tableau des visiteurs
             this.displayNonCustomerVisitors();
-            
-            // Graphiques
             this.createNonCustomerCharts();
             
         } catch (error) {
-            console.error('❌ Erreur loadNonCustomerVisitors:', error);
+            console.error('❌ Error loading Firebase visitors:', error);
         }
     }
 
@@ -1294,23 +1502,23 @@ class AdminAnalyticsPro {
         
         tbody.innerHTML = '';
         
-        // Trier par nombre de visites décroissant
         const sortedVisitors = this.nonCustomerVisitors
             .sort((a, b) => b.visits - a.visits)
-            .slice(0, 50); // Top 50
+            .slice(0, 50);
         
         sortedVisitors.forEach(visitor => {
             const row = document.createElement('tr');
             
-            const lastVisit = visitor.lastVisit ? visitor.lastVisit.toLocaleDateString('fr-FR') : 'N/A';
-            const pagesVisited = new Set(visitor.pages).size;
+            const lastVisit = visitor.lastVisit ? visitor.lastVisit.toLocaleDateString('en-US') : 'N/A';
+            const pagesVisited = visitor.pages ? new Set(visitor.pages).size : 0;
+            const devices = visitor.devices ? (Array.isArray(visitor.devices) ? visitor.devices.join(', ') : 'N/A') : 'N/A';
             
             row.innerHTML = `
                 <td>${visitor.ip}</td>
                 <td>${visitor.country}</td>
                 <td>${visitor.visits}</td>
                 <td>${pagesVisited}</td>
-                <td>${visitor.devices.join(', ')}</td>
+                <td>${devices}</td>
                 <td>${lastVisit}</td>
             `;
             
@@ -1318,12 +1526,11 @@ class AdminAnalyticsPro {
         });
         
         if (sortedVisitors.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun visiteur non-client</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No non-customer visitors</td></tr>';
         }
     }
 
     createNonCustomerCharts() {
-        // Graphique : Pays des visiteurs non-clients
         const countryCounts = {};
         this.nonCustomerVisitors.forEach(visitor => {
             const country = visitor.country || 'Unknown';
@@ -1337,7 +1544,7 @@ class AdminAnalyticsPro {
         this.createChart('non-customer-countries-chart', 'bar', {
             labels: sortedCountries.map(c => c[0]),
             datasets: [{
-                label: 'Visiteurs non-clients par pays',
+                label: 'Non-customer visitors by country',
                 data: sortedCountries.map(c => c[1]),
                 backgroundColor: 'rgba(249, 115, 22, 0.8)',
                 borderRadius: 8
@@ -1348,26 +1555,25 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🆕 POTENTIELS CLIENTS (NOUVELLE SECTION)
+    // 🆕 POTENTIAL CUSTOMERS (NEW SECTION)
     // ========================================
     
     async loadPotentialCustomers() {
         try {
-            console.log('🎯 Analyse des potentiels clients...');
+            console.log('🎯 Analyzing potential customers...');
             
-            // Analyser les visiteurs non-clients pour déterminer leur potentiel
             this.potentialCustomers = this.nonCustomerVisitors.map(visitor => {
-                // 🎯 SCORING DE POTENTIEL (0-100)
+                // 🎯 POTENTIAL SCORING (0-100)
                 let score = 0;
                 
-                // Facteur 1: Nombre de visites (max 30 points)
+                // Factor 1: Number of visits (max 30 points)
                 score += Math.min(visitor.visits * 3, 30);
                 
-                // Facteur 2: Nombre de pages différentes (max 25 points)
-                const uniquePages = new Set(visitor.pages).size;
+                // Factor 2: Number of unique pages (max 25 points)
+                const uniquePages = visitor.pages ? new Set(visitor.pages).size : 0;
                 score += Math.min(uniquePages * 5, 25);
                 
-                // Facteur 3: Récence (max 20 points)
+                // Factor 3: Recency (max 20 points)
                 if (visitor.lastVisit) {
                     const daysSinceLastVisit = (new Date() - visitor.lastVisit) / (1000 * 60 * 60 * 24);
                     if (daysSinceLastVisit < 1) score += 20;
@@ -1375,17 +1581,18 @@ class AdminAnalyticsPro {
                     else if (daysSinceLastVisit < 30) score += 10;
                 }
                 
-                // Facteur 4: Pages stratégiques visitées (max 15 points)
+                // Factor 4: Strategic pages visited (max 15 points)
                 const strategicPages = ['pricing', 'plans', 'dashboard', 'signup', 'register'];
-                const visitedStrategic = visitor.pages.filter(page =>
+                const visitedStrategic = visitor.pages ? visitor.pages.filter(page =>
                     strategicPages.some(sp => page.toLowerCase().includes(sp))
-                ).length;
+                ).length : 0;
                 score += Math.min(visitedStrategic * 5, 15);
                 
-                // Facteur 5: Multi-devices = engagement (max 10 points)
-                score += Math.min(visitor.devices.length * 5, 10);
+                // Factor 5: Multi-device = engagement (max 10 points)
+                const deviceCount = visitor.devices ? (Array.isArray(visitor.devices) ? visitor.devices.length : 0) : 0;
+                score += Math.min(deviceCount * 5, 10);
                 
-                // Catégorie de potentiel
+                // Potential category
                 let category = 'Low';
                 if (score >= 70) category = 'Hot Lead 🔥';
                 else if (score >= 50) category = 'Warm Lead 🌡';
@@ -1400,12 +1607,10 @@ class AdminAnalyticsPro {
                 };
             });
             
-            // Trier par score décroissant
             this.potentialCustomers.sort((a, b) => b.score - a.score);
             
-            console.log(`✅ ${this.potentialCustomers.length} potentiels clients analysés`);
+            console.log(`✅ ${this.potentialCustomers.length} potential customers analyzed`);
             
-            // Compter les catégories
             const hotLeads = this.potentialCustomers.filter(c => c.category.includes('Hot')).length;
             const warmLeads = this.potentialCustomers.filter(c => c.category.includes('Warm')).length;
             const coldLeads = this.potentialCustomers.filter(c => c.category.includes('Cold')).length;
@@ -1414,14 +1619,11 @@ class AdminAnalyticsPro {
             this.updateStat('warm-leads', warmLeads);
             this.updateStat('cold-leads', coldLeads);
             
-            // Afficher tableau
             this.displayPotentialCustomers();
-            
-            // Graphique
             this.createPotentialCustomersChart();
             
         } catch (error) {
-            console.error('❌ Erreur loadPotentialCustomers:', error);
+            console.error('❌ Error loading potential customers:', error);
         }
     }
 
@@ -1431,18 +1633,16 @@ class AdminAnalyticsPro {
         
         tbody.innerHTML = '';
         
-        // Top 50 leads
         const topLeads = this.potentialCustomers.slice(0, 50);
         
         topLeads.forEach((lead, index) => {
             const row = document.createElement('tr');
             
-            const lastVisit = lead.lastVisit ? lead.lastVisit.toLocaleDateString('fr-FR') : 'N/A';
+            const lastVisit = lead.lastVisit ? lead.lastVisit.toLocaleDateString('en-US') : 'N/A';
             
-            // Couleur selon le score
-            let scoreColor = '#ef4444'; // Rouge
-            if (lead.score >= 70) scoreColor = '#10b981'; // Vert
-            else if (lead.score >= 50) scoreColor = '#f59e0b'; // Orange
+            let scoreColor = '#ef4444';
+            if (lead.score >= 70) scoreColor = '#10b981';
+            else if (lead.score >= 50) scoreColor = '#f59e0b';
             
             row.innerHTML = `
                 <td>${index + 1}</td>
@@ -1459,12 +1659,11 @@ class AdminAnalyticsPro {
         });
         
         if (topLeads.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Aucun potentiel client détecté</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No potential customers detected</td></tr>';
         }
     }
 
     createPotentialCustomersChart() {
-        // Distribution des scores
         const scoreBuckets = {
             '0-20': 0,
             '21-40': 0,
@@ -1484,14 +1683,14 @@ class AdminAnalyticsPro {
         this.createChart('potential-customers-chart', 'bar', {
             labels: Object.keys(scoreBuckets),
             datasets: [{
-                label: 'Distribution des scores de potentiel',
+                label: 'Distribution of potential scores',
                 data: Object.values(scoreBuckets),
                 backgroundColor: [
-                    'rgba(239, 68, 68, 0.8)',   // Rouge
-                    'rgba(251, 146, 60, 0.8)',  // Orange clair
-                    'rgba(245, 158, 11, 0.8)',  // Orange
-                    'rgba(132, 204, 22, 0.8)',  // Vert clair
-                    'rgba(16, 185, 129, 0.8)'   // Vert
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(132, 204, 22, 0.8)',
+                    'rgba(16, 185, 129, 0.8)'
                 ],
                 borderRadius: 8
             }]
@@ -1499,12 +1698,12 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🆕 PRÉDICTIONS ML
+    // 🆕 ML PREDICTIONS
     // ========================================
     
     async loadMLPredictions() {
         try {
-            console.log('🤖 Génération des prédictions ML...');
+            console.log('🤖 Generating ML predictions...');
             
             const churnPrediction = await this.predictChurn();
             const ltvPrediction = await this.predictLTV();
@@ -1516,13 +1715,13 @@ class AdminAnalyticsPro {
                     <div class="prediction-card">
                         <div class="prediction-icon">📉</div>
                         <div class="prediction-content">
-                            <h3>Churn Prévu (30 jours)</h3>
+                            <h3>Predicted Churn (30 days)</h3>
                             <div class="prediction-value ${churnPrediction.risk > 5 ? 'danger' : 'success'}">
-                                ${churnPrediction.value} utilisateurs
+                                ${churnPrediction.value} users
                             </div>
                             <div class="prediction-detail">
-                                Taux: ${churnPrediction.risk.toFixed(1)}%
-                                ${churnPrediction.risk > 5 ? '⚠ Risque élevé' : '✅ Normal'}
+                                Rate: ${churnPrediction.risk.toFixed(1)}%
+                                ${churnPrediction.risk > 5 ? '⚠ High risk' : '✅ Normal'}
                             </div>
                         </div>
                     </div>
@@ -1530,12 +1729,12 @@ class AdminAnalyticsPro {
                     <div class="prediction-card">
                         <div class="prediction-icon">💰</div>
                         <div class="prediction-content">
-                            <h3>LTV Moyenne Projeté</h3>
+                            <h3>Projected Avg LTV</h3>
                             <div class="prediction-value success">
                                 $${ltvPrediction.toFixed(2)}
                             </div>
                             <div class="prediction-detail">
-                                Par utilisateur premium
+                                Per premium user
                             </div>
                         </div>
                     </div>
@@ -1543,22 +1742,22 @@ class AdminAnalyticsPro {
                     <div class="prediction-card">
                         <div class="prediction-icon">📈</div>
                         <div class="prediction-content">
-                            <h3>MRR Prévu (3 mois)</h3>
+                            <h3>Predicted MRR (3 months)</h3>
                             <div class="prediction-value success">
                                 $${mrrPrediction.toFixed(0)}
                             </div>
                             <div class="prediction-detail">
-                                Tendance: ${mrrPrediction > (this.currentMRR || 0) ? '↗ Croissance' : '↘ Baisse'}
+                                Trend: ${mrrPrediction > (this.currentMRR || 0) ? '↗ Growth' : '↘ Decline'}
                             </div>
                         </div>
                     </div>
                 `;
             }
             
-            console.log('✅ Prédictions ML générées');
+            console.log('✅ ML predictions generated');
             
         } catch (error) {
-            console.error('❌ Erreur ML predictions:', error);
+            console.error('❌ Error generating ML predictions:', error);
         }
     }
 
@@ -1655,12 +1854,12 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🔔 ALERTES
+    // 🔔 ALERTS
     // ========================================
     
     async checkAlerts() {
         try {
-            console.log('🔔 Vérification des alertes...');
+            console.log('🔔 Checking alerts...');
             
             const alerts = [];
             
@@ -1677,14 +1876,14 @@ class AdminAnalyticsPro {
             if (conversionAlert) alerts.push(conversionAlert);
             
             if (alerts.length > 0) {
-                console.log(`⚠ ${alerts.length} alerte(s) détectée(s):`, alerts);
+                console.log(`⚠ ${alerts.length} alert(s) detected:`, alerts);
                 await this.sendAlertEmail(alerts);
             } else {
-                console.log('✅ Aucune alerte - tout va bien');
+                console.log('✅ No alerts - all good');
             }
             
         } catch (error) {
-            console.error('❌ Erreur check alerts:', error);
+            console.error('❌ Error checking alerts:', error);
         }
     }
 
@@ -1723,7 +1922,7 @@ class AdminAnalyticsPro {
                 return {
                     type: 'MRR_DROP',
                     severity: 'high',
-                    message: `MRR a baissé de ${dropPercent.toFixed(1)}%`,
+                    message: `MRR dropped by ${dropPercent.toFixed(1)}%`,
                     data: {
                         currentMRR: currentMRR.toFixed(2),
                         lastMonthMRR: lastMonthMRR.toFixed(2),
@@ -1743,7 +1942,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'HIGH_CHURN',
                 severity: 'medium',
-                message: `Taux de churn élevé: ${churnPrediction.risk.toFixed(1)}%`,
+                message: `High churn rate: ${churnPrediction.risk.toFixed(1)}%`,
                 data: {
                     churnRate: churnPrediction.risk.toFixed(1),
                     affectedUsers: churnPrediction.value
@@ -1773,7 +1972,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'LOW_ACTIVE_USERS',
                 severity: 'medium',
-                message: `Seulement ${activeUsers} utilisateurs actifs cette semaine`,
+                message: `Only ${activeUsers} active users this week`,
                 data: {
                     activeUsers: activeUsers,
                     threshold: this.alertThresholds.lowActiveUsers
@@ -1803,7 +2002,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'CONVERSION_DROP',
                 severity: 'high',
-                message: `Taux de conversion a baissé de ${drop.toFixed(1)}%`,
+                message: `Conversion rate dropped by ${drop.toFixed(1)}%`,
                 data: {
                     currentConversion: currentConversion.toFixed(1),
                     lastConversion: lastConversion.toFixed(1),
@@ -1817,7 +2016,7 @@ class AdminAnalyticsPro {
 
     async sendAlertEmail(alerts) {
         try {
-            console.log('📧 Envoi des alertes par email...');
+            console.log('📧 Sending alert email...');
             
             const response = await fetch(`${WORKER_URL}/send-alert-email`, {
                 method: 'POST',
@@ -1832,22 +2031,22 @@ class AdminAnalyticsPro {
             });
             
             if (response.ok) {
-                console.log('✅ Email d\'alerte envoyé avec succès');
+                console.log('✅ Alert email sent successfully');
             } else {
-                console.warn('⚠ Erreur envoi email alerte');
+                console.warn('⚠ Error sending alert email');
             }
             
         } catch (error) {
-            console.error('❌ Erreur sendAlertEmail:', error);
+            console.error('❌ Error sending alert email:', error);
         }
     }
 
     // ========================================
-    // 📥 EXPORT CSV
+    // 📥 CSV EXPORT
     // ========================================
     
     async exportAllData() {
-        console.log('📥 Export de toutes les données...');
+        console.log('📥 Exporting all data...');
         
         await Promise.all([
             this.exportData('users'),
@@ -1858,12 +2057,12 @@ class AdminAnalyticsPro {
             this.exportData('potential-customers')
         ]);
         
-        alert('✅ Toutes les données ont été exportées en CSV !');
+        alert('✅ All data has been exported to CSV!');
     }
 
     async exportData(type) {
         try {
-            console.log(`📥 Export ${type} en CSV...`);
+            console.log(`📥 Exporting ${type} to CSV...`);
             
             let data = [];
             let filename = '';
@@ -1936,8 +2135,8 @@ class AdminAnalyticsPro {
                         v.ip,
                         v.country,
                         v.visits,
-                        new Set(v.pages).size,
-                        v.devices.join('; '),
+                        v.pages ? new Set(v.pages).size : 0,
+                        v.devices ? (Array.isArray(v.devices) ? v.devices.join('; ') : '') : '',
                         v.firstVisit ? v.firstVisit.toISOString() : 'N/A',
                         v.lastVisit ? v.lastVisit.toISOString() : 'N/A'
                     ]);
@@ -1959,22 +2158,22 @@ class AdminAnalyticsPro {
                     break;
                 
                 default:
-                    console.warn('Type d\'export inconnu:', type);
+                    console.warn('Unknown export type:', type);
                     return;
             }
             
             if (data.length === 0) {
-                console.warn(`Aucune donnée à exporter pour ${type}`);
+                console.warn(`No data to export for ${type}`);
                 return;
             }
             
             const csvContent = this.arrayToCSV(data, headers);
             this.downloadCSV(csvContent, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
             
-            console.log(`✅ Export ${type} réussi`);
+            console.log(`✅ Export ${type} successful`);
             
         } catch (error) {
-            console.error(`❌ Erreur export ${type}:`, error);
+            console.error(`❌ Error exporting ${type}:`, error);
         }
     }
 
@@ -2049,9 +2248,9 @@ class AdminAnalyticsPro {
 }
 
 // ========================================
-// INITIALISATION
+// INITIALIZATION
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Démarrage Admin Analytics PRO v3.1...');
-    new AdminAnalyticsPro();
+    console.log('🚀 Starting Admin Analytics PRO v3.2...');
+    window.adminAnalytics = new AdminAnalyticsPro(); // Expose globally for export buttons
 });
