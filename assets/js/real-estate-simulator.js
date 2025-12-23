@@ -962,8 +962,11 @@
                 return;
             }
             
-            const rules = this.taxRules[this.currentSimulation.country];
-            const estimatedRent = this.currentSimulation.purchasePrice * (rules.averageRentYield || 0.04) / 12;
+            const sim = this.currentSimulation;
+            const rules = this.taxRules[sim.country];
+            
+            // ✅ Calcul du loyer estimé basé sur le prix d'achat
+            const estimatedRent = sim.purchasePrice * (rules.averageRentYield || 0.04) / 12;
             
             const modalHTML = `
                 <div id='rentVsBuyModal' class='modal-overlay' onclick='if(event.target === this) RealEstateSimulator.closeRentVsBuyModal()'>
@@ -976,17 +979,27 @@
                         </div>
                         
                         <div class='modal-body'>
-                            <div class='form-group'>
-                                <label>Monthly Rent (Estimated: ${this.formatCurrency(estimatedRent, rules.currencySymbol)})</label>
-                                <input type='number' id='rentAmount' class='form-control' value='${estimatedRent.toFixed(0)}' placeholder='Enter monthly rent'>
+                            <div class='form-row'>
+                                <div class='form-group'>
+                                    <label>Monthly Rent (Estimated: ${this.formatCurrency(estimatedRent, rules.currencySymbol)})</label>
+                                    <input type='number' id='rentAmount' class='form-control' value='${estimatedRent.toFixed(0)}' placeholder='Enter monthly rent' min='0' step='50'>
+                                    <small class='hint'>Average market rent for similar property</small>
+                                </div>
+                                
+                                <div class='form-group'>
+                                    <label>Analysis Period (years)</label>
+                                    <select id='analysisPeriod' class='form-control'>
+                                        <option value='10'>10 years</option>
+                                        <option value='15'>15 years</option>
+                                        <option value='20'>20 years</option>
+                                        <option value='25'>25 years</option>
+                                        <option value='30' selected>30 years</option>
+                                    </select>
+                                    <small class='hint'>Comparison timeframe</small>
+                                </div>
                             </div>
                             
-                            <div class='form-group'>
-                                <label>Analysis Period (years)</label>
-                                <input type='number' id='analysisPeriod' class='form-control' value='30' min='5' max='50'>
-                            </div>
-                            
-                            <button class='btn-primary' onclick='RealEstateSimulator.calculateRentVsBuy()'>
+                            <button class='btn btn-primary' onclick='RealEstateSimulator.calculateRentVsBuy()'>
                                 <i class='fas fa-calculator'></i> Run Analysis
                             </button>
                             
@@ -1018,6 +1031,17 @@
             const rules = this.taxRules[sim.country];
             const results = sim.results;
             
+            // ✅ VÉRIFICATIONS
+            if (!results || !results.monthlyPayment) {
+                alert('Missing simulation results. Please recalculate.');
+                return;
+            }
+            
+            console.log('🧮 Rent vs Buy Calculation Started');
+            console.log('Monthly Rent:', rentAmount);
+            console.log('Period:', period, 'years');
+            console.log('Monthly Mortgage:', results.monthlyPayment);
+            
             // Buy scenario
             const buyData = {
                 years: [],
@@ -1034,11 +1058,12 @@
                 netWealth: []
             };
             
-            const downPaymentInvested = sim.downPayment + results.totalAcquisitionFees;
+            // Initial values
+            const downPaymentInvested = sim.downPayment + (results.totalAcquisitionFees || 0);
             const investmentReturn = 0.07; // 7% annual return assumption
             
             let propertyValue = sim.purchasePrice;
-            let loanBalance = results.loanAmount;
+            let loanBalance = results.loanAmount || 0;
             let buyTotalCost = downPaymentInvested;
             
             let rentTotalCost = 0;
@@ -1048,57 +1073,85 @@
             const rentInflation = 0.025; // 2.5% annual rent increase
             let currentRent = rentAmount;
             
-            for (let year = 0; year <= period; year++) {
-                buyData.years.push(year);
-                rentData.years.push(year);
+            const monthlyMortgage = results.monthlyPayment || 0;
+            const annualPropertyTax = results.annualPropertyTax || 0;
+            const annualInsurance = results.annualInsurance || 0;
+            const annualMaintenance = sim.purchasePrice * 0.01; // 1% maintenance
+            
+            console.log('📊 Initial Values:');
+            console.log('Property Value:', propertyValue);
+            console.log('Loan Balance:', loanBalance);
+            console.log('Down Payment + Fees:', downPaymentInvested);
+            console.log('Annual Costs:', annualPropertyTax + annualInsurance + annualMaintenance);
+            
+            // Year 0
+            buyData.years.push(0);
+            buyData.totalCost.push(buyTotalCost);
+            buyData.equity.push(propertyValue - loanBalance);
+            buyData.netWealth.push((propertyValue - loanBalance) - buyTotalCost);
+            
+            rentData.years.push(0);
+            rentData.totalCost.push(0);
+            rentData.savings.push(rentSavings);
+            rentData.netWealth.push(rentSavings);
+            
+            // Yearly calculations
+            for (let year = 1; year <= period; year++) {
+                // ✅ BUY SCENARIO
+                propertyValue *= (1 + appreciationRate);
                 
-                if (year > 0) {
-                    // Buy scenario
-                    propertyValue *= (1 + appreciationRate);
-                    
-                    const annualMortgage = results.monthlyPayment * 12;
-                    const annualPropertyTax = results.annualPropertyTax || 0;
-                    const annualInsurance = results.annualInsurance || 0;
-                    const annualMaintenance = sim.purchasePrice * 0.01;
-                    
-                    buyTotalCost += annualMortgage + annualPropertyTax + annualInsurance + annualMaintenance;
-                    
-                    const annualPrincipal = annualMortgage - (loanBalance * (sim.interestRate / 100));
-                    loanBalance = Math.max(0, loanBalance - annualPrincipal);
-                    
-                    // Rent scenario
-                    currentRent *= (1 + rentInflation);
-                    const annualRent = currentRent * 12;
-                    rentTotalCost += annualRent;
-                    
-                    const monthlySavings = results.monthlyPayment - currentRent;
-                    if (monthlySavings > 0) {
-                        rentSavings += monthlySavings * 12;
-                    }
-                    rentSavings *= (1 + investmentReturn);
-                }
+                const annualMortgage = monthlyMortgage * 12;
+                const totalAnnualCosts = annualMortgage + annualPropertyTax + annualInsurance + annualMaintenance;
+                buyTotalCost += totalAnnualCosts;
+                
+                // Principal paid this year
+                const interestRate = sim.interestRate / 100;
+                const annualInterest = loanBalance * interestRate;
+                const annualPrincipal = Math.min(annualMortgage - annualInterest, loanBalance);
+                loanBalance = Math.max(0, loanBalance - annualPrincipal);
                 
                 const buyEquity = propertyValue - loanBalance;
                 const buyNetWealth = buyEquity - buyTotalCost;
                 
+                // ✅ RENT SCENARIO
+                currentRent *= (1 + rentInflation);
+                const annualRent = currentRent * 12;
+                rentTotalCost += annualRent;
+                
+                // Monthly savings (difference between mortgage and rent)
+                const monthlySavings = monthlyMortgage - currentRent;
+                if (monthlySavings > 0) {
+                    rentSavings += monthlySavings * 12;
+                }
+                
+                // Investment returns on savings
+                rentSavings *= (1 + investmentReturn);
+                
                 const rentNetWealth = rentSavings - rentTotalCost;
                 
+                // Store data
+                buyData.years.push(year);
                 buyData.totalCost.push(buyTotalCost);
                 buyData.equity.push(buyEquity);
                 buyData.netWealth.push(buyNetWealth);
                 
+                rentData.years.push(year);
                 rentData.totalCost.push(rentTotalCost);
                 rentData.savings.push(rentSavings);
                 rentData.netWealth.push(rentNetWealth);
             }
             
+            console.log('✅ Calculation Complete');
+            console.log('Final Buy Net Wealth:', buyData.netWealth[period]);
+            console.log('Final Rent Net Wealth:', rentData.netWealth[period]);
+            
             // Display results
-            const breakEvenYear = buyData.netWealth.findIndex((val, i) => val > rentData.netWealth[i]);
+            const breakEvenYear = buyData.netWealth.findIndex((val, i) => i > 0 && val > rentData.netWealth[i]);
             
             const resultsHTML = `
                 <div class='rent-vs-buy-results'>
                     <div class='result-card'>
-                        <h3>Buy Scenario (${period} years)</h3>
+                        <h3>💰 Buy Scenario (${period} years)</h3>
                         <div class='result-metric'>
                             <label>Total Cost:</label>
                             <strong>${this.formatCurrency(buyData.totalCost[period], rules.currencySymbol)}</strong>
@@ -1118,7 +1171,7 @@
                     </div>
                     
                     <div class='result-card'>
-                        <h3>Rent Scenario (${period} years)</h3>
+                        <h3>🏠 Rent Scenario (${period} years)</h3>
                         <div class='result-metric'>
                             <label>Total Rent Paid:</label>
                             <strong>${this.formatCurrency(rentData.totalCost[period], rules.currencySymbol)}</strong>
@@ -1134,17 +1187,17 @@
                         <div class='result-metric'>
                             <label>Difference:</label>
                             <strong class='${buyData.netWealth[period] > rentData.netWealth[period] ? 'text-success' : 'text-danger'}'>
-                                ${this.formatCurrency(buyData.netWealth[period] - rentData.netWealth[period], rules.currencySymbol)}
+                                ${this.formatCurrency(Math.abs(buyData.netWealth[period] - rentData.netWealth[period]), rules.currencySymbol)}
                             </strong>
                         </div>
                     </div>
                     
                     <div class='result-card' style='grid-column: span 2;'>
-                        <h3>Recommendation</h3>
+                        <h3>📊 Recommendation</h3>
                         <div class='recommendation'>
                             ${buyData.netWealth[period] > rentData.netWealth[period] 
-                                ? `<div class='recommendation-buy'><i class='fas fa-home'></i> <strong>BUYING IS BETTER</strong><br/>You'll be ${this.formatCurrency(buyData.netWealth[period] - rentData.netWealth[period], rules.currencySymbol)} wealthier after ${period} years${breakEvenYear > 0 ? ` (break-even at year ${breakEvenYear})` : ''}</div>`
-                                : `<div class='recommendation-rent'><i class='fas fa-key'></i> <strong>RENTING IS BETTER</strong><br/>You'll save ${this.formatCurrency(rentData.netWealth[period] - buyData.netWealth[period], rules.currencySymbol)} after ${period} years by renting and investing</div>`
+                                ? `<div class='recommendation-buy'><i class='fas fa-home'></i> <strong>BUYING IS BETTER</strong><br/>You'll be <strong>${this.formatCurrency(buyData.netWealth[period] - rentData.netWealth[period], rules.currencySymbol)}</strong> wealthier after ${period} years${breakEvenYear > 0 ? ` (break-even at year ${breakEvenYear})` : ''}</div>`
+                                : `<div class='recommendation-rent'><i class='fas fa-key'></i> <strong>RENTING IS BETTER</strong><br/>You'll save <strong>${this.formatCurrency(rentData.netWealth[period] - buyData.netWealth[period], rules.currencySymbol)}</strong> after ${period} years by renting and investing</div>`
                             }
                         </div>
                     </div>
@@ -1175,7 +1228,11 @@
                 },
                 title: {
                     text: 'Net Wealth Evolution: Buy vs Rent',
-                    style: { color: chartColors.title }
+                    style: { 
+                        color: chartColors.title,
+                        fontSize: '1.25rem',
+                        fontWeight: '800'
+                    }
                 },
                 xAxis: {
                     categories: buyData.years.map(y => 'Year ' + y),
@@ -1188,46 +1245,70 @@
                     labels: { 
                         style: { color: chartColors.text },
                         formatter: function() {
-                            return rules.currencySymbol + ' ' + (this.value / 1000).toFixed(0) + 'k';
+                            return rules.currencySymbol + (this.value / 1000).toFixed(0) + 'k';
                         }
                     },
-                    gridLineColor: chartColors.gridLine
+                    gridLineColor: chartColors.gridLine,
+                    plotLines: [{
+                        value: 0,
+                        color: chartColors.gridLine,
+                        width: 2,
+                        zIndex: 2
+                    }]
                 },
                 tooltip: {
                     shared: true,
                     backgroundColor: chartColors.tooltipBg,
                     borderColor: chartColors.tooltipBorder,
                     style: { color: chartColors.text },
-                    valuePrefix: rules.currencySymbol
+                    useHTML: true,
+                    formatter: function() {
+                        let html = '<div style="padding: 8px;"><strong>' + this.x + '</strong><br/>';
+                        this.points.forEach(point => {
+                            html += '<span style="color:' + point.color + '">●</span> ' + 
+                                point.series.name + ': <strong>' + rules.currencySymbol + point.y.toLocaleString() + '</strong><br/>';
+                        });
+                        html += '</div>';
+                        return html;
+                    }
                 },
                 plotOptions: {
                     line: {
                         lineWidth: 3,
-                        marker: { enabled: false }
+                        marker: { 
+                            enabled: true,
+                            radius: 4
+                        }
                     }
                 },
                 series: [{
                     name: 'Buy Net Wealth',
                     data: buyData.netWealth,
-                    color: '#10b981'
+                    color: '#10b981',
+                    lineWidth: 4
                 }, {
                     name: 'Rent Net Wealth',
                     data: rentData.netWealth,
-                    color: '#3b82f6'
+                    color: '#3b82f6',
+                    lineWidth: 4
                 }, {
                     name: 'Buy Equity',
                     data: buyData.equity,
                     color: '#8b5cf6',
-                    dashStyle: 'Dash'
+                    dashStyle: 'Dash',
+                    lineWidth: 2
                 }, {
                     name: 'Rent Savings',
                     data: rentData.savings,
                     color: '#f59e0b',
-                    dashStyle: 'Dash'
+                    dashStyle: 'Dash',
+                    lineWidth: 2
                 }],
                 credits: { enabled: false },
                 legend: {
-                    itemStyle: { color: chartColors.text }
+                    itemStyle: { color: chartColors.text },
+                    align: 'center',
+                    verticalAlign: 'bottom'
                 }
             });
         },
@@ -1704,6 +1785,9 @@
                         borderRadius: 8,
                         dataLabels: {
                             enabled: true,
+                            align: 'right', // ✅ Alignement à droite
+                            inside: false, // ✅ À l'extérieur de la barre
+                            x: 5, // ✅ Décalage de 5px à droite
                             formatter: function() {
                                 return '€' + (this.y / 1000).toFixed(0) + 'k (' + this.point.percentage + '%)';
                             },
@@ -1739,10 +1823,8 @@
             
             const sorted = [...this.portfolio].sort((a, b) => new Date(a.purchaseDate) - new Date(b.purchaseDate));
             
-            const categories = sorted.map(p => {
-                const date = new Date(p.purchaseDate);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-            });
+            // ✅ Noms des propriétés au lieu des dates
+            const categories = sorted.map(p => p.name || 'Unknown Property');
             
             const purchaseData = sorted.map(p => p.purchasePrice);
             const currentData = sorted.map(p => p.currentValue);
