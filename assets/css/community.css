@@ -2274,3 +2274,220 @@ body.dark-mode .post-detail-stat {
 body.dark-mode .search-input {
     background: rgba(15, 23, 42, 0.6) !important;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTION - BORDURES DÉGRADÉES POUR CREATE POST
+   ════════════════════════════════════════════════════════════════ */
+
+/* Channel Select (dropdown) */
+.form-section:has(#channelSelect) {
+    position: relative;
+}
+
+.form-select {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.form-select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* Title Input */
+.form-input {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    width: 100% !important;
+    transition: all 0.3s ease !important;
+    
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.form-input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* Markdown Editor (SimpleMDE / CodeMirror) */
+.CodeMirror {
+    background: var(--glass-bg) !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    font-size: 1rem !important;
+    color: var(--text-primary) !important;
+    
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.CodeMirror-focused {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* SimpleMDE Toolbar */
+.editor-toolbar {
+    background: rgba(102, 126, 234, 0.05) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+}
+
+.editor-toolbar a {
+    color: var(--text-primary) !important;
+}
+
+.editor-toolbar a:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    border-color: transparent !important;
+}
+
+.editor-toolbar.fullscreen {
+    background: var(--glass-bg) !important;
+}
+
+/* Tags Input Wrapper */
+.tags-input-wrapper {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    min-height: 52px !important;
+    transition: all 0.3s ease !important;
+    
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.tags-input-wrapper:focus-within {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+.tag-input {
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+/* Upload Zone */
+.upload-zone {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 3px dashed transparent !important;
+    border-radius: 16px !important;
+    padding: 48px 24px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.upload-zone:hover {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.05), rgba(102, 126, 234, 0.05)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.upload-zone.drag-over {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.1)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    transform: scale(1.02) !important;
+}
+
+/* Image Preview */
+.image-preview {
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    
+    background-image: 
+        linear-gradient(white, white),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode .form-select,
+body.dark-mode .form-input,
+body.dark-mode .CodeMirror,
+body.dark-mode .tags-input-wrapper,
+body.dark-mode .upload-zone {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .upload-zone:hover {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.4)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .upload-zone.drag-over {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.15), rgba(102, 126, 234, 0.15)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .image-preview {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .CodeMirror {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .editor-toolbar {
+    background: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* Placeholder styling */
+.form-input::placeholder,
+.form-select::placeholder,
+.tag-input::placeholder {
+    color: var(--text-tertiary) !important;
+}
