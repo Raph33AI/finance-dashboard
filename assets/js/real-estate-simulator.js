@@ -1620,11 +1620,26 @@
                 byCountry[prop.country] += prop.currentValue;
             });
             
+            // ✅ MAPPING pays vers codes ISO
+            const countryCodeMap = {
+                'france': 'FR',
+                'uk': 'GB',
+                'usa': 'US',
+                'spain': 'ES',
+                'portugal': 'PT',
+                'germany': 'DE',
+                'switzerland': 'CH',
+                'italy': 'IT',
+                'belgium': 'BE',
+                'netherlands': 'NL'
+            };
+            
             const data = Object.keys(byCountry).map(country => {
-                const rules = this.taxRules[country];
                 return {
-                    name: `${rules.flag} ${rules.name}`,
-                    y: byCountry[country]
+                    'hc-key': countryCodeMap[country]?.toLowerCase(),
+                    code: countryCodeMap[country],
+                    value: byCountry[country],
+                    name: this.taxRules[country].name
                 };
             });
             
@@ -1634,9 +1649,10 @@
                 this.charts.portfolioDistribution.destroy();
             }
             
-            this.charts.portfolioDistribution = Highcharts.chart('portfolioDistributionChart', {
+            // ✅ CARTE DU MONDE (nécessite Highcharts Maps)
+            this.charts.portfolioDistribution = Highcharts.mapChart('portfolioDistributionChart', {
                 chart: {
-                    type: 'pie',
+                    map: 'countries/world/world', // ✅ Carte du monde
                     backgroundColor: 'transparent',
                     style: { fontFamily: 'Inter, sans-serif' }
                 },
@@ -1644,27 +1660,36 @@
                     text: 'Portfolio Distribution by Country',
                     style: { color: chartColors.title }
                 },
+                mapNavigation: {
+                    enabled: true,
+                    buttonOptions: {
+                        verticalAlign: 'bottom'
+                    }
+                },
+                colorAxis: {
+                    min: 0,
+                    minColor: '#e0f2fe',
+                    maxColor: '#0369a1'
+                },
                 tooltip: {
                     backgroundColor: chartColors.tooltipBg,
                     borderColor: chartColors.tooltipBorder,
                     style: { color: chartColors.text },
-                    pointFormat: '<b>{point.percentage:.1f}%</b><br/>€{point.y:,.0f}'
-                },
-                plotOptions: {
-                    pie: {
-                        allowPointSelect: true,
-                        cursor: 'pointer',
-                        dataLabels: {
-                            enabled: true,
-                            format: '<b>{point.name}</b>: {point.percentage:.1f}%',
-                            style: { color: chartColors.text }
-                        }
-                    }
+                    pointFormat: '<b>{point.name}</b><br/>Value: €{point.value:,.0f}'
                 },
                 series: [{
-                    name: 'Value',
-                    colorByPoint: true,
-                    data: data
+                    name: 'Portfolio Value',
+                    data: data,
+                    joinBy: 'hc-key',
+                    states: {
+                        hover: {
+                            color: '#0ea5e9'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.code}'
+                    }
                 }],
                 credits: { enabled: false }
             });
@@ -2158,7 +2183,7 @@
             
             this.charts.amortization = Highcharts.chart('amortizationChart', {
                 chart: {
-                    type: 'area',
+                    type: 'line', // ✅ CHANGÉ de 'area' à 'line'
                     backgroundColor: 'transparent',
                     style: { fontFamily: 'Inter, sans-serif' }
                 },
@@ -2185,10 +2210,9 @@
                     valuePrefix: this.taxRules[this.currentSimulation.country].currencySymbol
                 },
                 plotOptions: {
-                    area: {
-                        stacking: 'normal',
-                        lineWidth: 2,
-                        marker: { enabled: false }
+                    line: { // ✅ CHANGÉ
+                        lineWidth: 3,
+                        marker: { enabled: true, radius: 4 }
                     }
                 },
                 series: [{
@@ -2202,9 +2226,7 @@
                 }, {
                     name: 'Remaining Balance',
                     data: years.map(item => item.balance),
-                    color: '#3b82f6',
-                    type: 'line',
-                    stacking: undefined
+                    color: '#3b82f6'
                 }],
                 credits: { enabled: false },
                 legend: {
