@@ -5,10 +5,10 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Admin Analytics Dashboard - AlphaVault AI</title>
     
-    <!-- Chart.js (pour les graphiques) -->
+    <!-- Chart.js -->
     <script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
     
-    <!-- Leaflet.js (pour les cartes géographiques) -->
+    <!-- Leaflet.js -->
     <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'>
     <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
     
@@ -26,13 +26,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
-    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="theme-color" content="#667eea">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -42,7 +37,7 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page (AUTH GUARD) -->
+    <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
     
     <!-- Analytics Tracker -->
@@ -65,10 +60,10 @@
         </div>
     </div>
 
-    <!-- 📊 ADMIN DASHBOARD (hidden initially) -->
+    <!-- 📊 ADMIN DASHBOARD -->
     <div id="admin-dashboard" class='layout-wrapper' style="display: none;">
         
-        <!-- Sidebar Navigation (identique à dashboard-financier.html) -->
+        <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
@@ -206,7 +201,7 @@
                 <div class='header-right'>
                     <button class='dashboard-btn dashboard-btn-export' id='exportDataBtn'>
                         <i class='fas fa-download'></i>
-                        <span class='btn-text'>Export All Data</span>
+                        <span class='btn-text'>Export All</span>
                     </button>
                     <button class='dashboard-btn' id='refreshDataBtn'>
                         <i class='fas fa-sync-alt'></i>
@@ -218,22 +213,267 @@
             <div class='container'>
 
                 <!-- ========================================
-                     SECTION 1: THIRD-PARTY ANALYTICS
+                     NAVIGATION PRINCIPALE PAR ONGLETS
                      ======================================== -->
-                
-                <div class="section">
-                    <div class="section-header-collapsible" onclick="toggleSection('section1')">
+                <div class="main-tabs">
+                    <button class="main-tab active" data-section="dashboard">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </button>
+                    <button class="main-tab" data-section="users-management">
+                        <i class="fas fa-users-cog"></i>
+                        Users Management
+                    </button>
+                    <button class="main-tab" data-section="third-party">
+                        <i class="fas fa-plug"></i>
+                        Third-Party Analytics
+                    </button>
+                    <button class="main-tab" data-section="internal-analytics">
+                        <i class="fas fa-database"></i>
+                        Internal Analytics
+                    </button>
+                    <button class="main-tab" data-section="potential-customers">
+                        <i class="fas fa-fire"></i>
+                        Leads & Potential
+                    </button>
+                    <button class="main-tab" data-section="ml-predictions">
+                        <i class="fas fa-brain"></i>
+                        ML Predictions
+                    </button>
+                </div>
+
+                <!-- ========================================
+                     SECTION: DASHBOARD (MENU PRINCIPAL)
+                     ======================================== -->
+                <div id="dashboard" class="tab-section active" data-section-content="dashboard">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            Global Overview
+                        </h2>
+                        
+                        <!-- Stats Grid Globales -->
+                        <div class="dashboard-stats-grid">
+                            <!-- Total Users -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Users</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-users">0</div>
+                                <div class="dashboard-stat-change" id="users-change">+0 this week</div>
+                            </div>
+                            
+                            <!-- Premium Users -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Premium Users</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="premium-users">0</div>
+                                <div class="dashboard-stat-change" id="premium-change">0% conversion</div>
+                            </div>
+                            
+                            <!-- Active Users -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Active Users</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="active-users">0</div>
+                                <div class="dashboard-stat-change">Last 7 days</div>
+                            </div>
+                            
+                            <!-- Total Revenue -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Revenue</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-revenue">$0</div>
+                                <div class="dashboard-stat-change" id="revenue-change">+$0 this month</div>
+                            </div>
+                            
+                            <!-- MRR -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">MRR</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="mrr">$0</div>
+                                <div class="dashboard-stat-change">ARR: <span id="arr">$0</span></div>
+                            </div>
+                            
+                            <!-- Total Visits -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Visits</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-visits">0</div>
+                                <div class="dashboard-stat-change" id="visits-change">+0 today</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Grid -->
+                        <div class="charts-row">
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-line"></i>
+                                    User Registrations (90 Days)
+                                </h4>
+                                <canvas id="registrations-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Plans Distribution
+                                </h4>
+                                <canvas id="plans-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="charts-row">
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Daily Visits (90 Days)
+                                </h4>
+                                <canvas id="visits-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-area"></i>
+                                    Monthly Revenue (12 Months)
+                                </h4>
+                                <canvas id="revenue-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: USERS MANAGEMENT
+                     ======================================== -->
+                <div id="users-management" class="tab-section" data-section-content="users-management">
+                    <div class="section">
+                        <div class="section-header-with-actions">
+                            <h2 class='section-title'>
+                                <i class='fas fa-users-cog'></i>
+                                Users Management
+                                <span class="section-subtitle">Complete control panel</span>
+                            </h2>
+                            <button class='dashboard-btn' id='exportUsersBtn'>
+                                <i class='fas fa-file-csv'></i>
+                                Export Users
+                            </button>
+                        </div>
+                        
+                        <!-- Stats rapides -->
+                        <div class="kpis-grid" style="margin-bottom: 24px;">
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Total Users</div>
+                                    <div class="kpi-value" id="total-users-mgmt">0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                    <i class="fas fa-ban"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Banned Users</div>
+                                    <div class="kpi-value" id="banned-users-mgmt">0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Active Users</div>
+                                    <div class="kpi-value" id="active-users-mgmt">0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Premium Users</div>
+                                    <div class="kpi-value" id="premium-users-mgmt">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau complet des utilisateurs -->
+                        <div class="table-wrapper">
+                            <h4 class="chart-title">
+                                <i class="fas fa-table"></i>
+                                All Users (with Actions)
+                            </h4>
+                            <div class="table-responsive">
+                                <table class="data-table users-management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>User</th>
+                                            <th>Plan</th>
+                                            <th>Status</th>
+                                            <th>Created At</th>
+                                            <th>Last Login</th>
+                                            <th>Simulations</th>
+                                            <th>Visits</th>
+                                            <th>Activities</th>
+                                            <th>API Requests</th>
+                                            <th>Country</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-management-body">
+                                        <tr>
+                                            <td colspan="12" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading users data...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: THIRD-PARTY ANALYTICS
+                     ======================================== -->
+                <div id="third-party" class="tab-section" data-section-content="third-party">
+                    <div class="section">
                         <h2 class='section-title'>
                             <i class='fas fa-plug'></i>
-                            Section 1: Third-Party Analytics
-                            <span class="section-subtitle">Stripe • Cloudflare • Firebase</span>
+                            Third-Party Analytics
+                            <span class="section-subtitle">Stripe • Cloudflare</span>
                         </h2>
-                        <button class="collapse-btn" id="section1-toggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="section-content" id="section1-content">
                         
                         <!-- 💳 STRIPE ANALYTICS -->
                         <div class="analytics-subsection">
@@ -343,6 +583,11 @@
                                         <canvas id="stripe-plan-revenue-chart"></canvas>
                                     </div>
                                 </div>
+                                
+                                <button class='dashboard-btn' id='exportStripeBtn' style="margin-top: 16px;">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export Stripe Data
+                                </button>
                             </div>
                         </div>
                         
@@ -494,184 +739,39 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                <button class='dashboard-btn' id='exportCloudflareBtn' style="margin-top: 16px;">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export Cloudflare Data
+                                </button>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
 
                 <!-- ========================================
-                     SECTION 2: INTERNAL ANALYTICS
+                     SECTION: INTERNAL ANALYTICS
                      ======================================== -->
-                
-                <div class="section">
-                    <div class="section-header-collapsible" onclick="toggleSection('section2')">
+                <div id="internal-analytics" class="tab-section" data-section-content="internal-analytics">
+                    <div class="section">
                         <h2 class='section-title'>
                             <i class='fas fa-database'></i>
-                            Section 2: Internal Analytics
-                            <span class="section-subtitle">Firebase • Analytics Tracker</span>
+                            Internal Analytics
+                            <span class="section-subtitle">Firebase Data</span>
                         </h2>
-                        <button class="collapse-btn" id="section2-toggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="section-content" id="section2-content">
                         
-                        <!-- 👥 USERS ANALYTICS -->
+                        <!-- Sessions & Engagement -->
                         <div class="analytics-subsection">
-                            <div class="subsection-header" onclick="toggleSubsection('users')">
+                            <div class="subsection-header" onclick="toggleSubsection('sessions')">
                                 <h3 class="subsection-title">
-                                    <i class="fas fa-users"></i>
-                                    Users Analytics
+                                    <i class="fas fa-clock"></i>
+                                    Sessions & Engagement
                                 </h3>
-                                <i class="fas fa-chevron-down subsection-arrow" id="users-arrow"></i>
+                                <i class="fas fa-chevron-down subsection-arrow" id="sessions-arrow"></i>
                             </div>
                             
-                            <div class="subsection-content" id="users-content">
-                                <!-- KPIs Grid -->
+                            <div class="subsection-content" id="sessions-content">
                                 <div class="kpis-grid">
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Total Users</div>
-                                            <div class="kpi-value" id="total-users">0</div>
-                                            <div class="kpi-sublabel" id="users-change">+0 this week</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                                            <i class="fas fa-crown"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Premium Users</div>
-                                            <div class="kpi-value" id="premium-users">0</div>
-                                            <div class="kpi-sublabel" id="premium-change">0% conversion</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                            <i class="fas fa-user-check"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Active Users</div>
-                                            <div class="kpi-value" id="active-users">0</div>
-                                            <div class="kpi-sublabel">Last 7 days</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                            <i class="fas fa-user-plus"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Monthly Signups</div>
-                                            <div class="kpi-value" id="monthly-signups">0</div>
-                                            <div class="kpi-sublabel">Last 30 days</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                            <i class="fas fa-envelope-open-text"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Email Verified</div>
-                                            <div class="kpi-value" id="email-verified-users">0</div>
-                                            <div class="kpi-sublabel">
-                                                Rate: <span id="active-rate">0%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Charts -->
-                                <div class="charts-row">
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-line"></i>
-                                            Registrations (Last 90 Days)
-                                        </h4>
-                                        <canvas id="registrations-chart"></canvas>
-                                    </div>
-                                    
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-pie"></i>
-                                            Plans Distribution
-                                        </h4>
-                                        <canvas id="plans-chart"></canvas>
-                                    </div>
-                                </div>
-                                
-                                <!-- Recent Users Table -->
-                                <div class="table-wrapper">
-                                    <h4 class="chart-title">
-                                        <i class="fas fa-history"></i>
-                                        Recent Users
-                                    </h4>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Email</th>
-                                                <th>Plan</th>
-                                                <th>Created At</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="recent-users-body">
-                                            <tr>
-                                                <td colspan="4" style="text-align: center; padding: 20px;">
-                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 📊 VISITS & SESSIONS -->
-                        <div class="analytics-subsection">
-                            <div class="subsection-header" onclick="toggleSubsection('visits')">
-                                <h3 class="subsection-title">
-                                    <i class="fas fa-chart-bar"></i>
-                                    Visits & Sessions Analytics
-                                </h3>
-                                <i class="fas fa-chevron-down subsection-arrow" id="visits-arrow"></i>
-                            </div>
-                            
-                            <div class="subsection-content collapsed" id="visits-content">
-                                <!-- KPIs Grid -->
-                                <div class="kpis-grid">
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                            <i class="fas fa-eye"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Total Visits</div>
-                                            <div class="kpi-value" id="total-visits">0</div>
-                                            <div class="kpi-sublabel" id="visits-change">+0 today</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                            <i class="fas fa-user-friends"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Unique Visitors</div>
-                                            <div class="kpi-value" id="unique-visitors">0</div>
-                                            <div class="kpi-sublabel">
-                                                Anonymous: <span id="anonymous-visits">0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
                                     <div class="kpi-card">
                                         <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                             <i class="fas fa-clock"></i>
@@ -706,236 +806,119 @@
                                             <div class="kpi-sublabel">Overall</div>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <!-- Charts -->
-                                <div class="charts-row">
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-bar"></i>
-                                            Daily Visits (Last 90 Days)
-                                        </h4>
-                                        <canvas id="visits-chart"></canvas>
-                                    </div>
-                                    
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-door-open"></i>
-                                            Bounce Rate by Page
-                                        </h4>
-                                        <canvas id="bounce-rate-chart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 💰 REVENUE ANALYTICS -->
-                        <div class="analytics-subsection">
-                            <div class="subsection-header" onclick="toggleSubsection('revenue')">
-                                <h3 class="subsection-title">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    Revenue Analytics
-                                </h3>
-                                <i class="fas fa-chevron-down subsection-arrow" id="revenue-arrow"></i>
-                            </div>
-                            
-                            <div class="subsection-content collapsed" id="revenue-content">
-                                <!-- KPIs Grid -->
-                                <div class="kpis-grid">
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Total Revenue</div>
-                                            <div class="kpi-value" id="total-revenue">$0</div>
-                                            <div class="kpi-sublabel" id="revenue-change">+$0 this month</div>
-                                        </div>
-                                    </div>
                                     
                                     <div class="kpi-card">
                                         <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                            <i class="fas fa-calendar-alt"></i>
+                                            <i class="fas fa-route"></i>
                                         </div>
                                         <div class="kpi-content">
-                                            <div class="kpi-label">MRR</div>
-                                            <div class="kpi-value" id="mrr">$0</div>
-                                            <div class="kpi-sublabel">
-                                                ARR: <span id="arr">$0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                                            <i class="fas fa-chart-line"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Avg LTV</div>
-                                            <div class="kpi-value" id="avg-ltv">$0</div>
-                                            <div class="kpi-sublabel">
-                                                Max: <span id="max-ltv">$0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                            <i class="fas fa-user-dollar"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">ARPU</div>
-                                            <div class="kpi-value" id="arpu">$0</div>
-                                            <div class="kpi-sublabel">Per user</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Active Subscriptions</div>
-                                            <div class="kpi-value" id="active-subscriptions">0</div>
-                                            <div class="kpi-sublabel">Paying customers</div>
+                                            <div class="kpi-label">Conversion Paths</div>
+                                            <div class="kpi-value" id="unique-conversion-paths">0</div>
+                                            <div class="kpi-sublabel">Unique paths</div>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Charts -->
-                                <div class="charts-row">
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-bar"></i>
-                                            Monthly Revenue (Last 12 Months)
-                                        </h4>
-                                        <canvas id="revenue-chart"></canvas>
-                                    </div>
-                                    
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-line"></i>
-                                            Churn Analysis
-                                        </h4>
-                                        <canvas id="churn-chart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 🔥 NON-CUSTOMER VISITORS & POTENTIAL CUSTOMERS -->
-                        <div class="analytics-subsection">
-                            <div class="subsection-header" onclick="toggleSubsection('potential')">
-                                <h3 class="subsection-title">
-                                    <i class="fas fa-fire"></i>
-                                    Potential Customers & Leads
-                                </h3>
-                                <i class="fas fa-chevron-down subsection-arrow" id="potential-arrow"></i>
-                            </div>
-                            
-                            <div class="subsection-content collapsed" id="potential-content">
-                                <!-- KPIs Grid -->
-                                <div class="kpis-grid">
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                            <i class="fas fa-user-slash"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Non-Customers</div>
-                                            <div class="kpi-value" id="total-non-customers">0</div>
-                                            <div class="kpi-sublabel">
-                                                Visits: <span id="total-anonymous-visits">0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                                            <i class="fas fa-fire"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Hot Leads</div>
-                                            <div class="kpi-value" id="hot-leads">0</div>
-                                            <div class="kpi-sublabel">Score ≥ 70</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                            <i class="fas fa-temperature-high"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Warm Leads</div>
-                                            <div class="kpi-value" id="warm-leads">0</div>
-                                            <div class="kpi-sublabel">Score 50-69</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                            <i class="fas fa-snowflake"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Cold Leads</div>
-                                            <div class="kpi-value" id="cold-leads">0</div>
-                                            <div class="kpi-sublabel">Score < 50</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                                            <i class="fas fa-chart-line"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Avg Lead Score</div>
-                                            <div class="kpi-value" id="avg-lead-score">0</div>
-                                            <div class="kpi-sublabel">Out of 100</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Charts -->
-                                <div class="charts-row">
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-chart-bar"></i>
-                                            Lead Score Distribution
-                                        </h4>
-                                        <canvas id="potential-customers-chart"></canvas>
-                                    </div>
-                                    
-                                    <div class="chart-wrapper">
-                                        <h4 class="chart-title">
-                                            <i class="fas fa-globe"></i>
-                                            Non-Customers by Country
-                                        </h4>
-                                        <canvas id="non-customer-countries-chart"></canvas>
-                                    </div>
-                                </div>
-                                
-                                <!-- Potential Customers Table -->
+                                <!-- Conversion Paths Table -->
                                 <div class="table-wrapper">
                                     <h4 class="chart-title">
-                                        <i class="fas fa-trophy"></i>
-                                        Top 50 Potential Customers
+                                        <i class="fas fa-route"></i>
+                                        Top Conversion Paths
                                     </h4>
                                     <table class="data-table">
                                         <thead>
                                             <tr>
                                                 <th>#</th>
-                                                <th>IP</th>
-                                                <th>Country</th>
-                                                <th>Visits</th>
-                                                <th>Pages</th>
-                                                <th>Strategic</th>
-                                                <th>Score</th>
-                                                <th>Category</th>
-                                                <th>Last Visit</th>
+                                                <th>Path</th>
+                                                <th>Count</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="potential-customers-body">
+                                        <tbody id="conversion-paths-body">
                                             <tr>
-                                                <td colspan="9" style="text-align: center; padding: 20px;">
+                                                <td colspan="3" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <button class='dashboard-btn' id='exportSessionsBtn' style="margin-top: 16px;">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export Sessions Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Activity -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('activity')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-history"></i>
+                                    Recent Activity
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="activity-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="activity-content">
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-stream"></i>
+                                        Latest 20 Activities
+                                    </h4>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Action</th>
+                                                <th>Page</th>
+                                                <th>Timestamp</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-activity-body">
+                                            <tr>
+                                                <td colspan="4" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <button class='dashboard-btn' id='exportActivityBtn' style="margin-top: 16px;">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export Activity Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Conversion Funnel -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('funnel')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-filter"></i>
+                                    Conversion Funnel
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="funnel-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="funnel-content">
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-funnel-dollar"></i>
+                                        User Journey Funnel
+                                    </h4>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Stage</th>
+                                                <th>Count</th>
+                                                <th>Conversion Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="funnel-body">
+                                            <tr>
+                                                <td colspan="3" style="text-align: center; padding: 20px;">
                                                     <i class="fas fa-spinner fa-spin"></i> Loading...
                                                 </td>
                                             </tr>
@@ -945,30 +928,189 @@
                             </div>
                         </div>
                         
-                        <!-- 🤖 ML PREDICTIONS -->
+                        <!-- Churn Analysis -->
                         <div class="analytics-subsection">
-                            <div class="subsection-header" onclick="toggleSubsection('ml')">
+                            <div class="subsection-header" onclick="toggleSubsection('churn')">
                                 <h3 class="subsection-title">
-                                    <i class="fas fa-brain"></i>
-                                    ML Predictions & Insights
+                                    <i class="fas fa-user-slash"></i>
+                                    Churn Analysis
                                 </h3>
-                                <i class="fas fa-chevron-down subsection-arrow" id="ml-arrow"></i>
+                                <i class="fas fa-chevron-down subsection-arrow" id="churn-arrow"></i>
                             </div>
                             
-                            <div class="subsection-content collapsed" id="ml-content">
-                                <div id="ml-predictions" class="ml-predictions-grid">
-                                    <!-- Rempli par JavaScript -->
+                            <div class="subsection-content collapsed" id="churn-content">
+                                <div class="chart-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-chart-line"></i>
+                                        New vs Churned Users (6 Months)
+                                    </h4>
+                                    <canvas id="churn-chart"></canvas>
+                                </div>
+                                
+                                <div class="chart-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        Cohort Analysis (12 Months)
+                                    </h4>
+                                    <canvas id="cohort-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: POTENTIAL CUSTOMERS & LEADS
+                     ======================================== -->
+                <div id="potential-customers" class="tab-section" data-section-content="potential-customers">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-fire'></i>
+                            Leads & Potential Customers
+                            <span class="section-subtitle">Lead Scoring & Optimization</span>
+                        </h2>
+                        
+                        <!-- KPIs Grid -->
+                        <div class="kpis-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-user-slash"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Non-Customers</div>
+                                    <div class="kpi-value" id="total-non-customers">0</div>
+                                    <div class="kpi-sublabel">
+                                        Visits: <span id="total-anonymous-visits">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Hot Leads</div>
+                                    <div class="kpi-value" id="hot-leads">0</div>
+                                    <div class="kpi-sublabel">Score ≥ 70</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-temperature-high"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Warm Leads</div>
+                                    <div class="kpi-value" id="warm-leads">0</div>
+                                    <div class="kpi-sublabel">Score 50-69</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                    <i class="fas fa-snowflake"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Cold Leads</div>
+                                    <div class="kpi-value" id="cold-leads">0</div>
+                                    <div class="kpi-sublabel">Score < 50</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Avg Lead Score</div>
+                                    <div class="kpi-value" id="avg-lead-score">0</div>
+                                    <div class="kpi-sublabel">Out of 100</div>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- Charts -->
+                        <div class="charts-row">
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Lead Score Distribution
+                                </h4>
+                                <canvas id="potential-customers-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-globe"></i>
+                                    Non-Customers by Country
+                                </h4>
+                                <canvas id="non-customer-countries-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Potential Customers Table -->
+                        <div class="table-wrapper">
+                            <h4 class="chart-title">
+                                <i class="fas fa-trophy"></i>
+                                Top 50 Potential Customers
+                            </h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>IP</th>
+                                        <th>Country</th>
+                                        <th>Visits</th>
+                                        <th>Pages</th>
+                                        <th>Strategic</th>
+                                        <th>Score</th>
+                                        <th>Category</th>
+                                        <th>Last Visit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="potential-customers-body">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; padding: 20px;">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class='dashboard-btn' id='exportPotentialBtn' style="margin-top: 16px;">
+                            <i class='fas fa-file-csv'></i>
+                            Export Potential Customers
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: ML PREDICTIONS
+                     ======================================== -->
+                <div id="ml-predictions" class="tab-section" data-section-content="ml-predictions">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-brain'></i>
+                            Machine Learning Predictions
+                            <span class="section-subtitle">AI-Powered Insights</span>
+                        </h2>
+                        
+                        <div id="ml-predictions" class="ml-predictions-grid">
+                            <!-- Rempli dynamiquement par JavaScript -->
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                <p style="margin-top: 16px; color: #64748b;">Generating ML predictions...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Footer -->
-                <footer>
+                <footer style="margin-top: 40px; padding: 24px; text-align: center; color: #64748b; font-size: 0.9rem;">
                     <p>
-                        <i class='fas fa-shield-alt'></i> Admin Analytics Dashboard | 
+                        <i class='fas fa-shield-alt'></i> Admin Analytics Dashboard v5.0 | 
                         Real-time data from Stripe, Cloudflare & Firebase
                     </p>
                 </footer>
@@ -985,22 +1127,12 @@
     
     <!-- Toggle Functions -->
     <script>
-        function toggleSection(sectionId) {
-            const content = document.getElementById(`${sectionId}-content`);
-            const toggle = document.getElementById(`${sectionId}-toggle`);
-            
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                toggle.innerHTML = '<i class="fas fa-chevron-up"></i>';
-            } else {
-                content.style.display = 'none';
-                toggle.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            }
-        }
-        
+        // Toggle subsections (collapse/expand)
         function toggleSubsection(subsectionId) {
             const content = document.getElementById(`${subsectionId}-content`);
             const arrow = document.getElementById(`${subsectionId}-arrow`);
+            
+            if (!content || !arrow) return;
             
             content.classList.toggle('collapsed');
             
@@ -1010,6 +1142,34 @@
                 arrow.style.transform = 'rotate(180deg)';
             }
         }
+    </script>
+
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
     </script>
 </body>
 </html>
