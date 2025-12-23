@@ -25,41 +25,25 @@
     background-clip: text;
 }
 
-/* ✨ NOUVEAUTÉ: Bordures dégradées pour toutes les sections */
-.gradient-border {
-    position: relative;
-    border: 2px solid transparent;
-    background: var(--glass-bg);
-    background-clip: padding-box;
-}
-
-.gradient-border::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: -1;
-}
-
-/* ✨ NOUVEAUTÉ: Titres de pages/sections en dégradé */
+/* ✨ Titres de pages/sections en dégradé */
 h1, h2, h3, h4, 
-.section-title,
-.post-detail-title,
-.profile-name {
+.section-title {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
     font-weight: 800;
+}
+
+/* Exception pour les titres sur fond dégradé */
+.profile-header-card h1,
+.profile-header-card h2,
+.profile-header-card .profile-name {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: white !important;
+    background-clip: unset !important;
+    color: white !important;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -77,7 +61,6 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -85,21 +68,12 @@ h1, h2, h3, h4,
     gap: 20px;
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
-}
-
-/* ✨ Bordure dégradée pour les stat-cards */
-.stat-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    overflow: visible;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .stat-card::before {
@@ -195,7 +169,6 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 700;
@@ -205,20 +178,11 @@ h1, h2, h3, h4,
     white-space: nowrap;
     flex-shrink: 0;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour les channel-chips */
-.channel-chip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .channel-chip i {
@@ -235,10 +199,6 @@ h1, h2, h3, h4,
     color: white;
     border-color: transparent;
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-}
-
-.channel-chip.active::before {
-    display: none;
 }
 
 .channel-chip.active i {
@@ -271,6 +231,7 @@ h1, h2, h3, h4,
     color: var(--text-tertiary);
     font-size: 1.1rem;
     pointer-events: none;
+    z-index: 2;
 }
 
 .search-input {
@@ -279,17 +240,11 @@ h1, h2, h3, h4,
     font-size: 1rem;
     font-weight: 600;
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: all 0.3s ease;
-    position: relative;
-}
-
-/* ✨ Bordure dégradée pour search-input */
-.search-input {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -310,22 +265,11 @@ h1, h2, h3, h4,
     padding: 6px;
     border-radius: 12px;
     border: 2px solid transparent;
-    background-clip: padding-box;
-    position: relative;
-}
-
-/* ✨ Bordure dégradée pour filter-buttons */
-.filter-buttons::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .filter-btn {
@@ -405,6 +349,21 @@ h1, h2, h3, h4,
     top: 24px;
 }
 
+/* ✨ Bordures dégradées pour les widgets sidebar */
+.sidebar-widget {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 /* ════════════════════════════════════════════════════════════════
    6. POSTS GRID
    ════════════════════════════════════════════════════════════════ */
@@ -419,27 +378,16 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
-}
-
-/* ✨ Bordure dégradée pour post-cards */
-.post-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 0;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .post-card::before {
@@ -452,7 +400,7 @@ h1, h2, h3, h4,
     background: linear-gradient(135deg, #667eea, #764ba2);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 1;
+    z-index: 2;
 }
 
 .post-card:hover {
@@ -587,6 +535,7 @@ h1, h2, h3, h4,
     height: 36px;
     border-radius: 50%;
     border: 2px solid #667eea;
+    object-fit: cover;
 }
 
 .author-info {
@@ -631,27 +580,17 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour featured-posts */
-.featured-post::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .featured-post:hover {
@@ -693,25 +632,15 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour leaderboard-items */
-.leaderboard-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .leaderboard-item:hover {
@@ -750,6 +679,7 @@ h1, h2, h3, h4,
     height: 40px;
     border-radius: 50%;
     border: 2px solid #667eea;
+    object-fit: cover;
 }
 
 .leaderboard-info {
@@ -777,24 +707,14 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 16px;
     padding: 32px;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour editor-card */
-.editor-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .form-section {
@@ -821,24 +741,19 @@ h1, h2, h3, h4,
 }
 
 .form-input,
-.form-select {
+.form-select,
+textarea.form-input {
     width: 100%;
     padding: 14px 16px;
     font-size: 1rem;
     font-weight: 600;
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: all 0.3s ease;
     font-family: inherit;
-}
-
-/* ✨ Bordure dégradée pour inputs/selects */
-.form-input,
-.form-select {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -847,7 +762,8 @@ h1, h2, h3, h4,
 }
 
 .form-input:focus,
-.form-select:focus {
+.form-select:focus,
+textarea.form-input:focus {
     outline: none;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
@@ -867,16 +783,11 @@ h1, h2, h3, h4,
     gap: 8px;
     padding: 12px;
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     min-height: 52px;
     transition: all 0.3s ease;
-}
-
-/* ✨ Bordure dégradée pour tags-input */
-.tags-input-wrapper {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -935,7 +846,6 @@ h1, h2, h3, h4,
 /* Upload Zone */
 .upload-zone {
     border: 3px dashed transparent;
-    background-clip: padding-box;
     border-radius: 16px;
     padding: 48px 24px;
     text-align: center;
@@ -943,10 +853,6 @@ h1, h2, h3, h4,
     transition: all 0.3s ease;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-}
-
-/* ✨ Bordure dégradée pour upload-zone */
-.upload-zone {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -998,11 +904,6 @@ h1, h2, h3, h4,
     overflow: hidden;
     aspect-ratio: 1;
     border: 2px solid transparent;
-    background-clip: padding-box;
-}
-
-/* ✨ Bordure dégradée pour image-preview */
-.image-preview {
     background-image: 
         linear-gradient(white, white),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -1031,6 +932,7 @@ h1, h2, h3, h4,
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    z-index: 2;
 }
 
 .image-remove:hover {
@@ -1043,17 +945,12 @@ h1, h2, h3, h4,
     padding: 14px 32px;
     background: transparent;
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     font-size: 1rem;
     font-weight: 700;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-/* ✨ Bordure dégradée pour btn-cancel */
-.btn-cancel {
     background-image: 
         linear-gradient(transparent, transparent),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -1121,6 +1018,15 @@ h1, h2, h3, h4,
 
 .post-detail {
     padding: 32px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .post-detail-header {
@@ -1203,13 +1109,8 @@ h1, h2, h3, h4,
     width: 100%;
     border-radius: 12px;
     border: 2px solid transparent;
-    background-clip: padding-box;
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-/* ✨ Bordure dégradée pour post-detail-images */
-.post-detail-images img {
     background-image: 
         linear-gradient(white, white),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -1229,7 +1130,6 @@ h1, h2, h3, h4,
     padding: 16px;
     border-radius: 12px;
     border: 2px solid transparent;
-    background-clip: padding-box;
     background: var(--glass-bg);
     color: var(--text-primary);
     font-size: 1rem;
@@ -1238,10 +1138,6 @@ h1, h2, h3, h4,
     font-family: inherit;
     margin-bottom: 16px;
     transition: all 0.3s ease;
-}
-
-/* ✨ Bordure dégradée pour textarea */
-.comment-textarea {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2);
@@ -1264,25 +1160,15 @@ h1, h2, h3, h4,
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour comments */
-.comment-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .comment-item:hover {
@@ -1307,6 +1193,7 @@ h1, h2, h3, h4,
     height: 40px;
     border-radius: 50%;
     border: 2px solid #667eea;
+    object-fit: cover;
 }
 
 .comment-author-name {
@@ -1362,7 +1249,6 @@ h1, h2, h3, h4,
     font-weight: 900;
     margin-bottom: 12px;
     color: white !important;
-    -webkit-text-fill-color: white !important;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1427,26 +1313,16 @@ h1, h2, h3, h4,
 .user-post-item {
     background: var(--glass-bg);
     border: 2px solid transparent;
-    background-clip: padding-box;
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
-}
-
-/* ✨ Bordure dégradée pour user-posts */
-.user-post-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    padding: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .user-post-item:hover {
@@ -1599,7 +1475,7 @@ h1, h2, h3, h4,
         justify-content: center;
     }
     
-    /* ✨ CORRECTION: Channels reste horizontal sur mobile */
+    /* Channels reste horizontal sur mobile */
     .channels-scroll {
         display: flex !important;
         overflow-x: auto !important;
@@ -1618,11 +1494,6 @@ h1, h2, h3, h4,
     /* Form */
     .editor-card {
         padding: 24px 20px;
-    }
-    
-    .actions-bar {
-        flex-direction: column-reverse;
-        gap: 12px;
     }
     
     .btn-cancel,
@@ -1698,7 +1569,7 @@ h1, h2, h3, h4,
         grid-template-columns: repeat(2, 1fr);
     }
     
-    /* ✨ CORRECTION: Channels horizontal même sur petit mobile */
+    /* Channels horizontal même sur petit mobile */
     .channels-scroll {
         display: flex !important;
         overflow-x: auto !important;
@@ -1716,26 +1587,17 @@ body.dark-mode .featured-post,
 body.dark-mode .leaderboard-item,
 body.dark-mode .editor-card,
 body.dark-mode .comment-item,
-body.dark-mode .user-post-item {
-    background: rgba(15, 23, 42, 0.8);
+body.dark-mode .user-post-item,
+body.dark-mode .post-detail,
+body.dark-mode .sidebar-widget {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
+        linear-gradient(135deg, #667eea, #764ba2);
 }
 
 body.dark-mode .form-input,
 body.dark-mode .form-select,
-body.dark-mode .search-input,
-body.dark-mode .comment-textarea,
-body.dark-mode .tags-input-wrapper,
-body.dark-mode .upload-zone {
-    background: rgba(15, 23, 42, 0.6);
-}
-
-body.dark-mode .filter-btn:hover {
-    background: rgba(102, 126, 234, 0.2);
-}
-
-/* ✨ Bordures dégradées en dark mode */
-body.dark-mode .form-input,
-body.dark-mode .form-select,
+body.dark-mode textarea.form-input,
 body.dark-mode .search-input,
 body.dark-mode .comment-textarea,
 body.dark-mode .tags-input-wrapper,
@@ -1743,8 +1605,22 @@ body.dark-mode .upload-zone {
     background-image: 
         linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
         linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+}
+
+body.dark-mode .filter-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .image-preview {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
+        linear-gradient(135deg, #667eea, #764ba2);
+}
+
+body.dark-mode .post-detail-images img {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
+        linear-gradient(135deg, #667eea, #764ba2);
 }
 
 /* ════════════════════════════════════════════════════════════════
