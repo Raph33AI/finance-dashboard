@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Community Hub - AlphaVault AI</title>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/common.css">
-    <link rel="stylesheet" href="assets/css/community.css">
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/community.css'>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -18,173 +26,480 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
-    <!-- Firebase Config -->
+    <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Auth Guard -->
+    <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+    <script src="assets/js/analytics-tracker.js"></script>
 </head>
 <body>
+
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
-    <!-- Top Header (réutiliser votre header existant) -->
-    <div class="top-header">
-        <div class="logo-section">
-            <div class="logo">
-                <i class="fas fa-chart-line"></i>
-                <span>AlphaVault AI</span>
-            </div>
-        </div>
-        
-        <nav class="main-nav">
-            <a href="dashboard-financier.html">Dashboard</a>
-            <a href="community-hub.html" class="active">Community</a>
-            <a href="analyst-coverage.html">Analysis</a>
-        </nav>
-        
-        <div class="user-section">
-            <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-                <i class="fas fa-moon"></i>
-            </button>
-            <div class="user-menu">
-                <img src="" alt="User" class="user-avatar" id="userAvatar">
-                <span class="user-name" id="userName">Loading...</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Community Wrapper -->
-    <div class="community-wrapper">
-        <div class="community-container">
-            
-            <!-- Header -->
-            <div class="community-header">
-                <h1 class="community-title">
-                    <i class="fas fa-users"></i> Community Hub
-                </h1>
-                <p class="community-subtitle">
-                    Share insights, analyses, and connect with fellow traders
-                </p>
-                <div class="community-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalPosts">0</div>
-                        <div class="stat-label">Total Posts</div>
+    <div class='layout-wrapper'>
+        <!-- Sidebar Navigation -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Header avec Logo 3D -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalMembers">0</div>
-                        <div class="stat-label">Members</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="postsToday">0</div>
-                        <div class="stat-label">Posts Today</div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Channels Navigation -->
-            <div class="channels-nav">
-                <div class="channels-scroll" id="channelsScroll">
-                    <!-- Dynamically populated -->
-                </div>
-            </div>
-
-            <!-- Actions Bar -->
-            <div class="actions-bar">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        placeholder="Search posts, tags, or users..."
-                        id="searchInput"
-                    >
-                </div>
-                
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="trending">
-                        <i class="fas fa-fire"></i> Trending
-                    </button>
-                    <button class="filter-btn" data-filter="latest">
-                        <i class="fas fa-clock"></i> Latest
-                    </button>
-                    <button class="filter-btn" data-filter="top">
-                        <i class="fas fa-trophy"></i> Top
-                    </button>
-                </div>
-                
-                <button class="create-post-btn" onclick="window.location.href='create-post.html'">
-                    <i class="fas fa-plus"></i> Create Post
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
                 </button>
             </div>
-
-            <!-- Main Layout (Posts + Sidebar) -->
-            <div class="community-layout">
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
                 
-                <!-- Posts Grid -->
-                <div class="posts-section">
-                    <div class="posts-grid" id="postsGrid">
-                        <!-- Dynamically populated -->
-                        <div class="loading-spinner" id="loadingSpinner">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                        <a href='real-estate-tax-simulator.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Real Estate Simulator</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ✅ NOUVELLE SECTION BLOG -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Community">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='community-hub.html' class='nav-link active'>
+                            <i class='fas fa-home'></i>
+                            <span>Community Hub</span>
+                        </a>
+                        <a href='create-post.html' class='nav-link'>
+                            <i class='fas fa-pen-fancy'></i>
+                            <span>Create Post</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Section Admin -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
+                    <button class="nav-folder" data-tooltip="Admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Analytics Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
                         </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <!-- Load More -->
-                    <div style="text-align: center; margin-top: 32px;">
-                        <button class="filter-btn" id="loadMoreBtn" style="font-size: 1rem; padding: 16px 40px;">
-                            <i class="fas fa-chevron-down"></i> Load More
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class='main-content'>
+            <!-- Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class="page-title">
+                        <i class="fas fa-users"></i> Community Hub
+                    </h1>
+                </div>
+            </header>
+            
+            <div class='container'>
+                <!-- Community Header -->
+                <div class="community-header-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3B82F6, #1D4ED8);">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalPosts">0</div>
+                            <div class="stat-label">Total Posts</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #8B5CF6, #6366F1);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalMembers">0</div>
+                            <div class="stat-label">Members</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="postsToday">0</div>
+                            <div class="stat-label">Posts Today</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channels Navigation -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-folder"></i> Channels
+                    </h2>
+                    <div class="channels-scroll" id="channelsScroll">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Actions Bar -->
+                <div class="section">
+                    <div class="actions-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input 
+                                type="text" 
+                                class="search-input" 
+                                placeholder="Search posts, tags, or users..."
+                                id="searchInput"
+                            >
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="trending">
+                                <i class="fas fa-fire"></i> Trending
+                            </button>
+                            <button class="filter-btn" data-filter="latest">
+                                <i class="fas fa-clock"></i> Latest
+                            </button>
+                            <button class="filter-btn" data-filter="top">
+                                <i class="fas fa-trophy"></i> Top
+                            </button>
+                        </div>
+                        
+                        <button class="create-post-btn" onclick="window.location.href='create-post.html'">
+                            <i class="fas fa-plus"></i> Create Post
                         </button>
                     </div>
                 </div>
 
-                <!-- Sidebar -->
-                <aside class="sidebar">
+                <!-- Main Layout (Posts + Sidebar) -->
+                <div class="community-layout">
                     
-                    <!-- Featured Posts -->
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-title">
-                            <i class="fas fa-star"></i> Featured Posts
-                        </h3>
-                        <div id="featuredPosts">
-                            <!-- Dynamically populated -->
+                    <!-- Posts Grid -->
+                    <div class="posts-section">
+                        <div class="section">
+                            <h2 class="section-title">
+                                <i class="fas fa-newspaper"></i> Posts
+                            </h2>
+                            <div class="posts-grid" id="postsGrid">
+                                <div class="loading-spinner" id="loadingSpinner">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 32px;">
+                                <button class="filter-btn" id="loadMoreBtn" style="font-size: 1rem; padding: 16px 40px; display: none;">
+                                    <i class="fas fa-chevron-down"></i> Load More
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Leaderboard -->
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-title">
-                            <i class="fas fa-trophy"></i> Top Contributors
-                        </h3>
-                        <div class="leaderboard-list" id="leaderboardList">
-                            <!-- Dynamically populated -->
+                    <!-- Sidebar -->
+                    <aside class="community-sidebar">
+                        
+                        <!-- Featured Posts -->
+                        <div class="section">
+                            <h3 class="section-title" style="font-size: 1.25rem;">
+                                <i class="fas fa-star"></i> Featured Posts
+                            </h3>
+                            <div id="featuredPosts">
+                                <!-- Dynamically populated -->
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Trending Tags -->
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-title">
-                            <i class="fas fa-hashtag"></i> Trending Tags
-                        </h3>
-                        <div class="post-tags" id="trendingTags">
-                            <!-- Dynamically populated -->
+                        <!-- Leaderboard -->
+                        <div class="section">
+                            <h3 class="section-title" style="font-size: 1.25rem;">
+                                <i class="fas fa-trophy"></i> Top Contributors
+                            </h3>
+                            <div class="leaderboard-list" id="leaderboardList">
+                                <!-- Dynamically populated -->
+                            </div>
                         </div>
-                    </div>
 
-                </aside>
+                        <!-- Trending Tags -->
+                        <div class="section">
+                            <h3 class="section-title" style="font-size: 1.25rem;">
+                                <i class="fas fa-hashtag"></i> Trending Tags
+                            </h3>
+                            <div class="post-tags" id="trendingTags">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
 
+                    </aside>
+
+                </div>
+
+                <!-- Footer -->
+                <footer>
+                    <p>
+                        <i class='fas fa-users'></i> AlphaVault AI Community | 
+                        Share insights & grow together
+                    </p>
+                </footer>
             </div>
-
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="assets/js/chatbot-particles.js"></script>
-    <script src="assets/js/dark-mode.js"></script>
-    <script src="assets/js/common.js"></script>
-    <script src="assets/js/community-firebase.js"></script>
-    <script src="assets/js/channel-manager.js"></script>
-    <script src="assets/js/community-hub.js"></script>
+    <script src='assets/js/dark-mode.js'></script>
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/community-firebase.js'></script>
+    <script src='assets/js/channel-manager.js'></script>
+    <script src='assets/js/community-hub.js'></script>
+    <script src="assets/js/admin-visibility.js"></script>
 
 </body>
 </html>
