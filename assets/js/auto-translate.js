@@ -1,55 +1,207 @@
 /* ============================================
-   AUTO-TRANSLATE.JS - Traduction automatique 100% dynamique
-   ✅ NE CHARGE PAS PAR DÉFAUT
-   ✅ Activation uniquement via Settings
-   ✅ Persistance complète après activation
-   ✅ Synchronisation Firebase
+   AUTO-TRANSLATE.JS - Traduction automatique GLOBALE
+   ✅ Pré-traduit TOUTES les pages en arrière-plan
+   ✅ Changement de langue = traduction de tout le site
+   ✅ Navigation instantanée après première traduction
+   ✅ IndexedDB pour stockage illimité
    ============================================ */
 
 class AutoTranslate {
     constructor() {
-        this.currentLanguage = 'en'; // Langue par défaut
-        this.originalTexts = new Map(); // Cache des textes originaux
-        this.translationCache = new Map(); // Cache des traductions
+        this.currentLanguage = 'en';
+        this.originalTexts = new Map();
+        this.translationCache = new Map();
         this.isTranslating = false;
         this.isInitialized = false;
-        this.supportedLanguages = ['en', 'fr', 'es', 'de', 'it', 'pt', 'ja', 'zh', 'ar', 'ru'];
+        this.supportedLanguages = ['en', 'fr', 'es', 'de', 'it', 'pt'];
         
-        // API de traduction (MyMemory - gratuit, 10 000 mots/jour)
+        // API de traduction
         this.translationAPI = 'https://api.mymemory.translated.net/get';
         
-        console.log('🌍 AutoTranslate créé (mode: attente activation utilisateur)');
+        // ✅ LISTE DE TOUTES TES PAGES
+        this.allPages = [
+            'index.html',
+            'dashboard-financier.html',
+            'investment-analytics.html',
+            'real-estate-tax-simulator.html',
+            'monte-carlo.html',
+            'portfolio-optimizer.html',
+            'risk-parity.html',
+            'scenario-analysis.html',
+            'advanced-analysis.html',
+            'trend-prediction.html',
+            'forex-converter.html',
+            'ipo-intelligence.html',
+            'insider-flow-tracker.html',
+            'ma-predictor.html',
+            'chatbot-fullpage.html',
+            'economic-dashboard.html',
+            'inflation-calculator.html',
+            'interest-rate-tracker.html',
+            'recession-indicator.html',
+            'news-terminal.html',
+            'market-sentiment.html',
+            'trending-topics.html',
+            'settings.html',
+            'user-profile.html',
+            'help.html',
+            'admin-analytics.html'
+        ];
+        
+        this.pageId = this.getPageIdentifier();
+        this.db = null;
+        
+        console.log('🌍 AutoTranslate initialisé - Page:', this.pageId);
+        this.initIndexedDB();
     }
     
     // ============================================
-    // INITIALISATION (APPELÉE MANUELLEMENT)
+    // INDEXEDDB POUR STOCKAGE ILLIMITÉ
     // ============================================
+    
+    async initIndexedDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('AlphaVaultTranslations', 1);
+            
+            request.onerror = () => {
+                console.error('❌ Erreur IndexedDB');
+                reject(request.error);
+            };
+            
+            request.onsuccess = () => {
+                this.db = request.result;
+                console.log('✅ IndexedDB prêt');
+                resolve();
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                
+                if (!db.objectStoreNames.contains('translations')) {
+                    const store = db.createObjectStore('translations', { keyPath: 'id' });
+                    store.createIndex('lang', 'lang', { unique: false });
+                    store.createIndex('page', 'page', { unique: false });
+                    console.log('✅ Store IndexedDB créé');
+                }
+            };
+        });
+    }
+    
+    async saveToIndexedDB(lang, page, translations) {
+        if (!this.db) {
+            await this.initIndexedDB();
+        }
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['translations'], 'readwrite');
+            const store = transaction.objectStore('translations');
+            
+            const data = {
+                id: `${page}_${lang}`,
+                lang: lang,
+                page: page,
+                translations: translations,
+                timestamp: new Date().toISOString()
+            };
+            
+            const request = store.put(data);
+            
+            request.onsuccess = () => {
+                console.log(`✅ Sauvegardé IndexedDB: ${page} (${lang})`);
+                resolve();
+            };
+            
+            request.onerror = () => {
+                console.error('❌ Erreur sauvegarde IndexedDB');
+                reject(request.error);
+            };
+        });
+    }
+    
+    async loadFromIndexedDB(lang, page) {
+        if (!this.db) {
+            await this.initIndexedDB();
+        }
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['translations'], 'readonly');
+            const store = transaction.objectStore('translations');
+            const request = store.get(`${page}_${lang}`);
+            
+            request.onsuccess = () => {
+                if (request.result) {
+                    console.log(`✅ Chargé depuis IndexedDB: ${page} (${lang})`);
+                    resolve(request.result.translations);
+                } else {
+                    resolve(null);
+                }
+            };
+            
+            request.onerror = () => {
+                console.error('❌ Erreur lecture IndexedDB');
+                resolve(null);
+            };
+        });
+    }
+    
+    async deleteLanguageFromIndexedDB(lang) {
+        if (!this.db) return;
+        
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction(['translations'], 'readwrite');
+            const store = transaction.objectStore('translations');
+            const index = store.index('lang');
+            const request = index.openCursor(IDBKeyRange.only(lang));
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    cursor.delete();
+                    cursor.continue();
+                } else {
+                    console.log(`✅ Langue ${lang} supprimée d'IndexedDB`);
+                    resolve();
+                }
+            };
+        });
+    }
+    
+    // ============================================
+    // INITIALISATION
+    // ============================================
+    
+    getPageIdentifier() {
+        const path = window.location.pathname;
+        return path.split('/').pop() || 'index.html';
+    }
     
     async initialize() {
         if (this.isInitialized) {
-            console.log('ℹ AutoTranslate déjà initialisé');
+            console.log('ℹ Déjà initialisé');
             return;
         }
         
-        console.log('🔧 Initialisation AutoTranslate...');
+        console.log('🔧 Initialisation...');
         
-        // Sauvegarder les textes originaux
         this.saveOriginalTexts();
-        
-        // Charger la langue préférée (Firebase ou localStorage)
         await this.loadLanguagePreference();
         
-        // ✅ TRADUIRE UNIQUEMENT SI L'UTILISATEUR A DÉJÀ ACTIVÉ UNE LANGUE
         if (this.currentLanguage !== 'en') {
-            console.log('🌍 Langue active détectée:', this.currentLanguage);
-            console.log('🔄 Application de la traduction sauvegardée...');
-            await this.translatePage(this.currentLanguage);
-        } else {
-            console.log('ℹ Aucune traduction active - page en anglais');
+            console.log('🌍 Langue active:', this.currentLanguage);
+            
+            const cached = await this.loadFromIndexedDB(this.currentLanguage, this.pageId);
+            
+            if (cached) {
+                console.log('⚡ Application cache instantané...');
+                this.applyTranslationsFromCache(cached);
+            } else {
+                console.log('🔄 Pas de cache, traduction API...');
+                await this.translateCurrentPage(this.currentLanguage);
+            }
         }
         
         this.isInitialized = true;
-        console.log('✅ AutoTranslate prêt');
+        console.log('✅ Prêt');
     }
     
     // ============================================
@@ -58,7 +210,6 @@ class AutoTranslate {
     
     async loadLanguagePreference() {
         try {
-            // 1. Essayer de charger depuis Firebase
             if (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.uid) {
                 const settingsRef = firebaseDb
                     .collection('users')
@@ -73,26 +224,23 @@ class AutoTranslate {
                     if (this.supportedLanguages.includes(savedLang)) {
                         this.currentLanguage = savedLang;
                         localStorage.setItem('alphavault_language', savedLang);
-                        console.log('✅ Langue chargée depuis Firebase:', savedLang);
+                        console.log('✅ Langue Firebase:', savedLang);
                         return;
                     }
                 }
             }
         } catch (error) {
-            console.warn('⚠ Impossible de charger depuis Firebase:', error);
+            console.warn('⚠ Erreur Firebase:', error);
         }
         
-        // 2. Fallback sur localStorage
         const savedLang = localStorage.getItem('alphavault_language');
         if (savedLang && this.supportedLanguages.includes(savedLang)) {
             this.currentLanguage = savedLang;
-            console.log('✅ Langue chargée depuis localStorage:', savedLang);
+            console.log('✅ Langue localStorage:', savedLang);
             return;
         }
         
-        // 3. Par défaut : anglais (pas de traduction)
         this.currentLanguage = 'en';
-        console.log('ℹ Langue par défaut: en (aucune traduction)');
     }
     
     async changeLanguage(newLang) {
@@ -106,9 +254,8 @@ class AutoTranslate {
             return true;
         }
         
-        console.log('🔄 Changement de langue:', this.currentLanguage, '→', newLang);
+        console.log('🔄 Changement:', this.currentLanguage, '→', newLang);
         
-        // ✅ INITIALISER SI PAS ENCORE FAIT
         if (!this.isInitialized) {
             await this.initialize();
         }
@@ -116,26 +263,36 @@ class AutoTranslate {
         const oldLang = this.currentLanguage;
         this.currentLanguage = newLang;
         
-        // Sauvegarder dans localStorage
         localStorage.setItem('alphavault_language', newLang);
-        
-        // Sauvegarder dans Firebase
         await this.saveLanguageToFirebase(newLang);
         
-        // Traduire la page
         if (newLang === 'en') {
-            // Restaurer les textes originaux
             this.restoreOriginalTexts();
+            
+            // ✅ SUPPRIMER LES ANCIENNES TRADUCTIONS
+            if (oldLang !== 'en') {
+                await this.deleteLanguageFromIndexedDB(oldLang);
+            }
         } else {
-            await this.translatePage(newLang);
+            // ✅ TRADUIRE LA PAGE ACTUELLE D'ABORD
+            const cached = await this.loadFromIndexedDB(newLang, this.pageId);
+            
+            if (cached) {
+                console.log('⚡ Application cache instantané page actuelle...');
+                this.applyTranslationsFromCache(cached);
+            } else {
+                console.log('🔄 Traduction page actuelle...');
+                await this.translateCurrentPage(newLang);
+            }
+            
+            // ✅ PUIS LANCER LA PRÉ-TRADUCTION DE TOUTES LES AUTRES PAGES
+            this.preTranslateAllPages(newLang);
         }
         
-        // Émettre un événement pour notifier d'autres scripts
         window.dispatchEvent(new CustomEvent('languageChanged', { 
             detail: { oldLang, newLang } 
         }));
         
-        console.log('✅ Langue changée avec succès');
         return true;
     }
     
@@ -149,190 +306,283 @@ class AutoTranslate {
                     .doc('preferences');
                 
                 await settingsRef.set({ language }, { merge: true });
-                console.log('✅ Langue sauvegardée dans Firebase:', language);
+                console.log('✅ Langue Firebase sauvegardée');
             }
         } catch (error) {
-            console.warn('⚠ Impossible de sauvegarder dans Firebase:', error);
+            console.warn('⚠ Erreur Firebase:', error);
         }
     }
     
     // ============================================
-    // SAUVEGARDE DES TEXTES ORIGINAUX
+    // ✨ PRÉ-TRADUCTION DE TOUTES LES PAGES
     // ============================================
     
-    saveOriginalTexts() {
-        console.log('💾 Sauvegarde des textes originaux...');
+    async preTranslateAllPages(lang) {
+        console.log('🌍 DÉBUT PRÉ-TRADUCTION DE TOUTES LES PAGES en', lang);
         
-        // Sélectionner tous les éléments avec du texte
-        const elements = document.querySelectorAll(
-            'h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th, li, option, ' +
-            '[data-translate], .nav-link, .settings-nav-item, .setting-info label, ' +
-            '.setting-info p, .btn-back-dashboard, .user-dropdown-link, .brand-name, ' +
-            '.brand-tagline, .section-title, .card-label, .card-value'
-        );
+        // Afficher indicateur de progression
+        this.showGlobalTranslationProgress(lang);
         
-        elements.forEach(el => {
-            // Ignorer les éléments vides ou les scripts
-            if (!el.textContent.trim() || el.closest('script') || el.closest('style')) {
-                return;
-            }
-            
-            // Ignorer les éléments avec uniquement des icônes
-            if (el.children.length === 1 && el.children[0].tagName === 'I') {
-                return;
-            }
-            
-            // Ignorer les nombres purs
-            if (/^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(el.textContent.trim())) {
-                return;
-            }
-            
-            // Sauvegarder le texte original
-            const originalText = this.getTextContent(el);
-            if (originalText && originalText.length > 1) {
-                this.originalTexts.set(el, originalText);
+        const pagesToTranslate = this.allPages.filter(page => page !== this.pageId);
+        let completed = 0;
+        
+        for (const page of pagesToTranslate) {
+            try {
+                // Vérifier si déjà en cache
+                const cached = await this.loadFromIndexedDB(lang, page);
                 
-                // Ajouter un attribut data pour référence
-                el.setAttribute('data-translate-id', this.generateId());
-            }
-        });
-        
-        console.log(`✅ ${this.originalTexts.size} éléments sauvegardés`);
-    }
-    
-    restoreOriginalTexts() {
-        console.log('🔄 Restauration des textes originaux...');
-        
-        this.originalTexts.forEach((originalText, el) => {
-            if (el && el.isConnected) {
-                this.setTextContent(el, originalText);
-            }
-        });
-        
-        console.log('✅ Textes originaux restaurés');
-    }
-    
-    // ============================================
-    // TRADUCTION DE LA PAGE
-    // ============================================
-    
-    async translatePage(targetLang) {
-        if (this.isTranslating) {
-            console.log('⚠ Traduction déjà en cours...');
-            return;
-        }
-        
-        this.isTranslating = true;
-        console.log(`🌍 Traduction de la page en ${targetLang}...`);
-        
-        // Afficher un indicateur de chargement
-        this.showLoadingIndicator(targetLang);
-        
-        try {
-            // Récupérer tous les textes à traduire
-            const textsToTranslate = [];
-            const elementsMap = [];
-            
-            this.originalTexts.forEach((originalText, el) => {
-                if (el && el.isConnected && originalText.trim().length > 1) {
-                    textsToTranslate.push(originalText);
-                    elementsMap.push(el);
+                if (cached) {
+                    console.log(`⚡ ${page} déjà en cache`);
+                    completed++;
+                    this.updateGlobalProgress(completed, pagesToTranslate.length);
+                    continue;
                 }
-            });
-            
-            console.log(`📝 ${textsToTranslate.length} textes à traduire`);
-            
-            // Traduire par batch pour optimiser
-            const batchSize = 15; // Traduire 15 textes à la fois
-            let translated = 0;
-            
-            for (let i = 0; i < textsToTranslate.length; i += batchSize) {
-                const batch = textsToTranslate.slice(i, i + batchSize);
-                const batchElements = elementsMap.slice(i, i + batchSize);
                 
-                const translations = await this.translateBatch(batch, targetLang);
+                console.log(`🔄 Traduction de ${page}...`);
                 
-                // Appliquer les traductions
-                translations.forEach((translatedText, index) => {
-                    const element = batchElements[index];
-                    if (element && element.isConnected) {
-                        this.setTextContent(element, translatedText);
-                    }
-                });
+                // Charger le HTML de la page
+                const html = await this.fetchPageHTML(page);
                 
-                translated += batch.length;
-                console.log(`📊 Progression: ${translated}/${textsToTranslate.length}`);
+                if (!html) {
+                    console.warn(`⚠ Impossible de charger ${page}`);
+                    completed++;
+                    continue;
+                }
+                
+                // Extraire les textes
+                const texts = this.extractTextsFromHTML(html, page);
+                
+                if (texts.length === 0) {
+                    console.warn(`⚠ Aucun texte trouvé dans ${page}`);
+                    completed++;
+                    continue;
+                }
+                
+                // Traduire
+                const translations = await this.translateTexts(texts, lang);
+                
+                // Sauvegarder
+                await this.saveToIndexedDB(lang, page, translations);
+                
+                completed++;
+                this.updateGlobalProgress(completed, pagesToTranslate.length);
+                
+                console.log(`✅ ${page} traduit et mis en cache (${completed}/${pagesToTranslate.length})`);
                 
                 // Petit délai pour éviter de surcharger l'API
-                if (i + batchSize < textsToTranslate.length) {
-                    await this.delay(400);
-                }
+                await this.delay(500);
+                
+            } catch (error) {
+                console.error(`❌ Erreur traduction ${page}:`, error);
+                completed++;
+                this.updateGlobalProgress(completed, pagesToTranslate.length);
             }
-            
-            console.log('✅ Traduction terminée');
-            
+        }
+        
+        this.hideGlobalTranslationProgress();
+        console.log('🎉 PRÉ-TRADUCTION TERMINÉE !');
+        
+        // Notification utilisateur
+        this.showCompletionToast(lang, pagesToTranslate.length);
+    }
+    
+    async fetchPageHTML(page) {
+        try {
+            const response = await fetch(page);
+            if (!response.ok) return null;
+            return await response.text();
         } catch (error) {
-            console.error('❌ Erreur lors de la traduction:', error);
-            this.restoreOriginalTexts();
-        } finally {
-            this.isTranslating = false;
-            this.hideLoadingIndicator();
+            console.error(`Erreur fetch ${page}:`, error);
+            return null;
         }
     }
     
-    // ============================================
-    // API DE TRADUCTION
-    // ============================================
-    
-    async translateBatch(texts, targetLang) {
-        const translations = [];
+    extractTextsFromHTML(html, pageName) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
         
-        for (const text of texts) {
-            try {
-                const translated = await this.translateText(text, targetLang);
-                translations.push(translated);
-            } catch (error) {
-                console.warn('⚠ Erreur traduction:', error);
-                translations.push(text); // Fallback sur texte original
+        const elements = doc.querySelectorAll(
+            'h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th, li, option'
+        );
+        
+        const texts = [];
+        
+        elements.forEach((el, index) => {
+            const text = this.getTextContent(el);
+            
+            if (text && text.length > 1 && !/^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(text)) {
+                texts.push({
+                    id: `${pageName}_${index}`,
+                    text: text,
+                    selector: this.generateSelector(el)
+                });
+            }
+        });
+        
+        return texts;
+    }
+    
+    generateSelector(element) {
+        if (element.id) return `#${element.id}`;
+        if (element.className) return `.${element.className.split(' ')[0]}`;
+        return element.tagName.toLowerCase();
+    }
+    
+    async translateTexts(texts, lang) {
+        const translations = [];
+        const batchSize = 20;
+        
+        for (let i = 0; i < texts.length; i += batchSize) {
+            const batch = texts.slice(i, i + batchSize);
+            
+            for (const item of batch) {
+                const translated = await this.translateText(item.text, lang);
+                translations.push({
+                    id: item.id,
+                    selector: item.selector,
+                    original: item.text,
+                    translated: translated
+                });
+            }
+            
+            if (i + batchSize < texts.length) {
+                await this.delay(300);
             }
         }
         
         return translations;
     }
     
-    async translateText(text, targetLang) {
-        // Vérifier le cache
-        const cacheKey = `${text}_${targetLang}`;
+    // ============================================
+    // TRADUCTION PAGE ACTUELLE
+    // ============================================
+    
+    saveOriginalTexts() {
+        const elements = document.querySelectorAll(
+            'h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th, li, option, ' +
+            '.nav-link, .settings-nav-item, .brand-name, .brand-tagline'
+        );
+        
+        elements.forEach((el, index) => {
+            if (!el.textContent.trim() || el.closest('script') || el.closest('style')) return;
+            if (el.children.length === 1 && el.children[0].tagName === 'I') return;
+            if (/^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(el.textContent.trim())) return;
+            
+            const originalText = this.getTextContent(el);
+            if (originalText && originalText.length > 1) {
+                this.originalTexts.set(el, originalText);
+                el.setAttribute('data-translate-id', `current_${index}`);
+            }
+        });
+        
+        console.log(`💾 ${this.originalTexts.size} éléments sauvegardés`);
+    }
+    
+    restoreOriginalTexts() {
+        this.originalTexts.forEach((originalText, el) => {
+            if (el && el.isConnected) {
+                this.setTextContent(el, originalText);
+            }
+        });
+    }
+    
+    async translateCurrentPage(lang) {
+        this.showLoadingIndicator(lang);
+        
+        try {
+            const textsToTranslate = [];
+            const elementsMap = [];
+            
+            this.originalTexts.forEach((originalText, el) => {
+                if (el && el.isConnected && originalText.trim().length > 1) {
+                    textsToTranslate.push({
+                        text: originalText,
+                        id: el.getAttribute('data-translate-id')
+                    });
+                    elementsMap.push(el);
+                }
+            });
+            
+            const translationsForCache = [];
+            const batchSize = 15;
+            
+            for (let i = 0; i < textsToTranslate.length; i += batchSize) {
+                const batch = textsToTranslate.slice(i, i + batchSize);
+                const batchElements = elementsMap.slice(i, i + batchSize);
+                
+                for (let j = 0; j < batch.length; j++) {
+                    const item = batch[j];
+                    const element = batchElements[j];
+                    
+                    const translated = await this.translateText(item.text, lang);
+                    
+                    if (element && element.isConnected) {
+                        this.setTextContent(element, translated);
+                        
+                        translationsForCache.push({
+                            id: item.id,
+                            original: item.text,
+                            translated: translated
+                        });
+                    }
+                }
+                
+                if (i + batchSize < textsToTranslate.length) {
+                    await this.delay(300);
+                }
+            }
+            
+            await this.saveToIndexedDB(lang, this.pageId, translationsForCache);
+            
+        } catch (error) {
+            console.error('❌ Erreur:', error);
+        } finally {
+            this.hideLoadingIndicator();
+        }
+    }
+    
+    applyTranslationsFromCache(translations) {
+        let applied = 0;
+        
+        translations.forEach(item => {
+            const element = document.querySelector(`[data-translate-id="${item.id}"]`);
+            
+            if (element && element.isConnected) {
+                this.setTextContent(element, item.translated);
+                applied++;
+            }
+        });
+        
+        console.log(`✅ ${applied}/${translations.length} traductions appliquées`);
+    }
+    
+    // ============================================
+    // API
+    // ============================================
+    
+    async translateText(text, lang) {
+        const cacheKey = `${text}_${lang}`;
         if (this.translationCache.has(cacheKey)) {
             return this.translationCache.get(cacheKey);
         }
         
-        // Ignorer les textes très courts ou les nombres
         if (text.trim().length < 2 || /^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(text)) {
             return text;
         }
         
         try {
-            // MyMemory Translation API (gratuit)
-            const url = `${this.translationAPI}?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
-            
+            const url = `${this.translationAPI}?q=${encodeURIComponent(text)}&langpair=en|${lang}`;
             const response = await fetch(url);
             const data = await response.json();
             
             if (data.responseStatus === 200 && data.responseData) {
-                const translatedText = data.responseData.translatedText;
-                
-                // Mettre en cache
-                this.translationCache.set(cacheKey, translatedText);
-                
-                return translatedText;
+                const translated = data.responseData.translatedText;
+                this.translationCache.set(cacheKey, translated);
+                return translated;
             }
             
-            // Fallback
             return text;
-            
         } catch (error) {
-            console.warn('⚠ Erreur API traduction:', error);
             return text;
         }
     }
@@ -342,102 +592,49 @@ class AutoTranslate {
     // ============================================
     
     getTextContent(element) {
-        // Récupère uniquement le texte direct (pas les enfants)
         let text = '';
-        
         element.childNodes.forEach(node => {
             if (node.nodeType === Node.TEXT_NODE) {
                 text += node.textContent;
             }
         });
-        
         return text.trim();
     }
     
     setTextContent(element, text) {
-        // Remplace uniquement les text nodes, préserve les balises HTML
-        let textNodeFound = false;
-        
+        let found = false;
         element.childNodes.forEach(node => {
             if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
                 node.textContent = text;
-                textNodeFound = true;
+                found = true;
             }
         });
-        
-        // Si aucun text node, créer un nouveau
-        if (!textNodeFound && element.children.length === 0) {
+        if (!found && element.children.length === 0) {
             element.textContent = text;
         }
-    }
-    
-    generateId() {
-        return 'trans_' + Math.random().toString(36).substr(2, 9);
     }
     
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     
+    // ============================================
+    // UI - INDICATEURS
+    // ============================================
+    
     showLoadingIndicator(lang) {
-        const langNames = {
-            en: 'English',
-            fr: 'Français',
-            es: 'Español',
-            de: 'Deutsch',
-            it: 'Italiano',
-            pt: 'Português',
-            ja: '日本語',
-            zh: '中文',
-            ar: 'العربية',
-            ru: 'Русский'
-        };
-        
+        const langNames = { en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português' };
         const overlay = document.createElement('div');
         overlay.id = 'translation-overlay';
         overlay.innerHTML = `
-            <div style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.75);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 999999;
-                backdrop-filter: blur(8px);
-            ">
-                <div style="
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    padding: 50px 70px;
-                    border-radius: 24px;
-                    text-align: center;
-                    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-                ">
-                    <div style="
-                        width: 70px;
-                        height: 70px;
-                        border: 6px solid rgba(255, 255, 255, 0.3);
-                        border-top-color: white;
-                        border-radius: 50%;
-                        animation: spin 0.8s linear infinite;
-                        margin: 0 auto 24px;
-                    "></div>
-                    <h3 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">
-                        🌍 Translating to ${langNames[lang] || lang.toUpperCase()}
-                    </h3>
-                    <p style="color: rgba(255, 255, 255, 0.95); margin: 12px 0 0; font-size: 16px; font-weight: 500;">
-                        Please wait a moment...
-                    </p>
+            <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 999999; backdrop-filter: blur(10px);">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 70px; border-radius: 24px; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);">
+                    <div style="width: 70px; height: 70px; border: 6px solid rgba(255, 255, 255, 0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 24px;"></div>
+                    <h3 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">🌍 Translating...</h3>
+                    <p style="color: rgba(255, 255, 255, 0.95); margin: 12px 0 0; font-size: 16px;">to ${langNames[lang]}</p>
                 </div>
             </div>
-            <style>
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            </style>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         `;
         document.body.appendChild(overlay);
     }
@@ -446,19 +643,76 @@ class AutoTranslate {
         const overlay = document.getElementById('translation-overlay');
         if (overlay) {
             overlay.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.3s ease';
+            overlay.style.transition = 'opacity 0.3s';
             setTimeout(() => overlay.remove(), 300);
         }
+    }
+    
+    showGlobalTranslationProgress(lang) {
+        const langNames = { en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português' };
+        
+        const toast = document.createElement('div');
+        toast.id = 'global-translation-toast';
+        toast.innerHTML = `
+            <div style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px 32px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); z-index: 999998; min-width: 350px;">
+                <h4 style="color: white; margin: 0 0 12px 0; font-size: 18px; font-weight: 800;">🌍 Pre-translating all pages...</h4>
+                <p style="color: rgba(255, 255, 255, 0.95); margin: 0 0 16px 0; font-size: 14px;">to ${langNames[lang]}</p>
+                <div style="background: rgba(255, 255, 255, 0.2); border-radius: 8px; height: 8px; overflow: hidden;">
+                    <div id="global-progress-bar" style="background: white; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="global-progress-text" style="color: white; margin: 12px 0 0 0; font-size: 13px; font-weight: 600;">0 / 0 pages</p>
+            </div>
+        `;
+        document.body.appendChild(toast);
+    }
+    
+    updateGlobalProgress(completed, total) {
+        const progressBar = document.getElementById('global-progress-bar');
+        const progressText = document.getElementById('global-progress-text');
+        
+        if (progressBar && progressText) {
+            const percent = Math.round((completed / total) * 100);
+            progressBar.style.width = percent + '%';
+            progressText.textContent = `${completed} / ${total} pages`;
+        }
+    }
+    
+    hideGlobalTranslationProgress() {
+        const toast = document.getElementById('global-translation-toast');
+        if (toast) {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.5s';
+            setTimeout(() => toast.remove(), 500);
+        }
+    }
+    
+    showCompletionToast(lang, count) {
+        const langNames = { en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português' };
+        
+        const toast = document.createElement('div');
+        toast.innerHTML = `
+            <div style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px 32px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); z-index: 999998;">
+                <h4 style="color: white; margin: 0; font-size: 18px; font-weight: 800;">✅ Translation complete!</h4>
+                <p style="color: rgba(255, 255, 255, 0.95); margin: 8px 0 0 0; font-size: 14px;">${count} pages translated to ${langNames[lang]}</p>
+                <p style="color: rgba(255, 255, 255, 0.95); margin: 4px 0 0 0; font-size: 13px;">Navigation will now be instant ⚡</p>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.5s';
+            setTimeout(() => toast.remove(), 500);
+        }, 5000);
     }
 }
 
 // ============================================
-// INITIALISATION GLOBALE
+// INITIALISATION
 // ============================================
 
 let globalTranslator = null;
 
-// ✅ CRÉER L'INSTANCE MAIS NE PAS INITIALISER AUTOMATIQUEMENT
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', createTranslator);
 } else {
@@ -467,22 +721,18 @@ if (document.readyState === 'loading') {
 
 function createTranslator() {
     globalTranslator = new AutoTranslate();
-    window.translator = globalTranslator; // Exposer globalement
+    window.translator = globalTranslator;
     
-    // ✅ INITIALISER UNIQUEMENT SI L'UTILISATEUR EST CONNECTÉ
     window.addEventListener('userDataLoaded', async function(e) {
-        console.log('👤 Utilisateur connecté, vérification langue...');
         await globalTranslator.initialize();
     });
 }
 
-// Fonction helper pour changer de langue (utilisable partout)
 window.changeLanguage = async function(lang) {
     if (globalTranslator) {
         return await globalTranslator.changeLanguage(lang);
     }
-    console.error('❌ Translator non initialisé');
     return false;
 };
 
-console.log('✅ Auto-translate script chargé (mode: activation utilisateur uniquement)');
+console.log('✅ Auto-translate GLOBAL chargé');
