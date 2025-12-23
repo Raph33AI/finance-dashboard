@@ -1,14 +1,14 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - ADMIN ANALYTICS PRO v3.1 - STYLES COMPLETS
+ * ALPHAVAULT AI - ADMIN ANALYTICS PRO v3.2 - COMPLETE STYLES
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
- * Nouvelles fonctionnalités: 
+ * New Features: 
  * - ML Predictions
  * - Stripe Metrics
- * - Non-Customer Visitors
+ * - Non-Customer Visitors (Cloudflare)
  * - Potential Customers Lead Scoring
- * - Export CSV
+ * - CSV Export
  */
 
 /* ========================================
@@ -767,7 +767,7 @@ tbody tr:last-child td {
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
-/* 🆕 LEAD CATEGORY BADGES */
+/* Lead Category Badges */
 .lead-category-badge {
     padding: 6px 12px;
     border-radius: 8px;
@@ -809,7 +809,7 @@ tbody tr:last-child td {
 }
 
 /* ========================================
-   RESPONSIVE
+   RESPONSIVE DESIGN
    ======================================== */
 @media (max-width: 1024px) {
     .stats-grid,
@@ -935,7 +935,7 @@ body.dark-mode tbody tr:hover {
 }
 
 /* ========================================
-   ANIMATIONS PREMIUM
+   PREMIUM ANIMATIONS
    ======================================== */
 @keyframes slideInFromTop {
     from {
