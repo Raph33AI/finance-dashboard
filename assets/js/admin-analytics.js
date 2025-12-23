@@ -1,5 +1,6 @@
 // ========================================
-// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v5.0
+// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v5.1
+// ✅ Système de Cache & Rate Limiting intégré
 // ✅ Correction complète des erreurs
 // ✅ Tableau général des utilisateurs avec actions admin
 // ✅ Système de gestion d'accès
@@ -11,12 +12,192 @@ const ADMIN_EMAIL = 'raphnardone@gmail.com';
 const WORKER_URL = 'https://admin-analytics-api.raphnardone.workers.dev';
 const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
 
+// 🆕 CONFIGURATION DU CACHE & RATE LIMITING
+const CACHE_CONFIG = {
+    // Durée de validité du cache (en millisecondes)
+    // Par défaut: 6 heures = 6 * 60 * 60 * 1000
+    CACHE_DURATION: 6 * 60 * 60 * 1000, // ⬅ 6 heures (modifiable)
+    
+    // Nombre maximum d'appels Worker autorisés par jour
+    MAX_DAILY_CALLS: 50, // ⬅ Limite quotidienne (modifiable)
+    
+    // Activer/désactiver le cache
+    ENABLE_CACHE: true, // ⬅ Mettre à false pour désactiver le cache
+    
+    // Activer/désactiver le rate limiting
+    ENABLE_RATE_LIMIT: true, // ⬅ Mettre à false pour désactiver la limite
+    
+    // Endpoints à mettre en cache (tous par défaut)
+    CACHED_ENDPOINTS: [
+        'stripe-analytics',
+        'cloudflare-analytics',
+        'cloudflare-geo',
+        'cloudflare-devices',
+        'cloudflare-pages',
+        'cloudflare-visitors'
+    ]
+};
+
+// ========================================
+// 🗄 CACHE MANAGER
+// ========================================
+
+class CacheManager {
+    constructor(config) {
+        this.config = config;
+        this.storagePrefix = 'admin_cache_';
+        this.callsCountKey = 'admin_calls_count';
+        this.callsDateKey = 'admin_calls_date';
+    }
+    
+    // Vérifier si le cache est activé
+    isCacheEnabled() {
+        return this.config.ENABLE_CACHE;
+    }
+    
+    // Vérifier si le rate limiting est activé
+    isRateLimitEnabled() {
+        return this.config.ENABLE_RATE_LIMIT;
+    }
+    
+    // Obtenir des données du cache
+    get(key) {
+        if (!this.isCacheEnabled()) return null;
+        
+        try {
+            const cachedItem = localStorage.getItem(this.storagePrefix + key);
+            if (!cachedItem) return null;
+            
+            const { data, timestamp } = JSON.parse(cachedItem);
+            const now = Date.now();
+            
+            // Vérifier si le cache est encore valide
+            if (now - timestamp < this.config.CACHE_DURATION) {
+                const ageMinutes = Math.floor((now - timestamp) / 60000);
+                console.log(`✅ Cache HIT for ${key} (age: ${ageMinutes} min)`);
+                return data;
+            } else {
+                console.log(`⏰ Cache EXPIRED for ${key}`);
+                this.remove(key);
+                return null;
+            }
+        } catch (error) {
+            console.error('❌ Cache read error:', error);
+            return null;
+        }
+    }
+    
+    // Stocker des données dans le cache
+    set(key, data) {
+        if (!this.isCacheEnabled()) return;
+        
+        try {
+            const cacheItem = {
+                data: data,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(this.storagePrefix + key, JSON.stringify(cacheItem));
+            console.log(`💾 Cache SAVED for ${key}`);
+        } catch (error) {
+            console.error('❌ Cache write error:', error);
+        }
+    }
+    
+    // Supprimer une entrée du cache
+    remove(key) {
+        localStorage.removeItem(this.storagePrefix + key);
+    }
+    
+    // Vider tout le cache
+    clearAll() {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith(this.storagePrefix)) {
+                localStorage.removeItem(key);
+            }
+        });
+        // Réinitialiser aussi le compteur d'appels
+        localStorage.removeItem(this.callsCountKey);
+        localStorage.removeItem(this.callsDateKey);
+        console.log('🗑 All cache cleared');
+    }
+    
+    // Vérifier le nombre d'appels aujourd'hui
+    canMakeCall() {
+        if (!this.isRateLimitEnabled()) return true;
+        
+        const today = new Date().toDateString();
+        const storedDate = localStorage.getItem(this.callsDateKey);
+        let callsCount = parseInt(localStorage.getItem(this.callsCountKey) || '0');
+        
+        // Réinitialiser le compteur si on est un nouveau jour
+        if (storedDate !== today) {
+            callsCount = 0;
+            localStorage.setItem(this.callsDateKey, today);
+            localStorage.setItem(this.callsCountKey, '0');
+        }
+        
+        if (callsCount >= this.config.MAX_DAILY_CALLS) {
+            console.warn(`⚠ RATE LIMIT EXCEEDED: ${callsCount}/${this.config.MAX_DAILY_CALLS} calls today`);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Incrémenter le compteur d'appels
+    incrementCallCount() {
+        if (!this.isRateLimitEnabled()) return;
+        
+        const today = new Date().toDateString();
+        const storedDate = localStorage.getItem(this.callsDateKey);
+        let callsCount = parseInt(localStorage.getItem(this.callsCountKey) || '0');
+        
+        if (storedDate !== today) {
+            callsCount = 0;
+            localStorage.setItem(this.callsDateKey, today);
+        }
+        
+        callsCount++;
+        localStorage.setItem(this.callsCountKey, callsCount.toString());
+        
+        console.log(`📞 API Calls today: ${callsCount}/${this.config.MAX_DAILY_CALLS}`);
+    }
+    
+    // Obtenir les statistiques de cache
+    getStats() {
+        const today = new Date().toDateString();
+        const storedDate = localStorage.getItem(this.callsDateKey);
+        let callsCount = parseInt(localStorage.getItem(this.callsCountKey) || '0');
+        
+        if (storedDate !== today) {
+            callsCount = 0;
+        }
+        
+        return {
+            callsToday: callsCount,
+            maxCalls: this.config.MAX_DAILY_CALLS,
+            remaining: Math.max(0, this.config.MAX_DAILY_CALLS - callsCount),
+            cacheEnabled: this.isCacheEnabled(),
+            rateLimitEnabled: this.isRateLimitEnabled(),
+            cacheDuration: this.config.CACHE_DURATION / (60 * 60 * 1000) // en heures
+        };
+    }
+}
+
+// ========================================
+// 📊 ADMIN ANALYTICS PRO CLASS
+// ========================================
+
 class AdminAnalyticsPro {
     constructor() {
         this.db = firebase.firestore();
         this.auth = firebase.auth();
         this.charts = {};
         this.maps = {};
+        
+        // 🆕 CACHE MANAGER
+        this.cache = new CacheManager(CACHE_CONFIG);
         
         // Third-Party Data
         this.stripeData = null;
@@ -50,13 +231,16 @@ class AdminAnalyticsPro {
         };
         
         // Current section
-        this.currentSection = 'dashboard'; // 🆕 Menu principal par défaut
+        this.currentSection = 'dashboard';
+        
+        // Current MRR
+        this.currentMRR = 0;
         
         this.init();
     }
 
     async init() {
-        console.log('🔐 Initializing Admin Analytics PRO v5.0...');
+        console.log('🔐 Initializing Admin Analytics PRO v5.1...');
         
         this.auth.onAuthStateChanged(async (user) => {
             if (!user) {
@@ -84,6 +268,9 @@ class AdminAnalyticsPro {
             // Load Leaflet.js for maps
             await this.loadLeafletLibrary();
             
+            // 🆕 Afficher les stats de cache
+            this.displayCacheStats();
+            
             await this.loadAllData();
             this.initEventListeners();
             this.initSectionTabs();
@@ -91,8 +278,10 @@ class AdminAnalyticsPro {
             // 🆕 Afficher le menu principal par défaut
             this.showSection('dashboard');
             
-            // Auto-refresh every 5 minutes
-            setInterval(() => this.checkAlerts(), 5 * 60 * 1000);
+            // 🔥 AUTO-REFRESH DÉSACTIVÉ (économie d'appels)
+            // setInterval(() => this.checkAlerts(), 5 * 60 * 1000);
+            
+            console.log('✅ Admin Analytics PRO fully initialized');
         });
     }
 
@@ -152,12 +341,71 @@ class AdminAnalyticsPro {
                 refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
                 refreshBtn.disabled = true;
                 await this.loadAllData();
+                this.displayCacheStats(); // 🆕 Mettre à jour les stats
                 refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
                 refreshBtn.disabled = false;
             });
         }
         
+        // 🆕 BOUTON POUR VIDER LE CACHE
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        if (clearCacheBtn) {
+            clearCacheBtn.addEventListener('click', () => {
+                if (confirm('⚠ Clear all cached data? This will force fresh API calls on next refresh.')) {
+                    this.cache.clearAll();
+                    alert('✅ Cache cleared successfully!');
+                    this.displayCacheStats();
+                }
+            });
+        }
+        
         console.log('✅ Event listeners initialized');
+    }
+
+    // 🆕 AFFICHER LES STATS DE CACHE
+    displayCacheStats() {
+        const stats = this.cache.getStats();
+        
+        console.log('📊 Cache Statistics:');
+        console.log(`   - API Calls today: ${stats.callsToday}/${stats.maxCalls}`);
+        console.log(`   - Remaining calls: ${stats.remaining}`);
+        console.log(`   - Cache enabled: ${stats.cacheEnabled}`);
+        console.log(`   - Cache duration: ${stats.cacheDuration}h`);
+        
+        // Afficher dans l'UI si l'élément existe
+        const cacheStatsEl = document.getElementById('cache-stats');
+        if (cacheStatsEl) {
+            const percentUsed = (stats.callsToday / stats.maxCalls) * 100;
+            const statusClass = percentUsed >= 90 ? 'danger' : percentUsed >= 70 ? 'warning' : 'success';
+            
+            cacheStatsEl.innerHTML = `
+                <div class="cache-stats-card">
+                    <div class="stat-item">
+                        <span class="stat-label">📞 API Calls Today</span>
+                        <span class="stat-value ${statusClass}">
+                            ${stats.callsToday} / ${stats.maxCalls}
+                        </span>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentUsed}%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">⏳ Remaining Calls</span>
+                        <span class="stat-value">${stats.remaining}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">🗄 Cache Duration</span>
+                        <span class="stat-value">${stats.cacheDuration}h</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">⚡ Status</span>
+                        <span class="stat-value ${stats.cacheEnabled ? 'success' : 'danger'}">
+                            ${stats.cacheEnabled ? '✅ Active' : '❌ Disabled'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     // 🆕 SYSTÈME DE NAVIGATION PAR SECTIONS
@@ -226,7 +474,7 @@ class AdminAnalyticsPro {
         try {
             await Promise.all([
                 // ========================================
-                // SECTION 1: THIRD-PARTY ANALYTICS
+                // SECTION 1: THIRD-PARTY ANALYTICS (avec cache)
                 // ========================================
                 this.loadStripeMetrics(),
                 this.loadCloudflareAnalytics(),
@@ -236,7 +484,7 @@ class AdminAnalyticsPro {
                 this.loadCloudflareVisitors(),
                 
                 // ========================================
-                // SECTION 2: INTERNAL ANALYTICS
+                // SECTION 2: INTERNAL ANALYTICS (Firebase)
                 // ========================================
                 this.loadUsersStats(),
                 this.loadVisitsStats(),
@@ -277,7 +525,7 @@ class AdminAnalyticsPro {
             const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
             console.log(`✅ All data loaded successfully in ${loadTime}s`);
             
-            await this.checkAlerts();
+            // Note: checkAlerts() retiré de l'auto-refresh mais peut être appelé manuellement
             
         } catch (error) {
             console.error('❌ Error loading data:', error);
@@ -285,251 +533,278 @@ class AdminAnalyticsPro {
         }
     }
 
-    // 🆕 CHARGEMENT DES DONNÉES UTILISATEURS DÉTAILLÉES
-    async loadUsersDetailedData() {
+    // ========================================
+    // SECTION 1: THIRD-PARTY ANALYTICS (avec Cache & Rate Limiting)
+    // ========================================
+    
+    async loadStripeMetrics() {
         try {
-            console.log('👥 Loading detailed users data...');
+            console.log('💳 Loading Stripe metrics...');
             
-            this.allUsersDetailedData = [];
+            // 🆕 VÉRIFIER LE CACHE
+            const cacheKey = 'stripe-analytics';
+            const cachedData = this.cache.get(cacheKey);
             
-            for (const user of this.allUsersData) {
-                // Récupérer les simulations
-                const simulationsSnapshot = await this.db
-                    .collection('users')
-                    .doc(user.id)
-                    .collection('simulations')
-                    .get();
-                
-                // Compter les visites
-                const userVisits = this.allVisitsData.filter(v => v.userId === user.id).length;
-                
-                // Compter les activités
-                const userActivities = this.allActivityData.filter(a => a.userId === user.id).length;
-                
-                // Compter les requêtes API (si disponible)
-                const apiRequestsSnapshot = await this.db
-                    .collection('users')
-                    .doc(user.id)
-                    .collection('api_requests')
-                    .get();
-                
-                // Récupérer le statut de ban
-                const userDoc = await this.db.collection('users').doc(user.id).get();
-                const userData = userDoc.data();
-                
-                this.allUsersDetailedData.push({
-                    id: user.id,
-                    email: user.email || 'N/A',
-                    displayName: user.displayName || user.name || 'N/A',
-                    plan: user.plan || 'basic',
-                    subscriptionStatus: user.subscriptionStatus || 'inactive',
-                    createdAt: user.createdAt,
-                    lastLogin: user.lastLogin,
-                    emailVerified: user.emailVerified || false,
-                    simulations: simulationsSnapshot.size,
-                    visits: userVisits,
-                    activities: userActivities,
-                    apiRequests: apiRequestsSnapshot.size,
-                    isBanned: userData?.isBanned || false, // 🆕 Statut de ban
-                    bannedAt: userData?.bannedAt || null,
-                    bannedReason: userData?.bannedReason || null,
-                    photoURL: user.photoURL || null,
-                    country: user.country || 'Unknown'
-                });
-            }
-            
-            console.log(`✅ Detailed data loaded for ${this.allUsersDetailedData.length} users`);
-            
-        } catch (error) {
-            console.error('❌ Error loading detailed users data:', error);
-        }
-    }
-
-    // 🆕 AFFICHER LE TABLEAU DE GESTION DES UTILISATEURS
-    async loadUsersManagementTable() {
-        try {
-            console.log('📋 Loading users management table...');
-            
-            const tbody = document.getElementById('users-management-body');
-            if (!tbody) {
-                console.warn('⚠ Users management table not found');
+            if (cachedData) {
+                this.stripeData = cachedData;
+                this.displayStripeMetrics(cachedData);
                 return;
             }
             
-            tbody.innerHTML = '';
-            
-            // Trier par date d'inscription (plus récent en premier)
-            const sortedUsers = this.allUsersDetailedData
-                .sort((a, b) => {
-                    if (!a.createdAt) return 1;
-                    if (!b.createdAt) return -1;
-                    return b.createdAt.toDate() - a.createdAt.toDate();
-                });
-            
-            if (sortedUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="12" style="text-align: center;">No users available</td></tr>';
+            // 🆕 VÉRIFIER LE RATE LIMIT
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - using cached data only');
                 return;
             }
             
-            sortedUsers.forEach((user, index) => {
-                const row = document.createElement('tr');
-                
-                // Appliquer un style si l'utilisateur est banni
-                if (user.isBanned) {
-                    row.style.backgroundColor = '#fee2e2';
-                    row.style.opacity = '0.7';
-                }
-                
-                const createdAt = user.createdAt ? user.createdAt.toDate().toLocaleDateString('en-US') : 'N/A';
-                const lastLogin = user.lastLogin ? user.lastLogin.toDate().toLocaleDateString('en-US') : 'Never';
-                
-                // Badge de plan
-                const planBadge = `<span class="plan-badge plan-${user.plan}">${user.plan.toUpperCase()}</span>`;
-                
-                // Badge de statut
-                let statusBadge = '';
-                if (user.isBanned) {
-                    statusBadge = '<span class="status-badge status-banned">🚫 BANNED</span>';
-                } else if (user.subscriptionStatus === 'active' || user.subscriptionStatus === 'trialing') {
-                    statusBadge = '<span class="status-badge status-active">✅ Active</span>';
-                } else {
-                    statusBadge = '<span class="status-badge status-inactive">❌ Inactive</span>';
-                }
-                
-                // Bouton d'action
-                const actionButton = user.isBanned
-                    ? `<button class="btn-action btn-unban" onclick="adminAnalytics.unbanUser('${user.id}')">
-                        <i class="fas fa-unlock"></i> Unban
-                       </button>`
-                    : `<button class="btn-action btn-ban" onclick="adminAnalytics.banUser('${user.id}')">
-                        <i class="fas fa-ban"></i> Ban
-                       </button>`;
-                
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>
-                        <div class="user-info">
-                            ${user.photoURL ? `<img src="${user.photoURL}" alt="Avatar" class="user-avatar-small">` : ''}
-                            <div>
-                                <div class="user-email">${user.email}</div>
-                                ${user.displayName !== 'N/A' ? `<div class="user-name">${user.displayName}</div>` : ''}
-                            </div>
-                        </div>
-                    </td>
-                    <td>${planBadge}</td>
-                    <td>${statusBadge}</td>
-                    <td>${createdAt}</td>
-                    <td>${lastLogin}</td>
-                    <td>${user.simulations}</td>
-                    <td>${user.visits}</td>
-                    <td>${user.activities}</td>
-                    <td>${user.apiRequests}</td>
-                    <td>${user.country}</td>
-                    <td>${actionButton}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
+            // APPEL API RÉEL
+            this.cache.incrementCallCount();
             
-            // Mettre à jour les statistiques
-            this.updateUsersManagementStats();
+            const response = await fetch(`${WORKER_URL}/stripe-analytics`);
             
-            console.log(`✅ Users management table loaded (${sortedUsers.length} users)`);
+            if (!response.ok) {
+                throw new Error(`Stripe API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // 🆕 SAUVEGARDER DANS LE CACHE
+            this.cache.set(cacheKey, data);
+            
+            this.stripeData = data;
+            this.displayStripeMetrics(data);
+            
+            console.log('✅ Stripe metrics loaded from API');
             
         } catch (error) {
-            console.error('❌ Error loading users management table:', error);
+            console.error('❌ Error loading Stripe metrics:', error);
         }
     }
 
-    // 🆕 METTRE À JOUR LES STATISTIQUES DU TABLEAU UTILISATEURS
-    updateUsersManagementStats() {
-        const totalUsers = this.allUsersDetailedData.length;
-        const bannedUsers = this.allUsersDetailedData.filter(u => u.isBanned).length;
-        const activeUsers = this.allUsersDetailedData.filter(u => !u.isBanned && u.subscriptionStatus === 'active').length;
-        const premiumUsers = this.allUsersDetailedData.filter(u => u.plan !== 'basic' && u.plan !== 'free').length;
+    displayStripeMetrics(data) {
+        if (!data) return;
         
-        this.updateStat('total-users-mgmt', totalUsers);
-        this.updateStat('banned-users-mgmt', bannedUsers);
-        this.updateStat('active-users-mgmt', activeUsers);
-        this.updateStat('premium-users-mgmt', premiumUsers);
-    }
-
-    // 🆕 BANNIR UN UTILISATEUR
-    async banUser(userId) {
-        try {
-            const reason = prompt('Raison du bannissement (optionnel):');
-            
-            if (reason === null) return; // Annulé
-            
-            const confirmBan = confirm(`⚠ Êtes-vous sûr de vouloir bannir cet utilisateur?\n\nCette action:\n- Bloquera son accès au site\n- Annulera son abonnement actif\n- Sera enregistrée dans les logs`);
-            
-            if (!confirmBan) return;
-            
-            console.log(`🚫 Banning user: ${userId}`);
-            
-            // Mettre à jour Firestore
-            await this.db.collection('users').doc(userId).update({
-                isBanned: true,
-                bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                bannedReason: reason || 'No reason provided',
-                subscriptionStatus: 'banned'
-            });
-            
-            // Enregistrer dans les logs
-            await this.db.collection('admin_actions').add({
-                action: 'ban_user',
-                userId: userId,
-                adminEmail: ADMIN_EMAIL,
-                reason: reason,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            alert('✅ Utilisateur banni avec succès');
-            
-            // Recharger les données
-            await this.loadUsersDetailedData();
-            await this.loadUsersManagementTable();
-            
-        } catch (error) {
-            console.error('❌ Error banning user:', error);
-            alert('⚠ Erreur lors du bannissement: ' + error.message);
+        if (data.customers) {
+            this.updateStat('stripe-total-customers', data.customers.total || 0);
+            this.updateStat('stripe-with-subscription', data.customers.withSubscription || 0);
+        }
+        
+        if (data.subscriptions) {
+            this.updateStat('stripe-active-subs', data.subscriptions.active || 0);
+            this.updateStat('stripe-trialing-subs', data.subscriptions.trialing || 0);
+            this.updateStat('stripe-canceled-subs', data.subscriptions.canceled || 0);
+        }
+        
+        if (data.revenue) {
+            const mrr = (data.revenue.mrr / 100).toFixed(2);
+            const arr = (data.revenue.arr / 100).toFixed(2);
+            this.updateStat('stripe-mrr', `$${mrr}`);
+            this.updateStat('stripe-arr', `$${arr}`);
         }
     }
 
-    // 🆕 DÉBANNIR UN UTILISATEUR
-    async unbanUser(userId) {
+    async loadCloudflareAnalytics() {
         try {
-            const confirmUnban = confirm('✅ Débannir cet utilisateur?\n\nIl pourra à nouveau accéder au site.');
+            console.log('☁ Loading Cloudflare analytics...');
             
-            if (!confirmUnban) return;
+            // 🆕 VÉRIFIER LE CACHE
+            const cacheKey = 'cloudflare-analytics';
+            const cachedData = this.cache.get(cacheKey);
             
-            console.log(`✅ Unbanning user: ${userId}`);
+            if (cachedData) {
+                this.cloudflareData = cachedData;
+                this.displayCloudflareAnalytics(cachedData);
+                return;
+            }
             
-            // Mettre à jour Firestore
-            await this.db.collection('users').doc(userId).update({
-                isBanned: false,
-                bannedAt: null,
-                bannedReason: null,
-                subscriptionStatus: 'inactive'
-            });
+            // 🆕 VÉRIFIER LE RATE LIMIT
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Cloudflare analytics');
+                return;
+            }
             
-            // Enregistrer dans les logs
-            await this.db.collection('admin_actions').add({
-                action: 'unban_user',
-                userId: userId,
-                adminEmail: ADMIN_EMAIL,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            // APPEL API RÉEL
+            this.cache.incrementCallCount();
             
-            alert('✅ Utilisateur débanni avec succès');
+            const response = await fetch(`${WORKER_URL}/cloudflare-analytics?days=30`);
             
-            // Recharger les données
-            await this.loadUsersDetailedData();
-            await this.loadUsersManagementTable();
+            if (!response.ok) {
+                throw new Error(`Cloudflare API error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            // 🆕 SAUVEGARDER DANS LE CACHE
+            this.cache.set(cacheKey, result.data);
+            
+            this.cloudflareData = result.data;
+            this.displayCloudflareAnalytics(result.data);
+            
+            console.log('✅ Cloudflare analytics loaded from API');
             
         } catch (error) {
-            console.error('❌ Error unbanning user:', error);
-            alert('⚠ Erreur lors du débannissement: ' + error.message);
+            console.error('❌ Error loading Cloudflare analytics:', error);
+        }
+    }
+
+    displayCloudflareAnalytics(data) {
+        if (!data || !data.overview) return;
+        
+        const overview = data.overview;
+        
+        this.updateStat('cf-total-requests', (overview.totalRequests || 0).toLocaleString());
+        this.updateStat('cf-total-pageviews', (overview.totalPageViews || 0).toLocaleString());
+        this.updateStat('cf-total-uniques', (overview.totalUniques || 0).toLocaleString());
+        this.updateStat('cf-cache-hit-rate', `${overview.cacheHitRate || 0}%`);
+        this.updateStat('cf-total-threats', overview.totalThreats || 0);
+        this.updateStat('cf-total-bytes', this.formatBytes(overview.totalBytes || 0));
+    }
+
+    async loadCloudflareGeo() {
+        try {
+            console.log('🌍 Loading Cloudflare Geo...');
+            
+            const cacheKey = 'cloudflare-geo';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.cloudflareGeo = cachedData;
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Cloudflare Geo');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-geo`);
+            
+            if (!response.ok) {
+                throw new Error(`Cloudflare Geo error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            this.cache.set(cacheKey, result.countries);
+            this.cloudflareGeo = result.countries;
+            
+            console.log('✅ Cloudflare Geo loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare Geo:', error);
+        }
+    }
+
+    async loadCloudflareDevices() {
+        try {
+            console.log('📱 Loading Cloudflare Devices...');
+            
+            const cacheKey = 'cloudflare-devices';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.cloudflareDevices = cachedData;
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Cloudflare Devices');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-devices`);
+            
+            if (!response.ok) {
+                throw new Error(`Cloudflare Devices error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            this.cache.set(cacheKey, result.devices);
+            this.cloudflareDevices = result.devices;
+            
+            console.log('✅ Cloudflare Devices loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare Devices:', error);
+        }
+    }
+
+    async loadCloudflarePages() {
+        try {
+            console.log('📄 Loading Cloudflare Pages...');
+            
+            const cacheKey = 'cloudflare-pages';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.cloudflarePages = cachedData;
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Cloudflare Pages');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-pages`);
+            
+            if (!response.ok) {
+                throw new Error(`Cloudflare Pages error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            this.cache.set(cacheKey, result.pages);
+            this.cloudflarePages = result.pages;
+            
+            console.log('✅ Cloudflare Pages loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare Pages:', error);
+        }
+    }
+
+    async loadCloudflareVisitors() {
+        try {
+            console.log('👥 Loading Cloudflare Visitors...');
+            
+            const cacheKey = 'cloudflare-visitors';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.cloudflareVisitors = cachedData;
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Cloudflare Visitors');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-visitors?days=30`);
+            
+            if (!response.ok) {
+                throw new Error(`Cloudflare Visitors error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            this.cache.set(cacheKey, result.visitors);
+            this.cloudflareVisitors = result.visitors;
+            
+            console.log('✅ Cloudflare Visitors loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Cloudflare Visitors:', error);
         }
     }
 
@@ -771,9 +1046,14 @@ class AdminAnalyticsPro {
                 : '0';
             
             this.updateStat('total-activity', this.allActivityData.length.toLocaleString());
+            this.updateStat('avg-actions-per-user', avgActionsPerUser);
             
             const topAction = Object.entries(actionTypes)
                 .sort((a, b) => b[1] - a[1])[0];
+            
+            if (topAction) {
+                this.updateStat('top-action', `${topAction[0]} (${topAction[1]})`);
+            }
             
             console.log('✅ Engagement stats loaded:', weekActivity, 'activities this week');
             
@@ -974,7 +1254,7 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // CHARTS (Versions simplifiées pour éviter erreurs)
+    // CHARTS
     // ========================================
     
     async loadRegistrationsChart() {
@@ -1549,6 +1829,399 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
+    // ML PREDICTIONS
+    // ========================================
+    
+    async loadMLPredictions() {
+        try {
+            console.log('🤖 Generating ML predictions...');
+            
+            const churnPrediction = await this.predictChurn();
+            const ltvPrediction = await this.predictLTV();
+            const mrrPrediction = await this.predictMRR();
+            
+            const container = document.getElementById('ml-predictions');
+            if (container) {
+                container.innerHTML = `
+                    <div class="prediction-card">
+                        <div class="prediction-icon">📉</div>
+                        <div class="prediction-content">
+                            <h3>Predicted Churn (30 days)</h3>
+                            <div class="prediction-value ${churnPrediction.risk > 5 ? 'danger' : 'success'}">
+                                ${churnPrediction.value} users
+                            </div>
+                            <div class="prediction-detail">
+                                Rate: ${churnPrediction.risk.toFixed(1)}%
+                                ${churnPrediction.risk > 5 ? '⚠ High risk' : '✅ Normal'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-card">
+                        <div class="prediction-icon">💰</div>
+                        <div class="prediction-content">
+                            <h3>Projected Avg LTV</h3>
+                            <div class="prediction-value success">
+                                $${ltvPrediction.toFixed(2)}
+                            </div>
+                            <div class="prediction-detail">
+                                Per premium user
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-card">
+                        <div class="prediction-icon">📈</div>
+                        <div class="prediction-content">
+                            <h3>Predicted MRR (3 months)</h3>
+                            <div class="prediction-value success">
+                                $${mrrPrediction.toFixed(0)}
+                            </div>
+                            <div class="prediction-detail">
+                                Trend: ${mrrPrediction > (this.currentMRR || 0) ? '↗ Growth' : '↘ Decline'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            console.log('✅ ML predictions generated');
+            
+        } catch (error) {
+            console.error('❌ Error generating ML predictions:', error);
+        }
+    }
+
+    async predictChurn() {
+        const now = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        let inactiveUsers = 0;
+        let totalPremiumUsers = 0;
+        
+        this.allUsersData.forEach(user => {
+            if (user.plan && user.plan !== 'basic' && user.plan !== 'free') {
+                totalPremiumUsers++;
+                
+                if (!user.lastLogin || user.lastLogin.toDate() < thirtyDaysAgo) {
+                    inactiveUsers++;
+                }
+            }
+        });
+        
+        const churnRate = totalPremiumUsers > 0 ? (inactiveUsers / totalPremiumUsers) * 100 : 0;
+        
+        return {
+            value: inactiveUsers,
+            risk: churnRate
+        };
+    }
+
+    async predictLTV() {
+        const userPayments = {};
+        let totalRevenue = 0;
+        let totalUsers = 0;
+        
+        this.allPaymentsData.forEach(payment => {
+            const userId = payment.userId || 'unknown';
+            const amount = parseFloat(payment.amount) || 0;
+            
+            if (!userPayments[userId]) {
+                userPayments[userId] = 0;
+                totalUsers++;
+            }
+            
+            userPayments[userId] += amount;
+            totalRevenue += amount;
+        });
+        
+        const currentLTV = totalUsers > 0 ? totalRevenue / totalUsers : 0;
+        const projectedLTV = currentLTV * 1.15;
+        
+        return projectedLTV;
+    }
+
+    async predictMRR() {
+        const monthlyRevenue = {};
+        
+        this.allPaymentsData.forEach(payment => {
+            if (payment.createdAt) {
+                const monthKey = payment.createdAt.toDate().toISOString().slice(0, 7);
+                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (parseFloat(payment.amount) || 0);
+            }
+        });
+        
+        const months = Object.keys(monthlyRevenue).sort();
+        const revenues = months.map(m => monthlyRevenue[m]);
+        
+        if (revenues.length < 2) {
+            return this.currentMRR || 0;
+        }
+        
+        const n = revenues.length;
+        const sumX = (n * (n - 1)) / 2;
+        const sumY = revenues.reduce((a, b) => a + b, 0);
+        const sumXY = revenues.reduce((sum, y, x) => sum + x * y, 0);
+        const sumXX = (n * (n - 1) * (2 * n - 1)) / 6;
+        
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        
+        const futureMonth = n + 3;
+        const predictedMRR = slope * futureMonth + intercept;
+        
+        return Math.max(predictedMRR, 0);
+    }
+
+    // ========================================
+    // 🆕 USERS MANAGEMENT (DETAILED DATA)
+    // ========================================
+    
+    async loadUsersDetailedData() {
+        try {
+            console.log('👥 Loading detailed users data...');
+            
+            this.allUsersDetailedData = [];
+            
+            for (const user of this.allUsersData) {
+                // Récupérer les simulations
+                const simulationsSnapshot = await this.db
+                    .collection('users')
+                    .doc(user.id)
+                    .collection('simulations')
+                    .get();
+                
+                // Compter les visites
+                const userVisits = this.allVisitsData.filter(v => v.userId === user.id).length;
+                
+                // Compter les activités
+                const userActivities = this.allActivityData.filter(a => a.userId === user.id).length;
+                
+                // Compter les requêtes API (si disponible)
+                const apiRequestsSnapshot = await this.db
+                    .collection('users')
+                    .doc(user.id)
+                    .collection('api_requests')
+                    .get();
+                
+                // Récupérer le statut de ban
+                const userDoc = await this.db.collection('users').doc(user.id).get();
+                const userData = userDoc.data();
+                
+                this.allUsersDetailedData.push({
+                    id: user.id,
+                    email: user.email || 'N/A',
+                    displayName: user.displayName || user.name || 'N/A',
+                    plan: user.plan || 'basic',
+                    subscriptionStatus: user.subscriptionStatus || 'inactive',
+                    createdAt: user.createdAt,
+                    lastLogin: user.lastLogin,
+                    emailVerified: user.emailVerified || false,
+                    simulations: simulationsSnapshot.size,
+                    visits: userVisits,
+                    activities: userActivities,
+                    apiRequests: apiRequestsSnapshot.size,
+                    isBanned: userData?.isBanned || false,
+                    bannedAt: userData?.bannedAt || null,
+                    bannedReason: userData?.bannedReason || null,
+                    photoURL: user.photoURL || null,
+                    country: user.country || 'Unknown'
+                });
+            }
+            
+            console.log(`✅ Detailed data loaded for ${this.allUsersDetailedData.length} users`);
+            
+        } catch (error) {
+            console.error('❌ Error loading detailed users data:', error);
+        }
+    }
+
+    async loadUsersManagementTable() {
+        try {
+            console.log('📋 Loading users management table...');
+            
+            const tbody = document.getElementById('users-management-body');
+            if (!tbody) {
+                console.warn('⚠ Users management table not found');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            // Trier par date d'inscription (plus récent en premier)
+            const sortedUsers = this.allUsersDetailedData
+                .sort((a, b) => {
+                    if (!a.createdAt) return 1;
+                    if (!b.createdAt) return -1;
+                    return b.createdAt.toDate() - a.createdAt.toDate();
+                });
+            
+            if (sortedUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align: center;">No users available</td></tr>';
+                return;
+            }
+            
+            sortedUsers.forEach((user, index) => {
+                const row = document.createElement('tr');
+                
+                // Appliquer un style si l'utilisateur est banni
+                if (user.isBanned) {
+                    row.style.backgroundColor = '#fee2e2';
+                    row.style.opacity = '0.7';
+                }
+                
+                const createdAt = user.createdAt ? user.createdAt.toDate().toLocaleDateString('en-US') : 'N/A';
+                const lastLogin = user.lastLogin ? user.lastLogin.toDate().toLocaleDateString('en-US') : 'Never';
+                
+                // Badge de plan
+                const planBadge = `<span class="plan-badge plan-${user.plan}">${user.plan.toUpperCase()}</span>`;
+                
+                // Badge de statut
+                let statusBadge = '';
+                if (user.isBanned) {
+                    statusBadge = '<span class="status-badge status-banned">🚫 BANNED</span>';
+                } else if (user.subscriptionStatus === 'active' || user.subscriptionStatus === 'trialing') {
+                    statusBadge = '<span class="status-badge status-active">✅ Active</span>';
+                } else {
+                    statusBadge = '<span class="status-badge status-inactive">❌ Inactive</span>';
+                }
+                
+                // Bouton d'action
+                const actionButton = user.isBanned
+                    ? `<button class="btn-action btn-unban" onclick="adminAnalytics.unbanUser('${user.id}')">
+                        <i class="fas fa-unlock"></i> Unban
+                       </button>`
+                    : `<button class="btn-action btn-ban" onclick="adminAnalytics.banUser('${user.id}')">
+                        <i class="fas fa-ban"></i> Ban
+                       </button>`;
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="user-info">
+                            ${user.photoURL ? `<img src="${user.photoURL}" alt="Avatar" class="user-avatar-small">` : ''}
+                            <div>
+                                <div class="user-email">${user.email}</div>
+                                ${user.displayName !== 'N/A' ? `<div class="user-name">${user.displayName}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${planBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>${createdAt}</td>
+                    <td>${lastLogin}</td>
+                    <td>${user.simulations}</td>
+                    <td>${user.visits}</td>
+                    <td>${user.activities}</td>
+                    <td>${user.apiRequests}</td>
+                    <td>${user.country}</td>
+                    <td>${actionButton}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Mettre à jour les statistiques
+            this.updateUsersManagementStats();
+            
+            console.log(`✅ Users management table loaded (${sortedUsers.length} users)`);
+            
+        } catch (error) {
+            console.error('❌ Error loading users management table:', error);
+        }
+    }
+
+    updateUsersManagementStats() {
+        const totalUsers = this.allUsersDetailedData.length;
+        const bannedUsers = this.allUsersDetailedData.filter(u => u.isBanned).length;
+        const activeUsers = this.allUsersDetailedData.filter(u => !u.isBanned && (u.subscriptionStatus === 'active' || u.subscriptionStatus === 'trialing')).length;
+        const premiumUsers = this.allUsersDetailedData.filter(u => u.plan !== 'basic' && u.plan !== 'free').length;
+        
+        this.updateStat('total-users-mgmt', totalUsers);
+        this.updateStat('banned-users-mgmt', bannedUsers);
+        this.updateStat('active-users-mgmt', activeUsers);
+        this.updateStat('premium-users-mgmt', premiumUsers);
+    }
+
+    async banUser(userId) {
+        try {
+            const reason = prompt('Raison du bannissement (optionnel):');
+            
+            if (reason === null) return; // Annulé
+            
+            const confirmBan = confirm(`⚠ Êtes-vous sûr de vouloir bannir cet utilisateur?\n\nCette action:\n- Bloquera son accès au site\n- Annulera son abonnement actif\n- Sera enregistrée dans les logs`);
+            
+            if (!confirmBan) return;
+            
+            console.log(`🚫 Banning user: ${userId}`);
+            
+            // Mettre à jour Firestore
+            await this.db.collection('users').doc(userId).update({
+                isBanned: true,
+                bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                bannedReason: reason || 'No reason provided',
+                subscriptionStatus: 'banned'
+            });
+            
+            // Enregistrer dans les logs
+            await this.db.collection('admin_actions').add({
+                action: 'ban_user',
+                userId: userId,
+                adminEmail: ADMIN_EMAIL,
+                reason: reason,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            alert('✅ Utilisateur banni avec succès');
+            
+            // Recharger les données
+            await this.loadUsersDetailedData();
+            await this.loadUsersManagementTable();
+            
+        } catch (error) {
+            console.error('❌ Error banning user:', error);
+            alert('⚠ Erreur lors du bannissement: ' + error.message);
+        }
+    }
+
+    async unbanUser(userId) {
+        try {
+            const confirmUnban = confirm('✅ Débannir cet utilisateur?\n\nIl pourra à nouveau accéder au site.');
+            
+            if (!confirmUnban) return;
+            
+            console.log(`✅ Unbanning user: ${userId}`);
+            
+            // Mettre à jour Firestore
+            await this.db.collection('users').doc(userId).update({
+                isBanned: false,
+                bannedAt: null,
+                bannedReason: null,
+                subscriptionStatus: 'inactive'
+            });
+            
+            // Enregistrer dans les logs
+            await this.db.collection('admin_actions').add({
+                action: 'unban_user',
+                userId: userId,
+                adminEmail: ADMIN_EMAIL,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            alert('✅ Utilisateur débanni avec succès');
+            
+            // Recharger les données
+            await this.loadUsersDetailedData();
+            await this.loadUsersManagementTable();
+            
+        } catch (error) {
+            console.error('❌ Error unbanning user:', error);
+            alert('⚠ Erreur lors du débannissement: ' + error.message);
+        }
+    }
+
+    // ========================================
     // NON-CUSTOMER VISITORS & POTENTIAL
     // ========================================
     
@@ -1756,152 +2429,6 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // ML PREDICTIONS
-    // ========================================
-    
-    async loadMLPredictions() {
-        try {
-            console.log('🤖 Generating ML predictions...');
-            
-            const churnPrediction = await this.predictChurn();
-            const ltvPrediction = await this.predictLTV();
-            const mrrPrediction = await this.predictMRR();
-            
-            const container = document.getElementById('ml-predictions');
-            if (container) {
-                container.innerHTML = `
-                    <div class="prediction-card">
-                        <div class="prediction-icon">📉</div>
-                        <div class="prediction-content">
-                            <h3>Predicted Churn (30 days)</h3>
-                            <div class="prediction-value ${churnPrediction.risk > 5 ? 'danger' : 'success'}">
-                                ${churnPrediction.value} users
-                            </div>
-                            <div class="prediction-detail">
-                                Rate: ${churnPrediction.risk.toFixed(1)}%
-                                ${churnPrediction.risk > 5 ? '⚠ High risk' : '✅ Normal'}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="prediction-card">
-                        <div class="prediction-icon">💰</div>
-                        <div class="prediction-content">
-                            <h3>Projected Avg LTV</h3>
-                            <div class="prediction-value success">
-                                $${ltvPrediction.toFixed(2)}
-                            </div>
-                            <div class="prediction-detail">
-                                Per premium user
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="prediction-card">
-                        <div class="prediction-icon">📈</div>
-                        <div class="prediction-content">
-                            <h3>Predicted MRR (3 months)</h3>
-                            <div class="prediction-value success">
-                                $${mrrPrediction.toFixed(0)}
-                            </div>
-                            <div class="prediction-detail">
-                                Trend: ${mrrPrediction > (this.currentMRR || 0) ? '↗ Growth' : '↘ Decline'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            console.log('✅ ML predictions generated');
-            
-        } catch (error) {
-            console.error('❌ Error generating ML predictions:', error);
-        }
-    }
-
-    async predictChurn() {
-        const now = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        let inactiveUsers = 0;
-        let totalPremiumUsers = 0;
-        
-        this.allUsersData.forEach(user => {
-            if (user.plan && user.plan !== 'basic' && user.plan !== 'free') {
-                totalPremiumUsers++;
-                
-                if (!user.lastLogin || user.lastLogin.toDate() < thirtyDaysAgo) {
-                    inactiveUsers++;
-                }
-            }
-        });
-        
-        const churnRate = totalPremiumUsers > 0 ? (inactiveUsers / totalPremiumUsers) * 100 : 0;
-        
-        return {
-            value: inactiveUsers,
-            risk: churnRate
-        };
-    }
-
-    async predictLTV() {
-        const userPayments = {};
-        let totalRevenue = 0;
-        let totalUsers = 0;
-        
-        this.allPaymentsData.forEach(payment => {
-            const userId = payment.userId || 'unknown';
-            const amount = parseFloat(payment.amount) || 0;
-            
-            if (!userPayments[userId]) {
-                userPayments[userId] = 0;
-                totalUsers++;
-            }
-            
-            userPayments[userId] += amount;
-            totalRevenue += amount;
-        });
-        
-        const currentLTV = totalUsers > 0 ? totalRevenue / totalUsers : 0;
-        const projectedLTV = currentLTV * 1.15;
-        
-        return projectedLTV;
-    }
-
-    async predictMRR() {
-        const monthlyRevenue = {};
-        
-        this.allPaymentsData.forEach(payment => {
-            if (payment.createdAt) {
-                const monthKey = payment.createdAt.toDate().toISOString().slice(0, 7);
-                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (parseFloat(payment.amount) || 0);
-            }
-        });
-        
-        const months = Object.keys(monthlyRevenue).sort();
-        const revenues = months.map(m => monthlyRevenue[m]);
-        
-        if (revenues.length < 2) {
-            return this.currentMRR || 0;
-        }
-        
-        const n = revenues.length;
-        const sumX = (n * (n - 1)) / 2;
-        const sumY = revenues.reduce((a, b) => a + b, 0);
-        const sumXY = revenues.reduce((sum, y, x) => sum + x * y, 0);
-        const sumXX = (n * (n - 1) * (2 * n - 1)) / 6;
-        
-        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        const intercept = (sumY - slope * sumX) / n;
-        
-        const futureMonth = n + 3;
-        const predictedMRR = slope * futureMonth + intercept;
-        
-        return Math.max(predictedMRR, 0);
-    }
-
-    // ========================================
     // ALERTS
     // ========================================
     
@@ -1925,7 +2452,8 @@ class AdminAnalyticsPro {
             
             if (alerts.length > 0) {
                 console.log(`⚠ ${alerts.length} alert(s) detected:`, alerts);
-                await this.sendAlertEmail(alerts);
+                // Note: Envoi d'email désactivé par défaut (économie d'appels)
+                // await this.sendAlertEmail(alerts);
             } else {
                 console.log('✅ No alerts - all metrics are healthy');
             }
@@ -2057,6 +2585,14 @@ class AdminAnalyticsPro {
         try {
             console.log('📧 Sending alert email...');
             
+            // 🆕 VÉRIFIER LE RATE LIMIT
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping alert email');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
             const response = await fetch(`${WORKER_URL}/send-alert-email`, {
                 method: 'POST',
                 headers: {
@@ -2070,7 +2606,8 @@ class AdminAnalyticsPro {
             });
             
             if (response.ok) {
-                console.log('✅ Alert email sent successfully');
+                const result = await response.json();
+                console.log('✅ Alert email response:', result);
             } else {
                 console.warn('⚠ Error sending alert email');
             }
@@ -2235,7 +2772,6 @@ class AdminAnalyticsPro {
                     ]);
                     break;
                 
-                // 🆕 CLOUDFLARE EXPORT
                 case 'cloudflare':
                     if (!this.cloudflareData || !this.cloudflareData.overview) {
                         alert('⚠ No Cloudflare data available to export.');
@@ -2256,7 +2792,6 @@ class AdminAnalyticsPro {
                     ];
                     break;
                 
-                // 🆕 STRIPE EXPORT
                 case 'stripe':
                     if (!this.stripeData) {
                         alert('⚠ No Stripe data available to export.');
@@ -2293,7 +2828,6 @@ class AdminAnalyticsPro {
             this.downloadCSV(csvContent, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
             
             console.log(`✅ Export ${type} successful (${data.length} rows)`);
-            alert(`✅ Successfully exported ${data.length} rows to ${filename}.csv`);
             
         } catch (error) {
             console.error(`❌ Error exporting ${type}:`, error);
@@ -2342,7 +2876,7 @@ class AdminAnalyticsPro {
         if (element) {
             element.textContent = value;
         } else {
-            console.warn(`⚠ Element not found: ${elementId}`);
+            // console.warn(`⚠ Element not found: ${elementId}`);
         }
     }
 
@@ -2388,14 +2922,6 @@ class AdminAnalyticsPro {
         
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
-
-    // 🆕 FONCTIONS CLOUDFLARE (versions réduites pour éviter erreurs)
-    async loadStripeMetrics() { console.log('💳 Stripe skipped (optional)'); }
-    async loadCloudflareAnalytics() { console.log('☁ Cloudflare skipped (optional)'); }
-    async loadCloudflareGeo() { console.log('🌍 Cloudflare Geo skipped (optional)'); }
-    async loadCloudflareDevices() { console.log('📱 Cloudflare Devices skipped (optional)'); }
-    async loadCloudflarePages() { console.log('📄 Cloudflare Pages skipped (optional)'); }
-    async loadCloudflareVisitors() { console.log('👥 Cloudflare Visitors skipped (optional)'); }
 }
 
 // ========================================
@@ -2403,14 +2929,16 @@ class AdminAnalyticsPro {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Starting Admin Analytics PRO v5.0...');
+    console.log('🚀 Starting Admin Analytics PRO v5.1...');
     console.log('📊 Initializing comprehensive analytics dashboard...');
+    console.log('🗄 Cache & Rate Limiting enabled');
     
     window.adminAnalytics = new AdminAnalyticsPro();
     
     console.log('✅ Admin Analytics instance created and attached to window.adminAnalytics');
 });
 
+// Global function for export (called from HTML buttons)
 function exportAnalyticsData(type) {
     if (window.adminAnalytics) {
         window.adminAnalytics.exportData(type);
