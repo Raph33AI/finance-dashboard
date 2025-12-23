@@ -1,13 +1,10 @@
 // ========================================
-// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v3.2
-// ✅ Stripe API Integration
-// ✅ Cloudflare Analytics Integration (NEW!)
-// ✅ IP Geolocation
-// ✅ CSV Export
-// ✅ Email Alerts
-// ✅ ML Predictions
-// ✅ Non-Customer Visitors Tracking (Cloudflare)
-// ✅ Potential Customers Analysis
+// ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v4.0
+// ✅ Section 1: Third-Party Analytics (Stripe, Cloudflare, Firebase)
+// ✅ Section 2: Internal Analytics (analytics-tracker.js)
+// ✅ Geographic Maps (Leaflet.js)
+// ✅ Complete Data Exploitation
+// ✅ Advanced Sales Optimization
 // ========================================
 
 // 🔐 CONFIGURATION
@@ -20,16 +17,31 @@ class AdminAnalyticsPro {
         this.db = firebase.firestore();
         this.auth = firebase.auth();
         this.charts = {};
+        this.maps = {};
+        
+        // Third-Party Data
         this.stripeData = null;
-        this.cloudflareData = null; // 🆕 Cloudflare analytics
+        this.cloudflareData = null;
+        this.cloudflareGeo = null;
+        this.cloudflareDevices = null;
+        this.cloudflarePages = null;
+        this.cloudflareVisitors = null;
+        
+        // Internal Analytics Data
         this.allUsersData = [];
         this.allVisitsData = [];
         this.allPaymentsData = [];
         this.allActivityData = [];
-        this.nonCustomerVisitors = []; // 🆕 Non-customer visitors (Cloudflare)
-        this.potentialCustomers = []; // 🆕 Potential customers
+        this.nonCustomerVisitors = [];
+        this.potentialCustomers = [];
         
-        // 🎯 Alert thresholds
+        // Advanced Metrics
+        this.sessionData = [];
+        this.conversionPaths = [];
+        this.bounceRateData = {};
+        this.heatmapData = {};
+        
+        // Alert thresholds
         this.alertThresholds = {
             mrrDropPercent: 10,
             churnRatePercent: 5,
@@ -41,7 +53,7 @@ class AdminAnalyticsPro {
     }
 
     async init() {
-        console.log('🔐 Initializing Admin Analytics PRO v3.2...');
+        console.log('🔐 Initializing Admin Analytics PRO v4.0...');
         
         this.auth.onAuthStateChanged(async (user) => {
             if (!user) {
@@ -66,29 +78,70 @@ class AdminAnalyticsPro {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('admin-dashboard').style.display = 'block';
             
+            // Load Leaflet.js for maps
+            await this.loadLeafletLibrary();
+            
             await this.loadAllData();
             this.initEventListeners();
+            this.initSectionTabs();
             
+            // Auto-refresh every 5 minutes
             setInterval(() => this.checkAlerts(), 5 * 60 * 1000);
         });
     }
 
+    async loadLeafletLibrary() {
+        return new Promise((resolve) => {
+            if (typeof L !== 'undefined') {
+                resolve();
+                return;
+            }
+            
+            // Load Leaflet CSS
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(link);
+            
+            // Load Leaflet JS
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.onload = () => {
+                console.log('✅ Leaflet.js loaded');
+                resolve();
+            };
+            document.head.appendChild(script);
+        });
+    }
+
     initEventListeners() {
-        const exportBtn = document.getElementById('exportDataBtn');
-        if (exportBtn) exportBtn.addEventListener('click', () => this.exportAllData());
+        console.log('🎯 Initializing event listeners...');
         
-        const exportUsersBtn = document.getElementById('exportUsersBtn');
-        if (exportUsersBtn) exportUsersBtn.addEventListener('click', () => this.exportData('users'));
+        // Export buttons
+        const exportButtons = {
+            'exportDataBtn': () => this.exportAllData(),
+            'exportUsersBtn': () => this.exportData('users'),
+            'exportRevenueBtn': () => this.exportData('revenue'),
+            'exportVisitorsBtn': () => this.exportData('non-customers'),
+            'exportPotentialBtn': () => this.exportData('potential-customers'),
+            'exportCloudflareBtn': () => this.exportData('cloudflare'),
+            'exportStripeBtn': () => this.exportData('stripe'),
+            'exportSessionsBtn': () => this.exportData('sessions'),
+            'exportConversionPathsBtn': () => this.exportData('conversion-paths'),
+            'exportActivityBtn': () => this.exportData('activity'),
+            'exportVisitsBtn': () => this.exportData('visits'),
+            'exportPaymentsBtn': () => this.exportData('payments')
+        };
         
-        const exportRevenueBtn = document.getElementById('exportRevenueBtn');
-        if (exportRevenueBtn) exportRevenueBtn.addEventListener('click', () => this.exportData('revenue'));
+        Object.entries(exportButtons).forEach(([id, handler]) => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.addEventListener('click', handler);
+                console.log(`✅ Export button registered: ${id}`);
+            }
+        });
         
-        const exportVisitorsBtn = document.getElementById('exportVisitorsBtn');
-        if (exportVisitorsBtn) exportVisitorsBtn.addEventListener('click', () => this.exportData('non-customers'));
-        
-        const exportPotentialBtn = document.getElementById('exportPotentialBtn');
-        if (exportPotentialBtn) exportPotentialBtn.addEventListener('click', () => this.exportData('potential-customers'));
-        
+        // Refresh button
         const refreshBtn = document.getElementById('refreshDataBtn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', async () => {
@@ -99,35 +152,81 @@ class AdminAnalyticsPro {
                 refreshBtn.disabled = false;
             });
         }
+        
+        console.log('✅ Event listeners initialized');
+    }
+
+    initSectionTabs() {
+        const tabButtons = document.querySelectorAll('.section-tab');
+        const sections = document.querySelectorAll('.analytics-section');
+        
+        if (tabButtons.length === 0) {
+            console.warn('⚠ No section tabs found');
+            return;
+        }
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetSection = button.dataset.section;
+                
+                // Update active tab
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show target section
+                sections.forEach(section => {
+                    if (section.id === targetSection) {
+                        section.classList.add('active');
+                        section.style.display = 'block';
+                    } else {
+                        section.classList.remove('active');
+                        section.style.display = 'none';
+                    }
+                });
+                
+                console.log(`🔄 Switched to section: ${targetSection}`);
+            });
+        });
+        
+        console.log('✅ Section tabs initialized');
     }
 
     async loadAllData() {
         console.log('📊 Loading ALL analytics data (complete history)...');
         
+        const startTime = Date.now();
+        
         try {
             await Promise.all([
-                // Main KPIs
+                // ========================================
+                // SECTION 1: THIRD-PARTY ANALYTICS
+                // ========================================
+                this.loadStripeMetrics(),
+                this.loadCloudflareAnalytics(),
+                this.loadCloudflareGeo(),
+                this.loadCloudflareDevices(),
+                this.loadCloudflarePages(),
+                this.loadCloudflareVisitors(),
+                
+                // ========================================
+                // SECTION 2: INTERNAL ANALYTICS
+                // ========================================
                 this.loadUsersStats(),
                 this.loadVisitsStats(),
                 this.loadRevenueStats(),
                 this.loadEngagementStats(),
-                
-                // Stripe API
-                this.loadStripeMetrics(),
-                
-                // 🆕 Cloudflare Analytics (NEW!)
-                this.loadCloudflareAnalytics(),
+                this.loadSessionAnalytics(),
+                this.loadBounceRateAnalytics(),
+                this.loadConversionPaths(),
+                this.loadHeatmapData(),
                 
                 // Charts
                 this.loadRegistrationsChart(),
                 this.loadPlansChart(),
                 this.loadVisitsChart(),
-                this.loadPagesChart(), // 🆕 Will use Cloudflare data
                 this.loadRevenueChart(),
                 this.loadChurnChart(),
                 this.loadCohortChart(),
-                this.loadDeviceChart(), // 🆕 Will use Cloudflare data
-                this.loadGeographyChart(), // 🆕 Will use Cloudflare data
                 
                 // Tables
                 this.loadRecentUsers(),
@@ -135,33 +234,672 @@ class AdminAnalyticsPro {
                 this.loadTopUsers(),
                 this.loadUserSimulations(),
                 
-                // Advanced Analytics
+                // Advanced
                 this.loadConversionFunnel(),
                 this.loadLTVAnalysis(),
-                
-                // ML
                 this.loadMLPredictions(),
                 
-                // 🆕 NON-CUSTOMER VISITORS (CLOUDFLARE)
+                // Non-customers
                 this.loadNonCustomerVisitors(),
                 this.loadPotentialCustomers()
             ]);
             
-            console.log('✅ All data loaded successfully');
+            const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            console.log(`✅ All data loaded successfully in ${loadTime}s`);
+            
             await this.checkAlerts();
             
         } catch (error) {
             console.error('❌ Error loading data:', error);
+            alert('⚠ Error loading analytics data. Check console for details.');
         }
     }
 
     // ========================================
-    // 📈 MAIN KPIs
+    // SECTION 1: THIRD-PARTY ANALYTICS
+    // ========================================
+    
+    // 💳 STRIPE METRICS
+    async loadStripeMetrics() {
+        try {
+            console.log('💳 Loading Stripe metrics...');
+            
+            const response = await fetch(`${WORKER_URL}/stripe-analytics`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Stripe data unavailable, using Firebase fallback');
+                return;
+            }
+            
+            const stripeData = await response.json();
+            this.stripeData = stripeData;
+            
+            console.log('✅ Stripe data loaded:', stripeData);
+            
+            // Update stats
+            if (stripeData.customers) {
+                this.updateStat('stripe-total-customers', stripeData.customers.total || 0);
+                this.updateStat('stripe-customers-with-subs', stripeData.customers.withSubscription || 0);
+            }
+            
+            if (stripeData.subscriptions) {
+                this.updateStat('stripe-active-subs', stripeData.subscriptions.active || 0);
+                this.updateStat('stripe-trial-subs', stripeData.subscriptions.trialing || 0);
+                this.updateStat('stripe-canceled-subs', stripeData.subscriptions.canceled || 0);
+                this.updateStat('stripe-past-due-subs', stripeData.subscriptions.past_due || 0);
+                
+                const totalSubs = stripeData.subscriptions.total || 0;
+                const activeSubs = stripeData.subscriptions.active || 0;
+                const retentionRate = totalSubs > 0 ? ((activeSubs / totalSubs) * 100).toFixed(1) : 0;
+                this.updateStat('stripe-retention-rate', `${retentionRate}%`);
+            }
+            
+            if (stripeData.revenue) {
+                this.updateStat('stripe-mrr', `$${(stripeData.revenue.mrr / 100).toFixed(0)}`);
+                this.updateStat('stripe-arr', `$${(stripeData.revenue.arr / 100).toFixed(0)}`);
+                this.updateStat('stripe-total-revenue', `$${(stripeData.revenue.total / 100).toFixed(0)}`);
+                
+                // ARPU (Average Revenue Per User)
+                const totalCustomers = stripeData.customers.total || 1;
+                const arpu = (stripeData.revenue.mrr / 100) / totalCustomers;
+                this.updateStat('stripe-arpu', `$${arpu.toFixed(2)}`);
+            }
+            
+            // Charts
+            if (stripeData.revenueByMonth) {
+                this.createStripeRevenueChart(stripeData.revenueByMonth);
+            }
+            
+            if (stripeData.revenueByPlan) {
+                this.createStripePlanRevenueChart(stripeData.revenueByPlan);
+            }
+            
+        } catch (error) {
+            console.error('❌ Stripe error:', error);
+        }
+    }
+
+    createStripeRevenueChart(revenueByMonth) {
+        const labels = Object.keys(revenueByMonth).sort().map(key => {
+            const [year, month] = key.split('-');
+            return `${month}/${year.slice(2)}`;
+        });
+        
+        const data = Object.values(revenueByMonth).map(val => val / 100);
+        
+        this.createChart('stripe-revenue-chart', 'line', {
+            labels: labels,
+            datasets: [{
+                label: 'Monthly Revenue ($)',
+                data: data,
+                borderColor: 'rgb(99, 102, 241)',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3
+            }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    createStripePlanRevenueChart(revenueByPlan) {
+        const totalRevenue = revenueByPlan.basic + revenueByPlan.pro + revenueByPlan.platinum;
+        
+        this.createChart('stripe-plan-revenue-chart', 'doughnut', {
+            labels: ['Basic', 'Pro', 'Platinum'],
+            datasets: [{
+                data: [
+                    revenueByPlan.basic / 100,
+                    revenueByPlan.pro / 100,
+                    revenueByPlan.platinum / 100
+                ],
+                backgroundColor: [
+                    'rgba(6, 182, 212, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        }, {
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const percentage = totalRevenue > 0 ? ((value / (totalRevenue / 100)) * 100).toFixed(1) : 0;
+                            return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ☁ CLOUDFLARE ANALYTICS
+    async loadCloudflareAnalytics() {
+        try {
+            console.log('☁ Loading Cloudflare Analytics...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-analytics?days=30`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare analytics unavailable');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                console.warn('⚠ Cloudflare returned error:', result.error);
+                return;
+            }
+            
+            this.cloudflareData = result.data;
+            
+            console.log('✅ Cloudflare analytics loaded:', this.cloudflareData);
+            
+            if (this.cloudflareData.overview) {
+                const overview = this.cloudflareData.overview;
+                
+                this.updateStat('cf-total-requests', overview.totalRequests?.toLocaleString() || '0');
+                this.updateStat('cf-total-bytes', this.formatBytes(overview.totalBytes || 0));
+                this.updateStat('cf-cached-requests', overview.totalCachedRequests?.toLocaleString() || '0');
+                this.updateStat('cf-cache-hit-rate', `${overview.cacheHitRate || 0}%`);
+                this.updateStat('cf-total-pageviews', overview.totalPageViews?.toLocaleString() || '0');
+                this.updateStat('cf-total-uniques', overview.totalUniques?.toLocaleString() || '0');
+                this.updateStat('cf-total-threats', overview.totalThreats?.toLocaleString() || '0');
+                
+                // Bandwidth saved by cache
+                const totalBytes = overview.totalBytes || 0;
+                const cachedBytes = overview.totalCachedBytes || 0;
+                const bandwidthSaved = this.formatBytes(cachedBytes);
+                this.updateStat('cf-bandwidth-saved', bandwidthSaved);
+                
+                // Requests by date chart
+                if (overview.requestsByDate) {
+                    this.createCloudflareRequestsChart(overview.requestsByDate);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Cloudflare analytics error:', error);
+        }
+    }
+
+    createCloudflareRequestsChart(requestsByDate) {
+        const labels = Object.keys(requestsByDate).sort();
+        const data = labels.map(date => requestsByDate[date]);
+        
+        this.createChart('cf-requests-chart', 'line', {
+            labels: labels.map(date => {
+                const d = new Date(date);
+                return `${d.getDate()}/${d.getMonth() + 1}`;
+            }),
+            datasets: [{
+                label: 'Daily Requests',
+                data: data,
+                borderColor: 'rgb(249, 115, 22)',
+                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3
+            }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        });
+    }
+
+    // 🌍 CLOUDFLARE GEO (WITH MAP!)
+    async loadCloudflareGeo() {
+        try {
+            console.log('🌍 Loading Cloudflare Geo...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-geo`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare geo unavailable');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.countries) {
+                console.warn('⚠ No geo data');
+                return;
+            }
+            
+            this.cloudflareGeo = result.countries;
+            
+            console.log('✅ Geo data loaded:', this.cloudflareGeo.length, 'countries');
+            
+            // Stats
+            const topCountry = this.cloudflareGeo.sort((a, b) => b.requests - a.requests)[0];
+            this.updateStat('cf-top-country', topCountry?.country || 'N/A');
+            this.updateStat('cf-top-country-requests', topCountry?.requests?.toLocaleString() || '0');
+            
+            // Create geo chart
+            this.createCloudflareGeoChart(this.cloudflareGeo);
+            
+            // Create interactive map
+            this.createGeoMap(this.cloudflareGeo);
+            
+        } catch (error) {
+            console.error('❌ Cloudflare geo error:', error);
+        }
+    }
+
+    createCloudflareGeoChart(countries) {
+        const sortedCountries = countries
+            .sort((a, b) => b.requests - a.requests)
+            .slice(0, 10);
+        
+        this.createChart('cf-geo-chart', 'bar', {
+            labels: sortedCountries.map(c => c.country),
+            datasets: [{
+                label: 'Requests by Country',
+                data: sortedCountries.map(c => c.requests),
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderRadius: 8
+            }]
+        }, {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        });
+    }
+
+    createGeoMap(countries) {
+        const mapContainer = document.getElementById('geo-map');
+        if (!mapContainer || typeof L === 'undefined') {
+            console.warn('⚠ Map container not found or Leaflet not loaded');
+            return;
+        }
+        
+        // Clear existing map
+        if (this.maps.geoMap) {
+            this.maps.geoMap.remove();
+        }
+        
+        // Create map
+        const map = L.map('geo-map').setView([20, 0], 2);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Country coordinates (comprehensive list)
+        const countryCoords = {
+            'United States': [37.09, -95.71],
+            'France': [46.23, 2.21],
+            'United Kingdom': [55.38, -3.44],
+            'Germany': [51.17, 10.45],
+            'Canada': [56.13, -106.35],
+            'Spain': [40.46, -3.75],
+            'Italy': [41.87, 12.57],
+            'Japan': [36.20, 138.25],
+            'Australia': [-25.27, 133.78],
+            'Brazil': [-14.24, -51.93],
+            'India': [20.59, 78.96],
+            'China': [35.86, 104.20],
+            'Mexico': [23.63, -102.55],
+            'Netherlands': [52.13, 5.29],
+            'Switzerland': [46.82, 8.23],
+            'Belgium': [50.50, 4.47],
+            'Sweden': [60.13, 18.64],
+            'Norway': [60.47, 8.47],
+            'Denmark': [56.26, 9.50],
+            'Poland': [51.92, 19.15],
+            'Austria': [47.52, 14.55],
+            'Portugal': [39.40, -8.22],
+            'Ireland': [53.41, -8.24],
+            'Finland': [61.92, 25.75],
+            'Russia': [61.52, 105.32],
+            'South Korea': [35.91, 127.77],
+            'Singapore': [1.35, 103.82],
+            'Hong Kong': [22.40, 114.11],
+            'Taiwan': [23.70, 120.96],
+            'Thailand': [15.87, 100.99],
+            'Vietnam': [14.06, 108.28],
+            'Indonesia': [-0.79, 113.92],
+            'Malaysia': [4.21, 101.98],
+            'Philippines': [12.88, 121.77],
+            'South Africa': [-30.56, 22.94],
+            'Argentina': [-38.42, -63.62],
+            'Chile': [-35.68, -71.54],
+            'Colombia': [4.57, -74.30],
+            'Peru': [-9.19, -75.02],
+            'Turkey': [38.96, 35.24],
+            'Saudi Arabia': [23.89, 45.08],
+            'UAE': [23.42, 53.85],
+            'Israel': [31.05, 34.85],
+            'Egypt': [26.82, 30.80],
+            'Nigeria': [9.08, 8.68],
+            'Kenya': [-0.02, 37.91],
+            'New Zealand': [-40.90, 174.89],
+            'Greece': [39.07, 21.82],
+            'Czech Republic': [49.82, 15.47],
+            'Romania': [45.94, 24.97],
+            'Hungary': [47.16, 19.50],
+            'Ukraine': [48.38, 31.17],
+            'Morocco': [31.79, -7.09],
+            'Pakistan': [30.38, 69.35],
+            'Bangladesh': [23.68, 90.36],
+            'Unknown': [0, 0]
+        };
+        
+        // Find max requests for scaling
+        const maxRequests = Math.max(...countries.map(c => c.requests));
+        
+        // Add markers
+        countries.forEach(country => {
+            const coords = countryCoords[country.country];
+            if (coords && coords[0] !== 0 && coords[1] !== 0) {
+                // Scale radius based on requests
+                const radius = Math.sqrt(country.requests / maxRequests) * 30 + 5;
+                
+                L.circleMarker(coords, {
+                    radius: radius,
+                    fillColor: '#10b981',
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                })
+                .bindPopup(`
+                    <div style="text-align: center;">
+                        <strong style="font-size: 14px;">${country.country}</strong><br>
+                        <span style="color: #10b981;">Requests: ${country.requests.toLocaleString()}</span><br>
+                        <span style="color: #6366f1;">Uniques: ${country.uniques?.toLocaleString() || 'N/A'}</span>
+                    </div>
+                `)
+                .addTo(map);
+            }
+        });
+        
+        this.maps.geoMap = map;
+        
+        console.log('✅ Geo map created with', countries.length, 'countries');
+    }
+
+    // 📱 CLOUDFLARE DEVICES
+    async loadCloudflareDevices() {
+        try {
+            console.log('📱 Loading Cloudflare Devices...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-devices`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare devices unavailable');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.devices) {
+                console.warn('⚠ No device data');
+                return;
+            }
+            
+            this.cloudflareDevices = result.devices;
+            
+            console.log('✅ Device data loaded:', this.cloudflareDevices);
+            
+            // Update stats
+            const totalRequests = this.cloudflareDevices.reduce((sum, d) => sum + d.requests, 0);
+            const mobileRequests = this.cloudflareDevices.find(d => d.type === 'mobile')?.requests || 0;
+            const desktopRequests = this.cloudflareDevices.find(d => d.type === 'desktop')?.requests || 0;
+            const tabletRequests = this.cloudflareDevices.find(d => d.type === 'tablet')?.requests || 0;
+            
+            this.updateStat('cf-mobile-percent', `${((mobileRequests / totalRequests) * 100).toFixed(1)}%`);
+            this.updateStat('cf-desktop-percent', `${((desktopRequests / totalRequests) * 100).toFixed(1)}%`);
+            this.updateStat('cf-tablet-percent', `${((tabletRequests / totalRequests) * 100).toFixed(1)}%`);
+            
+            // Chart
+            this.createChart('cf-devices-chart', 'doughnut', {
+                labels: this.cloudflareDevices.map(d => d.type.charAt(0).toUpperCase() + d.type.slice(1)),
+                datasets: [{
+                    data: this.cloudflareDevices.map(d => d.requests),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            }, {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Cloudflare devices error:', error);
+        }
+    }
+
+    // 📄 CLOUDFLARE PAGES
+    async loadCloudflarePages() {
+        try {
+            console.log('📄 Loading Cloudflare Pages...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-pages`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare pages unavailable');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.pages) {
+                console.warn('⚠ No page data');
+                return;
+            }
+            
+            this.cloudflarePages = result.pages;
+            
+            console.log('✅ Page data loaded:', this.cloudflarePages.length, 'pages');
+            
+            // Stats
+            const topPage = this.cloudflarePages.sort((a, b) => b.requests - a.requests)[0];
+            this.updateStat('cf-top-page', topPage?.path || '/');
+            this.updateStat('cf-top-page-views', topPage?.requests?.toLocaleString() || '0');
+            
+            // Chart
+            const sortedPages = this.cloudflarePages
+                .sort((a, b) => b.requests - a.requests)
+                .slice(0, 10);
+            
+            this.createChart('cf-pages-chart', 'bar', {
+                labels: sortedPages.map(p => {
+                    let name = p.path || '/';
+                    if (name.includes('.html')) name = name.replace('.html', '');
+                    if (name === '/') name = 'Home';
+                    if (name.length > 20) name = name.substring(0, 20) + '...';
+                    return name;
+                }),
+                datasets: [{
+                    label: 'Page Views',
+                    data: sortedPages.map(p => p.requests),
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            });
+            
+            // Table
+            this.displayPagesTable(this.cloudflarePages);
+            
+        } catch (error) {
+            console.error('❌ Cloudflare pages error:', error);
+        }
+    }
+
+    displayPagesTable(pages) {
+        const tbody = document.getElementById('cf-pages-table-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        const sortedPages = pages
+            .sort((a, b) => b.requests - a.requests)
+            .slice(0, 20);
+        
+        sortedPages.forEach((page, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${page.path}</td>
+                <td>${page.requests.toLocaleString()}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        if (sortedPages.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No page data available</td></tr>';
+        }
+    }
+
+    // 👥 CLOUDFLARE VISITORS
+    async loadCloudflareVisitors() {
+        try {
+            console.log('👥 Loading Cloudflare Visitors...');
+            
+            const response = await fetch(`${WORKER_URL}/cloudflare-visitors?days=30`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn('⚠ Cloudflare visitors unavailable');
+                return;
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success || !result.visitors) {
+                console.warn('⚠ No visitor data');
+                return;
+            }
+            
+            this.cloudflareVisitors = result.visitors;
+            
+            console.log('✅ Visitor data loaded:', this.cloudflareVisitors.length, 'visitors');
+            
+            // Stats
+            this.updateStat('cf-total-visitors', this.cloudflareVisitors.length);
+            this.updateStat('cf-total-visitor-requests', result.stats?.totalRequests?.toLocaleString() || '0');
+            
+            const avgRequestsPerVisitor = this.cloudflareVisitors.length > 0
+                ? (result.stats?.totalRequests / this.cloudflareVisitors.length).toFixed(1)
+                : 0;
+            this.updateStat('cf-avg-requests-per-visitor', avgRequestsPerVisitor);
+            
+            // Table
+            this.displayCloudflareVisitorsTable(this.cloudflareVisitors);
+            
+        } catch (error) {
+            console.error('❌ Cloudflare visitors error:', error);
+        }
+    }
+
+    displayCloudflareVisitorsTable(visitors) {
+        const tbody = document.getElementById('cf-visitors-table-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        const topVisitors = visitors
+            .sort((a, b) => b.requests - a.requests)
+            .slice(0, 50);
+        
+        topVisitors.forEach((visitor, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${visitor.ip}</td>
+                <td>${visitor.country}</td>
+                <td>${visitor.requests}</td>
+                <td>${visitor.city || 'Unknown'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        if (topVisitors.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No visitor data available</td></tr>';
+        }
+    }
+
+    // ========================================
+    // SECTION 2: INTERNAL ANALYTICS (FIREBASE)
     // ========================================
     
     async loadUsersStats() {
         try {
-            // 🔥 COMPLETE HISTORY (no limit)
+            console.log('👥 Loading users stats...');
+            
             const usersSnapshot = await this.db.collection('users').get();
             const totalUsers = usersSnapshot.size;
             
@@ -175,6 +913,7 @@ class AdminAnalyticsPro {
             let monthUsers = 0;
             let premiumUsers = 0;
             let activeUsers = 0;
+            let emailVerifiedUsers = 0;
             
             this.allUsersData = [];
             
@@ -188,6 +927,10 @@ class AdminAnalyticsPro {
                 
                 if (data.plan && data.plan !== 'free' && data.plan !== 'basic') {
                     premiumUsers++;
+                }
+                
+                if (data.emailVerified) {
+                    emailVerifiedUsers++;
                 }
                 
                 if (data.createdAt) {
@@ -210,15 +953,22 @@ class AdminAnalyticsPro {
             
             this.updateStat('active-users', activeUsers);
             this.updateStat('monthly-signups', monthUsers);
+            this.updateStat('email-verified-users', emailVerifiedUsers);
+            
+            const activeRate = totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(1) : 0;
+            this.updateStat('active-rate', `${activeRate}%`);
+            
+            console.log('✅ Users stats loaded:', totalUsers, 'total users');
             
         } catch (error) {
-            console.error('Error loading users stats:', error);
+            console.error('❌ Error loading users stats:', error);
         }
     }
 
     async loadVisitsStats() {
         try {
-            // 🔥 COMPLETE HISTORY
+            console.log('📊 Loading visits stats...');
+            
             const visitsSnapshot = await this.db.collection('analytics_visits').get();
             const totalVisits = visitsSnapshot.size;
             
@@ -232,6 +982,7 @@ class AdminAnalyticsPro {
             let weekVisits = 0;
             let uniqueVisitors = new Set();
             let anonymousVisits = 0;
+            let authenticatedVisits = 0;
             
             this.allVisitsData = [];
             
@@ -251,6 +1002,7 @@ class AdminAnalyticsPro {
                     
                     if (data.userId) {
                         uniqueVisitors.add(data.userId);
+                        authenticatedVisits++;
                     } else {
                         anonymousVisits++;
                     }
@@ -262,15 +1014,22 @@ class AdminAnalyticsPro {
             this.updateStat('week-visits', weekVisits.toLocaleString());
             this.updateStat('unique-visitors', uniqueVisitors.size.toLocaleString());
             this.updateStat('anonymous-visits', anonymousVisits.toLocaleString());
+            this.updateStat('authenticated-visits', authenticatedVisits.toLocaleString());
+            
+            const avgVisitsPerDay = weekVisits / 7;
+            this.updateStat('avg-visits-per-day', avgVisitsPerDay.toFixed(1));
+            
+            console.log('✅ Visits stats loaded:', totalVisits, 'total visits');
             
         } catch (error) {
-            console.error('Error loading visits stats:', error);
+            console.error('❌ Error loading visits stats:', error);
         }
     }
 
     async loadRevenueStats() {
         try {
-            // 🔥 COMPLETE HISTORY
+            console.log('💰 Loading revenue stats...');
+            
             const paymentsSnapshot = await this.db.collection('payments').get();
             
             let totalRevenue = 0;
@@ -319,16 +1078,24 @@ class AdminAnalyticsPro {
             this.updateStat('arr', `$${arr.toFixed(0)}`);
             this.updateStat('active-subscriptions', activeSubscriptions);
             
+            // ARPU (Average Revenue Per User)
+            const totalCustomers = this.allUsersData.length || 1;
+            const arpu = totalRevenue / totalCustomers;
+            this.updateStat('arpu', `$${arpu.toFixed(2)}`);
+            
             this.currentMRR = mrr;
             
+            console.log('✅ Revenue stats loaded: $', totalRevenue);
+            
         } catch (error) {
-            console.error('Error loading revenue stats:', error);
+            console.error('❌ Error loading revenue stats:', error);
         }
     }
 
     async loadEngagementStats() {
         try {
-            // 🔥 COMPLETE HISTORY (no limit)
+            console.log('⚡ Loading engagement stats...');
+            
             const activitySnapshot = await this.db.collection('analytics_activity').get();
             
             const weekAgo = new Date();
@@ -336,6 +1103,7 @@ class AdminAnalyticsPro {
             
             let weekActivity = 0;
             let userActions = {};
+            const actionTypes = {};
             
             this.allActivityData = [];
             
@@ -353,6 +1121,10 @@ class AdminAnalyticsPro {
                     if (data.userId) {
                         userActions[data.userId] = (userActions[data.userId] || 0) + 1;
                     }
+                    
+                    if (data.action) {
+                        actionTypes[data.action] = (actionTypes[data.action] || 0) + 1;
+                    }
                 }
             });
             
@@ -362,130 +1134,287 @@ class AdminAnalyticsPro {
             
             this.updateStat('week-activity', weekActivity.toLocaleString());
             this.updateStat('avg-actions', avgActionsPerUser);
+            this.updateStat('total-activity', this.allActivityData.length.toLocaleString());
+            
+            // Most popular action
+            const topAction = Object.entries(actionTypes)
+                .sort((a, b) => b[1] - a[1])[0];
+            this.updateStat('top-action', topAction ? topAction[0] : 'N/A');
+            
+            console.log('✅ Engagement stats loaded:', weekActivity, 'activities this week');
             
         } catch (error) {
-            console.error('Error loading engagement stats:', error);
+            console.error('❌ Error loading engagement stats:', error);
         }
     }
 
-    // ========================================
-    // 🆕 STRIPE API INTEGRATION
-    // ========================================
-    
-    async loadStripeMetrics() {
+    // 🆕 SESSION ANALYTICS
+    async loadSessionAnalytics() {
         try {
-            console.log('💳 Loading Stripe metrics in real-time...');
+            console.log('📊 Loading session analytics...');
             
-            const response = await fetch(`${WORKER_URL}/stripe-analytics`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
+            // Group visits by session
+            const sessions = {};
+            
+            this.allVisitsData.forEach(visit => {
+                const sessionId = visit.sessionId || visit.userId || `anon-${visit.ip || Math.random()}`;
+                
+                if (!sessions[sessionId]) {
+                    sessions[sessionId] = {
+                        id: sessionId,
+                        userId: visit.userId,
+                        pages: [],
+                        startTime: null,
+                        endTime: null,
+                        duration: 0,
+                        deviceType: this.detectDevice(visit.userAgent),
+                        country: visit.country
+                    };
+                }
+                
+                sessions[sessionId].pages.push({
+                    page: visit.page,
+                    timestamp: visit.timestamp ? visit.timestamp.toDate() : null
+                });
+                
+                if (visit.timestamp) {
+                    const time = visit.timestamp.toDate();
+                    if (!sessions[sessionId].startTime || time < sessions[sessionId].startTime) {
+                        sessions[sessionId].startTime = time;
+                    }
+                    if (!sessions[sessionId].endTime || time > sessions[sessionId].endTime) {
+                        sessions[sessionId].endTime = time;
+                    }
                 }
             });
             
-            if (!response.ok) {
-                console.warn('⚠ Unable to load Stripe data, using Firebase data');
-                return;
-            }
-            
-            const stripeData = await response.json();
-            this.stripeData = stripeData;
-            
-            console.log('✅ Stripe data loaded:', stripeData);
-            
-            if (stripeData.customers) {
-                this.updateStat('stripe-customers', stripeData.customers.total || 0);
-            }
-            
-            if (stripeData.subscriptions) {
-                this.updateStat('stripe-active-subs', stripeData.subscriptions.active || 0);
-                this.updateStat('stripe-trial-subs', stripeData.subscriptions.trialing || 0);
-            }
-            
-            if (stripeData.revenue) {
-                this.updateStat('stripe-mrr', `$${(stripeData.revenue.mrr / 100).toFixed(0)}`);
-                this.updateStat('stripe-total-revenue', `$${(stripeData.revenue.total / 100).toFixed(0)}`);
-            }
-            
-            if (stripeData.revenueByMonth) {
-                this.createStripeRevenueChart(stripeData.revenueByMonth);
-            }
-            
-        } catch (error) {
-            console.error('❌ Error loading Stripe metrics:', error);
-        }
-    }
-
-    createStripeRevenueChart(revenueByMonth) {
-        const labels = Object.keys(revenueByMonth).map(key => {
-            const [year, month] = key.split('-');
-            return `${month}/${year.slice(2)}`;
-        });
-        
-        const data = Object.values(revenueByMonth).map(val => val / 100);
-        
-        this.createChart('stripe-revenue-chart', 'line', {
-            labels: labels,
-            datasets: [{
-                label: 'Real Stripe Revenue ($)',
-                data: data,
-                borderColor: 'rgb(99, 102, 241)',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        });
-    }
-
-    // ========================================
-    // 🆕 CLOUDFLARE ANALYTICS INTEGRATION
-    // ========================================
-    
-    async loadCloudflareAnalytics() {
-        try {
-            console.log('☁ Loading Cloudflare Analytics...');
-            
-            const response = await fetch(`${WORKER_URL}/cloudflare-analytics?days=30`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
+            // Calculate durations
+            Object.values(sessions).forEach(session => {
+                if (session.startTime && session.endTime) {
+                    session.duration = (session.endTime - session.startTime) / 1000; // seconds
                 }
             });
             
-            if (!response.ok) {
-                console.warn('⚠ Unable to load Cloudflare analytics');
-                return;
-            }
+            this.sessionData = Object.values(sessions);
             
-            const result = await response.json();
+            // Stats
+            const totalSessions = this.sessionData.length;
+            const avgDuration = this.sessionData.reduce((sum, s) => sum + s.duration, 0) / totalSessions;
+            const avgPagesPerSession = this.sessionData.reduce((sum, s) => sum + s.pages.length, 0) / totalSessions;
             
-            if (!result.success) {
-                console.warn('⚠ Cloudflare analytics returned error:', result.error);
-                return;
-            }
+            // Filter valid sessions (duration > 0)
+            const validSessions = this.sessionData.filter(s => s.duration > 0);
+            const avgValidDuration = validSessions.length > 0
+                ? validSessions.reduce((sum, s) => sum + s.duration, 0) / validSessions.length
+                : 0;
             
-            this.cloudflareData = result.data;
+            this.updateStat('total-sessions', totalSessions.toLocaleString());
+            this.updateStat('avg-session-duration', `${(avgValidDuration / 60).toFixed(1)} min`);
+            this.updateStat('avg-pages-per-session', avgPagesPerSession.toFixed(1));
             
-            console.log('✅ Cloudflare analytics loaded:', this.cloudflareData);
+            // Longest session
+            const longestSession = this.sessionData.reduce((max, s) => s.duration > max.duration ? s : max, { duration: 0 });
+            this.updateStat('longest-session', `${(longestSession.duration / 60).toFixed(1)} min`);
             
-            // Update stats with Cloudflare data
-            if (this.cloudflareData.overview) {
-                const overview = this.cloudflareData.overview;
-                console.log('📊 Cloudflare overview:', overview);
-            }
+            console.log('✅ Session analytics loaded:', totalSessions, 'sessions');
             
         } catch (error) {
-            console.error('❌ Error loading Cloudflare analytics:', error);
+            console.error('❌ Session analytics error:', error);
         }
     }
 
+    // 🆕 BOUNCE RATE ANALYTICS
+    async loadBounceRateAnalytics() {
+        try {
+            console.log('📊 Loading bounce rate analytics...');
+            
+            const pageVisits = {};
+            const pageBounces = {};
+            
+            this.sessionData.forEach(session => {
+                const firstPage = session.pages[0]?.page;
+                
+                if (firstPage) {
+                    pageVisits[firstPage] = (pageVisits[firstPage] || 0) + 1;
+                    
+                    if (session.pages.length === 1) {
+                        pageBounces[firstPage] = (pageBounces[firstPage] || 0) + 1;
+                    }
+                }
+            });
+            
+            this.bounceRateData = {};
+            
+            Object.keys(pageVisits).forEach(page => {
+                const bounces = pageBounces[page] || 0;
+                const visits = pageVisits[page];
+                this.bounceRateData[page] = {
+                    visits: visits,
+                    bounces: bounces,
+                    bounceRate: ((bounces / visits) * 100).toFixed(1)
+                };
+            });
+            
+            // Overall bounce rate
+            const totalVisits = Object.values(pageVisits).reduce((a, b) => a + b, 0);
+            const totalBounces = Object.values(pageBounces).reduce((a, b) => a + b, 0);
+            const overallBounceRate = totalVisits > 0 ? ((totalBounces / totalVisits) * 100).toFixed(1) : 0;
+            
+            this.updateStat('overall-bounce-rate', `${overallBounceRate}%`);
+            
+            // Best and worst pages
+            const sortedByBounce = Object.entries(this.bounceRateData)
+                .sort((a, b) => parseFloat(a[1].bounceRate) - parseFloat(b[1].bounceRate));
+            
+            const bestPage = sortedByBounce[0];
+            const worstPage = sortedByBounce[sortedByBounce.length - 1];
+            
+            this.updateStat('best-bounce-page', bestPage ? bestPage[0] : 'N/A');
+            this.updateStat('best-bounce-rate', bestPage ? `${bestPage[1].bounceRate}%` : 'N/A');
+            this.updateStat('worst-bounce-page', worstPage ? worstPage[0] : 'N/A');
+            this.updateStat('worst-bounce-rate', worstPage ? `${worstPage[1].bounceRate}%` : 'N/A');
+            
+            // Chart
+            const sortedPages = Object.entries(this.bounceRateData)
+                .sort((a, b) => b[1].visits - a[1].visits)
+                .slice(0, 10);
+            
+            this.createChart('bounce-rate-chart', 'bar', {
+                labels: sortedPages.map(([page]) => {
+                    let name = page;
+                    if (name.includes('.html')) name = name.replace('.html', '');
+                    if (name.length > 20) name = name.substring(0, 20) + '...';
+                    return name;
+                }),
+                datasets: [{
+                    label: 'Bounce Rate (%)',
+                    data: sortedPages.map(([, data]) => parseFloat(data.bounceRate)),
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            });
+            
+            console.log('✅ Bounce rate analytics loaded');
+            
+        } catch (error) {
+            console.error('❌ Bounce rate analytics error:', error);
+        }
+    }
+
+    // 🆕 CONVERSION PATHS
+    async loadConversionPaths() {
+        try {
+            console.log('📊 Loading conversion paths...');
+            
+            const paths = {};
+            
+            this.sessionData.forEach(session => {
+                if (session.userId && session.pages.length > 0) {
+                    const path = session.pages.map(p => p.page).join(' → ');
+                    paths[path] = (paths[path] || 0) + 1;
+                }
+            });
+            
+            this.conversionPaths = Object.entries(paths)
+                .map(([path, count]) => ({ path, count }))
+                .sort((a, b) => b.count - a.count);
+            
+            // Stats
+            const uniquePaths = this.conversionPaths.length;
+            const mostCommonPath = this.conversionPaths[0];
+            
+            this.updateStat('unique-conversion-paths', uniquePaths);
+            this.updateStat('most-common-path', mostCommonPath ? mostCommonPath.path : 'N/A');
+            this.updateStat('most-common-path-count', mostCommonPath ? mostCommonPath.count : 0);
+            
+            // Display top paths
+            this.displayConversionPaths(this.conversionPaths.slice(0, 10));
+            
+            console.log('✅ Conversion paths loaded:', this.conversionPaths.length, 'unique paths');
+            
+        } catch (error) {
+            console.error('❌ Conversion paths error:', error);
+        }
+    }
+
+    displayConversionPaths(paths) {
+        const tbody = document.getElementById('conversion-paths-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        paths.forEach((path, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${path.path}</td>
+                <td>${path.count}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        if (paths.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No conversion paths available</td></tr>';
+        }
+    }
+
+    // 🆕 HEATMAP DATA
+    async loadHeatmapData() {
+        try {
+            console.log('🔥 Loading heatmap data...');
+            
+            const pageClicks = {};
+            
+            this.allActivityData.forEach(activity => {
+                if (activity.action === 'click' && activity.page) {
+                    const page = activity.page;
+                    if (!pageClicks[page]) {
+                        pageClicks[page] = 0;
+                    }
+                    pageClicks[page]++;
+                }
+            });
+            
+            this.heatmapData = pageClicks;
+            
+            // Most clicked page
+            const sortedPages = Object.entries(pageClicks)
+                .sort((a, b) => b[1] - a[1]);
+            
+            const mostClicked = sortedPages[0];
+            
+            this.updateStat('most-clicked-page', mostClicked ? mostClicked[0] : 'N/A');
+            this.updateStat('most-clicked-count', mostClicked ? mostClicked[1] : 0);
+            
+            console.log('✅ Heatmap data loaded');
+            
+        } catch (error) {
+            console.error('❌ Heatmap data error:', error);
+        }
+    }
+
+    detectDevice(userAgent) {
+        const ua = (userAgent || '').toLowerCase();
+        if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) return 'Mobile';
+        if (ua.includes('tablet') || ua.includes('ipad')) return 'Tablet';
+        return 'Desktop';
+    }
+
     // ========================================
-    // 📊 ADVANCED CHARTS
+    // CHARTS
     // ========================================
     
     async loadRegistrationsChart() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📈 Loading registrations chart...');
             
             const daysCounts = {};
             const today = new Date();
@@ -497,10 +1426,9 @@ class AdminAnalyticsPro {
                 daysCounts[key] = 0;
             }
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.createdAt) {
-                    const dateKey = data.createdAt.toDate().toISOString().split('T')[0];
+            this.allUsersData.forEach(user => {
+                if (user.createdAt) {
+                    const dateKey = user.createdAt.toDate().toISOString().split('T')[0];
                     if (daysCounts.hasOwnProperty(dateKey)) {
                         daysCounts[dateKey]++;
                     }
@@ -517,34 +1445,35 @@ class AdminAnalyticsPro {
             this.createChart('registrations-chart', 'line', {
                 labels: labels,
                 datasets: [{
-                    label: 'Registrations (last 90 days)',
+                    label: 'Daily Registrations',
                     data: data,
                     borderColor: 'rgb(102, 126, 234)',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 3
                 }]
+            }, {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             });
             
         } catch (error) {
-            console.error('Error loading registrations chart:', error);
+            console.error('❌ Error loading registrations chart:', error);
         }
     }
 
     async loadPlansChart() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📈 Loading plans chart...');
             
-            const planCounts = {
-                basic: 0,
-                pro: 0,
-                platinum: 0
-            };
+            const planCounts = { basic: 0, pro: 0, platinum: 0 };
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
-                const plan = data.plan || 'basic';
-                
+            this.allUsersData.forEach(user => {
+                const plan = user.plan || 'basic';
                 if (planCounts.hasOwnProperty(plan)) {
                     planCounts[plan]++;
                 }
@@ -562,16 +1491,23 @@ class AdminAnalyticsPro {
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
+            }, {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
             });
             
         } catch (error) {
-            console.error('Error loading plans chart:', error);
+            console.error('❌ Error loading plans chart:', error);
         }
     }
 
     async loadVisitsChart() {
         try {
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
+            console.log('📈 Loading visits chart...');
             
             const daysCounts = {};
             const today = new Date();
@@ -583,10 +1519,9 @@ class AdminAnalyticsPro {
                 daysCounts[key] = 0;
             }
             
-            visitsSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.timestamp) {
-                    const dateKey = data.timestamp.toDate().toISOString().split('T')[0];
+            this.allVisitsData.forEach(visit => {
+                if (visit.timestamp) {
+                    const dateKey = visit.timestamp.toDate().toISOString().split('T')[0];
                     if (daysCounts.hasOwnProperty(dateKey)) {
                         daysCounts[dateKey]++;
                     }
@@ -603,21 +1538,27 @@ class AdminAnalyticsPro {
             this.createChart('visits-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Daily visits (last 90 days)',
+                    label: 'Daily Visits',
                     data: data,
                     backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderRadius: 8
                 }]
+            }, {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             });
             
         } catch (error) {
-            console.error('Error loading visits chart:', error);
+            console.error('❌ Error loading visits chart:', error);
         }
     }
 
     async loadRevenueChart() {
         try {
-            const paymentsSnapshot = await this.db.collection('payments').get();
+            console.log('📈 Loading revenue chart...');
             
             const monthsRevenue = {};
             
@@ -628,13 +1569,12 @@ class AdminAnalyticsPro {
                 monthsRevenue[key] = 0;
             }
             
-            paymentsSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.createdAt) {
-                    const date = data.createdAt.toDate();
+            this.allPaymentsData.forEach(payment => {
+                if (payment.createdAt) {
+                    const date = payment.createdAt.toDate();
                     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                     if (monthsRevenue.hasOwnProperty(key)) {
-                        monthsRevenue[key] += parseFloat(data.amount) || 0;
+                        monthsRevenue[key] += parseFloat(payment.amount) || 0;
                     }
                 }
             });
@@ -649,21 +1589,32 @@ class AdminAnalyticsPro {
             this.createChart('revenue-chart', 'bar', {
                 labels: labels,
                 datasets: [{
-                    label: 'Revenue ($)',
+                    label: 'Monthly Revenue ($)',
                     data: data,
                     backgroundColor: 'rgba(67, 233, 123, 0.8)',
                     borderRadius: 8
                 }]
+            }, {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
             });
             
         } catch (error) {
-            console.error('Error loading revenue chart:', error);
+            console.error('❌ Error loading revenue chart:', error);
         }
     }
 
     async loadChurnChart() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📈 Loading churn chart...');
             
             const monthlyData = {};
             
@@ -671,30 +1622,20 @@ class AdminAnalyticsPro {
                 const date = new Date();
                 date.setMonth(date.getMonth() - i);
                 const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                monthlyData[key] = {
-                    new: 0,
-                    churned: 0,
-                    active: 0
-                };
+                monthlyData[key] = { new: 0, churned: 0 };
             }
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
-                
-                if (data.createdAt) {
-                    const date = data.createdAt.toDate();
+            this.allUsersData.forEach(user => {
+                if (user.createdAt) {
+                    const date = user.createdAt.toDate();
                     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                    if (monthlyData[key]) {
-                        monthlyData[key].new++;
-                    }
+                    if (monthlyData[key]) monthlyData[key].new++;
                 }
                 
-                if (data.canceledAt) {
-                    const date = data.canceledAt.toDate();
+                if (user.canceledAt) {
+                    const date = user.canceledAt.toDate();
                     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                    if (monthlyData[key]) {
-                        monthlyData[key].churned++;
-                    }
+                    if (monthlyData[key]) monthlyData[key].churned++;
                 }
             });
             
@@ -707,58 +1648,55 @@ class AdminAnalyticsPro {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'New',
+                        label: 'New Users',
                         data: Object.values(monthlyData).map(d => d.new),
                         borderColor: 'rgb(16, 185, 129)',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3
                     },
                     {
-                        label: 'Churned',
+                        label: 'Churned Users',
                         data: Object.values(monthlyData).map(d => d.churned),
                         borderColor: 'rgb(239, 68, 68)',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3
                     }
                 ]
             });
             
         } catch (error) {
-            console.error('Error loading churn chart:', error);
+            console.error('❌ Error loading churn chart:', error);
         }
     }
 
     async loadCohortChart() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📈 Loading cohort chart...');
             
             const cohorts = {};
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.createdAt) {
-                    const cohortMonth = data.createdAt.toDate().toISOString().slice(0, 7);
+            this.allUsersData.forEach(user => {
+                if (user.createdAt) {
+                    const cohortMonth = user.createdAt.toDate().toISOString().slice(0, 7);
                     
                     if (!cohorts[cohortMonth]) {
-                        cohorts[cohortMonth] = {
-                            total: 0,
-                            active: 0,
-                            premium: 0
-                        };
+                        cohorts[cohortMonth] = { total: 0, active: 0, premium: 0 };
                     }
                     
                     cohorts[cohortMonth].total++;
                     
-                    if (data.plan && data.plan !== 'basic' && data.plan !== 'free') {
+                    if (user.plan && user.plan !== 'basic' && user.plan !== 'free') {
                         cohorts[cohortMonth].premium++;
                     }
                     
                     const weekAgo = new Date();
                     weekAgo.setDate(weekAgo.getDate() - 7);
                     
-                    if (data.lastLogin && data.lastLogin.toDate() > weekAgo) {
+                    if (user.lastLogin && user.lastLogin.toDate() > weekAgo) {
                         cohorts[cohortMonth].active++;
                     }
                 }
@@ -775,404 +1713,100 @@ class AdminAnalyticsPro {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Total',
+                        label: 'Total Users',
                         data: sortedCohorts.map(key => cohorts[key].total),
                         backgroundColor: 'rgba(99, 102, 241, 0.6)'
                     },
                     {
-                        label: 'Active',
+                        label: 'Active Users',
                         data: sortedCohorts.map(key => cohorts[key].active),
                         backgroundColor: 'rgba(16, 185, 129, 0.6)'
                     },
                     {
-                        label: 'Premium',
+                        label: 'Premium Users',
                         data: sortedCohorts.map(key => cohorts[key].premium),
                         backgroundColor: 'rgba(139, 92, 246, 0.6)'
                     }
                 ]
             }, {
                 scales: {
-                    x: { stacked: false },
-                    y: { stacked: false }
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             });
             
         } catch (error) {
-            console.error('Error loading cohort chart:', error);
-        }
-    }
-
-    // 🆕 CLOUDFLARE-POWERED PAGES CHART
-    async loadPagesChart() {
-        try {
-            console.log('📄 Loading pages from Cloudflare...');
-            
-            const response = await fetch(`${WORKER_URL}/cloudflare-pages`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            if (!response.ok) {
-                console.warn('⚠ Cloudflare pages endpoint error, falling back to Firebase');
-                return this.loadPagesChartFirebase();
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success || !result.pages || result.pages.length === 0) {
-                console.warn('⚠ No Cloudflare pages data, falling back to Firebase');
-                return this.loadPagesChartFirebase();
-            }
-            
-            const sortedPages = result.pages
-                .sort((a, b) => b.requests - a.requests)
-                .slice(0, 10);
-            
-            const labels = sortedPages.map(p => {
-                let pageName = p.path || '/';
-                if (pageName.includes('.html')) {
-                    pageName = pageName.replace('.html', '');
-                }
-                if (pageName === '/') {
-                    pageName = 'Home';
-                }
-                return pageName;
-            });
-            
-            const data = sortedPages.map(p => p.requests);
-            
-            this.createChart('pages-chart', 'bar', {
-                labels: labels,
-                datasets: [{
-                    label: 'Page Views (Cloudflare)',
-                    data: data,
-                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                    borderRadius: 8
-                }]
-            }, {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false
-            });
-            
-            console.log('✅ Pages chart loaded from Cloudflare');
-            
-        } catch (error) {
-            console.error('Error loading Cloudflare pages:', error);
-            return this.loadPagesChartFirebase();
-        }
-    }
-
-    // Fallback: Firebase pages chart
-    async loadPagesChartFirebase() {
-        try {
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
-            
-            const pagesCounts = {};
-            
-            visitsSnapshot.forEach(doc => {
-                const data = doc.data();
-                const page = data.page || data.url || 'unknown';
-                
-                let pageName = page;
-                if (page.includes('/')) {
-                    pageName = page.split('/').pop() || page;
-                }
-                if (pageName.includes('.html')) {
-                    pageName = pageName.replace('.html', '');
-                }
-                
-                pagesCounts[pageName] = (pagesCounts[pageName] || 0) + 1;
-            });
-            
-            const sortedPages = Object.entries(pagesCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const labels = sortedPages.map(p => p[0]);
-            const data = sortedPages.map(p => p[1]);
-            
-            this.createChart('pages-chart', 'bar', {
-                labels: labels,
-                datasets: [{
-                    label: 'Page Views (Firebase)',
-                    data: data,
-                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                    borderRadius: 8
-                }]
-            }, {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false
-            });
-            
-        } catch (error) {
-            console.error('Error loading Firebase pages:', error);
-        }
-    }
-
-    // 🆕 CLOUDFLARE-POWERED DEVICE CHART
-    async loadDeviceChart() {
-        try {
-            console.log('📱 Loading devices from Cloudflare...');
-            
-            const response = await fetch(`${WORKER_URL}/cloudflare-devices`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            if (!response.ok) {
-                console.warn('⚠ Cloudflare devices endpoint error, falling back to Firebase');
-                return this.loadDeviceChartFirebase();
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success || !result.devices || result.devices.length === 0) {
-                console.warn('⚠ No Cloudflare devices data, falling back to Firebase');
-                return this.loadDeviceChartFirebase();
-            }
-            
-            const deviceMap = {
-                mobile: 0,
-                tablet: 0,
-                desktop: 0
-            };
-            
-            result.devices.forEach(device => {
-                const type = (device.type || 'desktop').toLowerCase();
-                if (deviceMap.hasOwnProperty(type)) {
-                    deviceMap[type] += device.requests;
-                } else {
-                    deviceMap['desktop'] += device.requests;
-                }
-            });
-            
-            this.createChart('device-chart', 'doughnut', {
-                labels: ['Mobile', 'Tablet', 'Desktop'],
-                datasets: [{
-                    data: [deviceMap.mobile, deviceMap.tablet, deviceMap.desktop],
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)'
-                    ]
-                }]
-            });
-            
-            console.log('✅ Device chart loaded from Cloudflare');
-            
-        } catch (error) {
-            console.error('Error loading Cloudflare devices:', error);
-            return this.loadDeviceChartFirebase();
-        }
-    }
-
-    // Fallback: Firebase device chart
-    async loadDeviceChartFirebase() {
-        try {
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
-            
-            const devices = {
-                mobile: 0,
-                tablet: 0,
-                desktop: 0
-            };
-            
-            visitsSnapshot.forEach(doc => {
-                const data = doc.data();
-                const ua = (data.userAgent || '').toLowerCase();
-                
-                if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
-                    devices.mobile++;
-                } else if (ua.includes('tablet') || ua.includes('ipad')) {
-                    devices.tablet++;
-                } else {
-                    devices.desktop++;
-                }
-            });
-            
-            this.createChart('device-chart', 'doughnut', {
-                labels: ['Mobile', 'Tablet', 'Desktop'],
-                datasets: [{
-                    data: [devices.mobile, devices.tablet, devices.desktop],
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)'
-                    ]
-                }]
-            });
-            
-        } catch (error) {
-            console.error('Error loading Firebase devices:', error);
-        }
-    }
-
-    // 🆕 CLOUDFLARE-POWERED GEOGRAPHY CHART
-    async loadGeographyChart() {
-        try {
-            console.log('🌍 Loading geography from Cloudflare...');
-            
-            const response = await fetch(`${WORKER_URL}/cloudflare-geo`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            if (!response.ok) {
-                console.warn('⚠ Cloudflare geo endpoint error, falling back to Firebase');
-                return this.loadGeographyChartFirebase();
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success || !result.countries || result.countries.length === 0) {
-                console.warn('⚠ No Cloudflare geo data, falling back to Firebase');
-                return this.loadGeographyChartFirebase();
-            }
-            
-            const sortedCountries = result.countries
-                .sort((a, b) => b.requests - a.requests)
-                .slice(0, 10);
-            
-            const labels = sortedCountries.map(c => c.country || 'Unknown');
-            const data = sortedCountries.map(c => c.requests);
-            
-            this.createChart('geography-chart', 'bar', {
-                labels: labels,
-                datasets: [{
-                    label: 'Visits by Country (Cloudflare)',
-                    data: data,
-                    backgroundColor: 'rgba(245, 158, 11, 0.8)',
-                    borderRadius: 8
-                }]
-            }, {
-                indexAxis: 'y'
-            });
-            
-            console.log('✅ Geography chart loaded from Cloudflare');
-            
-        } catch (error) {
-            console.error('Error loading Cloudflare geo:', error);
-            return this.loadGeographyChartFirebase();
-        }
-    }
-
-    // Fallback: Firebase geography chart
-    async loadGeographyChartFirebase() {
-        try {
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
-            const countries = {};
-            
-            visitsSnapshot.forEach(doc => {
-                const data = doc.data();
-                const country = data.country || 'Unknown';
-                countries[country] = (countries[country] || 0) + 1;
-            });
-            
-            const sortedCountries = Object.entries(countries)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const labels = sortedCountries.map(c => c[0]);
-            const data = sortedCountries.map(c => c[1]);
-            
-            this.createChart('geography-chart', 'bar', {
-                labels: labels,
-                datasets: [{
-                    label: 'Visits by Country (Firebase)',
-                    data: data,
-                    backgroundColor: 'rgba(245, 158, 11, 0.8)',
-                    borderRadius: 8
-                }]
-            }, {
-                indexAxis: 'y'
-            });
-            
-        } catch (error) {
-            console.error('Error loading Firebase geo:', error);
+            console.error('❌ Error loading cohort chart:', error);
         }
     }
 
     // ========================================
-    // 📋 ADVANCED TABLES
+    // TABLES
     // ========================================
     
     async loadRecentUsers() {
         try {
-            const usersSnapshot = await this.db.collection('users')
-                .orderBy('createdAt', 'desc')
-                .limit(10)
-                .get();
+            console.log('📋 Loading recent users...');
             
             const tbody = document.getElementById('recent-users-body');
             if (!tbody) return;
             
             tbody.innerHTML = '';
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
+            const sortedUsers = this.allUsersData
+                .filter(u => u.createdAt)
+                .sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate())
+                .slice(0, 10);
+            
+            sortedUsers.forEach(user => {
                 const row = document.createElement('tr');
                 
-                const createdAt = data.createdAt ? data.createdAt.toDate().toLocaleDateString('en-US') : 'N/A';
-                const plan = data.plan || 'basic';
+                const createdAt = user.createdAt.toDate().toLocaleDateString('en-US');
+                const plan = user.plan || 'basic';
                 
                 row.innerHTML = `
-                    <td>${data.email || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
                     <td><span class="plan-badge plan-${plan}">${plan}</span></td>
                     <td>${createdAt}</td>
-                    <td>${data.subscriptionStatus || 'inactive'}</td>
+                    <td>${user.subscriptionStatus || 'inactive'}</td>
                 `;
                 
                 tbody.appendChild(row);
             });
             
+            if (sortedUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users available</td></tr>';
+            }
+            
         } catch (error) {
-            console.error('Error loading recent users:', error);
+            console.error('❌ Error loading recent users:', error);
         }
     }
 
     async loadRecentActivity() {
         try {
-            const activitySnapshot = await this.db.collection('analytics_activity').get();
+            console.log('📋 Loading recent activity...');
             
             const tbody = document.getElementById('recent-activity-body');
             if (!tbody) return;
             
             tbody.innerHTML = '';
             
-            const activities = [];
+            const activities = this.allActivityData
+                .filter(a => a.timestamp)
+                .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
+                .slice(0, 20);
             
-            activitySnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.timestamp) {
-                    activities.push({
-                        id: doc.id,
-                        ...data,
-                        timestampDate: data.timestamp.toDate()
-                    });
-                }
-            });
-            
-            activities.sort((a, b) => b.timestampDate - a.timestampDate);
-            
-            const recentActivities = activities.slice(0, 20);
-            
-            if (recentActivities.length === 0) {
+            if (activities.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No recent activity</td></tr>';
                 return;
             }
             
-            recentActivities.forEach(activity => {
+            activities.forEach(activity => {
                 const row = document.createElement('tr');
                 
-                const timestamp = activity.timestampDate.toLocaleString('en-US');
+                const timestamp = activity.timestamp.toDate().toLocaleString('en-US');
                 
                 row.innerHTML = `
                     <td>${activity.userId ? activity.userId.substring(0, 8) + '...' : 'Anonymous'}</td>
@@ -1184,37 +1818,28 @@ class AdminAnalyticsPro {
                 tbody.appendChild(row);
             });
             
-            console.log(`✅ ${recentActivities.length} activities displayed`);
-            
         } catch (error) {
-            console.error('Error loading recent activity:', error);
-            const tbody = document.getElementById('recent-activity-body');
-            if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Loading error</td></tr>';
-            }
+            console.error('❌ Error loading recent activity:', error);
         }
     }
 
     async loadTopUsers() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📋 Loading top users...');
             
             const usersData = [];
             
-            for (const doc of usersSnapshot.docs) {
-                const userData = doc.data();
-                
+            for (const user of this.allUsersData) {
                 const simulationsSnapshot = await this.db
                     .collection('users')
-                    .doc(doc.id)
+                    .doc(user.id)
                     .collection('simulations')
                     .get();
                 
                 usersData.push({
-                    email: userData.email,
-                    plan: userData.plan || 'basic',
-                    simulations: simulationsSnapshot.size,
-                    createdAt: userData.createdAt
+                    email: user.email,
+                    plan: user.plan || 'basic',
+                    simulations: simulationsSnapshot.size
                 });
             }
             
@@ -1236,57 +1861,57 @@ class AdminAnalyticsPro {
                 tbody.appendChild(row);
             });
             
+            if (usersData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users available</td></tr>';
+            }
+            
         } catch (error) {
-            console.error('Error loading top users:', error);
+            console.error('❌ Error loading top users:', error);
         }
     }
 
     async loadUserSimulations() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
+            console.log('📋 Loading user simulations...');
             
             let totalSimulations = 0;
-            const simulationsByUser = {};
             
-            for (const doc of usersSnapshot.docs) {
+            for (const user of this.allUsersData) {
                 const simsSnapshot = await this.db
                     .collection('users')
-                    .doc(doc.id)
+                    .doc(user.id)
                     .collection('simulations')
                     .get();
                 
                 totalSimulations += simsSnapshot.size;
-                simulationsByUser[doc.id] = simsSnapshot.size;
             }
             
-            const avgSimulations = usersSnapshot.size > 0
-                ? (totalSimulations / usersSnapshot.size).toFixed(1)
+            const avgSimulations = this.allUsersData.length > 0
+                ? (totalSimulations / this.allUsersData.length).toFixed(1)
                 : 0;
             
             this.updateStat('total-simulations', totalSimulations.toLocaleString());
             this.updateStat('avg-simulations', avgSimulations);
             
         } catch (error) {
-            console.error('Error loading simulations:', error);
+            console.error('❌ Error loading simulations:', error);
         }
     }
 
     async loadConversionFunnel() {
         try {
-            const usersSnapshot = await this.db.collection('users').get();
-            const paymentsSnapshot = await this.db.collection('payments').get();
+            console.log('📋 Loading conversion funnel...');
             
-            let registered = usersSnapshot.size;
+            let registered = this.allUsersData.length;
             let emailVerified = 0;
             let firstLogin = 0;
             let trialStarted = 0;
-            let converted = paymentsSnapshot.size;
+            let converted = this.allPaymentsData.length;
             
-            usersSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.emailVerified) emailVerified++;
-                if (data.lastLogin) firstLogin++;
-                if (data.trialEnds) trialStarted++;
+            this.allUsersData.forEach(user => {
+                if (user.emailVerified) emailVerified++;
+                if (user.lastLogin) firstLogin++;
+                if (user.trialEnds) trialStarted++;
             });
             
             const tbody = document.getElementById('funnel-body');
@@ -1301,41 +1926,39 @@ class AdminAnalyticsPro {
                 <tr>
                     <td>Email Verified</td>
                     <td>${emailVerified}</td>
-                    <td>${((emailVerified / registered) * 100).toFixed(1)}%</td>
+                    <td>${registered > 0 ? ((emailVerified / registered) * 100).toFixed(1) : 0}%</td>
                 </tr>
                 <tr>
                     <td>First Login</td>
                     <td>${firstLogin}</td>
-                    <td>${((firstLogin / registered) * 100).toFixed(1)}%</td>
+                    <td>${registered > 0 ? ((firstLogin / registered) * 100).toFixed(1) : 0}%</td>
                 </tr>
                 <tr>
                     <td>Trial Started</td>
                     <td>${trialStarted}</td>
-                    <td>${((trialStarted / registered) * 100).toFixed(1)}%</td>
+                    <td>${registered > 0 ? ((trialStarted / registered) * 100).toFixed(1) : 0}%</td>
                 </tr>
                 <tr class="conversion-row">
                     <td><strong>Paid Conversion</strong></td>
                     <td><strong>${converted}</strong></td>
-                    <td><strong>${((converted / registered) * 100).toFixed(1)}%</strong></td>
+                    <td><strong>${registered > 0 ? ((converted / registered) * 100).toFixed(1) : 0}%</strong></td>
                 </tr>
             `;
             
         } catch (error) {
-            console.error('Error loading funnel:', error);
+            console.error('❌ Error loading funnel:', error);
         }
     }
 
     async loadLTVAnalysis() {
         try {
-            const paymentsSnapshot = await this.db.collection('payments').get();
+            console.log('📋 Loading LTV analysis...');
             
             const userPayments = {};
             
-            paymentsSnapshot.forEach(doc => {
-                const data = doc.data();
-                const userId = data.userId || 'unknown';
-                const amount = parseFloat(data.amount) || 0;
-                
+            this.allPaymentsData.forEach(payment => {
+                const userId = payment.userId || 'unknown';
+                const amount = parseFloat(payment.amount) || 0;
                 userPayments[userId] = (userPayments[userId] || 0) + amount;
             });
             
@@ -1345,103 +1968,46 @@ class AdminAnalyticsPro {
                 : 0;
             
             const maxLTV = ltvValues.length > 0 ? Math.max(...ltvValues).toFixed(2) : 0;
+            const minLTV = ltvValues.length > 0 ? Math.min(...ltvValues).toFixed(2) : 0;
             
             this.updateStat('avg-ltv', `$${avgLTV}`);
             this.updateStat('max-ltv', `$${maxLTV}`);
+            this.updateStat('min-ltv', `$${minLTV}`);
             
         } catch (error) {
-            console.error('Error loading LTV:', error);
+            console.error('❌ Error loading LTV:', error);
         }
     }
 
     // ========================================
-    // 🆕 NON-CUSTOMER VISITORS (CLOUDFLARE)
+    // NON-CUSTOMER VISITORS
     // ========================================
     
     async loadNonCustomerVisitors() {
         try {
-            console.log('👥 Loading non-customer visitors from Cloudflare...');
+            console.log('👥 Loading non-customer visitors...');
             
-            const response = await fetch(`${WORKER_URL}/cloudflare-visitors?days=30`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            if (!response.ok) {
-                console.warn('⚠ Unable to load Cloudflare visitors, using Firebase fallback');
-                return this.loadNonCustomerVisitorsFirebase();
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success || !result.visitors) {
-                console.warn('⚠ No Cloudflare visitors data, using Firebase fallback');
-                return this.loadNonCustomerVisitorsFirebase();
-            }
-            
-            this.nonCustomerVisitors = result.visitors.map(visitor => ({
-                id: visitor.ip,
-                ip: visitor.ip,
-                country: visitor.country || 'Unknown',
-                visits: visitor.requests,
-                pages: [],
-                devices: [],
-                firstVisit: null,
-                lastVisit: null
-            }));
-            
-            console.log(`✅ ${this.nonCustomerVisitors.length} non-customer visitors loaded from Cloudflare`);
-            console.log(`📊 Total requests: ${result.stats?.totalRequests || 0}`);
-            
-            // Update UI stats
-            this.updateStat('total-non-customers', this.nonCustomerVisitors.length);
-            this.updateStat('total-anonymous-visits', result.stats?.totalRequests || 0);
-            
-            // Display table
-            this.displayNonCustomerVisitors();
-            
-            // Create charts
-            this.createNonCustomerCharts();
-            
-        } catch (error) {
-            console.error('❌ Error loading Cloudflare visitors:', error);
-            return this.loadNonCustomerVisitorsFirebase();
-        }
-    }
-
-    // Fallback: Firebase non-customer visitors
-    async loadNonCustomerVisitorsFirebase() {
-        try {
-            console.log('👥 Loading non-customer visitors from Firebase (fallback)...');
-            
-            const usersSnapshot = await this.db.collection('users').get();
             const customerIds = new Set();
-            usersSnapshot.forEach(doc => customerIds.add(doc.id));
-            
-            const visitsSnapshot = await this.db.collection('analytics_visits').get();
+            this.allUsersData.forEach(user => customerIds.add(user.id));
             
             const anonymousVisitors = {};
             let totalAnonymousVisits = 0;
             
-            visitsSnapshot.forEach(doc => {
-                const data = doc.data();
-                
-                const isNonCustomer = !data.userId || !customerIds.has(data.userId);
+            this.allVisitsData.forEach(visit => {
+                const isNonCustomer = !visit.userId || !customerIds.has(visit.userId);
                 
                 if (isNonCustomer) {
                     totalAnonymousVisits++;
                     
-                    const visitorId = data.sessionId || data.ip || 'unknown';
+                    const visitorId = visit.sessionId || visit.ip || `anon-${Math.random()}`;
                     
                     if (!anonymousVisitors[visitorId]) {
                         anonymousVisitors[visitorId] = {
                             id: visitorId,
-                            ip: data.ip || 'N/A',
-                            country: data.country || 'Unknown',
-                            firstVisit: data.timestamp ? data.timestamp.toDate() : null,
-                            lastVisit: data.timestamp ? data.timestamp.toDate() : null,
+                            ip: visit.ip || 'N/A',
+                            country: visit.country || 'Unknown',
+                            firstVisit: visit.timestamp ? visit.timestamp.toDate() : null,
+                            lastVisit: visit.timestamp ? visit.timestamp.toDate() : null,
                             visits: 0,
                             pages: [],
                             devices: new Set(),
@@ -1452,12 +2018,12 @@ class AdminAnalyticsPro {
                     const visitor = anonymousVisitors[visitorId];
                     visitor.visits++;
                     
-                    if (data.page) visitor.pages.push(data.page);
-                    if (data.userAgent) visitor.devices.add(this.detectDevice(data.userAgent));
-                    if (data.referrer) visitor.sources.add(data.referrer);
+                    if (visit.page) visitor.pages.push(visit.page);
+                    if (visit.userAgent) visitor.devices.add(this.detectDevice(visit.userAgent));
+                    if (visit.referrer) visitor.sources.add(visit.referrer);
                     
-                    if (data.timestamp) {
-                        const visitDate = data.timestamp.toDate();
+                    if (visit.timestamp) {
+                        const visitDate = visit.timestamp.toDate();
                         if (!visitor.firstVisit || visitDate < visitor.firstVisit) {
                             visitor.firstVisit = visitDate;
                         }
@@ -1475,25 +2041,23 @@ class AdminAnalyticsPro {
             
             this.nonCustomerVisitors = Object.values(anonymousVisitors);
             
-            console.log(`✅ ${this.nonCustomerVisitors.length} non-customer visitors detected (Firebase)`);
-            console.log(`📊 Total: ${totalAnonymousVisits} anonymous visits`);
+            console.log(`✅ ${this.nonCustomerVisitors.length} non-customer visitors detected`);
             
             this.updateStat('total-non-customers', this.nonCustomerVisitors.length);
             this.updateStat('total-anonymous-visits', totalAnonymousVisits);
+            
+            // Conversion rate (non-customers who became customers)
+            const conversionRate = this.allUsersData.length > 0
+                ? ((this.allUsersData.length / (this.allUsersData.length + this.nonCustomerVisitors.length)) * 100).toFixed(1)
+                : 0;
+            this.updateStat('visitor-to-customer-rate', `${conversionRate}%`);
             
             this.displayNonCustomerVisitors();
             this.createNonCustomerCharts();
             
         } catch (error) {
-            console.error('❌ Error loading Firebase visitors:', error);
+            console.error('❌ Error loading non-customer visitors:', error);
         }
-    }
-
-    detectDevice(userAgent) {
-        const ua = (userAgent || '').toLowerCase();
-        if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) return 'Mobile';
-        if (ua.includes('tablet') || ua.includes('ipad')) return 'Tablet';
-        return 'Desktop';
     }
 
     displayNonCustomerVisitors() {
@@ -1506,14 +2070,15 @@ class AdminAnalyticsPro {
             .sort((a, b) => b.visits - a.visits)
             .slice(0, 50);
         
-        sortedVisitors.forEach(visitor => {
+        sortedVisitors.forEach((visitor, index) => {
             const row = document.createElement('tr');
             
             const lastVisit = visitor.lastVisit ? visitor.lastVisit.toLocaleDateString('en-US') : 'N/A';
             const pagesVisited = visitor.pages ? new Set(visitor.pages).size : 0;
-            const devices = visitor.devices ? (Array.isArray(visitor.devices) ? visitor.devices.join(', ') : 'N/A') : 'N/A';
+            const devices = visitor.devices ? visitor.devices.join(', ') : 'N/A';
             
             row.innerHTML = `
+                <td>${index + 1}</td>
                 <td>${visitor.ip}</td>
                 <td>${visitor.country}</td>
                 <td>${visitor.visits}</td>
@@ -1526,7 +2091,7 @@ class AdminAnalyticsPro {
         });
         
         if (sortedVisitors.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No non-customer visitors</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No non-customer visitors</td></tr>';
         }
     }
 
@@ -1544,18 +2109,23 @@ class AdminAnalyticsPro {
         this.createChart('non-customer-countries-chart', 'bar', {
             labels: sortedCountries.map(c => c[0]),
             datasets: [{
-                label: 'Non-customer visitors by country',
+                label: 'Non-customer Visitors',
                 data: sortedCountries.map(c => c[1]),
                 backgroundColor: 'rgba(249, 115, 22, 0.8)',
                 borderRadius: 8
             }]
         }, {
-            indexAxis: 'y'
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
         });
     }
 
     // ========================================
-    // 🆕 POTENTIAL CUSTOMERS (NEW SECTION)
+    // POTENTIAL CUSTOMERS
     // ========================================
     
     async loadPotentialCustomers() {
@@ -1589,7 +2159,7 @@ class AdminAnalyticsPro {
                 score += Math.min(visitedStrategic * 5, 15);
                 
                 // Factor 5: Multi-device = engagement (max 10 points)
-                const deviceCount = visitor.devices ? (Array.isArray(visitor.devices) ? visitor.devices.length : 0) : 0;
+                const deviceCount = visitor.devices ? visitor.devices.length : 0;
                 score += Math.min(deviceCount * 5, 10);
                 
                 // Potential category
@@ -1618,6 +2188,11 @@ class AdminAnalyticsPro {
             this.updateStat('hot-leads', hotLeads);
             this.updateStat('warm-leads', warmLeads);
             this.updateStat('cold-leads', coldLeads);
+            
+            const avgScore = this.potentialCustomers.length > 0
+                ? (this.potentialCustomers.reduce((sum, c) => sum + c.score, 0) / this.potentialCustomers.length).toFixed(1)
+                : 0;
+            this.updateStat('avg-lead-score', avgScore);
             
             this.displayPotentialCustomers();
             this.createPotentialCustomersChart();
@@ -1650,6 +2225,7 @@ class AdminAnalyticsPro {
                 <td>${lead.country}</td>
                 <td>${lead.visits}</td>
                 <td>${lead.uniquePages}</td>
+                <td>${lead.strategicPages}</td>
                 <td style="font-weight: bold; color: ${scoreColor};">${lead.score}</td>
                 <td>${lead.category}</td>
                 <td>${lastVisit}</td>
@@ -1659,7 +2235,7 @@ class AdminAnalyticsPro {
         });
         
         if (topLeads.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No potential customers detected</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No potential customers detected</td></tr>';
         }
     }
 
@@ -1683,7 +2259,7 @@ class AdminAnalyticsPro {
         this.createChart('potential-customers-chart', 'bar', {
             labels: Object.keys(scoreBuckets),
             datasets: [{
-                label: 'Distribution of potential scores',
+                label: 'Lead Score Distribution',
                 data: Object.values(scoreBuckets),
                 backgroundColor: [
                     'rgba(239, 68, 68, 0.8)',
@@ -1694,11 +2270,17 @@ class AdminAnalyticsPro {
                 ],
                 borderRadius: 8
             }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
         });
     }
 
     // ========================================
-    // 🆕 ML PREDICTIONS
+    // ML PREDICTIONS
     // ========================================
     
     async loadMLPredictions() {
@@ -1762,8 +2344,6 @@ class AdminAnalyticsPro {
     }
 
     async predictChurn() {
-        const usersSnapshot = await this.db.collection('users').get();
-        
         const now = new Date();
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -1771,13 +2351,11 @@ class AdminAnalyticsPro {
         let inactiveUsers = 0;
         let totalPremiumUsers = 0;
         
-        usersSnapshot.forEach(doc => {
-            const data = doc.data();
-            
-            if (data.plan && data.plan !== 'basic' && data.plan !== 'free') {
+        this.allUsersData.forEach(user => {
+            if (user.plan && user.plan !== 'basic' && user.plan !== 'free') {
                 totalPremiumUsers++;
                 
-                if (!data.lastLogin || data.lastLogin.toDate() < thirtyDaysAgo) {
+                if (!user.lastLogin || user.lastLogin.toDate() < thirtyDaysAgo) {
                     inactiveUsers++;
                 }
             }
@@ -1792,16 +2370,13 @@ class AdminAnalyticsPro {
     }
 
     async predictLTV() {
-        const paymentsSnapshot = await this.db.collection('payments').get();
-        
         const userPayments = {};
         let totalRevenue = 0;
         let totalUsers = 0;
         
-        paymentsSnapshot.forEach(doc => {
-            const data = doc.data();
-            const userId = data.userId || 'unknown';
-            const amount = parseFloat(data.amount) || 0;
+        this.allPaymentsData.forEach(payment => {
+            const userId = payment.userId || 'unknown';
+            const amount = parseFloat(payment.amount) || 0;
             
             if (!userPayments[userId]) {
                 userPayments[userId] = 0;
@@ -1813,21 +2388,18 @@ class AdminAnalyticsPro {
         });
         
         const currentLTV = totalUsers > 0 ? totalRevenue / totalUsers : 0;
-        const projectedLTV = currentLTV * 1.1;
+        const projectedLTV = currentLTV * 1.15; // 15% growth projection
         
         return projectedLTV;
     }
 
     async predictMRR() {
-        const paymentsSnapshot = await this.db.collection('payments').get();
-        
         const monthlyRevenue = {};
         
-        paymentsSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.createdAt) {
-                const monthKey = data.createdAt.toDate().toISOString().slice(0, 7);
-                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (parseFloat(data.amount) || 0);
+        this.allPaymentsData.forEach(payment => {
+            if (payment.createdAt) {
+                const monthKey = payment.createdAt.toDate().toISOString().slice(0, 7);
+                monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (parseFloat(payment.amount) || 0);
             }
         });
         
@@ -1838,6 +2410,7 @@ class AdminAnalyticsPro {
             return this.currentMRR || 0;
         }
         
+        // Linear regression
         const n = revenues.length;
         const sumX = (n * (n - 1)) / 2;
         const sumY = revenues.reduce((a, b) => a + b, 0);
@@ -1847,14 +2420,14 @@ class AdminAnalyticsPro {
         const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
         const intercept = (sumY - slope * sumX) / n;
         
-        const futureMonth = n + 3;
+        const futureMonth = n + 3; // 3 months ahead
         const predictedMRR = slope * futureMonth + intercept;
         
         return Math.max(predictedMRR, 0);
     }
 
     // ========================================
-    // 🔔 ALERTS
+    // ALERTS
     // ========================================
     
     async checkAlerts() {
@@ -1879,7 +2452,7 @@ class AdminAnalyticsPro {
                 console.log(`⚠ ${alerts.length} alert(s) detected:`, alerts);
                 await this.sendAlertEmail(alerts);
             } else {
-                console.log('✅ No alerts - all good');
+                console.log('✅ No alerts - all metrics are healthy');
             }
             
         } catch (error) {
@@ -1888,9 +2461,7 @@ class AdminAnalyticsPro {
     }
 
     async checkMRRDrop() {
-        const paymentsSnapshot = await this.db.collection('payments')
-            .where('status', 'in', ['active', 'trialing'])
-            .get();
+        if (!this.allPaymentsData || this.allPaymentsData.length === 0) return null;
         
         const now = new Date();
         const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -1904,12 +2475,11 @@ class AdminAnalyticsPro {
         
         const planPrices = { basic: 0, pro: 29.99, platinum: 99.99 };
         
-        paymentsSnapshot.forEach(doc => {
-            const data = doc.data();
-            const price = planPrices[data.plan] || 0;
+        this.allPaymentsData.forEach(payment => {
+            const price = planPrices[payment.plan] || 0;
             
-            if (data.createdAt) {
-                const month = data.createdAt.toDate().toISOString().slice(0, 7);
+            if (payment.createdAt) {
+                const month = payment.createdAt.toDate().toISOString().slice(0, 7);
                 if (month === thisMonth) currentMRR += price;
                 if (month === lastMonth) lastMonthMRR += price;
             }
@@ -1922,7 +2492,7 @@ class AdminAnalyticsPro {
                 return {
                     type: 'MRR_DROP',
                     severity: 'high',
-                    message: `MRR dropped by ${dropPercent.toFixed(1)}%`,
+                    message: `MRR dropped by ${dropPercent.toFixed(1)}% (from $${lastMonthMRR.toFixed(0)} to $${currentMRR.toFixed(0)})`,
                     data: {
                         currentMRR: currentMRR.toFixed(2),
                         lastMonthMRR: lastMonthMRR.toFixed(2),
@@ -1942,7 +2512,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'HIGH_CHURN',
                 severity: 'medium',
-                message: `High churn rate: ${churnPrediction.risk.toFixed(1)}%`,
+                message: `High churn rate detected: ${churnPrediction.risk.toFixed(1)}% (${churnPrediction.value} inactive users)`,
                 data: {
                     churnRate: churnPrediction.risk.toFixed(1),
                     affectedUsers: churnPrediction.value
@@ -1954,16 +2524,13 @@ class AdminAnalyticsPro {
     }
 
     async checkLowActiveUsers() {
-        const usersSnapshot = await this.db.collection('users').get();
-        
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         
         let activeUsers = 0;
         
-        usersSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.lastLogin && data.lastLogin.toDate() > weekAgo) {
+        this.allUsersData.forEach(user => {
+            if (user.lastLogin && user.lastLogin.toDate() > weekAgo) {
                 activeUsers++;
             }
         });
@@ -1972,7 +2539,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'LOW_ACTIVE_USERS',
                 severity: 'medium',
-                message: `Only ${activeUsers} active users this week`,
+                message: `Only ${activeUsers} active users this week (threshold: ${this.alertThresholds.lowActiveUsers})`,
                 data: {
                     activeUsers: activeUsers,
                     threshold: this.alertThresholds.lowActiveUsers
@@ -1984,11 +2551,8 @@ class AdminAnalyticsPro {
     }
 
     async checkConversionDrop() {
-        const usersSnapshot = await this.db.collection('users').get();
-        const paymentsSnapshot = await this.db.collection('payments').get();
-        
-        const totalUsers = usersSnapshot.size;
-        const premiumUsers = paymentsSnapshot.size;
+        const totalUsers = this.allUsersData.length;
+        const premiumUsers = this.allPaymentsData.length;
         
         const currentConversion = totalUsers > 0 ? (premiumUsers / totalUsers) * 100 : 0;
         
@@ -2002,7 +2566,7 @@ class AdminAnalyticsPro {
             return {
                 type: 'CONVERSION_DROP',
                 severity: 'high',
-                message: `Conversion rate dropped by ${drop.toFixed(1)}%`,
+                message: `Conversion rate dropped by ${drop.toFixed(1)}% (from ${lastConversion.toFixed(1)}% to ${currentConversion.toFixed(1)}%)`,
                 data: {
                     currentConversion: currentConversion.toFixed(1),
                     lastConversion: lastConversion.toFixed(1),
@@ -2042,11 +2606,11 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📥 CSV EXPORT
+    // CSV EXPORT
     // ========================================
     
     async exportAllData() {
-        console.log('📥 Exporting all data...');
+        console.log('📥 Exporting all data to CSV...');
         
         await Promise.all([
             this.exportData('users'),
@@ -2054,10 +2618,12 @@ class AdminAnalyticsPro {
             this.exportData('payments'),
             this.exportData('activity'),
             this.exportData('non-customers'),
-            this.exportData('potential-customers')
+            this.exportData('potential-customers'),
+            this.exportData('sessions'),
+            this.exportData('conversion-paths')
         ]);
         
-        alert('✅ All data has been exported to CSV!');
+        alert('✅ All data has been exported to CSV files!');
     }
 
     async exportData(type) {
@@ -2072,21 +2638,22 @@ class AdminAnalyticsPro {
                 case 'users':
                     data = this.allUsersData;
                     filename = 'users';
-                    headers = ['ID', 'Email', 'Plan', 'Subscription Status', 'Created At', 'Last Login'];
+                    headers = ['ID', 'Email', 'Plan', 'Subscription Status', 'Created At', 'Last Login', 'Email Verified'];
                     data = data.map(u => [
                         u.id,
                         u.email,
                         u.plan || 'basic',
                         u.subscriptionStatus || 'inactive',
                         u.createdAt ? u.createdAt.toDate().toISOString() : 'N/A',
-                        u.lastLogin ? u.lastLogin.toDate().toISOString() : 'N/A'
+                        u.lastLogin ? u.lastLogin.toDate().toISOString() : 'N/A',
+                        u.emailVerified ? 'Yes' : 'No'
                     ]);
                     break;
                 
                 case 'visits':
                     data = this.allVisitsData;
                     filename = 'visits';
-                    headers = ['ID', 'User ID', 'Page', 'URL', 'Timestamp', 'Country', 'User Agent'];
+                    headers = ['ID', 'User ID', 'Page', 'URL', 'Timestamp', 'Country', 'Device', 'User Agent'];
                     data = data.map(v => [
                         v.id,
                         v.userId || 'Anonymous',
@@ -2094,6 +2661,7 @@ class AdminAnalyticsPro {
                         v.url || 'N/A',
                         v.timestamp ? v.timestamp.toDate().toISOString() : 'N/A',
                         v.country || 'Unknown',
+                        this.detectDevice(v.userAgent),
                         v.userAgent || 'N/A'
                     ]);
                     break;
@@ -2102,41 +2670,43 @@ class AdminAnalyticsPro {
                 case 'revenue':
                     data = this.allPaymentsData;
                     filename = 'payments';
-                    headers = ['ID', 'User ID', 'Plan', 'Amount', 'Status', 'Created At'];
+                    headers = ['ID', 'User ID', 'Plan', 'Amount', 'Status', 'Created At', 'Invoice Number'];
                     data = data.map(p => [
                         p.id,
                         p.userId || 'N/A',
                         p.plan || 'N/A',
                         p.amount || 0,
                         p.status || 'N/A',
-                        p.createdAt ? p.createdAt.toDate().toISOString() : 'N/A'
+                        p.createdAt ? p.createdAt.toDate().toISOString() : 'N/A',
+                        p.invoiceNumber || 'N/A'
                     ]);
                     break;
                 
                 case 'activity':
                     data = this.allActivityData;
                     filename = 'activity';
-                    headers = ['ID', 'User ID', 'Action', 'Page', 'Timestamp'];
+                    headers = ['ID', 'User ID', 'Action', 'Page', 'Timestamp', 'Details'];
                     data = data.map(a => [
                         a.id,
                         a.userId || 'Anonymous',
                         a.action || 'N/A',
                         a.page || 'N/A',
-                        a.timestamp ? a.timestamp.toDate().toISOString() : 'N/A'
+                        a.timestamp ? a.timestamp.toDate().toISOString() : 'N/A',
+                        a.details || 'N/A'
                     ]);
                     break;
                 
                 case 'non-customers':
                     data = this.nonCustomerVisitors;
                     filename = 'non_customer_visitors';
-                    headers = ['ID', 'IP', 'Country', 'Visits', 'Pages', 'Devices', 'First Visit', 'Last Visit'];
+                    headers = ['ID', 'IP', 'Country', 'Visits', 'Unique Pages', 'Devices', 'First Visit', 'Last Visit'];
                     data = data.map(v => [
                         v.id,
                         v.ip,
                         v.country,
                         v.visits,
                         v.pages ? new Set(v.pages).size : 0,
-                        v.devices ? (Array.isArray(v.devices) ? v.devices.join('; ') : '') : '',
+                        v.devices ? v.devices.join('; ') : '',
                         v.firstVisit ? v.firstVisit.toISOString() : 'N/A',
                         v.lastVisit ? v.lastVisit.toISOString() : 'N/A'
                     ]);
@@ -2145,16 +2715,81 @@ class AdminAnalyticsPro {
                 case 'potential-customers':
                     data = this.potentialCustomers;
                     filename = 'potential_customers';
-                    headers = ['IP', 'Country', 'Visits', 'Unique Pages', 'Score', 'Category', 'Last Visit'];
+                    headers = ['IP', 'Country', 'Visits', 'Unique Pages', 'Strategic Pages', 'Score', 'Category', 'Last Visit'];
                     data = data.map(c => [
                         c.ip,
                         c.country,
                         c.visits,
                         c.uniquePages,
+                        c.strategicPages,
                         c.score,
                         c.category,
                         c.lastVisit ? c.lastVisit.toISOString() : 'N/A'
                     ]);
+                    break;
+                
+                case 'sessions':
+                    data = this.sessionData;
+                    filename = 'sessions';
+                    headers = ['Session ID', 'User ID', 'Pages Count', 'Duration (seconds)', 'Device', 'Country', 'Start Time', 'End Time'];
+                    data = data.map(s => [
+                        s.id,
+                        s.userId || 'Anonymous',
+                        s.pages.length,
+                        s.duration,
+                        s.deviceType,
+                        s.country,
+                        s.startTime ? s.startTime.toISOString() : 'N/A',
+                        s.endTime ? s.endTime.toISOString() : 'N/A'
+                    ]);
+                    break;
+                
+                case 'conversion-paths':
+                    data = this.conversionPaths;
+                    filename = 'conversion_paths';
+                    headers = ['Path', 'Count'];
+                    data = data.map(p => [
+                        p.path,
+                        p.count
+                    ]);
+                    break;
+                
+                case 'cloudflare':
+                    if (!this.cloudflareData || !this.cloudflareData.overview) {
+                        console.warn('No Cloudflare data to export');
+                        return;
+                    }
+                    filename = 'cloudflare_analytics';
+                    headers = ['Metric', 'Value'];
+                    const overview = this.cloudflareData.overview;
+                    data = [
+                        ['Total Requests', overview.totalRequests],
+                        ['Total Bytes', overview.totalBytes],
+                        ['Cached Requests', overview.totalCachedRequests],
+                        ['Cache Hit Rate', overview.cacheHitRate + '%'],
+                        ['Total Pageviews', overview.totalPageViews],
+                        ['Total Uniques', overview.totalUniques],
+                        ['Total Threats', overview.totalThreats]
+                    ];
+                    break;
+                
+                case 'stripe':
+                    if (!this.stripeData) {
+                        console.warn('No Stripe data to export');
+                        return;
+                    }
+                    filename = 'stripe_analytics';
+                    headers = ['Metric', 'Value'];
+                    data = [
+                        ['Total Customers', this.stripeData.customers?.total || 0],
+                        ['Customers with Subscription', this.stripeData.customers?.withSubscription || 0],
+                        ['Active Subscriptions', this.stripeData.subscriptions?.active || 0],
+                        ['Trialing Subscriptions', this.stripeData.subscriptions?.trialing || 0],
+                        ['Canceled Subscriptions', this.stripeData.subscriptions?.canceled || 0],
+                        ['MRR (cents)', this.stripeData.revenue?.mrr || 0],
+                        ['ARR (cents)', this.stripeData.revenue?.arr || 0],
+                        ['Total Revenue (cents)', this.stripeData.revenue?.total || 0]
+                    ];
                     break;
                 
                 default:
@@ -2170,7 +2805,7 @@ class AdminAnalyticsPro {
             const csvContent = this.arrayToCSV(data, headers);
             this.downloadCSV(csvContent, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
             
-            console.log(`✅ Export ${type} successful`);
+            console.log(`✅ Export ${type} successful (${data.length} rows)`);
             
         } catch (error) {
             console.error(`❌ Error exporting ${type}:`, error);
@@ -2183,6 +2818,7 @@ class AdminAnalyticsPro {
         data.forEach(row => {
             csv += row.map(cell => {
                 const cellStr = String(cell || '');
+                // Escape quotes and wrap in quotes if necessary
                 if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
                     return `"${cellStr.replace(/"/g, '""')}"`;
                 }
@@ -2198,6 +2834,7 @@ class AdminAnalyticsPro {
         const link = document.createElement('a');
         
         if (navigator.msSaveBlob) {
+            // IE 10+
             navigator.msSaveBlob(blob, filename);
         } else {
             link.href = URL.createObjectURL(blob);
@@ -2210,26 +2847,33 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🛠 HELPERS
+    // HELPER FUNCTIONS
     // ========================================
     
     updateStat(elementId, value) {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = value;
+        } else {
+            console.warn(`⚠ Element not found: ${elementId}`);
         }
     }
 
     createChart(canvasId, type, data, options = {}) {
         const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
+        if (!canvas) {
+            console.warn(`⚠ Canvas not found: ${canvasId}`);
+            return;
+        }
         
         const ctx = canvas.getContext('2d');
         
+        // Destroy existing chart
         if (this.charts[canvasId]) {
             this.charts[canvasId].destroy();
         }
         
+        // Create new chart
         this.charts[canvasId] = new Chart(ctx, {
             type: type,
             data: data,
@@ -2238,19 +2882,52 @@ class AdminAnalyticsPro {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: type !== 'bar' && type !== 'line'
+                        display: type === 'doughnut' || type === 'pie',
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        enabled: true
                     }
                 },
                 ...options
             }
         });
     }
+
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
 }
 
 // ========================================
 // INITIALIZATION
 // ========================================
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Starting Admin Analytics PRO v3.2...');
-    window.adminAnalytics = new AdminAnalyticsPro(); // Expose globally for export buttons
+    console.log('🚀 Starting Admin Analytics PRO v4.0...');
+    console.log('📊 Initializing comprehensive analytics dashboard...');
+    
+    // Expose globally for export buttons and debugging
+    window.adminAnalytics = new AdminAnalyticsPro();
+    
+    console.log('✅ Admin Analytics instance created and attached to window.adminAnalytics');
 });
+
+// ========================================
+// GLOBAL EXPORT HELPER (for HTML buttons)
+// ========================================
+
+function exportAnalyticsData(type) {
+    if (window.adminAnalytics) {
+        window.adminAnalytics.exportData(type);
+    } else {
+        console.error('❌ Admin Analytics not initialized');
+        alert('Analytics system not ready. Please wait...');
+    }
+}

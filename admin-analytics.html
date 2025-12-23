@@ -3,34 +3,46 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Admin Analytics - AlphaVault AI</title>
+    <title>Admin Analytics Dashboard - AlphaVault AI</title>
+    
+    <!-- Chart.js (pour les graphiques) -->
+    <script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
+    
+    <!-- Leaflet.js (pour les cartes géographiques) -->
+    <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'>
+    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
-    <!-- Common Styles -->
+    <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/admin-analytics.css'>
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-TileColor" content="#667eea">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase Configuration -->
+    <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Page Protection (AUTH GUARD) -->
+    <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
     
     <!-- Analytics Tracker -->
@@ -44,20 +56,23 @@
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <div class="loader"></div>
-        <p>Checking admin access...</p>
+    <!-- 🔒 LOADING SCREEN -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading Admin Analytics...</h2>
+            <p>Fetching data from Stripe, Cloudflare & Firebase</p>
+        </div>
     </div>
 
-    <div class='layout-wrapper' id="admin-dashboard" style="display: none;">
+    <!-- 📊 ADMIN DASHBOARD (hidden initially) -->
+    <div id="admin-dashboard" class='layout-wrapper' style="display: none;">
         
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar Navigation (identique à dashboard-financier.html) -->
         <aside class='sidebar' id='sidebar'>
-            <!-- Header with 3D Logo -->
+            <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- 3D SVG Logo -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -66,22 +81,16 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Chart -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
                                   stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Arrow -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
@@ -89,15 +98,11 @@
                                   stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
-                        <span class="brand-tagline">Investments</span>
+                        <span class="brand-tagline">Admin</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
@@ -106,7 +111,7 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <button class="nav-folder" data-tooltip="Home">
+                    <button class="nav-folder">
                         <i class="fas fa-home"></i>
                         <span>Home</span>
                         <i class="fas fa-chevron-down arrow"></i>
@@ -120,85 +125,7 @@
                 </div>
                 
                 <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-wallet'></i>
-                        <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='dashboard-financier.html' class='nav-link'>
-                            <i class='fas fa-home'></i>
-                            <span>Dashboard Budget</span>
-                        </a>
-                        <a href='investment-analytics.html' class='nav-link'>
-                            <i class='fas fa-chart-bar'></i>
-                            <span>Investment Analytics</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-calculator'></i>
-                        <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice'></i>
-                            <span>Monte Carlo</span>
-                        </a>
-                        <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie'></i>
-                            <span>Markowitz</span>
-                        </a>
-                        <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale'></i>
-                            <span>Risk Parity</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="Stocks">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Stocks</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='ipo-intelligence.html' class='nav-link'>
-                            <i class='fas fa-exchange-alt'></i>
-                            <span>IPO Intelligence</span>
-                        </a>
-                        <a href='insider-flow-tracker.html' class='nav-link'>
-                            <i class='fas fa-user-secret'></i>
-                            <span>Insider Flow Tracker</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- AI ASSISTANT -->
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="AI Assistant">
-                        <i class="fas fa-robot"></i>
-                        <span>AI Assistant</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='chatbot-fullpage.html' class='nav-link'>
-                            <i class='fas fa-comments'></i>
-                            <span>Alphy AI Chat</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- ADMIN SECTION -->
-                <div class='nav-section' id='adminSection' style='display: none !important;'>
-                    <button class="nav-folder" data-tooltip="Admin">
+                    <button class="nav-folder">
                         <i class="fas fa-shield-alt"></i>
                         <span>Admin</span>
                         <i class="fas fa-chevron-down arrow"></i>
@@ -212,17 +139,17 @@
                 </div>
             </nav>
             
-            <!-- SIDEBAR FOOTER - USER MENU -->
+            <!-- Sidebar Footer -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
-                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            src="https://ui-avatars.com/api/?name=Admin&background=ef4444&color=fff" 
                             alt="Avatar" 
                             class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
-                            <span data-user-name class="sidebar-user-name">User</span>
-                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                            <span data-user-name class="sidebar-user-name">Admin</span>
+                            <span data-admin-email class="sidebar-user-plan">admin@alphavault.ai</span>
                         </div>
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
@@ -230,12 +157,12 @@
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
-                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                src="https://ui-avatars.com/api/?name=Admin&background=ef4444&color=fff" 
                                 alt="Avatar" 
                                 class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
-                                <h4 data-user-name class="user-dropdown-name">User</h4>
-                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                                <h4 data-user-name class="user-dropdown-name">Admin</h4>
+                                <p data-admin-email class="user-dropdown-email">admin@alphavault.ai</p>
                             </div>
                         </div>
                         
@@ -263,7 +190,7 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <div class='main-content'>
             <!-- Header -->
             <header class='top-header'>
@@ -272,602 +199,817 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class="page-title">
-                        <i class="fas fa-shield-alt"></i>
-                        Admin Analytics Pro v3.2
+                        <i class="fas fa-chart-line"></i>
+                        Admin Analytics Dashboard
                     </h1>
                 </div>
-                <div class="header-right">
-                    <button class="btn-export" id="exportDataBtn" title="Export all data">
-                        <i class="fas fa-download"></i>
-                        <span>Export All</span>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export' id='exportDataBtn'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export All Data</span>
                     </button>
-                    <button class="btn-refresh" id="refreshDataBtn" title="Refresh data">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Refresh</span>
+                    <button class='dashboard-btn' id='refreshDataBtn'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
                     </button>
                 </div>
             </header>
             
             <div class='container'>
+
+                <!-- ========================================
+                     SECTION 1: THIRD-PARTY ANALYTICS
+                     ======================================== -->
                 
-                <!-- ✅ ML PREDICTIONS SECTION -->
-                <section class="ml-predictions-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-brain"></i>
-                            Machine Learning Predictions
+                <div class="section">
+                    <div class="section-header-collapsible" onclick="toggleSection('section1')">
+                        <h2 class='section-title'>
+                            <i class='fas fa-plug'></i>
+                            Section 1: Third-Party Analytics
+                            <span class="section-subtitle">Stripe • Cloudflare • Firebase</span>
                         </h2>
-                    </div>
-                    <div id="ml-predictions" class="predictions-grid">
-                        <!-- Predictions will be injected here by JS -->
-                        <div class="prediction-card skeleton">
-                            <div class="skeleton-loader"></div>
-                        </div>
-                        <div class="prediction-card skeleton">
-                            <div class="skeleton-loader"></div>
-                        </div>
-                        <div class="prediction-card skeleton">
-                            <div class="skeleton-loader"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Firebase Stats Overview -->
-                <section class="stats-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-database"></i>
-                            Firebase Analytics Overview
-                        </h2>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="total-users">0</h3>
-                                <p>Accounts Created</p>
-                                <span class="stat-change positive" id="users-change">+0 this week</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="total-visits">0</h3>
-                                <p>Total Visits</p>
-                                <span class="stat-change positive" id="visits-change">+0 today</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                                <i class="fas fa-crown"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="premium-users">0</h3>
-                                <p>Premium Users</p>
-                                <span class="stat-change" id="premium-change">0% conversion</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="total-revenue">$0</h3>
-                                <p>Total Revenue</p>
-                                <span class="stat-change positive" id="revenue-change">+$0 this month</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
-                                <i class="fas fa-user-check"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="active-users">0</h3>
-                                <p>Active Users</p>
-                                <span class="stat-change">Last 7 days</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="monthly-signups">0</h3>
-                                <p>Monthly Signups</p>
-                                <span class="stat-change">Last 30 days</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ✅ STRIPE METRICS SECTION -->
-                <section class="stats-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fab fa-stripe"></i>
-                            Stripe Real-Time Metrics
-                        </h2>
-                        <button class="btn-export-sm" id="exportRevenueBtn" title="Export revenue">
-                            <i class="fas fa-file-csv"></i>
-                            Export Revenue
-                        </button>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #635bff, #4f46e5);">
-                                <i class="fas fa-users-cog"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="stripe-customers">0</h3>
-                                <p>Stripe Customers</p>
-                                <span class="stat-badge">Real-time</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="stripe-active-subs">0</h3>
-                                <p>Active Subscriptions</p>
-                                <span class="stat-badge success">Live</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="stripe-trial-subs">0</h3>
-                                <p>Trial Subscriptions</p>
-                                <span class="stat-badge warning">Active Trials</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="stripe-mrr">$0</h3>
-                                <p>Monthly Recurring Revenue</p>
-                                <span class="stat-badge">Stripe MRR</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="stripe-total-revenue">$0</h3>
-                                <p>Total Stripe Revenue</p>
-                                <span class="stat-badge">All-Time</span>
-                            </div>
-                        </div>
-
-                        <div class="stat-card stripe-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="arr">$0</h3>
-                                <p>Annual Recurring Revenue</p>
-                                <span class="stat-badge">ARR Projection</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 🆕 NON-CUSTOMER VISITORS SECTION (CLOUDFLARE) -->
-                <section class="stats-section visitors-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-user-secret"></i>
-                            Non-Customer Visitors Analytics (Cloudflare)
-                        </h2>
-                        <button class="btn-export-sm" id="exportVisitorsBtn" title="Export visitors">
-                            <i class="fas fa-file-csv"></i>
-                            Export Visitors
+                        <button class="collapse-btn" id="section1-toggle">
+                            <i class="fas fa-chevron-up"></i>
                         </button>
                     </div>
                     
-                    <!-- Visitors KPIs -->
-                    <div class="stats-grid">
-                        <div class="stat-card visitor-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
-                                <i class="fas fa-users"></i>
+                    <div class="section-content" id="section1-content">
+                        
+                        <!-- 💳 STRIPE ANALYTICS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('stripe')">
+                                <h3 class="subsection-title">
+                                    <i class="fab fa-stripe"></i>
+                                    Stripe Analytics
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="stripe-arrow"></i>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="total-non-customers">0</h3>
-                                <p>Unique Non-Customer Visitors</p>
-                                <span class="stat-badge">Tracked by IP/Session</span>
+                            
+                            <div class="subsection-content" id="stripe-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Customers</div>
+                                            <div class="kpi-value" id="stripe-total-customers">0</div>
+                                            <div class="kpi-sublabel">
+                                                <span id="stripe-customers-with-subs">0</span> with subscription
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Active Subscriptions</div>
+                                            <div class="kpi-value" id="stripe-active-subs">0</div>
+                                            <div class="kpi-sublabel">
+                                                <span id="stripe-trial-subs">0</span> trialing
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">MRR</div>
+                                            <div class="kpi-value" id="stripe-mrr">$0</div>
+                                            <div class="kpi-sublabel">
+                                                ARR: <span id="stripe-arr">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Revenue</div>
+                                            <div class="kpi-value" id="stripe-total-revenue">$0</div>
+                                            <div class="kpi-sublabel">
+                                                ARPU: <span id="stripe-arpu">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Canceled Subs</div>
+                                            <div class="kpi-value" id="stripe-canceled-subs">0</div>
+                                            <div class="kpi-sublabel">
+                                                Past Due: <span id="stripe-past-due-subs">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Retention Rate</div>
+                                            <div class="kpi-value" id="stripe-retention-rate">0%</div>
+                                            <div class="kpi-sublabel">Active / Total</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts Grid -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-area"></i>
+                                            Monthly Revenue (Stripe)
+                                        </h4>
+                                        <canvas id="stripe-revenue-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-pie"></i>
+                                            Revenue by Plan
+                                        </h4>
+                                        <canvas id="stripe-plan-revenue-chart"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="stat-card visitor-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #fb923c, #f97316);">
-                                <i class="fas fa-eye"></i>
+                        
+                        <!-- ☁ CLOUDFLARE ANALYTICS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('cloudflare')">
+                                <h3 class="subsection-title">
+                                    <i class="fab fa-cloudflare"></i>
+                                    Cloudflare Analytics
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="cloudflare-arrow"></i>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="total-anonymous-visits">0</h3>
-                                <p>Total Anonymous Visits</p>
-                                <span class="stat-badge">Anonymous Sessions</span>
+                            
+                            <div class="subsection-content collapsed" id="cloudflare-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Requests</div>
+                                            <div class="kpi-value" id="cf-total-requests">0</div>
+                                            <div class="kpi-sublabel">Last 30 days</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                            <i class="fas fa-server"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Bandwidth</div>
+                                            <div class="kpi-value" id="cf-total-bytes">0 GB</div>
+                                            <div class="kpi-sublabel">
+                                                Saved: <span id="cf-bandwidth-saved">0 GB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Cache Hit Rate</div>
+                                            <div class="kpi-value" id="cf-cache-hit-rate">0%</div>
+                                            <div class="kpi-sublabel">
+                                                Cached: <span id="cf-cached-requests">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Pageviews</div>
+                                            <div class="kpi-value" id="cf-total-pageviews">0</div>
+                                            <div class="kpi-sublabel">
+                                                Uniques: <span id="cf-total-uniques">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Threats Blocked</div>
+                                            <div class="kpi-value" id="cf-total-threats">0</div>
+                                            <div class="kpi-sublabel">Security events</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Top Country</div>
+                                            <div class="kpi-value" id="cf-top-country">N/A</div>
+                                            <div class="kpi-sublabel">
+                                                <span id="cf-top-country-requests">0</span> requests
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts & Maps -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-line"></i>
+                                            Daily Requests
+                                        </h4>
+                                        <canvas id="cf-requests-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-pie"></i>
+                                            Device Distribution
+                                        </h4>
+                                        <canvas id="cf-devices-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Geographic Map -->
+                                <div class="map-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-map"></i>
+                                        Geographic Distribution
+                                    </h4>
+                                    <div id="geo-map" class="geo-map"></div>
+                                </div>
+                                
+                                <!-- Geo Chart -->
+                                <div class="chart-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-globe-americas"></i>
+                                        Top 10 Countries
+                                    </h4>
+                                    <canvas id="cf-geo-chart"></canvas>
+                                </div>
+                                
+                                <!-- Pages Table -->
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-file-alt"></i>
+                                        Top Pages
+                                    </h4>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Page</th>
+                                                <th>Views</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cf-pages-table-body">
+                                            <tr>
+                                                <td colspan="3" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="stat-card visitor-card">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #fdba74, #fb923c);">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="unique-visitors">0</h3>
-                                <p>Unique Visitors (All)</p>
-                                <span class="stat-badge">Including Registered</span>
-                            </div>
-                        </div>
+                        
                     </div>
+                </div>
 
-                    <!-- Non-Customer Countries Chart -->
-                    <div class="chart-card" style="margin-top: 24px;">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-map-marked-alt"></i> Top 10 Countries - Non-Customer Visitors</h2>
-                        </div>
-                        <canvas id="non-customer-countries-chart"></canvas>
-                    </div>
-
-                    <!-- Non-Customer Visitors Table -->
-                    <div class="table-card" style="margin-top: 24px;">
-                        <div class="table-header">
-                            <h2><i class="fas fa-list"></i> Top 50 Non-Customer Visitors</h2>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="non-customer-visitors-table">
-                                <thead>
-                                    <tr>
-                                        <th>IP</th>
-                                        <th>Country</th>
-                                        <th>Visits</th>
-                                        <th>Unique Pages</th>
-                                        <th>Devices</th>
-                                        <th>Last Visit</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="non-customer-visitors-body">
-                                    <tr><td colspan="6" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 🆕 POTENTIAL CUSTOMERS SECTION -->
-                <section class="stats-section potential-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-bullseye"></i>
-                            Potential Customers Lead Scoring
+                <!-- ========================================
+                     SECTION 2: INTERNAL ANALYTICS
+                     ======================================== -->
+                
+                <div class="section">
+                    <div class="section-header-collapsible" onclick="toggleSection('section2')">
+                        <h2 class='section-title'>
+                            <i class='fas fa-database'></i>
+                            Section 2: Internal Analytics
+                            <span class="section-subtitle">Firebase • Analytics Tracker</span>
                         </h2>
-                        <button class="btn-export-sm" id="exportPotentialBtn" title="Export potential customers">
-                            <i class="fas fa-file-csv"></i>
-                            Export Leads
+                        <button class="collapse-btn" id="section2-toggle">
+                            <i class="fas fa-chevron-up"></i>
                         </button>
                     </div>
                     
-                    <!-- Leads KPIs -->
-                    <div class="stats-grid">
-                        <div class="stat-card lead-card hot">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-fire"></i>
+                    <div class="section-content" id="section2-content">
+                        
+                        <!-- 👥 USERS ANALYTICS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('users')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-users"></i>
+                                    Users Analytics
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="users-arrow"></i>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="hot-leads">0</h3>
-                                <p>Hot Leads</p>
-                                <span class="stat-badge success">Score ≥ 70</span>
+                            
+                            <div class="subsection-content" id="users-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Users</div>
+                                            <div class="kpi-value" id="total-users">0</div>
+                                            <div class="kpi-sublabel" id="users-change">+0 this week</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-crown"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Premium Users</div>
+                                            <div class="kpi-value" id="premium-users">0</div>
+                                            <div class="kpi-sublabel" id="premium-change">0% conversion</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Active Users</div>
+                                            <div class="kpi-value" id="active-users">0</div>
+                                            <div class="kpi-sublabel">Last 7 days</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Monthly Signups</div>
+                                            <div class="kpi-value" id="monthly-signups">0</div>
+                                            <div class="kpi-sublabel">Last 30 days</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                            <i class="fas fa-envelope-open-text"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Email Verified</div>
+                                            <div class="kpi-value" id="email-verified-users">0</div>
+                                            <div class="kpi-sublabel">
+                                                Rate: <span id="active-rate">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-line"></i>
+                                            Registrations (Last 90 Days)
+                                        </h4>
+                                        <canvas id="registrations-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-pie"></i>
+                                            Plans Distribution
+                                        </h4>
+                                        <canvas id="plans-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recent Users Table -->
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-history"></i>
+                                        Recent Users
+                                    </h4>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Email</th>
+                                                <th>Plan</th>
+                                                <th>Created At</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-users-body">
+                                            <tr>
+                                                <td colspan="4" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="stat-card lead-card warm">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                <i class="fas fa-temperature-high"></i>
+                        
+                        <!-- 📊 VISITS & SESSIONS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('visits')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Visits & Sessions Analytics
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="visits-arrow"></i>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="warm-leads">0</h3>
-                                <p>Warm Leads</p>
-                                <span class="stat-badge warning">Score ≥ 50</span>
+                            
+                            <div class="subsection-content collapsed" id="visits-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Visits</div>
+                                            <div class="kpi-value" id="total-visits">0</div>
+                                            <div class="kpi-sublabel" id="visits-change">+0 today</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-user-friends"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Unique Visitors</div>
+                                            <div class="kpi-value" id="unique-visitors">0</div>
+                                            <div class="kpi-sublabel">
+                                                Anonymous: <span id="anonymous-visits">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Avg Session Duration</div>
+                                            <div class="kpi-value" id="avg-session-duration">0 min</div>
+                                            <div class="kpi-sublabel">
+                                                Sessions: <span id="total-sessions">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Pages/Session</div>
+                                            <div class="kpi-value" id="avg-pages-per-session">0</div>
+                                            <div class="kpi-sublabel">Average</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-door-open"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Bounce Rate</div>
+                                            <div class="kpi-value" id="overall-bounce-rate">0%</div>
+                                            <div class="kpi-sublabel">Overall</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-bar"></i>
+                                            Daily Visits (Last 90 Days)
+                                        </h4>
+                                        <canvas id="visits-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-door-open"></i>
+                                            Bounce Rate by Page
+                                        </h4>
+                                        <canvas id="bounce-rate-chart"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="stat-card lead-card cold">
-                            <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
-                                <i class="fas fa-snowflake"></i>
+                        
+                        <!-- 💰 REVENUE ANALYTICS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('revenue')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    Revenue Analytics
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="revenue-arrow"></i>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="cold-leads">0</h3>
-                                <p>Cold Leads</p>
-                                <span class="stat-badge">Score ≥ 30</span>
+                            
+                            <div class="subsection-content collapsed" id="revenue-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Revenue</div>
+                                            <div class="kpi-value" id="total-revenue">$0</div>
+                                            <div class="kpi-sublabel" id="revenue-change">+$0 this month</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">MRR</div>
+                                            <div class="kpi-value" id="mrr">$0</div>
+                                            <div class="kpi-sublabel">
+                                                ARR: <span id="arr">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Avg LTV</div>
+                                            <div class="kpi-value" id="avg-ltv">$0</div>
+                                            <div class="kpi-sublabel">
+                                                Max: <span id="max-ltv">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-user-dollar"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">ARPU</div>
+                                            <div class="kpi-value" id="arpu">$0</div>
+                                            <div class="kpi-sublabel">Per user</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Active Subscriptions</div>
+                                            <div class="kpi-value" id="active-subscriptions">0</div>
+                                            <div class="kpi-sublabel">Paying customers</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-bar"></i>
+                                            Monthly Revenue (Last 12 Months)
+                                        </h4>
+                                        <canvas id="revenue-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-line"></i>
+                                            Churn Analysis
+                                        </h4>
+                                        <canvas id="churn-chart"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        
+                        <!-- 🔥 NON-CUSTOMER VISITORS & POTENTIAL CUSTOMERS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('potential')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-fire"></i>
+                                    Potential Customers & Leads
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="potential-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="potential-content">
+                                <!-- KPIs Grid -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-user-slash"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Non-Customers</div>
+                                            <div class="kpi-value" id="total-non-customers">0</div>
+                                            <div class="kpi-sublabel">
+                                                Visits: <span id="total-anonymous-visits">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Hot Leads</div>
+                                            <div class="kpi-value" id="hot-leads">0</div>
+                                            <div class="kpi-sublabel">Score ≥ 70</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-temperature-high"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Warm Leads</div>
+                                            <div class="kpi-value" id="warm-leads">0</div>
+                                            <div class="kpi-sublabel">Score 50-69</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                            <i class="fas fa-snowflake"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Cold Leads</div>
+                                            <div class="kpi-value" id="cold-leads">0</div>
+                                            <div class="kpi-sublabel">Score < 50</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Avg Lead Score</div>
+                                            <div class="kpi-value" id="avg-lead-score">0</div>
+                                            <div class="kpi-sublabel">Out of 100</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts -->
+                                <div class="charts-row">
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-chart-bar"></i>
+                                            Lead Score Distribution
+                                        </h4>
+                                        <canvas id="potential-customers-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="chart-wrapper">
+                                        <h4 class="chart-title">
+                                            <i class="fas fa-globe"></i>
+                                            Non-Customers by Country
+                                        </h4>
+                                        <canvas id="non-customer-countries-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Potential Customers Table -->
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-trophy"></i>
+                                        Top 50 Potential Customers
+                                    </h4>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>IP</th>
+                                                <th>Country</th>
+                                                <th>Visits</th>
+                                                <th>Pages</th>
+                                                <th>Strategic</th>
+                                                <th>Score</th>
+                                                <th>Category</th>
+                                                <th>Last Visit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="potential-customers-body">
+                                            <tr>
+                                                <td colspan="9" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 🤖 ML PREDICTIONS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('ml')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-brain"></i>
+                                    ML Predictions & Insights
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="ml-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="ml-content">
+                                <div id="ml-predictions" class="ml-predictions-grid">
+                                    <!-- Rempli par JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
-
-                    <!-- Score Distribution Chart -->
-                    <div class="chart-card" style="margin-top: 24px;">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-chart-bar"></i> Potential Score Distribution</h2>
-                        </div>
-                        <canvas id="potential-customers-chart"></canvas>
-                    </div>
-
-                    <!-- Potential Customers Table -->
-                    <div class="table-card" style="margin-top: 24px;">
-                        <div class="table-header">
-                            <h2><i class="fas fa-medal"></i> Top 50 Potential Customers (Scored)</h2>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="potential-customers-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>IP</th>
-                                        <th>Country</th>
-                                        <th>Visits</th>
-                                        <th>Unique Pages</th>
-                                        <th>Score</th>
-                                        <th>Category</th>
-                                        <th>Last Visit</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="potential-customers-body">
-                                    <tr><td colspan="8" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Firebase Charts -->
-                <section class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-chart-area"></i> Registrations per Day (Last 90 days)</h2>
-                        </div>
-                        <canvas id="registrations-chart"></canvas>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-chart-pie"></i> Plan Distribution</h2>
-                        </div>
-                        <canvas id="plans-chart"></canvas>
-                    </div>
-                </section>
-
-                <section class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-chart-line"></i> Visits per Day (Last 90 days)</h2>
-                        </div>
-                        <canvas id="visits-chart"></canvas>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-chart-bar"></i> Most Visited Pages (Top 10)</h2>
-                        </div>
-                        <canvas id="pages-chart"></canvas>
-                    </div>
-                </section>
-
-                <section class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-money-bill-wave"></i> Revenue per Month (12 months)</h2>
-                        </div>
-                        <canvas id="revenue-chart"></canvas>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-users-slash"></i> Churn vs New Users</h2>
-                        </div>
-                        <canvas id="churn-chart"></canvas>
-                    </div>
-                </section>
-
-                <section class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-layer-group"></i> Cohort Analysis (12 months)</h2>
-                        </div>
-                        <canvas id="cohort-chart"></canvas>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-mobile-alt"></i> Device Distribution</h2>
-                        </div>
-                        <canvas id="device-chart"></canvas>
-                    </div>
-                </section>
-
-                <section class="charts-section">
-                    <div class="chart-card full-width">
-                        <div class="chart-header">
-                            <h2><i class="fas fa-globe"></i> Top 10 Countries (All Visits)</h2>
-                        </div>
-                        <canvas id="geography-chart"></canvas>
-                    </div>
-                </section>
-
-                <!-- Firebase Tables -->
-                <section class="tables-section">
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h2><i class="fas fa-user-plus"></i> Latest Registrations</h2>
-                            <button class="btn-export-sm" id="exportUsersBtn" title="Export users">
-                                <i class="fas fa-file-csv"></i>
-                                Export Users
-                            </button>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="recent-users-table">
-                                <thead>
-                                    <tr>
-                                        <th>Email</th>
-                                        <th>Plan</th>
-                                        <th>Registration Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-users-body">
-                                    <tr><td colspan="4" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h2><i class="fas fa-trophy"></i> Top 10 Users (Simulations)</h2>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="top-users-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Email</th>
-                                        <th>Plan</th>
-                                        <th>Simulations</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="top-users-body">
-                                    <tr><td colspan="4" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="tables-section">
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h2><i class="fas fa-history"></i> Recent Activity (Last 20)</h2>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="activity-table">
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Action</th>
-                                        <th>Page</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-activity-body">
-                                    <tr><td colspan="4" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h2><i class="fas fa-filter"></i> Conversion Funnel</h2>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="funnel-table">
-                                <thead>
-                                    <tr>
-                                        <th>Stage</th>
-                                        <th>Users</th>
-                                        <th>Rate</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="funnel-body">
-                                    <tr><td colspan="3" class="loading">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
+                </div>
+                
+                <!-- Footer -->
+                <footer>
+                    <p>
+                        <i class='fas fa-shield-alt'></i> Admin Analytics Dashboard | 
+                        Real-time data from Stripe, Cloudflare & Firebase
+                    </p>
+                </footer>
             </div>
         </div>
     </div>
 
-    <!-- Common Scripts -->
+    <!-- Scripts -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- User Menu Script -->
+    <script src='assets/js/admin-analytics.js'></script>
+    
+    <!-- Toggle Functions -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+        function toggleSection(sectionId) {
+            const content = document.getElementById(`${sectionId}-content`);
+            const toggle = document.getElementById(`${sectionId}-toggle`);
             
-            if (sidebarUserTrigger && sidebarUserDropdown) {
-                sidebarUserTrigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebarUserTrigger.classList.toggle('active');
-                    sidebarUserDropdown.classList.toggle('active');
-                });
-                
-                document.addEventListener('click', (e) => {
-                    if (!sidebarUserDropdown.contains(e.target) && 
-                        !sidebarUserTrigger.contains(e.target)) {
-                        sidebarUserTrigger.classList.remove('active');
-                        sidebarUserDropdown.classList.remove('active');
-                    }
-                });
-                
-                sidebarUserDropdown.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.innerHTML = '<i class="fas fa-chevron-up"></i>';
+            } else {
+                content.style.display = 'none';
+                toggle.innerHTML = '<i class="fas fa-chevron-down"></i>';
             }
-
-            // Event listeners for new export buttons
-            const exportVisitorsBtn = document.getElementById('exportVisitorsBtn');
-            if (exportVisitorsBtn) {
-                exportVisitorsBtn.addEventListener('click', () => {
-                    if (window.adminAnalytics) {
-                        window.adminAnalytics.exportData('non-customers');
-                    }
-                });
+        }
+        
+        function toggleSubsection(subsectionId) {
+            const content = document.getElementById(`${subsectionId}-content`);
+            const arrow = document.getElementById(`${subsectionId}-arrow`);
+            
+            content.classList.toggle('collapsed');
+            
+            if (content.classList.contains('collapsed')) {
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                arrow.style.transform = 'rotate(180deg)';
             }
-
-            const exportPotentialBtn = document.getElementById('exportPotentialBtn');
-            if (exportPotentialBtn) {
-                exportPotentialBtn.addEventListener('click', () => {
-                    if (window.adminAnalytics) {
-                        window.adminAnalytics.exportData('potential-customers');
-                    }
-                });
-            }
-        });
-    </script>
-    
-    <!-- Admin Analytics Script -->
-    <script src="assets/js/admin-analytics.js"></script>
-    
-    <!-- Expose instance for export buttons -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Instance will be created automatically by admin-analytics.js
-            // and exposed via window.adminAnalytics
-        });
+        }
     </script>
 </body>
 </html>
