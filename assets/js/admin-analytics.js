@@ -9,7 +9,7 @@
 
 // 🔐 CONFIGURATION
 const ADMIN_EMAIL = 'raphnardone@gmail.com';
-const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+const WORKER_URL = 'https://admin-analytics-api.raphnardone.workers.dev';
 const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
 
 class AdminAnalyticsPro {
