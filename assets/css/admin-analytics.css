@@ -1,9 +1,9 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - ADMIN ANALYTICS DASHBOARD - STYLES COMPLETS
+ * ALPHAVAULT AI - ADMIN ANALYTICS PRO v3.0 - STYLES COMPLETS
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
- * Sécurité: Accès réservé raphnardone@gmail.com
+ * Nouvelles fonctionnalités: ML Predictions, Stripe Metrics, Export CSV
  */
 
 /* ========================================
@@ -19,10 +19,14 @@
     --admin-warning: #f59e0b;
     --admin-info: #3b82f6;
     
-    /* Couleurs spécifiques Admin */
-    --admin-shield: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    --admin-gold: #fbbf24;
-    --admin-platinum: #e5e7eb;
+    /* Stripe Colors */
+    --stripe-purple: #635bff;
+    --stripe-gradient: linear-gradient(135deg, #635bff, #4f46e5);
+    
+    /* ML Predictions */
+    --ml-brain: linear-gradient(135deg, #ec4899, #8b5cf6);
+    --ml-success: #10b981;
+    --ml-danger: #ef4444;
     
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(255, 255, 255, 0.3);
@@ -91,16 +95,56 @@ body.dark-mode {
 }
 
 /* ========================================
-   GRADIENT TITLES
+   HEADER
    ======================================== */
-.gradient-title {
-    background: var(--admin-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 32px;
 }
 
+.header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-export,
+.btn-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--admin-gradient);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-export:hover,
+.btn-refresh:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+.btn-refresh {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-refresh:hover {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+}
+
+/* ========================================
+   GRADIENT TITLES
+   ======================================== */
 .page-title {
     background: var(--admin-gradient);
     -webkit-background-clip: text;
@@ -120,14 +164,171 @@ body.dark-mode {
     background-clip: text;
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    background: var(--admin-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.section-title i {
+    background: var(--admin-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 /* ========================================
-   STATS GRID
+   ML PREDICTIONS SECTION
    ======================================== */
+.ml-predictions-section {
+    margin-bottom: 40px;
+}
+
+.predictions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.prediction-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    padding: 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.prediction-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--ml-brain);
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.prediction-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4);
+    border-color: var(--admin-secondary);
+}
+
+.prediction-card:hover::before {
+    opacity: 1;
+}
+
+.prediction-icon {
+    font-size: 3rem;
+    min-width: 60px;
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.prediction-content {
+    flex: 1;
+}
+
+.prediction-content h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.prediction-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 8px 0;
+    line-height: 1;
+}
+
+.prediction-value.success {
+    background: linear-gradient(135deg, var(--ml-success), #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.prediction-value.danger {
+    background: linear-gradient(135deg, var(--ml-danger), #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.prediction-detail {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* Skeleton Loader */
+.prediction-card.skeleton {
+    min-height: 180px;
+}
+
+.skeleton-loader {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(100, 116, 139, 0.1) 25%,
+        rgba(100, 116, 139, 0.2) 50%,
+        rgba(100, 116, 139, 0.1) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ========================================
+   STATS SECTION
+   ======================================== */
+.stats-section {
+    margin-bottom: 40px;
+}
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
-    margin-bottom: 32px;
 }
 
 .stat-card {
@@ -165,6 +366,16 @@ body.dark-mode {
 
 .stat-card:hover::before {
     opacity: 1;
+}
+
+/* Stripe Card Variant */
+.stat-card.stripe-card::before {
+    background: var(--stripe-gradient);
+}
+
+.stat-card.stripe-card:hover {
+    border-color: var(--stripe-purple);
+    box-shadow: 0 16px 48px rgba(99, 91, 255, 0.4);
 }
 
 .stat-icon {
@@ -225,9 +436,26 @@ body.dark-mode {
     color: var(--admin-success);
 }
 
-.stat-change.negative {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--admin-danger);
+.stat-badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.stat-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--admin-success);
+}
+
+.stat-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--admin-warning);
 }
 
 /* ========================================
@@ -274,20 +502,24 @@ body.dark-mode {
     opacity: 1;
 }
 
-.chart-card h2 {
+.chart-header {
+    margin-bottom: 24px;
+}
+
+.chart-header h2 {
     font-size: 1.2rem;
     font-weight: 800;
     background: var(--admin-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 0 0 24px 0;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.chart-card h2 i {
+.chart-header h2 i {
     background: var(--admin-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -306,6 +538,7 @@ body.dark-mode {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     gap: 24px;
+    margin-bottom: 32px;
 }
 
 .table-card {
@@ -342,24 +575,52 @@ body.dark-mode {
     opacity: 1;
 }
 
-.table-card h2 {
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.table-header h2 {
     font-size: 1.2rem;
     font-weight: 800;
     background: var(--admin-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 0 0 20px 0;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.table-card h2 i {
+.table-header h2 i {
     background: var(--admin-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.btn-export-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--admin-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-export-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .table-wrapper {
@@ -419,7 +680,6 @@ tbody tr:last-child td {
 /* ========================================
    BADGES
    ======================================== */
-.status-badge,
 .plan-badge {
     padding: 6px 12px;
     border-radius: 8px;
@@ -430,140 +690,28 @@ tbody tr:last-child td {
     display: inline-block;
 }
 
-.status-active {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--admin-success);
-}
-
-.status-trial {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--admin-info);
-}
-
-.status-expired {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--admin-danger);
-}
-
-.plan-free {
-    background: rgba(100, 116, 139, 0.1);
-    color: #64748b;
-}
-
 .plan-basic {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--admin-info);
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
 }
 
 .plan-pro {
-    background: rgba(139, 92, 246, 0.1);
-    color: var(--admin-secondary);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--admin-primary);
 }
 
 .plan-platinum {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     color: white;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-}
-
-.admin-badge {
-    background: var(--admin-shield);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    animation: pulse-admin 3s ease-in-out infinite;
-}
-
-@keyframes pulse-admin {
-    0%, 100% {
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.3);
-        transform: scale(1.05);
-    }
-}
-
-/* ========================================
-   ADMIN EMAIL DISPLAY
-   ======================================== */
-.admin-email {
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 8px 16px;
-    background: rgba(100, 116, 139, 0.1);
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.admin-email::before {
-    content: '👤';
-    font-size: 1.1rem;
-}
-
-/* ========================================
-   BUTTONS
-   ======================================== */
-.btn-logout {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: var(--admin-shield);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-logout::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
-}
-
-.btn-logout:hover::before {
-    left: 100%;
-}
-
-.btn-logout:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
-}
-
-.btn-logout:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 /* ========================================
    RESPONSIVE
    ======================================== */
 @media (max-width: 1024px) {
-    .stats-grid {
+    .stats-grid,
+    .predictions-grid {
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
     
@@ -574,11 +722,24 @@ tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
-    .stats-grid {
+    .header-right {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-export,
+    .btn-refresh {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .stats-grid,
+    .predictions-grid {
         grid-template-columns: 1fr;
     }
     
-    .stat-card {
+    .stat-card,
+    .prediction-card {
         padding: 20px;
     }
     
@@ -588,7 +749,8 @@ tbody tr:last-child td {
         font-size: 28px;
     }
     
-    .stat-info h3 {
+    .stat-info h3,
+    .prediction-value {
         font-size: 2rem;
     }
     
@@ -596,43 +758,23 @@ tbody tr:last-child td {
     .table-card {
         padding: 20px;
     }
-    
-    .chart-card h2,
-    .table-card h2 {
-        font-size: 1rem;
-    }
-    
-    .table-wrapper {
-        overflow-x: scroll;
-    }
-    
-    table {
-        font-size: 0.85rem;
-    }
-    
-    th, td {
-        padding: 10px 8px;
-    }
 }
 
 @media (max-width: 480px) {
-    .stat-card {
+    .stat-card,
+    .prediction-card {
         flex-direction: column;
         text-align: center;
     }
     
-    .stat-info h3 {
-        font-size: 1.8rem;
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
     
-    .admin-email {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-    }
-    
-    .btn-logout {
+    .btn-export-sm {
         width: 100%;
-        justify-content: center;
     }
 }
 
@@ -658,60 +800,19 @@ tbody tr:last-child td {
 }
 
 /* ========================================
-   ACCESSIBILITY
-   ======================================== */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-button:focus-visible {
-    outline: 3px solid var(--admin-primary);
-    outline-offset: 2px;
-}
-
-/* ========================================
-   PRINT STYLES
-   ======================================== */
-@media print {
-    .sidebar,
-    .top-header,
-    .btn-logout,
-    #loading-screen {
-        display: none !important;
-    }
-    
-    .stat-card,
-    .chart-card,
-    .table-card {
-        break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ccc;
-    }
-    
-    .charts-section,
-    .tables-section {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ========================================
    DARK MODE ENHANCEMENTS
    ======================================== */
 body.dark-mode .stat-card,
 body.dark-mode .chart-card,
-body.dark-mode .table-card {
+body.dark-mode .table-card,
+body.dark-mode .prediction-card {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 body.dark-mode .stat-card:hover,
 body.dark-mode .chart-card:hover,
-body.dark-mode .table-card:hover {
+body.dark-mode .table-card:hover,
+body.dark-mode .prediction-card:hover {
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
 }
 
@@ -721,10 +822,6 @@ body.dark-mode thead {
 
 body.dark-mode tbody tr:hover {
     background: rgba(30, 41, 59, 0.3);
-}
-
-body.dark-mode .admin-email {
-    background: rgba(100, 116, 139, 0.2);
 }
 
 /* ========================================
@@ -741,13 +838,17 @@ body.dark-mode .admin-email {
     }
 }
 
-.stat-card {
+.stat-card,
+.prediction-card {
     animation: slideInFromTop 0.6s ease-out;
 }
 
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(1),
+.prediction-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2),
+.prediction-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3),
+.prediction-card:nth-child(3) { animation-delay: 0.3s; }
 .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
 .chart-card,

@@ -1,5 +1,5 @@
 // ========================================
-// ANALYTICS TRACKER - À INCLURE SUR TOUTES LES PAGES
+// ANALYTICS TRACKER - VERSION CORRIGÉE
 // ========================================
 
 class AnalyticsTracker {
@@ -10,14 +10,27 @@ class AnalyticsTracker {
 
     async trackPageVisit() {
         try {
+            // ✅ CORRECTION: Extraire correctement le nom de la page
+            const fullPath = window.location.pathname;
+            let pageName = fullPath.split('/').pop() || 'index.html';
+            
+            // Si c'est juste "/", considérer comme index.html
+            if (pageName === '' || pageName === '/') {
+                pageName = 'index.html';
+            }
+            
             const visitData = {
-                page: window.location.pathname,
-                url: window.location.href,
+                page: pageName, // ✅ Nom court de la page
+                url: window.location.href, // URL complète
+                path: fullPath, // Chemin complet
                 referrer: document.referrer || 'direct',
                 userAgent: navigator.userAgent,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 screenWidth: window.screen.width,
-                screenHeight: window.screen.height
+                screenHeight: window.screen.height,
+                language: navigator.language,
+                // ✅ Ajouter device type
+                deviceType: this.getDeviceType()
             };
 
             // Ajouter l'utilisateur si connecté
@@ -28,11 +41,21 @@ class AnalyticsTracker {
             }
 
             await this.db.collection('analytics_visits').add(visitData);
-            console.log('📊 Visite trackée');
+            console.log('📊 Visite trackée:', pageName);
 
         } catch (error) {
             console.error('Erreur tracking:', error);
         }
+    }
+
+    getDeviceType() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+            return 'mobile';
+        } else if (ua.includes('tablet') || ua.includes('ipad')) {
+            return 'tablet';
+        }
+        return 'desktop';
     }
 
     async trackEvent(type, details) {
@@ -44,7 +67,7 @@ class AnalyticsTracker {
                 details: details,
                 userId: user?.uid || null,
                 userEmail: user?.email || null,
-                page: window.location.pathname,
+                page: window.location.pathname.split('/').pop() || 'index.html',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
