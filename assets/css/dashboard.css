@@ -492,13 +492,22 @@ body.dark-mode .btn-secondary:hover {
     /* ✅ Background statique (pas d'animation) */
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     color: white !important;
+}
+
+/* ✅ CORRECTION : Sticky sur les TH, pas sur THEAD */
+.data-table thead th {
     position: sticky;
     top: 0;
     z-index: 10;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 body.dark-mode .data-table thead {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+body.dark-mode .data-table thead th {
     background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
@@ -517,7 +526,7 @@ body.dark-mode .data-table thead {
 .data-table th:first-child {
     position: sticky;
     left: 0;
-    z-index: 11;
+    z-index: 11;  /* ✅ Déjà correct, mais assure-toi qu'il est > 10 */
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     box-shadow: 2px 0 8px rgba(102, 126, 234, 0.3);
     color: white !important;
