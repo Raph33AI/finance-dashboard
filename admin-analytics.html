@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics - AlphaVault AI</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js pour les graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/admin-analytics.css">
+</head>
+<body>
+    <!-- Écran de chargement -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Vérification des accès admin...</p>
+    </div>
+
+    <!-- Page Admin (cachée par défaut) -->
+    <div id="admin-dashboard" style="display: none;">
+        
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-chart-line"></i> Analytics Dashboard</h1>
+                <div class="header-actions">
+                    <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+                    <span id="admin-email" class="admin-email"></span>
+                    <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="total-users">0</h3>
+                    <p>Comptes Créés</p>
+                    <span class="stat-change positive" id="users-change">+0 cette semaine</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="total-visits">0</h3>
+                    <p>Visites Totales</p>
+                    <span class="stat-change positive" id="visits-change">+0 aujourd'hui</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="premium-users">0</h3>
+                    <p>Utilisateurs Premium</p>
+                    <span class="stat-change" id="premium-change">0% conversion</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="total-revenue">0€</h3>
+                    <p>Revenus Totaux</p>
+                    <span class="stat-change positive" id="revenue-change">+0€ ce mois</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Graphiques -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-area"></i> Inscriptions par Jour (30 derniers jours)</h2>
+                <canvas id="registrations-chart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-pie"></i> Répartition des Plans</h2>
+                <canvas id="plans-chart"></canvas>
+            </div>
+        </section>
+
+        <section class="charts-section">
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-line"></i> Visites par Jour (7 derniers jours)</h2>
+                <canvas id="visits-chart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-bar"></i> Pages les Plus Visitées</h2>
+                <canvas id="pages-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tableaux -->
+        <section class="tables-section">
+            <!-- Derniers Utilisateurs -->
+            <div class="table-card">
+                <h2><i class="fas fa-user-plus"></i> Dernières Inscriptions</h2>
+                <div class="table-wrapper">
+                    <table id="recent-users-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Date d'inscription</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-users-body">
+                            <tr><td colspan="4" class="loading">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Activité Récente -->
+            <div class="table-card">
+                <h2><i class="fas fa-history"></i> Activité Récente</h2>
+                <div class="table-wrapper">
+                    <table id="activity-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Utilisateur</th>
+                                <th>Détails</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity-body">
+                            <tr><td colspan="4" class="loading">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Configuration Firebase -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Script Analytics Admin -->
+    <script src="assets/js/admin-analytics.js"></script>
+</body>
+</html>
