@@ -25,6 +25,43 @@
     background-clip: text;
 }
 
+/* ✨ NOUVEAUTÉ: Bordures dégradées pour toutes les sections */
+.gradient-border {
+    position: relative;
+    border: 2px solid transparent;
+    background: var(--glass-bg);
+    background-clip: padding-box;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ✨ NOUVEAUTÉ: Titres de pages/sections en dégradé */
+h1, h2, h3, h4, 
+.section-title,
+.post-detail-title,
+.profile-name {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-weight: 800;
+}
+
 /* ════════════════════════════════════════════════════════════════
    2. COMMUNITY HEADER STATS
    ════════════════════════════════════════════════════════════════ */
@@ -39,7 +76,8 @@
 .stat-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -48,6 +86,20 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+}
+
+/* ✨ Bordure dégradée pour les stat-cards */
+.stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .stat-card::before {
@@ -60,12 +112,12 @@
     background: linear-gradient(135deg, #667eea, #764ba2);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 1;
 }
 
 .stat-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
-    border-color: #667eea;
 }
 
 .stat-card:hover::before {
@@ -142,7 +194,8 @@
     padding: 12px 20px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 700;
@@ -151,6 +204,21 @@
     transition: all 0.3s ease;
     white-space: nowrap;
     flex-shrink: 0;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour les channel-chips */
+.channel-chip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .channel-chip i {
@@ -160,7 +228,6 @@
 .channel-chip:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
-    border-color: #667eea;
 }
 
 .channel-chip.active {
@@ -168,6 +235,10 @@
     color: white;
     border-color: transparent;
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.channel-chip.active::before {
+    display: none;
 }
 
 .channel-chip.active i {
@@ -207,17 +278,27 @@
     padding: 14px 16px 14px 48px;
     font-size: 1rem;
     font-weight: 600;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: all 0.3s ease;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour search-input */
+.search-input {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .search-input:focus {
     outline: none;
-    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -228,7 +309,23 @@
     backdrop-filter: blur(20px) saturate(180%);
     padding: 6px;
     border-radius: 12px;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour filter-buttons */
+.filter-buttons::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .filter-btn {
@@ -321,12 +418,28 @@
 .post-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
+}
+
+/* ✨ Bordure dégradée pour post-cards */
+.post-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .post-card::before {
@@ -339,12 +452,12 @@
     background: linear-gradient(135deg, #667eea, #764ba2);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 1;
 }
 
 .post-card:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
-    border-color: #667eea;
 }
 
 .post-card:hover::before {
@@ -357,6 +470,8 @@
     align-items: flex-start;
     padding: 20px 20px 0 20px;
     gap: 12px;
+    position: relative;
+    z-index: 1;
 }
 
 .post-channel {
@@ -402,6 +517,8 @@
 
 .post-content {
     padding: 16px 20px 20px 20px;
+    position: relative;
+    z-index: 1;
 }
 
 .post-title {
@@ -513,18 +630,33 @@
 .featured-post {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour featured-posts */
+.featured-post::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .featured-post:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-    border-color: #667eea;
 }
 
 .featured-post-title {
@@ -560,16 +692,31 @@
     padding: 14px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour leaderboard-items */
+.leaderboard-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .leaderboard-item:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-    border-color: #667eea;
 }
 
 .leaderboard-rank {
@@ -629,9 +776,25 @@
 .editor-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 16px;
     padding: 32px;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour editor-card */
+.editor-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .form-section {
@@ -663,7 +826,8 @@
     padding: 14px 16px;
     font-size: 1rem;
     font-weight: 600;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
@@ -672,10 +836,19 @@
     font-family: inherit;
 }
 
+/* ✨ Bordure dégradée pour inputs/selects */
+.form-input,
+.form-select {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 .form-input:focus,
 .form-select:focus {
     outline: none;
-    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -693,7 +866,8 @@
     flex-wrap: wrap;
     gap: 8px;
     padding: 12px;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
@@ -701,8 +875,16 @@
     transition: all 0.3s ease;
 }
 
+/* ✨ Bordure dégradée pour tags-input */
+.tags-input-wrapper {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 .tags-input-wrapper:focus-within {
-    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -752,7 +934,8 @@
 
 /* Upload Zone */
 .upload-zone {
-    border: 3px dashed var(--glass-border);
+    border: 3px dashed transparent;
+    background-clip: padding-box;
     border-radius: 16px;
     padding: 48px 24px;
     text-align: center;
@@ -762,13 +945,20 @@
     backdrop-filter: blur(20px) saturate(180%);
 }
 
+/* ✨ Bordure dégradée pour upload-zone */
+.upload-zone {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 .upload-zone:hover {
-    border-color: #667eea;
     background: rgba(102, 126, 234, 0.05);
 }
 
 .upload-zone.drag-over {
-    border-color: #667eea;
     background: rgba(102, 126, 234, 0.1);
     transform: scale(1.02);
 }
@@ -807,7 +997,17 @@
     border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 1;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* ✨ Bordure dégradée pour image-preview */
+.image-preview {
+    background-image: 
+        linear-gradient(white, white),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .image-preview img {
@@ -842,7 +1042,8 @@
 .btn-cancel {
     padding: 14px 32px;
     background: transparent;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     font-size: 1rem;
     font-weight: 700;
@@ -851,9 +1052,17 @@
     transition: all 0.3s ease;
 }
 
+/* ✨ Bordure dégradée pour btn-cancel */
+.btn-cancel {
+    background-image: 
+        linear-gradient(transparent, transparent),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 .btn-cancel:hover {
     background: rgba(239, 68, 68, 0.1);
-    border-color: #ef4444;
     color: #ef4444;
 }
 
@@ -921,10 +1130,10 @@
 .post-detail-title {
     font-size: 2.5rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
     margin-bottom: 20px;
     line-height: 1.2;
 }
@@ -952,6 +1161,10 @@
     margin-top: 32px;
     margin-bottom: 16px;
     font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 .post-detail-content p {
@@ -989,9 +1202,19 @@
 .post-detail-images img {
     width: 100%;
     border-radius: 12px;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+/* ✨ Bordure dégradée pour post-detail-images */
+.post-detail-images img {
+    background-image: 
+        linear-gradient(white, white),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 .post-detail-images img:hover {
@@ -1005,7 +1228,8 @@
     min-height: 120px;
     padding: 16px;
     border-radius: 12px;
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     background: var(--glass-bg);
     color: var(--text-primary);
     font-size: 1rem;
@@ -1016,9 +1240,17 @@
     transition: all 0.3s ease;
 }
 
+/* ✨ Bordure dégradée pour textarea */
+.comment-textarea {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 .comment-textarea:focus {
     outline: none;
-    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -1031,10 +1263,26 @@
 .comment-item {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour comments */
+.comment-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .comment-item:hover {
@@ -1114,6 +1362,7 @@
     font-weight: 900;
     margin-bottom: 12px;
     color: white !important;
+    -webkit-text-fill-color: white !important;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1177,17 +1426,32 @@
 
 .user-post-item {
     background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
+}
+
+/* ✨ Bordure dégradée pour user-posts */
+.user-post-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .user-post-item:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
-    border-color: #667eea;
 }
 
 .user-post-title {
@@ -1335,6 +1599,17 @@
         justify-content: center;
     }
     
+    /* ✨ CORRECTION: Channels reste horizontal sur mobile */
+    .channels-scroll {
+        display: flex !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+    }
+    
+    .channel-chip {
+        flex-shrink: 0 !important;
+    }
+    
     /* Posts Grid */
     .posts-grid {
         grid-template-columns: 1fr;
@@ -1422,6 +1697,12 @@
     .image-preview-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+    
+    /* ✨ CORRECTION: Channels horizontal même sur petit mobile */
+    .channels-scroll {
+        display: flex !important;
+        overflow-x: auto !important;
+    }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1437,7 +1718,6 @@ body.dark-mode .editor-card,
 body.dark-mode .comment-item,
 body.dark-mode .user-post-item {
     background: rgba(15, 23, 42, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-mode .form-input,
@@ -1447,11 +1727,24 @@ body.dark-mode .comment-textarea,
 body.dark-mode .tags-input-wrapper,
 body.dark-mode .upload-zone {
     background: rgba(15, 23, 42, 0.6);
-    border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-mode .filter-btn:hover {
     background: rgba(102, 126, 234, 0.2);
+}
+
+/* ✨ Bordures dégradées en dark mode */
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .search-input,
+body.dark-mode .comment-textarea,
+body.dark-mode .tags-input-wrapper,
+body.dark-mode .upload-zone {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1504,244 +1797,3 @@ body.dark-mode #particles-canvas {
 .posts-grid > .post-card:nth-child(4) { animation-delay: 0.2s; }
 .posts-grid > .post-card:nth-child(5) { animation-delay: 0.25s; }
 .posts-grid > .post-card:nth-child(6) { animation-delay: 0.3s; }
-
-/* ════════════════════════════════════════════════════════════════
-   16. CORRECTIONS ADDITIONNELLES - GRADIENTS & MOBILE
-   ════════════════════════════════════════════════════════════════ */
-
-/* ─────────────────────────────────────────────────────────────
-   A. CONTOURS BLEU/VIOLET DÉGRADÉ (Toutes cartes/sections)
-   ───────────────────────────────────────────────────────────── */
-
-.stat-card,
-.channel-chip,
-.post-card,
-.featured-post,
-.leaderboard-item,
-.editor-card,
-.comment-item,
-.user-post-item,
-.search-input,
-.form-input,
-.form-select,
-.comment-textarea,
-.tags-input-wrapper,
-.upload-zone,
-.filter-buttons,
-.image-preview {
-    border: 2px solid transparent !important;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
-}
-
-/* Dark Mode Adaptation */
-body.dark-mode .stat-card,
-body.dark-mode .channel-chip,
-body.dark-mode .post-card,
-body.dark-mode .featured-post,
-body.dark-mode .leaderboard-item,
-body.dark-mode .editor-card,
-body.dark-mode .comment-item,
-body.dark-mode .user-post-item {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-body.dark-mode .form-input,
-body.dark-mode .form-select,
-body.dark-mode .search-input,
-body.dark-mode .comment-textarea,
-body.dark-mode .tags-input-wrapper,
-body.dark-mode .upload-zone {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-/* Effet Glow au Hover */
-.stat-card:hover,
-.post-card:hover,
-.featured-post:hover,
-.leaderboard-item:hover,
-.user-post-item:hover {
-    box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.35),
-        0 0 40px rgba(118, 75, 162, 0.2),
-        inset 0 0 60px rgba(102, 126, 234, 0.08) !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   B. TITRES EN BLEU/VIOLET DÉGRADÉ (Tous les titres)
-   ───────────────────────────────────────────────────────────── */
-
-/* Section Titles */
-.section-title,
-h1, h2, h3, h4,
-.post-title,
-.post-detail-title,
-.profile-name,
-.featured-post-title,
-.user-post-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-weight: 800 !important;
-}
-
-/* Labels et sous-titres */
-.stat-label,
-.form-label,
-.section-header h3,
-.profile-stat-label {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-weight: 700 !important;
-}
-
-/* Titres dans les cartes */
-.post-card .post-title,
-.featured-post .featured-post-title,
-.user-post-item .user-post-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-}
-
-/* Headers de formulaire */
-.editor-card h3,
-.editor-card .section-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   C. CHANNELS HORIZONTAL SUR SMARTPHONE (Force le scroll)
-   ───────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-    .channels-scroll {
-        display: flex !important;
-        flex-direction: row !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        white-space: nowrap !important;
-        -webkit-overflow-scrolling: touch !important;
-        scroll-snap-type: x mandatory !important;
-        padding-bottom: 20px !important;
-    }
-    
-    .channel-chip {
-        flex: 0 0 auto !important;
-        scroll-snap-align: start !important;
-        min-width: fit-content !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .channels-scroll {
-        gap: 10px !important;
-        padding: 8px 4px 20px 4px !important;
-    }
-    
-    .channel-chip {
-        padding: 10px 16px !important;
-        font-size: 0.9rem !important;
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   D. CONTOURS ANIMÉS (Effet premium)
-   ───────────────────────────────────────────────────────────── */
-
-@keyframes gradientBorderRotate {
-    0% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
-    }
-    50% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #8b5cf6 0%, #667eea 50%, #764ba2 100%);
-    }
-    100% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
-    }
-}
-
-.stat-card:hover,
-.post-card:hover {
-    animation: gradientBorderRotate 3s ease infinite !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   E. RENFORCEMENT DES SECTIONS PRINCIPALES
-   ───────────────────────────────────────────────────────────── */
-
-.section,
-.card,
-.community-sidebar > div,
-.profile-header-card {
-    border: 2px solid transparent !important;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
-}
-
-body.dark-mode .section,
-body.dark-mode .card,
-body.dark-mode .community-sidebar > div {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   F. SMOOTH SCROLL POUR CHANNELS (Mobile UX)
-   ───────────────────────────────────────────────────────────── */
-
-.channels-scroll {
-    scroll-behavior: smooth !important;
-}
-
-/* Indicateur de scroll (optionnel) */
-.channels-scroll::after {
-    content: '→';
-    position: sticky;
-    right: 0;
-    background: linear-gradient(90deg, transparent 0%, var(--glass-bg) 30%);
-    padding: 12px 20px 12px 40px;
-    font-size: 1.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-@media (max-width: 768px) {
-    .channels-scroll.has-more::after {
-        opacity: 1;
-    }
-}
-
-/* ════════════════════════════════════════════════════════════════
-   FIN DES CORRECTIONS ADDITIONNELLES
-   ════════════════════════════════════════════════════════════════ */
