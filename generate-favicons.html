@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Générateur de Favicons AlphaVault AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #667eea; }
+        .preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .preview-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .preview-item canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        code {
+            background: #1a1a2e;
+            color: #a78bfa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Générateur de Favicons AlphaVault AI</h1>
+        <p>Ce script va générer tous les favicons nécessaires pour ton site en utilisant EXACTEMENT ton design actuel.</p>
+        
+        <div id="success" class="success">
+            ✅ Favicons générés avec succès ! Télécharge-les en cliquant sur les boutons ci-dessous.
+        </div>
+
+        <div class="preview" id="preview"></div>
+
+        <h3>📥 Instructions :</h3>
+        <ol>
+            <li>Clique sur chaque bouton "Download" pour télécharger les favicons</li>
+            <li>Place tous les fichiers téléchargés à la <strong>racine</strong> de ton site</li>
+            <li>Ajoute le code HTML fourni plus bas dans tes pages</li>
+            <li>C'est terminé ! 🎉</li>
+        </ol>
+    </div>
+
+    <script>
+        // Classe pour générer les favicons (TON CODE EXACT)
+        class FaviconGenerator {
+            constructor() {
+                this.defaultColor1 = '#667eea';
+                this.defaultColor2 = '#764ba2';
+            }
+
+            draw(size, color1 = this.defaultColor1, color2 = this.defaultColor2) {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // Facteur d'échelle
+                const scale = size / 32;
+                
+                // Effacer le canvas
+                ctx.clearRect(0, 0, size, size);
+                
+                // ═══ FOND CIRCULAIRE ═══
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                ctx.arc(16 * scale, 16 * scale, 15 * scale, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // ═══ GRADIENT POUR LE GRAPHIQUE ═══
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, color1);
+                gradient.addColorStop(1, color2);
+                
+                // ═══ LIGNE DU GRAPHIQUE ═══
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2.5 * scale;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                ctx.beginPath();
+                ctx.moveTo(4 * scale, 26 * scale);
+                ctx.lineTo(8 * scale, 22 * scale);
+                ctx.lineTo(12 * scale, 24 * scale);
+                ctx.lineTo(16 * scale, 19 * scale);
+                ctx.lineTo(20 * scale, 21 * scale);
+                ctx.lineTo(24 * scale, 14 * scale);
+                ctx.lineTo(28 * scale, 9 * scale);
+                ctx.stroke();
+                
+                // ═══ POINTS DE DONNÉES ═══
+                const points = [
+                    { x: 8 * scale, y: 22 * scale, color: color1 },
+                    { x: 16 * scale, y: 19 * scale, color: this.blendColors(color1, color2, 0.5) },
+                    { x: 24 * scale, y: 14 * scale, color: color2 }
+                ];
+                
+                points.forEach(point => {
+                    ctx.fillStyle = point.color;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 1.8 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // ═══ POINT FINAL AVEC HALO ═══
+                ctx.fillStyle = '#a78bfa';
+                ctx.shadowColor = '#a78bfa';
+                ctx.shadowBlur = 4 * scale;
+                ctx.beginPath();
+                ctx.arc(28 * scale, 9 * scale, 2.2 * scale, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // ═══ FLÈCHE MONTANTE ═══
+                ctx.strokeStyle = '#a78bfa';
+                ctx.lineWidth = 1.8 * scale;
+                ctx.beginPath();
+                ctx.moveTo(26 * scale, 11 * scale);
+                ctx.lineTo(28 * scale, 9 * scale);
+                ctx.lineTo(26 * scale, 7 * scale);
+                ctx.stroke();
+                
+                return canvas;
+            }
+
+            blendColors(color1, color2, ratio) {
+                const hex = (color) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+                    return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                    } : null;
+                };
+                
+                const c1 = hex(color1);
+                const c2 = hex(color2);
+                
+                if (!c1 || !c2) return color1;
+                
+                const r = Math.round(c1.r + (c2.r - c1.r) * ratio);
+                const g = Math.round(c1.g + (c2.g - c1.g) * ratio);
+                const b = Math.round(c1.b + (c2.b - c1.b) * ratio);
+                
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+
+            downloadCanvas(canvas, filename) {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Générer tous les favicons
+        const generator = new FaviconGenerator();
+        const preview = document.getElementById('preview');
+
+        const sizes = [
+            { size: 16, name: 'favicon-16x16.png', label: '16x16 (Browser Tab)' },
+            { size: 32, name: 'favicon-32x32.png', label: '32x32 (Browser Tab HD)' },
+            { size: 180, name: 'apple-touch-icon.png', label: '180x180 (Apple Touch Icon)' },
+            { size: 192, name: 'android-chrome-192x192.png', label: '192x192 (Android)' },
+            { size: 512, name: 'android-chrome-512x512.png', label: '512x512 (Android HD)' }
+        ];
+
+        sizes.forEach(({ size, name, label }) => {
+            const canvas = generator.draw(size);
+            
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            item.innerHTML = `
+                <h4>${label}</h4>
+                <div style="background: #f0f0f0; padding: 10px; border-radius: 8px;">
+                    <!-- Canvas sera inséré ici -->
+                </div>
+                <code>${name}</code>
+                <br><br>
+                <button onclick="downloadFavicon(${size}, '${name}')">📥 Download ${name}</button>
+            `;
+            
+            item.querySelector('div').appendChild(canvas);
+            preview.appendChild(item);
+        });
+
+        // Fonction globale de téléchargement
+        window.downloadFavicon = function(size, name) {
+            const canvas = generator.draw(size);
+            generator.downloadCanvas(canvas, name);
+            document.getElementById('success').style.display = 'block';
+        };
+
+        // Générer aussi le favicon.ico (combinaison 16x16 et 32x32)
+        const icoButton = document.createElement('button');
+        icoButton.textContent = '📥 Download favicon.ico (16x16 + 32x32)';
+        icoButton.style.width = '100%';
+        icoButton.style.marginTop = '20px';
+        icoButton.onclick = function() {
+            // Pour favicon.ico, on télécharge le 32x32 et on le renomme
+            const canvas = generator.draw(32);
+            generator.downloadCanvas(canvas, 'favicon.ico');
+            document.getElementById('success').style.display = 'block';
+            alert('⚠ Note: Le fichier .ico téléchargé est en format PNG. Pour un vrai .ico multi-résolution, utilise un convertisseur en ligne comme https://convertico.com/');
+        };
+        preview.appendChild(icoButton);
+    </script>
+</body>
+</html>
