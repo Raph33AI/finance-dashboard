@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/community.css">
+    
+    <style>
+        /* ============================================
+           PUBLIC PROFILE PAGE STYLES
+           ============================================ */
+        
+        .profile-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 100px 20px 40px;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .profile-header-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6, #EC4899);
+            opacity: 0.2;
+        }
+
+        .profile-header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 3rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            border: 4px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-bio {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .profile-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .profile-stat-value {
+            font-size: 1.75rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .profile-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .profile-badge {
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #F59E0B, #FBBF24);
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .profile-badge.platinum {
+            background: linear-gradient(135deg, #8B5CF6, #6366F1);
+        }
+
+        .profile-badge.verified {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        .profile-section-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-count {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 6px 14px;
+            border-radius: 12px;
+            color: #60A5FA;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .user-posts-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .user-post-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-post-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-post-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .user-post-meta {
+            display: flex;
+            gap: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header-card {
+                padding: 24px;
+            }
+
+            .profile-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-name {
+                font-size: 2rem;
+                justify-content: center;
+            }
+
+            .profile-stats {
+                justify-content: center;
+            }
+        }
+    </style>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="assets/js/firebase-config.js"></script>
+</head>
+<body>
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="logo-section">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>AlphaVault AI</span>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="dashboard-financier.html">Dashboard</a>
+            <a href="community-hub.html">Community</a>
+            <a href="analyst-coverage.html">Analysis</a>
+        </nav>
+        
+        <div class="user-section">
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-menu">
+                <img src="" alt="User" class="user-avatar" id="userAvatar">
+                <span class="user-name" id="userName">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Wrapper -->
+    <div class="profile-wrapper">
+        <div class="profile-container">
+            
+            <!-- Back Button -->
+            <a href="community-hub.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Community
+            </a>
+
+            <!-- Profile Header -->
+            <div class="profile-header-card">
+                <div class="profile-header-content" id="profileHeader">
+                    <!-- Loading -->
+                    <div style="text-align: center; padding: 40px; width: 100%;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                
+                <!-- Recent Posts -->
+                <div class="profile-section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-file-alt"></i> Recent Posts
+                        </h2>
+                        <span class="section-count" id="postsCount">0</span>
+                    </div>
+                    <div class="user-posts-grid" id="userPostsGrid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/chatbot-particles.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/community-firebase.js"></script>
+
+    <script>
+        /* ============================================
+           PUBLIC PROFILE LOGIC
+           ============================================ */
+
+        class PublicProfile {
+            constructor() {
+                this.userId = null;
+                this.userData = null;
+                this.userPosts = [];
+            }
+
+            async initialize() {
+                try {
+                    console.log('👤 Initializing Public Profile...');
+                    
+                    // Get user ID from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    this.userId = urlParams.get('id');
+
+                    if (!this.userId) {
+                        this.showError('User not found');
+                        return;
+                    }
+
+                    // Load user data
+                    await this.loadUserData();
+                    
+                    // Load user posts
+                    await this.loadUserPosts();
+                    
+                    console.log('✅ Public Profile initialized');
+                } catch (error) {
+                    console.error('❌ Error initializing profile:', error);
+                    this.showError('Failed to load profile');
+                }
+            }
+
+            async loadUserData() {
+                const userDoc = await firebase.firestore()
+                    .collection('users')
+                    .doc(this.userId)
+                    .get();
+
+                if (!userDoc.exists) {
+                    throw new Error('User not found');
+                }
+
+                this.userData = userDoc.data();
+                this.renderProfileHeader();
+            }
+
+            async loadUserPosts() {
+                const snapshot = await firebase.firestore()
+                    .collection('community_posts')
+                    .where('authorId', '==', this.userId)
+                    .orderBy('createdAt', 'desc')
+                    .limit(20)
+                    .get();
+
+                this.userPosts = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt?.toDate()
+                }));
+
+                this.renderUserPosts();
+            }
+
+            renderProfileHeader() {
+                const displayName = this.userData.displayName || this.userData.email?.split('@')[0] || 'Unknown User';
+                const bio = this.userData.bio || 'No bio available';
+                const reputation = this.userData.reputation || 0;
+                const postCount = this.userData.postCount || 0;
+                const badges = this.userData.badges || [];
+
+                const badgesHTML = badges.map(badge => {
+                    const badgeInfo = this.getBadgeInfo(badge);
+                    return `
+                        <div class="profile-badge ${badgeInfo.class}">
+                            <i class="${badgeInfo.icon}"></i>
+                            <span>${badgeInfo.name}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                const profileHTML = `
+                    <div class="profile-avatar-large">
+                        ${displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">
+                            ${this.escapeHtml(displayName)}
+                            ${badges.includes('verified-analyst') ? '<i class="fas fa-badge-check" style="color: #3B82F6;"></i>' : ''}
+                        </h1>
+                        <p class="profile-bio">${this.escapeHtml(bio)}</p>
+                        
+                        <div class="profile-stats">
+                            <div class="profile-stat-item">
+                                <div class="profile-stat-value">${reputation.toLocaleString()}</div>
+                                <div class="profile-stat-label">Reputation</div>
+                            </div>
+                            <div class="profile-stat-item">
+                                <div class="profile-stat-value">${postCount}</div>
+                                <div class="profile-stat-label">Posts</div>
+                            </div>
+                            <div class="profile-stat-item">
+                                <div class="profile-stat-value">${badges.length}</div>
+                                <div class="profile-stat-label">Badges</div>
+                            </div>
+                        </div>
+
+                        ${badges.length > 0 ? `
+                            <div class="profile-badges">
+                                ${badgesHTML}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                document.getElementById('profileHeader').innerHTML = profileHTML;
+                document.title = `${displayName} - AlphaVault AI`;
+            }
+
+            renderUserPosts() {
+                const postsGrid = document.getElementById('userPostsGrid');
+                const postsCount = document.getElementById('postsCount');
+
+                postsCount.textContent = this.userPosts.length;
+
+                if (this.userPosts.length === 0) {
+                    postsGrid.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p style="font-size: 1.1rem; font-weight: 700;">No posts yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const postsHTML = this.userPosts.map(post => `
+                    <div class="user-post-item" onclick="window.location.href='post.html?id=${post.id}'">
+                        <h3 class="user-post-title">${this.escapeHtml(post.title)}</h3>
+                        <div class="user-post-meta">
+                            <span><i class="fas fa-arrow-up"></i> ${post.upvotes || 0}</span>
+                            <span><i class="fas fa-comment"></i> ${post.commentCount || 0}</span>
+                            <span><i class="fas fa-eye"></i> ${post.viewCount || 0}</span>
+                            <span><i class="fas fa-clock"></i> ${this.formatTimeAgo(post.createdAt)}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                postsGrid.innerHTML = postsHTML;
+            }
+
+            getBadgeInfo(badge) {
+                const badges = {
+                    'verified-analyst': { name: 'Verified Analyst', icon: 'fas fa-badge-check', class: 'verified' },
+                    'top-contributor': { name: 'Top Contributor', icon: 'fas fa-trophy', class: 'platinum' },
+                    'platinum-member': { name: 'Platinum Member', icon: 'fas fa-star', class: 'platinum' }
+                };
+                return badges[badge] || { name: badge, icon: 'fas fa-award', class: '' };
+            }
+
+            formatTimeAgo(date) {
+                if (!date) return 'Unknown';
+                const seconds = Math.floor((new Date() - date) / 1000);
+                const intervals = { year: 31536000, month: 2592000, week: 604800, day: 86400, hour: 3600, minute: 60 };
+                for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                    const interval = Math.floor(seconds / secondsInUnit);
+                    if (interval >= 1) return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
+                }
+                return 'Just now';
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            showError(message) {
+                document.getElementById('profileHeader').innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #EF4444; width: 100%;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                        <h3 style="font-size: 1.5rem; font-weight: 800; color: white;">${message}</h3>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            window.publicProfile = new PublicProfile();
+            window.publicProfile.initialize();
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Hub - AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/community.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Auth Guard -->
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <!-- Top Header (réutiliser votre header existant) -->
+    <div class="top-header">
+        <div class="logo-section">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>AlphaVault AI</span>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="dashboard-financier.html">Dashboard</a>
+            <a href="community-hub.html" class="active">Community</a>
+            <a href="analyst-coverage.html">Analysis</a>
+        </nav>
+        
+        <div class="user-section">
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-menu">
+                <img src="" alt="User" class="user-avatar" id="userAvatar">
+                <span class="user-name" id="userName">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Wrapper -->
+    <div class="community-wrapper">
+        <div class="community-container">
+            
+            <!-- Header -->
+            <div class="community-header">
+                <h1 class="community-title">
+                    <i class="fas fa-users"></i> Community Hub
+                </h1>
+                <p class="community-subtitle">
+                    Share insights, analyses, and connect with fellow traders
+                </p>
+                <div class="community-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalPosts">0</div>
+                        <div class="stat-label">Total Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalMembers">0</div>
+                        <div class="stat-label">Members</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="postsToday">0</div>
+                        <div class="stat-label">Posts Today</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels Navigation -->
+            <div class="channels-nav">
+                <div class="channels-scroll" id="channelsScroll">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="actions-bar">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        placeholder="Search posts, tags, or users..."
+                        id="searchInput"
+                    >
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="trending">
+                        <i class="fas fa-fire"></i> Trending
+                    </button>
+                    <button class="filter-btn" data-filter="latest">
+                        <i class="fas fa-clock"></i> Latest
+                    </button>
+                    <button class="filter-btn" data-filter="top">
+                        <i class="fas fa-trophy"></i> Top
+                    </button>
+                </div>
+                
+                <button class="create-post-btn" onclick="window.location.href='create-post.html'">
+                    <i class="fas fa-plus"></i> Create Post
+                </button>
+            </div>
+
+            <!-- Main Layout (Posts + Sidebar) -->
+            <div class="community-layout">
+                
+                <!-- Posts Grid -->
+                <div class="posts-section">
+                    <div class="posts-grid" id="postsGrid">
+                        <!-- Dynamically populated -->
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Load More -->
+                    <div style="text-align: center; margin-top: 32px;">
+                        <button class="filter-btn" id="loadMoreBtn" style="font-size: 1rem; padding: 16px 40px;">
+                            <i class="fas fa-chevron-down"></i> Load More
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    
+                    <!-- Featured Posts -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-star"></i> Featured Posts
+                        </h3>
+                        <div id="featuredPosts">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-trophy"></i> Top Contributors
+                        </h3>
+                        <div class="leaderboard-list" id="leaderboardList">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Trending Tags -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-hashtag"></i> Trending Tags
+                        </h3>
+                        <div class="post-tags" id="trendingTags">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/chatbot-particles.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/community-firebase.js"></script>
+    <script src="assets/js/channel-manager.js"></script>
+    <script src="assets/js/community-hub.js"></script>
+
+</body>
+</html>
