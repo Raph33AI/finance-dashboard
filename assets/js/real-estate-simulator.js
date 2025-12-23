@@ -1620,28 +1620,21 @@
                 byCountry[prop.country] += prop.currentValue;
             });
             
-            // ✅ MAPPING pays vers codes ISO
-            const countryCodeMap = {
-                'france': 'FR',
-                'uk': 'GB',
-                'usa': 'US',
-                'spain': 'ES',
-                'portugal': 'PT',
-                'germany': 'DE',
-                'switzerland': 'CH',
-                'italy': 'IT',
-                'belgium': 'BE',
-                'netherlands': 'NL'
-            };
+            // ✅ Calcul du total pour les pourcentages
+            const total = Object.values(byCountry).reduce((sum, val) => sum + val, 0);
             
-            const data = Object.keys(byCountry).map(country => {
-                return {
-                    'hc-key': countryCodeMap[country]?.toLowerCase(),
-                    code: countryCodeMap[country],
-                    value: byCountry[country],
-                    name: this.taxRules[country].name
-                };
-            });
+            // ✅ DONNÉES TRIÉES PAR VALEUR
+            const data = Object.keys(byCountry)
+                .map(country => {
+                    const rules = this.taxRules[country];
+                    return {
+                        name: `${rules.flag} ${rules.name}`,
+                        y: byCountry[country],
+                        country: country,
+                        percentage: (byCountry[country] / total * 100).toFixed(1)
+                    };
+                })
+                .sort((a, b) => b.y - a.y); // Tri décroissant
             
             const chartColors = this.getChartColors();
             
@@ -1649,49 +1642,94 @@
                 this.charts.portfolioDistribution.destroy();
             }
             
-            // ✅ CARTE DU MONDE (nécessite Highcharts Maps)
-            this.charts.portfolioDistribution = Highcharts.mapChart('portfolioDistributionChart', {
+            // ✅ GRAPHIQUE EN BARRES HORIZONTALES (sans Maps)
+            this.charts.portfolioDistribution = Highcharts.chart('portfolioDistributionChart', {
                 chart: {
-                    map: 'countries/world/world', // ✅ Carte du monde
+                    type: 'bar',
                     backgroundColor: 'transparent',
-                    style: { fontFamily: 'Inter, sans-serif' }
+                    style: { fontFamily: 'Inter, sans-serif' },
+                    height: Math.max(350, data.length * 80) // Hauteur dynamique
                 },
                 title: {
                     text: 'Portfolio Distribution by Country',
-                    style: { color: chartColors.title }
-                },
-                mapNavigation: {
-                    enabled: true,
-                    buttonOptions: {
-                        verticalAlign: 'bottom'
+                    style: { 
+                        color: chartColors.title,
+                        fontSize: '1.25rem',
+                        fontWeight: '800'
                     }
                 },
-                colorAxis: {
-                    min: 0,
-                    minColor: '#e0f2fe',
-                    maxColor: '#0369a1'
+                xAxis: {
+                    categories: data.map(d => d.name),
+                    labels: { 
+                        style: { 
+                            color: chartColors.text,
+                            fontSize: '1rem',
+                            fontWeight: '600'
+                        } 
+                    },
+                    gridLineColor: chartColors.gridLine,
+                    lineColor: chartColors.axisLine
+                },
+                yAxis: {
+                    title: { 
+                        text: 'Total Value (€)', 
+                        style: { color: chartColors.title } 
+                    },
+                    labels: { 
+                        style: { color: chartColors.text },
+                        formatter: function() {
+                            return '€' + (this.value / 1000).toFixed(0) + 'k';
+                        }
+                    },
+                    gridLineColor: chartColors.gridLine
                 },
                 tooltip: {
                     backgroundColor: chartColors.tooltipBg,
                     borderColor: chartColors.tooltipBorder,
                     style: { color: chartColors.text },
-                    pointFormat: '<b>{point.name}</b><br/>Value: €{point.value:,.0f}'
+                    useHTML: true,
+                    formatter: function() {
+                        const pct = (this.y / total * 100).toFixed(1);
+                        return `
+                            <div style="padding: 8px;">
+                                <strong>${this.x}</strong><br/>
+                                <span style="font-size: 1.1rem; font-weight: 700;">€${this.y.toLocaleString()}</span><br/>
+                                <span style="color: #10b981; font-weight: 600;">${pct}% of portfolio</span>
+                            </div>
+                        `;
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 8,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return '€' + (this.y / 1000).toFixed(0) + 'k (' + this.point.percentage + '%)';
+                            },
+                            style: { 
+                                color: chartColors.text,
+                                fontWeight: '700',
+                                fontSize: '0.95rem',
+                                textOutline: 'none'
+                            }
+                        },
+                        colorByPoint: true,
+                        colors: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444',
+                            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6'
+                        ]
+                    }
                 },
                 series: [{
                     name: 'Portfolio Value',
-                    data: data,
-                    joinBy: 'hc-key',
-                    states: {
-                        hover: {
-                            color: '#0ea5e9'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.code}'
-                    }
+                    data: data.map(d => ({
+                        y: d.y,
+                        percentage: d.percentage
+                    }))
                 }],
-                credits: { enabled: false }
+                credits: { enabled: false },
+                legend: { enabled: false }
             });
         },
         
@@ -1999,21 +2037,45 @@
             const sim = this.currentSimulation;
             const rules = this.taxRules[sim.country];
             
-            document.getElementById('kpiPurchasePrice').textContent = this.formatCurrency(sim.purchasePrice, rules.currencySymbol);
-            document.getElementById('kpiDownPayment').textContent = this.formatCurrency(sim.downPayment, rules.currencySymbol);
-            document.getElementById('kpiMonthlyPayment').textContent = this.formatCurrency(results.totalMonthlyPayment, rules.currencySymbol);
-            document.getElementById('kpiNetYield').textContent = results.netYield.toFixed(2) + '%';
-            document.getElementById('kpiTotalCost').textContent = this.formatCurrency(results.totalCost, rules.currencySymbol);
+            // ✅ VÉRIFICATIONS pour éviter les erreurs
+            if (!results || !rules) {
+                console.warn('⚠ Missing results or rules in updateKPIs');
+                return;
+            }
             
-            const debtRatioEl = document.getElementById('kpiDebtRatio');
-            debtRatioEl.textContent = results.debtRatio.toFixed(1) + '%';
+            // ✅ Valeurs par défaut pour éviter undefined
+            const purchasePrice = sim.purchasePrice || 0;
+            const downPayment = sim.downPayment || 0;
+            const totalMonthlyPayment = results.totalMonthlyPayment || 0;
+            const netYield = results.netYield || 0;
+            const totalCost = results.totalCost || 0;
+            const debtRatio = results.debtRatio || 0;
             
-            if (results.debtRatio <= 33) {
-                debtRatioEl.style.color = '#10b981';
-            } else if (results.debtRatio <= 40) {
-                debtRatioEl.style.color = '#f59e0b';
-            } else {
-                debtRatioEl.style.color = '#ef4444';
+            // ✅ Mise à jour sécurisée
+            const kpiPurchasePrice = document.getElementById('kpiPurchasePrice');
+            const kpiDownPayment = document.getElementById('kpiDownPayment');
+            const kpiMonthlyPayment = document.getElementById('kpiMonthlyPayment');
+            const kpiNetYield = document.getElementById('kpiNetYield');
+            const kpiTotalCost = document.getElementById('kpiTotalCost');
+            const kpiDebtRatio = document.getElementById('kpiDebtRatio');
+            
+            if (kpiPurchasePrice) kpiPurchasePrice.textContent = this.formatCurrency(purchasePrice, rules.currencySymbol);
+            if (kpiDownPayment) kpiDownPayment.textContent = this.formatCurrency(downPayment, rules.currencySymbol);
+            if (kpiMonthlyPayment) kpiMonthlyPayment.textContent = this.formatCurrency(totalMonthlyPayment, rules.currencySymbol);
+            if (kpiNetYield) kpiNetYield.textContent = netYield.toFixed(2) + '%';
+            if (kpiTotalCost) kpiTotalCost.textContent = this.formatCurrency(totalCost, rules.currencySymbol);
+            
+            if (kpiDebtRatio) {
+                kpiDebtRatio.textContent = debtRatio.toFixed(1) + '%';
+                
+                // Couleur conditionnelle
+                if (debtRatio <= 33) {
+                    kpiDebtRatio.style.color = '#10b981';
+                } else if (debtRatio <= 40) {
+                    kpiDebtRatio.style.color = '#f59e0b';
+                } else {
+                    kpiDebtRatio.style.color = '#ef4444';
+                }
             }
         },
         
