@@ -2276,15 +2276,31 @@ body.dark-mode .search-input {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   🔧 CORRECTION - BORDURES DÉGRADÉES POUR CREATE POST
+   🔧 CORRECTION FINALE - BORDURES DÉGRADÉES CREATE POST (FORCÉ)
    ════════════════════════════════════════════════════════════════ */
 
-/* Channel Select (dropdown) */
+/* Wrapper pour Channel Select */
 .form-section:has(#channelSelect) {
     position: relative;
 }
 
+.form-section:has(#channelSelect)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(100% - 45px); /* Ajuster selon la hauteur du label */
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    padding: 2px;
+    z-index: 0;
+    pointer-events: none;
+}
+
 .form-select {
+    position: relative !important;
+    z-index: 1 !important;
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     border: 2px solid transparent !important;
@@ -2309,7 +2325,11 @@ body.dark-mode .search-input {
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
 }
 
-/* Title Input */
+/* Title Input avec wrapper */
+.form-section:has(#postTitle) {
+    position: relative;
+}
+
 .form-input {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
@@ -2321,6 +2341,8 @@ body.dark-mode .search-input {
     color: var(--text-primary) !important;
     width: 100% !important;
     transition: all 0.3s ease !important;
+    position: relative !important;
+    z-index: 1 !important;
     
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
@@ -2334,13 +2356,29 @@ body.dark-mode .search-input {
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
 }
 
-/* Markdown Editor (SimpleMDE / CodeMirror) */
-.CodeMirror {
+/* Markdown Editor Container - MÉTHODE WRAPPER */
+.form-section:has(#markdownEditor) {
+    position: relative;
+}
+
+.form-section:has(#markdownEditor) .editor-toolbar {
+    background: rgba(102, 126, 234, 0.05) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.form-section:has(#markdownEditor) .CodeMirror {
     background: var(--glass-bg) !important;
     border: 2px solid transparent !important;
-    border-radius: 12px !important;
+    border-radius: 0 0 12px 12px !important;
     font-size: 1rem !important;
     color: var(--text-primary) !important;
+    position: relative !important;
+    z-index: 1 !important;
     
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
@@ -2349,41 +2387,49 @@ body.dark-mode .search-input {
     background-clip: padding-box, border-box !important;
 }
 
-.CodeMirror-focused {
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+/* Alternative pour SimpleMDE si background-clip ne marche pas */
+.form-section:has(#markdownEditor)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 45px; /* Hauteur du label */
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    z-index: 0;
+    pointer-events: none;
 }
 
-/* SimpleMDE Toolbar */
-.editor-toolbar {
-    background: rgba(102, 126, 234, 0.05) !important;
-    border: none !important;
-    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
-    border-top-left-radius: 12px !important;
-    border-top-right-radius: 12px !important;
+.editor-toolbar,
+.CodeMirror {
+    position: relative !important;
+    z-index: 2 !important;
 }
 
-.editor-toolbar a {
-    color: var(--text-primary) !important;
+.CodeMirror {
+    margin: 2px !important;
+    border-radius: 10px !important;
 }
 
-.editor-toolbar a:hover {
-    background: rgba(102, 126, 234, 0.1) !important;
-    border-color: transparent !important;
+/* Tags Input - MÉTHODE WRAPPER QUI FONCTIONNE */
+.form-section:has(.tags-input-wrapper) {
+    position: relative;
 }
 
-.editor-toolbar.fullscreen {
-    background: var(--glass-bg) !important;
-}
-
-/* Tags Input Wrapper */
 .tags-input-wrapper {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 12px !important;
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     border: 2px solid transparent !important;
     border-radius: 12px !important;
-    padding: 12px !important;
     min-height: 52px !important;
     transition: all 0.3s ease !important;
+    position: relative !important;
+    z-index: 1 !important;
     
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
@@ -2397,12 +2443,22 @@ body.dark-mode .search-input {
 }
 
 .tag-input {
+    flex: 1 !important;
+    min-width: 150px !important;
     border: none !important;
     background: transparent !important;
     color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 4px !important;
+    outline: none !important;
 }
 
-/* Upload Zone */
+/* Upload Zone - MÉTHODE WRAPPER QUI FONCTIONNE */
+.form-section:has(.upload-zone) {
+    position: relative;
+}
+
 .upload-zone {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
@@ -2412,6 +2468,8 @@ body.dark-mode .search-input {
     text-align: center !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
+    position: relative !important;
+    z-index: 1 !important;
     
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
@@ -2435,9 +2493,11 @@ body.dark-mode .search-input {
 
 /* Image Preview */
 .image-preview {
-    border: 2px solid transparent !important;
+    position: relative !important;
     border-radius: 12px !important;
     overflow: hidden !important;
+    aspect-ratio: 1 !important;
+    border: 2px solid transparent !important;
     
     background-image: 
         linear-gradient(white, white),
@@ -2446,17 +2506,21 @@ body.dark-mode .search-input {
     background-clip: padding-box, border-box !important;
 }
 
-/* Dark Mode Adjustments */
+/* Dark Mode */
 body.dark-mode .form-select,
 body.dark-mode .form-input,
-body.dark-mode .CodeMirror,
 body.dark-mode .tags-input-wrapper,
 body.dark-mode .upload-zone {
     background-image: 
         linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
         linear-gradient(135deg, #667eea, #764ba2) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .CodeMirror {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .upload-zone:hover {
@@ -2477,17 +2541,22 @@ body.dark-mode .image-preview {
         linear-gradient(135deg, #667eea, #764ba2) !important;
 }
 
-body.dark-mode .CodeMirror {
-    color: #e2e8f0 !important;
-}
-
 body.dark-mode .editor-toolbar {
     background: rgba(15, 23, 42, 0.8) !important;
 }
 
-/* Placeholder styling */
+/* Placeholder colors */
 .form-input::placeholder,
-.form-select::placeholder,
 .tag-input::placeholder {
     color: var(--text-tertiary) !important;
+}
+
+/* SimpleMDE toolbar buttons */
+.editor-toolbar a {
+    color: var(--text-primary) !important;
+}
+
+.editor-toolbar a:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    border-color: transparent !important;
 }
