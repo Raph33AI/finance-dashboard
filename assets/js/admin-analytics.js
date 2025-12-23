@@ -2,8 +2,8 @@
 // ADMIN ANALYTICS ENGINE
 // ========================================
 
-// 🔐 TON ADRESSE EMAIL ADMIN (À MODIFIER)
-const ADMIN_EMAIL = 'raphnardone@gmail.com'; // ⚠ CHANGE ICI
+// 🔐 EMAIL ADMIN AUTORISÉ (NE PAS MODIFIER SANS RAISON VALABLE)
+const ADMIN_EMAIL = 'raphnardone@gmail.com';
 
 class AdminAnalytics {
     constructor() {
@@ -19,22 +19,31 @@ class AdminAnalytics {
         
         // Vérifier l'authentification
         this.auth.onAuthStateChanged(async (user) => {
+            
+            // ❌ PAS CONNECTÉ - REDIRECTION VERS LOGIN
             if (!user) {
-                console.log('❌ Non authentifié - redirection...');
+                console.log('❌ Non authentifié - redirection vers login...');
+                alert('⛔ Vous devez être connecté pour accéder à cette page.');
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Vérifier si c'est l'admin
+            // ❌ CONNECTÉ MAIS PAS L'ADMIN - REDIRECTION VERS INDEX
             if (user.email !== ADMIN_EMAIL) {
-                console.log('⛔ Accès refusé - Pas autorisé');
-                alert('⛔ Accès interdit - Cette page est réservée aux administrateurs.');
+                console.log('⛔ Accès refusé pour:', user.email);
+                alert(`⛔ ACCÈS INTERDIT\n\nCette page est réservée aux administrateurs.\n\nUtilisateur connecté: ${user.email}\nAdmin autorisé: ${ADMIN_EMAIL}`);
                 window.location.href = 'index.html';
                 return;
             }
 
+            // ✅ C'EST L'ADMIN - AFFICHER LE DASHBOARD
             console.log('✅ Admin authentifié:', user.email);
-            document.getElementById('admin-email').textContent = user.email;
+            
+            // Afficher l'email dans l'interface
+            const adminEmailDisplay = document.getElementById('admin-email-display');
+            if (adminEmailDisplay) {
+                adminEmailDisplay.textContent = user.email;
+            }
             
             // Cacher l'écran de chargement
             document.getElementById('loading-screen').style.display = 'none';
@@ -43,15 +52,10 @@ class AdminAnalytics {
             // Charger les données
             await this.loadAllData();
         });
-
-        // Bouton déconnexion
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            this.auth.signOut();
-        });
     }
 
     async loadAllData() {
-        console.log('📊 Chargement des données...');
+        console.log('📊 Chargement des données analytics...');
         
         try {
             await Promise.all([
@@ -66,9 +70,9 @@ class AdminAnalytics {
                 this.loadRecentActivity()
             ]);
             
-            console.log('✅ Toutes les données chargées');
+            console.log('✅ Toutes les données chargées avec succès');
         } catch (error) {
-            console.error('❌ Erreur chargement:', error);
+            console.error('❌ Erreur lors du chargement des données:', error);
         }
     }
 
@@ -80,7 +84,6 @@ class AdminAnalytics {
             const usersSnapshot = await this.db.collection('users').get();
             const totalUsers = usersSnapshot.size;
             
-            // Utilisateurs de la semaine dernière
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
             
@@ -90,12 +93,10 @@ class AdminAnalytics {
             usersSnapshot.forEach(doc => {
                 const data = doc.data();
                 
-                // Compter premium
                 if (data.plan && data.plan !== 'free') {
                     premiumUsers++;
                 }
                 
-                // Compter nouveaux cette semaine
                 if (data.createdAt && data.createdAt.toDate() > weekAgo) {
                     weekUsers++;
                 }
@@ -176,7 +177,7 @@ class AdminAnalytics {
     }
 
     // ========================================
-    // GRAPHIQUE INSCRIPTIONS
+    // GRAPHIQUE INSCRIPTIONS (30 derniers jours)
     // ========================================
     async loadRegistrationsChart() {
         try {
@@ -185,7 +186,6 @@ class AdminAnalytics {
                 .limit(1000)
                 .get();
             
-            // Grouper par jour (30 derniers jours)
             const daysCounts = {};
             const today = new Date();
             
@@ -295,7 +295,7 @@ class AdminAnalytics {
     }
 
     // ========================================
-    // GRAPHIQUE VISITES
+    // GRAPHIQUE VISITES (7 derniers jours)
     // ========================================
     async loadVisitsChart() {
         try {
@@ -304,7 +304,6 @@ class AdminAnalytics {
                 .limit(1000)
                 .get();
             
-            // Grouper par jour (7 derniers jours)
             const daysCounts = {};
             const today = new Date();
             
@@ -358,7 +357,7 @@ class AdminAnalytics {
     }
 
     // ========================================
-    // GRAPHIQUE PAGES
+    // GRAPHIQUE PAGES LES PLUS VISITÉES
     // ========================================
     async loadPagesChart() {
         try {
@@ -372,7 +371,6 @@ class AdminAnalytics {
                 pagesCounts[page] = (pagesCounts[page] || 0) + 1;
             });
             
-            // Top 5 pages
             const sortedPages = Object.entries(pagesCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
@@ -396,7 +394,8 @@ class AdminAnalytics {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
-                    }
+                    },
+                    indexAxis: 'y'
                 }
             });
             
@@ -417,6 +416,11 @@ class AdminAnalytics {
             
             const tbody = document.getElementById('recent-users-body');
             tbody.innerHTML = '';
+            
+            if (usersSnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">Aucun utilisateur trouvé</td></tr>';
+                return;
+            }
             
             usersSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -492,5 +496,6 @@ class AdminAnalytics {
 // INITIALISATION
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Démarrage Admin Analytics...');
     new AdminAnalytics();
 });

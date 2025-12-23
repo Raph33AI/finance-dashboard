@@ -315,14 +315,14 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (VISIBLE UNIQUEMENT POUR L'ADMIN) ===== -->
-                <div class='nav-section' id='adminSection' style='display: none;'>
+                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
                         <span>Admin</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu'>
+                    <div class='nav-submenu' style='display: block;'>
                         <a href='admin-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-line'></i>
                             <span>Analytics Dashboard</span>
@@ -809,7 +809,7 @@
     <!-- Dashboard Script -->
     <script src='assets/js/dashboard.js'></script>
     <script src="assets/js/chatbot-particles.js"></script>
-    <!-- Admin Visibility (affiche le menu admin si connecté) -->
+    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
     <script src="assets/js/admin-visibility.js"></script>
 </body>
     
