@@ -25,27 +25,6 @@
     background-clip: text;
 }
 
-/* ✨ Titres de pages/sections en dégradé */
-h1, h2, h3, h4, 
-.section-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-weight: 800;
-}
-
-/* Exception pour les titres sur fond dégradé */
-.profile-header-card h1,
-.profile-header-card h2,
-.profile-header-card .profile-name {
-    background: none !important;
-    -webkit-background-clip: unset !important;
-    -webkit-text-fill-color: white !important;
-    background-clip: unset !important;
-    color: white !important;
-}
-
 /* ════════════════════════════════════════════════════════════════
    2. COMMUNITY HEADER STATS
    ════════════════════════════════════════════════════════════════ */
@@ -60,7 +39,7 @@ h1, h2, h3, h4,
 .stat-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -68,12 +47,7 @@ h1, h2, h3, h4,
     gap: 20px;
     transition: all 0.3s ease;
     position: relative;
-    overflow: visible;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    overflow: hidden;
 }
 
 .stat-card::before {
@@ -86,12 +60,12 @@ h1, h2, h3, h4,
     background: linear-gradient(135deg, #667eea, #764ba2);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 1;
 }
 
 .stat-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
 }
 
 .stat-card:hover::before {
@@ -168,7 +142,7 @@ h1, h2, h3, h4,
     padding: 12px 20px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 700;
@@ -177,12 +151,6 @@ h1, h2, h3, h4,
     transition: all 0.3s ease;
     white-space: nowrap;
     flex-shrink: 0;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .channel-chip i {
@@ -192,6 +160,7 @@ h1, h2, h3, h4,
 .channel-chip:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
 }
 
 .channel-chip.active {
@@ -231,7 +200,6 @@ h1, h2, h3, h4,
     color: var(--text-tertiary);
     font-size: 1.1rem;
     pointer-events: none;
-    z-index: 2;
 }
 
 .search-input {
@@ -239,21 +207,17 @@ h1, h2, h3, h4,
     padding: 14px 16px 14px 48px;
     font-size: 1rem;
     font-weight: 600;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: all 0.3s ease;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .search-input:focus {
     outline: none;
+    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -264,12 +228,7 @@ h1, h2, h3, h4,
     backdrop-filter: blur(20px) saturate(180%);
     padding: 6px;
     border-radius: 12px;
-    border: 2px solid transparent;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: 2px solid var(--glass-border);
 }
 
 .filter-btn {
@@ -349,21 +308,6 @@ h1, h2, h3, h4,
     top: 24px;
 }
 
-/* ✨ Bordures dégradées pour les widgets sidebar */
-.sidebar-widget {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-}
-
 /* ════════════════════════════════════════════════════════════════
    6. POSTS GRID
    ════════════════════════════════════════════════════════════════ */
@@ -377,17 +321,12 @@ h1, h2, h3, h4,
 .post-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .post-card::before {
@@ -400,12 +339,12 @@ h1, h2, h3, h4,
     background: linear-gradient(135deg, #667eea, #764ba2);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 2;
 }
 
 .post-card:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
 }
 
 .post-card:hover::before {
@@ -418,8 +357,6 @@ h1, h2, h3, h4,
     align-items: flex-start;
     padding: 20px 20px 0 20px;
     gap: 12px;
-    position: relative;
-    z-index: 1;
 }
 
 .post-channel {
@@ -465,8 +402,6 @@ h1, h2, h3, h4,
 
 .post-content {
     padding: 16px 20px 20px 20px;
-    position: relative;
-    z-index: 1;
 }
 
 .post-title {
@@ -535,7 +470,6 @@ h1, h2, h3, h4,
     height: 36px;
     border-radius: 50%;
     border: 2px solid #667eea;
-    object-fit: cover;
 }
 
 .author-info {
@@ -579,23 +513,18 @@ h1, h2, h3, h4,
 .featured-post {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .featured-post:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
 }
 
 .featured-post-title {
@@ -631,21 +560,16 @@ h1, h2, h3, h4,
     padding: 14px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .leaderboard-item:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
 }
 
 .leaderboard-rank {
@@ -679,7 +603,6 @@ h1, h2, h3, h4,
     height: 40px;
     border-radius: 50%;
     border: 2px solid #667eea;
-    object-fit: cover;
 }
 
 .leaderboard-info {
@@ -706,15 +629,9 @@ h1, h2, h3, h4,
 .editor-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 16px;
     padding: 32px;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .form-section {
@@ -741,30 +658,24 @@ h1, h2, h3, h4,
 }
 
 .form-input,
-.form-select,
-textarea.form-input {
+.form-select {
     width: 100%;
     padding: 14px 16px;
     font-size: 1rem;
     font-weight: 600;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: all 0.3s ease;
     font-family: inherit;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .form-input:focus,
-.form-select:focus,
-textarea.form-input:focus {
+.form-select:focus {
     outline: none;
+    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -782,20 +693,16 @@ textarea.form-input:focus {
     flex-wrap: wrap;
     gap: 8px;
     padding: 12px;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     min-height: 52px;
     transition: all 0.3s ease;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .tags-input-wrapper:focus-within {
+    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -845,7 +752,7 @@ textarea.form-input:focus {
 
 /* Upload Zone */
 .upload-zone {
-    border: 3px dashed transparent;
+    border: 3px dashed var(--glass-border);
     border-radius: 16px;
     padding: 48px 24px;
     text-align: center;
@@ -853,18 +760,15 @@ textarea.form-input:focus {
     transition: all 0.3s ease;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .upload-zone:hover {
+    border-color: #667eea;
     background: rgba(102, 126, 234, 0.05);
 }
 
 .upload-zone.drag-over {
+    border-color: #667eea;
     background: rgba(102, 126, 234, 0.1);
     transform: scale(1.02);
 }
@@ -903,12 +807,7 @@ textarea.form-input:focus {
     border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 1;
-    border: 2px solid transparent;
-    background-image: 
-        linear-gradient(white, white),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: 2px solid var(--glass-border);
 }
 
 .image-preview img {
@@ -932,7 +831,6 @@ textarea.form-input:focus {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    z-index: 2;
 }
 
 .image-remove:hover {
@@ -944,22 +842,18 @@ textarea.form-input:focus {
 .btn-cancel {
     padding: 14px 32px;
     background: transparent;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     font-size: 1rem;
     font-weight: 700;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
-    background-image: 
-        linear-gradient(transparent, transparent),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .btn-cancel:hover {
     background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
     color: #ef4444;
 }
 
@@ -1018,15 +912,6 @@ textarea.form-input:focus {
 
 .post-detail {
     padding: 32px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
-    border-radius: 16px;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .post-detail-header {
@@ -1036,10 +921,10 @@ textarea.form-input:focus {
 .post-detail-title {
     font-size: 2.5rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 20px;
     line-height: 1.2;
 }
@@ -1067,10 +952,6 @@ textarea.form-input:focus {
     margin-top: 32px;
     margin-bottom: 16px;
     font-weight: 800;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
 }
 
 .post-detail-content p {
@@ -1108,14 +989,9 @@ textarea.form-input:focus {
 .post-detail-images img {
     width: 100%;
     border-radius: 12px;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     cursor: pointer;
     transition: all 0.3s ease;
-    background-image: 
-        linear-gradient(white, white),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .post-detail-images img:hover {
@@ -1129,7 +1005,7 @@ textarea.form-input:focus {
     min-height: 120px;
     padding: 16px;
     border-radius: 12px;
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     background: var(--glass-bg);
     color: var(--text-primary);
     font-size: 1rem;
@@ -1138,15 +1014,11 @@ textarea.form-input:focus {
     font-family: inherit;
     margin-bottom: 16px;
     transition: all 0.3s ease;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .comment-textarea:focus {
     outline: none;
+    border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
@@ -1159,16 +1031,10 @@ textarea.form-input:focus {
 .comment-item {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .comment-item:hover {
@@ -1193,7 +1059,6 @@ textarea.form-input:focus {
     height: 40px;
     border-radius: 50%;
     border: 2px solid #667eea;
-    object-fit: cover;
 }
 
 .comment-author-name {
@@ -1312,22 +1177,17 @@ textarea.form-input:focus {
 
 .user-post-item {
     background: var(--glass-bg);
-    border: 2px solid transparent;
+    border: 2px solid var(--glass-border);
     border-radius: 12px;
     padding: 20px;
     transition: all 0.3s ease;
     cursor: pointer;
-    position: relative;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea, #764ba2);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
 }
 
 .user-post-item:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
 }
 
 .user-post-title {
@@ -1475,17 +1335,6 @@ textarea.form-input:focus {
         justify-content: center;
     }
     
-    /* Channels reste horizontal sur mobile */
-    .channels-scroll {
-        display: flex !important;
-        overflow-x: auto !important;
-        flex-wrap: nowrap !important;
-    }
-    
-    .channel-chip {
-        flex-shrink: 0 !important;
-    }
-    
     /* Posts Grid */
     .posts-grid {
         grid-template-columns: 1fr;
@@ -1494,6 +1343,11 @@ textarea.form-input:focus {
     /* Form */
     .editor-card {
         padding: 24px 20px;
+    }
+    
+    .actions-bar {
+        flex-direction: column-reverse;
+        gap: 12px;
     }
     
     .btn-cancel,
@@ -1568,12 +1422,6 @@ textarea.form-input:focus {
     .image-preview-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
-    /* Channels horizontal même sur petit mobile */
-    .channels-scroll {
-        display: flex !important;
-        overflow-x: auto !important;
-    }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1587,40 +1435,23 @@ body.dark-mode .featured-post,
 body.dark-mode .leaderboard-item,
 body.dark-mode .editor-card,
 body.dark-mode .comment-item,
-body.dark-mode .user-post-item,
-body.dark-mode .post-detail,
-body.dark-mode .sidebar-widget {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-        linear-gradient(135deg, #667eea, #764ba2);
+body.dark-mode .user-post-item {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-mode .form-input,
 body.dark-mode .form-select,
-body.dark-mode textarea.form-input,
 body.dark-mode .search-input,
 body.dark-mode .comment-textarea,
 body.dark-mode .tags-input-wrapper,
 body.dark-mode .upload-zone {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
-        linear-gradient(135deg, #667eea, #764ba2);
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-mode .filter-btn:hover {
     background: rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode .image-preview {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-        linear-gradient(135deg, #667eea, #764ba2);
-}
-
-body.dark-mode .post-detail-images img {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-        linear-gradient(135deg, #667eea, #764ba2);
 }
 
 /* ════════════════════════════════════════════════════════════════
