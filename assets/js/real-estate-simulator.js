@@ -1463,22 +1463,30 @@
             const container = document.getElementById('portfolioPropertiesList');
             if (!container) return;
             
-            const filterCountry = document.getElementById('filterCountry')?.value || 'all';
-            const filterType = document.getElementById('filterPropertyType')?.value || 'all';
-            const filterStatus = document.getElementById('filterStatus')?.value || 'all';
-            
-            let filtered = this.portfolio;
-            
-            if (filterCountry !== 'all') {
-                filtered = filtered.filter(p => p.country === filterCountry);
+            // Portfolio Filters (✅ CORRECTION)
+            const filterCountry = document.getElementById('filterCountry');
+            const filterType = document.getElementById('filterPropertyType');
+            const filterStatus = document.getElementById('filterStatus');
+
+            if (filterCountry) {
+                filterCountry.addEventListener('change', function() {
+                    console.log('🔍 Country filter changed:', this.value);
+                    self.renderPortfolioProperties();
+                });
             }
-            
-            if (filterType !== 'all') {
-                filtered = filtered.filter(p => p.propertyType === filterType);
+
+            if (filterType) {
+                filterType.addEventListener('change', function() {
+                    console.log('🔍 Type filter changed:', this.value);
+                    self.renderPortfolioProperties();
+                });
             }
-            
-            if (filterStatus !== 'all') {
-                filtered = filtered.filter(p => p.status === filterStatus);
+
+            if (filterStatus) {
+                filterStatus.addEventListener('change', function() {
+                    console.log('🔍 Status filter changed:', this.value);
+                    self.renderPortfolioProperties();
+                });
             }
             
             if (filtered.length === 0) {
