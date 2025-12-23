@@ -52,11 +52,12 @@
 
     <div class='layout-wrapper' id="admin-dashboard" style="display: none;">
         
-        <!-- Sidebar Navigation (COPIÉE DE TES PAGES) -->
+        <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
+                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -65,31 +66,49 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
+                            
+                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
-                                  stroke-linecap="round" stroke-linejoin="round"/>
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            
+                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" 
-                                  stroke-width="3" fill="none" stroke-linecap="round"/>
+                            
+                            <!-- Flèche -->
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
                         </svg>
                     </div>
+                    
+                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
+                
+                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
             </div>
             
-            <!-- Navigation (TON MENU COMPLET) -->
+            <!-- Navigation -->
             <nav class="sidebar-nav">
+                
+                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
-                    <button class="nav-folder">
+                    <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
                         <span>Home</span>
                         <i class="fas fa-chevron-down arrow"></i>
@@ -109,7 +128,7 @@
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
                     <div class='nav-submenu'>
-                        <a href='dashboard-financier.html' class='nav-link'>
+                        <a href='dashboard-financier.html' class='nav-link active'>
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
@@ -123,16 +142,160 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- ✅ SECTION ADMIN (TOUJOURS VISIBLE SUR LA PAGE ADMIN) -->
+                
                 <div class='nav-section'>
-                    <button class="nav-folder">
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                        <!-- <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='market-intelligence.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Intelligence</span>
+                        </a>
+                        <a href='company-insights.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Company Insights</span>
+                        </a>
+                        <a href='analyst-coverage.html' class='nav-link active'>
+                            <i class='fas fa-users'></i>
+                            <span>Analyst Coverage</span>
+                        </a>
+                        <a href='earnings-estimates.html' class='nav-link'>
+                            <i class='fas fa-coins'></i>
+                            <span>Earnings & Estimates</span>
+                        </a>
+                    </div> -->
+                </div>
+
+                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dasboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ✨ NOUVELLE SECTION NEWS -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
+                    <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
                         <span>Admin</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
                     <div class='nav-submenu' style='display: block;'>
-                        <a href='admin-analytics.html' class='nav-link active'>
+                        <a href='admin-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-line'></i>
                             <span>Analytics Dashboard</span>
                         </a>
@@ -140,28 +303,32 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer - Menu Utilisateur -->
+            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
-                            src="https://ui-avatars.com/api/?name=Admin&background=ef4444&color=fff" 
-                            alt="Avatar" class="sidebar-user-avatar">
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
-                            <span data-user-name class="sidebar-user-name">Admin</span>
-                            <span data-user-plan class="sidebar-user-plan">Administrator</span>
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
                         </div>
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
+                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
-                                src="https://ui-avatars.com/api/?name=Admin&background=ef4444&color=fff" 
-                                alt="Avatar" class="user-dropdown-avatar">
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
-                                <h4 data-user-name class="user-dropdown-name">Admin</h4>
-                                <p data-user-email class="user-dropdown-email" id="admin-email-display"></p>
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
                             </div>
                         </div>
                         
@@ -176,17 +343,22 @@
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
                         </nav>
                         
                         <div class="user-dropdown-divider"></div>
                         
-                        <button onclick="firebase.auth().signOut()" class="user-dropdown-logout">
+                        <button onclick="logout()" class="user-dropdown-logout">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Disconnect</span>
                         </button>
                     </div>
                 </div>
             </div>
+            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
 
         <!-- Main Content -->
