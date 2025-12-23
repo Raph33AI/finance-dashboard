@@ -154,7 +154,7 @@ class CommunityHub {
             
             card.addEventListener('click', (e) => {
                 // Don't navigate if clicking on buttons
-                if (e.target.closest('.stat-btn')) return;
+                if (e.target.closest('.post-stat')) return;
                 
                 window.location.href = `post.html?id=${postId}`;
             });
@@ -172,91 +172,119 @@ class CommunityHub {
 
     createPostCard(post) {
         const channel = window.channelManager.getChannel(post.channelId);
-        const channelGradient = channel ? channel.gradient : 'linear-gradient(135deg, #667eea, #764ba2)';
-        const channelIcon = channel ? channel.icon : '📄';
+        const channelIconFA = this.getChannelIconFA(post.channelId);
         const channelName = channel ? channel.name : 'General';
         
         const timeAgo = this.formatTimeAgo(post.createdAt);
-        const excerpt = this.createExcerpt(post.content, 200);
+        const excerpt = this.createExcerpt(post.content, 150);
         
-        const imagesHTML = post.images && post.images.length > 0 ? `
-            <div class="post-images">
-                ${post.images.slice(0, 3).map(img => `
-                    <img src="${img}" alt="Post image" class="post-image">
-                `).join('')}
-            </div>
-        ` : '';
-
+        // Tags HTML
         const tagsHTML = post.tags && post.tags.length > 0 ? `
             <div class="post-tags">
                 ${post.tags.slice(0, 5).map(tag => `
-                    <span class="tag">#${tag}</span>
+                    <span class="post-tag">#${this.escapeHtml(tag)}</span>
                 `).join('')}
             </div>
         ` : '';
 
+        // Verified badge
         const verifiedBadge = post.authorBadges?.includes('verified-analyst') ? 
-            '<i class="fas fa-badge-check verified-badge"></i>' : '';
+            '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 6px; font-size: 0.9rem;"></i>' : '';
 
+        // Check if user upvoted
         const currentUser = firebase.auth().currentUser;
         const hasUpvoted = currentUser && post.upvotedBy?.includes(currentUser.uid);
 
+        // Author avatar
+        const authorAvatar = post.authorPhoto || 
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=667eea&color=fff&size=64`;
+
         return `
-            <div class="post-card" data-post-id="${post.id}" style="--channel-gradient: ${channelGradient};">
+            <div class="post-card" data-post-id="${post.id}">
+                <!-- Header -->
                 <div class="post-header">
                     <div class="post-author">
-                        <div class="author-avatar" style="background: ${channelGradient};">
-                            ${post.authorName.charAt(0).toUpperCase()}
-                        </div>
+                        <img 
+                            src="${authorAvatar}" 
+                            alt="${this.escapeHtml(post.authorName)}" 
+                            class="author-avatar"
+                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=667eea&color=fff&size=64'"
+                        >
                         <div class="author-info">
                             <div class="author-name">
-                                ${post.authorName}
+                                ${this.escapeHtml(post.authorName)}
                                 ${verifiedBadge}
                             </div>
-                            <div class="post-meta">
+                            <div class="post-date">
                                 <i class="fas fa-clock"></i> ${timeAgo}
                             </div>
                         </div>
                     </div>
-                    <div class="channel-badge" style="background: ${channelGradient};">
-                        <span>${channelIcon}</span>
-                        <span>${channelName}</span>
+                    
+                    <!-- ✅ CORRECTION : Badge channel SANS style inline -->
+                    <div class="post-channel">
+                        <i class="fas ${channelIconFA}"></i>
+                        ${channelName}
                     </div>
                 </div>
 
-                <h3 class="post-title">${this.escapeHtml(post.title)}</h3>
+                <!-- Content -->
+                <div class="post-content">
+                    <h3 class="post-title">${this.escapeHtml(post.title)}</h3>
+                    <p class="post-excerpt">${excerpt}</p>
+                </div>
                 
-                <p class="post-excerpt">${excerpt}</p>
-                
+                <!-- Tags -->
                 ${tagsHTML}
-                
-                ${imagesHTML}
 
+                <!-- Footer -->
                 <div class="post-footer">
+                    <div class="post-author">
+                        <!-- Left side - could add additional info here -->
+                    </div>
                     <div class="post-stats">
-                        <button class="stat-btn upvote-btn ${hasUpvoted ? 'upvoted' : ''}">
+                        <div class="post-stat upvote-btn ${hasUpvoted ? 'upvoted' : ''}" style="cursor: pointer;">
                             <i class="fas fa-arrow-up"></i>
                             <span>${post.upvotes || 0}</span>
-                        </button>
-                        <button class="stat-btn">
+                        </div>
+                        <div class="post-stat">
                             <i class="fas fa-comment"></i>
                             <span>${post.commentCount || 0}</span>
-                        </button>
-                        <button class="stat-btn">
+                        </div>
+                        <div class="post-stat">
                             <i class="fas fa-eye"></i>
                             <span>${post.viewCount || 0}</span>
-                        </button>
+                        </div>
                     </div>
-                    <button class="read-more-btn">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </button>
                 </div>
             </div>
         `;
     }
 
+    getChannelIconFA(channelId) {
+        const channelIcons = {
+            'market-analysis': 'fa-chart-line',
+            'ma-intelligence': 'fa-handshake',
+            'trading-strategies': 'fa-bullseye',
+            'ipo-watch': 'fa-rocket',
+            'portfolio-reviews': 'fa-chart-pie',
+            'ai-quant': 'fa-robot',
+            'ideas-insights': 'fa-lightbulb',
+            'news-events': 'fa-newspaper',
+            'education': 'fa-graduation-cap',
+            'success-stories': 'fa-trophy'
+        };
+        return channelIcons[channelId] || 'fa-folder';
+    }
+
     async handleUpvote(postId, buttonElement) {
         try {
+            const currentUser = firebase.auth().currentUser;
+            if (!currentUser) {
+                alert('Please sign in to upvote');
+                return;
+            }
+
             await window.communityService.upvotePost(postId);
             
             // Update UI
@@ -266,12 +294,17 @@ class CommunityHub {
                 countSpan.textContent = post.upvotes || 0;
             }
             
-            const currentUser = firebase.auth().currentUser;
             const hasUpvoted = currentUser && post.upvotedBy?.includes(currentUser.uid);
-            buttonElement.classList.toggle('upvoted', hasUpvoted);
+            
+            if (hasUpvoted) {
+                buttonElement.classList.add('upvoted');
+            } else {
+                buttonElement.classList.remove('upvoted');
+            }
             
         } catch (error) {
             console.error('❌ Error upvoting post:', error);
+            alert('Failed to upvote post');
         }
     }
 
@@ -299,21 +332,31 @@ class CommunityHub {
         if (!container) return;
 
         if (posts.length === 0) {
-            container.innerHTML = '<p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">No featured posts yet</p>';
+            container.innerHTML = `
+                <div class="featured-posts-empty">
+                    <i class="fas fa-inbox"></i>
+                    <p>No featured posts yet</p>
+                </div>
+            `;
             return;
         }
 
-        container.innerHTML = posts.map(post => `
-            <div style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" onclick="window.location.href='post.html?id=${post.id}'">
-                <div style="font-weight: 700; color: white; font-size: 0.95rem; margin-bottom: 6px;">
-                    ${this.escapeHtml(post.title)}
+        container.innerHTML = posts.map(post => {
+            const timeAgo = this.formatTimeAgo(post.createdAt);
+            
+            return `
+                <div class="featured-post" onclick="window.location.href='post.html?id=${post.id}'">
+                    <div class="featured-post-title">
+                        ${this.escapeHtml(post.title)}
+                    </div>
+                    <div class="featured-post-meta">
+                        <span><i class="fas fa-arrow-up"></i> ${post.upvotes || 0}</span>
+                        <span><i class="fas fa-comment"></i> ${post.commentCount || 0}</span>
+                        <span><i class="fas fa-clock"></i> ${timeAgo}</span>
+                    </div>
                 </div>
-                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">
-                    <i class="fas fa-arrow-up"></i> ${post.upvotes || 0} • 
-                    <i class="fas fa-comment"></i> ${post.commentCount || 0}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     renderLeaderboard(users) {
@@ -321,22 +364,35 @@ class CommunityHub {
         if (!container) return;
 
         if (users.length === 0) {
-            container.innerHTML = '<p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">No contributors yet</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.9rem;">
+                    No contributors yet
+                </div>
+            `;
             return;
         }
 
         container.innerHTML = users.map((user, index) => {
-            const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+            const rankClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+            const avatar = user.photoURL || 
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=667eea&color=fff&size=64`;
             
             return `
                 <div class="leaderboard-item">
-                    <div class="rank-badge ${rankClass}">${index + 1}</div>
-                    <div class="user-mini-avatar" style="background: linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)});">
-                        ${(user.displayName || user.email).charAt(0).toUpperCase()}
-                    </div>
-                    <div class="user-mini-info">
-                        <div class="user-mini-name">${user.displayName || user.email.split('@')[0]}</div>
-                        <div class="user-mini-score">${user.reputation || 0} points</div>
+                    <div class="leaderboard-rank ${rankClass}">${index + 1}</div>
+                    <img 
+                        src="${avatar}" 
+                        alt="${this.escapeHtml(user.displayName || user.email)}" 
+                        class="leaderboard-avatar"
+                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=667eea&color=fff&size=64'"
+                    >
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">
+                            ${this.escapeHtml(user.displayName || user.email.split('@')[0])}
+                        </div>
+                        <div class="leaderboard-points">
+                            ${user.reputation || 0} points
+                        </div>
                     </div>
                 </div>
             `;
@@ -348,13 +404,15 @@ class CommunityHub {
         if (!container) return;
 
         if (tags.length === 0) {
-            container.innerHTML = '<span class="tag">No trending tags</span>';
+            container.innerHTML = `
+                <span class="post-tag" style="opacity: 0.5;">No trending tags</span>
+            `;
             return;
         }
 
         container.innerHTML = tags.map(({ tag, count }) => `
-            <span class="tag" style="cursor: pointer;" onclick="document.getElementById('searchInput').value='#${tag}'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
-                #${tag} <small>(${count})</small>
+            <span class="post-tag" style="cursor: pointer;" onclick="document.getElementById('searchInput').value='#${tag}'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+                #${this.escapeHtml(tag)} <small style="opacity: 0.7;">(${count})</small>
             </span>
         `).join('');
     }
@@ -363,9 +421,13 @@ class CommunityHub {
         try {
             const stats = await window.communityService.getCommunityStats();
             
-            document.getElementById('totalPosts').textContent = stats.totalPosts.toLocaleString();
-            document.getElementById('totalMembers').textContent = stats.totalMembers.toLocaleString();
-            document.getElementById('postsToday').textContent = stats.postsToday.toLocaleString();
+            const totalPostsEl = document.getElementById('totalPosts');
+            const totalMembersEl = document.getElementById('totalMembers');
+            const postsTodayEl = document.getElementById('postsToday');
+            
+            if (totalPostsEl) totalPostsEl.textContent = stats.totalPosts.toLocaleString();
+            if (totalMembersEl) totalMembersEl.textContent = stats.totalMembers.toLocaleString();
+            if (postsTodayEl) postsTodayEl.textContent = stats.postsToday.toLocaleString();
             
         } catch (error) {
             console.error('❌ Error loading community stats:', error);
@@ -395,7 +457,7 @@ class CommunityHub {
             this.postsGrid.innerHTML = '';
             
             if (filteredPosts.length === 0) {
-                this.showEmptyState(`No posts found for "${query}"`);
+                this.showEmptyState(`No posts found for "${this.escapeHtml(query)}"`);
             } else {
                 this.renderPosts(filteredPosts);
             }
@@ -427,10 +489,9 @@ class CommunityHub {
 
     showEmptyState(message = 'No posts yet in this channel') {
         this.postsGrid.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.6);">
-                <i class="fas fa-inbox" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
-                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; color: white;">${message}</h3>
-                <p style="font-size: 1rem; margin-bottom: 24px;">Be the first to share your insights!</p>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p style="font-size: 1.2rem; margin-top: 16px; margin-bottom: 24px;">${this.escapeHtml(message)}</p>
                 <button class="create-post-btn" onclick="window.location.href='create-post.html'">
                     <i class="fas fa-plus"></i> Create First Post
                 </button>
@@ -440,24 +501,31 @@ class CommunityHub {
 
     showError(message) {
         this.postsGrid.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: #EF4444;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px;">${message}</h3>
-                <button class="filter-btn" onclick="window.communityHub.loadPosts('all')" style="margin-top: 20px;">
+            <div class="empty-state" style="color: #ef4444;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p style="font-size: 1.2rem; margin-top: 16px; margin-bottom: 24px;">${this.escapeHtml(message)}</p>
+                <button class="filter-btn" onclick="window.communityHub.loadPosts('all')" style="padding: 14px 28px;">
                     <i class="fas fa-redo"></i> Retry
                 </button>
             </div>
         `;
     }
 
-    createExcerpt(content, maxLength = 200) {
+    createExcerpt(content, maxLength = 150) {
         const text = content.replace(/[#*`]/g, '').trim();
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
+        if (text.length <= maxLength) return this.escapeHtml(text);
+        return this.escapeHtml(text.substring(0, maxLength)) + '...';
     }
 
     formatTimeAgo(date) {
         if (!date) return 'Just now';
+        
+        // Si c'est un timestamp Firestore
+        if (date.seconds) {
+            date = new Date(date.seconds * 1000);
+        } else if (!(date instanceof Date)) {
+            date = new Date(date);
+        }
         
         const seconds = Math.floor((new Date() - date) / 1000);
         
@@ -481,6 +549,7 @@ class CommunityHub {
     }
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
