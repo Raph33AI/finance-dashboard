@@ -1463,30 +1463,22 @@
             const container = document.getElementById('portfolioPropertiesList');
             if (!container) return;
             
-            // Portfolio Filters (✅ CORRECTION)
-            const filterCountry = document.getElementById('filterCountry');
-            const filterType = document.getElementById('filterPropertyType');
-            const filterStatus = document.getElementById('filterStatus');
-
-            if (filterCountry) {
-                filterCountry.addEventListener('change', function() {
-                    console.log('🔍 Country filter changed:', this.value);
-                    self.renderPortfolioProperties();
-                });
+            const filterCountry = document.getElementById('filterCountry')?.value || 'all';
+            const filterType = document.getElementById('filterPropertyType')?.value || 'all';
+            const filterStatus = document.getElementById('filterStatus')?.value || 'all';
+            
+            let filtered = this.portfolio;
+            
+            if (filterCountry !== 'all') {
+                filtered = filtered.filter(p => p.country === filterCountry);
             }
-
-            if (filterType) {
-                filterType.addEventListener('change', function() {
-                    console.log('🔍 Type filter changed:', this.value);
-                    self.renderPortfolioProperties();
-                });
+            
+            if (filterType !== 'all') {
+                filtered = filtered.filter(p => p.propertyType === filterType);
             }
-
-            if (filterStatus) {
-                filterStatus.addEventListener('change', function() {
-                    console.log('🔍 Status filter changed:', this.value);
-                    self.renderPortfolioProperties();
-                });
+            
+            if (filterStatus !== 'all') {
+                filtered = filtered.filter(p => p.status === filterStatus);
             }
             
             if (filtered.length === 0) {
@@ -2253,7 +2245,6 @@
             
             this.charts.amortization = Highcharts.chart('amortizationChart', {
                 chart: {
-                    type: 'line', // ✅ CHANGÉ de 'area' à 'line'
                     backgroundColor: 'transparent',
                     style: { fontFamily: 'Inter, sans-serif' }
                 },
@@ -2267,40 +2258,106 @@
                     gridLineColor: chartColors.gridLine,
                     lineColor: chartColors.axisLine
                 },
-                yAxis: {
-                    title: { text: 'Amount', style: { color: chartColors.title } },
-                    labels: { style: { color: chartColors.text } },
+                yAxis: [{
+                    // ✅ Axe Y primaire (gauche) - Paiements mensuels
+                    title: { 
+                        text: 'Monthly Payments', 
+                        style: { color: chartColors.title } 
+                    },
+                    labels: { 
+                        style: { color: chartColors.text },
+                        formatter: function() {
+                            return '€' + (this.value / 1000).toFixed(1) + 'k';
+                        }
+                    },
                     gridLineColor: chartColors.gridLine
-                },
+                }, {
+                    // ✅ Axe Y secondaire (droite) - Balance restante
+                    title: { 
+                        text: 'Remaining Balance', 
+                        style: { color: '#3b82f6' } 
+                    },
+                    labels: { 
+                        style: { color: '#3b82f6' },
+                        formatter: function() {
+                            return '€' + (this.value / 1000).toFixed(0) + 'k';
+                        }
+                    },
+                    opposite: true,
+                    gridLineColor: 'transparent'
+                }],
                 tooltip: {
                     shared: true,
                     backgroundColor: chartColors.tooltipBg,
                     borderColor: chartColors.tooltipBorder,
                     style: { color: chartColors.text },
-                    valuePrefix: this.taxRules[this.currentSimulation.country].currencySymbol
+                    useHTML: true,
+                    formatter: function() {
+                        const rules = RealEstateSimulator.taxRules[RealEstateSimulator.currentSimulation.country];
+                        const symbol = rules.currencySymbol;
+                        let html = '<div style="padding: 8px;"><strong>' + this.x + '</strong><br/>';
+                        
+                        this.points.forEach(point => {
+                            html += '<span style="color:' + point.color + '">●</span> ' + 
+                                point.series.name + ': <strong>' + symbol + point.y.toLocaleString() + '</strong><br/>';
+                        });
+                        
+                        html += '</div>';
+                        return html;
+                    }
                 },
                 plotOptions: {
-                    line: { // ✅ CHANGÉ
+                    column: {
+                        borderRadius: 4,
+                        stacking: 'normal' // ✅ Empilement UNIQUEMENT pour les colonnes
+                    },
+                    line: {
                         lineWidth: 3,
-                        marker: { enabled: true, radius: 4 }
+                        marker: { 
+                            enabled: true,
+                            radius: 4,
+                            symbol: 'circle'
+                        }
                     }
                 },
                 series: [{
+                    // ✅ Principal Payment - Colonne verte
                     name: 'Principal Payment',
+                    type: 'column',
                     data: years.map(item => item.principal),
-                    color: '#10b981'
+                    color: '#10b981',
+                    yAxis: 0 // Axe gauche
                 }, {
+                    // ✅ Interest Payment - Colonne rouge
                     name: 'Interest Payment',
+                    type: 'column',
                     data: years.map(item => item.interest),
-                    color: '#ef4444'
+                    color: '#ef4444',
+                    yAxis: 0 // Axe gauche
                 }, {
+                    // ✅ Remaining Balance - Ligne bleue
                     name: 'Remaining Balance',
+                    type: 'line',
                     data: years.map(item => item.balance),
-                    color: '#3b82f6'
+                    color: '#3b82f6',
+                    lineWidth: 4,
+                    yAxis: 1, // ✅ Axe droit
+                    marker: {
+                        enabled: true,
+                        radius: 5,
+                        fillColor: '#3b82f6',
+                        lineWidth: 2,
+                        lineColor: '#ffffff'
+                    },
+                    dashStyle: 'Solid',
+                    zIndex: 10 // ✅ Au-dessus des colonnes
                 }],
                 credits: { enabled: false },
                 legend: {
-                    itemStyle: { color: chartColors.text }
+                    itemStyle: { color: chartColors.text },
+                    align: 'center',
+                    verticalAlign: 'bottom',
+                    layout: 'horizontal'
                 }
             });
         },
