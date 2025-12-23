@@ -437,20 +437,23 @@ async function saveGeneralSettings() {
     // ✅ DÉCLENCHER LA TRADUCTION AUTOMATIQUE
     if (newLanguage !== oldLanguage && window.translator) {
         console.log('🌍 Changement de langue détecté:', oldLanguage, '→', newLanguage);
-        await window.translator.changeLanguage(newLanguage);
         
-        // Toast dans la nouvelle langue
-        const messages = {
-            en: { title: 'Success!', message: 'Language changed to English' },
-            fr: { title: 'Succès !', message: 'Langue changée en Français' },
-            es: { title: '¡Éxito!', message: 'Idioma cambiado a Español' },
-            de: { title: 'Erfolg!', message: 'Sprache auf Deutsch geändert' }
-        };
+        const success = await window.changeLanguage(newLanguage);
         
-        const msg = messages[newLanguage] || messages.en;
-        showToast('success', msg.title, msg.message);
+        if (success) {
+            // Toast dans la nouvelle langue
+            const messages = {
+                en: { title: 'Success!', message: 'Language changed to English' },
+                fr: { title: 'Succès !', message: 'Langue changée en Français' },
+                es: { title: '¡Éxito!', message: 'Idioma cambiado a Español' },
+                de: { title: 'Erfolg!', message: 'Sprache auf Deutsch geändert' }
+            };
+            
+            const msg = messages[newLanguage] || messages.en;
+            showToast('success', msg.title, msg.message);
+        }
     } else {
-        showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
+        showToast('success', 'Success!', 'General settings saved');
     }
 }
 

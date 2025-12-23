@@ -1,9 +1,9 @@
 /* ============================================
    AUTO-TRANSLATE.JS - Traduction automatique 100% dynamique
-   ✅ Utilise Google Translate API (gratuit via MyMemory)
-   ✅ Cache intelligent pour performances
+   ✅ NE CHARGE PAS PAR DÉFAUT
+   ✅ Activation uniquement via Settings
+   ✅ Persistance complète après activation
    ✅ Synchronisation Firebase
-   ✅ Traduction en temps réel de TOUTE la page
    ============================================ */
 
 class AutoTranslate {
@@ -12,38 +12,44 @@ class AutoTranslate {
         this.originalTexts = new Map(); // Cache des textes originaux
         this.translationCache = new Map(); // Cache des traductions
         this.isTranslating = false;
+        this.isInitialized = false;
         this.supportedLanguages = ['en', 'fr', 'es', 'de', 'it', 'pt', 'ja', 'zh', 'ar', 'ru'];
         
         // API de traduction (MyMemory - gratuit, 10 000 mots/jour)
         this.translationAPI = 'https://api.mymemory.translated.net/get';
         
-        // Alternative : LibreTranslate (auto-hébergé ou public)
-        // this.translationAPI = 'https://libretranslate.de/translate';
-        
-        console.log('🌍 AutoTranslate initialisé');
-        this.init();
+        console.log('🌍 AutoTranslate créé (mode: attente activation utilisateur)');
     }
     
     // ============================================
-    // INITIALISATION
+    // INITIALISATION (APPELÉE MANUELLEMENT)
     // ============================================
     
-    async init() {
-        // Charger la langue depuis Firebase ou localStorage
-        await this.loadLanguagePreference();
-        
-        // Sauvegarder les textes originaux de la page
-        this.saveOriginalTexts();
-        
-        // Écouter les changements de langue
-        this.setupLanguageChangeListener();
-        
-        // Si la langue n'est pas l'anglais, traduire immédiatement
-        if (this.currentLanguage !== 'en') {
-            await this.translatePage(this.currentLanguage);
+    async initialize() {
+        if (this.isInitialized) {
+            console.log('ℹ AutoTranslate déjà initialisé');
+            return;
         }
         
-        console.log('✅ AutoTranslate prêt - Langue:', this.currentLanguage);
+        console.log('🔧 Initialisation AutoTranslate...');
+        
+        // Sauvegarder les textes originaux
+        this.saveOriginalTexts();
+        
+        // Charger la langue préférée (Firebase ou localStorage)
+        await this.loadLanguagePreference();
+        
+        // ✅ TRADUIRE UNIQUEMENT SI L'UTILISATEUR A DÉJÀ ACTIVÉ UNE LANGUE
+        if (this.currentLanguage !== 'en') {
+            console.log('🌍 Langue active détectée:', this.currentLanguage);
+            console.log('🔄 Application de la traduction sauvegardée...');
+            await this.translatePage(this.currentLanguage);
+        } else {
+            console.log('ℹ Aucune traduction active - page en anglais');
+        }
+        
+        this.isInitialized = true;
+        console.log('✅ AutoTranslate prêt');
     }
     
     // ============================================
@@ -53,7 +59,7 @@ class AutoTranslate {
     async loadLanguagePreference() {
         try {
             // 1. Essayer de charger depuis Firebase
-            if (typeof currentUserData !== 'undefined' && currentUserData) {
+            if (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.uid) {
                 const settingsRef = firebaseDb
                     .collection('users')
                     .doc(currentUserData.uid)
@@ -62,30 +68,31 @@ class AutoTranslate {
                 
                 const doc = await settingsRef.get();
                 if (doc.exists && doc.data().language) {
-                    this.currentLanguage = doc.data().language;
-                    localStorage.setItem('alphavault_language', this.currentLanguage);
-                    console.log('✅ Langue chargée depuis Firebase:', this.currentLanguage);
-                    return;
+                    const savedLang = doc.data().language;
+                    
+                    if (this.supportedLanguages.includes(savedLang)) {
+                        this.currentLanguage = savedLang;
+                        localStorage.setItem('alphavault_language', savedLang);
+                        console.log('✅ Langue chargée depuis Firebase:', savedLang);
+                        return;
+                    }
                 }
             }
         } catch (error) {
-            console.warn('⚠ Impossible de charger la langue depuis Firebase:', error);
+            console.warn('⚠ Impossible de charger depuis Firebase:', error);
         }
         
         // 2. Fallback sur localStorage
         const savedLang = localStorage.getItem('alphavault_language');
         if (savedLang && this.supportedLanguages.includes(savedLang)) {
             this.currentLanguage = savedLang;
-            console.log('✅ Langue chargée depuis localStorage:', this.currentLanguage);
+            console.log('✅ Langue chargée depuis localStorage:', savedLang);
             return;
         }
         
-        // 3. Fallback sur langue du navigateur
-        const browserLang = navigator.language.split('-')[0];
-        if (this.supportedLanguages.includes(browserLang)) {
-            this.currentLanguage = browserLang;
-            console.log('✅ Langue détectée depuis navigateur:', this.currentLanguage);
-        }
+        // 3. Par défaut : anglais (pas de traduction)
+        this.currentLanguage = 'en';
+        console.log('ℹ Langue par défaut: en (aucune traduction)');
     }
     
     async changeLanguage(newLang) {
@@ -100,6 +107,11 @@ class AutoTranslate {
         }
         
         console.log('🔄 Changement de langue:', this.currentLanguage, '→', newLang);
+        
+        // ✅ INITIALISER SI PAS ENCORE FAIT
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
         
         const oldLang = this.currentLanguage;
         this.currentLanguage = newLang;
@@ -123,12 +135,13 @@ class AutoTranslate {
             detail: { oldLang, newLang } 
         }));
         
+        console.log('✅ Langue changée avec succès');
         return true;
     }
     
     async saveLanguageToFirebase(language) {
         try {
-            if (typeof currentUserData !== 'undefined' && currentUserData) {
+            if (typeof currentUserData !== 'undefined' && currentUserData && currentUserData.uid) {
                 const settingsRef = firebaseDb
                     .collection('users')
                     .doc(currentUserData.uid)
@@ -154,7 +167,8 @@ class AutoTranslate {
         const elements = document.querySelectorAll(
             'h1, h2, h3, h4, h5, h6, p, span, a, button, label, td, th, li, option, ' +
             '[data-translate], .nav-link, .settings-nav-item, .setting-info label, ' +
-            '.setting-info p, .btn-back-dashboard, .user-dropdown-link'
+            '.setting-info p, .btn-back-dashboard, .user-dropdown-link, .brand-name, ' +
+            '.brand-tagline, .section-title, .card-label, .card-value'
         );
         
         elements.forEach(el => {
@@ -168,9 +182,14 @@ class AutoTranslate {
                 return;
             }
             
+            // Ignorer les nombres purs
+            if (/^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(el.textContent.trim())) {
+                return;
+            }
+            
             // Sauvegarder le texte original
             const originalText = this.getTextContent(el);
-            if (originalText && originalText.length > 0) {
+            if (originalText && originalText.length > 1) {
                 this.originalTexts.set(el, originalText);
                 
                 // Ajouter un attribut data pour référence
@@ -207,7 +226,7 @@ class AutoTranslate {
         console.log(`🌍 Traduction de la page en ${targetLang}...`);
         
         // Afficher un indicateur de chargement
-        this.showLoadingIndicator();
+        this.showLoadingIndicator(targetLang);
         
         try {
             // Récupérer tous les textes à traduire
@@ -215,7 +234,7 @@ class AutoTranslate {
             const elementsMap = [];
             
             this.originalTexts.forEach((originalText, el) => {
-                if (el && el.isConnected && originalText.trim().length > 0) {
+                if (el && el.isConnected && originalText.trim().length > 1) {
                     textsToTranslate.push(originalText);
                     elementsMap.push(el);
                 }
@@ -224,7 +243,8 @@ class AutoTranslate {
             console.log(`📝 ${textsToTranslate.length} textes à traduire`);
             
             // Traduire par batch pour optimiser
-            const batchSize = 20; // Traduire 20 textes à la fois
+            const batchSize = 15; // Traduire 15 textes à la fois
+            let translated = 0;
             
             for (let i = 0; i < textsToTranslate.length; i += batchSize) {
                 const batch = textsToTranslate.slice(i, i + batchSize);
@@ -240,9 +260,12 @@ class AutoTranslate {
                     }
                 });
                 
+                translated += batch.length;
+                console.log(`📊 Progression: ${translated}/${textsToTranslate.length}`);
+                
                 // Petit délai pour éviter de surcharger l'API
                 if (i + batchSize < textsToTranslate.length) {
-                    await this.delay(500);
+                    await this.delay(400);
                 }
             }
             
@@ -284,8 +307,8 @@ class AutoTranslate {
             return this.translationCache.get(cacheKey);
         }
         
-        // Ignorer les textes très courts ou les icônes
-        if (text.trim().length < 2 || /^[0-9\s\-\/\(\)]+$/.test(text)) {
+        // Ignorer les textes très courts ou les nombres
+        if (text.trim().length < 2 || /^[0-9\s\-\/\(\)$€£¥%.,]+$/.test(text)) {
             return text;
         }
         
@@ -356,19 +379,20 @@ class AutoTranslate {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     
-    setupLanguageChangeListener() {
-        // Écouter les changements via le select
-        const languageSelect = document.getElementById('language');
-        if (languageSelect) {
-            languageSelect.addEventListener('change', async (e) => {
-                const newLang = e.target.value;
-                await this.changeLanguage(newLang);
-            });
-        }
-    }
-    
-    showLoadingIndicator() {
-        // Créer un overlay de chargement
+    showLoadingIndicator(lang) {
+        const langNames = {
+            en: 'English',
+            fr: 'Français',
+            es: 'Español',
+            de: 'Deutsch',
+            it: 'Italiano',
+            pt: 'Português',
+            ja: '日本語',
+            zh: '中文',
+            ar: 'العربية',
+            ru: 'Русский'
+        };
+        
         const overlay = document.createElement('div');
         overlay.id = 'translation-overlay';
         overlay.innerHTML = `
@@ -378,34 +402,34 @@ class AutoTranslate {
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(0, 0, 0, 0.7);
+                background: rgba(0, 0, 0, 0.75);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 999999;
-                backdrop-filter: blur(5px);
+                backdrop-filter: blur(8px);
             ">
                 <div style="
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    padding: 40px 60px;
-                    border-radius: 20px;
+                    padding: 50px 70px;
+                    border-radius: 24px;
                     text-align: center;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
                 ">
                     <div style="
-                        width: 60px;
-                        height: 60px;
-                        border: 5px solid rgba(255, 255, 255, 0.3);
+                        width: 70px;
+                        height: 70px;
+                        border: 6px solid rgba(255, 255, 255, 0.3);
                         border-top-color: white;
                         border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                        margin: 0 auto 20px;
+                        animation: spin 0.8s linear infinite;
+                        margin: 0 auto 24px;
                     "></div>
-                    <h3 style="color: white; margin: 0; font-size: 24px; font-weight: 800;">
-                        🌍 Translating...
+                    <h3 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">
+                        🌍 Translating to ${langNames[lang] || lang.toUpperCase()}
                     </h3>
-                    <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0; font-size: 16px;">
-                        Please wait a moment
+                    <p style="color: rgba(255, 255, 255, 0.95); margin: 12px 0 0; font-size: 16px; font-weight: 500;">
+                        Please wait a moment...
                     </p>
                 </div>
             </div>
@@ -421,7 +445,9 @@ class AutoTranslate {
     hideLoadingIndicator() {
         const overlay = document.getElementById('translation-overlay');
         if (overlay) {
-            overlay.remove();
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => overlay.remove(), 300);
         }
     }
 }
@@ -432,16 +458,22 @@ class AutoTranslate {
 
 let globalTranslator = null;
 
-// Initialiser dès que le DOM est prêt
+// ✅ CRÉER L'INSTANCE MAIS NE PAS INITIALISER AUTOMATIQUEMENT
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTranslator);
+    document.addEventListener('DOMContentLoaded', createTranslator);
 } else {
-    initTranslator();
+    createTranslator();
 }
 
-function initTranslator() {
+function createTranslator() {
     globalTranslator = new AutoTranslate();
     window.translator = globalTranslator; // Exposer globalement
+    
+    // ✅ INITIALISER UNIQUEMENT SI L'UTILISATEUR EST CONNECTÉ
+    window.addEventListener('userDataLoaded', async function(e) {
+        console.log('👤 Utilisateur connecté, vérification langue...');
+        await globalTranslator.initialize();
+    });
 }
 
 // Fonction helper pour changer de langue (utilisable partout)
@@ -453,4 +485,4 @@ window.changeLanguage = async function(lang) {
     return false;
 };
 
-console.log('✅ Auto-translate script chargé');
+console.log('✅ Auto-translate script chargé (mode: activation utilisateur uniquement)');
