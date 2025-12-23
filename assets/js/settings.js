@@ -415,46 +415,13 @@ function switchTab(tabName) {
 // SAUVEGARDE DES PARAMÈTRES
 // ============================================
 
-// async function saveGeneralSettings() {
-//     currentSettings.language = document.getElementById('language').value;
-//     currentSettings.timezone = document.getElementById('timezone').value;
-//     currentSettings.currency = document.getElementById('currency').value;
-    
-//     await saveSettings();
-//     showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
-// }
-
 async function saveGeneralSettings() {
-    const newLanguage = document.getElementById('language').value;
-    const oldLanguage = currentSettings.language;
-    
-    currentSettings.language = newLanguage;
+    currentSettings.language = document.getElementById('language').value;
     currentSettings.timezone = document.getElementById('timezone').value;
     currentSettings.currency = document.getElementById('currency').value;
     
     await saveSettings();
-    
-    // ✅ DÉCLENCHER LA TRADUCTION AUTOMATIQUE
-    if (newLanguage !== oldLanguage && window.translator) {
-        console.log('🌍 Changement de langue détecté:', oldLanguage, '→', newLanguage);
-        
-        const success = await window.changeLanguage(newLanguage);
-        
-        if (success) {
-            // Toast dans la nouvelle langue
-            const messages = {
-                en: { title: 'Success!', message: 'Language changed to English' },
-                fr: { title: 'Succès !', message: 'Langue changée en Français' },
-                es: { title: '¡Éxito!', message: 'Idioma cambiado a Español' },
-                de: { title: 'Erfolg!', message: 'Sprache auf Deutsch geändert' }
-            };
-            
-            const msg = messages[newLanguage] || messages.en;
-            showToast('success', msg.title, msg.message);
-        }
-    } else {
-        showToast('success', 'Success!', 'General settings saved');
-    }
+    showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
 }
 
 async function saveNotificationSettings() {
