@@ -52,6 +52,9 @@ class PostManager {
             // Show comments section
             this.commentsSection.style.display = 'block';
             
+            // Increment views
+            await this.incrementViews();
+            
         } catch (error) {
             console.error('❌ Error loading post:', error);
             throw error;
@@ -62,8 +65,7 @@ class PostManager {
         if (!this.post) return;
 
         // Get channel info
-        const channelGradient = this.getChannelGradient(this.post.channelId);
-        const channelIcon = this.getChannelIcon(this.post.channelId);
+        const channelIcon = this.getChannelIconFA(this.post.channelId);
         const channelName = this.getChannelName(this.post.channelId);
 
         // Format date
@@ -81,77 +83,102 @@ class PostManager {
         const tagsHTML = this.post.tags && this.post.tags.length > 0 ? `
             <div class="post-tags" style="margin-bottom: 24px;">
                 ${this.post.tags.map(tag => `
-                    <span class="tag">#${tag}</span>
+                    <span class="post-tag">#${this.escapeHtml(tag)}</span>
                 `).join('')}
             </div>
         ` : '';
 
         // Images HTML
         const imagesHTML = this.post.images && this.post.images.length > 0 ? `
-            <div class="post-images-gallery">
+            <div class="post-detail-images">
                 ${this.post.images.map(img => `
-                    <div class="post-image-item" onclick="window.open('${img}', '_blank')">
-                        <img src="${img}" alt="Post image">
-                    </div>
+                    <img src="${img}" alt="Post image" onclick="window.open('${img}', '_blank')">
                 `).join('')}
             </div>
         ` : '';
 
+        // Author avatar (utilise la photo ou un avatar généré)
+        const authorAvatar = this.post.authorPhoto || 
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(this.post.authorName)}&background=667eea&color=fff&size=128`;
+
         // Verified badge
         const verifiedBadge = this.post.authorBadges?.includes('verified-analyst') ? 
-            '<i class="fas fa-badge-check verified-badge"></i>' : '';
+            '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 8px;"></i>' : '';
+
+        // Admin actions (si l'utilisateur est l'auteur ou admin)
+        const isAuthor = currentUser && currentUser.uid === this.post.authorId;
+        const isAdmin = currentUser && currentUser.email === 'raph.nardone@gmail.com'; // À adapter selon ton système
+        
+        const adminActionsHTML = (isAuthor || isAdmin) ? `
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--glass-border); display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn-cancel" onclick="window.postManager.editPost()">
+                    <i class="fas fa-edit"></i> Edit Post
+                </button>
+                <button class="btn-cancel" onclick="window.postManager.deletePost()" style="color: #ef4444; border-color: #ef4444;">
+                    <i class="fas fa-trash"></i> Delete Post
+                </button>
+            </div>
+        ` : '';
 
         const postHTML = `
-            <div class="post-detail-header">
-                <div class="post-detail-title">${this.escapeHtml(this.post.title)}</div>
-                
-                <div class="post-detail-meta">
-                    <div class="post-author-detail">
-                        <div class="author-avatar-large" style="background: ${channelGradient};">
-                            ${this.post.authorName.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="author-detail-info">
-                            <h3>
-                                ${this.post.authorName}
-                                ${verifiedBadge}
-                            </h3>
-                            <p>
-                                <i class="fas fa-calendar"></i> ${postDate} (${timeAgo})
-                            </p>
-                        </div>
+            <!-- Channel Badge -->
+            <div class="post-detail-channel">
+                <i class="fas ${channelIcon}"></i>
+                ${channelName}
+            </div>
+            
+            <!-- Title -->
+            <h1 class="post-detail-title">${this.escapeHtml(this.post.title)}</h1>
+            
+            <!-- Author Info & Stats -->
+            <div class="post-detail-author">
+                <img 
+                    src="${authorAvatar}" 
+                    alt="${this.escapeHtml(this.post.authorName)}" 
+                    class="post-detail-author-avatar"
+                    onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(this.post.authorName)}&background=667eea&color=fff&size=128'"
+                >
+                <div class="post-detail-author-info">
+                    <div class="post-detail-author-name">
+                        ${this.escapeHtml(this.post.authorName)}
+                        ${verifiedBadge}
                     </div>
-                    
-                    <div class="channel-badge" style="background: ${channelGradient};">
-                        <span>${channelIcon}</span>
-                        <span>${channelName}</span>
+                    <div class="post-detail-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        ${postDate} (${timeAgo})
                     </div>
                 </div>
-            </div>
-
-            ${tagsHTML}
-
-            ${imagesHTML}
-
-            <div class="post-content">
-                ${renderedContent}
-            </div>
-
-            <div class="post-footer" style="border-top: 2px solid rgba(255, 255, 255, 0.1); padding-top: 24px;">
-                <div class="post-stats">
-                    <button class="stat-btn ${hasUpvoted ? 'upvoted' : ''}" id="upvoteBtn">
+                
+                <!-- Stats -->
+                <div class="post-detail-stats">
+                    <div class="post-detail-stat ${hasUpvoted ? 'liked' : ''}" id="upvoteBtn" style="cursor: pointer;">
                         <i class="fas fa-arrow-up"></i>
                         <span id="upvoteCount">${this.post.upvotes || 0}</span>
-                    </button>
-                    <button class="stat-btn">
+                    </div>
+                    <div class="post-detail-stat">
                         <i class="fas fa-comment"></i>
                         <span id="commentCountPost">${this.post.commentCount || 0}</span>
-                    </button>
-                    <button class="stat-btn">
+                    </div>
+                    <div class="post-detail-stat">
                         <i class="fas fa-eye"></i>
                         <span>${this.post.viewCount || 0}</span>
-                    </button>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Tags -->
+            ${tagsHTML}
+            
+            <!-- Content -->
+            <div class="post-detail-content">
+                ${renderedContent}
+            </div>
+            
+            <!-- Images -->
+            ${imagesHTML}
+            
+            <!-- Admin Actions -->
+            ${adminActionsHTML}
         `;
 
         this.postDetailCard.innerHTML = postHTML;
@@ -161,13 +188,26 @@ class PostManager {
 
         // Add upvote handler
         const upvoteBtn = document.getElementById('upvoteBtn');
-        if (upvoteBtn) {
+        if (upvoteBtn && currentUser) {
             upvoteBtn.addEventListener('click', () => this.handleUpvote());
+        }
+
+        // Highlight code blocks
+        if (typeof hljs !== 'undefined') {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
         }
     }
 
     async handleUpvote() {
         try {
+            const currentUser = firebase.auth().currentUser;
+            if (!currentUser) {
+                alert('Please sign in to upvote');
+                return;
+            }
+
             await window.communityService.upvotePost(this.postId);
             
             // Reload post to get updated data
@@ -181,66 +221,80 @@ class PostManager {
                 upvoteCount.textContent = this.post.upvotes || 0;
             }
             
-            const currentUser = firebase.auth().currentUser;
             const hasUpvoted = currentUser && this.post.upvotedBy?.includes(currentUser.uid);
             
             if (upvoteBtn) {
-                upvoteBtn.classList.toggle('upvoted', hasUpvoted);
+                if (hasUpvoted) {
+                    upvoteBtn.classList.add('liked');
+                } else {
+                    upvoteBtn.classList.remove('liked');
+                }
             }
             
         } catch (error) {
             console.error('❌ Error upvoting post:', error);
+            alert('Failed to upvote post');
+        }
+    }
+
+    async incrementViews() {
+        try {
+            // Increment view count
+            await firebase.firestore()
+                .collection('posts')
+                .doc(this.postId)
+                .update({
+                    viewCount: firebase.firestore.FieldValue.increment(1)
+                });
+        } catch (error) {
+            console.error('❌ Error incrementing views:', error);
         }
     }
 
     renderMarkdown(markdown) {
+        if (typeof marked === 'undefined') {
+            console.warn('⚠ Marked.js not loaded, returning raw markdown');
+            return this.escapeHtml(markdown).replace(/\n/g, '<br>');
+        }
+
         // Configure marked.js
         marked.setOptions({
             highlight: function(code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
+                if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
                     try {
                         return hljs.highlight(code, { language: lang }).value;
-                    } catch (err) {}
+                    } catch (err) {
+                        console.warn('Highlight error:', err);
+                    }
                 }
-                return hljs.highlightAuto(code).value;
+                if (typeof hljs !== 'undefined') {
+                    return hljs.highlightAuto(code).value;
+                }
+                return code;
             },
             breaks: true,
-            gfm: true
+            gfm: true,
+            headerIds: true,
+            mangle: false
         });
 
         return marked.parse(markdown);
     }
 
-    getChannelGradient(channelId) {
-        const channelGradients = {
-            'market-analysis': 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-            'ma-intelligence': 'linear-gradient(135deg, #8B5CF6, #6366F1)',
-            'trading-strategies': 'linear-gradient(135deg, #10B981, #059669)',
-            'ipo-watch': 'linear-gradient(135deg, #F59E0B, #D97706)',
-            'portfolio-reviews': 'linear-gradient(135deg, #EC4899, #D946EF)',
-            'ai-quant': 'linear-gradient(135deg, #06B6D4, #0891B2)',
-            'ideas-insights': 'linear-gradient(135deg, #6366F1, #4F46E5)',
-            'news-events': 'linear-gradient(135deg, #EF4444, #DC2626)',
-            'education': 'linear-gradient(135deg, #EAB308, #CA8A04)',
-            'success-stories': 'linear-gradient(135deg, #F59E0B, #FBBF24)'
-        };
-        return channelGradients[channelId] || 'linear-gradient(135deg, #667eea, #764ba2)';
-    }
-
-    getChannelIcon(channelId) {
+    getChannelIconFA(channelId) {
         const channelIcons = {
-            'market-analysis': '📈',
-            'ma-intelligence': '💼',
-            'trading-strategies': '🎯',
-            'ipo-watch': '🚀',
-            'portfolio-reviews': '📊',
-            'ai-quant': '🤖',
-            'ideas-insights': '💡',
-            'news-events': '📰',
-            'education': '🎓',
-            'success-stories': '🏆'
+            'market-analysis': 'fa-chart-line',
+            'ma-intelligence': 'fa-handshake',
+            'trading-strategies': 'fa-bullseye',
+            'ipo-watch': 'fa-rocket',
+            'portfolio-reviews': 'fa-chart-pie',
+            'ai-quant': 'fa-robot',
+            'ideas-insights': 'fa-lightbulb',
+            'news-events': 'fa-newspaper',
+            'education': 'fa-graduation-cap',
+            'success-stories': 'fa-trophy'
         };
-        return channelIcons[channelId] || '📄';
+        return channelIcons[channelId] || 'fa-folder';
     }
 
     getChannelName(channelId) {
@@ -262,6 +316,13 @@ class PostManager {
     formatDate(date) {
         if (!date) return 'Unknown';
         
+        // Si c'est un timestamp Firestore
+        if (date.seconds) {
+            date = new Date(date.seconds * 1000);
+        } else if (!(date instanceof Date)) {
+            date = new Date(date);
+        }
+        
         const options = { 
             year: 'numeric', 
             month: 'long', 
@@ -275,6 +336,13 @@ class PostManager {
 
     formatTimeAgo(date) {
         if (!date) return 'Just now';
+        
+        // Si c'est un timestamp Firestore
+        if (date.seconds) {
+            date = new Date(date.seconds * 1000);
+        } else if (!(date instanceof Date)) {
+            date = new Date(date);
+        }
         
         const seconds = Math.floor((new Date() - date) / 1000);
         
@@ -298,21 +366,55 @@ class PostManager {
     }
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
     showError(message) {
+        this.postLoading.style.display = 'none';
         this.postDetailCard.innerHTML = `
-            <div style="text-align: center; padding: 60px; color: #EF4444;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; color: white;">${message}</h3>
-                <a href="community-hub.html" class="filter-btn" style="display: inline-block; margin-top: 20px; text-decoration: none;">
+            <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px; color: #ef4444;"></i>
+                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; color: var(--text-primary);">${this.escapeHtml(message)}</h3>
+                <p style="margin-bottom: 24px; color: var(--text-secondary);">The post you're looking for doesn't exist or has been removed.</p>
+                <a href="community-hub.html" class="create-post-btn" style="display: inline-flex; text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> Back to Community
                 </a>
             </div>
         `;
+    }
+
+    // Méthodes pour les actions admin
+    editPost() {
+        if (!this.post) return;
+        
+        // Rediriger vers la page d'édition (à implémenter)
+        alert('Edit feature coming soon!');
+        // window.location.href = `edit-post.html?id=${this.postId}`;
+    }
+
+    async deletePost() {
+        if (!this.post) return;
+        
+        const confirmDelete = confirm('Are you sure you want to delete this post? This action cannot be undone.');
+        
+        if (!confirmDelete) return;
+        
+        try {
+            await firebase.firestore()
+                .collection('posts')
+                .doc(this.postId)
+                .delete();
+            
+            alert('Post deleted successfully');
+            window.location.href = 'community-hub.html';
+            
+        } catch (error) {
+            console.error('❌ Error deleting post:', error);
+            alert('Failed to delete post');
+        }
     }
 }
 

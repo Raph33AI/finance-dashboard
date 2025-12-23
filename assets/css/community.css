@@ -1799,242 +1799,399 @@ body.dark-mode #particles-canvas {
 .posts-grid > .post-card:nth-child(6) { animation-delay: 0.3s; }
 
 /* ════════════════════════════════════════════════════════════════
-   16. CORRECTIONS ADDITIONNELLES - GRADIENTS & MOBILE
+   🔧 CORRECTIONS - SECTIONS POSTS & SIDEBAR
    ════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────
-   A. CONTOURS BLEU/VIOLET DÉGRADÉ (Toutes cartes/sections)
-   ───────────────────────────────────────────────────────────── */
-
-.stat-card,
-.channel-chip,
-.post-card,
-.featured-post,
-.leaderboard-item,
-.editor-card,
-.comment-item,
-.user-post-item,
-.search-input,
-.form-input,
-.form-select,
-.comment-textarea,
-.tags-input-wrapper,
-.upload-zone,
-.filter-buttons,
-.image-preview {
-    border: 2px solid transparent !important;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
-}
-
-/* Dark Mode Adaptation */
-body.dark-mode .stat-card,
-body.dark-mode .channel-chip,
-body.dark-mode .post-card,
-body.dark-mode .featured-post,
-body.dark-mode .leaderboard-item,
-body.dark-mode .editor-card,
-body.dark-mode .comment-item,
-body.dark-mode .user-post-item {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-body.dark-mode .form-input,
-body.dark-mode .form-select,
-body.dark-mode .search-input,
-body.dark-mode .comment-textarea,
-body.dark-mode .tags-input-wrapper,
-body.dark-mode .upload-zone {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-/* Effet Glow au Hover */
-.stat-card:hover,
-.post-card:hover,
-.featured-post:hover,
-.leaderboard-item:hover,
-.user-post-item:hover {
-    box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.35),
-        0 0 40px rgba(118, 75, 162, 0.2),
-        inset 0 0 60px rgba(102, 126, 234, 0.08) !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   B. TITRES EN BLEU/VIOLET DÉGRADÉ (Tous les titres)
-   ───────────────────────────────────────────────────────────── */
-
-/* Section Titles */
-.section-title,
-h1, h2, h3, h4,
-.post-title,
-.post-detail-title,
-.profile-name,
-.featured-post-title,
-.user-post-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-weight: 800 !important;
-}
-
-/* Labels et sous-titres */
-.stat-label,
-.form-label,
-.section-header h3,
-.profile-stat-label {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-weight: 700 !important;
-}
-
-/* Titres dans les cartes */
-.post-card .post-title,
-.featured-post .featured-post-title,
-.user-post-item .user-post-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-}
-
-/* Headers de formulaire */
-.editor-card h3,
-.editor-card .section-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   C. CHANNELS HORIZONTAL SUR SMARTPHONE (Force le scroll)
-   ───────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-    .channels-scroll {
-        display: flex !important;
-        flex-direction: row !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        white-space: nowrap !important;
-        -webkit-overflow-scrolling: touch !important;
-        scroll-snap-type: x mandatory !important;
-        padding-bottom: 20px !important;
-    }
-    
-    .channel-chip {
-        flex: 0 0 auto !important;
-        scroll-snap-align: start !important;
-        min-width: fit-content !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .channels-scroll {
-        gap: 10px !important;
-        padding: 8px 4px 20px 4px !important;
-    }
-    
-    .channel-chip {
-        padding: 10px 16px !important;
-        font-size: 0.9rem !important;
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   D. CONTOURS ANIMÉS (Effet premium)
-   ───────────────────────────────────────────────────────────── */
-
-@keyframes gradientBorderRotate {
-    0% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
-    }
-    50% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #8b5cf6 0%, #667eea 50%, #764ba2 100%);
-    }
-    100% {
-        background-image: 
-            linear-gradient(var(--glass-bg), var(--glass-bg)),
-            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%);
-    }
-}
-
-.stat-card:hover,
-.post-card:hover {
-    animation: gradientBorderRotate 3s ease infinite !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   E. RENFORCEMENT DES SECTIONS PRINCIPALES
-   ───────────────────────────────────────────────────────────── */
-
-.section,
-.card,
-.community-sidebar > div,
-.profile-header-card {
-    border: 2px solid transparent !important;
-    background-image: 
-        linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
-}
-
-body.dark-mode .section,
-body.dark-mode .card,
-body.dark-mode .community-sidebar > div {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5cf6 100%) !important;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   F. SMOOTH SCROLL POUR CHANNELS (Mobile UX)
-   ───────────────────────────────────────────────────────────── */
-
-.channels-scroll {
-    scroll-behavior: smooth !important;
-}
-
-/* Indicateur de scroll (optionnel) */
-.channels-scroll::after {
-    content: '→';
-    position: sticky;
-    right: 0;
-    background: linear-gradient(90deg, transparent 0%, var(--glass-bg) 30%);
-    padding: 12px 20px 12px 40px;
-    font-size: 1.5rem;
+/* 1⃣ Section Title (Posts, Featured Posts, Top Contributors) */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.75rem;
     font-weight: 900;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+}
+
+.section-title i {
+    font-size: 1.6rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
-@media (max-width: 768px) {
-    .channels-scroll.has-more::after {
-        opacity: 1;
-    }
+/* 2⃣ Sidebar Widgets (Featured Posts, Top Contributors) */
+.sidebar-widget {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+}
+
+/* Bordure dégradée pour widgets */
+.sidebar-widget::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.sidebar-widget .section-title {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+}
+
+/* 3⃣ Featured Posts - Corrections */
+.featured-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.featured-post {
+    background: rgba(102, 126, 234, 0.05);
+    backdrop-filter: blur(10px);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 0 !important; /* Override existing margin */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.featured-post::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.featured-post:hover {
+    transform: translateX(6px);
+    background: rgba(102, 126, 234, 0.1);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+}
+
+/* Empty state pour Featured Posts */
+.featured-posts-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.featured-posts-empty i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.3;
+    display: block;
+}
+
+/* 4⃣ Top Contributors - Corrections */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(102, 126, 234, 0.05);
+    backdrop-filter: blur(10px);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.leaderboard-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.leaderboard-item:hover {
+    transform: translateX(6px);
+    background: rgba(102, 126, 234, 0.1);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
 }
 
 /* ════════════════════════════════════════════════════════════════
-   FIN DES CORRECTIONS ADDITIONNELLES
+   🔧 CORRECTIONS - POST DETAIL PAGE
    ════════════════════════════════════════════════════════════════ */
+
+/* 1⃣ Post Detail Container */
+.post-detail-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 24px 0;
+    position: relative;
+}
+
+.post-detail-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* 2⃣ Post Detail Channel Badge (la barre cyan) - CORRECTION */
+.post-detail-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.post-detail-channel i {
+    font-size: 1.1rem;
+    color: white !important;
+}
+
+/* 3⃣ Author Info Section - RESTRUCTURATION */
+.post-detail-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.post-detail-author-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid #667eea;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.post-detail-author-info {
+    flex: 1;
+}
+
+.post-detail-author-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+}
+
+.post-detail-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.post-detail-date i {
+    color: #667eea;
+}
+
+/* 4⃣ Post Stats (likes, comments, views) */
+.post-detail-stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.post-detail-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    border: 2px solid rgba(102, 126, 234, 0.15);
+    transition: all 0.3s ease;
+}
+
+.post-detail-stat:hover {
+    background: rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.post-detail-stat i {
+    font-size: 1.1rem;
+    color: #667eea;
+}
+
+/* 5⃣ Comments Section */
+.comments-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+}
+
+.comments-section .section-title {
+    font-size: 1.6rem;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 DARK MODE - CORRECTIONS
+   ════════════════════════════════════════════════════════════════ */
+
+body.dark-mode .sidebar-widget {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+body.dark-mode .post-detail-container {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+body.dark-mode .featured-post,
+body.dark-mode .leaderboard-item {
+    background: rgba(30, 41, 59, 0.6);
+}
+
+body.dark-mode .featured-post:hover,
+body.dark-mode .leaderboard-item:hover {
+    background: rgba(30, 41, 59, 0.8);
+}
+
+body.dark-mode .post-detail-author {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .post-detail-stat {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE - CORRECTIONS
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .sidebar-widget {
+        padding: 20px;
+    }
+    
+    .post-detail-container {
+        padding: 24px 18px;
+    }
+    
+    .post-detail-author {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .post-detail-stats {
+        gap: 12px;
+    }
+    
+    .post-detail-stat {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.4rem;
+    }
+    
+    .post-detail-channel {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+    
+    .post-detail-stats {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .post-detail-stat {
+        justify-content: center;
+    }
+}
+
+/* État "liked" pour le bouton like */
+.post-detail-stat.liked,
+.post-detail-stat#likeBtn.liked {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border-color: transparent !important;
+}
+
+.post-detail-stat.liked i,
+.post-detail-stat#likeBtn.liked i {
+    color: white !important;
+}
+
+.post-detail-stat.liked:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+}

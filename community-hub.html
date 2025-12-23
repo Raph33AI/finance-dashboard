@@ -434,18 +434,23 @@
                     <aside class="community-sidebar">
                         
                         <!-- Featured Posts -->
-                        <div class="section">
-                            <h3 class="section-title" style="font-size: 1.25rem;">
+                        <div class="sidebar-widget">
+                            <h3 class="section-title">
                                 <i class="fas fa-star"></i> Featured Posts
                             </h3>
-                            <div id="featuredPosts">
+                            <div class="featured-posts-list" id="featuredPosts">
                                 <!-- Dynamically populated -->
+                                <!-- Empty state par défaut (sera masqué par JS quand il y a des posts) -->
+                                <div class="featured-posts-empty">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No featured posts yet</p>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Leaderboard -->
-                        <div class="section">
-                            <h3 class="section-title" style="font-size: 1.25rem;">
+                        <div class="sidebar-widget">
+                            <h3 class="section-title">
                                 <i class="fas fa-trophy"></i> Top Contributors
                             </h3>
                             <div class="leaderboard-list" id="leaderboardList">
@@ -454,8 +459,8 @@
                         </div>
 
                         <!-- Trending Tags -->
-                        <div class="section">
-                            <h3 class="section-title" style="font-size: 1.25rem;">
+                        <div class="sidebar-widget">
+                            <h3 class="section-title">
                                 <i class="fas fa-hashtag"></i> Trending Tags
                             </h3>
                             <div class="post-tags" id="trendingTags">
