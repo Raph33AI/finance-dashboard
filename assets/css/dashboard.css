@@ -494,7 +494,8 @@ body.dark-mode .btn-secondary:hover {
 
 .data-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;  /* ✅ CORRECTION */
+    border-spacing: 0;          /* ✅ Pour garder l'apparence */
     font-size: 0.85em;
     position: relative;
 }
@@ -504,7 +505,7 @@ body.dark-mode .btn-secondary:hover {
     color: white !important;
 }
 
-/* ✅ STICKY sur chaque TH */
+/* ✅ Bordures ajustées pour border-collapse: separate */
 .data-table thead th {
     position: sticky;
     top: 0;
@@ -515,11 +516,21 @@ body.dark-mode .btn-secondary:hover {
     font-weight: 800 !important;
     white-space: nowrap;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);  /* ✅ AJOUTER */
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: white !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Retirer la bordure droite de la dernière colonne */
+.data-table thead th:last-child {
+    border-right: none;
+}
+
+.data-table tbody td:last-child {
+    border-right: none;
 }
 
 /* ✅ Première colonne STICKY à gauche ET en haut */
