@@ -8,12 +8,10 @@
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/heatmap.js'></script>
-    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/map.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     <script src='https://code.highcharts.com/modules/export-data.js'></script>
-    <!-- Highcharts Maps -->
-    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
-    <script src="https://code.highcharts.com/mapdata/countries/world/world.js"></script>
+    <script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
     
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
@@ -494,66 +492,6 @@
                 </div>
 
                 <!-- ========================================
-                     KPIs SUMMARY
-                     ======================================== -->
-                <div class='kpis-grid' id='kpisGrid'>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon primary'>
-                            <i class='fas fa-money-bill-wave'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Purchase Price</div>
-                            <div class='kpi-value' id='kpiPurchasePrice'>€0</div>
-                        </div>
-                    </div>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon success'>
-                            <i class='fas fa-piggy-bank'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Down Payment</div>
-                            <div class='kpi-value' id='kpiDownPayment'>€0</div>
-                        </div>
-                    </div>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon warning'>
-                            <i class='fas fa-calendar-alt'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Monthly Payment</div>
-                            <div class='kpi-value' id='kpiMonthlyPayment'>€0</div>
-                        </div>
-                    </div>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon info'>
-                            <i class='fas fa-percent'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Net Yield</div>
-                            <div class='kpi-value' id='kpiNetYield'>0%</div>
-                        </div>
-                    </div>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon purple'>
-                            <i class='fas fa-coins'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Total Cost (Fees Included)</div>
-                            <div class='kpi-value' id='kpiTotalCost'>€0</div>
-                        </div>
-                    </div>
-                    <div class='kpi-card'>
-                        <div class='kpi-icon danger'>
-                            <i class='fas fa-chart-line'></i>
-                        </div>
-                        <div class='kpi-content'>
-                            <div class='kpi-label'>Debt Ratio</div>
-                            <div class='kpi-value' id='kpiDebtRatio'>0%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================
                      MAIN SIMULATION FORM
                      ======================================== -->
                 <div class='section'>
@@ -979,6 +917,66 @@
                     
                     <div class='comparison-chart-container'>
                         <div id='comparisonChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     KPIs SUMMARY
+                     ======================================== -->
+                <div class='kpis-grid' id='kpisGrid'>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon primary'>
+                            <i class='fas fa-money-bill-wave'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Purchase Price</div>
+                            <div class='kpi-value' id='kpiPurchasePrice'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon success'>
+                            <i class='fas fa-piggy-bank'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Down Payment</div>
+                            <div class='kpi-value' id='kpiDownPayment'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon warning'>
+                            <i class='fas fa-calendar-alt'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Monthly Payment</div>
+                            <div class='kpi-value' id='kpiMonthlyPayment'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon info'>
+                            <i class='fas fa-percent'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Net Yield</div>
+                            <div class='kpi-value' id='kpiNetYield'>0%</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon purple'>
+                            <i class='fas fa-coins'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Total Cost (Fees Included)</div>
+                            <div class='kpi-value' id='kpiTotalCost'>€0</div>
+                        </div>
+                    </div>
+                    <div class='kpi-card'>
+                        <div class='kpi-icon danger'>
+                            <i class='fas fa-chart-line'></i>
+                        </div>
+                        <div class='kpi-content'>
+                            <div class='kpi-label'>Debt Ratio</div>
+                            <div class='kpi-value' id='kpiDebtRatio'>0%</div>
+                        </div>
                     </div>
                 </div>
 
