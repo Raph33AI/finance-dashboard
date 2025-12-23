@@ -311,7 +311,7 @@
 
 /**
  * ═══════════════════════════════════════════════════════════
- * FAVICON DYNAMIQUE ALPHAVAULT AI - VERSION COMPATIBLE SEO
+ * FAVICON DYNAMIQUE ALPHAVAULT AI - VERSION SEO OPTIMISÉE
  * Favicon intelligent avec support complet des moteurs de recherche
  * ═══════════════════════════════════════════════════════════
  */
@@ -335,10 +335,10 @@ class DynamicFavicon {
      * Initialisation du favicon
      */
     init() {
-        // ✅ CORRECTION: Chercher spécifiquement le lien dynamique
+        // Chercher le lien favicon dynamique
         this.link = document.getElementById('dynamic-favicon');
         
-        // Si pas trouvé, chercher un lien favicon existant
+        // Si pas trouvé, chercher un lien favicon standard
         if (!this.link) {
             this.link = document.querySelector("link[rel*='icon'][sizes='32x32']");
         }
@@ -348,7 +348,7 @@ class DynamicFavicon {
             this.link = document.createElement('link');
             this.link.id = 'dynamic-favicon';
             this.link.type = 'image/png';
-            this.link.rel = 'icon';
+            this.link.rel = 'alternate icon';
             this.link.sizes = '32x32';
             this.link.href = this.staticFaviconUrl;
             document.head.appendChild(this.link);
@@ -357,13 +357,12 @@ class DynamicFavicon {
             console.log('✅ DynamicFavicon: Lien existant trouvé');
         }
         
-        // ⚠ IMPORTANT: Ne dessiner le favicon dynamique que si on est sur une page interactive
-        // Pour le SEO, garder le favicon statique par défaut
+        // Vérifier si on doit utiliser le favicon dynamique
         if (this.shouldUseDynamicFavicon()) {
             this.draw();
             console.log('🎉 DynamicFavicon: Mode dynamique activé');
         } else {
-            console.log('📄 DynamicFavicon: Mode statique (SEO)');
+            console.log('📄 DynamicFavicon: Mode statique (SEO/Bot détecté)');
         }
     }
 
@@ -371,12 +370,12 @@ class DynamicFavicon {
      * Détermine si on doit utiliser le favicon dynamique
      */
     shouldUseDynamicFavicon() {
-        // Ne pas utiliser le favicon dynamique pour les bots
+        // Détecter les bots/crawlers
         const userAgent = navigator.userAgent.toLowerCase();
-        const isCrawler = /bot|crawler|spider|crawling|google|bing|yahoo|facebook|whatsapp/i.test(userAgent);
+        const isCrawler = /bot|crawler|spider|crawling|google|bing|yahoo|facebook|whatsapp|lighthouse/i.test(userAgent);
         
         if (isCrawler) {
-            console.log('🤖 Bot détecté, favicon statique maintenu');
+            console.log('🤖 Bot/Crawler détecté, favicon statique maintenu pour le SEO');
             return false;
         }
         
@@ -384,7 +383,7 @@ class DynamicFavicon {
     }
 
     /**
-     * Dessiner le favicon de base
+     * Dessiner le favicon de base (TON CODE EXACT)
      */
     draw(color1 = this.defaultColor1, color2 = this.defaultColor2) {
         const ctx = this.ctx;
@@ -483,6 +482,8 @@ class DynamicFavicon {
      */
     notify(count = 1) {
         console.log(`🔔 Notification: ${count}`);
+        
+        // Redessiner le favicon de base
         this.draw();
         
         const ctx = this.ctx;
@@ -519,9 +520,12 @@ class DynamicFavicon {
      * Afficher une barre de progression
      */
     progress(percent) {
+        // Redessiner le favicon de base
         this.draw();
+        
         const ctx = this.ctx;
         
+        // Arc de progression vert
         ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 2.5;
         ctx.shadowColor = '#10b981';
@@ -535,31 +539,49 @@ class DynamicFavicon {
         this.updateFavicon();
     }
 
+    /**
+     * Mode "Alert" - Favicon rouge clignotant
+     */
     alert() {
         console.log('⚠ Mode Alert activé');
         this.setColors('#ef4444', '#dc2626');
     }
 
+    /**
+     * Mode "Success" - Favicon vert
+     */
     success() {
         console.log('✅ Mode Success activé');
         this.setColors('#10b981', '#059669');
     }
 
+    /**
+     * Mode "Dark" - Adaptation au mode sombre
+     */
     darkMode() {
         console.log('🌙 Mode Dark activé');
         this.setColors('#818cf8', '#c084fc');
     }
 
+    /**
+     * Mode "Light" - Retour aux couleurs par défaut
+     */
     lightMode() {
         console.log('☀ Mode Light activé');
         this.draw();
     }
 
+    /**
+     * Restaurer le favicon par défaut
+     */
     reset() {
         console.log('🔄 Reset du favicon');
         this.draw();
     }
 
+    /**
+     * Mélanger deux couleurs
+     */
     blendColors(color1, color2, ratio) {
         const hex = (color) => {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
@@ -590,6 +612,7 @@ class DynamicFavicon {
 (function() {
     'use strict';
     
+    // Attendre que le DOM soit chargé
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initFavicon);
     } else {
@@ -597,12 +620,15 @@ class DynamicFavicon {
     }
     
     function initFavicon() {
+        // Créer l'instance globale
         window.dynamicFavicon = new DynamicFavicon();
         
+        // Adapter au mode sombre si actif
         if (document.body.classList.contains('dark-mode')) {
             window.dynamicFavicon.darkMode();
         }
         
+        // Écouter les changements de mode sombre
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.attributeName === 'class') {
