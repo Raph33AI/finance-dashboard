@@ -2923,3 +2923,132 @@ body.dark-mode .comment-action-btn:hover {
         font-size: 0.85rem;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTIONS SUPPLÉMENTAIRES
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1⃣ BOUTON "BACK TO COMMUNITY" - BORDURE DÉGRADÉE PERMANENTE */
+.filter-btn {
+    padding: 10px 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    position: relative;
+    
+    /* Bordure dégradée permanente */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+.filter-btn i {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.filter-btn:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    background-image: 
+        linear-gradient(135deg, #667eea, #764ba2),
+        linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.filter-btn:hover i {
+    -webkit-text-fill-color: white;
+}
+
+/* Dark mode */
+body.dark-mode .filter-btn {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+body.dark-mode .filter-btn:hover {
+    background-image: 
+        linear-gradient(135deg, #667eea, #764ba2),
+        linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* 2⃣ ALIGNEMENT NOM + DATE SUR LA MÊME LIGNE */
+.comment-author-details {
+    display: flex;
+    flex-direction: row !important; /* Changé de column à row */
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.comment-author-name {
+    font-weight: 800;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0; /* Supprime les marges */
+}
+
+.comment-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin: 0; /* Supprime les marges */
+}
+
+.comment-date i {
+    font-size: 0.75rem;
+    color: #667eea;
+}
+
+/* Séparateur visuel optionnel entre nom et date */
+.comment-author-details::after {
+    content: '•';
+    color: var(--text-tertiary);
+    font-weight: 700;
+    opacity: 0.5;
+    order: 1; /* Place le point entre le nom et la date */
+}
+
+.comment-author-name {
+    order: 0;
+}
+
+.comment-date {
+    order: 2;
+}
+
+/* Responsive - Revenir à column sur mobile si nécessaire */
+@media (max-width: 480px) {
+    .comment-author-details {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+    }
+    
+    .comment-author-details::after {
+        display: none; /* Cache le séparateur sur mobile */
+    }
+}
