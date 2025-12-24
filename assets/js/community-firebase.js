@@ -680,7 +680,7 @@ class CommunityFirebaseService {
         
         // ⚠ REMPLACE PAR L'URL DE TON WORKER IMAGE STORAGE
         // Soit le domaine personnalisé, soit l'URL workers.dev
-        this.imageWorkerUrl = 'https://images-api.alphavault-ai.com'; // OU https://alphavault-image-storage.xxx.workers.dev
+        this.imageWorkerUrl = 'alphavault-image-storage.raphnardone.workers.dev'; // OU https://alphavault-image-storage.xxx.workers.dev
     }
 
     /* ==========================================
