@@ -1,22 +1,21 @@
 /**
  * ════════════════════════════════════════════════════════════════
  * NEWS TERMINAL - OPTIMIZED VERSION (MAX Articles Support)
+ * WITH COLLAPSIBLE FILTERS DROPDOWN
  * ════════════════════════════════════════════════════════════════
  */
 
 class NewsTerminal {
     constructor() {
         this.rssClient = new RSSClient();
-        // ❌ SUPPRIMÉ : this.firestoreManager = new FirestoreRSSManager();
         
         this.allArticles = [];
         this.filteredArticles = [];
         this.displayedArticles = [];
         this.currentView = 'grid';
-        this.articlesPerPage = 50; // ✨ Par défaut 50
+        this.articlesPerPage = 50;
         this.currentPage = 0;
         
-        // ✨ NOUVEAU : Options de chargement
         this.loadingInProgress = false;
         this.autoLoadMore = false;
 
@@ -28,18 +27,32 @@ class NewsTerminal {
         
         this.setupEventListeners();
         this.setupInfiniteScroll();
+        this.restoreFiltersState(); // ✅ NOUVEAU : Restaurer l'état des filtres
         await this.loadArticles();
     }
 
     setupEventListeners() {
         // Search avec debounce
         let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => this.applyFilters(), 300);
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => this.applyFilters(), 300);
+            });
+        }
+
+        // ✅ NOUVEAU : Listeners pour les filtres (avec mise à jour du compteur)
+        ['sourceFilter', 'sectorFilter', 'regionFilter', 'sortFilter'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', () => {
+                    this.applyFilters();
+                });
+            }
         });
 
-        // ✨ Sélecteur de nombre d'articles
+        // Sélecteur de nombre d'articles
         const articleLimitSelect = document.getElementById('articleLimitSelect');
         if (articleLimitSelect) {
             console.log('✅ Article limit select found');
@@ -51,7 +64,7 @@ class NewsTerminal {
             console.warn('⚠ Article limit select NOT found');
         }
 
-        // ✨ Toggle Auto-Load
+        // Toggle Auto-Load
         const autoLoadToggle = document.getElementById('autoLoadToggle');
         if (autoLoadToggle) {
             console.log('✅ Auto-load toggle found');
@@ -63,7 +76,7 @@ class NewsTerminal {
             console.warn('⚠ Auto-load toggle NOT found');
         }
 
-        // ✨ Bouton "Load MAX" - CRITIQUE!
+        // Bouton "Load MAX"
         const loadMaxBtn = document.getElementById('loadMaxBtn');
         if (loadMaxBtn) {
             console.log('✅ Load MAX button found!');
@@ -72,11 +85,10 @@ class NewsTerminal {
                 this.loadMaxArticles();
             });
         } else {
-            console.error('❌❌❌ Load MAX button NOT FOUND! Check HTML ID!');
+            console.error('❌ Load MAX button NOT FOUND! Check HTML ID!');
         }
     }
 
-    // ✨ NOUVEAU : Infinite Scroll
     setupInfiniteScroll() {
         let scrollTimeout;
         window.addEventListener('scroll', () => {
@@ -87,7 +99,6 @@ class NewsTerminal {
                 const scrollPosition = window.innerHeight + window.scrollY;
                 const pageHeight = document.documentElement.scrollHeight;
                 
-                // Charger plus quand on atteint 80% de la page
                 if (scrollPosition >= pageHeight * 0.8) {
                     const hasMore = (this.currentPage + 1) * this.articlesPerPage < this.filteredArticles.length;
                     if (hasMore) {
@@ -99,6 +110,111 @@ class NewsTerminal {
         });
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // ✨ NOUVEAU : GESTION DU DROPDOWN DES FILTRES
+    // ════════════════════════════════════════════════════════════════
+
+    toggleFilters() {
+        const content = document.getElementById('filtersContent');
+        const btn = document.getElementById('filtersToggleBtn');
+        const header = document.querySelector('.filters-header');
+        
+        if (!content || !header) {
+            console.error('❌ Filters elements not found');
+            return;
+        }
+        
+        const isCollapsed = content.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            // Ouvrir
+            content.classList.remove('collapsed');
+            header.classList.remove('collapsed');
+            localStorage.setItem('filtersExpanded', 'true');
+            console.log('🔽 Filters expanded');
+        } else {
+            // Fermer
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            localStorage.setItem('filtersExpanded', 'false');
+            console.log('🔼 Filters collapsed');
+        }
+    }
+
+    restoreFiltersState() {
+        const isExpanded = localStorage.getItem('filtersExpanded') !== 'false'; // Ouvert par défaut
+        const content = document.getElementById('filtersContent');
+        const header = document.querySelector('.filters-header');
+        
+        if (!content || !header) {
+            console.warn('⚠ Filters elements not found for state restoration');
+            return;
+        }
+        
+        if (!isExpanded) {
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            console.log('📦 Filters restored: COLLAPSED');
+        } else {
+            console.log('📦 Filters restored: EXPANDED');
+        }
+    }
+
+    updateActiveFiltersCount() {
+        let count = 0;
+        
+        const searchInput = document.getElementById('searchInput');
+        const sourceFilter = document.getElementById('sourceFilter');
+        const sectorFilter = document.getElementById('sectorFilter');
+        const regionFilter = document.getElementById('regionFilter');
+        
+        if (searchInput && searchInput.value.trim() !== '') count++;
+        if (sourceFilter && sourceFilter.value !== 'all') count++;
+        if (sectorFilter && sectorFilter.value !== 'all') count++;
+        if (regionFilter && regionFilter.value !== 'all') count++;
+        
+        const countElement = document.getElementById('activeFiltersCount');
+        if (countElement) {
+            countElement.textContent = `(${count} active)`;
+            countElement.style.color = count > 0 ? '#10b981' : 'var(--text-secondary)';
+        }
+        
+        // Highlight des filtres actifs
+        this.highlightActiveFilters();
+        
+        console.log(`🔢 Active filters: ${count}`);
+    }
+
+    highlightActiveFilters() {
+        const filters = [
+            { input: document.getElementById('searchInput'), parent: null },
+            { input: document.getElementById('sourceFilter'), parent: null },
+            { input: document.getElementById('sectorFilter'), parent: null },
+            { input: document.getElementById('regionFilter'), parent: null }
+        ];
+        
+        filters.forEach(filter => {
+            if (!filter.input) return;
+            
+            filter.parent = filter.input.closest('.filter-group');
+            if (!filter.parent) return;
+            
+            const hasValue = filter.input.tagName === 'SELECT' 
+                ? filter.input.value !== 'all'
+                : filter.input.value.trim() !== '';
+            
+            if (hasValue) {
+                filter.parent.classList.add('has-value');
+            } else {
+                filter.parent.classList.remove('has-value');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // CHARGEMENT DES ARTICLES
+    // ════════════════════════════════════════════════════════════════
+
     changeArticleLimit(limit) {
         console.log(`📊 Changing article limit to: ${limit >= 999999 ? 'ALL' : limit}`);
         this.articlesPerPage = limit >= 999999 ? this.filteredArticles.length : limit;
@@ -106,14 +222,13 @@ class NewsTerminal {
         this.displayArticles();
     }
 
-    // ✨ AMÉLIORÉ : Chargement standard (100 articles par source)
     async loadArticles() {
         try {
             this.loadingInProgress = true;
             console.log('📡 Loading articles (standard mode)...');
             
             const data = await this.rssClient.getAllArticles({
-                maxPerSource: 100 // 100 articles par source
+                maxPerSource: 100
             });
             
             this.allArticles = data.articles;
@@ -131,7 +246,6 @@ class NewsTerminal {
         }
     }
 
-    // ✨ NOUVEAU : Charger le MAXIMUM d'articles (200 par source)
     async loadMaxArticles() {
         console.log('🔥🔥🔥 LOAD MAX ARTICLES CLICKED!');
         
@@ -157,7 +271,6 @@ class NewsTerminal {
             this.loadingInProgress = true;
             console.log('🚀 Starting MAX articles load...');
             
-            // Afficher un loader
             document.getElementById('articlesContainer').innerHTML = `
                 <div class='loading-state'>
                     <i class='fas fa-spinner fa-spin' style='font-size: 48px; color: #667eea;'></i>
@@ -198,12 +311,16 @@ class NewsTerminal {
         }
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // FILTRAGE ET TRI
+    // ════════════════════════════════════════════════════════════════
+
     applyFilters() {
-        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-        const sourceFilter = document.getElementById('sourceFilter').value;
-        const sectorFilter = document.getElementById('sectorFilter').value;
-        const regionFilter = document.getElementById('regionFilter').value;
-        const sortFilter = document.getElementById('sortFilter').value;
+        const searchQuery = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        const sourceFilter = document.getElementById('sourceFilter')?.value || 'all';
+        const sectorFilter = document.getElementById('sectorFilter')?.value || 'all';
+        const regionFilter = document.getElementById('regionFilter')?.value || 'all';
+        const sortFilter = document.getElementById('sortFilter')?.value || 'newest';
 
         this.filteredArticles = this.allArticles.filter(article => {
             const matchesSearch = searchQuery === '' || 
@@ -221,6 +338,8 @@ class NewsTerminal {
         this.sortArticles(sortFilter);
         this.currentPage = 0;
         this.displayArticles();
+        
+        this.updateActiveFiltersCount(); // ✅ NOUVEAU : Mise à jour du compteur
     }
 
     sortArticles(sortBy) {
@@ -272,6 +391,10 @@ class NewsTerminal {
         
         return 'all';
     }
+
+    // ════════════════════════════════════════════════════════════════
+    // AFFICHAGE DES ARTICLES
+    // ════════════════════════════════════════════════════════════════
 
     displayArticles() {
         const container = document.getElementById('articlesContainer');
@@ -354,15 +477,9 @@ class NewsTerminal {
         `;
     }
 
-    // ✅ CORRIGÉ : Suppression de articleId et de firestoreManager
     openArticle(link) {
-        // ❌ SUPPRIMÉ : const article = this.allArticles.find(a => a.id === articleId);
-        // ❌ SUPPRIMÉ : if (article) { await this.firestoreManager.recordArticleView(article); }
         window.open(link, '_blank');
     }
-
-    // ❌ MÉTHODE COMPLÈTE SUPPRIMÉE : toggleWatchlist()
-    // (Était utilisée pour ajouter/retirer des tickers de la watchlist Firebase)
 
     shareArticle(link) {
         if (navigator.share) {
@@ -399,7 +516,8 @@ class NewsTerminal {
     updateStats() {
         const total = this.allArticles.length;
 
-        document.getElementById('totalArticles').textContent = total;
+        const totalElement = document.getElementById('totalArticles');
+        if (totalElement) totalElement.textContent = total;
 
         const tickerCount = {};
         this.allArticles.forEach(article => {
@@ -408,13 +526,16 @@ class NewsTerminal {
             });
         });
         
-        document.getElementById('hotTopicsCount').textContent = Object.keys(tickerCount).length;
+        const hotTopicsElement = document.getElementById('hotTopicsCount');
+        if (hotTopicsElement) hotTopicsElement.textContent = Object.keys(tickerCount).length;
 
         const sources = new Set(this.allArticles.map(a => a.source));
-        document.getElementById('sourcesCount').textContent = sources.size;
+        const sourcesElement = document.getElementById('sourcesCount');
+        if (sourcesElement) sourcesElement.textContent = sources.size;
 
         const uniqueTickers = new Set(this.allArticles.flatMap(a => a.tickers));
-        document.getElementById('tickersCount').textContent = uniqueTickers.size;
+        const tickersElement = document.getElementById('tickersCount');
+        if (tickersElement) tickersElement.textContent = uniqueTickers.size;
     }
 
     loadMore() {
@@ -501,20 +622,7 @@ class NewsTerminal {
     }
 }
 
-// Animations CSS
-// const style = document.createElement('style');
-// style.textContent = `
-//     @keyframes slideIn {
-//         from { transform: translateX(400px); opacity: 0; }
-//         to { transform: translateX(0); opacity: 1; }
-//     }
-//     @keyframes slideOut {
-//         from { transform: translateX(0); opacity: 1; }
-//         to { transform: translateX(400px); opacity: 0; }
-//     }
-// `;
-// document.head.appendChild(style);
-
+// Initialisation
 let newsTerminal;
 document.addEventListener('DOMContentLoaded', () => {
     newsTerminal = new NewsTerminal();
