@@ -3054,7 +3054,7 @@ body.dark-mode .filter-btn:hover {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   🔧 CREATE POST - BORDURES DÉGRADÉES UNIQUEMENT (CORRECTION)
+   🔧 CREATE POST - BORDURES DÉGRADÉES DISCRÈTES UNIFORMES
    ════════════════════════════════════════════════════════════════ */
 
 /* 1⃣ Container principal du formulaire */
@@ -3081,13 +3081,14 @@ body.dark-mode .filter-btn:hover {
     mask-composite: exclude;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.5;
 }
 
 body.dark-mode .editor-card {
     background: rgba(15, 23, 42, 0.9);
 }
 
-/* 2⃣ Sections de formulaire - BORDURE UNIQUEMENT */
+/* 2⃣ Sections de formulaire - BORDURE DISCRÈTE */
 .form-section {
     margin-bottom: 28px;
     padding: 20px;
@@ -3111,6 +3112,7 @@ body.dark-mode .editor-card {
     mask-composite: exclude;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.5;
 }
 
 /* Contenu au-dessus de la bordure */
@@ -3119,7 +3121,7 @@ body.dark-mode .editor-card {
     z-index: 1;
 }
 
-/* 3⃣ Inputs et Selects - BORDURE UNIQUEMENT */
+/* 3⃣ Inputs et Selects - BORDURE DISCRÈTE */
 .form-input,
 .form-select {
     width: 100%;
@@ -3134,9 +3136,24 @@ body.dark-mode .editor-card {
     transition: all 0.3s ease;
     font-family: inherit;
     position: relative;
-    
-    /* Bordure dégradée avec border-image */
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+}
+
+.form-input::before,
+.form-select::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.5;
 }
 
 body.dark-mode .form-input,
@@ -3148,10 +3165,14 @@ body.dark-mode .form-select {
 .form-select:focus {
     outline: none;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
 }
 
-/* 4⃣ Tags Input Wrapper - BORDURE UNIQUEMENT */
+.form-input:focus::before,
+.form-select:focus::before {
+    opacity: 0.8;
+}
+
+/* 4⃣ Tags Input Wrapper - BORDURE DISCRÈTE */
 .tags-input-wrapper {
     display: flex;
     flex-wrap: wrap;
@@ -3163,9 +3184,24 @@ body.dark-mode .form-select {
     backdrop-filter: blur(20px) saturate(180%);
     min-height: 52px;
     transition: all 0.3s ease;
-    
-    /* Bordure dégradée */
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+    position: relative;
+}
+
+.tags-input-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.5;
 }
 
 body.dark-mode .tags-input-wrapper {
@@ -3176,9 +3212,19 @@ body.dark-mode .tags-input-wrapper {
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
-/* 5⃣ Upload Zone - BORDURE UNIQUEMENT */
+.tags-input-wrapper:focus-within::before {
+    opacity: 0.8;
+}
+
+/* Contenu au-dessus */
+.tags-input-wrapper > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 5⃣ Upload Zone - BORDURE DISCRÈTE */
 .upload-zone {
-    border: 2px dashed transparent;
+    border: 2px solid transparent;
     border-radius: 16px;
     padding: 48px 24px;
     text-align: center;
@@ -3202,7 +3248,7 @@ body.dark-mode .tags-input-wrapper {
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.5; /* Bordure plus discrète */
+    opacity: 0.5;
 }
 
 body.dark-mode .upload-zone {
@@ -3217,13 +3263,17 @@ body.dark-mode .upload-zone {
     background: rgba(102, 126, 234, 0.05);
 }
 
+.upload-zone.drag-over::before {
+    opacity: 1;
+}
+
 /* Contenu au-dessus */
 .upload-zone > * {
     position: relative;
     z-index: 1;
 }
 
-/* 6⃣ Image Preview - BORDURE UNIQUEMENT */
+/* 6⃣ Image Preview - BORDURE DISCRÈTE */
 .image-preview {
     position: relative;
     border-radius: 12px;
@@ -3246,6 +3296,7 @@ body.dark-mode .upload-zone {
     mask-composite: exclude;
     pointer-events: none;
     z-index: 1;
+    opacity: 0.5;
 }
 
 .image-preview img {
@@ -3256,15 +3307,29 @@ body.dark-mode .upload-zone {
     z-index: 0;
 }
 
-/* 7⃣ Markdown Editor (SimpleMDE) - BORDURE UNIQUEMENT */
+/* 7⃣ Markdown Editor (SimpleMDE) - BORDURE DISCRÈTE */
 .CodeMirror {
     border: 2px solid transparent !important;
     border-radius: 12px !important;
     background: var(--glass-bg) !important;
     position: relative;
-    
-    /* Bordure dégradée */
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1 !important;
+}
+
+.CodeMirror::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.5;
 }
 
 body.dark-mode .CodeMirror {
@@ -3273,6 +3338,10 @@ body.dark-mode .CodeMirror {
 
 .CodeMirror-focused {
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+.CodeMirror-focused::before {
+    opacity: 0.8;
 }
 
 /* SimpleMDE Toolbar */
