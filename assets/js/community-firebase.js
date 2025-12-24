@@ -190,7 +190,7 @@ class CommunityFirebaseService {
                 channelId: postData.channelId,
                 authorId: currentUser.uid,
                 authorName: userData.displayName || currentUser.email.split('@')[0],
-                authorAvatar: userData.photoURL || null,
+                authorAvatar: userData.photoURL || null,  // ✅ CORRECT
                 authorBadges: userData.badges || [],
                 title: postData.title,
                 content: postData.content,

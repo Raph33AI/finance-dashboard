@@ -148,18 +148,35 @@ class FollowSystem {
 
         if (followingIds.length === 0) return [];
 
-        // Récupérer les posts (max 10 utilisateurs à la fois pour Firestore 'in')
-        const postsSnapshot = await this.db.collection('community_posts')
-            .where('authorId', 'in', followingIds.slice(0, 10))
-            .orderBy('createdAt', 'desc')
-            .limit(limit)
-            .get();
+        // ✅ Firestore 'in' limite à 10 éléments, donc on divise si nécessaire
+        const chunks = [];
+        for (let i = 0; i < followingIds.length; i += 10) {
+            chunks.push(followingIds.slice(i, i + 10));
+        }
 
-        return postsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate()
-        }));
+        // Récupérer les posts pour chaque chunk
+        const allPosts = [];
+        
+        for (const chunk of chunks) {
+            const postsSnapshot = await this.db.collection('community_posts')
+                .where('authorId', 'in', chunk)
+                .orderBy('createdAt', 'desc')
+                .limit(limit)
+                .get();
+
+            const posts = postsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate()
+            }));
+
+            allPosts.push(...posts);
+        }
+
+        // Trier tous les posts par date et limiter au total
+        return allPosts
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(0, limit);
     }
 }
 

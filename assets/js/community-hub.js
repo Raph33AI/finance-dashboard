@@ -97,6 +97,12 @@ class CommunityHub {
                 this.lastDoc = null;
             }
 
+            // ✅ NOUVEAU : Gestion du filtre "Following"
+            if (this.currentFilter === 'following') {
+                await this.loadFollowingPosts();
+                return;
+            }
+
             // Determine order
             let orderBy = 'createdAt';
             let orderDirection = 'desc';
@@ -109,7 +115,7 @@ class CommunityHub {
 
             const result = await window.communityService.getPosts({
                 channelId: channelId === 'all' ? null : channelId,
-                limit: 20,
+                limit: 10,  // ✅ Pagination à 10
                 orderBy,
                 orderDirection,
                 lastDoc: append ? this.lastDoc : null
@@ -125,7 +131,6 @@ class CommunityHub {
                 this.renderPosts(result.posts);
                 this.lastDoc = result.lastDoc;
                 
-                // Show/hide load more button
                 if (this.loadMoreBtn) {
                     this.loadMoreBtn.style.display = result.hasMore ? 'inline-flex' : 'none';
                 }
@@ -137,6 +142,39 @@ class CommunityHub {
         } finally {
             this.isLoading = false;
             this.hideLoading();
+        }
+    }
+
+    async loadFollowingPosts() {
+        try {
+            const currentUser = firebase.auth().currentUser;
+            
+            if (!currentUser) {
+                this.showEmptyState('Please sign in to see posts from people you follow');
+                return;
+            }
+
+            // Récupérer les posts des utilisateurs suivis
+            const posts = await window.followSystem.getFollowingPosts(20);
+
+            this.postsGrid.innerHTML = '';
+
+            if (posts.length === 0) {
+                this.showEmptyState('No posts from people you follow. Start following users to see their posts here!');
+            } else {
+                this.renderPosts(posts);
+            }
+
+            // Cacher le bouton "Load More" pour le filtre Following
+            if (this.loadMoreBtn) {
+                this.loadMoreBtn.style.display = 'none';
+            }
+
+            this.hideLoading();
+
+        } catch (error) {
+            console.error('❌ Error loading following posts:', error);
+            this.showError('Failed to load posts from people you follow');
         }
     }
 
