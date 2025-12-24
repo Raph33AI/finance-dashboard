@@ -636,16 +636,17 @@
 
 /* ============================================
    ALPHAVAULT AI - COMMUNITY HUB
-   Page principale de la communauté
+   Compatible avec l'HTML existant
    ============================================ */
 
 class CommunityHub {
     constructor() {
         this.currentChannel = 'all';
-        this.currentSort = 'createdAt';
+        this.currentFilter = 'trending';
         this.currentTag = null;
         this.posts = [];
         this.channels = [];
+        this.currentUser = null;
     }
 
     async initialize() {
@@ -661,11 +662,11 @@ class CommunityHub {
             // Charger les posts
             await this.loadPosts();
 
-            // Charger la sidebar
-            await this.loadSidebarData();
-
             // Charger les stats
             await this.loadCommunityStats();
+
+            // Charger la sidebar
+            await this.loadSidebarData();
 
             // Setup event listeners
             this.setupEventListeners();
@@ -691,46 +692,85 @@ class CommunityHub {
     async loadChannels() {
         try {
             this.channels = await window.communityService.getChannels();
-            this.renderChannelFilters();
+            this.renderChannels();
             console.log('✅ Channels loaded:', this.channels.length);
         } catch (error) {
             console.error('❌ Error loading channels:', error);
-            // Continuer même si les channels ne chargent pas
         }
+    }
+
+    renderChannels() {
+        const channelsScroll = document.getElementById('channelsScroll');
+        if (!channelsScroll) return;
+
+        const allChannel = `
+            <button class="channel-card ${this.currentChannel === 'all' ? 'active' : ''}" data-channel="all">
+                <div class="channel-icon">🌐</div>
+                <div class="channel-info">
+                    <div class="channel-name">All Channels</div>
+                </div>
+            </button>
+        `;
+
+        const channelsHTML = this.channels.map(channel => `
+            <button class="channel-card ${this.currentChannel === channel.id ? 'active' : ''}" data-channel="${channel.id}">
+                <div class="channel-icon">${channel.icon}</div>
+                <div class="channel-info">
+                    <div class="channel-name">${channel.name}</div>
+                    <div class="channel-count">${channel.postCount || 0} posts</div>
+                </div>
+            </button>
+        `).join('');
+
+        channelsScroll.innerHTML = allChannel + channelsHTML;
     }
 
     async loadPosts() {
         try {
-            const postsContainer = document.getElementById('postsContainer');
-            if (!postsContainer) {
-                console.error('❌ Posts container not found');
+            // ✅ CORRECTION : Utiliser postsGrid au lieu de postsContainer
+            const postsGrid = document.getElementById('postsGrid');
+            if (!postsGrid) {
+                console.error('❌ Posts grid not found');
                 return;
             }
 
-            postsContainer.innerHTML = `
-                <div style="text-align: center; padding: 60px;">
+            // Afficher le loading
+            postsGrid.innerHTML = `
+                <div class="loading-spinner">
                     <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
                     <p style="margin-top: 16px; color: var(--text-secondary);">Loading posts...</p>
                 </div>
             `;
 
+            // Options de requête
             const options = {
-                sortBy: this.currentSort,
-                sortOrder: 'desc',
                 limit: 50
             };
 
+            // Tri selon le filtre actif
+            if (this.currentFilter === 'trending') {
+                options.sortBy = 'views';
+                options.sortOrder = 'desc';
+            } else if (this.currentFilter === 'latest') {
+                options.sortBy = 'createdAt';
+                options.sortOrder = 'desc';
+            } else if (this.currentFilter === 'top') {
+                options.sortBy = 'likes';
+                options.sortOrder = 'desc';
+            }
+
+            // Filtre par channel
             if (this.currentChannel !== 'all') {
                 options.channelId = this.currentChannel;
             }
 
+            // Filtre par tag
             if (this.currentTag) {
                 options.tag = this.currentTag;
             }
 
             this.posts = await window.communityService.getPosts(options);
 
-            // ✅ VÉRIFICATION CRITIQUE
             if (!this.posts) {
                 this.posts = [];
             }
@@ -741,56 +781,40 @@ class CommunityHub {
 
         } catch (error) {
             console.error('❌ Error loading posts:', error);
-            const postsContainer = document.getElementById('postsContainer');
-            if (postsContainer) {
-                postsContainer.innerHTML = `
+            const postsGrid = document.getElementById('postsGrid');
+            if (postsGrid) {
+                postsGrid.innerHTML = `
                     <div style="text-align: center; padding: 60px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #EF4444;"></i>
                         <p style="margin-top: 16px; color: var(--text-secondary);">Failed to load posts</p>
+                        <button class="filter-btn" onclick="location.reload()" style="margin-top: 16px;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
                     </div>
                 `;
             }
         }
     }
 
-    renderChannelFilters() {
-        const filtersContainer = document.getElementById('channelFilters');
-        if (!filtersContainer) return;
-
-        const allButton = `
-            <button class="filter-btn ${this.currentChannel === 'all' ? 'active' : ''}" data-channel="all">
-                <i class="fas fa-border-all"></i> All Channels
-            </button>
-        `;
-
-        const channelButtons = this.channels.map(channel => `
-            <button class="filter-btn ${this.currentChannel === channel.id ? 'active' : ''}" data-channel="${channel.id}">
-                <span>${channel.icon}</span> ${channel.name}
-            </button>
-        `).join('');
-
-        filtersContainer.innerHTML = allButton + channelButtons;
-    }
-
     renderPosts() {
-        const postsContainer = document.getElementById('postsContainer');
-        if (!postsContainer) return;
+        const postsGrid = document.getElementById('postsGrid');
+        if (!postsGrid) return;
 
         if (this.posts.length === 0) {
-            postsContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-inbox" style="font-size: 4rem; opacity: 0.3; margin-bottom: 16px;"></i>
-                    <h3>No posts yet</h3>
-                    <p>Be the first to share your insights!</p>
-                    <a href="create-post.html" class="filter-btn" style="margin-top: 16px; display: inline-flex;">
-                        <i class="fas fa-plus"></i> Create Post
-                    </a>
+            postsGrid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
+                    <i class="fas fa-inbox" style="font-size: 4rem; opacity: 0.3; margin-bottom: 24px; color: var(--text-secondary);"></i>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">No posts yet</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">Be the first to share your insights with the community!</p>
+                    <button class="create-post-btn" onclick="window.location.href='create-post.html'">
+                        <i class="fas fa-plus"></i> Create First Post
+                    </button>
                 </div>
             `;
             return;
         }
 
-        postsContainer.innerHTML = this.posts.map(post => this.renderPostCard(post)).join('');
+        postsGrid.innerHTML = this.posts.map(post => this.renderPostCard(post)).join('');
     }
 
     renderPostCard(post) {
@@ -799,24 +823,30 @@ class CommunityHub {
         const channelName = channel ? channel.name : 'General';
 
         const tagsHTML = post.tags && post.tags.length > 0 
-            ? post.tags.slice(0, 3).map(tag => `<span class="post-tag">#${tag}</span>`).join('')
-            : '';
-
-        const imagePreview = post.images && post.images.length > 0
-            ? `<div class="post-image-preview">
-                   <img src="${post.images[0]}" alt="Post preview" loading="lazy">
-                   ${post.images.length > 1 ? `<div class="image-count">+${post.images.length - 1}</div>` : ''}
+            ? `<div class="post-card-tags">
+                   ${post.tags.slice(0, 3).map(tag => `<span class="post-tag">#${tag}</span>`).join('')}
                </div>`
             : '';
 
+        const imagePreview = post.images && post.images.length > 0
+            ? `<div class="post-image-preview" style="width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 16px 0;">
+                   <img src="${post.images[0]}" alt="Post preview" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                   ${post.images.length > 1 ? `<div class="image-count" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700;">+${post.images.length - 1}</div>` : ''}
+               </div>`
+            : '';
+
+        const excerpt = post.content ? this.stripMarkdown(post.content).substring(0, 150) + '...' : '';
+
         return `
-            <article class="post-card" onclick="window.location.href='post.html?id=${post.id}'">
-                <div class="post-card-header">
-                    <div class="post-author">
-                        <img src="${post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.authorName) + '&background=3B82F6&color=fff'}" alt="${post.authorName}" class="author-avatar-small">
+            <article class="post-card" onclick="window.location.href='post.html?id=${post.id}'" style="cursor: pointer; background: var(--card-background); border-radius: 16px; padding: 24px; transition: all 0.3s ease; border: 2px solid var(--glass-border);">
+                <div class="post-card-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div class="post-author" style="display: flex; align-items: center; gap: 12px;">
+                        <img src="${post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.authorName) + '&background=3B82F6&color=fff'}" 
+                             alt="${this.escapeHtml(post.authorName)}" 
+                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                         <div>
-                            <div class="author-name-small">${post.authorName}</div>
-                            <div class="post-meta-small">
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">${this.escapeHtml(post.authorName)}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
                                 <span>${channelIcon} ${channelName}</span>
                                 <span>•</span>
                                 <span>${this.formatDate(post.createdAt)}</span>
@@ -825,77 +855,32 @@ class CommunityHub {
                     </div>
                 </div>
 
-                <h2 class="post-card-title">${this.escapeHtml(post.title)}</h2>
+                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; line-height: 1.3;">${this.escapeHtml(post.title)}</h2>
 
-                ${post.content ? `<p class="post-card-excerpt">${this.truncate(this.escapeHtml(post.content), 200)}</p>` : ''}
+                ${excerpt ? `<p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 16px;">${this.escapeHtml(excerpt)}</p>` : ''}
 
                 ${imagePreview}
 
-                ${tagsHTML ? `<div class="post-card-tags">${tagsHTML}</div>` : ''}
+                ${tagsHTML}
 
-                <div class="post-card-footer">
-                    <div class="post-stats-small">
-                        <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
-                        <span><i class="fas fa-heart"></i> ${post.likes?.length || 0}</span>
-                        <span><i class="fas fa-comments"></i> ${post.commentsCount || 0}</span>
+                <div class="post-card-footer" style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 2px solid var(--glass-border); margin-top: 16px;">
+                    <div style="display: flex; gap: 16px; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-eye"></i> ${post.views || 0}
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-heart"></i> ${post.likes?.length || 0}
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-comments"></i> ${post.commentsCount || 0}
+                        </span>
                     </div>
-                    <button class="btn-read-more">
+                    <button class="btn-read-more" style="padding: 8px 16px; border-radius: 8px; background: var(--primary-gradient); color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                         Read More <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             </article>
         `;
-    }
-
-    async loadSidebarData() {
-        try {
-            // Charger les posts populaires
-            const featuredPosts = await window.communityService.getFeaturedPosts(5);
-            this.renderFeaturedPosts(featuredPosts);
-
-            // Charger les tags populaires
-            const popularTags = await window.communityService.getPopularTags(10);
-            this.renderPopularTags(popularTags);
-
-        } catch (error) {
-            console.error('❌ Error loading sidebar data:', error);
-        }
-    }
-
-    renderFeaturedPosts(posts) {
-        const container = document.getElementById('featuredPosts');
-        if (!container || !posts) return;
-
-        if (posts.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No posts yet</p>';
-            return;
-        }
-
-        container.innerHTML = posts.map(post => `
-            <div class="sidebar-post-item" onclick="window.location.href='post.html?id=${post.id}'">
-                <h4>${this.truncate(this.escapeHtml(post.title), 60)}</h4>
-                <div class="sidebar-post-meta">
-                    <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
-                    <span><i class="fas fa-heart"></i> ${post.likes?.length || 0}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    renderPopularTags(tags) {
-        const container = document.getElementById('popularTags');
-        if (!container || !tags) return;
-
-        if (tags.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No tags yet</p>';
-            return;
-        }
-
-        container.innerHTML = tags.map(({ tag, count }) => `
-            <button class="tag-cloud-item" onclick="window.communityHub.filterByTag('${tag}')">
-                #${tag} <span class="tag-count">${count}</span>
-            </button>
-        `).join('');
     }
 
     async loadCommunityStats() {
@@ -908,48 +893,101 @@ class CommunityHub {
     }
 
     renderCommunityStats(stats) {
-        const container = document.getElementById('communityStats');
-        if (!container || !stats) return;
+        // Total Posts
+        const totalPostsEl = document.getElementById('totalPosts');
+        if (totalPostsEl) {
+            totalPostsEl.textContent = stats.totalPosts || 0;
+        }
 
-        container.innerHTML = `
-            <div class="stat-item">
-                <i class="fas fa-file-alt"></i>
-                <div>
-                    <div class="stat-value">${stats.totalPosts || 0}</div>
-                    <div class="stat-label">Posts</div>
+        // Total Members
+        const totalMembersEl = document.getElementById('totalMembers');
+        if (totalMembersEl) {
+            totalMembersEl.textContent = stats.totalMembers || 0;
+        }
+
+        // Posts Today
+        const postsTodayEl = document.getElementById('postsToday');
+        if (postsTodayEl) {
+            postsTodayEl.textContent = stats.activePosts || 0;
+        }
+    }
+
+    async loadSidebarData() {
+        try {
+            // Featured Posts
+            const featuredPosts = await window.communityService.getFeaturedPosts(5);
+            this.renderFeaturedPosts(featuredPosts);
+
+            // Trending Tags
+            const popularTags = await window.communityService.getPopularTags(10);
+            this.renderTrendingTags(popularTags);
+
+        } catch (error) {
+            console.error('❌ Error loading sidebar data:', error);
+        }
+    }
+
+    renderFeaturedPosts(posts) {
+        const container = document.getElementById('featuredPosts');
+        if (!container) return;
+
+        if (!posts || posts.length === 0) {
+            container.innerHTML = `
+                <div class="featured-posts-empty" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                    <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 12px;"></i>
+                    <p>No featured posts yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = posts.map(post => `
+            <div class="featured-post-item" onclick="window.location.href='post.html?id=${post.id}'" 
+                 style="padding: 16px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--glass-border);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4;">
+                    ${this.truncate(this.escapeHtml(post.title), 60)}
+                </h4>
+                <div style="display: flex; gap: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+                    <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
+                    <span><i class="fas fa-heart"></i> ${post.likes?.length || 0}</span>
                 </div>
             </div>
-            <div class="stat-item">
-                <i class="fas fa-users"></i>
-                <div>
-                    <div class="stat-value">${stats.totalMembers || 0}</div>
-                    <div class="stat-label">Members</div>
-                </div>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-comments"></i>
-                <div>
-                    <div class="stat-value">${stats.totalComments || 0}</div>
-                    <div class="stat-label">Comments</div>
-                </div>
-            </div>
-        `;
+        `).join('');
+    }
+
+    renderTrendingTags(tags) {
+        const container = document.getElementById('trendingTags');
+        if (!container) return;
+
+        if (!tags || tags.length === 0) {
+            container.innerHTML = `<p style="text-align: center; color: var(--text-secondary);">No tags yet</p>`;
+            return;
+        }
+
+        container.innerHTML = tags.map(({ tag, count }) => `
+            <button class="post-tag" onclick="window.communityHub.filterByTag('${tag}')" 
+                    style="cursor: pointer; transition: all 0.3s ease;">
+                #${tag} <span style="opacity: 0.7;">(${count})</span>
+            </button>
+        `).join('');
     }
 
     setupEventListeners() {
         // Channel filters
         document.addEventListener('click', (e) => {
-            if (e.target.closest('[data-channel]')) {
-                const channel = e.target.closest('[data-channel]').dataset.channel;
+            const channelBtn = e.target.closest('[data-channel]');
+            if (channelBtn) {
+                const channel = channelBtn.dataset.channel;
                 this.filterByChannel(channel);
             }
         });
 
-        // Sort filters
+        // Filter buttons (trending, latest, top)
         document.addEventListener('click', (e) => {
-            if (e.target.closest('[data-sort]')) {
-                const sort = e.target.closest('[data-sort]').dataset.sort;
-                this.sortBy(sort);
+            const filterBtn = e.target.closest('[data-filter]');
+            if (filterBtn) {
+                const filter = filterBtn.dataset.filter;
+                this.filterBy(filter);
             }
         });
     }
@@ -957,20 +995,51 @@ class CommunityHub {
     filterByChannel(channelId) {
         this.currentChannel = channelId;
         this.currentTag = null;
-        this.renderChannelFilters();
+        this.renderChannels();
         this.loadPosts();
     }
 
     filterByTag(tag) {
         this.currentTag = tag;
         this.currentChannel = 'all';
-        this.renderChannelFilters();
+        this.renderChannels();
         this.loadPosts();
     }
 
-    sortBy(sortBy) {
-        this.currentSort = sortBy;
+    filterBy(filter) {
+        this.currentFilter = filter;
+        
+        // Mettre à jour l'UI des boutons
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        
         this.loadPosts();
+    }
+
+    // Fonction pour toggle la section des filtres
+    toggleFiltersSection() {
+        const content = document.getElementById('communityFiltersContent');
+        const toggleBtn = document.getElementById('communityFiltersToggleBtn');
+        
+        if (content && toggleBtn) {
+            const isCollapsed = content.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                content.classList.remove('collapsed');
+                toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                content.classList.add('collapsed');
+                toggleBtn.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+        }
+    }
+
+    stripMarkdown(text) {
+        return text
+            .replace(/[#*_~`]/g, '')
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+            .replace(/\n/g, ' ');
     }
 
     formatDate(timestamp) {
@@ -1006,10 +1075,10 @@ class CommunityHub {
     }
 
     showError(message) {
-        const postsContainer = document.getElementById('postsContainer');
-        if (postsContainer) {
-            postsContainer.innerHTML = `
-                <div style="text-align: center; padding: 60px;">
+        const postsGrid = document.getElementById('postsGrid');
+        if (postsGrid) {
+            postsGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #EF4444;"></i>
                     <p style="margin-top: 16px; color: var(--text-secondary);">${message}</p>
                 </div>
