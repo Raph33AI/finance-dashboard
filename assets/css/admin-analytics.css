@@ -1115,3 +1115,15 @@ footer i {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
 }
+
+/* Activity Action Badge */
+.action-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    white-space: nowrap;
+}

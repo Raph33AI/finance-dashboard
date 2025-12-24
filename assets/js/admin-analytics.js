@@ -601,7 +601,16 @@ class AdminAnalyticsPro {
 
             if (this.cloudflareData) {
                 this.displayCloudflareAnalytics(this.cloudflareData);
-                this.createGeoMap(); // 🆕 AJOUTER ICI
+            }
+
+            // 🔥 APPELER displayCloudflareExtras() APRÈS QUE TOUTES LES DONNÉES CLOUDFLARE SOIENT CHARGÉES
+            if (this.cloudflareGeo || this.cloudflarePages) {
+                this.displayCloudflareExtras();
+            }
+
+            // Créer la carte géographique
+            if (this.cloudflareGeo && this.cloudflareGeo.length > 0) {
+                this.createGeoMap();
             }
             
             // Rafraîchir les tableaux
@@ -764,43 +773,81 @@ class AdminAnalyticsPro {
         
         console.log(`📊 Cloudflare Stats - Requests: ${overview.totalRequests}, Pageviews: ${overview.totalPageViews}, Uniques: ${overview.totalUniques}`);
         
-        // 🆕 CRÉER DES GRAPHIQUES CLOUDFLARE
+        // 🔥 CRÉER DES GRAPHIQUES CLOUDFLARE
         this.createCloudflareCharts(data);
+        
+        // ❌ NE PLUS APPELER displayCloudflareExtras() ICI
         
         console.log('✅ Cloudflare analytics displayed');
     }
 
     // 🆕 AFFICHER TOP COUNTRY & TOP PAGES
     displayCloudflareExtras() {
-        // Top Country KPI
+        console.log('📊 Displaying Cloudflare extras (Top Country & Pages)...');
+        
+        // ============================================
+        // TOP COUNTRY KPI
+        // ============================================
         if (this.cloudflareGeo && this.cloudflareGeo.length > 0) {
-            const topCountry = this.cloudflareGeo[0];
+            // Trier par nombre de requêtes (décroissant)
+            const sortedCountries = [...this.cloudflareGeo].sort((a, b) => b.requests - a.requests);
+            const topCountry = sortedCountries[0];
+            
             this.updateStat('cf-top-country', topCountry.country);
             this.updateStat('cf-top-country-requests', topCountry.requests.toLocaleString());
-            console.log(`🌍 Top Country: ${topCountry.country} (${topCountry.requests} requests)`);
+            
+            console.log(`🌍 Top Country: ${topCountry.country} (${topCountry.requests.toLocaleString()} requests)`);
+        } else {
+            console.warn('⚠ No geo data available for Top Country KPI');
+            this.updateStat('cf-top-country', 'N/A');
+            this.updateStat('cf-top-country-requests', '0');
         }
         
-        // Top Pages Table
-        if (this.cloudflarePages && this.cloudflarePages.length > 0) {
-            const tbody = document.getElementById('cf-pages-table-body');
-            if (tbody) {
-                tbody.innerHTML = '';
-                
-                this.cloudflarePages.slice(0, 10).forEach((page, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${page.path}
-                        </td>
-                        <td>${page.requests.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`📄 Top Pages table populated with ${this.cloudflarePages.length} pages`);
-            }
+        // ============================================
+        // TOP PAGES TABLE
+        // ============================================
+        const tbody = document.getElementById('cf-pages-table-body');
+        if (!tbody) {
+            console.warn('⚠ Top Pages table body not found');
+            return;
         }
+        
+        if (!this.cloudflarePages || this.cloudflarePages.length === 0) {
+            console.warn('⚠ No pages data available');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 20px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 8px; display: block;"></i>
+                        <p style="margin: 0;">No page data available</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Trier par nombre de requêtes (décroissant)
+        const sortedPages = [...this.cloudflarePages].sort((a, b) => b.requests - a.requests);
+        const topPages = sortedPages.slice(0, 10);
+        
+        console.log(`📄 Displaying top ${topPages.length} pages`);
+        
+        topPages.forEach((page, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td style="width: 40px; text-align: center;">${index + 1}</td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${page.path || 'N/A'}
+                </td>
+                <td style="width: 120px; text-align: right; font-weight: 600;">
+                    ${page.requests.toLocaleString()}
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log('✅ Top Pages table populated');
     }
 
     // 🆕 CRÉER LA CARTE GÉOGRAPHIQUE
@@ -1872,37 +1919,78 @@ class AdminAnalyticsPro {
 
     async loadRecentActivity() {
         try {
-            console.log('📋 Loading recent activity...');
+            console.log('📋 Loading recent activity (real connection data)...');
             
             const tbody = document.getElementById('recent-activity-body');
             if (!tbody) return;
             
             tbody.innerHTML = '';
             
-            const activities = this.allActivityData
-                .filter(a => a.timestamp)
-                .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
-                .slice(0, 20);
-            
-            if (activities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No recent activity</td></tr>';
+            // 🔥 UTILISER LES VISITES COMME ACTIVITÉ RÉELLE
+            if (this.allVisitsData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No visit data available</p>
+                        </td>
+                    </tr>
+                `;
+                console.log('⚠ No visits data available');
                 return;
             }
             
-            activities.forEach(activity => {
+            // Trier par timestamp (plus récent en premier)
+            const recentVisits = this.allVisitsData
+                .filter(v => v.timestamp)
+                .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
+                .slice(0, 20);
+            
+            console.log(`📊 Displaying ${recentVisits.length} recent visits`);
+            
+            recentVisits.forEach(visit => {
                 const row = document.createElement('tr');
                 
-                const timestamp = activity.timestamp.toDate().toLocaleString('en-US');
+                // User : Email si userId existe, sinon IP ou "Anonymous"
+                let userDisplay = 'Anonymous';
+                if (visit.userId) {
+                    const user = this.allUsersData.find(u => u.id === visit.userId);
+                    userDisplay = user?.email ? user.email.substring(0, 20) + '...' : visit.userId.substring(0, 8) + '...';
+                } else if (visit.ip) {
+                    userDisplay = `IP: ${visit.ip}`;
+                }
+                
+                // Action : Type de visite
+                const action = visit.page ? 'Page View' : 'Visit';
+                
+                // Page : Nettoyer le nom de la page
+                let page = visit.page || visit.url || 'N/A';
+                if (page.includes('.html')) {
+                    page = page.replace('.html', '').replace(/\//g, '');
+                }
+                if (page.length > 30) {
+                    page = page.substring(0, 30) + '...';
+                }
+                
+                // Timestamp
+                const timestamp = visit.timestamp.toDate().toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
                 
                 row.innerHTML = `
-                    <td>${activity.userId ? activity.userId.substring(0, 8) + '...' : 'Anonymous'}</td>
-                    <td>${activity.action || 'N/A'}</td>
-                    <td>${activity.page || 'N/A'}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userDisplay}</td>
+                    <td><span class="action-badge">${action}</span></td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${page}</td>
                     <td>${timestamp}</td>
                 `;
                 
                 tbody.appendChild(row);
             });
+            
+            console.log('✅ Recent activity table loaded with real visits data');
             
         } catch (error) {
             console.error('❌ Error loading recent activity:', error);
