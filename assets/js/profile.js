@@ -827,105 +827,121 @@ async function loadUserStats(userId) {
 // ✅ GESTION DE LA LISTE DES ABONNEMENTS
 // ============================================
 
+// ✅ NOUVELLE VERSION AVEC LISTENER TEMPS RÉEL
 async function loadFollowingList() {
     const followingList = document.getElementById('followingList');
     const followingCountEl = document.getElementById('followingCount');
     
     if (!currentUserData || !currentUserData.uid) return;
     
+    console.log('🔄 Chargement de la liste Following avec listener temps réel...');
+    
     try {
-        const followingSnapshot = await firebase.firestore()
+        // ✅ ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
+        firebase.firestore()
             .collection('users')
             .doc(currentUserData.uid)
             .collection('following')
             .orderBy('followedAt', 'desc')
-            .get();
-        
-        if (followingCountEl) {
-            followingCountEl.textContent = followingSnapshot.size;
-        }
-        
-        if (followingSnapshot.empty) {
-            followingList.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    <i class="fas fa-user-friends" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p style="font-size: 1.1rem; font-weight: 700;">You're not following anyone yet</p>
-                    <p style="font-size: 0.9rem; margin-top: 8px;">Discover interesting profiles in the Community!</p>
-                    <a href="community-hub.html" class="btn-save" style="margin-top: 20px; display: inline-flex; text-decoration: none;">
-                        <i class="fas fa-users"></i>
-                        Explore Community
-                    </a>
-                </div>
-            `;
-            return;
-        }
-        
-        // Charger les données de chaque utilisateur suivi
-        const followingUsers = await Promise.all(
-            followingSnapshot.docs.map(async (doc) => {
-                const followedUserId = doc.id;
-                const followedAt = doc.data().followedAt;
+            .onSnapshot(async (followingSnapshot) => {
                 
-                const userDoc = await firebase.firestore()
-                    .collection('users')
-                    .doc(followedUserId)
-                    .get();
+                console.log(`📊 ${followingSnapshot.size} abonnements détectés`);
                 
-                if (!userDoc.exists) return null;
+                if (followingCountEl) {
+                    followingCountEl.textContent = followingSnapshot.size;
+                }
                 
-                return {
-                    uid: followedUserId,
-                    ...userDoc.data(),
-                    followedAt: followedAt
-                };
-            })
-        );
-        
-        // Filtrer les utilisateurs null (supprimés)
-        const validUsers = followingUsers.filter(user => user !== null);
-        
-        // Afficher la liste
-        const followingHTML = validUsers.map(user => {
-            const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email?.split('@')[0] || 'Unknown User';
-            const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
-            const bio = user.bio || 'No biography';
-            
-            return `
-                <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
-                    <img 
-                        src="${avatar}" 
-                        alt="${escapeHtml(displayName)}" 
-                        style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(59, 130, 246, 0.3); cursor: pointer;"
-                        onclick="window.location.href='public-profile.html?uid=${user.uid}'"
-                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
-                    >
-                    <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
-                        <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
-                            ${escapeHtml(displayName)}
-                        </h4>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${escapeHtml(bio)}
-                        </p>
-                        <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                            <span><i class="fas fa-file-alt"></i> ${user.postCount || 0} posts</span>
-                            <span><i class="fas fa-users"></i> ${user.followersCount || 0} followers</span>
+                if (followingSnapshot.empty) {
+                    followingList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-user-friends" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p style="font-size: 1.1rem; font-weight: 700;">You're not following anyone yet</p>
+                            <p style="font-size: 0.9rem; margin-top: 8px;">Discover interesting profiles in the Community!</p>
+                            <a href="community-hub.html" class="btn-save" style="margin-top: 20px; display: inline-flex; text-decoration: none;">
+                                <i class="fas fa-users"></i>
+                                Explore Community
+                            </a>
                         </div>
+                    `;
+                    return;
+                }
+                
+                // Charger les données de chaque utilisateur suivi
+                const followingUsers = await Promise.all(
+                    followingSnapshot.docs.map(async (doc) => {
+                        const followedUserId = doc.id;
+                        const followedAt = doc.data().followedAt;
+                        
+                        const userDoc = await firebase.firestore()
+                            .collection('users')
+                            .doc(followedUserId)
+                            .get();
+                        
+                        if (!userDoc.exists) return null;
+                        
+                        return {
+                            uid: followedUserId,
+                            ...userDoc.data(),
+                            followedAt: followedAt
+                        };
+                    })
+                );
+                
+                // Filtrer les utilisateurs null (supprimés)
+                const validUsers = followingUsers.filter(user => user !== null);
+                
+                // Afficher la liste
+                const followingHTML = validUsers.map(user => {
+                    const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email?.split('@')[0] || 'Unknown User';
+                    const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+                    const bio = user.bio || 'No biography';
+                    
+                    return `
+                        <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
+                            <img 
+                                src="${avatar}" 
+                                alt="${escapeHtml(displayName)}" 
+                                style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(59, 130, 246, 0.3); cursor: pointer;"
+                                onclick="window.location.href='public-profile.html?uid=${user.uid}'"
+                                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
+                            >
+                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
+                                <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
+                                    ${escapeHtml(displayName)}
+                                </h4>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${escapeHtml(bio)}
+                                </p>
+                                <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <span><i class="fas fa-file-alt"></i> ${user.postCount || 0} posts</span>
+                                    <span><i class="fas fa-users"></i> ${user.followersCount || 0} followers</span>
+                                </div>
+                            </div>
+                            <button 
+                                class="btn-danger" 
+                                onclick="unfollowUser('${user.uid}')"
+                                style="padding: 10px 20px; white-space: nowrap;"
+                            >
+                                <i class="fas fa-user-minus"></i>
+                                Unfollow
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+                followingList.innerHTML = followingHTML;
+                
+                console.log(`✅ ${validUsers.length} abonnements affichés (temps réel)`);
+                
+            }, (error) => {
+                console.error('❌ Erreur listener Following:', error);
+                followingList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #EF4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>Failed to load following list</p>
                     </div>
-                    <button 
-                        class="btn-danger" 
-                        onclick="unfollowUser('${user.uid}')"
-                        style="padding: 10px 20px; white-space: nowrap;"
-                    >
-                        <i class="fas fa-user-minus"></i>
-                        Unfollow
-                    </button>
-                </div>
-            `;
-        }).join('');
-        
-        followingList.innerHTML = followingHTML;
-        
-        console.log(`✅ ${validUsers.length} abonnements chargés`);
+                `;
+            });
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des abonnements:', error);
@@ -988,103 +1004,119 @@ async function unfollowUser(userId) {
 // ✅ GESTION DE LA LISTE DES FOLLOWERS
 // ============================================
 
+// ✅ LISTENER TEMPS RÉEL POUR FOLLOWERS
 async function loadFollowersList() {
     const followersList = document.getElementById('followersList');
     const followersCountEl = document.getElementById('followersCount');
     
     if (!currentUserData || !currentUserData.uid) return;
     
+    console.log('🔄 Chargement de la liste Followers avec listener temps réel...');
+    
     try {
-        const followersSnapshot = await firebase.firestore()
+        // ✅ ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
+        firebase.firestore()
             .collection('users')
             .doc(currentUserData.uid)
             .collection('followers')
             .orderBy('followedAt', 'desc')
-            .get();
-        
-        if (followersCountEl) {
-            followersCountEl.textContent = followersSnapshot.size;
-        }
-        
-        if (followersSnapshot.empty) {
-            followersList.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p style="font-size: 1.1rem; font-weight: 700;">No followers yet</p>
-                    <p style="font-size: 0.9rem; margin-top: 8px;">Share your profile to grow your community!</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Charger les données de chaque follower
-        const followers = await Promise.all(
-            followersSnapshot.docs.map(async (doc) => {
-                const followerId = doc.id;
-                const followedAt = doc.data().followedAt;
+            .onSnapshot(async (followersSnapshot) => {
                 
-                const userDoc = await firebase.firestore()
-                    .collection('users')
-                    .doc(followerId)
-                    .get();
+                console.log(`📊 ${followersSnapshot.size} followers détectés`);
                 
-                if (!userDoc.exists) return null;
+                if (followersCountEl) {
+                    followersCountEl.textContent = followersSnapshot.size;
+                }
                 
-                return {
-                    uid: followerId,
-                    ...userDoc.data(),
-                    followedAt: followedAt
-                };
-            })
-        );
-        
-        // Filtrer les utilisateurs null (supprimés)
-        const validFollowers = followers.filter(user => user !== null);
-        
-        // Afficher la liste
-        const followersHTML = validFollowers.map(user => {
-            const firstName = user.firstName || '';
-            const lastName = user.lastName || '';
-            const displayName = `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'Unknown User';
-            const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
-            const bio = user.bio || 'No biography';
-            
-            return `
-                <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
-                    <img 
-                        src="${avatar}" 
-                        alt="${escapeHtml(displayName)}" 
-                        style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer;"
-                        onclick="window.location.href='public-profile.html?uid=${user.uid}'"
-                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
-                    >
-                    <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
-                        <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
-                            ${escapeHtml(displayName)}
-                        </h4>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${escapeHtml(bio)}
-                        </p>
-                        <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                            <span><i class="fas fa-file-alt"></i> ${user.postCount || 0} posts</span>
-                            <span><i class="fas fa-users"></i> ${user.followersCount || 0} followers</span>
+                if (followersSnapshot.empty) {
+                    followersList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p style="font-size: 1.1rem; font-weight: 700;">No followers yet</p>
+                            <p style="font-size: 0.9rem; margin-top: 8px;">Share your profile to grow your community!</p>
                         </div>
+                    `;
+                    return;
+                }
+                
+                // Charger les données de chaque follower
+                const followers = await Promise.all(
+                    followersSnapshot.docs.map(async (doc) => {
+                        const followerId = doc.id;
+                        const followedAt = doc.data().followedAt;
+                        
+                        const userDoc = await firebase.firestore()
+                            .collection('users')
+                            .doc(followerId)
+                            .get();
+                        
+                        if (!userDoc.exists) return null;
+                        
+                        return {
+                            uid: followerId,
+                            ...userDoc.data(),
+                            followedAt: followedAt
+                        };
+                    })
+                );
+                
+                // Filtrer les utilisateurs null (supprimés)
+                const validFollowers = followers.filter(user => user !== null);
+                
+                // Afficher la liste
+                const followersHTML = validFollowers.map(user => {
+                    const firstName = user.firstName || '';
+                    const lastName = user.lastName || '';
+                    const displayName = `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'Unknown User';
+                    const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+                    const bio = user.bio || 'No biography';
+                    
+                    return `
+                        <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
+                            <img 
+                                src="${avatar}" 
+                                alt="${escapeHtml(displayName)}" 
+                                style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer;"
+                                onclick="window.location.href='public-profile.html?uid=${user.uid}'"
+                                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
+                            >
+                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
+                                <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
+                                    ${escapeHtml(displayName)}
+                                </h4>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${escapeHtml(bio)}
+                                </p>
+                                <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <span><i class="fas fa-file-alt"></i> ${user.postCount || 0} posts</span>
+                                    <span><i class="fas fa-users"></i> ${user.followersCount || 0} followers</span>
+                                </div>
+                            </div>
+                            <button 
+                                class="btn-secondary" 
+                                onclick="removeFollower('${user.uid}')"
+                                style="padding: 10px 20px; white-space: nowrap;"
+                            >
+                                <i class="fas fa-user-times"></i>
+                                Remove
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+                followersList.innerHTML = followersHTML;
+                
+                console.log(`✅ ${validFollowers.length} followers affichés (temps réel)`);
+                
+            }, (error) => {
+                console.error('❌ Erreur listener Followers:', error);
+                followersList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #EF4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>Failed to load followers list</p>
                     </div>
-                    <button 
-                        class="btn-secondary" 
-                        onclick="removeFollower('${user.uid}')"
-                        style="padding: 10px 20px; white-space: nowrap;"
-                    >
-                        <i class="fas fa-user-times"></i>
-                        Remove
-                    </button>
-                </div>
-            `;
-        }).join('');
-        
-        followersList.innerHTML = followersHTML;
-        
-        console.log(`✅ ${validFollowers.length} followers chargés`);
+                `;
+            });
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des followers:', error);

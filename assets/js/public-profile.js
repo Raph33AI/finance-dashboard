@@ -706,8 +706,12 @@ class PublicProfile {
             followBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
             if (this.isFollowing) {
+                // Unfollow
                 await window.followSystem.unfollowUser(this.userId);
-                this.isFollowing = false;
+                
+                // ✅ VÉRIFIER LE STATUT RÉEL APRÈS L'ACTION
+                this.isFollowing = await window.followSystem.isFollowing(this.userId);
+                
                 followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
                 followBtn.style.background = '';
                 
@@ -718,8 +722,12 @@ class PublicProfile {
                 
                 console.log('✅ User unfollowed');
             } else {
+                // Follow
                 await window.followSystem.followUser(this.userId);
-                this.isFollowing = true;
+                
+                // ✅ VÉRIFIER LE STATUT RÉEL APRÈS L'ACTION
+                this.isFollowing = await window.followSystem.isFollowing(this.userId);
+                
                 followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
                 followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
                 
@@ -735,7 +743,9 @@ class PublicProfile {
 
         } catch (error) {
             console.error('❌ Error toggling follow:', error);
-            alert('Failed to update follow status. Please try again.');
+            
+            // ✅ EN CAS D'ERREUR, RECHARGER LE STATUT RÉEL
+            this.isFollowing = await window.followSystem.isFollowing(this.userId);
             
             const followBtn = document.getElementById('followBtn');
             if (followBtn) {
@@ -743,7 +753,12 @@ class PublicProfile {
                 followBtn.innerHTML = this.isFollowing 
                     ? '<i class="fas fa-user-minus"></i> Unfollow' 
                     : '<i class="fas fa-user-plus"></i> Follow';
+                followBtn.style.background = this.isFollowing 
+                    ? 'linear-gradient(135deg, #6b7280, #4b5563)' 
+                    : '';
             }
+            
+            alert('Failed to update follow status. Please refresh the page.');
         }
     }
 
