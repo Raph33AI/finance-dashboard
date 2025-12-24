@@ -369,80 +369,127 @@
                         </button>
                     </div>
 
-                    <!-- ✨ NOUVEAU : Container collapsible -->
-                    <div class='filters-content collapsed' id='filtersContent'>
-                        <div class='filters-grid'>
-                            <!-- VOS FILTRES EXISTANTS (ne changent pas) -->
-                            <div class='filter-group'>
-                                <label><i class='fas fa-search'></i> Search</label>
-                                <input type='text' id='searchInput' placeholder='Search by keyword or ticker...' class='search-input'>
-                            </div>
+                    <!-- SECTION FILTRES AVEC DROPDOWN -->
+                    <div class='section filters-section'>
+                        <!-- ✨ Header avec bouton toggle -->
+                        <div class='filters-header' onclick='newsTerminal.toggleFilters()'>
+                            <h3 class='filters-title'>
+                                <i class='fas fa-filter'></i>
+                                <span>Advanced Filters</span>
+                                <span class='filter-count' id='activeFiltersCount'>(0 active)</span>
+                            </h3>
+                            <button class='filters-toggle-btn' id='filtersToggleBtn'>
+                                <i class='fas fa-chevron-down'></i>
+                            </button>
+                        </div>
 
-                            <div class='filter-group'>
-                                <label><i class='fas fa-rss'></i> Source</label>
-                                <select id='sourceFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
-                                    <option value='all'>All Sources (13)</option>
-                                    <!-- ... vos options existantes ... -->
-                                </select>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-industry'></i> Sector</label>
-                                <select id='sectorFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
-                                    <option value='all'>All Sectors</option>
-                                    <!-- ... vos options existantes ... -->
-                                </select>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-globe'></i> Region</label>
-                                <select id='regionFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
-                                    <option value='all'>All Regions</option>
-                                    <!-- ... vos options existantes ... -->
-                                </select>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-sort'></i> Sort By</label>
-                                <select id='sortFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
-                                    <option value='newest'>Newest First</option>
-                                    <option value='oldest'>Oldest First</option>
-                                    <option value='importance'>Importance</option>
-                                </select>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-list-ol'></i> Articles per page</label>
-                                <select id='articleLimitSelect' class='filter-select'>
-                                    <option value='20'>20 articles</option>
-                                    <option value='50'>50 articles</option>
-                                    <option value='100'>100 articles</option>
-                                    <option value='150'>150 articles</option>
-                                    <option value='999999'>All articles</option>
-                                </select>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-bolt'></i> Load Mode</label>
-                                <button id='loadMaxBtn' class='load-max-btn'>
-                                    <i class='fas fa-download'></i>
-                                    <span>Load MAX Articles</span>
-                                </button>
-                            </div>
-
-                            <div class='filter-group'>
-                                <label><i class='fas fa-infinity'></i> Auto-Load</label>
-                                <div class='auto-load-container'>
-                                    <input type='checkbox' id='autoLoadToggle'>
-                                    <label for='autoLoadToggle' class='auto-load-label'>
-                                        <i class='fas fa-arrows-alt-v'></i>
-                                        <span>Auto-load on scroll</span>
-                                    </label>
+                        <!-- ✨ Container collapsible -->
+                        <div class='filters-content collapsed' id='filtersContent'>
+                            <div class='filters-grid'>
+                                
+                                <!-- SEARCH -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-search'></i> Search</label>
+                                    <input type='text' id='searchInput' placeholder='Search by keyword or ticker...' class='search-input'>
                                 </div>
+
+                                <!-- SOURCE -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-rss'></i> Source</label>
+                                    <select id='sourceFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                        <option value='all'>All Sources (13)</option>
+                                        
+                                        <!-- CNBC (6) -->
+                                        <option value='cnbc-top'>CNBC Top Stories</option>
+                                        <option value='cnbc-tech'>CNBC Technology</option>
+                                        <option value='cnbc-earnings'>CNBC Earnings</option>
+                                        <option value='cnbc-markets'>CNBC Markets</option>
+                                        <option value='cnbc-finance'>CNBC Finance</option>
+                                        <option value='cnbc-investing'>CNBC Investing</option>
+                                        
+                                        <!-- MarketWatch (2) -->
+                                        <option value='marketwatch-top'>MarketWatch Top</option>
+                                        <option value='marketwatch-realtime'>MarketWatch Live</option>
+                                        
+                                        <!-- Autres (5) -->
+                                        <option value='yahoo-finance'>Yahoo Finance</option>
+                                        <option value='seeking-alpha'>Seeking Alpha</option>
+                                        <option value='bloomberg-markets'>Bloomberg Markets</option>
+                                        <option value='financial-times'>Financial Times</option>
+                                        <option value='wsj-markets'>WSJ Markets</option>
+                                    </select>
+                                </div>
+
+                                <!-- SECTOR -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-industry'></i> Sector</label>
+                                    <select id='sectorFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                        <option value='all'>All Sectors</option>
+                                        <option value='tech'>Technology</option>
+                                        <option value='finance'>Finance</option>
+                                        <option value='energy'>Energy</option>
+                                        <option value='healthcare'>Healthcare</option>
+                                        <option value='consumer'>Consumer</option>
+                                    </select>
+                                </div>
+
+                                <!-- REGION -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-globe'></i> Region</label>
+                                    <select id='regionFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                        <option value='all'>All Regions</option>
+                                        <option value='us'>United States</option>
+                                        <option value='eu'>Europe</option>
+                                        <option value='asia'>Asia</option>
+                                    </select>
+                                </div>
+
+                                <!-- SORT BY -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-sort'></i> Sort By</label>
+                                    <select id='sortFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                        <option value='newest'>Newest First</option>
+                                        <option value='oldest'>Oldest First</option>
+                                        <option value='importance'>Importance</option>
+                                    </select>
+                                </div>
+
+                                <!-- ARTICLES PER PAGE -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-list-ol'></i> Articles per page</label>
+                                    <select id='articleLimitSelect' class='filter-select'>
+                                        <option value='20'>20 articles</option>
+                                        <option value='50' selected>50 articles</option>
+                                        <option value='100'>100 articles</option>
+                                        <option value='150'>150 articles</option>
+                                        <option value='999999'>All articles</option>
+                                    </select>
+                                </div>
+
+                                <!-- LOAD MAX BUTTON -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-bolt'></i> Load Mode</label>
+                                    <button id='loadMaxBtn' class='load-max-btn'>
+                                        <i class='fas fa-download'></i>
+                                        <span>Load MAX Articles</span>
+                                    </button>
+                                </div>
+
+                                <!-- AUTO-LOAD TOGGLE -->
+                                <div class='filter-group'>
+                                    <label><i class='fas fa-infinity'></i> Auto-Load</label>
+                                    <div class='auto-load-container'>
+                                        <input type='checkbox' id='autoLoadToggle'>
+                                        <label for='autoLoadToggle' class='auto-load-label'>
+                                            <i class='fas fa-arrows-alt-v'></i>
+                                            <span>Auto-load on scroll</span>
+                                        </label>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                </div>
 
                 <div class='section'>
                     <h2 class='section-title gradient-title'>
