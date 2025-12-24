@@ -98,7 +98,8 @@ class PostManager {
         ` : '';
 
         // Author avatar (utilise la photo ou un avatar généré)
-        const authorAvatar = this.post.authorAvatar ||  // ✅ CORRECT
+        // ✅ Essayer authorPhoto, puis authorAvatar, puis générer un avatar
+        const authorAvatar = this.post.authorPhoto || this.post.authorAvatar || 
             `https://ui-avatars.com/api/?name=${encodeURIComponent(this.post.authorName)}&background=667eea&color=fff&size=128`;
 
         // Verified badge

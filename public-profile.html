@@ -386,7 +386,7 @@
                     console.log('👤 Initializing Public Profile...');
                     
                     const urlParams = new URLSearchParams(window.location.search);
-                    this.userId = urlParams.get('id');
+                    this.userId = urlParams.get('uid');  // ✅ CORRECT
 
                     if (!this.userId) {
                         this.showError('User not found');

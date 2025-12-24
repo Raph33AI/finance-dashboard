@@ -92,9 +92,22 @@ class CommentSystem {
         return `
             <div class="comment-item ${isReply ? 'reply' : ''}" data-comment-id="${comment.id}">
                 <div class="comment-author-section">
-                    <div class="comment-avatar" style="background: linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)});">
-                        ${comment.authorName.charAt(0).toUpperCase()}
-                    </div>
+                    ${comment.authorAvatar || comment.authorPhoto ? `
+                        <img 
+                            src="${comment.authorAvatar || comment.authorPhoto}" 
+                            alt="${comment.authorName}" 
+                            class="comment-avatar"
+                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+                        <div class="comment-avatar" style="display: none; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.2rem;">
+                            ${comment.authorName.charAt(0).toUpperCase()}
+                        </div>
+                    ` : `
+                        <div class="comment-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.2rem;">
+                            ${comment.authorName.charAt(0).toUpperCase()}
+                        </div>
+                    `}
                     <div class="comment-author-info">
                         <h4>${this.escapeHtml(comment.authorName)}</h4>
                         <p><i class="fas fa-clock"></i> ${timeAgo}</p>
