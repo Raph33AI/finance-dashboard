@@ -1,9 +1,8 @@
 /* ==============================================
    DASHBOARD.JS - Logique du dashboard financier
-   Version Cloud avec Cloudflare Workers
+   Version Cloud avec Cloudflare Workers + Dropdown
    ============================================== */
 
-// Module Dashboard (pattern IIFE pour éviter la pollution du scope global)
 const Dashboard = (function() {
     'use strict';
     
@@ -11,19 +10,15 @@ const Dashboard = (function() {
     let allData = [];
     let chart1Instance, chart4Instance, chart5Instance, chart6Instance;
     let currentMonthIndex = 0;
-    let monthlyEstYield = 8; // % annual
-    let inflationRate = 2.5; // % annual
+    let monthlyEstYield = 8;
+    let inflationRate = 2.5;
     let showInflation = false;
     
     // ========== INITIALISATION ==========
     
-    /**
-     * Initialise le dashboard au chargement de la page
-     */
     async function init() {
         console.log('🚀 Initializing Dashboard...');
         
-        // Attendre que l'utilisateur soit authentifié
         const waitForAuth = new Promise((resolve) => {
             const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -36,18 +31,15 @@ const Dashboard = (function() {
         
         await waitForAuth;
         
-        // Charger les données
         await initData();
         renderTable();
         updateAllCharts();
         updateLastUpdateTime();
+        restoreDataSectionState(); // ✅ NOUVEAU : Restaurer l'état du dropdown
         
         console.log('✅ Dashboard initialized');
     }
     
-    /**
-     * Met à jour l'heure de dernière mise à jour
-     */
     function updateLastUpdateTime() {
         const now = new Date();
         const formatted = now.toLocaleDateString('en-US', { 
@@ -63,9 +55,6 @@ const Dashboard = (function() {
     
     // ========== GESTION DES DONNÉES ==========
     
-    /**
-     * Génère un tableau de mois
-     */
     function generateMonths(startYear, startMonth, count) {
         const months = [];
         let year = startYear;
@@ -82,9 +71,6 @@ const Dashboard = (function() {
         return months;
     }
     
-    /**
-     * Trouve l'index du mois actuel
-     */
     function findCurrentMonthIndex() {
         const today = new Date();
         const currentMonth = today.getMonth() + 1;
@@ -99,13 +85,9 @@ const Dashboard = (function() {
         return 0;
     }
     
-    /**
-     * Initialise les données (depuis Cloudflare ou localStorage si hors ligne)
-     */
     async function initData() {
         console.log('📥 Loading data...');
         
-        // Essayer de charger depuis Cloudflare
         let loadedFromCloud = false;
         
         if (window.SimulationManager) {
@@ -115,7 +97,6 @@ const Dashboard = (function() {
             const cloudData = await window.SimulationManager.loadSimulation(currentSimName);
             
             if (cloudData && cloudData.data && cloudData.data.length > 0) {
-                // Charger depuis Cloudflare
                 console.log('✅ Loaded from Cloudflare');
                 monthlyEstYield = cloudData.monthlyEstYield || 8;
                 inflationRate = cloudData.inflationRate || 2.5;
@@ -124,9 +105,8 @@ const Dashboard = (function() {
             }
         }
         
-        // Fallback sur localStorage si pas chargé depuis cloud
         if (!loadedFromCloud) {
-            console.log('⚠️ Loading from localStorage (fallback)');
+            console.log('⚠ Loading from localStorage (fallback)');
             const saved = localStorage.getItem('financialDataDynamic');
             const savedYield = localStorage.getItem('monthlyEstYield');
             const savedInflation = localStorage.getItem('inflationRate');
@@ -151,7 +131,6 @@ const Dashboard = (function() {
             }
         }
         
-        // Mettre à jour l'UI
         document.getElementById('monthlyEstYield').value = monthlyEstYield;
         document.getElementById('inflationRate').value = inflationRate;
         updateEstYieldDisplay();
@@ -161,9 +140,6 @@ const Dashboard = (function() {
         updateTotalMonthsDisplay();
     }
     
-    /**
-     * Crée les données par défaut
-     */
     function createDefaultData() {
         console.log('📝 Creating default data...');
         const today = new Date();
@@ -189,9 +165,6 @@ const Dashboard = (function() {
     
     // ========== CALCULS ==========
     
-    /**
-     * Calcule tous les indicateurs financiers
-     */
     function calculateAll() {
         let cumulatedSavings = 0;
         let cumulatedInvestment = 0;
@@ -219,9 +192,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Recalcule les gains d'investissement
-     */
     function recalculateGains() {
         const monthlyYieldRate = monthlyEstYield / 12 / 100;
         let cumulatedGains = 0;
@@ -252,9 +222,6 @@ const Dashboard = (function() {
 
     // ========== GESTION DES PARAMÈTRES ==========
     
-    /**
-     * Met à jour le rendement mensuel estimé
-     */
     function updateEstYield() {
         monthlyEstYield = parseFloat(document.getElementById('monthlyEstYield').value) || 0;
         updateEstYieldDisplay();
@@ -262,27 +229,18 @@ const Dashboard = (function() {
         recalculateGains();
     }
     
-    /**
-     * Affiche le rendement mensuel
-     */
     function updateEstYieldDisplay() {
         const monthlyRate = (monthlyEstYield / 12).toFixed(2);
         const elem = document.getElementById('monthlyEstYieldDisplay');
         if (elem) elem.textContent = monthlyRate;
     }
     
-    /**
-     * Met à jour le taux d'inflation
-     */
     function updateInflationRate() {
         inflationRate = parseFloat(document.getElementById('inflationRate').value) || 2.5;
         localStorage.setItem('inflationRate', inflationRate);
         if (showInflation) updateAllCharts();
     }
     
-    /**
-     * Active/désactive les graphiques ajustés pour l'inflation
-     */
     function toggleInflationCharts() {
         showInflation = !showInflation;
         const btn = document.getElementById('btnToggleInflation');
@@ -303,19 +261,60 @@ const Dashboard = (function() {
         updateAllCharts();
     }
     
-    /**
-     * Ajuste une valeur pour l'inflation
-     */
     function adjustForInflation(value, monthIndex) {
         const monthlyInflation = Math.pow(1 + inflationRate / 100, 1/12) - 1;
         return value / Math.pow(1 + monthlyInflation, monthIndex);
     }
     
+    // ════════════════════════════════════════════════════════════════
+    // ✨ NOUVEAU : GESTION DU DROPDOWN DE LA SECTION DATA
+    // ════════════════════════════════════════════════════════════════
+
+    function toggleDataSection() {
+        const content = document.getElementById('dataSectionContent');
+        const header = document.querySelector('.data-section-header');
+        
+        if (!content || !header) {
+            console.error('❌ Data section elements not found');
+            return;
+        }
+        
+        const isCollapsed = content.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            content.classList.remove('collapsed');
+            header.classList.remove('collapsed');
+            localStorage.setItem('dataSectionExpanded', 'true');
+            console.log('🔽 Data section expanded');
+        } else {
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            localStorage.setItem('dataSectionExpanded', 'false');
+            console.log('🔼 Data section collapsed');
+        }
+    }
+
+    function restoreDataSectionState() {
+        const isExpanded = localStorage.getItem('dataSectionExpanded') !== 'false';
+        const content = document.getElementById('dataSectionContent');
+        const header = document.querySelector('.data-section-header');
+        
+        if (!content || !header) {
+            console.warn('⚠ Data section elements not found for state restoration');
+            return;
+        }
+        
+        if (!isExpanded) {
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            console.log('📦 Data section restored: COLLAPSED');
+        } else {
+            console.log('📦 Data section restored: EXPANDED');
+        }
+    }
+    
     // ========== GESTION DE LA TIMELINE ==========
     
-    /**
-     * Ajoute des mois avant
-     */
     function addMonthsBefore(count) {
         if (allData.length === 0) return;
         
@@ -347,9 +346,6 @@ const Dashboard = (function() {
         updateAllCharts();
     }
     
-    /**
-     * Ajoute des mois après
-     */
     function addMonthsAfter(count) {
         if (allData.length === 0) return;
         
@@ -380,9 +376,6 @@ const Dashboard = (function() {
         updateAllCharts();
     }
     
-    /**
-     * Supprime une ligne
-     */
     function deleteRow(index) {
         if (allData.length <= 12) {
             alert('Cannot delete! Minimum 12 months required.');
@@ -398,47 +391,36 @@ const Dashboard = (function() {
         }
     }
     
-    /**
-     * Met à jour l'affichage du nombre total de mois
-     */
     function updateTotalMonthsDisplay() {
         const elem = document.getElementById('totalMonthsDisplay');
         if (elem) elem.textContent = allData.length;
     }
     
-    // ========== SAUVEGARDE/CHARGEMENT (VERSION CLOUD) ==========
+    // ========== SAUVEGARDE/CHARGEMENT ==========
     
-    /**
-     * Sauvegarde manuelle (vers Cloudflare)
-     */
     async function saveData() {
         calculateAll();
         
-        // Préparer les données
         const simulationData = {
             monthlyEstYield: monthlyEstYield,
             inflationRate: inflationRate,
             data: allData
         };
         
-        // Obtenir le nom de la simulation actuelle
         const name = window.SimulationManager 
             ? window.SimulationManager.getCurrentSimulationName() 
             : 'default';
         
-        // Sauvegarder sur Cloudflare
         if (window.SimulationManager) {
             const success = await window.SimulationManager.saveSimulation(name, simulationData);
             
             if (!success) {
-                // Fallback sur localStorage en cas d'erreur
                 localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
                 localStorage.setItem('monthlyEstYield', monthlyEstYield);
                 localStorage.setItem('inflationRate', inflationRate);
                 window.FinanceDashboard.showNotification('Saved locally (cloud save failed)', 'warning');
             }
         } else {
-            // Pas de SimulationManager, utiliser localStorage
             localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
             localStorage.setItem('monthlyEstYield', monthlyEstYield);
             localStorage.setItem('inflationRate', inflationRate);
@@ -446,9 +428,6 @@ const Dashboard = (function() {
         }
     }
     
-    /**
-     * Sauvegarde automatique (débounced)
-     */
     let autoSaveTimeout;
     function autoSave() {
         clearTimeout(autoSaveTimeout);
@@ -465,17 +444,13 @@ const Dashboard = (function() {
                 const name = window.SimulationManager.getCurrentSimulationName() || 'default';
                 await window.SimulationManager.saveSimulation(name, simulationData);
             } else {
-                // Fallback localStorage
                 localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
                 localStorage.setItem('monthlyEstYield', monthlyEstYield);
                 localStorage.setItem('inflationRate', inflationRate);
             }
-        }, 2000); // Sauvegarde après 2 secondes d'inactivité
+        }, 2000);
     }
     
-    /**
-     * Charge des données de simulation
-     */
     function loadSimulationData(simulationData) {
         if (!simulationData) return;
         
@@ -498,9 +473,6 @@ const Dashboard = (function() {
         window.FinanceDashboard.showNotification('Simulation loaded successfully!', 'success');
     }
     
-    /**
-     * Récupère les données actuelles
-     */
     function getCurrentData() {
         return {
             monthlyEstYield: monthlyEstYield,
@@ -509,9 +481,6 @@ const Dashboard = (function() {
         };
     }
     
-    /**
-     * Exporte en JSON
-     */
     function exportToJSON() {
         const exportData = {
             monthlyEstYield: monthlyEstYield,
@@ -529,9 +498,6 @@ const Dashboard = (function() {
         window.FinanceDashboard.showNotification('Data exported successfully!', 'success');
     }
     
-    /**
-     * Importe depuis JSON
-     */
     function importFromJSON() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -572,9 +538,6 @@ const Dashboard = (function() {
         input.click();
     }
     
-    /**
-     * Réinitialise aux valeurs par défaut
-     */
     function resetToDefault() {
         if (confirm('Reset all data to default 12 months?')) {
             localStorage.removeItem('financialDataDynamic');
@@ -596,9 +559,6 @@ const Dashboard = (function() {
 
     // ========== AFFICHAGE DU TABLEAU ==========
     
-    /**
-     * Affiche le tableau de données
-     */
     function renderTable() {
         const tbody = document.getElementById('dataTableBody');
         if (!tbody) return;
@@ -632,15 +592,11 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Met à jour une valeur du tableau
-     */
     function updateValue(index, field, value) {
         allData[index][field] = parseFloat(value) || 0;
         
-        // ✅ CORRECTION : Gérer aussi le champ 'pee'
         if (field === 'investment' || field === 'pee') {
-            recalculateGains();  // Recalcul complet pour investissements
+            recalculateGains();
         } else {
             calculateAll();
             renderTable();
@@ -650,9 +606,6 @@ const Dashboard = (function() {
     
     // ========== ÉDITION EN MASSE ==========
     
-    /**
-     * Applique une modification en masse
-     */
     function applyBulkEdit() {
         const category = document.getElementById('bulkCategory').value;
         const startMonth = document.getElementById('bulkStartMonth').value;
@@ -693,12 +646,9 @@ const Dashboard = (function() {
             }
         });
         
-        // ✅ CORRECTION MAJEURE : Recalcul approprié selon le champ
         if (field === 'investment' || field === 'pee') {
-            // Pour les investissements, recalcul complet des gains
             recalculateGains();
         } else {
-            // Pour les autres champs, recalcul simple + sauvegarde
             calculateAll();
             renderTable();
             autoSave();
@@ -713,9 +663,6 @@ const Dashboard = (function() {
     
     // ========== STATISTIQUES ==========
     
-    /**
-     * Met à jour les statistiques
-     */
     function updateStats() {
         const currentRow = allData[currentMonthIndex];
         const monthName = currentRow.month;
@@ -749,9 +696,6 @@ const Dashboard = (function() {
 
     // ========== GRAPHIQUES (CHARTS) ==========
     
-    /**
-     * Initialise les filtres de mois pour les graphiques
-     */
     function initMonthFilters() {
         const incomeFilter = document.getElementById('incomeMonthFilter');
         const expenseFilter = document.getElementById('expenseMonthFilter');
@@ -780,9 +724,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 1 : Évolution Revenus vs Dépenses
-     */
     function createChart1() {
         const months = allData.map(d => d.month);
         const incomeValues = allData.map(d => d.totalIncome);
@@ -853,9 +794,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 2 : Répartition des Revenus
-     */
     function updateChart2() {
         const monthIndex = parseInt(document.getElementById('incomeMonthFilter')?.value || 0);
         const row = allData[monthIndex];
@@ -901,9 +839,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 3 : Répartition des Dépenses
-     */
     function updateChart3() {
         const monthIndex = parseInt(document.getElementById('expenseMonthFilter')?.value || 0);
         const row = allData[monthIndex];
@@ -926,18 +861,18 @@ const Dashboard = (function() {
                 pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
             },
             series: [{
-            name: 'Amount',
-            data: [
-                { name: 'Rent', y: row.rent },
-                { name: 'Food', y: row.food },
-                { name: 'Fix Costs', y: row.fixCosts },
-                { name: 'Others', y: row.others },
-                { name: 'Loan', y: row.loan },
-                { name: 'Monthly Investment', y: row.investment },     // ✅ AJOUTER
-            ],
+                name: 'Amount',
+                data: [
+                    { name: 'Rent', y: row.rent },
+                    { name: 'Food', y: row.food },
+                    { name: 'Fix Costs', y: row.fixCosts },
+                    { name: 'Others', y: row.others },
+                    { name: 'Loan', y: row.loan },
+                    { name: 'Monthly Investment', y: row.investment },
+                ],
                 colorByPoint: true
             }],
-            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3', '#4A74F3'],  // ✅ Ajouter 1 couleur
+            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3', '#4A74F3'],
             plotOptions: {
                 pie: {
                     dataLabels: {
@@ -952,9 +887,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 4 : Évolution de l'Épargne Cumulée
-     */
     function createChart4() {
         const months = allData.map(d => d.month);
         const savingsData = allData.map(d => d.cumulatedSavings);
@@ -1034,9 +966,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 5 : Portefeuille d'Investissement
-     */
     function createChart5() {
         const months = allData.map(d => d.month);
         const cumInv = allData.map(d => d.cumulatedInvestment);
@@ -1136,9 +1065,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 6 : Évolution du ROI
-     */
     function createChart6() {
         const months = allData.map(d => d.month);
         const roi = allData.map(d => d.roi);
@@ -1195,9 +1121,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Graphique 7 : Allocation Budgétaire (50/30/20)
-     */
     function updateChart7() {
         const monthIndex = parseInt(document.getElementById('budgetMonthFilter')?.value || 0);
         const row = allData[monthIndex];
@@ -1206,7 +1129,7 @@ const Dashboard = (function() {
         
         const needsAmount = row.rent + row.food + row.fixCosts + row.loan;
         const wantsAmount = row.others;
-        const savingsAmount = row.savings + (row.investment || 0);  // ✅ CORRECTION
+        const savingsAmount = row.savings + (row.investment || 0);
         const total = row.totalIncome;
         
         const needsPercent = total > 0 ? (needsAmount / total * 100) : 0;
@@ -1268,9 +1191,6 @@ const Dashboard = (function() {
         });
     }
     
-    /**
-     * Met à jour tous les graphiques
-     */
     function updateAllCharts() {
         updateStats();
         initMonthFilters();
@@ -1285,70 +1205,48 @@ const Dashboard = (function() {
 
     // ========== EXPORTS PUBLICS ==========
     return {
-        // Initialisation
         init,
-        
-        // Paramètres
         updateEstYield,
         updateEstYieldDisplay,
         updateInflationRate,
         toggleInflationCharts,
-        
-        // Calculs
         recalculateGains,
-        
-        // Timeline
         addMonthsBefore,
         addMonthsAfter,
         deleteRow,
-        
-        // Sauvegarde
         saveData,
         exportToJSON,
         importFromJSON,
         resetToDefault,
-        
-        // Tableau
         updateValue,
         applyBulkEdit,
-        
-        // Graphiques
         updateAllCharts,
         updateChart2,
         updateChart3,
         updateChart7,
-        
-        // Gestion des simulations
         loadSimulationData,
-        getCurrentData
+        getCurrentData,
+        toggleDataSection, // ✅ NOUVEAU : Exposé publiquement
+        restoreDataSectionState // ✅ NOUVEAU : Exposé publiquement
     };
 })();
 
-// ========== EXPOSITION GLOBALE DU DASHBOARD (✅ LIGNE CRITIQUE AJOUTÉE) ==========
 window.Dashboard = Dashboard;
 
-// Initialisation au chargement de la page
 window.addEventListener('DOMContentLoaded', Dashboard.init);
 
-/* ============================================
-   SIDEBAR USER MENU - Toggle
-   ============================================ */
-
+/* Sidebar User Menu - Toggle */
 document.addEventListener('DOMContentLoaded', () => {
     const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
     const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
     
     if (sidebarUserTrigger && sidebarUserDropdown) {
-        // Toggle dropdown au clic
         sidebarUserTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            
-            // Toggle classes
             sidebarUserTrigger.classList.toggle('active');
             sidebarUserDropdown.classList.toggle('active');
         });
         
-        // Fermer le dropdown si on clique ailleurs
         document.addEventListener('click', (e) => {
             if (!sidebarUserDropdown.contains(e.target) && 
                 !sidebarUserTrigger.contains(e.target)) {
@@ -1357,11 +1255,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Empêcher la fermeture si on clique dans le dropdown
         sidebarUserDropdown.addEventListener('click', (e) => {
             e.stopPropagation();
         });
     }
 });
 
-console.log('✅ Dashboard script loaded - Cloud version');
+console.log('✅ Dashboard script loaded - Cloud version with Dropdown');
