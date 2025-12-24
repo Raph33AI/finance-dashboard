@@ -36,6 +36,9 @@ class CommunityHub {
             // Setup event listeners
             this.setupEventListeners();
             
+            // ✅ NOUVEAU : Restaurer l'état du dropdown
+            this.restoreFiltersState();
+            
             console.log('✅ Community Hub initialized');
         } catch (error) {
             console.error('❌ Error initializing Community Hub:', error);
@@ -71,6 +74,57 @@ class CommunityHub {
         }
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // ✨ NOUVEAU : GESTION DU DROPDOWN DES FILTRES
+    // ════════════════════════════════════════════════════════════════
+
+    toggleFiltersSection() {
+        const content = document.getElementById('communityFiltersContent');
+        const header = document.querySelector('.community-filters-header');
+        
+        if (!content || !header) {
+            console.error('❌ Community filters elements not found');
+            return;
+        }
+        
+        const isCollapsed = content.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            content.classList.remove('collapsed');
+            header.classList.remove('collapsed');
+            localStorage.setItem('communityFiltersExpanded', 'true');
+            console.log('🔽 Community filters expanded');
+        } else {
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            localStorage.setItem('communityFiltersExpanded', 'false');
+            console.log('🔼 Community filters collapsed');
+        }
+    }
+
+    restoreFiltersState() {
+        const isExpanded = localStorage.getItem('communityFiltersExpanded') !== 'false';
+        const content = document.getElementById('communityFiltersContent');
+        const header = document.querySelector('.community-filters-header');
+        
+        if (!content || !header) {
+            console.warn('⚠ Community filters elements not found for state restoration');
+            return;
+        }
+        
+        if (!isExpanded) {
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+            console.log('📦 Community filters restored: COLLAPSED');
+        } else {
+            console.log('📦 Community filters restored: EXPANDED');
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // FILTRES ET CHARGEMENT
+    // ════════════════════════════════════════════════════════════════
+
     setFilter(filter) {
         this.currentFilter = filter;
         
@@ -97,7 +151,7 @@ class CommunityHub {
                 this.lastDoc = null;
             }
 
-            // ✅ NOUVEAU : Gestion du filtre "Following"
+            // Gestion du filtre "Following"
             if (this.currentFilter === 'following') {
                 await this.loadFollowingPosts();
                 return;
@@ -115,7 +169,7 @@ class CommunityHub {
 
             const result = await window.communityService.getPosts({
                 channelId: channelId === 'all' ? null : channelId,
-                limit: 10,  // ✅ Pagination à 10
+                limit: 10,
                 orderBy,
                 orderDirection,
                 lastDoc: append ? this.lastDoc : null
@@ -154,7 +208,6 @@ class CommunityHub {
                 return;
             }
 
-            // Récupérer les posts des utilisateurs suivis
             const posts = await window.followSystem.getFollowingPosts(20);
 
             this.postsGrid.innerHTML = '';
@@ -165,7 +218,6 @@ class CommunityHub {
                 this.renderPosts(posts);
             }
 
-            // Cacher le bouton "Load More" pour le filtre Following
             if (this.loadMoreBtn) {
                 this.loadMoreBtn.style.display = 'none';
             }
@@ -191,13 +243,10 @@ class CommunityHub {
             const postId = card.dataset.postId;
             
             card.addEventListener('click', (e) => {
-                // Don't navigate if clicking on buttons
                 if (e.target.closest('.post-stat')) return;
-                
                 window.location.href = `post.html?id=${postId}`;
             });
             
-            // Upvote button
             const upvoteBtn = card.querySelector('.upvote-btn');
             if (upvoteBtn) {
                 upvoteBtn.addEventListener('click', async (e) => {
@@ -216,7 +265,6 @@ class CommunityHub {
         const timeAgo = this.formatTimeAgo(post.createdAt);
         const excerpt = this.createExcerpt(post.content, 150);
         
-        // Tags HTML
         const tagsHTML = post.tags && post.tags.length > 0 ? `
             <div class="post-tags">
                 ${post.tags.slice(0, 5).map(tag => `
@@ -225,22 +273,17 @@ class CommunityHub {
             </div>
         ` : '';
 
-        // Verified badge
         const verifiedBadge = post.authorBadges?.includes('verified-analyst') ? 
             '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 6px; font-size: 0.9rem;"></i>' : '';
 
-        // Check if user upvoted
         const currentUser = firebase.auth().currentUser;
         const hasUpvoted = currentUser && post.upvotedBy?.includes(currentUser.uid);
 
-        // Author avatar
-        // ✅ Essayer authorPhoto, puis authorAvatar, puis générer un avatar
         const authorAvatar = post.authorPhoto || post.authorAvatar || 
             `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=667eea&color=fff&size=64`;
 
         return `
             <div class="post-card" data-post-id="${post.id}">
-                <!-- Header -->
                 <div class="post-header">
                     <div class="post-author">
                         <img 
@@ -260,27 +303,21 @@ class CommunityHub {
                         </div>
                     </div>
                     
-                    <!-- ✅ CORRECTION : Badge channel SANS style inline -->
                     <div class="post-channel">
                         <i class="fas ${channelIconFA}"></i>
                         ${channelName}
                     </div>
                 </div>
 
-                <!-- Content -->
                 <div class="post-content">
                     <h3 class="post-title">${this.escapeHtml(post.title)}</h3>
                     <p class="post-excerpt">${excerpt}</p>
                 </div>
                 
-                <!-- Tags -->
                 ${tagsHTML}
 
-                <!-- Footer -->
                 <div class="post-footer">
-                    <div class="post-author">
-                        <!-- Left side - could add additional info here -->
-                    </div>
+                    <div class="post-author"></div>
                     <div class="post-stats">
                         <div class="post-stat upvote-btn ${hasUpvoted ? 'upvoted' : ''}" style="cursor: pointer;">
                             <i class="fas fa-arrow-up"></i>
@@ -326,7 +363,6 @@ class CommunityHub {
 
             await window.communityService.upvotePost(postId);
             
-            // Update UI
             const post = await window.communityService.getPost(postId);
             const countSpan = buttonElement.querySelector('span');
             if (countSpan) {
@@ -349,15 +385,12 @@ class CommunityHub {
 
     async loadSidebarData() {
         try {
-            // Load featured posts
             const featuredPosts = await window.communityService.getFeaturedPosts(3);
             this.renderFeaturedPosts(featuredPosts);
 
-            // Load leaderboard
             const topContributors = await window.communityService.getTopContributors(5);
             this.renderLeaderboard(topContributors);
 
-            // Load trending tags
             const trendingTags = await window.communityService.getTrendingTags(10);
             this.renderTrendingTags(trendingTags);
 
@@ -416,7 +449,6 @@ class CommunityHub {
             const avatar = user.photoURL || 
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=667eea&color=fff&size=64`;
             
-            // ✅ CORRECTION : Redirection vers la page PUBLIQUE du profil
             return `
                 <div class="leaderboard-item" 
                     onclick="window.location.href='public-profile.html?uid=${user.uid}'" 
@@ -484,7 +516,6 @@ class CommunityHub {
 
         console.log('🔍 Searching for:', query);
         
-        // Simple client-side search (you can implement Algolia for better search)
         try {
             const result = await window.communityService.getPosts({
                 channelId: this.currentChannel === 'all' ? null : this.currentChannel,
@@ -562,7 +593,6 @@ class CommunityHub {
     formatTimeAgo(date) {
         if (!date) return 'Just now';
         
-        // Si c'est un timestamp Firestore
         if (date.seconds) {
             date = new Date(date.seconds * 1000);
         } else if (!(date instanceof Date)) {
