@@ -590,33 +590,21 @@ class AdminAnalyticsPro {
             // Rafraîchir les stats affichées
             this.displayCacheStats();
             
+            // 🆕 AFFICHER LES MÉTRIQUES THIRD-PARTY
+            if (this.stripeData) {
+                this.displayStripeMetrics(this.stripeData);
+            }
+            
+            if (this.cloudflareData) {
+                this.displayCloudflareAnalytics(this.cloudflareData);
+            }
+            
             // Rafraîchir les tableaux
             await this.loadRecentUsers();
             await this.loadRecentActivity();
             await this.loadTopUsers();
             
-            // Rafraîchir les graphiques
-            await this.loadRegistrationsChart();
-            await this.loadPlansChart();
-            await this.loadVisitsChart();
-            await this.loadRevenueChart();
-            await this.loadChurnChart();
-            await this.loadCohortChart();
-            
-            // Rafraîchir les analyses avancées
-            await this.loadConversionFunnel();
-            await this.loadLTVAnalysis();
-            await this.loadMLPredictions();
-            
-            // 🆕 FORCER L'AFFICHAGE DES VISITEURS NON-CLIENTS
-            this.displayNonCustomerVisitors();
-            this.displayPotentialCustomers();
-            
-            // 🆕 FORCER L'AFFICHAGE DES CHEMINS DE CONVERSION
-            this.displayConversionPaths(this.conversionPaths.slice(0, 10));
-            
-            // 🆕 AFFICHER LE TABLEAU UTILISATEURS DÉTAILLÉ
-            await this.loadUsersManagementTable();
+            // ... reste du code inchangé ...
             
             console.log('✅ All displays refreshed successfully');
             
@@ -674,7 +662,12 @@ class AdminAnalyticsPro {
     }
 
     displayStripeMetrics(data) {
-        if (!data) return;
+        console.log('💳 Displaying Stripe metrics:', data);
+        
+        if (!data) {
+            console.warn('⚠ No Stripe data to display');
+            return;
+        }
         
         if (data.customers) {
             this.updateStat('stripe-total-customers', data.customers.total || 0);
@@ -692,7 +685,13 @@ class AdminAnalyticsPro {
             const arr = (data.revenue.arr / 100).toFixed(2);
             this.updateStat('stripe-mrr', `$${mrr}`);
             this.updateStat('stripe-arr', `$${arr}`);
+            console.log(`💰 Stripe Revenue - MRR: $${mrr}, ARR: $${arr}`);
         }
+        
+        // 🆕 CRÉER UN GRAPHIQUE STRIPE SI L'ÉLÉMENT EXISTE
+        this.createStripeChart(data);
+        
+        console.log('✅ Stripe metrics displayed');
     }
 
     async loadCloudflareAnalytics() {
@@ -740,7 +739,12 @@ class AdminAnalyticsPro {
     }
 
     displayCloudflareAnalytics(data) {
-        if (!data || !data.overview) return;
+        console.log('☁ Displaying Cloudflare analytics:', data);
+        
+        if (!data || !data.overview) {
+            console.warn('⚠ No Cloudflare data to display');
+            return;
+        }
         
         const overview = data.overview;
         
@@ -750,6 +754,13 @@ class AdminAnalyticsPro {
         this.updateStat('cf-cache-hit-rate', `${overview.cacheHitRate || 0}%`);
         this.updateStat('cf-total-threats', overview.totalThreats || 0);
         this.updateStat('cf-total-bytes', this.formatBytes(overview.totalBytes || 0));
+        
+        console.log(`📊 Cloudflare Stats - Requests: ${overview.totalRequests}, Pageviews: ${overview.totalPageViews}, Uniques: ${overview.totalUniques}`);
+        
+        // 🆕 CRÉER DES GRAPHIQUES CLOUDFLARE
+        this.createCloudflareCharts(data);
+        
+        console.log('✅ Cloudflare analytics displayed');
     }
 
     async loadCloudflareGeo() {
@@ -2238,62 +2249,141 @@ class AdminAnalyticsPro {
 
     async banUser(userId) {
         try {
+            console.log(`🚫 Attempting to ban user: ${userId}`);
+            console.log(`👤 Current admin: ${this.auth.currentUser?.email}`);
+            
+            // Vérifier que l'utilisateur admin est bien connecté
+            if (!this.auth.currentUser) {
+                alert('❌ Erreur : Vous n\'êtes pas connecté');
+                return;
+            }
+            
+            if (this.auth.currentUser.email !== ADMIN_EMAIL) {
+                alert('❌ Erreur : Accès admin refusé');
+                return;
+            }
+            
             const reason = prompt('Raison du bannissement (optionnel):');
             
-            if (reason === null) return; // Annulé
+            if (reason === null) {
+                console.log('❌ Ban canceled by user');
+                return; // Annulé
+            }
             
-            const confirmBan = confirm(`⚠ Êtes-vous sûr de vouloir bannir cet utilisateur?\n\nCette action:\n- Bloquera son accès au site\n- Annulera son abonnement actif\n- Sera enregistrée dans les logs`);
+            const confirmBan = confirm(
+                `⚠ BANNIR CET UTILISATEUR ?\n\n` +
+                `Cette action va :\n` +
+                `✓ Bloquer son accès au site\n` +
+                `✓ Annuler son abonnement actif\n` +
+                `✓ Être enregistrée dans les logs admin\n\n` +
+                `Raison : ${reason || 'Aucune raison fournie'}\n\n` +
+                `Confirmer le bannissement ?`
+            );
             
-            if (!confirmBan) return;
+            if (!confirmBan) {
+                console.log('❌ Ban canceled by confirmation');
+                return;
+            }
             
-            console.log(`🚫 Banning user: ${userId}`);
+            console.log(`🔄 Banning user ${userId}...`);
             
-            // Mettre à jour Firestore
+            // 🔥 METTRE À JOUR FIRESTORE
             await this.db.collection('users').doc(userId).update({
                 isBanned: true,
                 bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 bannedReason: reason || 'No reason provided',
-                subscriptionStatus: 'banned'
+                subscriptionStatus: 'banned',
+                bannedBy: ADMIN_EMAIL
             });
             
-            // Enregistrer dans les logs
+            console.log('✅ User document updated');
+            
+            // 🔥 ENREGISTRER DANS LES LOGS ADMIN
             await this.db.collection('admin_actions').add({
                 action: 'ban_user',
                 userId: userId,
                 adminEmail: ADMIN_EMAIL,
-                reason: reason,
+                reason: reason || 'No reason provided',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            alert('✅ Utilisateur banni avec succès');
+            console.log('✅ Admin action logged');
             
-            // Recharger les données
+            alert('✅ Utilisateur banni avec succès !');
+            
+            // 🔄 RECHARGER LES DONNÉES
+            console.log('🔄 Reloading user data...');
             await this.loadUsersDetailedData();
             await this.loadUsersManagementTable();
             
+            console.log('✅ User ban complete');
+            
         } catch (error) {
             console.error('❌ Error banning user:', error);
-            alert('⚠ Erreur lors du bannissement: ' + error.message);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            
+            let errorMessage = '⚠ Erreur lors du bannissement :\n\n';
+            
+            if (error.code === 'permission-denied') {
+                errorMessage += '🔒 Permissions insuffisantes.\n\n';
+                errorMessage += 'Solutions :\n';
+                errorMessage += '1. Vérifiez que vous êtes connecté en tant qu\'admin\n';
+                errorMessage += '2. Vérifiez les règles Firestore\n';
+                errorMessage += '3. Actualisez la page et réessayez';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
         }
     }
 
     async unbanUser(userId) {
         try {
-            const confirmUnban = confirm('✅ Débannir cet utilisateur?\n\nIl pourra à nouveau accéder au site.');
+            console.log(`✅ Attempting to unban user: ${userId}`);
+            console.log(`👤 Current admin: ${this.auth.currentUser?.email}`);
             
-            if (!confirmUnban) return;
+            // Vérifier que l'utilisateur admin est bien connecté
+            if (!this.auth.currentUser) {
+                alert('❌ Erreur : Vous n\'êtes pas connecté');
+                return;
+            }
             
-            console.log(`✅ Unbanning user: ${userId}`);
+            if (this.auth.currentUser.email !== ADMIN_EMAIL) {
+                alert('❌ Erreur : Accès admin refusé');
+                return;
+            }
             
-            // Mettre à jour Firestore
+            const confirmUnban = confirm(
+                `✅ DÉBANNIR CET UTILISATEUR ?\n\n` +
+                `Cette action va :\n` +
+                `✓ Restaurer son accès au site\n` +
+                `✓ Réinitialiser son statut à "inactive"\n` +
+                `✓ Être enregistrée dans les logs admin\n\n` +
+                `Confirmer le débannissement ?`
+            );
+            
+            if (!confirmUnban) {
+                console.log('❌ Unban canceled');
+                return;
+            }
+            
+            console.log(`🔄 Unbanning user ${userId}...`);
+            
+            // 🔥 METTRE À JOUR FIRESTORE
             await this.db.collection('users').doc(userId).update({
                 isBanned: false,
                 bannedAt: null,
                 bannedReason: null,
-                subscriptionStatus: 'inactive'
+                subscriptionStatus: 'inactive',
+                unbannedBy: ADMIN_EMAIL,
+                unbannedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            // Enregistrer dans les logs
+            console.log('✅ User document updated');
+            
+            // 🔥 ENREGISTRER DANS LES LOGS ADMIN
             await this.db.collection('admin_actions').add({
                 action: 'unban_user',
                 userId: userId,
@@ -2301,15 +2391,32 @@ class AdminAnalyticsPro {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            alert('✅ Utilisateur débanni avec succès');
+            console.log('✅ Admin action logged');
             
-            // Recharger les données
+            alert('✅ Utilisateur débanni avec succès !');
+            
+            // 🔄 RECHARGER LES DONNÉES
+            console.log('🔄 Reloading user data...');
             await this.loadUsersDetailedData();
             await this.loadUsersManagementTable();
             
+            console.log('✅ User unban complete');
+            
         } catch (error) {
             console.error('❌ Error unbanning user:', error);
-            alert('⚠ Erreur lors du débannissement: ' + error.message);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+            
+            let errorMessage = '⚠ Erreur lors du débannissement :\n\n';
+            
+            if (error.code === 'permission-denied') {
+                errorMessage += '🔒 Permissions insuffisantes.\n\n';
+                errorMessage += 'Vérifiez les règles Firestore.';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
         }
     }
 
@@ -3003,6 +3110,164 @@ class AdminAnalyticsPro {
                 ...options
             }
         });
+    }
+
+    // 🆕 CRÉER GRAPHIQUE STRIPE
+    createStripeChart(data) {
+        if (!data || !data.subscriptions) return;
+        
+        const canvas = document.getElementById('stripe-subscriptions-chart');
+        if (!canvas) {
+            console.warn('⚠ Stripe chart canvas not found (id: stripe-subscriptions-chart)');
+            return;
+        }
+        
+        console.log('📊 Creating Stripe subscriptions chart...');
+        
+        this.createChart('stripe-subscriptions-chart', 'doughnut', {
+            labels: ['Active', 'Trialing', 'Canceled', 'Past Due'],
+            datasets: [{
+                data: [
+                    data.subscriptions.active || 0,
+                    data.subscriptions.trialing || 0,
+                    data.subscriptions.canceled || 0,
+                    data.subscriptions.past_due || 0
+                ],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.8)',  // Green for active
+                    'rgba(59, 130, 246, 0.8)',   // Blue for trialing
+                    'rgba(239, 68, 68, 0.8)',    // Red for canceled
+                    'rgba(245, 158, 11, 0.8)'    // Orange for past due
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        }, {
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Stripe Subscriptions Status'
+                }
+            }
+        });
+        
+        console.log('✅ Stripe chart created');
+    }
+
+    // 🆕 CRÉER GRAPHIQUES CLOUDFLARE
+    createCloudflareCharts(data) {
+        if (!data || !data.overview) return;
+        
+        // Graphique 1 : Requests Over Time
+        const requestsCanvas = document.getElementById('cf-requests-chart');
+        if (requestsCanvas && data.overview.requestsByDate) {
+            console.log('📊 Creating Cloudflare requests chart...');
+            
+            const dates = Object.keys(data.overview.requestsByDate).sort();
+            const requests = dates.map(date => data.overview.requestsByDate[date]);
+            
+            this.createChart('cf-requests-chart', 'line', {
+                labels: dates.map(d => {
+                    const date = new Date(d);
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
+                }),
+                datasets: [{
+                    label: 'Daily Requests',
+                    data: requests,
+                    borderColor: 'rgb(249, 115, 22)',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
+            }, {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Cloudflare Requests Over Time'
+                    }
+                }
+            });
+            
+            console.log('✅ Cloudflare requests chart created');
+        } else {
+            console.warn('⚠ Cloudflare requests chart canvas not found (id: cf-requests-chart)');
+        }
+        
+        // Graphique 2 : Geo Distribution
+        const geoCanvas = document.getElementById('cf-geo-chart');
+        if (geoCanvas && this.cloudflareGeo && this.cloudflareGeo.length > 0) {
+            console.log('📊 Creating Cloudflare geo chart...');
+            
+            const topCountries = this.cloudflareGeo.slice(0, 6);
+            
+            this.createChart('cf-geo-chart', 'bar', {
+                labels: topCountries.map(c => c.country),
+                datasets: [{
+                    label: 'Requests by Country',
+                    data: topCountries.map(c => c.requests),
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y',
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Countries by Requests'
+                    }
+                }
+            });
+            
+            console.log('✅ Cloudflare geo chart created');
+        } else {
+            console.warn('⚠ Cloudflare geo chart canvas not found (id: cf-geo-chart)');
+        }
+        
+        // Graphique 3 : Device Distribution
+        const deviceCanvas = document.getElementById('cf-devices-chart');
+        if (deviceCanvas && this.cloudflareDevices && this.cloudflareDevices.length > 0) {
+            console.log('📊 Creating Cloudflare devices chart...');
+            
+            this.createChart('cf-devices-chart', 'pie', {
+                labels: this.cloudflareDevices.map(d => d.type),
+                datasets: [{
+                    data: this.cloudflareDevices.map(d => d.requests),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            }, {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Requests by Device Type'
+                    }
+                }
+            });
+            
+            console.log('✅ Cloudflare devices chart created');
+        } else {
+            console.warn('⚠ Cloudflare devices chart canvas not found (id: cf-devices-chart)');
+        }
     }
 
     formatBytes(bytes) {

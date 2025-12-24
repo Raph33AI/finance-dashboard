@@ -790,7 +790,7 @@
                                             <div class="kpi-label">Total Customers</div>
                                             <div class="kpi-value" id="stripe-total-customers">0</div>
                                             <div class="kpi-sublabel">
-                                                <span id="stripe-customers-with-subs">0</span> with subscription
+                                                <span id="stripe-with-subscription">0</span> with subscription
                                             </div>
                                         </div>
                                     </div>
@@ -803,7 +803,7 @@
                                             <div class="kpi-label">Active Subscriptions</div>
                                             <div class="kpi-value" id="stripe-active-subs">0</div>
                                             <div class="kpi-sublabel">
-                                                <span id="stripe-trial-subs">0</span> trialing
+                                                <span id="stripe-trialing-subs">0</span> trialing
                                             </div>
                                         </div>
                                     </div>
@@ -842,7 +842,7 @@
                                             <div class="kpi-label">Canceled Subs</div>
                                             <div class="kpi-value" id="stripe-canceled-subs">0</div>
                                             <div class="kpi-sublabel">
-                                                Past Due: <span id="stripe-past-due-subs">0</span>
+                                                Past Due: <span id="stripe-past-due">0</span>
                                             </div>
                                         </div>
                                     </div>
@@ -857,6 +857,15 @@
                                             <div class="kpi-sublabel">Active / Total</div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <!-- 🆕 Graphique Subscriptions Status -->
+                                <div class="chart-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-chart-pie"></i>
+                                        Subscriptions Status
+                                    </h4>
+                                    <canvas id="stripe-subscriptions-chart"></canvas>
                                 </div>
                                 
                                 <!-- Charts Grid -->
