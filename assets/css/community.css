@@ -3052,3 +3052,303 @@ body.dark-mode .filter-btn:hover {
         display: none; /* Cache le séparateur sur mobile */
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🔧 CREATE POST - BORDURES DÉGRADÉES DISCRÈTES PERMANENTES
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1⃣ Container principal du formulaire */
+.editor-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid transparent !important;
+    background-clip: padding-box;
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    
+    /* Bordure dégradée permanente */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* Suppression de l'ancien ::before si existant */
+.editor-card::before {
+    display: none !important;
+}
+
+/* Dark mode */
+body.dark-mode .editor-card {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* 2⃣ Sections de formulaire (Channel, Title, Content, Tags, Images) */
+.form-section {
+    margin-bottom: 28px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.02);
+    border: 2px solid transparent !important;
+    border-radius: 12px;
+    
+    /* Bordure dégradée discrète */
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.02), rgba(102, 126, 234, 0.02)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .form-section {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.3), rgba(30, 41, 59, 0.3)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* 3⃣ Inputs et Selects - Bordure dégradée discrète */
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid transparent !important;
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    font-family: inherit;
+    
+    /* Bordure dégradée */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-select {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* Focus state - bordure plus lumineuse */
+.form-input:focus,
+.form-select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode .form-select:focus {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* 4⃣ Tags Input Wrapper */
+.tags-input-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border: 2px solid transparent !important;
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    min-height: 52px;
+    transition: all 0.3s ease;
+    
+    /* Bordure dégradée */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .tags-input-wrapper {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.tags-input-wrapper:focus-within {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* 5⃣ Upload Zone */
+.upload-zone {
+    border: 2px solid transparent !important;
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    
+    /* Bordure dégradée discrète */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .upload-zone {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* Hover léger (optionnel - supprimez si vous ne voulez AUCUN effet) */
+.upload-zone:hover {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.03), rgba(102, 126, 234, 0.03)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .upload-zone:hover {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.7), rgba(30, 41, 59, 0.7)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* État drag-over */
+.upload-zone.drag-over {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.08), rgba(102, 126, 234, 0.08)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    transform: scale(1);
+}
+
+/* 6⃣ Image Preview */
+.image-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border: 2px solid transparent !important;
+    
+    /* Bordure dégradée */
+    background-image: 
+        linear-gradient(white, white),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .image-preview {
+    background-image: 
+        linear-gradient(#1e293b, #1e293b),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* 7⃣ Markdown Editor Container (SimpleMDE) */
+.CodeMirror {
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    background: var(--glass-bg) !important;
+    
+    /* Bordure dégradée */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .CodeMirror {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+.CodeMirror-focused {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* SimpleMDE Toolbar */
+.editor-toolbar {
+    border: 2px solid transparent !important;
+    border-bottom: none !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: rgba(102, 126, 234, 0.04) !important;
+    
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.04), rgba(102, 126, 234, 0.04)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+body.dark-mode .editor-toolbar {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.5), rgba(30, 41, 59, 0.5)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* 8⃣ Suppression des effets hover/transform indésirables (si nécessaire) */
+.form-section:hover,
+.upload-zone:hover,
+.image-preview:hover {
+    transform: none !important; /* Supprime tout effet de transformation */
+}
+
+/* Si vous voulez supprimer TOUS les effets hover */
+.form-section:hover {
+    background-image: 
+        linear-gradient(rgba(102, 126, 234, 0.02), rgba(102, 126, 234, 0.02)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .form-section:hover {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.3), rgba(30, 41, 59, 0.3)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .editor-card {
+        padding: 24px 20px;
+    }
+    
+    .form-section {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .editor-card {
+        padding: 20px 16px;
+    }
+    
+    .form-section {
+        padding: 14px;
+    }
+}
