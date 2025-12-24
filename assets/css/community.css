@@ -3421,14 +3421,13 @@ body.dark-mode .editor-toolbar {
 }
 
 /* ──────────────────────────────────────────────────────────
-   BOUTON TOGGLE (Flèche VIOLETTE) - ✅ CORRECTION
+   BOUTON TOGGLE (Flèche VIOLETTE) - ✅ CORRECTION FINALE
    ────────────────────────────────────────────────────────── */
 
 .community-filters-toggle-btn {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    /* ✅ Fond blanc/glassmorphism au lieu du gradient */
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(10px);
     border: 2px solid var(--glass-border);
@@ -3442,13 +3441,15 @@ body.dark-mode .editor-toolbar {
     flex-shrink: 0;
 }
 
-/* ✅ Flèche VIOLETTE avec gradient */
-.community-filters-toggle-btn i {
-    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: transform 0.3s ease;
+/* ✅ FORCE la couleur violette (pas de background-clip) */
+.community-filters-toggle-btn i,
+.community-filters-toggle-btn i.fas {
+    color: #667eea !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
+    background-clip: unset !important;
+    transition: transform 0.3s ease, color 0.3s ease;
     font-size: 1.4rem;
     font-weight: 900;
 }
@@ -3458,6 +3459,10 @@ body.dark-mode .editor-toolbar {
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
     border-color: var(--ml-primary);
     background: white !important;
+}
+
+.community-filters-toggle-btn:hover i {
+    color: #764ba2 !important;
 }
 
 .community-filters-toggle-btn:active {
