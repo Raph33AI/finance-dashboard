@@ -545,14 +545,14 @@ class PostManager {
                 <div class="post-meta">
                     ${channelBadge}
                     <div class="post-author">
-                        <!-- ✅ CORRECTION 3 : Lien cliquable vers le profil -->
+                        <!-- ✅ CORRECTION : public-profile.html -->
                         <img src="${this.post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(this.post.authorName) + '&background=3B82F6&color=fff'}" 
-                             alt="${this.post.authorName}" 
-                             class="author-avatar"
-                             onclick="window.location.href='user-profile.html?id=${this.post.authorId}'"
-                             style="cursor: pointer;">
+                            alt="${this.post.authorName}" 
+                            class="author-avatar"
+                            onclick="window.location.href='public-profile.html?id=${this.post.authorId}'"
+                            style="cursor: pointer;">
                         <div class="author-info">
-                            <div class="author-name" onclick="window.location.href='user-profile.html?id=${this.post.authorId}'" style="cursor: pointer;">
+                            <div class="author-name" onclick="window.location.href='public-profile.html?id=${this.post.authorId}'" style="cursor: pointer;">
                                 ${this.post.authorName}
                                 ${planBadge}
                             </div>
@@ -832,15 +832,15 @@ class PostManager {
 
         return `
             <div class="comment-item" data-comment-id="${comment.id}">
-                <!-- ✅ CORRECTION 4 : Avatar cliquable -->
+                <!-- ✅ CORRECTION : public-profile.html -->
                 <img src="${comment.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.authorName) + '&background=3B82F6&color=fff'}" 
-                     alt="${comment.authorName}" 
-                     class="comment-avatar"
-                     onclick="window.location.href='user-profile.html?id=${comment.authorId}'"
-                     style="cursor: pointer;">
+                    alt="${comment.authorName}" 
+                    class="comment-avatar"
+                    onclick="window.location.href='public-profile.html?id=${comment.authorId}'"
+                    style="cursor: pointer;">
                 <div class="comment-content-wrapper">
                     <div class="comment-header">
-                        <div class="comment-author" onclick="window.location.href='user-profile.html?id=${comment.authorId}'" style="cursor: pointer;">
+                        <div class="comment-author" onclick="window.location.href='public-profile.html?id=${comment.authorId}'" style="cursor: pointer;">
                             ${comment.authorName}
                             ${planBadge}
                         </div>
