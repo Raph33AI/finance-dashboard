@@ -1327,3 +1327,165 @@ body.dark-mode .highcharts-legend-item text {
         font-size: 1.2rem;
     }
 }
+
+/* ════════════════════════════════════════════════════════════
+   BORDURES DÉGRADÉES ENTRE SOUS-SECTIONS DU DROPDOWN
+   ════════════════════════════════════════════════════════════ */
+
+/* Bordure dégradée sous chaque sous-section (sauf la dernière) */
+.data-section-content > .info-box,
+.data-section-content > .toolbar,
+.data-section-content > .parameters-grid {
+    position: relative;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+}
+
+/* Pseudo-élément pour créer la bordure dégradée */
+.data-section-content > .info-box::after,
+.data-section-content > .toolbar::after,
+.data-section-content > .parameters-grid::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(102, 126, 234, 0.15) 10%,
+        rgba(118, 75, 162, 0.25) 50%,
+        rgba(102, 126, 234, 0.15) 90%,
+        transparent 100%
+    );
+    border-radius: 2px;
+}
+
+/* Variation alternative avec glow subtil */
+.data-section-content > .toolbar.simulation-management::after {
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(102, 126, 234, 0.2) 10%,
+        rgba(139, 92, 246, 0.3) 50%,
+        rgba(102, 126, 234, 0.2) 90%,
+        transparent 100%
+    );
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+    height: 2px;
+}
+
+/* Retirer la bordure de la dernière section */
+.data-section-content > .toolbar:last-child::after {
+    display: none;
+}
+
+/* Alternative : Bordure avec animation subtile au hover de la section */
+.data-section-content > .info-box:hover::after,
+.data-section-content > .toolbar:hover::after,
+.data-section-content > .parameters-grid:hover::after {
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(102, 126, 234, 0.3) 10%,
+        rgba(118, 75, 162, 0.45) 50%,
+        rgba(102, 126, 234, 0.3) 90%,
+        transparent 100%
+    );
+    box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Dark Mode Support */
+body.dark-mode .data-section-content > .info-box::after,
+body.dark-mode .data-section-content > .toolbar::after,
+body.dark-mode .data-section-content > .parameters-grid::after {
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(139, 92, 246, 0.25) 10%,
+        rgba(167, 139, 250, 0.35) 50%,
+        rgba(139, 92, 246, 0.25) 90%,
+        transparent 100%
+    );
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════
+   VARIANTE : Bordure plus épaisse avec double ligne
+   ══════════════════════════════════════════════════════════ */
+
+/* Décommentez cette section pour une bordure double ligne */
+/*
+.data-section-content > .info-box::after,
+.data-section-content > .toolbar::after,
+.data-section-content > .parameters-grid::after {
+    height: 3px;
+    background: 
+        linear-gradient(
+            90deg, 
+            transparent 0%, 
+            rgba(102, 126, 234, 0.4) 50%,
+            transparent 100%
+        ),
+        linear-gradient(
+            90deg, 
+            transparent 0%, 
+            rgba(118, 75, 162, 0.3) 50%,
+            transparent 100%
+        );
+    background-size: 100% 1px, 100% 1px;
+    background-position: 0 0, 0 100%;
+    background-repeat: no-repeat;
+}
+*/
+
+/* ══════════════════════════════════════════════════════════
+   VARIANTE : Bordure avec effet "glow" animé
+   ══════════════════════════════════════════════════════════ */
+
+/* Décommentez pour une bordure avec glow pulsant (léger) */
+/*
+@keyframes borderGlow {
+    0%, 100% {
+        opacity: 0.3;
+        box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+    }
+    50% {
+        opacity: 0.5;
+        box-shadow: 0 0 16px rgba(118, 75, 162, 0.4);
+    }
+}
+
+.data-section-content > .toolbar.simulation-management::after {
+    animation: borderGlow 3s ease-in-out infinite;
+}
+*/
+
+/* ══════════════════════════════════════════════════════════
+   Responsive : Bordures plus subtiles sur mobile
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .data-section-content > .info-box::after,
+    .data-section-content > .toolbar::after,
+    .data-section-content > .parameters-grid::after {
+        height: 1px;
+        background: linear-gradient(
+            90deg, 
+            transparent 0%, 
+            rgba(102, 126, 234, 0.1) 20%,
+            rgba(118, 75, 162, 0.15) 50%,
+            rgba(102, 126, 234, 0.1) 80%,
+            transparent 100%
+        );
+    }
+    
+    .data-section-content > .info-box,
+    .data-section-content > .toolbar,
+    .data-section-content > .parameters-grid {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+}
