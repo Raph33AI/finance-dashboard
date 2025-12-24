@@ -722,6 +722,9 @@ window.addEventListener('userDataLoaded', (e) => {
     
     // ✅ Charger la liste des abonnements
     loadFollowingList();
+
+    // ✅ NOUVEAU : Charger la liste des followers
+    loadFollowersList();
 });
 
 // ============================================
@@ -982,6 +985,165 @@ async function unfollowUser(userId) {
 }
 
 // ============================================
+// ✅ GESTION DE LA LISTE DES FOLLOWERS
+// ============================================
+
+async function loadFollowersList() {
+    const followersList = document.getElementById('followersList');
+    const followersCountEl = document.getElementById('followersCount');
+    
+    if (!currentUserData || !currentUserData.uid) return;
+    
+    try {
+        const followersSnapshot = await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('followers')
+            .orderBy('followedAt', 'desc')
+            .get();
+        
+        if (followersCountEl) {
+            followersCountEl.textContent = followersSnapshot.size;
+        }
+        
+        if (followersSnapshot.empty) {
+            followersList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p style="font-size: 1.1rem; font-weight: 700;">No followers yet</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px;">Share your profile to grow your community!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Charger les données de chaque follower
+        const followers = await Promise.all(
+            followersSnapshot.docs.map(async (doc) => {
+                const followerId = doc.id;
+                const followedAt = doc.data().followedAt;
+                
+                const userDoc = await firebase.firestore()
+                    .collection('users')
+                    .doc(followerId)
+                    .get();
+                
+                if (!userDoc.exists) return null;
+                
+                return {
+                    uid: followerId,
+                    ...userDoc.data(),
+                    followedAt: followedAt
+                };
+            })
+        );
+        
+        // Filtrer les utilisateurs null (supprimés)
+        const validFollowers = followers.filter(user => user !== null);
+        
+        // Afficher la liste
+        const followersHTML = validFollowers.map(user => {
+            const firstName = user.firstName || '';
+            const lastName = user.lastName || '';
+            const displayName = `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'Unknown User';
+            const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+            const bio = user.bio || 'No biography';
+            
+            return `
+                <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
+                    <img 
+                        src="${avatar}" 
+                        alt="${escapeHtml(displayName)}" 
+                        style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer;"
+                        onclick="window.location.href='public-profile.html?uid=${user.uid}'"
+                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
+                    >
+                    <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
+                        <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
+                            ${escapeHtml(displayName)}
+                        </h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${escapeHtml(bio)}
+                        </p>
+                        <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                            <span><i class="fas fa-file-alt"></i> ${user.postCount || 0} posts</span>
+                            <span><i class="fas fa-users"></i> ${user.followersCount || 0} followers</span>
+                        </div>
+                    </div>
+                    <button 
+                        class="btn-secondary" 
+                        onclick="removeFollower('${user.uid}')"
+                        style="padding: 10px 20px; white-space: nowrap;"
+                    >
+                        <i class="fas fa-user-times"></i>
+                        Remove
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        followersList.innerHTML = followersHTML;
+        
+        console.log(`✅ ${validFollowers.length} followers chargés`);
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des followers:', error);
+        followersList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #EF4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                <p>Failed to load followers list</p>
+            </div>
+        `;
+    }
+}
+
+async function removeFollower(userId) {
+    if (!confirm('Are you sure you want to remove this follower?')) return;
+    
+    try {
+        if (!currentUserData || !currentUserData.uid) {
+            throw new Error('User not authenticated');
+        }
+        
+        const db = firebase.firestore();
+        const batch = db.batch();
+        
+        // Supprimer de la collection followers
+        const followerRef = db.collection('users').doc(currentUserData.uid).collection('followers').doc(userId);
+        batch.delete(followerRef);
+        
+        // Supprimer de la collection following de l'autre utilisateur
+        const followingRef = db.collection('users').doc(userId).collection('following').doc(currentUserData.uid);
+        batch.delete(followingRef);
+        
+        // Décrémenter followersCount
+        const currentUserRef = db.collection('users').doc(currentUserData.uid);
+        batch.update(currentUserRef, {
+            followersCount: firebase.firestore.FieldValue.increment(-1)
+        });
+        
+        // Décrémenter followingCount de l'autre utilisateur
+        const followerUserRef = db.collection('users').doc(userId);
+        batch.update(followerUserRef, {
+            followingCount: firebase.firestore.FieldValue.increment(-1)
+        });
+        
+        await batch.commit();
+        
+        showToast('success', 'Success', 'Follower removed successfully');
+        
+        // Recharger la liste
+        loadFollowersList();
+        
+        console.log('✅ Follower retiré');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du retrait du follower:', error);
+        showToast('error', 'Error', 'Failed to remove follower');
+    }
+}
+
+// ============================================
 // GESTIONNAIRES D'ÉVÉNEMENTS
 // ============================================
 
@@ -1190,12 +1352,17 @@ async function handleAvatarChange(e) {
         
         const storage = firebase.storage();
         const storageRef = storage.ref();
-        const avatarRef = storageRef.child(`users/${currentUserData.uid}/profile/${file.name}`);
         
+        // ✅ Nom de fichier unique avec timestamp
+        const timestamp = Date.now();
+        const fileName = `avatar_${timestamp}_${file.name}`;
+        const avatarRef = storageRef.child(`users/${currentUserData.uid}/profile/${fileName}`);
+        
+        // Upload du fichier
         const uploadTask = await avatarRef.put(file);
         const downloadURL = await uploadTask.ref.getDownloadURL();
         
-        // ✅ Mettre à jour Firestore
+        // ✅ IMPORTANT : Mettre à jour Firestore EN PREMIER
         await firebase.firestore().collection('users').doc(currentUserData.uid).update({
             photoURL: downloadURL,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1208,6 +1375,9 @@ async function handleAvatarChange(e) {
                 photoURL: downloadURL
             });
         }
+        
+        // ✅ Mettre à jour les données locales
+        currentUserData.photoURL = downloadURL;
         
         // Mettre à jour toutes les images [data-user-photo]
         document.querySelectorAll('[data-user-photo]').forEach(img => {
