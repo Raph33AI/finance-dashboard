@@ -337,15 +337,32 @@
                     </div>
                 </div>
 
-                <!-- Recent Posts -->
+                <!-- ✅ ACTIVITY TABS -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">
-                            <i class="fas fa-file-alt"></i> Recent Posts
+                            <i class="fas fa-chart-line"></i> Activity
                         </h2>
-                        <span class="section-count" id="postsCount" style="background: rgba(59, 130, 246, 0.2); padding: 6px 14px; border-radius: 12px; color: #60A5FA; font-weight: 800; font-size: 0.9rem;">0</span>
                     </div>
-                    <div class="user-posts-grid" id="userPostsGrid">
+                    
+                    <!-- Tabs Navigation -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <button class="filter-btn active" data-tab="posts" onclick="window.publicProfile.switchTab('posts')">
+                            <i class="fas fa-file-alt"></i> 
+                            Posts (<span id="postsTabCount">0</span>)
+                        </button>
+                        <button class="filter-btn" data-tab="liked" onclick="window.publicProfile.switchTab('liked')">
+                            <i class="fas fa-heart"></i> 
+                            Liked (<span id="likedTabCount">0</span>)
+                        </button>
+                        <button class="filter-btn" data-tab="commented" onclick="window.publicProfile.switchTab('commented')">
+                            <i class="fas fa-comment"></i> 
+                            Commented (<span id="commentedTabCount">0</span>)
+                        </button>
+                    </div>
+                    
+                    <!-- Content Container -->
+                    <div id="activityContent" class="user-posts-grid">
                         <!-- Dynamically populated -->
                     </div>
                 </div>
@@ -364,304 +381,37 @@
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/community-firebase.js'></script>
     <script src='assets/js/follow-system.js'></script>
+    <script src='assets/js/public-profile.js'></script>
 
+    <!-- User Menu Script -->
     <script>
-        /* ============================================
-           PUBLIC PROFILE LOGIC (ENHANCED WITH FOLLOW SYSTEM)
-           ============================================ */
-
-        class PublicProfile {
-            constructor() {
-                this.userId = null;
-                this.userData = null;
-                this.userPosts = [];
-                this.isFollowing = false;
-                this.isOwnProfile = false;
-            }
-
-            async initialize() {
-                try {
-                    console.log('👤 Initializing Public Profile...');
-                    
-                    const urlParams = new URLSearchParams(window.location.search);
-                    this.userId = urlParams.get('uid');
-
-                    if (!this.userId) {
-                        this.showError('User not found');
-                        return;
-                    }
-
-                    // Vérifier si c'est son propre profil
-                    const currentUser = firebase.auth().currentUser;
-                    this.isOwnProfile = currentUser && currentUser.uid === this.userId;
-
-                    await this.loadUserData();
-                    
-                    // Vérifier le statut de suivi (sauf si c'est son propre profil)
-                    if (!this.isOwnProfile && currentUser) {
-                        this.isFollowing = await window.followSystem.isFollowing(this.userId);
-                    }
-                    
-                    await this.loadUserPosts();
-                    
-                    console.log('✅ Public Profile initialized');
-                } catch (error) {
-                    console.error('❌ Error initializing profile:', error);
-                    this.showError('Failed to load profile');
-                }
-            }
-
-            async loadUserData() {
-                const userDoc = await firebase.firestore()
-                    .collection('users')
-                    .doc(this.userId)
-                    .get();
-
-                if (!userDoc.exists) {
-                    throw new Error('User not found');
-                }
-
-                this.userData = userDoc.data();
-                this.renderProfileHeader();
-            }
-
-            async loadUserPosts() {
-                const snapshot = await firebase.firestore()
-                    .collection('community_posts')
-                    .where('authorId', '==', this.userId)
-                    .orderBy('createdAt', 'desc')
-                    .limit(20)
-                    .get();
-
-                this.userPosts = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: doc.data().createdAt?.toDate()
-                }));
-
-                this.renderUserPosts();
-            }
-
-            renderProfileHeader() {
-                const displayName = this.userData.displayName || this.userData.email?.split('@')[0] || 'Unknown User';
-                const bio = this.userData.bio || 'No bio available';
-                const reputation = this.userData.reputation || 0;
-                const postCount = this.userData.postCount || 0;
-                const badges = this.userData.badges || [];
-                const followersCount = this.userData.followersCount || 0;
-                const followingCount = this.userData.followingCount || 0;
-
-                // ✅ Photo de profil avec fallback
-                const photoURL = this.userData.photoURL;
-                const avatarHTML = photoURL ? `
-                    <img 
-                        src="${photoURL}" 
-                        alt="${this.escapeHtml(displayName)}" 
-                        class="profile-avatar-large"
-                        style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                    >
-                    <div class="profile-avatar-large-fallback" style="display: none; width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: none; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
-                        ${displayName.charAt(0).toUpperCase()}
-                    </div>
-                ` : `
-                    <div class="profile-avatar-large" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
-                        ${displayName.charAt(0).toUpperCase()}
-                    </div>
-                `;
-
-                const badgesHTML = badges.map(badge => {
-                    const badgeInfo = this.getBadgeInfo(badge);
-                    return `
-                        <div class="profile-badge" style="padding: 10px 20px; border-radius: 12px; background: ${badgeInfo.gradient}; color: white; font-weight: 800; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); margin-right: 12px; margin-bottom: 12px;">
-                            <i class="${badgeInfo.icon}"></i>
-                            <span>${badgeInfo.name}</span>
-                        </div>
-                    `;
-                }).join('');
-
-                // Bouton Follow/Unfollow
-                const followButtonHTML = !this.isOwnProfile ? `
-                    <button 
-                        id="followBtn" 
-                        class="create-post-btn" 
-                        onclick="window.publicProfile.toggleFollow()"
-                        style="margin-top: 24px; ${this.isFollowing ? 'background: linear-gradient(135deg, #6b7280, #4b5563);' : ''}"
-                    >
-                        <i class="fas ${this.isFollowing ? 'fa-user-minus' : 'fa-user-plus'}"></i>
-                        ${this.isFollowing ? 'Unfollow' : 'Follow'}
-                    </button>
-                ` : '';
-
-                const profileHTML = `
-                    <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
-                        ${avatarHTML}
-                        <div style="flex: 1; min-width: 300px;">
-                            <h1 class="profile-name" style="font-size: 2.5rem; font-weight: 900; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
-                                <span class="gradient-title">${this.escapeHtml(displayName)}</span>
-                                ${badges.includes('verified-analyst') ? '<i class="fas fa-badge-check" style="color: #3B82F6;"></i>' : ''}
-                            </h1>
-                            <p class="profile-bio" style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">${this.escapeHtml(bio)}</p>
-                            
-                            <div class="profile-stats" style="display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 24px;">
-                                <div class="profile-stat-item">
-                                    <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${reputation.toLocaleString()}</div>
-                                    <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Reputation</div>
-                                </div>
-                                <div class="profile-stat-item">
-                                    <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${postCount}</div>
-                                    <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Posts</div>
-                                </div>
-                                <div class="profile-stat-item">
-                                    <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;" id="followersCount">${followersCount}</div>
-                                    <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Followers</div>
-                                </div>
-                                <div class="profile-stat-item">
-                                    <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${followingCount}</div>
-                                    <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Following</div>
-                                </div>
-                                <div class="profile-stat-item">
-                                    <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${badges.length}</div>
-                                    <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Badges</div>
-                                </div>
-                            </div>
-
-                            ${badges.length > 0 ? `<div class="profile-badges">${badgesHTML}</div>` : ''}
-                            
-                            ${followButtonHTML}
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('profileHeader').innerHTML = profileHTML;
-                document.title = `${displayName} - AlphaVault AI`;
-            }
-
-            async toggleFollow() {
-                try {
-                    const followBtn = document.getElementById('followBtn');
-                    const followersCountEl = document.getElementById('followersCount');
-                    
-                    if (!followBtn) return;
-                    
-                    followBtn.disabled = true;
-                    followBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-
-                    if (this.isFollowing) {
-                        await window.followSystem.unfollowUser(this.userId);
-                        this.isFollowing = false;
-                        followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
-                        followBtn.style.background = '';
-                        
-                        if (followersCountEl) {
-                            const currentCount = parseInt(followersCountEl.textContent) || 0;
-                            followersCountEl.textContent = Math.max(0, currentCount - 1);
-                        }
-                        
-                        console.log('✅ User unfollowed');
-                    } else {
-                        await window.followSystem.followUser(this.userId);
-                        this.isFollowing = true;
-                        followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
-                        followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
-                        
-                        if (followersCountEl) {
-                            const currentCount = parseInt(followersCountEl.textContent) || 0;
-                            followersCountEl.textContent = currentCount + 1;
-                        }
-                        
-                        console.log('✅ User followed');
-                    }
-
-                    followBtn.disabled = false;
-
-                } catch (error) {
-                    console.error('❌ Error toggling follow:', error);
-                    alert('Failed to update follow status. Please try again.');
-                    
-                    const followBtn = document.getElementById('followBtn');
-                    if (followBtn) {
-                        followBtn.disabled = false;
-                        followBtn.innerHTML = this.isFollowing 
-                            ? '<i class="fas fa-user-minus"></i> Unfollow' 
-                            : '<i class="fas fa-user-plus"></i> Follow';
-                    }
-                }
-            }
-
-            renderUserPosts() {
-                const postsGrid = document.getElementById('userPostsGrid');
-                const postsCount = document.getElementById('postsCount');
-
-                postsCount.textContent = this.userPosts.length;
-
-                if (this.userPosts.length === 0) {
-                    postsGrid.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-                            <p style="font-size: 1.1rem; font-weight: 700;">No posts yet</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const postsHTML = this.userPosts.map(post => `
-                    <div class="user-post-item" onclick="window.location.href='post.html?id=${post.id}'" style="background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; padding: 16px; transition: all 0.3s ease; cursor: pointer;">
-                        <h3 class="user-post-title gradient-title" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 12px;">${this.escapeHtml(post.title)}</h3>
-                        <div class="user-post-meta" style="display: flex; gap: 20px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;">
-                            <span><i class="fas fa-arrow-up"></i> ${post.upvotes || 0}</span>
-                            <span><i class="fas fa-comment"></i> ${post.commentCount || 0}</span>
-                            <span><i class="fas fa-eye"></i> ${post.viewCount || 0}</span>
-                            <span><i class="fas fa-clock"></i> ${this.formatTimeAgo(post.createdAt)}</span>
-                        </div>
-                    </div>
-                `).join('');
-
-                postsGrid.innerHTML = postsHTML;
-            }
-
-            getBadgeInfo(badge) {
-                const badges = {
-                    'verified-analyst': { name: 'Verified Analyst', icon: 'fas fa-badge-check', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
-                    'top-contributor': { name: 'Top Contributor', icon: 'fas fa-trophy', gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)' },
-                    'platinum-member': { name: 'Platinum Member', icon: 'fas fa-star', gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)' }
-                };
-                return badges[badge] || { name: badge, icon: 'fas fa-award', gradient: 'linear-gradient(135deg, #6b7280, #4b5563)' };
-            }
-
-            formatTimeAgo(date) {
-                if (!date) return 'Unknown';
-                const seconds = Math.floor((new Date() - date) / 1000);
-                const intervals = { year: 31536000, month: 2592000, week: 604800, day: 86400, hour: 3600, minute: 60 };
-                for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-                    const interval = Math.floor(seconds / secondsInUnit);
-                    if (interval >= 1) return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
-                }
-                return 'Just now';
-            }
-
-            escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            showError(message) {
-                document.getElementById('profileHeader').innerHTML = `
-                    <div style="text-align: center; padding: 60px; color: #EF4444; width: 100%;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                        <h3 style="font-size: 1.5rem; font-weight: 800;">${message}</h3>
-                    </div>
-                `;
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            window.publicProfile = new PublicProfile();
-            window.publicProfile.initialize();
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
         });
     </script>
+
+    <script src="assets/js/admin-visibility.js"></script>
 
 </body>
 </html>

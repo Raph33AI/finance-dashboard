@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/profile.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    
+    <!-- Favicon -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Firebase SDK -->
@@ -28,11 +29,11 @@
     <!-- Page Protection -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ TRADUCTION AUTOMATIQUE (AVANT analytics-tracker) -->
+    <!-- Traduction Automatique -->
     <script src="assets/js/auto-translate.js"></script>
 </head>
 <body>
-    <!-- ⚡ THEME SCRIPT -->
+    <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
 
     <!-- Particles Background -->
@@ -159,7 +160,7 @@
                             <i class='fas fa-chart-line'></i>
                             <span>Trend Prediction</span>
                         </a>
-                        <a href='forex-converter.html' class='nav-link active'>
+                        <a href='forex-converter.html' class='nav-link'>
                             <i class='fas fa-exchange-alt'></i>
                             <span>Forex Converter</span>
                         </a>
@@ -240,7 +241,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -259,7 +259,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
@@ -422,6 +421,25 @@
                                 </div>
                             </div>
                             
+                            <!-- ✅ NOUVEAU CHAMP BIO -->
+                            <div class="form-group">
+                                <label for="bio">
+                                    <i class="fas fa-align-left"></i>
+                                    Biography
+                                </label>
+                                <textarea 
+                                    id="bio" 
+                                    class="form-input" 
+                                    placeholder="Tell us about yourself..."
+                                    rows="3"
+                                    maxlength="500"
+                                    disabled
+                                ></textarea>
+                                <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; display: block;">
+                                    <span id="bioCharCount">0</span>/500 characters
+                                </small>
+                            </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="company">
@@ -458,6 +476,23 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                    
+                    <!-- ✅ NOUVELLE SECTION FOLLOWING -->
+                    <div class="profile-section glass-card">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-user-friends section-icon-glow"></i> 
+                                Following (<span id="followingCount">0</span>)
+                            </h3>
+                        </div>
+                        
+                        <div id="followingList" style="display: grid; gap: 16px;">
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+                                <p style="margin-top: 12px;">Loading...</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Security Section -->
@@ -673,7 +708,7 @@
         });
     </script>
 
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
+    <!-- Admin Visibility -->
     <script src="assets/js/admin-visibility.js"></script>
     
 </body>
