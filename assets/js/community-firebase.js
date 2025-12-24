@@ -678,7 +678,7 @@ class CommunityFirebaseService {
         this.auth = firebase.auth();
         
         // ⚠ REMPLACE PAR L'URL DE TON WORKER IMAGE STORAGE
-        this.imageWorkerUrl = 'https://alphavault-image-storage.YOUR-SUBDOMAIN.workers.dev';
+        this.imageWorkerUrl = 'https://alphavault-image-storage.raphnardone.workers.dev';
     }
 
     /* ==========================================
