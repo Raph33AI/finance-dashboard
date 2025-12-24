@@ -3382,10 +3382,13 @@ body.dark-mode .editor-toolbar {
 }
 
 /* ════════════════════════════════════════════════════════════
-   COMMUNITY FILTERS DROPDOWN STYLES
+   COMMUNITY FILTERS DROPDOWN - STYLES COMPLETS
    ════════════════════════════════════════════════════════════ */
 
-/* Header de la section (toujours visible) */
+/* ──────────────────────────────────────────────────────────
+   HEADER DU DROPDOWN (Toujours visible)
+   ────────────────────────────────────────────────────────── */
+
 .community-filters-header {
     display: flex;
     justify-content: space-between;
@@ -3410,15 +3413,24 @@ body.dark-mode .editor-toolbar {
 .community-filters-header .section-title {
     margin: 0;
     font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
+
+/* ──────────────────────────────────────────────────────────
+   BOUTON TOGGLE (Flèche) - ✅ CORRECTION APPLIQUÉE
+   ────────────────────────────────────────────────────────── */
 
 .community-filters-toggle-btn {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     border: none;
-    color: white;
+    color: white !important;
     font-size: 1.4rem;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -3426,6 +3438,14 @@ body.dark-mode .editor-toolbar {
     align-items: center;
     justify-content: center;
     box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+    flex-shrink: 0;
+}
+
+/* ✅ FORCE la couleur blanche de l'icône */
+.community-filters-toggle-btn i {
+    color: white !important;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
 .community-filters-toggle-btn:hover {
@@ -3433,16 +3453,19 @@ body.dark-mode .editor-toolbar {
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
 }
 
-.community-filters-toggle-btn i {
-    transition: transform 0.3s ease;
+.community-filters-toggle-btn:active {
+    transform: scale(1.05);
 }
 
-/* Rotation de l'icône quand ouvert */
+/* Rotation de l'icône quand le dropdown est ouvert */
 .community-filters-header:not(.collapsed) .community-filters-toggle-btn i {
     transform: rotate(180deg);
 }
 
-/* Container des filtres (collapsible) */
+/* ──────────────────────────────────────────────────────────
+   CONTAINER COLLAPSIBLE (Contenu du dropdown)
+   ────────────────────────────────────────────────────────── */
+
 .community-filters-content {
     max-height: 2000px;
     overflow: hidden;
@@ -3460,7 +3483,10 @@ body.dark-mode .editor-toolbar {
     pointer-events: none;
 }
 
-/* Wrapper pour les channels */
+/* ──────────────────────────────────────────────────────────
+   WRAPPER POUR LES CHANNELS
+   ────────────────────────────────────────────────────────── */
+
 .channels-section-wrapper {
     position: relative;
     padding-bottom: 30px;
@@ -3480,7 +3506,28 @@ body.dark-mode .editor-toolbar {
     gap: 10px;
 }
 
-/* Animation des sections internes */
+.subsection-title i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ──────────────────────────────────────────────────────────
+   ANIMATIONS D'ENTRÉE (Fade In Up)
+   ────────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .community-filters-content > * {
     animation: fadeInUp 0.4s ease-out backwards;
 }
@@ -3493,9 +3540,9 @@ body.dark-mode .editor-toolbar {
     animation-delay: 0.1s;
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────────
    BORDURES DÉGRADÉES ENTRE SOUS-SECTIONS
-   ════════════════════════════════════════════════════════════ */
+   ────────────────────────────────────────────────────────── */
 
 /* Bordure sous les stats */
 .community-filters-content > .community-header-stats {
@@ -3522,6 +3569,7 @@ body.dark-mode .editor-toolbar {
     border-radius: 2px;
 }
 
+/* Effet hover sur la bordure */
 .community-filters-content > .community-header-stats:hover::after {
     background: linear-gradient(
         90deg, 
@@ -3535,7 +3583,28 @@ body.dark-mode .editor-toolbar {
     transition: all 0.3s ease;
 }
 
-/* Dark Mode Support */
+/* ──────────────────────────────────────────────────────────
+   DARK MODE SUPPORT
+   ────────────────────────────────────────────────────────── */
+
+body.dark-mode .community-filters-header {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(148, 163, 184, 0.1);
+}
+
+body.dark-mode .community-filters-toggle-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
+}
+
+body.dark-mode .community-filters-toggle-btn i {
+    color: white !important;
+}
+
+body.dark-mode .community-filters-toggle-btn:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.7);
+}
+
 body.dark-mode .community-filters-content > .community-header-stats::after {
     background: linear-gradient(
         90deg, 
@@ -3548,7 +3617,10 @@ body.dark-mode .community-filters-content > .community-header-stats::after {
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
 }
 
-/* Responsive */
+/* ──────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ────────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
     .community-filters-header {
         padding: 18px 20px;
@@ -3564,6 +3636,11 @@ body.dark-mode .community-filters-content > .community-header-stats::after {
         font-size: 1.2rem;
     }
     
+    .community-filters-content > .community-header-stats {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    
     .community-filters-content > .community-header-stats::after {
         height: 1px;
         background: linear-gradient(
@@ -3575,4 +3652,65 @@ body.dark-mode .community-filters-content > .community-header-stats::after {
             transparent 100%
         );
     }
+    
+    .subsection-title {
+        font-size: 1rem;
+    }
 }
+
+/* ──────────────────────────────────────────────────────────
+   OPTIMISATIONS PERFORMANCES
+   ────────────────────────────────────────────────────────── */
+
+/* GPU Acceleration */
+.community-filters-toggle-btn,
+.community-filters-content {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Préférence utilisateur : Réduire les animations */
+@media (prefers-reduced-motion: reduce) {
+    .community-filters-content,
+    .community-filters-toggle-btn i {
+        transition-duration: 0.01ms !important;
+    }
+    
+    .community-filters-content > * {
+        animation: none !important;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   HOVER EFFECTS (Desktop uniquement)
+   ────────────────────────────────────────────────────────── */
+
+@media (hover: hover) and (pointer: fine) {
+    .community-filters-header:hover {
+        box-shadow: 
+            0 12px 36px var(--glass-shadow),
+            0 0 0 1px rgba(102, 126, 234, 0.2);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   ÉTATS SPÉCIAUX
+   ────────────────────────────────────────────────────────── */
+
+/* État focus pour accessibilité */
+.community-filters-toggle-btn:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* État désactivé (si nécessaire) */
+.community-filters-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   FIN DU DROPDOWN COMMUNITY FILTERS
+   ══════════════════════════════════════════════════════════ */
