@@ -186,6 +186,162 @@ class CacheManager {
 }
 
 // ========================================
+// 🆕 PAGINATION MANAGER
+// ========================================
+
+class PaginationManager {
+    constructor(tableId, data, renderRowCallback, itemsPerPageOptions = [10, 25, 50, 100]) {
+        this.tableId = tableId;
+        this.data = data;
+        this.renderRowCallback = renderRowCallback;
+        this.itemsPerPageOptions = itemsPerPageOptions;
+        this.currentPage = 1;
+        this.itemsPerPage = itemsPerPageOptions[0];
+        this.totalPages = Math.ceil(data.length / this.itemsPerPage);
+    }
+    
+    updateData(newData) {
+        this.data = newData;
+        this.currentPage = 1;
+        this.totalPages = Math.ceil(newData.length / this.itemsPerPage);
+        this.render();
+    }
+    
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.render();
+    }
+    
+    changeItemsPerPage(newItemsPerPage) {
+        this.itemsPerPage = newItemsPerPage;
+        this.totalPages = Math.ceil(this.data.length / this.itemsPerPage);
+        this.currentPage = 1;
+        this.render();
+    }
+    
+    render() {
+        const tbody = document.getElementById(this.tableId);
+        if (!tbody) {
+            console.error(`❌ Table body not found: ${this.tableId}`);
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Calculer les indices de début et fin
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.data.length);
+        
+        // Afficher les données de la page actuelle
+        const pageData = this.data.slice(startIndex, endIndex);
+        
+        if (pageData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="100" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No data available</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        pageData.forEach((item, index) => {
+            const globalIndex = startIndex + index;
+            this.renderRowCallback(item, globalIndex, tbody);
+        });
+        
+        // Mettre à jour les contrôles de pagination
+        this.renderControls();
+    }
+    
+    renderControls() {
+        const controlsId = `${this.tableId}-pagination-controls`;
+        let controlsContainer = document.getElementById(controlsId);
+        
+        if (!controlsContainer) {
+            // Créer le conteneur de contrôles
+            const tbody = document.getElementById(this.tableId);
+            if (!tbody) return;
+            
+            const tableWrapper = tbody.closest('.table-wrapper');
+            if (!tableWrapper) return;
+            
+            controlsContainer = document.createElement('div');
+            controlsContainer.id = controlsId;
+            controlsContainer.className = 'pagination-controls';
+            tableWrapper.appendChild(controlsContainer);
+        }
+        
+        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.data.length);
+        
+        controlsContainer.innerHTML = `
+            <div class="pagination-info">
+                Showing ${startItem}-${endItem} of ${this.data.length} items
+            </div>
+            
+            <div class="pagination-buttons">
+                <button class="pagination-btn" onclick="window.paginationManagers['${this.tableId}'].goToPage(1)" ${this.currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" onclick="window.paginationManagers['${this.tableId}'].goToPage(${this.currentPage - 1})" ${this.currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                
+                <div class="pagination-pages">
+                    ${this.generatePageButtons()}
+                </div>
+                
+                <button class="pagination-btn" onclick="window.paginationManagers['${this.tableId}'].goToPage(${this.currentPage + 1})" ${this.currentPage === this.totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn" onclick="window.paginationManagers['${this.tableId}'].goToPage(${this.totalPages})" ${this.currentPage === this.totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+            
+            <div class="pagination-selector">
+                <label>Items per page:</label>
+                <select onchange="window.paginationManagers['${this.tableId}'].changeItemsPerPage(parseInt(this.value))" class="pagination-select">
+                    ${this.itemsPerPageOptions.map(option => 
+                        `<option value="${option}" ${option === this.itemsPerPage ? 'selected' : ''}>${option}</option>`
+                    ).join('')}
+                </select>
+            </div>
+        `;
+    }
+    
+    generatePageButtons() {
+        const pages = [];
+        const maxButtons = 5;
+        
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(this.totalPages, startPage + maxButtons - 1);
+        
+        if (endPage - startPage < maxButtons - 1) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(`
+                <button class="pagination-page-btn ${i === this.currentPage ? 'active' : ''}" 
+                        onclick="window.paginationManagers['${this.tableId}'].goToPage(${i})">
+                    ${i}
+                </button>
+            `);
+        }
+        
+        return pages.join('');
+    }
+}
+
+// Global registry for pagination managers
+window.paginationManagers = {};
+
+// ========================================
 // 📊 ADMIN ANALYTICS PRO CLASS
 // ========================================
 
@@ -834,18 +990,28 @@ class AdminAnalyticsPro {
         console.log(`📄 Displaying top ${topPages.length} pages`);
         
         topPages.forEach((page, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td style="width: 40px; text-align: center;">${index + 1}</td>
-                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${page.path || 'N/A'}
-                </td>
-                <td style="width: 120px; text-align: right; font-weight: 600;">
-                    ${page.requests.toLocaleString()}
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
+        const row = document.createElement('tr');
+        
+        // 🔥 TRANSFORMER "/" EN "Home Page"
+        let pageName = page.path || 'N/A';
+        if (pageName === '/') {
+            pageName = '🏠 Home Page';
+        } else if (pageName.endsWith('.html')) {
+            // Nettoyer les noms de fichiers HTML
+            pageName = pageName.replace('.html', '').replace(/\//g, '');
+        }
+        
+        row.innerHTML = `
+            <td style="width: 40px; text-align: center;">${index + 1}</td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${pageName}
+            </td>
+            <td style="width: 120px; text-align: right; font-weight: 600;">
+                ${page.requests.toLocaleString()}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
         
         console.log('✅ Top Pages table populated');
     }
@@ -1252,19 +1418,28 @@ class AdminAnalyticsPro {
                 }
             });
 
-            // 🔥 CALCULER LES SUBSCRIPTIONS ACTIVES DEPUIS LES USERS (PAS LES PAYMENTS)
+            // 🔥 CALCULER LES SUBSCRIPTIONS ACTIVES DEPUIS LES USERS
+            console.log('📊 Calculating active subscriptions from users...');
+
             this.allUsersData.forEach(user => {
                 const plan = user.plan || 'basic';
-                const status = user.subscriptionStatus || 'inactive';
                 
-                // Compter comme actif si plan payant ET (status actif OU trialing)
-                if ((plan === 'pro' || plan === 'platinum') && 
-                    (status === 'active' || status === 'trialing')) {
+                // Debug : Logger chaque user avec son plan
+                console.log(`   User ${user.email}: plan="${plan}"`);
+                
+                // Compter TOUS les users avec un plan (basic, pro, platinum)
+                // Un user est considéré comme "actif" s'il a un plan assigné
+                if (plan && (plan === 'basic' || plan === 'pro' || plan === 'platinum')) {
                     activeSubscriptions++;
                     const planPrice = planPrices[plan] || 0;
                     mrr += planPrice;
+                    
+                    console.log(`   ✅ Counted as active: ${plan} (MRR contribution: $${planPrice})`);
                 }
             });
+
+            console.log(`📊 Total Active Subscriptions: ${activeSubscriptions}`);
+            console.log(`📊 Total MRR: $${mrr.toFixed(2)}`);
             
             const arr = mrr * 12;
             
@@ -2362,15 +2537,13 @@ class AdminAnalyticsPro {
 
     async loadUsersManagementTable() {
         try {
-            console.log('📋 Loading users management table...');
+            console.log('📋 Loading users management table with pagination...');
             
             const tbody = document.getElementById('users-management-body');
             if (!tbody) {
                 console.warn('⚠ Users management table not found');
                 return;
             }
-            
-            tbody.innerHTML = '';
             
             // Trier par date d'inscription (plus récent en premier)
             const sortedUsers = this.allUsersDetailedData
@@ -2385,7 +2558,8 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            sortedUsers.forEach((user, index) => {
+            // 🆕 CRÉER LE PAGINATION MANAGER
+            const renderUserRow = (user, index, tbody) => {
                 const row = document.createElement('tr');
                 
                 // Appliquer un style si l'utilisateur est banni
@@ -2414,10 +2588,10 @@ class AdminAnalyticsPro {
                 const actionButton = user.isBanned
                     ? `<button class="btn-action btn-unban" onclick="adminAnalytics.unbanUser('${user.id}')">
                         <i class="fas fa-unlock"></i> Unban
-                       </button>`
+                    </button>`
                     : `<button class="btn-action btn-ban" onclick="adminAnalytics.banUser('${user.id}')">
                         <i class="fas fa-ban"></i> Ban
-                       </button>`;
+                    </button>`;
                 
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -2443,12 +2617,27 @@ class AdminAnalyticsPro {
                 `;
                 
                 tbody.appendChild(row);
-            });
+            };
+            
+            // Créer ou mettre à jour le pagination manager
+            if (!window.paginationManagers['users-management-body']) {
+                window.paginationManagers['users-management-body'] = new PaginationManager(
+                    'users-management-body',
+                    sortedUsers,
+                    renderUserRow,
+                    [10, 25, 50, 100]
+                );
+            } else {
+                window.paginationManagers['users-management-body'].updateData(sortedUsers);
+            }
+            
+            // Rendre la première page
+            window.paginationManagers['users-management-body'].render();
             
             // Mettre à jour les statistiques
             this.updateUsersManagementStats();
             
-            console.log(`✅ Users management table loaded (${sortedUsers.length} users)`);
+            console.log(`✅ Users management table loaded with pagination (${sortedUsers.length} users)`);
             
         } catch (error) {
             console.error('❌ Error loading users management table:', error);
@@ -2811,14 +3000,18 @@ class AdminAnalyticsPro {
     }
 
     displayPotentialCustomers() {
+        console.log('📊 Displaying potential customers with pagination...');
+        
         const tbody = document.getElementById('potential-customers-body');
         if (!tbody) return;
         
-        tbody.innerHTML = '';
+        if (this.potentialCustomers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No potential customers detected</td></tr>';
+            return;
+        }
         
-        const topLeads = this.potentialCustomers.slice(0, 50);
-        
-        topLeads.forEach((lead, index) => {
+        // 🆕 CRÉER LE PAGINATION MANAGER
+        const renderLeadRow = (lead, index, tbody) => {
             const row = document.createElement('tr');
             
             const lastVisit = lead.lastVisit ? lead.lastVisit.toLocaleDateString('en-US') : 'N/A';
@@ -2840,11 +3033,24 @@ class AdminAnalyticsPro {
             `;
             
             tbody.appendChild(row);
-        });
+        };
         
-        if (topLeads.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No potential customers detected</td></tr>';
+        // Créer ou mettre à jour le pagination manager
+        if (!window.paginationManagers['potential-customers-body']) {
+            window.paginationManagers['potential-customers-body'] = new PaginationManager(
+                'potential-customers-body',
+                this.potentialCustomers,
+                renderLeadRow,
+                [10, 25, 50, 100]
+            );
+        } else {
+            window.paginationManagers['potential-customers-body'].updateData(this.potentialCustomers);
         }
+        
+        // Rendre la première page
+        window.paginationManagers['potential-customers-body'].render();
+        
+        console.log(`✅ Potential customers displayed with pagination (${this.potentialCustomers.length} leads)`);
     }
 
     // 🆕 CRÉER LES GRAPHIQUES LEADS
