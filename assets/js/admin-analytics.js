@@ -262,6 +262,7 @@ class AdminAnalyticsPro {
             const displays = document.querySelectorAll('[data-admin-email]');
             displays.forEach(el => el.textContent = user.email);
             
+            // 🆕 AFFICHER LE DASHBOARD AVANT DE CHARGER
             document.getElementById('loading-screen')?.style.setProperty('display', 'none');
             document.getElementById('admin-dashboard')?.style.setProperty('display', 'block');
             
@@ -271,15 +272,21 @@ class AdminAnalyticsPro {
             // 🆕 Afficher les stats de cache
             this.displayCacheStats();
             
-            await this.loadAllData();
-            this.initEventListeners();
+            // 🆕 INITIALISER LES SECTIONS AVANT LE CHARGEMENT
             this.initSectionTabs();
             
-            // 🆕 Afficher le menu principal par défaut
+            // 🆕 AFFICHER LA SECTION DASHBOARD PAR DÉFAUT
             this.showSection('dashboard');
             
-            // 🔥 AUTO-REFRESH DÉSACTIVÉ (économie d'appels)
-            // setInterval(() => this.checkAlerts(), 5 * 60 * 1000);
+            // 🔥 CHARGER TOUTES LES DONNÉES
+            console.log('📊 Starting data loading...');
+            await this.loadAllData();
+            console.log('✅ Data loading complete');
+            
+            // 🆕 AFFICHER EXPLICITEMENT LES TABLEAUX/GRAPHIQUES
+            await this.refreshAllDisplays();
+            
+            this.initEventListeners();
             
             console.log('✅ Admin Analytics PRO fully initialized');
         });
@@ -432,7 +439,6 @@ class AdminAnalyticsPro {
         console.log(`✅ Section tabs initialized (${tabButtons.length} tabs)`);
     }
 
-    // 🆕 AFFICHER UNE SECTION SPÉCIFIQUE
     showSection(sectionName) {
         console.log(`🔄 Switching to section: ${sectionName}`);
         
@@ -448,88 +454,174 @@ class AdminAnalyticsPro {
         });
         
         // Show target section, hide others
+        let sectionFound = false;
         document.querySelectorAll('.analytics-section, .tab-section, [data-section-content]').forEach(section => {
             const sectionId = section.id || section.dataset.sectionContent;
             
             if (sectionId === sectionName || section.id === `${sectionName}-section`) {
                 section.classList.add('active');
                 section.style.display = 'block';
+                sectionFound = true;
+                console.log(`✅ Section "${sectionName}" displayed`);
             } else {
                 section.classList.remove('active');
                 section.style.display = 'none';
             }
         });
         
+        // 🆕 VÉRIFIER SI LA SECTION EXISTE
+        if (!sectionFound) {
+            console.warn(`⚠ Section "${sectionName}" NOT FOUND in DOM`);
+        }
+        
         // 🆕 Charger les données spécifiques si nécessaire
         if (sectionName === 'users-management') {
+            console.log('📋 Loading users management data...');
             this.loadUsersManagementTable();
         }
     }
 
     async loadAllData() {
-        console.log('📊 Loading ALL analytics data (complete history)...');
+        console.log('📊 ========================================');
+        console.log('📊 LOADING ALL ANALYTICS DATA');
+        console.log('📊 ========================================');
         
         const startTime = Date.now();
         
         try {
+            // SECTION 1: THIRD-PARTY ANALYTICS
+            console.log('💳 Loading Stripe & Cloudflare...');
             await Promise.all([
-                // ========================================
-                // SECTION 1: THIRD-PARTY ANALYTICS (avec cache)
-                // ========================================
                 this.loadStripeMetrics(),
                 this.loadCloudflareAnalytics(),
                 this.loadCloudflareGeo(),
                 this.loadCloudflareDevices(),
                 this.loadCloudflarePages(),
-                this.loadCloudflareVisitors(),
-                
-                // ========================================
-                // SECTION 2: INTERNAL ANALYTICS (Firebase)
-                // ========================================
+                this.loadCloudflareVisitors()
+            ]);
+            console.log('✅ Third-party analytics loaded');
+            
+            // SECTION 2: FIREBASE INTERNAL ANALYTICS
+            console.log('🔥 Loading Firebase data...');
+            await Promise.all([
                 this.loadUsersStats(),
                 this.loadVisitsStats(),
                 this.loadRevenueStats(),
-                this.loadEngagementStats(),
+                this.loadEngagementStats()
+            ]);
+            console.log('✅ Firebase core stats loaded');
+            
+            console.log(`📊 Total users loaded: ${this.allUsersData.length}`);
+            console.log(`📊 Total visits loaded: ${this.allVisitsData.length}`);
+            console.log(`📊 Total payments loaded: ${this.allPaymentsData.length}`);
+            console.log(`📊 Total activities loaded: ${this.allActivityData.length}`);
+            
+            // SECTION 3: ADVANCED ANALYTICS
+            console.log('📈 Loading advanced analytics...');
+            await Promise.all([
                 this.loadSessionAnalytics(),
                 this.loadBounceRateAnalytics(),
                 this.loadConversionPaths(),
-                this.loadHeatmapData(),
-                
-                // Charts
+                this.loadHeatmapData()
+            ]);
+            console.log('✅ Advanced analytics loaded');
+            
+            // SECTION 4: CHARTS
+            console.log('📊 Loading charts...');
+            await Promise.all([
                 this.loadRegistrationsChart(),
                 this.loadPlansChart(),
                 this.loadVisitsChart(),
                 this.loadRevenueChart(),
                 this.loadChurnChart(),
-                this.loadCohortChart(),
-                
-                // Tables
+                this.loadCohortChart()
+            ]);
+            console.log('✅ Charts loaded');
+            
+            // SECTION 5: TABLES
+            console.log('📋 Loading tables...');
+            await Promise.all([
                 this.loadRecentUsers(),
                 this.loadRecentActivity(),
                 this.loadTopUsers(),
-                this.loadUserSimulations(),
-                
-                // Advanced
+                this.loadUserSimulations()
+            ]);
+            console.log('✅ Tables loaded');
+            
+            // SECTION 6: ADVANCED FEATURES
+            console.log('🤖 Loading advanced features...');
+            await Promise.all([
                 this.loadConversionFunnel(),
                 this.loadLTVAnalysis(),
-                this.loadMLPredictions(),
-                
-                // Non-customers
-                this.loadNonCustomerVisitors(),
-                this.loadPotentialCustomers(),
-                
-                // 🆕 Tableau utilisateurs détaillé
-                this.loadUsersDetailedData()
+                this.loadMLPredictions()
             ]);
+            console.log('✅ Advanced features loaded');
+            
+            // SECTION 7: NON-CUSTOMERS
+            console.log('👥 Loading non-customer data...');
+            await this.loadNonCustomerVisitors();
+            await this.loadPotentialCustomers();
+            console.log('✅ Non-customer data loaded');
+            
+            // SECTION 8: DETAILED USERS
+            console.log('📋 Loading detailed users data...');
+            await this.loadUsersDetailedData();
+            console.log('✅ Detailed users data loaded');
             
             const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`✅ All data loaded successfully in ${loadTime}s`);
-            
-            // Note: checkAlerts() retiré de l'auto-refresh mais peut être appelé manuellement
+            console.log('========================================');
+            console.log(`✅ ALL DATA LOADED in ${loadTime}s`);
+            console.log('========================================');
             
         } catch (error) {
-            console.error('❌ Error loading data:', error);
+            console.error('❌ ========================================');
+            console.error('❌ ERROR LOADING DATA:');
+            console.error('❌ ========================================');
+            console.error(error);
             alert('⚠ Error loading analytics data. Check console for details.');
+        }
+    }
+
+    // 🆕 FONCTION POUR RAFRAÎCHIR TOUS LES AFFICHAGES
+    async refreshAllDisplays() {
+        console.log('🔄 Refreshing all displays...');
+        
+        try {
+            // Rafraîchir les stats affichées
+            this.displayCacheStats();
+            
+            // Rafraîchir les tableaux
+            await this.loadRecentUsers();
+            await this.loadRecentActivity();
+            await this.loadTopUsers();
+            
+            // Rafraîchir les graphiques
+            await this.loadRegistrationsChart();
+            await this.loadPlansChart();
+            await this.loadVisitsChart();
+            await this.loadRevenueChart();
+            await this.loadChurnChart();
+            await this.loadCohortChart();
+            
+            // Rafraîchir les analyses avancées
+            await this.loadConversionFunnel();
+            await this.loadLTVAnalysis();
+            await this.loadMLPredictions();
+            
+            // 🆕 FORCER L'AFFICHAGE DES VISITEURS NON-CLIENTS
+            this.displayNonCustomerVisitors();
+            this.displayPotentialCustomers();
+            
+            // 🆕 FORCER L'AFFICHAGE DES CHEMINS DE CONVERSION
+            this.displayConversionPaths(this.conversionPaths.slice(0, 10));
+            
+            // 🆕 AFFICHER LE TABLEAU UTILISATEURS DÉTAILLÉ
+            await this.loadUsersManagementTable();
+            
+            console.log('✅ All displays refreshed successfully');
+            
+        } catch (error) {
+            console.error('❌ Error refreshing displays:', error);
         }
     }
 
@@ -2937,6 +3029,55 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Admin Analytics instance created and attached to window.adminAnalytics');
 });
+
+// 🔍 DIAGNOSTIC TOOL - À SUPPRIMER APRÈS LE DEBUG
+function diagnoseData() {
+    console.log('🔍 ========================================');
+    console.log('🔍 DATA DIAGNOSTIC');
+    console.log('🔍 ========================================');
+    
+    const analytics = window.adminAnalytics;
+    
+    if (!analytics) {
+        console.error('❌ Admin Analytics NOT INITIALIZED');
+        return;
+    }
+    
+    console.log('✅ Admin Analytics instance found');
+    console.log(`📊 Users loaded: ${analytics.allUsersData.length}`);
+    console.log(`📊 Users detailed: ${analytics.allUsersDetailedData.length}`);
+    console.log(`📊 Visits: ${analytics.allVisitsData.length}`);
+    console.log(`📊 Payments: ${analytics.allPaymentsData.length}`);
+    console.log(`📊 Activities: ${analytics.allActivityData.length}`);
+    console.log(`📊 Sessions: ${analytics.sessionData.length}`);
+    console.log(`📊 Non-customers: ${analytics.nonCustomerVisitors.length}`);
+    console.log(`📊 Potential customers: ${analytics.potentialCustomers.length}`);
+    console.log(`📊 Stripe data:`, analytics.stripeData ? '✅ Loaded' : '❌ NULL');
+    console.log(`📊 Cloudflare data:`, analytics.cloudflareData ? '✅ Loaded' : '❌ NULL');
+    
+    // Vérifier les éléments DOM
+    console.log('🔍 Checking DOM elements...');
+    const elementsToCheck = [
+        'total-users',
+        'recent-users-body',
+        'users-management-body',
+        'registrations-chart',
+        'plans-chart'
+    ];
+    
+    elementsToCheck.forEach(id => {
+        const el = document.getElementById(id);
+        console.log(`   ${id}: ${el ? '✅ Found' : '❌ NOT FOUND'}`);
+    });
+    
+    console.log('🔍 ========================================');
+}
+
+// Appeler le diagnostic après 5 secondes
+setTimeout(() => {
+    console.log('⏰ Running automatic diagnostic...');
+    diagnoseData();
+}, 5000);
 
 // Global function for export (called from HTML buttons)
 function exportAnalyticsData(type) {
