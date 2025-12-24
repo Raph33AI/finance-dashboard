@@ -416,10 +416,10 @@ class CommunityHub {
             const avatar = user.photoURL || 
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=667eea&color=fff&size=64`;
             
-            // ✅ AJOUT : Lien vers le profil utilisateur
+            // ✅ CORRECTION : Redirection vers la page PUBLIQUE du profil
             return `
                 <div class="leaderboard-item" 
-                    onclick="window.location.href='user-profile.html?uid=${user.uid}'" 
+                    onclick="window.location.href='public-profile.html?uid=${user.uid}'" 
                     style="cursor: pointer; transition: all 0.3s ease;">
                     <div class="leaderboard-rank ${rankClass}">${index + 1}</div>
                     <img 
