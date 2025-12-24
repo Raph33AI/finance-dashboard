@@ -1053,8 +1053,8 @@
                 </div>
 
                 <!-- ========================================
-                     SECTION: INTERNAL ANALYTICS
-                     ======================================== -->
+                    SECTION: INTERNAL ANALYTICS
+                    ======================================== -->
                 <div id="internal-analytics" class="tab-section" data-section-content="internal-analytics">
                     <div class="section">
                         <h2 class='section-title'>
@@ -1128,22 +1128,25 @@
                                         <i class="fas fa-route"></i>
                                         Top Conversion Paths
                                     </h4>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Path</th>
-                                                <th>Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="conversion-paths-body">
-                                            <tr>
-                                                <td colspan="3" style="text-align: center; padding: 20px;">
-                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <!-- ✅ AJOUT DE .table-responsive -->
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Path</th>
+                                                    <th>Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="conversion-paths-body">
+                                                <tr>
+                                                    <td colspan="3" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 
                                 <button class='dashboard-btn' id='exportSessionsBtn' style="margin-top: 16px;">
@@ -1169,23 +1172,26 @@
                                         <i class="fas fa-stream"></i>
                                         Latest 20 Activities
                                     </h4>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>User</th>
-                                                <th>Action</th>
-                                                <th>Page</th>
-                                                <th>Timestamp</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="recent-activity-body">
-                                            <tr>
-                                                <td colspan="4" style="text-align: center; padding: 20px;">
-                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <!-- ✅ AJOUT DE .table-responsive -->
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>User</th>
+                                                    <th>Action</th>
+                                                    <th>Page</th>
+                                                    <th>Timestamp</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="recent-activity-body">
+                                                <tr>
+                                                    <td colspan="4" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 
                                 <button class='dashboard-btn' id='exportActivityBtn' style="margin-top: 16px;">
@@ -1211,22 +1217,25 @@
                                         <i class="fas fa-funnel-dollar"></i>
                                         User Journey Funnel
                                     </h4>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Stage</th>
-                                                <th>Count</th>
-                                                <th>Conversion Rate</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="funnel-body">
-                                            <tr>
-                                                <td colspan="3" style="text-align: center; padding: 20px;">
-                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <!-- ✅ AJOUT DE .table-responsive -->
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Stage</th>
+                                                    <th>Count</th>
+                                                    <th>Conversion Rate</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="funnel-body">
+                                                <tr>
+                                                    <td colspan="3" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1263,8 +1272,8 @@
                 </div>
 
                 <!-- ========================================
-                     SECTION: POTENTIAL CUSTOMERS & LEADS
-                     ======================================== -->
+                    SECTION: POTENTIAL CUSTOMERS & LEADS
+                    ======================================== -->
                 <div id="potential-customers" class="tab-section" data-section-content="potential-customers">
                     <div class="section">
                         <h2 class='section-title'>
@@ -1358,28 +1367,31 @@
                                 <i class="fas fa-trophy"></i>
                                 Top 50 Potential Customers
                             </h4>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>IP</th>
-                                        <th>Country</th>
-                                        <th>Visits</th>
-                                        <th>Pages</th>
-                                        <th>Strategic</th>
-                                        <th>Score</th>
-                                        <th>Category</th>
-                                        <th>Last Visit</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="potential-customers-body">
-                                    <tr>
-                                        <td colspan="9" style="text-align: center; padding: 20px;">
-                                            <i class="fas fa-spinner fa-spin"></i> Loading...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <!-- ✅ AJOUT DE .table-responsive -->
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>IP</th>
+                                            <th>Country</th>
+                                            <th>Visits</th>
+                                            <th>Pages</th>
+                                            <th>Strategic</th>
+                                            <th>Score</th>
+                                            <th>Category</th>
+                                            <th>Last Visit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="potential-customers-body">
+                                        <tr>
+                                            <td colspan="9" style="text-align: center; padding: 20px;">
+                                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         
                         <button class='dashboard-btn' id='exportPotentialBtn' style="margin-top: 16px;">
