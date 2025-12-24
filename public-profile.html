@@ -235,7 +235,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -254,7 +253,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
@@ -386,20 +384,20 @@
                     console.log('👤 Initializing Public Profile...');
                     
                     const urlParams = new URLSearchParams(window.location.search);
-                    this.userId = urlParams.get('uid');  // ✅ CORRECT
+                    this.userId = urlParams.get('uid');
 
                     if (!this.userId) {
                         this.showError('User not found');
                         return;
                     }
 
-                    // ✅ Vérifier si c'est son propre profil
+                    // Vérifier si c'est son propre profil
                     const currentUser = firebase.auth().currentUser;
                     this.isOwnProfile = currentUser && currentUser.uid === this.userId;
 
                     await this.loadUserData();
                     
-                    // ✅ Vérifier le statut de suivi (sauf si c'est son propre profil)
+                    // Vérifier le statut de suivi (sauf si c'est son propre profil)
                     if (!this.isOwnProfile && currentUser) {
                         this.isFollowing = await window.followSystem.isFollowing(this.userId);
                     }
@@ -450,10 +448,27 @@
                 const reputation = this.userData.reputation || 0;
                 const postCount = this.userData.postCount || 0;
                 const badges = this.userData.badges || [];
-                
-                // ✅ Récupérer les compteurs followers/following
                 const followersCount = this.userData.followersCount || 0;
                 const followingCount = this.userData.followingCount || 0;
+
+                // ✅ Photo de profil avec fallback
+                const photoURL = this.userData.photoURL;
+                const avatarHTML = photoURL ? `
+                    <img 
+                        src="${photoURL}" 
+                        alt="${this.escapeHtml(displayName)}" 
+                        class="profile-avatar-large"
+                        style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+                    <div class="profile-avatar-large-fallback" style="display: none; width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: none; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
+                        ${displayName.charAt(0).toUpperCase()}
+                    </div>
+                ` : `
+                    <div class="profile-avatar-large" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
+                        ${displayName.charAt(0).toUpperCase()}
+                    </div>
+                `;
 
                 const badgesHTML = badges.map(badge => {
                     const badgeInfo = this.getBadgeInfo(badge);
@@ -465,7 +480,7 @@
                     `;
                 }).join('');
 
-                // ✅ Bouton Follow/Unfollow (uniquement si ce n'est pas son propre profil)
+                // Bouton Follow/Unfollow
                 const followButtonHTML = !this.isOwnProfile ? `
                     <button 
                         id="followBtn" 
@@ -480,9 +495,7 @@
 
                 const profileHTML = `
                     <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
-                        <div class="profile-avatar-large" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
-                            ${displayName.charAt(0).toUpperCase()}
-                        </div>
+                        ${avatarHTML}
                         <div style="flex: 1; min-width: 300px;">
                             <h1 class="profile-name" style="font-size: 2.5rem; font-weight: 900; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
                                 <span class="gradient-title">${this.escapeHtml(displayName)}</span>
@@ -499,12 +512,10 @@
                                     <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${postCount}</div>
                                     <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Posts</div>
                                 </div>
-                                <!-- ✅ NOUVEAU : Compteur Followers -->
                                 <div class="profile-stat-item">
                                     <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;" id="followersCount">${followersCount}</div>
                                     <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Followers</div>
                                 </div>
-                                <!-- ✅ NOUVEAU : Compteur Following -->
                                 <div class="profile-stat-item">
                                     <div class="profile-stat-value gradient-title" style="font-size: 1.75rem; font-weight: 900;">${followingCount}</div>
                                     <div class="profile-stat-label" style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Following</div>
@@ -517,7 +528,6 @@
 
                             ${badges.length > 0 ? `<div class="profile-badges">${badgesHTML}</div>` : ''}
                             
-                            <!-- ✅ NOUVEAU : Bouton Follow/Unfollow -->
                             ${followButtonHTML}
                         </div>
                     </div>
@@ -527,7 +537,6 @@
                 document.title = `${displayName} - AlphaVault AI`;
             }
 
-            // ✅ NOUVELLE MÉTHODE : Toggle Follow
             async toggleFollow() {
                 try {
                     const followBtn = document.getElementById('followBtn');
@@ -535,18 +544,15 @@
                     
                     if (!followBtn) return;
                     
-                    // Désactiver le bouton temporairement
                     followBtn.disabled = true;
                     followBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
                     if (this.isFollowing) {
-                        // Unfollow
                         await window.followSystem.unfollowUser(this.userId);
                         this.isFollowing = false;
                         followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
                         followBtn.style.background = '';
                         
-                        // Décrémenter le compteur
                         if (followersCountEl) {
                             const currentCount = parseInt(followersCountEl.textContent) || 0;
                             followersCountEl.textContent = Math.max(0, currentCount - 1);
@@ -554,13 +560,11 @@
                         
                         console.log('✅ User unfollowed');
                     } else {
-                        // Follow
                         await window.followSystem.followUser(this.userId);
                         this.isFollowing = true;
                         followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
                         followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
                         
-                        // Incrémenter le compteur
                         if (followersCountEl) {
                             const currentCount = parseInt(followersCountEl.textContent) || 0;
                             followersCountEl.textContent = currentCount + 1;
@@ -575,7 +579,6 @@
                     console.error('❌ Error toggling follow:', error);
                     alert('Failed to update follow status. Please try again.');
                     
-                    // Réactiver le bouton
                     const followBtn = document.getElementById('followBtn');
                     if (followBtn) {
                         followBtn.disabled = false;
@@ -638,6 +641,7 @@
             }
 
             escapeHtml(text) {
+                if (!text) return '';
                 const div = document.createElement('div');
                 div.textContent = text;
                 return div.innerHTML;
