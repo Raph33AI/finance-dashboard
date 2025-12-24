@@ -532,7 +532,7 @@ body.dark-mode {
 
 .charts-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
     margin-bottom: 32px;
 }
@@ -869,20 +869,26 @@ body.dark-mode #particles-canvas {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE - VERSION AMÉLIORÉE
    ════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
     .charts-row {
         grid-template-columns: 1fr;
     }
+    
+    .chart-wrapper {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
+    /* ========== SECTIONS ========== */
     .section {
         padding: 20px;
     }
 
+    /* ========== TABS ========== */
     .main-tabs {
         padding: 8px;
         gap: 6px;
@@ -893,6 +899,7 @@ body.dark-mode #particles-canvas {
         font-size: 0.85rem;
     }
 
+    /* ========== KPI CARDS ========== */
     .kpis-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 16px;
@@ -915,31 +922,59 @@ body.dark-mode #particles-canvas {
         font-size: 1.6rem;
     }
 
+    /* ========== CHARTS - FIX DÉBORDEMENT ========== */
     .charts-row {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .chart-wrapper {
         padding: 16px;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    canvas {
+        max-width: 100%;
+        max-height: 300px;
+        width: 100% !important;
+        height: auto !important;
     }
 
+    /* ========== TABLES - FIX SCROLL ========== */
     .table-wrapper {
         padding: 16px;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
     }
 
     .data-table {
         font-size: 0.8rem;
+        min-width: 600px;
     }
 
     .data-table thead th,
     .data-table tbody td {
         padding: 10px 12px;
+        white-space: nowrap;
+    }
+    
+    .users-management-table {
+        min-width: 1000px;
     }
 
+    /* ========== GEO MAP ========== */
     .geo-map {
         height: 350px;
     }
 
+    /* ========== ML PREDICTIONS ========== */
     .ml-predictions-grid {
         grid-template-columns: 1fr;
     }
@@ -951,14 +986,55 @@ body.dark-mode #particles-canvas {
     .prediction-icon {
         font-size: 2.5rem;
     }
+    
+    /* ========== SUBSECTIONS ========== */
+    .subsection-header {
+        padding: 12px 16px;
+    }
+    
+    .subsection-title {
+        font-size: 1rem;
+    }
+    
+    /* ========== FIX SPÉCIFIQUE INTERNAL ANALYTICS & LEADS ========== */
+    #internal-analytics .chart-wrapper,
+    #internal-analytics .table-wrapper {
+        max-width: calc(100vw - 40px);
+        overflow: hidden;
+    }
+    
+    #internal-analytics .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    #potential-customers .chart-wrapper,
+    #potential-customers .table-wrapper {
+        max-width: calc(100vw - 40px);
+        overflow: hidden;
+    }
+    
+    #potential-customers .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    #internal-analytics canvas,
+    #potential-customers canvas {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+    }
 }
 
 @media (max-width: 480px) {
+    /* ========== KPI CARDS - 1 COLONNE ========== */
     .kpis-grid,
     .dashboard-stats-grid {
         grid-template-columns: 1fr;
     }
 
+    /* ========== TABS - ICÔNES SEULEMENT ========== */
     .main-tab span {
         display: none;
     }
@@ -967,18 +1043,31 @@ body.dark-mode #particles-canvas {
         padding: 10px;
     }
 
+    /* ========== SECTIONS ========== */
     .section {
         padding: 16px;
     }
 
+    /* ========== CHARTS ========== */
     .chart-wrapper {
         padding: 12px;
     }
+    
+    canvas {
+        max-height: 250px;
+    }
 
+    /* ========== TABLES ========== */
     .data-table {
         font-size: 0.75rem;
     }
+    
+    .data-table thead th,
+    .data-table tbody td {
+        padding: 8px 10px;
+    }
 
+    /* ========== USERS TABLE ========== */
     .user-avatar-small {
         width: 28px;
         height: 28px;
@@ -987,6 +1076,22 @@ body.dark-mode #particles-canvas {
     .btn-action {
         padding: 4px 10px;
         font-size: 0.75rem;
+    }
+    
+    /* ========== GEO MAP ========== */
+    .geo-map {
+        height: 300px;
+    }
+    
+    /* ========== HEADER ========== */
+    .section-header-with-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .section-header-with-actions .dashboard-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -1109,11 +1214,6 @@ footer i {
 
 .stat-value.success {
     color: #d1fae5;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
 }
 
 /* Activity Action Badge */
@@ -1275,7 +1375,7 @@ body.dark-mode .pagination-select {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Responsive */
+/* Responsive Pagination */
 @media (max-width: 768px) {
     .pagination-controls {
         flex-direction: column;
@@ -1292,5 +1392,75 @@ body.dark-mode .pagination-select {
     
     .pagination-buttons {
         order: 3;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🆕 CHART.JS RESPONSIVE FIX
+   ════════════════════════════════════════════════════════════════ */
+
+.chart-wrapper > div {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.chart-wrapper canvas {
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .chart-wrapper canvas {
+        max-height: 300px !important;
+        height: auto !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-wrapper canvas {
+        max-height: 250px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🆕 TABLE SCROLL INDICATOR (MOBILE)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .table-wrapper {
+        position: relative;
+    }
+    
+    .table-responsive::after {
+        content: '→ Scroll';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        pointer-events: none;
+        opacity: 0.8;
+        animation: scrollPulse 2s infinite;
+    }
+    
+    .table-responsive.scrolled::after {
+        display: none;
+    }
+}
+
+@keyframes scrollPulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.4;
     }
 }
