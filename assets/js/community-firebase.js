@@ -241,8 +241,12 @@ class CommunityFirebaseService {
 
             let query = this.postsCollection;
 
+            // ✅ DEBUG : Vérifier le channelId
+            console.log('🔍 Filtering posts by channelId:', channelId);
+
             if (channelId && channelId !== 'all') {
                 query = query.where('channelId', '==', channelId);
+                console.log('✅ Filter applied for channel:', channelId);
             }
 
             query = query.orderBy(orderBy, orderDirection);
@@ -575,15 +579,20 @@ class CommunityFirebaseService {
 
     async getTopContributors(limit = 5) {
         try {
-            const snapshot = await this.usersCollection
-                .orderBy('reputation', 'desc')
-                .limit(limit)
-                .get();
-
-            return snapshot.docs.map(doc => ({
-                uid: doc.id,
-                ...doc.data()
-            }));
+            // Récupérer TOUS les utilisateurs (sans orderBy pour éviter l'index)
+            const snapshot = await this.usersCollection.get();
+            
+            // Trier côté client
+            const users = snapshot.docs
+                .map(doc => ({
+                    uid: doc.id,
+                    ...doc.data(),
+                    reputation: doc.data().reputation || 0
+                }))
+                .sort((a, b) => b.reputation - a.reputation)  // Tri descendant
+                .slice(0, limit);  // Limiter aux N premiers
+            
+            return users;
         } catch (error) {
             console.error('❌ Error fetching top contributors:', error);
             return [];

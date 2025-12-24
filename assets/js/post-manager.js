@@ -98,7 +98,7 @@ class PostManager {
         ` : '';
 
         // Author avatar (utilise la photo ou un avatar généré)
-        const authorAvatar = this.post.authorPhoto || 
+        const authorAvatar = this.post.authorAvatar ||  // ✅ CORRECT
             `https://ui-avatars.com/api/?name=${encodeURIComponent(this.post.authorName)}&background=667eea&color=fff&size=128`;
 
         // Verified badge
@@ -135,11 +135,13 @@ class PostManager {
                 <img 
                     src="${authorAvatar}" 
                     alt="${this.escapeHtml(this.post.authorName)}" 
-                    class="post-detail-author-avatar"
+                    class="post-detail-author-avatar clickable-author"
+                    data-author-id="${this.post.authorId}"
                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(this.post.authorName)}&background=667eea&color=fff&size=128'"
+                    style="cursor: pointer;"
                 >
                 <div class="post-detail-author-info">
-                    <div class="post-detail-author-name">
+                    <div class="post-detail-author-name clickable-author" data-author-id="${this.post.authorId}" style="cursor: pointer;">
                         ${this.escapeHtml(this.post.authorName)}
                         ${verifiedBadge}
                     </div>
@@ -182,6 +184,16 @@ class PostManager {
         `;
 
         this.postDetailCard.innerHTML = postHTML;
+
+        // Add click handlers for author profile
+        document.querySelectorAll('.clickable-author').forEach(el => {
+            el.addEventListener('click', () => {
+                const authorId = el.dataset.authorId;
+                if (authorId) {
+                    window.location.href = `public-profile.html?uid=${authorId}`;
+                }
+            });
+        });
 
         // Update page title
         document.title = `${this.post.title} - AlphaVault AI Community`;
@@ -241,7 +253,7 @@ class PostManager {
         try {
             // Increment view count
             await firebase.firestore()
-                .collection('posts')
+                .collection('community_posts')  // ✅ CORRECT
                 .doc(this.postId)
                 .update({
                     viewCount: firebase.firestore.FieldValue.increment(1)
@@ -404,7 +416,7 @@ class PostManager {
         
         try {
             await firebase.firestore()
-                .collection('posts')
+                .collection('community_posts')  // ✅ CORRECT
                 .doc(this.postId)
                 .delete();
             

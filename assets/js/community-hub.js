@@ -196,7 +196,7 @@ class CommunityHub {
         const hasUpvoted = currentUser && post.upvotedBy?.includes(currentUser.uid);
 
         // Author avatar
-        const authorAvatar = post.authorPhoto || 
+        const authorAvatar = post.authorAvatar ||  // ✅ Déjà correct dans votre code
             `https://ui-avatars.com/api/?name=${encodeURIComponent(post.authorName)}&background=667eea&color=fff&size=64`;
 
         return `
