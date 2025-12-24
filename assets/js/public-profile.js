@@ -286,6 +286,7 @@
 /* ============================================
    PUBLIC-PROFILE.JS - Profil Public v3.0
    ✅ Avec Bio + Activity Tabs (Posts/Liked/Commented)
+   ✅ CORRECTION : Photo de profil avec multiples fallbacks
    ============================================ */
 
 class PublicProfile {
@@ -446,7 +447,7 @@ class PublicProfile {
         try {
             // Récupérer tous les commentaires de l'utilisateur
             const commentsSnapshot = await firebase.firestore()
-                .collectionGroup('comments')
+                .collection('comments')  // ✅ CORRECTION : collection au lieu de collectionGroup
                 .where('authorId', '==', this.userId)
                 .orderBy('createdAt', 'desc')
                 .limit(100)
@@ -458,15 +459,22 @@ class PublicProfile {
                 return;
             }
 
-            // Extraire les IDs de posts uniques
+            // Extraire les IDs de posts uniques depuis le champ 'postId'
             const postIdsSet = new Set();
             commentsSnapshot.docs.forEach(doc => {
-                const commentRef = doc.ref;
-                const postId = commentRef.parent.parent.id;
-                postIdsSet.add(postId);
+                const comment = doc.data();
+                if (comment.postId) {
+                    postIdsSet.add(comment.postId);
+                }
             });
 
             const postIds = Array.from(postIdsSet);
+
+            if (postIds.length === 0) {
+                this.commentedPosts = [];
+                document.getElementById('commentedTabCount').textContent = '0';
+                return;
+            }
 
             // Charger les posts par lots de 10
             const batchSize = 10;
@@ -602,23 +610,20 @@ class PublicProfile {
         const followersCount = this.userData.followersCount || 0;
         const followingCount = this.userData.followingCount || 0;
 
-        // ✅ Photo de profil avec fallback
-        const photoURL = this.userData.photoURL;
-        const avatarHTML = photoURL ? `
+        // ✅ CORRECTION : Photo de profil avec multiples fallbacks (comme post-manager.js)
+        const userAvatar = this.userData.photoURL || 
+                          this.userData.authorPhoto || 
+                          this.userData.avatar || 
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=256`;
+
+        const avatarHTML = `
             <img 
-                src="${photoURL}" 
+                src="${userAvatar}" 
                 alt="${this.escapeHtml(displayName)}" 
                 class="profile-avatar-large"
                 style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); border: 5px solid rgba(255, 255, 255, 0.2);"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=256'"
             >
-            <div class="profile-avatar-large-fallback" style="display: none; width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3.5rem; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); border: 5px solid rgba(255, 255, 255, 0.2);">
-                ${displayName.charAt(0).toUpperCase()}
-            </div>
-        ` : `
-            <div class="profile-avatar-large" style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 3.5rem; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); border: 5px solid rgba(255, 255, 255, 0.2);">
-                ${displayName.charAt(0).toUpperCase()}
-            </div>
         `;
 
         const badgesHTML = badges.map(badge => {
@@ -813,4 +818,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.publicProfile.initialize();
 });
 
-console.log('✅ public-profile.js chargé (v3.0 - avec Bio + Activity Tabs)');
+console.log('✅ public-profile.js chargé (v3.1 - Photo + Permissions FIXED)');
