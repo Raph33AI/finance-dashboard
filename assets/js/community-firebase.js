@@ -425,7 +425,8 @@ class CommunityFirebaseService {
                 postId: commentData.postId,
                 authorId: currentUser.uid,
                 authorName: userData.displayName || currentUser.email.split('@')[0],
-                authorAvatar: userData.photoURL || null,
+                authorAvatar: userData.photoURL || null,  // ✅ Ajouter la photo
+                authorPhoto: userData.photoURL || null,   // ✅ Pour compatibilité
                 content: commentData.content,
                 parentCommentId: commentData.parentCommentId || null,
                 upvotes: 0,
@@ -433,7 +434,11 @@ class CommunityFirebaseService {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            console.log('📝 Création du commentaire:', comment);
+
             const docRef = await this.commentsCollection.add(comment);
+
+            console.log('✅ Commentaire créé avec ID:', docRef.id);
 
             // Update post comment count
             await this.postsCollection.doc(commentData.postId).update({
@@ -455,16 +460,25 @@ class CommunityFirebaseService {
 
     async getComments(postId) {
         try {
+            console.log('🔍 Récupération des commentaires pour le post:', postId);
+            
             const snapshot = await this.commentsCollection
                 .where('postId', '==', postId)
                 .orderBy('createdAt', 'asc')
                 .get();
 
-            const comments = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate()
-            }));
+            console.log('📊 Nombre de commentaires trouvés:', snapshot.size);
+            
+            const comments = snapshot.docs.map(doc => {
+                const data = doc.data();
+                console.log('📄 Commentaire:', data);
+                
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate()
+                };
+            });
 
             // Organize comments into threads
             const commentMap = new Map();
@@ -485,6 +499,8 @@ class CommunityFirebaseService {
                     rootComments.push(comment);
                 }
             });
+
+            console.log('✅ Commentaires organisés:', rootComments);
 
             return rootComments;
         } catch (error) {

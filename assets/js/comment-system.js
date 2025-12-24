@@ -51,33 +51,88 @@ class CommentSystem {
 
     async loadComments() {
         try {
+            console.log('💬 Chargement des commentaires pour le post:', this.postId);
+            
             this.comments = await window.communityService.getComments(this.postId);
+            
+            console.log('📊 Commentaires récupérés:', this.comments);
+            console.log('📊 Nombre de commentaires:', this.comments.length);
+            
             this.renderComments();
             this.updateCommentsCount();
         } catch (error) {
             console.error('❌ Error loading comments:', error);
+            
+            // Afficher l'erreur dans l'UI
+            if (this.commentsList) {
+                this.commentsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 16px;"></i>
+                        <p style="font-weight: 700;">Failed to load comments</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">${error.message}</p>
+                    </div>
+                `;
+            }
         }
     }
 
-    renderComments() {
-        if (!this.commentsList) return;
+    renderComment(comment, isReply = false) {
+        const timeAgo = this.formatTimeAgo(comment.createdAt);
+        const currentUser = firebase.auth().currentUser;
+        const hasUpvoted = currentUser && comment.upvotedBy?.includes(currentUser.uid);
 
-        if (this.comments.length === 0) {
-            this.commentsList.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
-                    <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p style="font-size: 1.1rem; font-weight: 700;">No comments yet</p>
-                    <p style="font-size: 0.95rem;">Be the first to share your thoughts!</p>
+        const repliesHTML = comment.replies && comment.replies.length > 0 
+            ? comment.replies.map(reply => this.renderComment(reply, true)).join('')
+            : '';
+
+        // ✅ Gestion de l'avatar avec photo OU initiales
+        const authorAvatar = comment.authorPhoto || comment.authorAvatar;
+        
+        const avatarHTML = authorAvatar ? `
+            <img 
+                src="${authorAvatar}" 
+                alt="${this.escapeHtml(comment.authorName)}" 
+                class="comment-avatar"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            >
+            <div class="comment-avatar-fallback" style="display: none; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: none; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.2rem;">
+                ${comment.authorName.charAt(0).toUpperCase()}
+            </div>
+        ` : `
+            <div class="comment-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.2rem;">
+                ${comment.authorName.charAt(0).toUpperCase()}
+            </div>
+        `;
+
+        return `
+            <div class="comment-item ${isReply ? 'reply' : ''}" data-comment-id="${comment.id}">
+                <div class="comment-author-section">
+                    ${avatarHTML}
+                    <div class="comment-author-info">
+                        <h4>${this.escapeHtml(comment.authorName)}</h4>
+                        <p><i class="fas fa-clock"></i> ${timeAgo}</p>
+                    </div>
                 </div>
-            `;
-            return;
-        }
 
-        const commentsHTML = this.comments.map(comment => this.renderComment(comment)).join('');
-        this.commentsList.innerHTML = commentsHTML;
+                <div class="comment-content">
+                    ${this.escapeHtml(comment.content)}
+                </div>
 
-        // Add event listeners
-        this.addCommentEventListeners();
+                <div class="comment-actions">
+                    <button class="comment-action-btn upvote-comment-btn ${hasUpvoted ? 'upvoted' : ''}" data-comment-id="${comment.id}">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>${comment.upvotes || 0}</span>
+                    </button>
+                    <button class="comment-action-btn reply-comment-btn" data-comment-id="${comment.id}" data-author-name="${comment.authorName}">
+                        <i class="fas fa-reply"></i>
+                        <span>Reply</span>
+                    </button>
+                </div>
+
+                ${repliesHTML}
+            </div>
+        `;
     }
 
     renderComment(comment, isReply = false) {
