@@ -307,7 +307,7 @@ class PublicProfile {
             console.log('👤 Initializing Public Profile...');
             
             const urlParams = new URLSearchParams(window.location.search);
-            this.userId = urlParams.get('uid');
+            this.userId = urlParams.get('id');
 
             if (!this.userId) {
                 this.showError('User not found');
@@ -364,7 +364,7 @@ class PublicProfile {
     async loadUserPosts() {
         try {
             const snapshot = await firebase.firestore()
-                .collection('community_posts')
+                .collection('posts')
                 .where('authorId', '==', this.userId)
                 .orderBy('createdAt', 'desc')
                 .limit(50)
@@ -415,7 +415,7 @@ class PublicProfile {
             for (let i = 0; i < postIds.length; i += batchSize) {
                 const batchIds = postIds.slice(i, i + batchSize);
                 const batchSnapshot = await firebase.firestore()
-                    .collection('community_posts')
+                    .collection('posts')
                     .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
                     .get();
                 
@@ -475,7 +475,7 @@ class PublicProfile {
             for (let i = 0; i < postIds.length; i += batchSize) {
                 const batchIds = postIds.slice(i, i + batchSize);
                 const batchSnapshot = await firebase.firestore()
-                    .collection('community_posts')
+                    .collection('posts')
                     .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
                     .get();
                 
