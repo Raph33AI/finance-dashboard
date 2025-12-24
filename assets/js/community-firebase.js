@@ -669,8 +669,7 @@
 
 /* ============================================
    ALPHAVAULT AI - COMMUNITY FIREBASE SERVICE
-   Gestion des posts avec images sur Cloudflare R2
-   Version: 2.0
+   Version complète avec toutes les méthodes
    ============================================ */
 
 class CommunityFirebaseService {
@@ -679,8 +678,7 @@ class CommunityFirebaseService {
         this.auth = firebase.auth();
         
         // ⚠ REMPLACE PAR L'URL DE TON WORKER IMAGE STORAGE
-        // Soit le domaine personnalisé, soit l'URL workers.dev
-        this.imageWorkerUrl = 'alphavault-image-storage.raphnardone.workers.dev'; // OU https://alphavault-image-storage.xxx.workers.dev
+        this.imageWorkerUrl = 'https://alphavault-image-storage.YOUR-SUBDOMAIN.workers.dev';
     }
 
     /* ==========================================
@@ -691,39 +689,31 @@ class CommunityFirebaseService {
         try {
             console.log('📤 Starting image upload...');
 
-            // Validations client-side
-            const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+            const MAX_SIZE = 5 * 1024 * 1024;
             if (file.size > MAX_SIZE) {
                 throw new Error(`Image too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Max: 5MB`);
             }
 
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
-                throw new Error(`Invalid file type: ${file.type}. Allowed: JPG, PNG, GIF, WEBP`);
+                throw new Error(`Invalid file type: ${file.type}`);
             }
 
-            // Vérifier l'authentification
             const user = this.auth.currentUser;
             if (!user) {
                 throw new Error('User not authenticated');
             }
 
-            console.log('👤 User ID:', user.uid);
-
-            // Optimiser l'image avant upload
             const optimizedBlob = await this.optimizeImage(file);
 
-            // Préparer le FormData
             const formData = new FormData();
             formData.append('image', optimizedBlob, file.name);
             formData.append('userId', user.uid);
 
-            // Récupérer le token Firebase
             const token = await user.getIdToken();
 
             console.log('🚀 Uploading to Cloudflare R2...');
 
-            // Upload vers le Worker
             const response = await fetch(`${this.imageWorkerUrl}/upload`, {
                 method: 'POST',
                 headers: {
@@ -738,9 +728,7 @@ class CommunityFirebaseService {
             }
 
             const result = await response.json();
-
-            console.log('✅ Image uploaded successfully:', result.imageUrl);
-
+            console.log('✅ Image uploaded:', result.imageUrl);
             return result.imageUrl;
 
         } catch (error) {
@@ -749,10 +737,6 @@ class CommunityFirebaseService {
         }
     }
 
-    /* ==========================================
-       🖼 OPTIMISATION D'IMAGE
-       ========================================== */
-    
     async optimizeImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -761,21 +745,18 @@ class CommunityFirebaseService {
                 const img = new Image();
                 
                 img.onload = () => {
-                    // Dimensions maximales
                     const MAX_WIDTH = 1600;
                     const MAX_HEIGHT = 1600;
                     
                     let width = img.width;
                     let height = img.height;
                     
-                    // Calculer le ratio pour maintenir les proportions
                     if (width > MAX_WIDTH || height > MAX_HEIGHT) {
                         const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
                         width = Math.floor(width * ratio);
                         height = Math.floor(height * ratio);
                     }
                     
-                    // Créer un canvas
                     const canvas = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
@@ -785,7 +766,6 @@ class CommunityFirebaseService {
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Convertir en Blob
                     canvas.toBlob((blob) => {
                         if (blob) {
                             console.log('🖼 Image optimized:', {
@@ -797,7 +777,7 @@ class CommunityFirebaseService {
                         } else {
                             reject(new Error('Failed to optimize image'));
                         }
-                    }, 'image/jpeg', 0.85); // JPEG 85% qualité
+                    }, 'image/jpeg', 0.85);
                 };
                 
                 img.onerror = () => reject(new Error('Failed to load image'));
@@ -809,10 +789,6 @@ class CommunityFirebaseService {
         });
     }
 
-    /* ==========================================
-       🗑 SUPPRESSION D'IMAGE
-       ========================================== */
-    
     async deleteImage(imageUrl) {
         try {
             const user = this.auth.currentUser;
@@ -820,12 +796,10 @@ class CommunityFirebaseService {
                 throw new Error('User not authenticated');
             }
 
-            // Extraire le fileName depuis l'URL
-            // Format: https://xxx/images/userId/timestamp-random.ext
             const urlParts = imageUrl.split('/images/');
             if (urlParts.length !== 2) {
                 console.warn('⚠ Invalid image URL format:', imageUrl);
-                return; // Ne pas throw - l'image peut être externe
+                return;
             }
 
             const fileName = urlParts[1];
@@ -848,7 +822,6 @@ class CommunityFirebaseService {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('❌ Delete failed:', errorData.message);
-                // Ne pas throw - l'image peut déjà être supprimée
                 return;
             }
 
@@ -857,40 +830,6 @@ class CommunityFirebaseService {
 
         } catch (error) {
             console.error('❌ Error deleting image:', error);
-            // Ne pas throw - ne pas bloquer la suppression du post
-        }
-    }
-
-    /* ==========================================
-       📋 LISTER LES IMAGES D'UN UTILISATEUR
-       ========================================== */
-    
-    async listUserImages() {
-        try {
-            const user = this.auth.currentUser;
-            if (!user) {
-                throw new Error('User not authenticated');
-            }
-
-            const token = await user.getIdToken();
-
-            const response = await fetch(`${this.imageWorkerUrl}/list?userId=${user.uid}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to list images');
-            }
-
-            const result = await response.json();
-            return result.images;
-
-        } catch (error) {
-            console.error('❌ Error listing images:', error);
-            throw error;
         }
     }
 
@@ -949,7 +888,7 @@ class CommunityFirebaseService {
                 title: postData.title,
                 content: postData.content,
                 tags: postData.tags || [],
-                images: postData.images || [], // URLs depuis R2
+                images: postData.images || [],
                 authorId: user.uid,
                 authorName: userData.displayName || user.displayName || 'Anonymous',
                 authorPhoto: userData.photoURL || user.photoURL || null,
@@ -991,7 +930,6 @@ class CommunityFirebaseService {
                 throw new Error('You are not authorized to edit this post');
             }
 
-            // Supprimer les anciennes images si nécessaire
             if (updateData.imagesToDelete && updateData.imagesToDelete.length > 0) {
                 for (const imageUrl of updateData.imagesToDelete) {
                     await this.deleteImage(imageUrl);
@@ -1036,7 +974,6 @@ class CommunityFirebaseService {
                 throw new Error('You are not authorized to delete this post');
             }
 
-            // Supprimer les images R2
             if (postData.images && postData.images.length > 0) {
                 for (const imageUrl of postData.images) {
                     await this.deleteImage(imageUrl);
@@ -1101,10 +1038,14 @@ class CommunityFirebaseService {
 
             const snapshot = await query.get();
 
-            return snapshot.docs.map(doc => ({
+            const posts = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            console.log(`✅ Posts loaded: ${posts.length}`);
+            
+            return posts;
 
         } catch (error) {
             console.error('❌ Error getting posts:', error);
@@ -1151,6 +1092,115 @@ class CommunityFirebaseService {
         } catch (error) {
             console.error('❌ Error toggling like:', error);
             throw error;
+        }
+    }
+
+    /* ==========================================
+       🌟 POSTS EN VEDETTE (Featured)
+       ========================================== */
+    
+    async getFeaturedPosts(limit = 5) {
+        try {
+            const snapshot = await this.db.collection('posts')
+                .orderBy('views', 'desc')
+                .limit(limit)
+                .get();
+
+            const posts = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log(`✅ Featured posts loaded: ${posts.length}`);
+            
+            return posts;
+
+        } catch (error) {
+            console.error('❌ Error getting featured posts:', error);
+            return []; // Retourner un tableau vide au lieu de throw
+        }
+    }
+
+    /* ==========================================
+       📊 STATISTIQUES COMMUNAUTÉ
+       ========================================== */
+    
+    async getCommunityStats() {
+        try {
+            // Compter les posts
+            const postsSnapshot = await this.db.collection('posts').get();
+            const totalPosts = postsSnapshot.size;
+
+            // Compter les utilisateurs
+            const usersSnapshot = await this.db.collection('users').get();
+            const totalMembers = usersSnapshot.size;
+
+            // Compter les commentaires
+            const commentsSnapshot = await this.db.collection('comments').get();
+            const totalComments = commentsSnapshot.size;
+
+            // Calculer les posts actifs (dernières 24h)
+            const oneDayAgo = new Date();
+            oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+            
+            const activePostsSnapshot = await this.db.collection('posts')
+                .where('createdAt', '>', firebase.firestore.Timestamp.fromDate(oneDayAgo))
+                .get();
+            const activePosts = activePostsSnapshot.size;
+
+            const stats = {
+                totalPosts,
+                totalMembers,
+                totalComments,
+                activePosts
+            };
+
+            console.log('✅ Community stats loaded:', stats);
+            
+            return stats;
+
+        } catch (error) {
+            console.error('❌ Error getting community stats:', error);
+            return {
+                totalPosts: 0,
+                totalMembers: 0,
+                totalComments: 0,
+                activePosts: 0
+            };
+        }
+    }
+
+    /* ==========================================
+       🏷 TAGS POPULAIRES
+       ========================================== */
+    
+    async getPopularTags(limit = 10) {
+        try {
+            const snapshot = await this.db.collection('posts').get();
+            
+            const tagCounts = {};
+            
+            snapshot.docs.forEach(doc => {
+                const post = doc.data();
+                if (post.tags && Array.isArray(post.tags)) {
+                    post.tags.forEach(tag => {
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    });
+                }
+            });
+
+            const sortedTags = Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, limit)
+                .map(([tag, count]) => ({ tag, count }));
+
+            console.log(`✅ Popular tags loaded: ${sortedTags.length}`);
+            
+            return sortedTags;
+
+        } catch (error) {
+            console.error('❌ Error getting popular tags:', error);
+            return [];
         }
     }
 
