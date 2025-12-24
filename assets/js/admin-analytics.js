@@ -598,13 +598,20 @@ class AdminAnalyticsPro {
             if (this.cloudflareData) {
                 this.displayCloudflareAnalytics(this.cloudflareData);
             }
+
+            if (this.cloudflareData) {
+                this.displayCloudflareAnalytics(this.cloudflareData);
+                this.createGeoMap(); // 🆕 AJOUTER ICI
+            }
             
             // Rafraîchir les tableaux
             await this.loadRecentUsers();
             await this.loadRecentActivity();
             await this.loadTopUsers();
-            
-            // ... reste du code inchangé ...
+            // 🆕 FORCER L'AFFICHAGE DES VISITEURS NON-CLIENTS
+            this.displayNonCustomerVisitors();
+            this.displayPotentialCustomers();
+            this.createLeadsCharts(); // 🆕 AJOUTER ICI
             
             console.log('✅ All displays refreshed successfully');
             
@@ -761,6 +768,123 @@ class AdminAnalyticsPro {
         this.createCloudflareCharts(data);
         
         console.log('✅ Cloudflare analytics displayed');
+    }
+
+    // 🆕 AFFICHER TOP COUNTRY & TOP PAGES
+    displayCloudflareExtras() {
+        // Top Country KPI
+        if (this.cloudflareGeo && this.cloudflareGeo.length > 0) {
+            const topCountry = this.cloudflareGeo[0];
+            this.updateStat('cf-top-country', topCountry.country);
+            this.updateStat('cf-top-country-requests', topCountry.requests.toLocaleString());
+            console.log(`🌍 Top Country: ${topCountry.country} (${topCountry.requests} requests)`);
+        }
+        
+        // Top Pages Table
+        if (this.cloudflarePages && this.cloudflarePages.length > 0) {
+            const tbody = document.getElementById('cf-pages-table-body');
+            if (tbody) {
+                tbody.innerHTML = '';
+                
+                this.cloudflarePages.slice(0, 10).forEach((page, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${page.path}
+                        </td>
+                        <td>${page.requests.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`📄 Top Pages table populated with ${this.cloudflarePages.length} pages`);
+            }
+        }
+    }
+
+    // 🆕 CRÉER LA CARTE GÉOGRAPHIQUE
+    createGeoMap() {
+        const mapContainer = document.getElementById('geo-map');
+        if (!mapContainer) {
+            console.warn('⚠ Geo map container not found');
+            return;
+        }
+        
+        if (!this.cloudflareGeo || this.cloudflareGeo.length === 0) {
+            console.warn('⚠ No geo data available for map');
+            return;
+        }
+        
+        console.log('🗺 Creating geographic map...');
+        
+        // Détruire la carte existante si elle existe
+        if (this.maps.geoMap) {
+            this.maps.geoMap.remove();
+        }
+        
+        // Créer la carte
+        const map = L.map('geo-map').setView([20, 0], 2);
+        
+        // Ajouter la couche de tuiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Coordonnées approximatives des pays
+        const countryCoords = {
+            'US': [37.0902, -95.7129],
+            'United States': [37.0902, -95.7129],
+            'FR': [46.2276, 2.2137],
+            'France': [46.2276, 2.2137],
+            'GB': [55.3781, -3.4360],
+            'United Kingdom': [55.3781, -3.4360],
+            'DE': [51.1657, 10.4515],
+            'Germany': [51.1657, 10.4515],
+            'CA': [56.1304, -106.3468],
+            'Canada': [56.1304, -106.3468],
+            'JP': [36.2048, 138.2529],
+            'Japan': [36.2048, 138.2529],
+            'CN': [35.8617, 104.1954],
+            'China': [35.8617, 104.1954],
+            'IN': [20.5937, 78.9629],
+            'India': [20.5937, 78.9629],
+            'BR': [-14.2350, -51.9253],
+            'Brazil': [-14.2350, -51.9253],
+            'AU': [-25.2744, 133.7751],
+            'Australia': [-25.2744, 133.7751]
+        };
+        
+        // Ajouter des marqueurs pour chaque pays
+        this.cloudflareGeo.forEach(country => {
+            const coords = countryCoords[country.country] || countryCoords[country.countryCode];
+            
+            if (coords) {
+                const requests = country.requests || 0;
+                
+                // Taille du cercle proportionnelle aux requêtes
+                const radius = Math.max(5, Math.min(50, Math.sqrt(requests) / 10));
+                
+                L.circleMarker(coords, {
+                    radius: radius,
+                    fillColor: '#667eea',
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                })
+                .bindPopup(`
+                    <b>${country.country}</b><br>
+                    Requests: ${requests.toLocaleString()}<br>
+                    Uniques: ${(country.uniques || 0).toLocaleString()}
+                `)
+                .addTo(map);
+            }
+        });
+        
+        this.maps.geoMap = map;
+        console.log('✅ Geographic map created');
     }
 
     async loadCloudflareGeo() {
@@ -1062,9 +1186,9 @@ class AdminAnalyticsPro {
                 'pro': 29.99,
                 'platinum': 99.99
             };
-            
+
             this.allPaymentsData = [];
-            
+
             paymentsSnapshot.forEach(doc => {
                 const data = doc.data();
                 const amount = parseFloat(data.amount) || 0;
@@ -1079,10 +1203,18 @@ class AdminAnalyticsPro {
                 if (data.createdAt && data.createdAt.toDate() > monthAgo) {
                     monthRevenue += amount;
                 }
+            });
+
+            // 🔥 CALCULER LES SUBSCRIPTIONS ACTIVES DEPUIS LES USERS (PAS LES PAYMENTS)
+            this.allUsersData.forEach(user => {
+                const plan = user.plan || 'basic';
+                const status = user.subscriptionStatus || 'inactive';
                 
-                if (data.status === 'active' || data.status === 'trialing') {
+                // Compter comme actif si plan payant ET (status actif OU trialing)
+                if ((plan === 'pro' || plan === 'platinum') && 
+                    (status === 'active' || status === 'trialing')) {
                     activeSubscriptions++;
-                    const planPrice = planPrices[data.plan] || 0;
+                    const planPrice = planPrices[plan] || 0;
                     mrr += planPrice;
                 }
             });
@@ -2624,6 +2756,90 @@ class AdminAnalyticsPro {
         
         if (topLeads.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No potential customers detected</td></tr>';
+        }
+    }
+
+    // 🆕 CRÉER LES GRAPHIQUES LEADS
+    createLeadsCharts() {
+        // Graphique 1 : Lead Score Distribution
+        const scoreCanvas = document.getElementById('potential-customers-chart');
+        if (scoreCanvas && this.potentialCustomers && this.potentialCustomers.length > 0) {
+            console.log('📊 Creating lead score distribution chart...');
+            
+            const hotLeads = this.potentialCustomers.filter(c => c.category.includes('Hot')).length;
+            const warmLeads = this.potentialCustomers.filter(c => c.category.includes('Warm')).length;
+            const coldLeads = this.potentialCustomers.filter(c => c.category.includes('Cold')).length;
+            
+            this.createChart('potential-customers-chart', 'doughnut', {
+                labels: ['🔥 Hot Leads', '🌡 Warm Leads', '❄ Cold Leads'],
+                datasets: [{
+                    data: [hotLeads, warmLeads, coldLeads],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',    // Red for hot
+                        'rgba(245, 158, 11, 0.8)',   // Orange for warm
+                        'rgba(6, 182, 212, 0.8)'     // Cyan for cold
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            }, {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Lead Categories Distribution'
+                    }
+                }
+            });
+            
+            console.log('✅ Lead score chart created');
+        }
+        
+        // Graphique 2 : Non-Customers by Country
+        const countryCanvas = document.getElementById('non-customer-countries-chart');
+        if (countryCanvas && this.nonCustomerVisitors && this.nonCustomerVisitors.length > 0) {
+            console.log('📊 Creating non-customers by country chart...');
+            
+            // Compter par pays
+            const countryVisits = {};
+            this.nonCustomerVisitors.forEach(visitor => {
+                const country = visitor.country || 'Unknown';
+                countryVisits[country] = (countryVisits[country] || 0) + visitor.visits;
+            });
+            
+            // Top 6 pays
+            const topCountries = Object.entries(countryVisits)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6);
+            
+            this.createChart('non-customer-countries-chart', 'bar', {
+                labels: topCountries.map(c => c[0]),
+                datasets: [{
+                    label: 'Visits by Non-Customers',
+                    data: topCountries.map(c => c[1]),
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderRadius: 8
+                }]
+            }, {
+                indexAxis: 'y',
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Countries (Non-Customers)'
+                    }
+                }
+            });
+            
+            console.log('✅ Non-customers country chart created');
+        }
+        
+        // Calculer et afficher Avg Lead Score
+        if (this.potentialCustomers && this.potentialCustomers.length > 0) {
+            const avgScore = this.potentialCustomers.reduce((sum, c) => sum + c.score, 0) / this.potentialCustomers.length;
+            this.updateStat('avg-lead-score', avgScore.toFixed(1));
         }
     }
 
