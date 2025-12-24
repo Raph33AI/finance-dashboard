@@ -2356,7 +2356,8 @@ body.dark-mode .leaderboard-item:hover .leaderboard-name {
     font-size: 0.9rem;
     color: #64748b;
     margin-top: 12px;
-    margin-bottom: 12px; /* ✅ AJOUTÉ : espace avec la bordure */
+    margin-bottom: 12px;
+    margin-left: 12px; /* ✅ AJOUTÉ : décalage vers la gauche */
 }
 
 /* Chaque statistique individuelle */
@@ -2498,6 +2499,7 @@ body.dark-mode .stat-item.upvoted {
     .profile-post-stats {
         gap: 12px;
         font-size: 0.85rem;
+        margin-left: 8px; /* ✅ Décalage mobile ajusté */
     }
     
     .post-stat,
