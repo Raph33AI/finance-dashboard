@@ -2365,13 +2365,13 @@ body.dark-mode .leaderboard-item:hover .leaderboard-name {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 10px 14px; /* ✅ AUGMENTÉ : de 6px à 10px */
+    padding: 14px 18px; /* ✅ AUGMENTÉ : de 6px à 10px */
     border-radius: 8px;
     background: rgba(100, 116, 139, 0.08);
     transition: all 0.3s ease;
     font-weight: 600;
     cursor: default;
-    min-height: 36px; /* ✅ AJOUTÉ : hauteur minimale */
+    min-height: 50px; /* ✅ AJOUTÉ : hauteur minimale */
 }
 
 /* Icônes des statistiques */
@@ -2462,7 +2462,7 @@ body.dark-mode .leaderboard-item:hover .leaderboard-name {
 .stat-item.timestamp {
     color: #64748b;
     background: transparent;
-    padding: 10px 0; /* ✅ Padding vertical cohérent */
+    padding: 15px 0; /* ✅ Padding vertical cohérent */
 }
 
 .post-stat:has(.fa-clock):hover,
