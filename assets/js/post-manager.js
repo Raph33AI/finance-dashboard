@@ -439,8 +439,7 @@
 
 /* ============================================
    ALPHAVAULT AI - POST MANAGER
-   Affichage et gestion des posts
-   Version: 2.0
+   Affichage et gestion des posts (CORRIGÉ)
    ============================================ */
 
 class PostManager {
@@ -448,6 +447,7 @@ class PostManager {
         this.postId = null;
         this.post = null;
         this.currentUser = null;
+        this.channels = []; // ✅ Stocker les channels
         this.postContainer = document.getElementById('postDetailCard');
         this.loadingElement = document.getElementById('postLoading');
     }
@@ -456,7 +456,6 @@ class PostManager {
         try {
             console.log('📄 Initializing Post Manager...');
 
-            // Récupérer l'ID du post depuis l'URL
             const urlParams = new URLSearchParams(window.location.search);
             this.postId = urlParams.get('id');
 
@@ -464,19 +463,17 @@ class PostManager {
                 throw new Error('No post ID provided');
             }
 
-            // Attendre que l'utilisateur soit connecté
             await this.waitForAuth();
 
-            // Charger le post
+            // ✅ CORRECTION 1 : Charger les channels AVANT le post
+            await this.loadChannels();
+
             await this.loadPost();
 
-            // Incrémenter les vues
             await window.communityService.incrementViews(this.postId);
 
-            // Afficher le post
             this.renderPost();
 
-            // Charger les commentaires
             await this.loadComments();
 
             console.log('✅ Post Manager initialized');
@@ -495,6 +492,17 @@ class PostManager {
                 resolve();
             });
         });
+    }
+
+    // ✅ CORRECTION 2 : Charger les channels
+    async loadChannels() {
+        try {
+            this.channels = await window.communityService.getChannels();
+            console.log('📂 Channels loaded:', this.channels.length);
+        } catch (error) {
+            console.error('❌ Error loading channels:', error);
+            this.channels = []; // Fallback vide
+        }
     }
 
     async loadPost() {
@@ -537,9 +545,14 @@ class PostManager {
                 <div class="post-meta">
                     ${channelBadge}
                     <div class="post-author">
-                        <img src="${this.post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(this.post.authorName) + '&background=3B82F6&color=fff'}" alt="${this.post.authorName}" class="author-avatar">
+                        <!-- ✅ CORRECTION 3 : Lien cliquable vers le profil -->
+                        <img src="${this.post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(this.post.authorName) + '&background=3B82F6&color=fff'}" 
+                             alt="${this.post.authorName}" 
+                             class="author-avatar"
+                             onclick="window.location.href='user-profile.html?id=${this.post.authorId}'"
+                             style="cursor: pointer;">
                         <div class="author-info">
-                            <div class="author-name">
+                            <div class="author-name" onclick="window.location.href='user-profile.html?id=${this.post.authorId}'" style="cursor: pointer;">
                                 ${this.post.authorName}
                                 ${planBadge}
                             </div>
@@ -819,10 +832,15 @@ class PostManager {
 
         return `
             <div class="comment-item" data-comment-id="${comment.id}">
-                <img src="${comment.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.authorName) + '&background=3B82F6&color=fff'}" alt="${comment.authorName}" class="comment-avatar">
+                <!-- ✅ CORRECTION 4 : Avatar cliquable -->
+                <img src="${comment.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.authorName) + '&background=3B82F6&color=fff'}" 
+                     alt="${comment.authorName}" 
+                     class="comment-avatar"
+                     onclick="window.location.href='user-profile.html?id=${comment.authorId}'"
+                     style="cursor: pointer;">
                 <div class="comment-content-wrapper">
                     <div class="comment-header">
-                        <div class="comment-author">
+                        <div class="comment-author" onclick="window.location.href='user-profile.html?id=${comment.authorId}'" style="cursor: pointer;">
                             ${comment.authorName}
                             ${planBadge}
                         </div>
@@ -861,22 +879,26 @@ class PostManager {
         }
     }
 
+    // ✅ CORRECTION 5 : Mapping corrigé des nouveaux channels
     getChannelBadge(channelId) {
-        const channels = {
-            'market-analysis': { icon: '📊', name: 'Market Analysis', color: '#3B82F6' },
-            'stock-picks': { icon: '🎯', name: 'Stock Picks', color: '#10B981' },
-            'trading-strategies': { icon: '📈', name: 'Trading Strategies', color: '#8B5CF6' },
-            'crypto': { icon: '₿', name: 'Crypto', color: '#F59E0B' },
-            'portfolio-review': { icon: '💼', name: 'Portfolio Review', color: '#EF4444' },
-            'education': { icon: '📚', name: 'Education', color: '#6366F1' }
-        };
+        // Chercher le channel dans les channels chargés
+        const channel = this.channels.find(c => c.id === channelId);
 
-        const channel = channels[channelId] || { icon: '📝', name: 'General', color: '#6B7280' };
+        if (channel) {
+            return `
+                <div class="channel-badge" style="background: linear-gradient(135deg, #3B82F615, #3B82F630); border-left: 4px solid #3B82F6;">
+                    <span>${channel.icon}</span>
+                    <span>${channel.name}</span>
+                </div>
+            `;
+        }
 
+        // Fallback si channel non trouvé
+        console.warn('⚠ Channel not found:', channelId);
         return `
-            <div class="channel-badge" style="background: linear-gradient(135deg, ${channel.color}15, ${channel.color}30); border-left: 4px solid ${channel.color};">
-                <span>${channel.icon}</span>
-                <span>${channel.name}</span>
+            <div class="channel-badge" style="background: linear-gradient(135deg, #6B728015, #6B728030); border-left: 4px solid #6B7280;">
+                <span>📝</span>
+                <span>General</span>
             </div>
         `;
     }
