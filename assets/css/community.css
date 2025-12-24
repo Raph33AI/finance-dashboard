@@ -2357,7 +2357,7 @@ body.dark-mode .leaderboard-item:hover .leaderboard-name {
     color: #64748b;
     margin-top: 12px;
     margin-bottom: 12px;
-    margin-left: 14px; /* ✅ AJOUTÉ : décalage vers la gauche */
+    margin-left: 20px; /* ✅ AJOUTÉ : décalage vers la gauche */
 }
 
 /* Chaque statistique individuelle */
