@@ -2340,3 +2340,200 @@ body.dark-mode .leaderboard-item:hover {
 body.dark-mode .leaderboard-item:hover .leaderboard-name {
     color: #60A5FA;
 }
+
+/* ========================================
+   STATISTIQUES DES POSTS - STYLE UNIFIÉ
+   ======================================== */
+
+/* Container des statistiques */
+.post-stats,
+.post-footer .post-stats,
+.activity-stats,
+.profile-post-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 12px;
+}
+
+/* Chaque statistique individuelle */
+.post-stat,
+.stat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(100, 116, 139, 0.08);
+    transition: all 0.3s ease;
+    font-weight: 600;
+    cursor: default;
+}
+
+/* Icônes des statistiques */
+.post-stat i,
+.stat-item i {
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+/* Valeurs numériques */
+.post-stat span,
+.stat-item span {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* Hover effet */
+.post-stat:hover,
+.stat-item:hover {
+    background: rgba(100, 116, 139, 0.12);
+    transform: translateY(-2px);
+}
+
+/* Upvote - Couleur verte */
+.post-stat.upvote-btn,
+.stat-item.upvote {
+    color: #10b981;
+}
+
+.post-stat.upvote-btn i,
+.stat-item.upvote i {
+    color: #10b981;
+}
+
+.post-stat.upvote-btn span,
+.stat-item.upvote span {
+    color: #059669;
+}
+
+.post-stat.upvote-btn:hover,
+.stat-item.upvote:hover {
+    background: rgba(16, 185, 129, 0.1);
+    cursor: pointer;
+}
+
+/* Upvoted state */
+.post-stat.upvoted,
+.stat-item.upvoted {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+/* Comments - Couleur bleue */
+.post-stat:has(.fa-comment),
+.stat-item.comments {
+    color: #3B82F6;
+}
+
+.post-stat:has(.fa-comment) i,
+.stat-item.comments i {
+    color: #3B82F6;
+}
+
+.post-stat:has(.fa-comment) span,
+.stat-item.comments span {
+    color: #2563EB;
+}
+
+/* Views - Couleur violette */
+.post-stat:has(.fa-eye),
+.stat-item.views {
+    color: #8B5CF6;
+}
+
+.post-stat:has(.fa-eye) i,
+.stat-item.views i {
+    color: #8B5CF6;
+}
+
+.post-stat:has(.fa-eye) span,
+.stat-item.views span {
+    color: #7C3AED;
+}
+
+/* Timestamp - Couleur grise */
+.post-stat:has(.fa-clock),
+.stat-item.timestamp {
+    color: #64748b;
+    background: transparent;
+    padding: 6px 0;
+}
+
+.post-stat:has(.fa-clock):hover,
+.stat-item.timestamp:hover {
+    background: transparent;
+    transform: none;
+}
+
+/* Dark Mode */
+body.dark-mode .post-stat,
+body.dark-mode .stat-item {
+    background: rgba(148, 163, 184, 0.1);
+}
+
+body.dark-mode .post-stat span,
+body.dark-mode .stat-item span {
+    color: #cbd5e1;
+}
+
+body.dark-mode .post-stat:hover,
+body.dark-mode .stat-item:hover {
+    background: rgba(148, 163, 184, 0.15);
+}
+
+body.dark-mode .post-stat.upvoted,
+body.dark-mode .stat-item.upvoted {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .post-stats,
+    .activity-stats,
+    .profile-post-stats {
+        gap: 12px;
+        font-size: 0.85rem;
+    }
+    
+    .post-stat,
+    .stat-item {
+        padding: 5px 10px;
+        gap: 5px;
+    }
+    
+    .post-stat i,
+    .stat-item i {
+        font-size: 0.85rem;
+    }
+    
+    .post-stat span,
+    .stat-item span {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation au chargement */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.post-stat,
+.stat-item {
+    animation: fadeInUp 0.3s ease-out backwards;
+}
+
+.post-stat:nth-child(1) { animation-delay: 0.05s; }
+.post-stat:nth-child(2) { animation-delay: 0.1s; }
+.post-stat:nth-child(3) { animation-delay: 0.15s; }
+.post-stat:nth-child(4) { animation-delay: 0.2s; }
