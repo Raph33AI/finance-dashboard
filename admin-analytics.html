@@ -414,14 +414,9 @@
                         Admin Analytics Dashboard
                     </h1>
                 </div>
-                <!-- Cache Statistics -->
-                <!-- <div class="analytics-section">
-                    <h2>Cache & API Management</h2>
-                    <div id="cache-stats"></div>
-                    <button id="clearCacheBtn" class="btn-action btn-danger">
-                        <i class="fas fa-trash"></i> Clear Cache
-                    </button>
-                </div> -->
+                <div class='header-center'>
+                    <div id="cache-stats" class="cache-stats-inline"></div>
+                </div>
                 <div class='header-right'>
                     <button class='dashboard-btn dashboard-btn-export' id='exportDataBtn'>
                         <i class='fas fa-download'></i>
@@ -620,6 +615,98 @@
                                 <div class="dashboard-stat-change">ARPU: <span id="arpu">$0</span></div>
                             </div>
                         </div>
+
+                        <!-- 🆕 NOUVELLES DONNÉES FIRESTORE -->
+                        <div class="subsection-divider" style="margin: 32px 0;">
+                            <h3 class="subsection-title">
+                                <i class="fas fa-database"></i>
+                                Firebase Collections
+                            </h3>
+                        </div>
+
+                        <div class="dashboard-stats-grid">
+                            <!-- Watchlists -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white;">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Watchlists</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-watchlists">0</div>
+                                <div class="dashboard-stat-change">
+                                    Users: <span id="users-with-watchlists">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Portfolios -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Portfolios</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-portfolios">0</div>
+                                <div class="dashboard-stat-change">
+                                    Avg: <span id="avg-portfolios-per-user">0</span>/user
+                                </div>
+                            </div>
+                            
+                            <!-- Newsletter -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Newsletter</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-newsletter-subscribers">0</div>
+                                <div class="dashboard-stat-change" id="new-newsletter-subscribers">+0 this week</div>
+                            </div>
+                            
+                            <!-- API Usage -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                        <i class="fas fa-plug"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">API Requests</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-api-requests">0</div>
+                                <div class="dashboard-stat-change">
+                                    Today: <span id="api-requests-today">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Feedback -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Feedback</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-feedback">0</div>
+                                <div class="dashboard-stat-change">
+                                    Positive: <span id="positive-feedback">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- User Alerts -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">User Alerts</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-user-alerts">0</div>
+                                <div class="dashboard-stat-change">
+                                    Active: <span id="active-user-alerts">0</span>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Charts Grid -->
                         <div class="charts-row">
@@ -793,6 +880,20 @@
                             Third-Party Analytics
                             <span class="section-subtitle">Stripe • Cloudflare</span>
                         </h2>
+
+                        <!-- Cache Management -->
+                        <div class="cache-management-bar" style="margin-bottom: 24px; padding: 16px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; color: #ef4444; font-size: 1rem;">
+                                    <i class="fas fa-database"></i> Cache & API Management
+                                </h4>
+                                <div id="cache-stats"></div>
+                            </div>
+                            <button id="clearCacheBtn" class="dashboard-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                <i class="fas fa-trash"></i>
+                                Clear Cache
+                            </button>
+                        </div>
                         
                         <!-- 💳 STRIPE ANALYTICS -->
                         <div class="analytics-subsection">
@@ -1292,6 +1393,116 @@
                                     </h4>
                                     <canvas id="cohort-chart"></canvas>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 WATCHLISTS & PORTFOLIOS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('watchlists')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-list-ul"></i>
+                                    Watchlists & Portfolios
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="watchlists-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="watchlists-content">
+                                <!-- KPIs -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                            <i class="fas fa-list"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Watchlists</div>
+                                            <div class="kpi-value" id="total-watchlists-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Avg: <span id="avg-watchlists-per-user">0</span>/user
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-briefcase"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Portfolios</div>
+                                            <div class="kpi-value" id="total-portfolios-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Value: <span id="total-portfolios-value">$0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Top Symbols in Watchlists -->
+                                <div class="table-wrapper">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-trophy"></i>
+                                        Top 10 Symbols in Watchlists
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Symbol</th>
+                                                    <th>Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="top-watchlist-symbols-body">
+                                                <tr>
+                                                    <td colspan="3" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                                    <button class='dashboard-btn' id='exportWatchlistsBtn'>
+                                        <i class='fas fa-file-csv'></i>
+                                        Export Watchlists
+                                    </button>
+                                    <button class='dashboard-btn' id='exportPortfoliosBtn'>
+                                        <i class='fas fa-file-csv'></i>
+                                        Export Portfolios
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 NEWSLETTER SUBSCRIBERS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('newsletter')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-envelope-open-text"></i>
+                                    Newsletter Subscribers
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="newsletter-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="newsletter-content">
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Subscribers</div>
+                                            <div class="kpi-value" id="total-newsletter-subscribers-detail">0</div>
+                                            <div class="kpi-sublabel" id="new-newsletter-subscribers-detail">+0 this week</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class='dashboard-btn' id='exportNewsletterBtn' style="margin-top: 16px;">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export Newsletter Subscribers
+                                </button>
                             </div>
                         </div>
                     </div>
