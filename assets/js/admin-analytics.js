@@ -4628,6 +4628,9 @@ class AdminAnalyticsPro {
             this.displayWatchlistsStats();
             this.displayPortfoliosStats();
             this.displayNewsletterStats();
+            this.displayRealEstateStats();
+            this.displayLoginHistoryStats();
+            this.displayConversationsStats();
             
             console.log('✅ All displays refreshed successfully');
             
@@ -5753,7 +5756,9 @@ class AdminAnalyticsPro {
                         });
                     });
                 } catch (e) {
-                    // User n'a pas de simulations
+                    this.updateStat('total-real-estate-simulations-detail', totalSimulations);
+                    this.updateStat('users-with-real-estate-detail', usersWithSimulations);
+                    this.updateStat('avg-real-estate-per-user-detail', avgPerUser);
                 }
             }
             
@@ -5798,7 +5803,9 @@ class AdminAnalyticsPro {
                         });
                     });
                 } catch (e) {
-                    // User n'a pas d'historique
+                    this.updateStat('total-logins-detail', totalLogins);
+                    this.updateStat('avg-logins-per-user-detail', avgLoginsPerUser);
+                    this.updateStat('top-login-method-detail', topMethod ? `${topMethod[0]}` : 'N/A');
                 }
             }
             
@@ -5855,7 +5862,10 @@ class AdminAnalyticsPro {
                         totalMessages += data.messageCount || (data.messages ? data.messages.length : 0);
                     });
                 } catch (e) {
-                    // User n'a pas de conversations
+                    this.updateStat('total-conversations-detail', totalConversations);
+                    this.updateStat('avg-conversations-per-user-detail', avgConversationsPerUser);
+                    this.updateStat('total-ai-messages-detail', totalMessages);
+                    this.updateStat('avg-messages-per-conversation-detail', avgMessagesPerConversation);
                 }
             }
             
@@ -5923,53 +5933,487 @@ class AdminAnalyticsPro {
     displayWatchlistsStats() {
         console.log('📊 Displaying watchlists stats...');
         
-        // Top symboles dans les watchlists
+        // 🔥 MISE À JOUR DES STATS GLOBALES
+        const totalWatchlists = this.allWatchlistsData.length;
+        const usersWithWatchlists = new Set(this.allWatchlistsData.map(w => w.userId)).size;
+        const avgPerUser = usersWithWatchlists > 0 ? (totalWatchlists / usersWithWatchlists).toFixed(1) : 0;
+        
+        this.updateStat('total-watchlists', totalWatchlists);
+        this.updateStat('users-with-watchlists', usersWithWatchlists);
+        this.updateStat('avg-watchlists-per-user', avgPerUser);
+        this.updateStat('total-watchlists-detail', totalWatchlists);
+        
+        // 🔥 VÉRIFIER SI AUCUNE DONNÉE
+        if (this.allWatchlistsData.length === 0) {
+            console.warn('⚠ No watchlists data available');
+            
+            const tbody = document.getElementById('top-watchlist-symbols-body');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0; font-weight: 600;">No Watchlists Data</p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Users haven't created watchlists yet.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // 🔥 VIDER LE TABLEAU DES USERS
+            const usersTableBody = document.getElementById('watchlists-users-table-body');
+            if (usersTableBody) {
+                usersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No data available</p>
+                        </td>
+                    </tr>
+                `;
+            }
+            return;
+        }
+        
+        // 🔥 TOP SYMBOLES DANS LES WATCHLISTS
         const symbolCounts = {};
         this.allWatchlistsData.forEach(watchlist => {
+            // Gérer différentes structures de données
+            let symbols = [];
+            
             if (watchlist.symbols && Array.isArray(watchlist.symbols)) {
-                watchlist.symbols.forEach(symbol => {
-                    symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
-                });
+                symbols = watchlist.symbols;
+            } else if (watchlist.symbol) {
+                symbols = [watchlist.symbol];
+            } else if (watchlist.ticker) {
+                symbols = [watchlist.ticker];
             }
+            
+            symbols.forEach(symbol => {
+                if (symbol) {
+                    symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+                }
+            });
         });
         
         const topSymbols = Object.entries(symbolCounts)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
+            .slice(0, 10);
         
         const tbody = document.getElementById('top-watchlist-symbols-body');
-        if (tbody && topSymbols.length > 0) {
-            tbody.innerHTML = '';
-            topSymbols.forEach(([symbol, count], index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${symbol}</td>
-                    <td>${count}</td>
+        if (tbody) {
+            if (topSymbols.length > 0) {
+                tbody.innerHTML = '';
+                topSymbols.forEach(([symbol, count], index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="width: 40px; text-align: center;">${index + 1}</td>
+                        <td style="font-weight: 600; color: #1e293b;">${symbol}</td>
+                        <td style="width: 100px; text-align: right; font-weight: 600; color: #667eea;">${count}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                console.log(`✅ Top symbols table populated with ${topSymbols.length} symbols`);
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 20px;">
+                            No symbols tracked yet
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
-            });
+            }
         }
+        
+        // 🔥 TABLEAU DÉTAILLÉ PAR USER
+        this.displayWatchlistsByUser();
+    }
+
+    displayWatchlistsByUser() {
+        console.log('📋 Displaying watchlists by user...');
+        
+        const tbody = document.getElementById('watchlists-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Watchlists users table not found');
+            return;
+        }
+        
+        if (this.allWatchlistsData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No watchlists data</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Grouper par user
+        const watchlistsByUser = {};
+        this.allWatchlistsData.forEach(watchlist => {
+            const userId = watchlist.userId || 'unknown';
+            if (!watchlistsByUser[userId]) {
+                watchlistsByUser[userId] = [];
+            }
+            watchlistsByUser[userId].push(watchlist);
+        });
+        
+        // Afficher une ligne par user
+        let index = 0;
+        Object.entries(watchlistsByUser).forEach(([userId, watchlists]) => {
+            const user = this.allUsersData.find(u => u.id === userId);
+            const userEmail = user?.email || watchlists[0]?.userEmail || 'N/A';
+            
+            // Récupérer tous les symboles uniques
+            const allSymbols = new Set();
+            watchlists.forEach(w => {
+                if (w.symbols && Array.isArray(w.symbols)) {
+                    w.symbols.forEach(s => allSymbols.add(s));
+                } else if (w.symbol) {
+                    allSymbols.add(w.symbol);
+                } else if (w.ticker) {
+                    allSymbols.add(w.ticker);
+                }
+            });
+            
+            const symbolsList = Array.from(allSymbols).join(', ');
+            const displaySymbols = symbolsList.length > 50 ? 
+                symbolsList.substring(0, 50) + '...' : 
+                symbolsList;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${++index}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${watchlists.length}</td>
+                <td style="text-align: center; font-weight: 600; color: #10b981;">${allSymbols.size}</td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${symbolsList}">${displaySymbols || 'N/A'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Watchlists by user table populated (${index} users)`);
     }
 
     displayPortfoliosStats() {
         console.log('📊 Displaying portfolios stats...');
         
-        // Calculer la valeur totale des portfolios
+        // 🔥 CALCULER LES STATS
+        const totalPortfolios = this.allPortfoliosData.length;
+        const usersWithPortfolios = new Set(this.allPortfoliosData.map(p => p.userId)).size;
+        const avgPerUser = usersWithPortfolios > 0 ? (totalPortfolios / usersWithPortfolios).toFixed(1) : 0;
+        
         let totalValue = 0;
         this.allPortfoliosData.forEach(portfolio => {
             if (portfolio.totalValue) {
                 totalValue += parseFloat(portfolio.totalValue);
+            } else if (portfolio.value) {
+                totalValue += parseFloat(portfolio.value);
             }
         });
         
+        // 🔥 METTRE À JOUR LES STATS
+        this.updateStat('total-portfolios', totalPortfolios);
+        this.updateStat('users-with-portfolios', usersWithPortfolios);
+        this.updateStat('avg-portfolios-per-user', avgPerUser);
+        this.updateStat('total-portfolios-detail', totalPortfolios);
         this.updateStat('total-portfolios-value', `$${totalValue.toLocaleString()}`);
+        
+        console.log(`💼 Portfolios: ${totalPortfolios} total, $${totalValue.toLocaleString()} value`);
+        
+        // 🔥 TABLEAU DÉTAILLÉ PAR USER
+        this.displayPortfoliosByUser();
+    }
+
+    displayPortfoliosByUser() {
+        console.log('📋 Displaying portfolios by user...');
+        
+        const tbody = document.getElementById('portfolios-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Portfolios users table not found');
+            return;
+        }
+        
+        if (this.allPortfoliosData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No portfolios data</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Grouper par user
+        const portfoliosByUser = {};
+        this.allPortfoliosData.forEach(portfolio => {
+            const userId = portfolio.userId || 'unknown';
+            if (!portfoliosByUser[userId]) {
+                portfoliosByUser[userId] = [];
+            }
+            portfoliosByUser[userId].push(portfolio);
+        });
+        
+        // Afficher une ligne par user
+        let index = 0;
+        Object.entries(portfoliosByUser).forEach(([userId, portfolios]) => {
+            const user = this.allUsersData.find(u => u.id === userId);
+            const userEmail = user?.email || portfolios[0]?.userEmail || 'N/A';
+            
+            // Calculer la valeur totale des portfolios de ce user
+            let userTotalValue = 0;
+            portfolios.forEach(p => {
+                userTotalValue += parseFloat(p.totalValue || p.value || 0);
+            });
+            
+            // Récupérer les noms des portfolios
+            const portfolioNames = portfolios
+                .map(p => p.name || p.portfolioName || 'Unnamed')
+                .join(', ');
+            const displayNames = portfolioNames.length > 50 ? 
+                portfolioNames.substring(0, 50) + '...' : 
+                portfolioNames;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${++index}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${portfolios.length}</td>
+                <td style="text-align: right; font-weight: 600; color: #10b981;">$${userTotalValue.toLocaleString()}</td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${portfolioNames}">${displayNames}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Portfolios by user table populated (${index} users)`);
     }
 
     displayNewsletterStats() {
         console.log('📊 Displaying newsletter stats...');
         
         // Déjà affiché dans loadNewsletterData()
+    }
+
+    displayRealEstateStats() {
+        console.log('📊 Displaying real estate stats...');
+        
+        const tbody = document.getElementById('real-estate-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Real estate users table not found');
+            return;
+        }
+        
+        if (!this.allRealEstateSimulations || this.allRealEstateSimulations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No real estate simulations</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Grouper par user
+        const simulationsByUser = {};
+        this.allRealEstateSimulations.forEach(sim => {
+            const userId = sim.userId || 'unknown';
+            if (!simulationsByUser[userId]) {
+                simulationsByUser[userId] = [];
+            }
+            simulationsByUser[userId].push(sim);
+        });
+        
+        // Afficher une ligne par user
+        let index = 0;
+        Object.entries(simulationsByUser).forEach(([userId, sims]) => {
+            const user = this.allUsersData.find(u => u.id === userId);
+            const userEmail = user?.email || sims[0]?.userEmail || 'N/A';
+            
+            // Récupérer la dernière simulation
+            const latestSim = sims.sort((a, b) => {
+                const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                return dateB - dateA;
+            })[0];
+            
+            const lastSimDate = latestSim.createdAt ? 
+                (latestSim.createdAt.toDate ? latestSim.createdAt.toDate() : new Date(latestSim.createdAt)).toLocaleDateString('en-US') : 
+                'N/A';
+            
+            const propertyTypes = [...new Set(sims.map(s => s.propertyType || s.type || 'Unknown'))].join(', ');
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${++index}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${sims.length}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${propertyTypes}</td>
+                <td>${lastSimDate}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Real estate by user table populated (${index} users)`);
+    }
+
+    displayLoginHistoryStats() {
+        console.log('📊 Displaying login history stats...');
+        
+        const tbody = document.getElementById('login-history-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Login history users table not found');
+            return;
+        }
+        
+        if (!this.allLoginHistory || this.allLoginHistory.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No login history</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Grouper par user
+        const loginsByUser = {};
+        this.allLoginHistory.forEach(login => {
+            const userId = login.userId || 'unknown';
+            if (!loginsByUser[userId]) {
+                loginsByUser[userId] = [];
+            }
+            loginsByUser[userId].push(login);
+        });
+        
+        // Afficher une ligne par user
+        let index = 0;
+        Object.entries(loginsByUser).forEach(([userId, logins]) => {
+            const user = this.allUsersData.find(u => u.id === userId);
+            const userEmail = user?.email || logins[0]?.userEmail || 'N/A';
+            
+            // Trouver le dernier login
+            const latestLogin = logins.sort((a, b) => {
+                const dateA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp)) : new Date(0);
+                const dateB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp)) : new Date(0);
+                return dateB - dateA;
+            })[0];
+            
+            const lastLoginDate = latestLogin.timestamp ? 
+                (latestLogin.timestamp.toDate ? latestLogin.timestamp.toDate() : new Date(latestLogin.timestamp)).toLocaleString('en-US') : 
+                'N/A';
+            
+            // Compter les méthodes
+            const methods = {};
+            logins.forEach(l => {
+                const method = l.method || l.loginMethod || 'unknown';
+                methods[method] = (methods[method] || 0) + 1;
+            });
+            
+            const topMethod = Object.entries(methods).sort((a, b) => b[1] - a[1])[0];
+            const methodDisplay = topMethod ? `${topMethod[0]} (${topMethod[1]})` : 'N/A';
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${++index}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${logins.length}</td>
+                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${methodDisplay}</td>
+                <td>${lastLoginDate}</td>
+                <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${latestLogin.ip || 'N/A'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Login history by user table populated (${index} users)`);
+    }
+
+    displayConversationsStats() {
+        console.log('📊 Displaying conversations stats...');
+        
+        const tbody = document.getElementById('conversations-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Conversations users table not found');
+            return;
+        }
+        
+        if (!this.allConversations || this.allConversations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No AI conversations</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Grouper par user
+        const conversationsByUser = {};
+        this.allConversations.forEach(conv => {
+            const userId = conv.userId || 'unknown';
+            if (!conversationsByUser[userId]) {
+                conversationsByUser[userId] = [];
+            }
+            conversationsByUser[userId].push(conv);
+        });
+        
+        // Afficher une ligne par user
+        let index = 0;
+        Object.entries(conversationsByUser).forEach(([userId, conversations]) => {
+            const user = this.allUsersData.find(u => u.id === userId);
+            const userEmail = user?.email || conversations[0]?.userEmail || 'N/A';
+            
+            // Compter total messages
+            let totalMessages = 0;
+            conversations.forEach(c => {
+                totalMessages += c.messageCount || (c.messages ? c.messages.length : 0);
+            });
+            
+            const avgMessages = conversations.length > 0 ? (totalMessages / conversations.length).toFixed(1) : 0;
+            
+            // Trouver la dernière conversation
+            const latestConv = conversations.sort((a, b) => {
+                const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                return dateB - dateA;
+            })[0];
+            
+            const lastConvDate = latestConv.createdAt ? 
+                (latestConv.createdAt.toDate ? latestConv.createdAt.toDate() : new Date(latestConv.createdAt)).toLocaleDateString('en-US') : 
+                'N/A';
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${++index}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${conversations.length}</td>
+                <td style="text-align: center; font-weight: 600; color: #10b981;">${totalMessages}</td>
+                <td style="text-align: center; color: #64748b;">${avgMessages}</td>
+                <td>${lastConvDate}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Conversations by user table populated (${index} users)`);
     }
 
     // ========================================

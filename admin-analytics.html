@@ -1503,6 +1503,62 @@
                                         </table>
                                     </div>
                                 </div>
+
+                                <!-- 🆕 TABLEAU DÉTAILLÉ PAR USER -->
+                                <div class="table-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        Watchlists by User
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>User</th>
+                                                    <th>Watchlists</th>
+                                                    <th>Total Symbols</th>
+                                                    <th>Symbols List</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="watchlists-users-table-body">
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- 🆕 TABLEAU PORTFOLIOS PAR USER -->
+                                <div class="table-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        Portfolios by User
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>User</th>
+                                                    <th>Portfolios</th>
+                                                    <th>Total Value</th>
+                                                    <th>Portfolio Names</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="portfolios-users-table-body">
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                                 
                                 <div style="display: flex; gap: 12px; margin-top: 16px;">
                                     <button class='dashboard-btn' id='exportWatchlistsBtn'>
@@ -1603,7 +1659,7 @@
                                             <div class="kpi-label">Total Conversations</div>
                                             <div class="kpi-value" id="total-conversations-detail">0</div>
                                             <div class="kpi-sublabel">
-                                                Avg: <span id="avg-conversations-per-user">0</span>/user
+                                                Avg: <span id="avg-conversations-per-user-detail">0</span>/user
                                             </div>
                                         </div>
                                     </div>
@@ -1616,9 +1672,38 @@
                                             <div class="kpi-label">Total Messages</div>
                                             <div class="kpi-value" id="total-ai-messages-detail">0</div>
                                             <div class="kpi-sublabel">
-                                                Avg: <span id="avg-messages-per-conversation">0</span>/conv
+                                                Avg: <span id="avg-messages-per-conversation-detail">0</span>/conv
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- 🆕 TABLEAU PAR USER -->
+                                <div class="table-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        AI Conversations by User
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>User</th>
+                                                    <th>Conversations</th>
+                                                    <th>Total Messages</th>
+                                                    <th>Avg Msg/Conv</th>
+                                                    <th>Last Conversation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="conversations-users-table-body">
+                                                <tr>
+                                                    <td colspan="6" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -1655,9 +1740,38 @@
                                         </div>
                                         <div class="kpi-content">
                                             <div class="kpi-label">Top Method</div>
-                                            <div class="kpi-value" id="top-login-method" style="font-size: 1rem;">N/A</div>
+                                            <div class="kpi-value" id="top-login-method-detail" style="font-size: 1rem;">N/A</div>
                                             <div class="kpi-sublabel">Most used</div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- 🆕 TABLEAU PAR USER -->
+                                <div class="table-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        Login History by User
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>User</th>
+                                                    <th>Total Logins</th>
+                                                    <th>Top Method</th>
+                                                    <th>Last Login</th>
+                                                    <th>Last IP</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="login-history-users-table-body">
+                                                <tr>
+                                                    <td colspan="6" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -1694,9 +1808,37 @@
                                         </div>
                                         <div class="kpi-content">
                                             <div class="kpi-label">Avg Per User</div>
-                                            <div class="kpi-value" id="avg-real-estate-per-user">0</div>
+                                            <div class="kpi-value" id="avg-real-estate-per-user-detail">0</div>
                                             <div class="kpi-sublabel">Simulations</div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- 🆕 TABLEAU PAR USER -->
+                                <div class="table-wrapper" style="margin-top: 24px;">
+                                    <h4 class="chart-title">
+                                        <i class="fas fa-users"></i>
+                                        Real Estate Simulations by User
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>User</th>
+                                                    <th>Simulations</th>
+                                                    <th>Property Types</th>
+                                                    <th>Last Simulation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="real-estate-users-table-body">
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center; padding: 20px;">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
