@@ -370,16 +370,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// Animations CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(400px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+// ✅ CORRECTION : Animations CSS avec variable unique
+(function() {
+    const newsletterStyles = document.createElement('style');
+    newsletterStyles.id = 'auto-newsletter-styles';
+    newsletterStyles.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    
+    // Vérifier si les styles n'existent pas déjà
+    if (!document.getElementById('auto-newsletter-styles')) {
+        document.head.appendChild(newsletterStyles);
     }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(400px); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
+})();
