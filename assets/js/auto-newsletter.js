@@ -263,20 +263,19 @@ class AutoNewsletterSystem {
         let md = '';
 
         // ═══════════════════════════════════════════════════════
-        // ✅ BANNIÈRE PREMIUM (TEXTE BLANC)
+        // ✅ BANNIÈRE PREMIUM (TEXTE NET ET VISIBLE)
         // ═══════════════════════════════════════════════════════
-        md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);">\n\n`;
-        md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
-        md += `<h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 20px 0; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">Premium Financial Digest</h3>\n\n`;
-        md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.2);">${weekRange}</p>\n\n`;
-        md += `<p style="font-size: 1rem; margin: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.2);">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">\n\n`;
+        md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 2px; line-height: 1.2;">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
+        md += `<h3 style="font-size: 1.4rem; font-weight: 700; margin: 0 0 20px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4); letter-spacing: 1px;">Premium Financial Digest</h3>\n\n`;
+        md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4);">${weekRange}</p>\n\n`;
+        md += `<p style="font-size: 1rem; margin: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4);">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
         md += `</div>\n\n`;
 
-        // ✅ SÉPARATEUR SIMPLE
         md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // ✅ EXECUTIVE SUMMARY (SANS DOUBLONS)
+        // EXECUTIVE SUMMARY
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #667eea;">Executive Summary</h2>\n\n`;
@@ -408,18 +407,18 @@ class AutoNewsletterSystem {
         md += `<h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #3b82f6;">This Week in Numbers</h2>\n\n`;
         md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 24px 0;">\n\n`;
         
-        md += `<div style="background: linear-gradient(135deg, #10b981, #059669); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);">\n\n`;
-        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">${allNews.length}</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #10b981, #059669); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">\n\n`;
+        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${allNews.length}</p>\n\n`;
         md += `<p style="font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Stories Analyzed</p>\n\n`;
         md += `</div>\n\n`;
         
-        md += `<div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);">\n\n`;
-        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">${this.countUniqueTickers(allNews)}</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">\n\n`;
+        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${this.countUniqueTickers(allNews)}</p>\n\n`;
         md += `<p style="font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Companies</p>\n\n`;
         md += `</div>\n\n`;
         
-        md += `<div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">\n\n`;
-        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">${sectors.length}</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: 32px; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">\n\n`;
+        md += `<p style="font-size: 3rem; font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${sectors.length}</p>\n\n`;
         md += `<p style="font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Active Sectors</p>\n\n`;
         md += `</div>\n\n`;
         
@@ -460,7 +459,7 @@ class AutoNewsletterSystem {
         md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // ✅ SECTION COMPLÈTE : 10 ARTICLES COMPACTS
+        // ✅ SECTION COMPLÈTE : 10 ARTICLES - DÉGRADÉ CYAN/ROSE
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">Complete News Coverage</h2>\n\n`;
@@ -469,44 +468,32 @@ class AutoNewsletterSystem {
         const top10Articles = this.selectTopNews(allNews, 10);
         
         top10Articles.forEach((article, index) => {
-            const cardColors = [
-                'linear-gradient(135deg, #667eea, #764ba2)',
-                'linear-gradient(135deg, #f093fb, #f5576c)',
-                'linear-gradient(135deg, #4facfe, #00f2fe)',
-                'linear-gradient(135deg, #43e97b, #38f9d7)',
-                'linear-gradient(135deg, #fa709a, #fee140)',
-                'linear-gradient(135deg, #30cfd0, #330867)',
-                'linear-gradient(135deg, #a8edea, #fed6e3)',
-                'linear-gradient(135deg, #ff9a9e, #fecfef)',
-                'linear-gradient(135deg, #ffecd2, #fcb69f)',
-                'linear-gradient(135deg, #ff6e7f, #bfe9ff)'
-            ];
+            // ✅ TOUS LES HEADERS AVEC LE MÊME DÉGRADÉ CYAN → ROSE
+            const headerGradient = 'linear-gradient(135deg, #06b6d4, #ec4899)';
             
-            // ✅ CARDS PLUS COMPACTES
-            md += `<div style="background: white; border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: 2px solid rgba(102, 126, 234, 0.2);">\n\n`;
+            md += `<div style="background: white; border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
             
-            // Header compact
-            md += `<div style="background: ${cardColors[index]}; padding: 16px 24px; display: flex; align-items: center; gap: 12px;">\n\n`;
-            md += `<div style="background: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${index + 1}</div>\n\n`;
+            // ✅ Header avec dégradé cyan-rose
+            md += `<div style="background: ${headerGradient}; padding: 16px 24px; display: flex; align-items: center; gap: 12px;">\n\n`;
+            md += `<div style="background: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #06b6d4; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${index + 1}</div>\n\n`;
             md += `<div style="flex: 1;">\n\n`;
-            md += `<p style="margin: 0; font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 0.5px;">${article.sourceName}</p>\n\n`;
-            md += `<p style="margin: 4px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.85);">${this.getTimeAgo(article.timestamp)}</p>\n\n`;
+            md += `<p style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">${article.sourceName}</p>\n\n`;
+            md += `<p style="margin: 4px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.95); text-shadow: 0 1px 3px rgba(0,0,0,0.3);">${this.getTimeAgo(article.timestamp)}</p>\n\n`;
             md += `</div>\n\n`;
             md += `</div>\n\n`;
             
-            // ✅ Image réduite (180px au lieu de 300px)
+            // Image réduite
             if (article.image) {
                 md += `<div style="width: 100%; height: 180px; overflow: hidden; background: #f1f5f9;">\n\n`;
                 md += `<img src="${article.image}" alt="${this.escapeHtml(article.title)}" style="width: 100%; height: 100%; object-fit: cover;">\n\n`;
                 md += `</div>\n\n`;
             }
             
-            // ✅ Contenu plus compact
+            // Contenu compact
             md += `<div style="padding: 20px;">\n\n`;
             md += `<h3 style="font-size: 1.3rem; font-weight: 800; color: #1e293b; margin: 0 0 12px 0; line-height: 1.3;">${article.title}</h3>\n\n`;
             
             if (article.description) {
-                // ✅ Description tronquée à 120 caractères
                 const shortDesc = article.description.length > 120 ? article.description.substring(0, 120) + '...' : article.description;
                 md += `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0 0 16px 0;">${shortDesc}</p>\n\n`;
             }
@@ -516,17 +503,17 @@ class AutoNewsletterSystem {
                 md += `<div style="margin: 0 0 16px 0;">\n\n`;
                 md += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">\n\n`;
                 article.tickers.slice(0, 4).forEach(ticker => {
-                    md += `<code style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">${ticker}</code>\n\n`;
+                    md += `<code style="background: ${headerGradient}; color: white; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(6, 182, 212, 0.3);">${ticker}</code>\n\n`;
                 });
                 md += `</div>\n\n`;
                 md += `</div>\n\n`;
             }
             
-            // Footer compact
+            // ✅ Footer avec bouton BLANC
             md += `<div style="padding-top: 16px; border-top: 2px solid #e2e8f0;">\n\n`;
-            md += `<a href="${article.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">\n\n`;
-            md += `Read Full Article\n\n`;
-            md += `<span style="font-size: 1rem;">→</span>\n\n`;
+            md += `<a href="${article.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: ${headerGradient}; color: #ffffff !important; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);">\n\n`;
+            md += `<span style="color: #ffffff !important;">Read Full Article</span>\n\n`;
+            md += `<span style="font-size: 1rem; color: #ffffff !important;">→</span>\n\n`;
             md += `</a>\n\n`;
             md += `</div>\n\n`;
             
@@ -541,7 +528,7 @@ class AutoNewsletterSystem {
         // ═══════════════════════════════════════════════════════
         // PREMIUM FOOTER
         // ═══════════════════════════════════════════════════════
-        md += `<div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">\n\n`;
         md += `<h3 style="font-size: 1.8rem; font-weight: 800; color: white; margin: 0 0 16px 0;">Stay Ahead of the Market</h3>\n\n`;
         md += `<p style="font-size: 1.05rem; color: rgba(255,255,255,0.9); line-height: 1.7; margin: 0 0 24px 0; max-width: 700px; margin-left: auto; margin-right: auto;">This premium newsletter is automatically curated by <strong style="color: #667eea;">AlphaVault AI</strong> using advanced algorithms and real-time market data analysis.</p>\n\n`;
         md += `<div style="display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin: 24px 0;">\n\n`;
@@ -559,8 +546,8 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
         md += `<div style="margin-top: 32px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">\n\n`;
-        md += `<a href="https://alphavault-ai.com" target="_blank" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);">Explore More Tools</a>\n\n`;
-        md += `<a href="https://alphavault-ai.com/pricing" target="_blank" style="background: white; color: #667eea; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 6px 20px rgba(255,255,255,0.2);">Join Premium</a>\n\n`;
+        md += `<a href="https://alphavault-ai.com" target="_blank" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">Explore More Tools</a>\n\n`;
+        md += `<a href="https://alphavault-ai.com/pricing" target="_blank" style="background: white; color: #667eea; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">Join Premium</a>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
@@ -570,7 +557,6 @@ class AutoNewsletterSystem {
         };
     }
 
-    // ✅ SÉPARATEUR SIMPLE (JUSTE UN TRAIT)
     createSimpleSeparator() {
         return `<div style="height: 40px; margin: 30px 0; position: relative; display: flex; align-items: center;">\n\n` +
                `<div style="flex: 1; height: 3px; background: linear-gradient(90deg, transparent 0%, #667eea 30%, #764ba2 50%, #667eea 70%, transparent 100%); border-radius: 2px;"></div>\n\n` +
