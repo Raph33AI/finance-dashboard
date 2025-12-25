@@ -19,26 +19,51 @@ class AutoNewsletterSystem {
         // Attendre que les services soient disponibles
         await this.waitForServices();
 
+        // ✅ CORRECTION : Vérifier que rssClient est bien initialisé
+        if (!this.rssClient) {
+            console.error('❌ RSSClient not available - cannot generate newsletter');
+            return;
+        }
+
         // Vérifier si un post doit être généré
         await this.checkAndGeneratePost();
     }
 
     async waitForServices() {
         return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 50; // 5 secondes max
+
             const checkServices = setInterval(() => {
+                attempts++;
+
+                // ✅ OPTION 1 : Utiliser l'instance existante de newsTerminal
+                if (window.newsTerminal && window.newsTerminal.rssClient) {
+                    console.log('✅ Using existing newsTerminal.rssClient');
+                    this.rssClient = window.newsTerminal.rssClient;
+                    this.communityService = window.communityService;
+                    clearInterval(checkServices);
+                    resolve();
+                    return;
+                }
+
+                // ✅ OPTION 2 : Créer notre propre instance si RSSClient existe
                 if (window.RSSClient && window.communityService) {
+                    console.log('✅ Creating new RSSClient instance');
                     this.rssClient = new RSSClient();
                     this.communityService = window.communityService;
                     clearInterval(checkServices);
                     resolve();
+                    return;
+                }
+
+                // Timeout après maxAttempts
+                if (attempts >= maxAttempts) {
+                    console.warn('⚠ Services not available after 5s - skipping auto-newsletter');
+                    clearInterval(checkServices);
+                    resolve();
                 }
             }, 100);
-
-            // Timeout après 10 secondes
-            setTimeout(() => {
-                clearInterval(checkServices);
-                resolve();
-            }, 10000);
         });
     }
 
