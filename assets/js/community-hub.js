@@ -979,7 +979,7 @@ class CommunityHub {
 
         container.innerHTML = users.map((user, index) => `
             <div class="leaderboard-item" 
-                onclick="window.location.href='public-profile.html?userId=${user.id}'" 
+                onclick="window.location.href='public-profile.html?id=${user.id}'" 
                 style="display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--glass-border); background: ${index === 0 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05))' : 'var(--card-background)'};">
                 <div class="leaderboard-rank" style="font-size: 1.5rem; min-width: 32px; text-align: center;">
                     ${medals[index]}
