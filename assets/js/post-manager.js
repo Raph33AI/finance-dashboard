@@ -784,12 +784,12 @@ class PostManager {
                                 <span>Instagram</span>
                             </a>
 
-                            <!-- X (Twitter) -->
+                            <!-- X -->
                             <a href="#" class="share-platform-btn twitter" data-platform="twitter">
                                 <div class="platform-icon">
-                                    <i class="fab fa-x-twitter"></i>
+                                    <i class="fab fa-x"></i>
                                 </div>
-                                <span>X (Twitter)</span>
+                                <span>X</span>
                             </a>
 
                             <!-- LinkedIn -->
