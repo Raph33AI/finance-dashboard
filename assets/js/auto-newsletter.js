@@ -379,39 +379,66 @@ class AutoNewsletterSystem {
 }
 
 // ════════════════════════════════════════════════════════════════
-// INITIALISATION AUTOMATIQUE
+// INITIALISATION MANUELLE UNIQUEMENT
 // ════════════════════════════════════════════════════════════════
 
 window.autoNewsletterSystem = null;
 
+// ✅ Fonction pour initialiser à la demande
+async function initAutoNewsletter() {
+    if (!window.autoNewsletterSystem) {
+        console.log('📰 Initializing Auto-Newsletter System (manual)...');
+        window.autoNewsletterSystem = new AutoNewsletterSystem();
+        
+        // Initialiser les services manuellement
+        if (window.newsTerminal && window.newsTerminal.rssClient) {
+            window.autoNewsletterSystem.rssClient = window.newsTerminal.rssClient;
+        } else if (typeof window.RSSClient === 'function') {
+            window.autoNewsletterSystem.rssClient = new window.RSSClient();
+        }
+        
+        window.autoNewsletterSystem.communityService = window.communityService;
+    }
+    
+    return window.autoNewsletterSystem;
+}
+
+// ✅ Fonction pour forcer la génération (appelée par le bouton)
+async function generateWeeklyNewsletter() {
+    try {
+        const system = await initAutoNewsletter();
+        
+        if (!system.rssClient) {
+            alert('⚠ RSS Client not available. Please make sure news-terminal.js is loaded.');
+            return;
+        }
+        
+        if (!firebase.auth().currentUser) {
+            alert('⚠ Please log in to generate newsletter');
+            return;
+        }
+        
+        await system.generateAndPublishPost(true);
+        
+    } catch (error) {
+        console.error('❌ Error generating newsletter:', error);
+        alert('Failed to generate newsletter: ' + error.message);
+    }
+}
+
+// ✅ Exposition globale
+window.generateWeeklyNewsletter = generateWeeklyNewsletter;
+
+// ✅ Auto-check optionnel (commenté par défaut)
+/*
 document.addEventListener('DOMContentLoaded', async () => {
-    // Attendre Firebase Auth
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-            console.log('✅ User authenticated - initializing auto-newsletter');
-            window.autoNewsletterSystem = new AutoNewsletterSystem();
-            await window.autoNewsletterSystem.initialize();
+            const system = await initAutoNewsletter();
+            if (system.rssClient) {
+                await system.checkAndGeneratePost();
+            }
         }
     });
 });
-
-// ✅ CORRECTION : Animations CSS avec variable unique
-(function() {
-    const newsletterStyles = document.createElement('style');
-    newsletterStyles.id = 'auto-newsletter-styles';
-    newsletterStyles.textContent = `
-        @keyframes slideInRight {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(400px); opacity: 0; }
-        }
-    `;
-    
-    // Vérifier si les styles n'existent pas déjà
-    if (!document.getElementById('auto-newsletter-styles')) {
-        document.head.appendChild(newsletterStyles);
-    }
-})();
+*/
