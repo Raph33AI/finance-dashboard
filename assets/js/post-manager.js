@@ -839,21 +839,16 @@ class PostManager {
             `;
             document.body.appendChild(modal);
 
-            // ✅ Event listeners (déléguées pour éviter les doublons)
+            // Event listeners
             const overlay = modal.querySelector('.share-modal-overlay');
             const closeBtn = modal.querySelector('.share-modal-close');
             const copyBtn = modal.querySelector('.share-copy-btn');
             
-            // Fermeture via overlay
             overlay.addEventListener('click', () => this.closeShareModal());
-            
-            // Fermeture via bouton X
             closeBtn.addEventListener('click', () => this.closeShareModal());
-            
-            // Copie du lien
             copyBtn.addEventListener('click', () => this.copyShareLink());
 
-            // ✅ Fermeture via touche Escape
+            // Escape key
             this.escapeHandler = (e) => {
                 if (e.key === 'Escape' && modal.classList.contains('active')) {
                     this.closeShareModal();
@@ -862,34 +857,31 @@ class PostManager {
             document.addEventListener('keydown', this.escapeHandler);
         }
 
-        // ✅ Remplir le champ de lien
+        // Remplir le champ de lien
         const linkInput = modal.querySelector('.share-link-input');
         linkInput.value = url;
 
-        // ✅ Encoder les données pour les URLs
+        // Encoder les données
         const encodedUrl = encodeURIComponent(url);
         const encodedTitle = encodeURIComponent(title);
         const encodedDescription = encodeURIComponent(description);
 
-        // ✅ WHATSAPP
+        // WHATSAPP
         const whatsappBtn = modal.querySelector('[data-platform="whatsapp"]');
         whatsappBtn.href = `https://wa.me/?text=${encodedTitle}%0A%0A${encodedDescription}%0A%0A${encodedUrl}`;
         whatsappBtn.target = '_blank';
         whatsappBtn.rel = 'noopener noreferrer';
 
-        // ✅ INSTAGRAM (copie + redirection)
+        // INSTAGRAM
         const instagramBtn = modal.querySelector('[data-platform="instagram"]');
-        // Supprimer les anciens listeners pour éviter les doublons
         const newInstagramBtn = instagramBtn.cloneNode(true);
         instagramBtn.parentNode.replaceChild(newInstagramBtn, instagramBtn);
         
         newInstagramBtn.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Copier le lien dans le presse-papier
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(url).then(() => {
-                    // Feedback visuel
                     const originalHTML = newInstagramBtn.innerHTML;
                     newInstagramBtn.innerHTML = `
                         <div class="platform-icon">
@@ -902,67 +894,60 @@ class PostManager {
                         newInstagramBtn.innerHTML = originalHTML;
                     }, 2000);
                     
-                    // Ouvrir Instagram après un court délai
                     setTimeout(() => {
                         window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
                     }, 500);
                 }).catch(() => {
-                    // Fallback si clipboard API échoue
                     alert('Link copied! Paste it in your Instagram Story or Bio.');
                     window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
                 });
             } else {
-                // Fallback pour anciens navigateurs
                 alert('Link copied! Paste it in your Instagram Story or Bio.');
                 window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
             }
         });
 
-        // ✅ X (TWITTER)
+        // X (TWITTER)
         const twitterBtn = modal.querySelector('[data-platform="twitter"]');
         twitterBtn.href = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
         twitterBtn.target = '_blank';
         twitterBtn.rel = 'noopener noreferrer';
 
-        // ✅ LINKEDIN
+        // LINKEDIN
         const linkedinBtn = modal.querySelector('[data-platform="linkedin"]');
         linkedinBtn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
         linkedinBtn.target = '_blank';
         linkedinBtn.rel = 'noopener noreferrer';
 
-        // ✅ FACEBOOK
+        // FACEBOOK
         const facebookBtn = modal.querySelector('[data-platform="facebook"]');
         facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
         facebookBtn.target = '_blank';
         facebookBtn.rel = 'noopener noreferrer';
 
-        // ✅ TELEGRAM
+        // TELEGRAM
         const telegramBtn = modal.querySelector('[data-platform="telegram"]');
         telegramBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
         telegramBtn.target = '_blank';
         telegramBtn.rel = 'noopener noreferrer';
 
-        // ✅ EMAIL
+        // EMAIL
         const emailBtn = modal.querySelector('[data-platform="email"]');
         emailBtn.href = `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0ARead more: ${encodedUrl}`;
 
-        // ✅ AFFICHER LE MODAL avec fix iOS scroll
-        // Sauvegarder la position de scroll actuelle
+        // ✅ AFFICHER LE MODAL - FORÇAGE iOS
         const scrollY = window.scrollY;
         
-        // Bloquer le scroll du body (fix iOS)
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
+        // Ajouter classe modal-open sur body
+        document.body.classList.add('modal-open');
         document.body.style.top = `-${scrollY}px`;
         
-        // Ajouter aussi sur html pour iOS Safari
-        document.documentElement.style.overflow = 'hidden';
-        
         // Activer le modal
-        modal.classList.add('active');
+        requestAnimationFrame(() => {
+            modal.classList.add('active');
+        });
         
-        // Focus sur le modal pour accessibility
+        // Accessibility
         modal.setAttribute('role', 'dialog');
         modal.setAttribute('aria-modal', 'true');
         modal.setAttribute('aria-labelledby', 'share-modal-title');
@@ -972,30 +957,27 @@ class PostManager {
         const modal = document.getElementById('shareModal');
         
         if (modal && modal.classList.contains('active')) {
-            // ✅ Désactiver le modal
+            // Désactiver le modal
             modal.classList.remove('active');
             
-            // ✅ RESTAURER LE SCROLL (fix iOS)
+            // ✅ RESTAURER LE SCROLL - FIX iOS
             const scrollY = document.body.style.top;
             
-            // Retirer les styles de blocage
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
+            // Retirer classe modal-open
+            document.body.classList.remove('modal-open');
             document.body.style.top = '';
-            document.documentElement.style.overflow = '';
             
             // Restaurer la position de scroll
             if (scrollY) {
                 window.scrollTo(0, parseInt(scrollY || '0') * -1);
             }
             
-            // ✅ Retirer les attributs accessibility
+            // Retirer attributs accessibility
             modal.removeAttribute('role');
             modal.removeAttribute('aria-modal');
             modal.removeAttribute('aria-labelledby');
             
-            // ✅ Nettoyer le listener Escape si défini
+            // Nettoyer le listener Escape
             if (this.escapeHandler) {
                 document.removeEventListener('keydown', this.escapeHandler);
                 this.escapeHandler = null;
@@ -1009,11 +991,10 @@ class PostManager {
         
         if (!linkInput || !copyBtn) return;
         
-        // ✅ Méthode moderne avec Clipboard API
+        // Méthode moderne avec Clipboard API
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(linkInput.value)
                 .then(() => {
-                    // Feedback visuel de succès
                     const originalHTML = copyBtn.innerHTML;
                     copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
                     copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
@@ -1025,20 +1006,17 @@ class PostManager {
                 })
                 .catch(err => {
                     console.error('Failed to copy:', err);
-                    // Fallback vers l'ancienne méthode
                     this.copyShareLinkFallback(linkInput, copyBtn);
                 });
         } else {
-            // ✅ Fallback pour anciens navigateurs
             this.copyShareLinkFallback(linkInput, copyBtn);
         }
     }
 
     copyShareLinkFallback(linkInput, copyBtn) {
-        // ✅ Méthode de secours pour anciens navigateurs
         try {
             linkInput.select();
-            linkInput.setSelectionRange(0, 99999); // Pour mobile
+            linkInput.setSelectionRange(0, 99999);
             
             const successful = document.execCommand('copy');
             
@@ -1059,7 +1037,6 @@ class PostManager {
             alert('Please copy the link manually: ' + linkInput.value);
         }
         
-        // Désélectionner pour mobile
         window.getSelection().removeAllRanges();
     }
 
