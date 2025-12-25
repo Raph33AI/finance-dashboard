@@ -918,6 +918,9 @@ class CommunityHub {
             const featuredPosts = await window.communityService.getFeaturedPosts(5);
             this.renderFeaturedPosts(featuredPosts);
 
+            // ✅ AJOUT : Charger le Leaderboard
+            await this.loadLeaderboard();
+
             // Trending Tags
             const popularTags = await window.communityService.getPopularTags(10);
             this.renderTrendingTags(popularTags);
@@ -925,6 +928,78 @@ class CommunityHub {
         } catch (error) {
             console.error('❌ Error loading sidebar data:', error);
         }
+    }
+
+    async loadLeaderboard() {
+        try {
+            const container = document.getElementById('leaderboardList');
+            if (!container) return;
+
+            // Loading state
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #3B82F6;"></i>
+                </div>
+            `;
+
+            // ✅ Récupérer les top 5 utilisateurs triés par points
+            const topUsers = await window.communityService.getTopContributors(5);
+
+            if (!topUsers || topUsers.length === 0) {
+                container.innerHTML = `
+                    <div class="leaderboard-empty" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <i class="fas fa-trophy" style="font-size: 2rem; opacity: 0.3; margin-bottom: 12px;"></i>
+                        <p>No contributors yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            this.renderLeaderboard(topUsers);
+
+        } catch (error) {
+            console.error('❌ Error loading leaderboard:', error);
+            const container = document.getElementById('leaderboardList');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load leaderboard</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    renderLeaderboard(users) {
+        const container = document.getElementById('leaderboardList');
+        if (!container) return;
+
+        const medals = ['🥇', '🥈', '🥉', '4⃣', '5⃣'];
+
+        container.innerHTML = users.map((user, index) => `
+            <div class="leaderboard-item" style="display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--glass-border); background: ${index === 0 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05))' : 'var(--card-background)'};">
+                <div class="leaderboard-rank" style="font-size: 1.5rem; min-width: 32px; text-align: center;">
+                    ${medals[index]}
+                </div>
+                <img 
+                    src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=3B82F6&color=fff'}" 
+                    alt="${this.escapeHtml(user.displayName || 'User')}" 
+                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid ${index === 0 ? '#FFD700' : 'var(--glass-border)'};"
+                >
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">
+                        ${this.escapeHtml(user.displayName || 'Anonymous')}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-fire" style="color: #F59E0B;"></i> ${user.points || 0} points
+                    </div>
+                </div>
+                <div style="text-align: right; font-size: 0.85rem; color: var(--text-secondary);">
+                    <div><i class="fas fa-file-alt"></i> ${user.postsCount || 0}</div>
+                </div>
+            </div>
+        `).join('');
     }
 
     renderFeaturedPosts(posts) {

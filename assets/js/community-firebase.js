@@ -906,7 +906,10 @@ class CommunityFirebaseService {
             const docRef = await this.db.collection('posts').add(post);
             
             console.log('✅ Post created:', docRef.id);
-            
+
+            // ✅ AJOUT : Recalculer les points de l'auteur
+            await this.recalculateUserPoints(user.uid);
+
             return {
                 id: docRef.id,
                 ...post
@@ -982,6 +985,8 @@ class CommunityFirebaseService {
             }
 
             await this.db.collection('posts').doc(postId).delete();
+            // ✅ AJOUT : Recalculer les points de l'auteur
+            await this.recalculateUserPoints(user.uid);
             
             console.log('✅ Post deleted:', postId);
 
@@ -1087,6 +1092,8 @@ class CommunityFirebaseService {
                 await postRef.update({
                     likes: firebase.firestore.FieldValue.arrayUnion(user.uid)
                 });
+                // ✅ AJOUT : Recalculer les points de l'auteur du post
+                await this.recalculateUserPoints(postData.authorId);
                 return { liked: true, count: likes.length + 1 };
             }
 
@@ -1235,6 +1242,8 @@ class CommunityFirebaseService {
             });
 
             console.log('✅ Comment added:', docRef.id);
+            // ✅ AJOUT : Recalculer les points de l'auteur du commentaire
+            await this.recalculateUserPoints(user.uid);
 
             return {
                 id: docRef.id,
@@ -1283,11 +1292,137 @@ class CommunityFirebaseService {
             await this.db.collection('posts').doc(postId).update({
                 commentsCount: firebase.firestore.FieldValue.increment(-1)
             });
+            
+            // ✅ AJOUT : Recalculer les points de l'auteur du commentaire
+            await this.recalculateUserPoints(user.uid);
 
             console.log('✅ Comment deleted:', commentId);
 
         } catch (error) {
             console.error('❌ Error deleting comment:', error);
+            throw error;
+        }
+    }
+
+    /* ==========================================
+    🏆 LEADERBOARD - TOP CONTRIBUTEURS
+    ========================================== */
+
+    /**
+     * Récupérer les top contributeurs (triés par points)
+     */
+    async getTopContributors(limit = 5) {
+        try {
+            const snapshot = await this.db.collection('users')
+                .orderBy('points', 'desc') // ✅ Nécessite un index
+                .limit(limit)
+                .get();
+
+            if (snapshot.empty) {
+                console.warn('⚠ No users found in leaderboard');
+                return [];
+            }
+
+            const topUsers = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log('✅ Top contributors loaded:', topUsers.length);
+            return topUsers;
+
+        } catch (error) {
+            console.error('❌ Error fetching top contributors:', error);
+            
+            // Si l'erreur est due à un index manquant
+            if (error.code === 'failed-precondition') {
+                console.error('🔥 MISSING INDEX! Create index for: users.points (desc)');
+                console.error('📝 Index URL:', error.message.match(/https:\/\/[^\s]+/)?.[0]);
+            }
+            
+            return [];
+        }
+    }
+
+    /**
+     * Recalculer les points d'un utilisateur
+     * À appeler après création/suppression de post, like, commentaire
+     */
+    async recalculateUserPoints(userId) {
+        try {
+            const userRef = this.db.collection('users').doc(userId);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                console.warn('⚠ User not found:', userId);
+                return 0;
+            }
+
+            // 📊 Compter les posts de l'utilisateur
+            const postsSnapshot = await this.db.collection('posts')
+                .where('authorId', '==', userId)
+                .get();
+
+            // 💖 Compter les likes reçus sur tous ses posts
+            let totalLikes = 0;
+            postsSnapshot.docs.forEach(doc => {
+                const post = doc.data();
+                totalLikes += (post.likes?.length || 0);
+            });
+
+            // 💬 Compter les commentaires de l'utilisateur
+            const commentsSnapshot = await this.db.collection('comments')
+                .where('authorId', '==', userId)
+                .get();
+
+            // 🏆 FORMULE DE SCORING (ajustez selon vos besoins)
+            const points = 
+                (postsSnapshot.size * 10) +      // 10 points par post créé
+                (totalLikes * 2) +               // 2 points par like reçu
+                (commentsSnapshot.size * 3);     // 3 points par commentaire
+
+            // 💾 Mettre à jour les stats de l'utilisateur
+            await userRef.update({
+                points: points,
+                postsCount: postsSnapshot.size,
+                commentsCount: commentsSnapshot.size,
+                likesReceived: totalLikes,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log(`✅ Points recalculated for ${userId}: ${points} points`);
+            return points;
+
+        } catch (error) {
+            console.error('❌ Error recalculating points:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Initialiser les points d'un nouvel utilisateur
+     */
+    async initializeUserPoints(userId, userData = {}) {
+        try {
+            const userRef = this.db.collection('users').doc(userId);
+            
+            await userRef.set({
+                displayName: userData.displayName || 'Anonymous',
+                photoURL: userData.photoURL || null,
+                email: userData.email || null,
+                plan: userData.plan || 'free',
+                points: 0,
+                postsCount: 0,
+                commentsCount: 0,
+                likesReceived: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }); // merge: true pour ne pas écraser les données existantes
+
+            console.log('✅ User points initialized:', userId);
+
+        } catch (error) {
+            console.error('❌ Error initializing user points:', error);
             throw error;
         }
     }
