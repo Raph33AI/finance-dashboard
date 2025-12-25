@@ -263,14 +263,14 @@ class AutoNewsletterSystem {
         let md = '';
 
         // ═══════════════════════════════════════════════════════
-        // ✅ BANNIÈRE PREMIUM (TEXTE NET ET VISIBLE)
-        // ═══════════════════════════════════════════════════════
-        md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">\n\n`;
-        md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 2px; line-height: 1.2;">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
-        md += `<h3 style="font-size: 1.4rem; font-weight: 700; margin: 0 0 20px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4); letter-spacing: 1px;">Premium Financial Digest</h3>\n\n`;
-        md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4);">${weekRange}</p>\n\n`;
-        md += `<p style="font-size: 1rem; margin: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.4);">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
-        md += `</div>\n\n`;
+    // ✅ BANNIÈRE PREMIUM (TEXTE BLANC ULTRA-VISIBLE)
+    // ═══════════════════════════════════════════════════════
+    md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">\n\n`;
+    md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff !important; text-shadow: 0 4px 16px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6); letter-spacing: 2px; line-height: 1.2; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
+    md += `<h3 style="font-size: 1.4rem; font-weight: 700; margin: 0 0 20px 0; color: #ffffff !important; text-shadow: 0 3px 12px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); letter-spacing: 1px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Premium Financial Digest</h3>\n\n`;
+    md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff !important; text-shadow: 0 3px 12px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">${weekRange}</p>\n\n`;
+    md += `<p style="font-size: 1rem; margin: 0; color: #ffffff !important; text-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
+    md += `</div>\n\n`;
 
         md += this.createSimpleSeparator();
 
@@ -547,7 +547,7 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `<div style="margin-top: 32px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">\n\n`;
         md += `<a href="https://alphavault-ai.com" target="_blank" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">Explore More Tools</a>\n\n`;
-        md += `<a href="https://alphavault-ai.com/pricing" target="_blank" style="background: white; color: #667eea; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">Join Premium</a>\n\n`;
+        md += `<a href="checkout.html" target="_blank" style="background: white; color: #667eea; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(255,255,255,0.2);">Join Premium</a>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
