@@ -4297,3 +4297,522 @@ body.dark-mode .post-image-wrapper:hover {
         opacity: 1;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 CORRECTIONS FINALES - POST DETAIL & COMMUNITY HUB
+   Ajoutez ce code à la FIN de community.css
+   ════════════════════════════════════════════════════════════════ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   1⃣ CHANNEL BADGE - DESIGN UNIFIÉ (Posts + Community Hub)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Channel dans les cards de posts */
+.post-channel,
+.post-detail-channel {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 16px !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+}
+
+.post-channel i,
+.post-detail-channel i {
+    font-size: 1rem !important;
+    color: white !important;
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+}
+
+.post-channel:hover,
+.post-detail-channel:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+}
+
+/* Channel chips dans Community Hub */
+.channel-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 24px !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 2px solid transparent !important;
+    border-radius: 14px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    
+    /* Bordure dégradée */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.channel-chip i {
+    font-size: 1.1rem !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.channel-chip:hover {
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.35) !important;
+}
+
+/* État actif du channel */
+.channel-chip.active {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5) !important;
+}
+
+.channel-chip.active i {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    background: none !important;
+}
+
+/* Dark mode pour channels */
+body.dark-mode .channel-chip {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   2⃣ ACTIONS EN BAS DU POST - Like, Share, Save
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Container des actions principales */
+.post-detail-actions,
+.post-actions-bar {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    padding: 20px 0 !important;
+    border-top: 2px solid var(--glass-border) !important;
+    margin-top: 32px !important;
+}
+
+/* Boutons Like, Share, Save - Style unifié */
+.action-btn,
+.like-btn,
+.share-btn,
+.save-btn,
+#likeBtn,
+#shareBtn,
+#saveBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 2px solid transparent !important;
+    border-radius: 12px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    
+    /* Bordure dégradée par défaut */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.action-btn i,
+.like-btn i,
+.share-btn i,
+.save-btn i {
+    font-size: 1.1rem !important;
+    transition: transform 0.3s ease !important;
+}
+
+.action-btn:hover,
+.like-btn:hover,
+.share-btn:hover,
+.save-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3) !important;
+}
+
+.action-btn:hover i,
+.like-btn:hover i,
+.share-btn:hover i,
+.save-btn:hover i {
+    transform: scale(1.2) !important;
+}
+
+/* Like Button - Gradient vert */
+.like-btn,
+#likeBtn {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #10b981, #059669) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.like-btn i,
+#likeBtn i {
+    color: #10b981 !important;
+}
+
+.like-btn:hover,
+#likeBtn:hover {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* État "liked" */
+.like-btn.liked,
+#likeBtn.liked,
+.action-btn.liked {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5) !important;
+}
+
+.like-btn.liked i,
+#likeBtn.liked i,
+.action-btn.liked i {
+    color: white !important;
+}
+
+.like-btn.liked:hover,
+#likeBtn.liked:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Share Button - Gradient bleu */
+.share-btn,
+#shareBtn {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.share-btn i,
+#shareBtn i {
+    color: #3b82f6 !important;
+}
+
+.share-btn:hover,
+#shareBtn:hover {
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Save Button - Gradient orange */
+.save-btn,
+#saveBtn {
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #f59e0b, #d97706) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.save-btn i,
+#saveBtn i {
+    color: #f59e0b !important;
+}
+
+.save-btn:hover,
+#saveBtn:hover {
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* État "saved" */
+.save-btn.saved,
+#saveBtn.saved,
+.action-btn.saved {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5) !important;
+}
+
+.save-btn.saved i,
+#saveBtn.saved i,
+.action-btn.saved i {
+    color: white !important;
+}
+
+/* Dark mode pour actions */
+body.dark-mode .action-btn,
+body.dark-mode .like-btn,
+body.dark-mode .share-btn,
+body.dark-mode .save-btn {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+body.dark-mode .like-btn,
+body.dark-mode #likeBtn {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+body.dark-mode .share-btn,
+body.dark-mode #shareBtn {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+body.dark-mode .save-btn,
+body.dark-mode #saveBtn {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   3⃣ BOUTON DELETE DANS LA SECTION COMMENTAIRES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Bouton delete spécifique */
+.comment-delete-btn,
+.delete-comment-btn,
+.comment-action-btn.delete,
+button[onclick*="deleteComment"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 16px !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid transparent !important;
+    border-radius: 10px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: #ef4444 !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* Bordure dégradée rouge */
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #ef4444, #dc2626) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+.comment-delete-btn i,
+.delete-comment-btn i,
+.comment-action-btn.delete i {
+    font-size: 0.9rem !important;
+    color: #ef4444 !important;
+}
+
+.comment-delete-btn:hover,
+.delete-comment-btn:hover,
+.comment-action-btn.delete:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5) !important;
+}
+
+.comment-delete-btn:hover i,
+.delete-comment-btn:hover i,
+.comment-action-btn.delete:hover i {
+    color: white !important;
+}
+
+/* Dark mode pour delete button */
+body.dark-mode .comment-delete-btn,
+body.dark-mode .delete-comment-btn,
+body.dark-mode .comment-action-btn.delete {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(135deg, #ef4444, #dc2626) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   4⃣ CORRECTIONS SUPPLÉMENTAIRES - POST HEADER ACTIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Actions en haut du post (Edit, Delete, Pin) */
+.post-header-actions,
+.post-action-buttons {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+.post-action-btn,
+.edit-post-btn,
+.delete-post-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    border: 2px solid var(--glass-border) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1rem !important;
+}
+
+.post-action-btn:hover {
+    transform: translateY(-2px) scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25) !important;
+}
+
+/* Edit button - Bleu */
+.edit-post-btn:hover,
+.post-action-btn.edit:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+/* Delete button - Rouge */
+.delete-post-btn:hover,
+.post-action-btn.delete:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   5⃣ RESPONSIVE DESIGN - CORRECTIONS MOBILES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    /* Channels plus compacts sur mobile */
+    .channel-chip {
+        padding: 10px 18px !important;
+        font-size: 0.85rem !important;
+        gap: 8px !important;
+    }
+    
+    .channel-chip i {
+        font-size: 1rem !important;
+    }
+    
+    /* Actions du post en colonne sur mobile */
+    .post-detail-actions,
+    .post-actions-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .action-btn,
+    .like-btn,
+    .share-btn,
+    .save-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 14px 20px !important;
+    }
+    
+    /* Delete button mobile */
+    .comment-delete-btn,
+    .delete-comment-btn {
+        padding: 10px 14px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-channel,
+    .post-detail-channel {
+        padding: 6px 12px !important;
+        font-size: 0.75rem !important;
+        gap: 6px !important;
+    }
+    
+    .channel-chip {
+        padding: 8px 14px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   6⃣ ANIMATIONS & MICRO-INTERACTIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Animation du like */
+@keyframes likeAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(-10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.like-btn.liked i,
+#likeBtn.liked i {
+    animation: likeAnimation 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Animation du save */
+@keyframes saveAnimation {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-6px); }
+    75% { transform: translateY(2px); }
+}
+
+.save-btn.saved i,
+#saveBtn.saved i {
+    animation: saveAnimation 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Pulse effect pour les actions importantes */
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(102, 126, 234, 0); }
+}
+
+.action-btn:active,
+.like-btn:active,
+.share-btn:active,
+.save-btn:active {
+    animation: pulseGlow 0.6s ease-out !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎯 FIN DES CORRECTIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
