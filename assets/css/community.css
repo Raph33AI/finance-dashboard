@@ -5024,3 +5024,113 @@ body.dark-mode .comment-action-btn.delete {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🎯 FIN DES CORRECTIONS COMPLÈTES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+   /* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTION - BOUTON SAVE CHANGES SANS ROTATION
+   ════════════════════════════════════════════════════════════════ */
+
+/* Désactiver l'animation de rotation du spinner */
+.btn-publish .spinner,
+.btn-publish.loading .spinner,
+.btn-save-changes .spinner,
+.btn-save-changes.loading .spinner,
+button[type="submit"] .spinner,
+button[type="submit"].loading .spinner {
+    animation: none !important;
+    display: inline-block !important;
+}
+
+/* Désactiver fa-spin sur tous les boutons de soumission */
+.btn-publish .fa-spin,
+.btn-save-changes .fa-spin,
+button[type="submit"] .fa-spin,
+.loading .fa-spin {
+    animation: none !important;
+}
+
+/* Alternative : Animation pulse subtile au lieu de spin */
+@keyframes buttonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.btn-publish.loading,
+.btn-save-changes.loading,
+button[type="submit"].loading {
+    opacity: 0.8 !important;
+    cursor: wait !important;
+    position: relative !important;
+}
+
+/* Animation pulse pour l'icône (au lieu de spin) */
+.btn-publish.loading i,
+.btn-save-changes.loading i,
+button[type="submit"].loading i {
+    animation: buttonPulse 1.5s ease-in-out infinite !important;
+}
+
+/* Option : Garder l'icône complètement statique */
+.btn-publish.loading i.static,
+.btn-save-changes.loading i.static,
+button[type="submit"].loading i.static {
+    animation: none !important;
+}
+
+/* Désactiver toutes les animations de rotation globalement */
+@keyframes spin {
+    to { transform: rotate(0deg) !important; }
+}
+
+/* Force l'arrêt de fa-spin sur les boutons */
+.btn-publish i.fa-spinner,
+.btn-save-changes i.fa-spinner,
+button[type="submit"] i.fa-spinner {
+    animation: none !important;
+    transform: none !important;
+}
+
+/* État loading avec texte changé (optionnel) */
+.btn-publish.loading::before,
+.btn-save-changes.loading::before {
+    content: attr(data-loading-text) !important;
+}
+
+/* Masquer le texte original pendant le loading */
+.btn-publish.loading span:not(.spinner),
+.btn-save-changes.loading span:not(.spinner) {
+    opacity: 0.7 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 STYLE ALTERNATIF - Barre de progression au lieu de spinner
+   ════════════════════════════════════════════════════════════════ */
+
+/* Container du bouton avec barre de progression */
+.btn-publish.loading::after,
+.btn-save-changes.loading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 0 0 12px 12px;
+    animation: progressBar 2s ease-in-out forwards;
+}
+
+@keyframes progressBar {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* Désactiver la barre de progression si non souhaitée */
+.btn-publish.loading.no-progress::after,
+.btn-save-changes.loading.no-progress::after {
+    display: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ FIN DE LA CORRECTION
+   ════════════════════════════════════════════════════════════════ */
