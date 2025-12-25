@@ -784,10 +784,10 @@ class PostManager {
                                 <span>Instagram</span>
                             </a>
 
-                            <!-- X -->
+                            <!-- X (Twitter) -->
                             <a href="#" class="share-platform-btn twitter" data-platform="twitter">
                                 <div class="platform-icon">
-                                    <i class="fab fa-x"></i>
+                                    <i class="fab fa-x-twitter"></i>
                                 </div>
                                 <span>X</span>
                             </a>
@@ -839,79 +839,167 @@ class PostManager {
             `;
             document.body.appendChild(modal);
 
-            // Event listeners
+            // ✅ Event listeners (déléguées pour éviter les doublons)
             const overlay = modal.querySelector('.share-modal-overlay');
             const closeBtn = modal.querySelector('.share-modal-close');
             const copyBtn = modal.querySelector('.share-copy-btn');
             
+            // Fermeture via overlay
             overlay.addEventListener('click', () => this.closeShareModal());
+            
+            // Fermeture via bouton X
             closeBtn.addEventListener('click', () => this.closeShareModal());
+            
+            // Copie du lien
             copyBtn.addEventListener('click', () => this.copyShareLink());
 
-            // Escape key
-            document.addEventListener('keydown', (e) => {
+            // ✅ Fermeture via touche Escape
+            this.escapeHandler = (e) => {
                 if (e.key === 'Escape' && modal.classList.contains('active')) {
                     this.closeShareModal();
                 }
-            });
+            };
+            document.addEventListener('keydown', this.escapeHandler);
         }
 
-        // Remplir les liens
+        // ✅ Remplir le champ de lien
         const linkInput = modal.querySelector('.share-link-input');
         linkInput.value = url;
 
+        // ✅ Encoder les données pour les URLs
         const encodedUrl = encodeURIComponent(url);
         const encodedTitle = encodeURIComponent(title);
         const encodedDescription = encodeURIComponent(description);
 
-        // WhatsApp
+        // ✅ WHATSAPP
         const whatsappBtn = modal.querySelector('[data-platform="whatsapp"]');
         whatsappBtn.href = `https://wa.me/?text=${encodedTitle}%0A%0A${encodedDescription}%0A%0A${encodedUrl}`;
         whatsappBtn.target = '_blank';
+        whatsappBtn.rel = 'noopener noreferrer';
 
-        // Instagram (copie le lien + ouvre Instagram web)
+        // ✅ INSTAGRAM (copie + redirection)
         const instagramBtn = modal.querySelector('[data-platform="instagram"]');
-        instagramBtn.addEventListener('click', (e) => {
+        // Supprimer les anciens listeners pour éviter les doublons
+        const newInstagramBtn = instagramBtn.cloneNode(true);
+        instagramBtn.parentNode.replaceChild(newInstagramBtn, instagramBtn);
+        
+        newInstagramBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            navigator.clipboard.writeText(url);
-            alert('Link copied! You can now paste it in your Instagram Story or Bio.');
-            window.open('https://www.instagram.com/', '_blank');
+            
+            // Copier le lien dans le presse-papier
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    // Feedback visuel
+                    const originalHTML = newInstagramBtn.innerHTML;
+                    newInstagramBtn.innerHTML = `
+                        <div class="platform-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span>Link copied!</span>
+                    `;
+                    
+                    setTimeout(() => {
+                        newInstagramBtn.innerHTML = originalHTML;
+                    }, 2000);
+                    
+                    // Ouvrir Instagram après un court délai
+                    setTimeout(() => {
+                        window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+                    }, 500);
+                }).catch(() => {
+                    // Fallback si clipboard API échoue
+                    alert('Link copied! Paste it in your Instagram Story or Bio.');
+                    window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+                });
+            } else {
+                // Fallback pour anciens navigateurs
+                alert('Link copied! Paste it in your Instagram Story or Bio.');
+                window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+            }
         });
 
-        // X (Twitter)
+        // ✅ X (TWITTER)
         const twitterBtn = modal.querySelector('[data-platform="twitter"]');
         twitterBtn.href = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
         twitterBtn.target = '_blank';
+        twitterBtn.rel = 'noopener noreferrer';
 
-        // LinkedIn
+        // ✅ LINKEDIN
         const linkedinBtn = modal.querySelector('[data-platform="linkedin"]');
         linkedinBtn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
         linkedinBtn.target = '_blank';
+        linkedinBtn.rel = 'noopener noreferrer';
 
-        // Facebook
+        // ✅ FACEBOOK
         const facebookBtn = modal.querySelector('[data-platform="facebook"]');
         facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
         facebookBtn.target = '_blank';
+        facebookBtn.rel = 'noopener noreferrer';
 
-        // Telegram
+        // ✅ TELEGRAM
         const telegramBtn = modal.querySelector('[data-platform="telegram"]');
         telegramBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
         telegramBtn.target = '_blank';
+        telegramBtn.rel = 'noopener noreferrer';
 
-        // Email
+        // ✅ EMAIL
         const emailBtn = modal.querySelector('[data-platform="email"]');
         emailBtn.href = `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0ARead more: ${encodedUrl}`;
 
-        // Afficher le modal
-        modal.classList.add('active');
+        // ✅ AFFICHER LE MODAL avec fix iOS scroll
+        // Sauvegarder la position de scroll actuelle
+        const scrollY = window.scrollY;
+        
+        // Bloquer le scroll du body (fix iOS)
         document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${scrollY}px`;
+        
+        // Ajouter aussi sur html pour iOS Safari
+        document.documentElement.style.overflow = 'hidden';
+        
+        // Activer le modal
+        modal.classList.add('active');
+        
+        // Focus sur le modal pour accessibility
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'share-modal-title');
     }
 
     closeShareModal() {
         const modal = document.getElementById('shareModal');
-        if (modal) {
+        
+        if (modal && modal.classList.contains('active')) {
+            // ✅ Désactiver le modal
             modal.classList.remove('active');
+            
+            // ✅ RESTAURER LE SCROLL (fix iOS)
+            const scrollY = document.body.style.top;
+            
+            // Retirer les styles de blocage
             document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            document.documentElement.style.overflow = '';
+            
+            // Restaurer la position de scroll
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+            
+            // ✅ Retirer les attributs accessibility
+            modal.removeAttribute('role');
+            modal.removeAttribute('aria-modal');
+            modal.removeAttribute('aria-labelledby');
+            
+            // ✅ Nettoyer le listener Escape si défini
+            if (this.escapeHandler) {
+                document.removeEventListener('keydown', this.escapeHandler);
+                this.escapeHandler = null;
+            }
         }
     }
 
@@ -919,18 +1007,60 @@ class PostManager {
         const linkInput = document.querySelector('.share-link-input');
         const copyBtn = document.querySelector('.share-copy-btn');
         
-        linkInput.select();
-        document.execCommand('copy');
+        if (!linkInput || !copyBtn) return;
         
-        // Feedback visuel
-        const originalHTML = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        // ✅ Méthode moderne avec Clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(linkInput.value)
+                .then(() => {
+                    // Feedback visuel de succès
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    // Fallback vers l'ancienne méthode
+                    this.copyShareLinkFallback(linkInput, copyBtn);
+                });
+        } else {
+            // ✅ Fallback pour anciens navigateurs
+            this.copyShareLinkFallback(linkInput, copyBtn);
+        }
+    }
+
+    copyShareLinkFallback(linkInput, copyBtn) {
+        // ✅ Méthode de secours pour anciens navigateurs
+        try {
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // Pour mobile
+            
+            const successful = document.execCommand('copy');
+            
+            if (successful) {
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalHTML;
+                    copyBtn.style.background = '';
+                }, 2000);
+            } else {
+                throw new Error('Copy command failed');
+            }
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            alert('Please copy the link manually: ' + linkInput.value);
+        }
         
-        setTimeout(() => {
-            copyBtn.innerHTML = originalHTML;
-            copyBtn.style.background = '';
-        }, 2000);
+        // Désélectionner pour mobile
+        window.getSelection().removeAllRanges();
     }
 
     stripMarkdown(text) {
