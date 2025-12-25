@@ -414,9 +414,9 @@
                         Admin Analytics Dashboard
                     </h1>
                 </div>
-                <div class='header-center'>
+                <!-- <div class='header-center'>
                     <div id="cache-stats" class="cache-stats-inline"></div>
-                </div>
+                </div> -->
                 <div class='header-right'>
                     <button class='dashboard-btn dashboard-btn-export' id='exportDataBtn'>
                         <i class='fas fa-download'></i>
@@ -704,6 +704,48 @@
                                 <div class="dashboard-stat-value" id="total-user-alerts">0</div>
                                 <div class="dashboard-stat-change">
                                     Active: <span id="active-user-alerts">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Real Estate Simulations -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Real Estate Sims</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-real-estate-simulations">0</div>
+                                <div class="dashboard-stat-change">
+                                    Users: <span id="users-with-real-estate">0</span>
+                                </div>
+                            </div>
+
+                            <!-- AI Conversations -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">AI Conversations</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-conversations">0</div>
+                                <div class="dashboard-stat-change">
+                                    Messages: <span id="total-ai-messages">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Total Logins -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Logins</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="total-logins">0</div>
+                                <div class="dashboard-stat-change">
+                                    Avg: <span id="avg-logins-per-user">0</span>/user
                                 </div>
                             </div>
                         </div>
@@ -1471,6 +1513,191 @@
                                         <i class='fas fa-file-csv'></i>
                                         Export Portfolios
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 COMMUNITY & SOCIAL STATS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('social')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-users"></i>
+                                    Community & Social Stats
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="social-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="social-content">
+                                <!-- KPIs -->
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-user-friends"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Followers</div>
+                                            <div class="kpi-value" id="total-followers">0</div>
+                                            <div class="kpi-sublabel">
+                                                Following: <span id="total-following">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-edit"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Posts</div>
+                                            <div class="kpi-value" id="total-posts">0</div>
+                                            <div class="kpi-sublabel">
+                                                Comments: <span id="total-comments">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Avg Points/User</div>
+                                            <div class="kpi-value" id="avg-points-per-user">0</div>
+                                            <div class="kpi-sublabel">
+                                                Avg Rep: <span id="avg-reputation-per-user">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Likes</div>
+                                            <div class="kpi-value" id="total-likes-received">0</div>
+                                            <div class="kpi-sublabel">Received</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 AI CONVERSATIONS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('conversations')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-robot"></i>
+                                    AI Conversations
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="conversations-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="conversations-content">
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                            <i class="fas fa-comments"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Conversations</div>
+                                            <div class="kpi-value" id="total-conversations-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Avg: <span id="avg-conversations-per-user">0</span>/user
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Messages</div>
+                                            <div class="kpi-value" id="total-ai-messages-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Avg: <span id="avg-messages-per-conversation">0</span>/conv
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 LOGIN HISTORY -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('login-history')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-history"></i>
+                                    Login History
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="login-history-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="login-history-content">
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Logins</div>
+                                            <div class="kpi-value" id="total-logins-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Avg: <span id="avg-logins-per-user-detail">0</span>/user
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                            <i class="fas fa-trophy"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Top Method</div>
+                                            <div class="kpi-value" id="top-login-method" style="font-size: 1rem;">N/A</div>
+                                            <div class="kpi-sublabel">Most used</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 🆕 REAL ESTATE SIMULATIONS -->
+                        <div class="analytics-subsection">
+                            <div class="subsection-header" onclick="toggleSubsection('real-estate')">
+                                <h3 class="subsection-title">
+                                    <i class="fas fa-building"></i>
+                                    Real Estate Simulations
+                                </h3>
+                                <i class="fas fa-chevron-down subsection-arrow" id="real-estate-arrow"></i>
+                            </div>
+                            
+                            <div class="subsection-content collapsed" id="real-estate-content">
+                                <div class="kpis-grid">
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Total Simulations</div>
+                                            <div class="kpi-value" id="total-real-estate-simulations-detail">0</div>
+                                            <div class="kpi-sublabel">
+                                                Users: <span id="users-with-real-estate-detail">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="kpi-card">
+                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                            <i class="fas fa-calculator"></i>
+                                        </div>
+                                        <div class="kpi-content">
+                                            <div class="kpi-label">Avg Per User</div>
+                                            <div class="kpi-value" id="avg-real-estate-per-user">0</div>
+                                            <div class="kpi-sublabel">Simulations</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

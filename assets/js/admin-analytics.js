@@ -4216,6 +4216,10 @@ class AdminAnalyticsPro {
         this.allApiUsageData = [];
         this.allFeedbackData = [];
         this.allAlertsData = [];
+        // 🆕 NOUVELLES DONNÉES
+        this.allRealEstateSimulations = [];
+        this.allLoginHistory = [];
+        this.allConversations = [];
         
         // Analytics Data
         this.nonCustomerVisitors = [];
@@ -4504,10 +4508,15 @@ class AdminAnalyticsPro {
                 this.loadNewsletterData(),
                 this.loadApiUsageData(),
                 this.loadFeedbackData(),
-                this.loadAlertsData()
+                this.loadAlertsData(),
+                // 🆕 NOUVELLES FONCTIONS
+                this.loadRealEstateSimulations(),
+                this.loadLoginHistory(),
+                this.loadConversationsData(),
+                this.loadSocialStats()
             ]);
             console.log('✅ New Firestore collections loaded');
-            
+
             console.log(`📊 Total users loaded: ${this.allUsersData.length}`);
             console.log(`📊 Total visits loaded: ${this.allVisitsData.length}`);
             console.log(`📊 Total payments loaded: ${this.allPaymentsData.length}`);
@@ -4515,6 +4524,9 @@ class AdminAnalyticsPro {
             console.log(`📊 Total watchlists: ${this.allWatchlistsData.length}`);
             console.log(`📊 Total portfolios: ${this.allPortfoliosData.length}`);
             console.log(`📊 Newsletter subscribers: ${this.allNewsletterSubscribers.length}`);
+            console.log(`📊 Real estate simulations: ${this.allRealEstateSimulations?.length || 0}`);
+            console.log(`📊 Login history entries: ${this.allLoginHistory?.length || 0}`);
+            console.log(`📊 AI conversations: ${this.allConversations?.length || 0}`);
             
             // SECTION 4: ADVANCED ANALYTICS
             console.log('📈 Loading advanced analytics...');
@@ -5386,7 +5398,7 @@ class AdminAnalyticsPro {
             
             this.allWatchlistsData = [];
             
-            // 🔥 MÉTHODE 1 : Collection globale /watchlists
+            // 🔥 MÉTHODE 1 : Collection globale /watchlists (si elle existe)
             try {
                 const watchlistsSnapshot = await this.db.collection('watchlists').get();
                 console.log(`   Found ${watchlistsSnapshot.size} global watchlists`);
@@ -5402,16 +5414,19 @@ class AdminAnalyticsPro {
                 console.warn('⚠ No global /watchlists collection');
             }
             
-            // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/watchlists
+            // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/watchlist (SINGULIER)
             for (const user of this.allUsersData) {
                 try {
-                    const userWatchlistsSnapshot = await this.db
+                    // 🔥 CORRECTION : watchlist (SINGULIER, pas watchlists)
+                    const userWatchlistSnapshot = await this.db
                         .collection('users')
                         .doc(user.id)
-                        .collection('watchlists')
+                        .collection('watchlist')
                         .get();
                     
-                    userWatchlistsSnapshot.forEach(doc => {
+                    console.log(`   User ${user.email}: ${userWatchlistSnapshot.size} watchlist items`);
+                    
+                    userWatchlistSnapshot.forEach(doc => {
                         this.allWatchlistsData.push({
                             id: doc.id,
                             userId: user.id,
@@ -5435,6 +5450,7 @@ class AdminAnalyticsPro {
             this.updateStat('total-watchlists', totalWatchlists);
             this.updateStat('users-with-watchlists', usersWithWatchlists);
             this.updateStat('avg-watchlists-per-user', avgWatchlistsPerUser);
+            this.updateStat('total-watchlists-detail', totalWatchlists); // Pour la section détail
             
         } catch (error) {
             console.error('❌ Error loading watchlists:', error);
@@ -5523,17 +5539,33 @@ class AdminAnalyticsPro {
                 console.warn('⚠ No /newsletter_subscribers collection');
             }
             
-            // 🔥 ALTERNATIVE : Chercher dans users les champs newsletterSubscribed
+            // 🔥 MÉTHODE 2 : Lire depuis les champs users
             this.allUsersData.forEach(user => {
-                if (user.newsletterSubscribed || user.newsletter) {
+                // Vérifier si l'utilisateur a le champ newsletterSubscribedAt ou weeklyNewsletter
+                if (user.newsletterSubscribedAt || user.weeklyNewsletter) {
                     this.allNewsletterSubscribers.push({
                         id: user.id,
                         email: user.email,
-                        subscribedAt: user.newsletterSubscribedAt || user.createdAt,
+                        subscribedAt: user.newsletterSubscribedAt ? 
+                            (typeof user.newsletterSubscribedAt === 'string' ? 
+                                new Date(user.newsletterSubscribedAt) : 
+                                user.newsletterSubscribedAt) : 
+                            user.createdAt,
+                        weeklyNewsletter: user.weeklyNewsletter,
                         source: 'user_field'
                     });
                 }
             });
+            
+            // Dédupliquer par email
+            const uniqueSubscribers = new Map();
+            this.allNewsletterSubscribers.forEach(sub => {
+                if (!uniqueSubscribers.has(sub.email)) {
+                    uniqueSubscribers.set(sub.email, sub);
+                }
+            });
+            
+            this.allNewsletterSubscribers = Array.from(uniqueSubscribers.values());
             
             console.log(`✅ Newsletter subscribers loaded: ${this.allNewsletterSubscribers.length} total`);
             
@@ -5544,12 +5576,15 @@ class AdminAnalyticsPro {
             
             const newSubscribers = this.allNewsletterSubscribers.filter(sub => {
                 if (!sub.subscribedAt) return false;
-                const subDate = sub.subscribedAt.toDate ? sub.subscribedAt.toDate() : new Date(sub.subscribedAt);
+                const subDate = sub.subscribedAt instanceof Date ? sub.subscribedAt : 
+                            (sub.subscribedAt.toDate ? sub.subscribedAt.toDate() : new Date(sub.subscribedAt));
                 return subDate > weekAgo;
             }).length;
             
             this.updateStat('total-newsletter-subscribers', totalSubscribers);
             this.updateStat('new-newsletter-subscribers', `+${newSubscribers} this week`);
+            this.updateStat('total-newsletter-subscribers-detail', totalSubscribers);
+            this.updateStat('new-newsletter-subscribers-detail', `+${newSubscribers} this week`);
             
         } catch (error) {
             console.error('❌ Error loading newsletter data:', error);
@@ -5688,6 +5723,198 @@ class AdminAnalyticsPro {
             
         } catch (error) {
             console.error('❌ Error loading alerts:', error);
+        }
+    }
+
+    // ========================================
+    // 🆕 SECTION 3B: NOUVELLES DONNÉES FIRESTORE
+    // ========================================
+
+    async loadRealEstateSimulations() {
+        try {
+            console.log('🏠 Loading real estate simulations...');
+            
+            this.allRealEstateSimulations = [];
+            
+            for (const user of this.allUsersData) {
+                try {
+                    const realEstateSnapshot = await this.db
+                        .collection('users')
+                        .doc(user.id)
+                        .collection('realEstateSimulations')
+                        .get();
+                    
+                    realEstateSnapshot.forEach(doc => {
+                        this.allRealEstateSimulations.push({
+                            id: doc.id,
+                            userId: user.id,
+                            userEmail: user.email,
+                            ...doc.data()
+                        });
+                    });
+                } catch (e) {
+                    // User n'a pas de simulations
+                }
+            }
+            
+            console.log(`✅ Real estate simulations loaded: ${this.allRealEstateSimulations.length} total`);
+            
+            // Stats
+            const totalSimulations = this.allRealEstateSimulations.length;
+            const usersWithSimulations = new Set(this.allRealEstateSimulations.map(s => s.userId)).size;
+            const avgPerUser = usersWithSimulations > 0 ? (totalSimulations / usersWithSimulations).toFixed(1) : 0;
+            
+            this.updateStat('total-real-estate-simulations', totalSimulations);
+            this.updateStat('users-with-real-estate', usersWithSimulations);
+            this.updateStat('avg-real-estate-per-user', avgPerUser);
+            
+        } catch (error) {
+            console.error('❌ Error loading real estate simulations:', error);
+        }
+    }
+
+    async loadLoginHistory() {
+        try {
+            console.log('🔐 Loading login history...');
+            
+            this.allLoginHistory = [];
+            
+            for (const user of this.allUsersData) {
+                try {
+                    const loginSnapshot = await this.db
+                        .collection('users')
+                        .doc(user.id)
+                        .collection('login_history')
+                        .orderBy('timestamp', 'desc')
+                        .limit(50) // Limiter pour ne pas surcharger
+                        .get();
+                    
+                    loginSnapshot.forEach(doc => {
+                        this.allLoginHistory.push({
+                            id: doc.id,
+                            userId: user.id,
+                            userEmail: user.email,
+                            ...doc.data()
+                        });
+                    });
+                } catch (e) {
+                    // User n'a pas d'historique
+                }
+            }
+            
+            console.log(`✅ Login history loaded: ${this.allLoginHistory.length} total logins`);
+            
+            // Stats
+            const totalLogins = this.allLoginHistory.length;
+            const uniqueUsers = new Set(this.allLoginHistory.map(l => l.userId)).size;
+            const avgLoginsPerUser = uniqueUsers > 0 ? (totalLogins / uniqueUsers).toFixed(1) : 0;
+            
+            // Méthodes de connexion
+            const loginMethods = {};
+            this.allLoginHistory.forEach(login => {
+                const method = login.method || login.loginMethod || 'unknown';
+                loginMethods[method] = (loginMethods[method] || 0) + 1;
+            });
+            
+            const topMethod = Object.entries(loginMethods)
+                .sort((a, b) => b[1] - a[1])[0];
+            
+            this.updateStat('total-logins', totalLogins);
+            this.updateStat('avg-logins-per-user', avgLoginsPerUser);
+            this.updateStat('top-login-method', topMethod ? `${topMethod[0]} (${topMethod[1]})` : 'N/A');
+            
+        } catch (error) {
+            console.error('❌ Error loading login history:', error);
+        }
+    }
+
+    async loadConversationsData() {
+        try {
+            console.log('💬 Loading AI conversations...');
+            
+            this.allConversations = [];
+            let totalMessages = 0;
+            
+            for (const user of this.allUsersData) {
+                try {
+                    const conversationsSnapshot = await this.db
+                        .collection('users')
+                        .doc(user.id)
+                        .collection('conversations')
+                        .get();
+                    
+                    conversationsSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        this.allConversations.push({
+                            id: doc.id,
+                            userId: user.id,
+                            userEmail: user.email,
+                            ...data
+                        });
+                        
+                        totalMessages += data.messageCount || (data.messages ? data.messages.length : 0);
+                    });
+                } catch (e) {
+                    // User n'a pas de conversations
+                }
+            }
+            
+            console.log(`✅ AI conversations loaded: ${this.allConversations.length} conversations`);
+            
+            // Stats
+            const totalConversations = this.allConversations.length;
+            const usersWithConversations = new Set(this.allConversations.map(c => c.userId)).size;
+            const avgConversationsPerUser = usersWithConversations > 0 ? 
+                (totalConversations / usersWithConversations).toFixed(1) : 0;
+            const avgMessagesPerConversation = totalConversations > 0 ? 
+                (totalMessages / totalConversations).toFixed(1) : 0;
+            
+            this.updateStat('total-conversations', totalConversations);
+            this.updateStat('total-ai-messages', totalMessages);
+            this.updateStat('avg-conversations-per-user', avgConversationsPerUser);
+            this.updateStat('avg-messages-per-conversation', avgMessagesPerConversation);
+            
+        } catch (error) {
+            console.error('❌ Error loading conversations:', error);
+        }
+    }
+
+    async loadSocialStats() {
+        try {
+            console.log('👥 Loading social stats...');
+            
+            let totalFollowers = 0;
+            let totalFollowing = 0;
+            let totalPosts = 0;
+            let totalComments = 0;
+            let totalPoints = 0;
+            let totalReputation = 0;
+            let totalLikesReceived = 0;
+            
+            this.allUsersData.forEach(user => {
+                totalFollowers += user.followersCount || 0;
+                totalFollowing += user.followingCount || 0;
+                totalPosts += user.postsCount || user.postCount || 0;
+                totalComments += user.commentsCount || 0;
+                totalPoints += user.points || 0;
+                totalReputation += user.reputation || 0;
+                totalLikesReceived += user.likesReceived || 0;
+            });
+            
+            const totalUsers = this.allUsersData.length || 1;
+            
+            this.updateStat('total-followers', totalFollowers);
+            this.updateStat('total-following', totalFollowing);
+            this.updateStat('total-posts', totalPosts);
+            this.updateStat('total-comments', totalComments);
+            this.updateStat('avg-points-per-user', (totalPoints / totalUsers).toFixed(1));
+            this.updateStat('avg-reputation-per-user', (totalReputation / totalUsers).toFixed(1));
+            this.updateStat('total-likes-received', totalLikesReceived);
+            
+            console.log(`✅ Social stats loaded`);
+            
+        } catch (error) {
+            console.error('❌ Error loading social stats:', error);
         }
     }
 
@@ -8074,3 +8301,4 @@ function exportAnalyticsData(type) {
         alert('Analytics system not ready. Please wait...');
     }
 }
+
