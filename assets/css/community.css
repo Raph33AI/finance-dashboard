@@ -5134,3 +5134,67 @@ button[type="submit"] i.fa-spinner {
 /* ════════════════════════════════════════════════════════════════
    ✅ FIN DE LA CORRECTION
    ════════════════════════════════════════════════════════════════ */
+
+   /* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTION - MASQUER L'ICÔNE DE CHARGEMENT
+   Garde uniquement la barre de progression
+   ════════════════════════════════════════════════════════════════ */
+
+/* Masquer l'icône spinner pendant le loading */
+.btn-publish.loading .spinner,
+.btn-publish.loading i.fa-spinner,
+.btn-save-changes.loading .spinner,
+.btn-save-changes.loading i.fa-spinner,
+button[type="submit"].loading .spinner,
+button[type="submit"].loading i.fa-spinner {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Masquer TOUTES les icônes pendant le loading */
+.btn-publish.loading i,
+.btn-save-changes.loading i,
+button[type="submit"].loading i {
+    display: none !important;
+}
+
+/* Garder uniquement le texte visible */
+.btn-publish.loading span,
+.btn-save-changes.loading span,
+button[type="submit"].loading span {
+    display: inline !important;
+    opacity: 1 !important;
+}
+
+/* Barre de progression (déjà existante) */
+.btn-publish.loading::after,
+.btn-save-changes.loading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 0 0 12px 12px;
+    animation: progressBar 2s ease-in-out forwards;
+    z-index: 10;
+}
+
+@keyframes progressBar {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* Assurer que le bouton garde sa position relative */
+.btn-publish,
+.btn-save-changes {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ FIN DE LA CORRECTION
+   ════════════════════════════════════════════════════════════════ */
