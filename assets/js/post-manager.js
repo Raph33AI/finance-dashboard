@@ -776,6 +776,14 @@ class PostManager {
                                 <span>WhatsApp</span>
                             </a>
 
+                            <!-- Instagram -->
+                            <a href="#" class="share-platform-btn instagram" data-platform="instagram">
+                                <div class="platform-icon">
+                                    <i class="fab fa-instagram"></i>
+                                </div>
+                                <span>Instagram</span>
+                            </a>
+
                             <!-- X (Twitter) -->
                             <a href="#" class="share-platform-btn twitter" data-platform="twitter">
                                 <div class="platform-icon">
@@ -860,6 +868,15 @@ class PostManager {
         const whatsappBtn = modal.querySelector('[data-platform="whatsapp"]');
         whatsappBtn.href = `https://wa.me/?text=${encodedTitle}%0A%0A${encodedDescription}%0A%0A${encodedUrl}`;
         whatsappBtn.target = '_blank';
+
+        // Instagram (copie le lien + ouvre Instagram web)
+        const instagramBtn = modal.querySelector('[data-platform="instagram"]');
+        instagramBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText(url);
+            alert('Link copied! You can now paste it in your Instagram Story or Bio.');
+            window.open('https://www.instagram.com/', '_blank');
+        });
 
         // X (Twitter)
         const twitterBtn = modal.querySelector('[data-platform="twitter"]');
