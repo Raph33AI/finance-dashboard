@@ -292,3 +292,56 @@ body.dark-mode .user-dropdown-divider {
 .sidebar-user-dropdown.active {
     animation: slideUpFadeIn 0.3s ease;
 }
+
+/* ============================================
+   RESPONSIVE - BOUTONS PROFIL (MOBILE)
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Bouton Edit */
+    .btn-edit,
+    .edit-profile-btn,
+    .profile-edit {
+        font-size: 0.75rem !important; /* Réduction taille texte */
+        padding: 0.5rem 0.75rem !important; /* Réduction padding */
+        min-width: auto !important;
+    }
+    
+    /* Bouton Unfollow */
+    .btn-unfollow,
+    .unfollow-btn {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.75rem !important;
+        min-width: auto !important;
+    }
+    
+    /* Bouton Remove Follower */
+    .btn-remove-follower,
+    .remove-follower-btn,
+    .btn-remove {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.75rem !important;
+        min-width: auto !important;
+    }
+    
+    /* Si les boutons ont des icônes */
+    .btn-edit i,
+    .btn-unfollow i,
+    .btn-remove-follower i {
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Pour très petits écrans (320px - 480px) */
+@media (max-width: 480px) {
+    .btn-edit,
+    .btn-unfollow,
+    .btn-remove-follower,
+    .edit-profile-btn,
+    .unfollow-btn,
+    .remove-follower-btn {
+        font-size: 0.7rem !important;
+        padding: 0.4rem 0.6rem !important;
+        gap: 0.25rem !important; /* Réduction espacement icône/texte */
+    }
+}
