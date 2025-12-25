@@ -4299,12 +4299,12 @@ body.dark-mode .post-image-wrapper:hover {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   🎨 CORRECTIONS FINALES - POST DETAIL & COMMUNITY HUB
-   Ajoutez ce code à la FIN de community.css
+   🎨 CORRECTIONS FINALES COMPLÈTES - POST DETAIL & COMMUNITY HUB
+   Version Mobile-First avec tous les fixes
    ════════════════════════════════════════════════════════════════ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   1⃣ CHANNEL BADGE - DESIGN UNIFIÉ (Posts + Community Hub)
+   1⃣ CHANNEL BADGES - DESIGN UNIFIÉ (Posts + Community Hub)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Channel dans les cards de posts */
@@ -4340,12 +4340,45 @@ body.dark-mode .post-image-wrapper:hover {
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
 }
 
-/* Channel chips dans Community Hub */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   2⃣ CHANNELS NAVIGATION (Community Hub) - DESIGN COMPLET
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Container des channels */
+.channels-scroll {
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    padding: 12px 4px 20px 4px !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(102, 126, 234, 0.4) transparent !important;
+    flex-wrap: nowrap !important;
+}
+
+.channels-scroll::-webkit-scrollbar {
+    height: 8px !important;
+}
+
+.channels-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 10px !important;
+}
+
+.channels-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border-radius: 10px !important;
+}
+
+.channels-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea) !important;
+}
+
+/* Channel chips - DESIGN GRADIENT VIOLET */
 .channel-chip {
     display: inline-flex !important;
     align-items: center !important;
     gap: 10px !important;
-    padding: 12px 24px !important;
+    padding: 14px 24px !important;
     background: var(--glass-bg) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     border: 2px solid transparent !important;
@@ -4359,7 +4392,7 @@ body.dark-mode .post-image-wrapper:hover {
     flex-shrink: 0 !important;
     position: relative !important;
     
-    /* Bordure dégradée */
+    /* Bordure dégradée violette */
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
         linear-gradient(135deg, #667eea, #764ba2) !important;
@@ -4368,11 +4401,12 @@ body.dark-mode .post-image-wrapper:hover {
 }
 
 .channel-chip i {
-    font-size: 1.1rem !important;
+    font-size: 1.15rem !important;
     background: linear-gradient(135deg, #667eea, #764ba2) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
+    transition: all 0.3s ease !important;
 }
 
 .channel-chip:hover {
@@ -4397,24 +4431,32 @@ body.dark-mode .post-image-wrapper:hover {
 /* Dark mode pour channels */
 body.dark-mode .channel-chip {
     background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
+        linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
         linear-gradient(135deg, #667eea, #764ba2) !important;
     background-origin: border-box !important;
     background-clip: padding-box, border-box !important;
 }
 
+body.dark-mode .channel-chip:hover {
+    background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)),
+        linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   2⃣ ACTIONS EN BAS DU POST - Like, Share, Save
+   3⃣ BOUTONS LIKE / SHARE / SAVE - DISPOSITION HORIZONTALE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Container des actions principales */
+/* Container des actions principales - TOUJOURS EN LIGNE */
 .post-detail-actions,
 .post-actions-bar {
     display: flex !important;
+    flex-direction: row !important; /* FORCE horizontal même sur mobile */
     gap: 12px !important;
     align-items: center !important;
-    flex-wrap: wrap !important;
-    padding: 20px 0 !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    padding: 24px 0 !important;
     border-top: 2px solid var(--glass-border) !important;
     margin-top: 32px !important;
 }
@@ -4429,6 +4471,7 @@ body.dark-mode .channel-chip {
 #saveBtn {
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 8px !important;
     padding: 12px 24px !important;
     background: var(--glass-bg) !important;
@@ -4441,6 +4484,8 @@ body.dark-mode .channel-chip {
     cursor: pointer !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     position: relative !important;
+    flex: 1 !important;
+    min-width: 0 !important;
     
     /* Bordure dégradée par défaut */
     background-image: 
@@ -4453,9 +4498,13 @@ body.dark-mode .channel-chip {
 .action-btn i,
 .like-btn i,
 .share-btn i,
-.save-btn i {
+.save-btn i,
+#likeBtn i,
+#shareBtn i,
+#saveBtn i {
     font-size: 1.1rem !important;
     transition: transform 0.3s ease !important;
+    flex-shrink: 0 !important;
 }
 
 .action-btn:hover,
@@ -4535,34 +4584,34 @@ body.dark-mode .channel-chip {
     box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4) !important;
 }
 
-/* Save Button - Gradient orange */
+/* Save Button - Gradient noir/gris */
 .save-btn,
 #saveBtn {
     background-image: 
         linear-gradient(var(--glass-bg), var(--glass-bg)),
-        linear-gradient(135deg, #f59e0b, #d97706) !important;
+        linear-gradient(135deg, #1e293b, #334155) !important;
     background-origin: border-box !important;
     background-clip: padding-box, border-box !important;
 }
 
 .save-btn i,
 #saveBtn i {
-    color: #f59e0b !important;
+    color: #1e293b !important;
 }
 
 .save-btn:hover,
 #saveBtn:hover {
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4) !important;
+    box-shadow: 0 8px 24px rgba(30, 41, 59, 0.4) !important;
 }
 
 /* État "saved" */
 .save-btn.saved,
 #saveBtn.saved,
 .action-btn.saved {
-    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    background: linear-gradient(135deg, #1e293b, #334155) !important;
     color: white !important;
     border-color: transparent !important;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(30, 41, 59, 0.5) !important;
 }
 
 .save-btn.saved i,
@@ -4572,15 +4621,6 @@ body.dark-mode .channel-chip {
 }
 
 /* Dark mode pour actions */
-body.dark-mode .action-btn,
-body.dark-mode .like-btn,
-body.dark-mode .share-btn,
-body.dark-mode .save-btn {
-    background-image: 
-        linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
-        linear-gradient(135deg, #667eea, #764ba2) !important;
-}
-
 body.dark-mode .like-btn,
 body.dark-mode #likeBtn {
     background-image: 
@@ -4599,11 +4639,11 @@ body.dark-mode .save-btn,
 body.dark-mode #saveBtn {
     background-image: 
         linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
-        linear-gradient(135deg, #f59e0b, #d97706) !important;
+        linear-gradient(135deg, #475569, #64748b) !important;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   3⃣ BOUTON DELETE DANS LA SECTION COMMENTAIRES
+   4⃣ BOUTON DELETE DANS LA SECTION COMMENTAIRES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Bouton delete spécifique */
@@ -4663,12 +4703,10 @@ body.dark-mode .comment-action-btn.delete {
     background-image: 
         linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)),
         linear-gradient(135deg, #ef4444, #dc2626) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   4⃣ CORRECTIONS SUPPLÉMENTAIRES - POST HEADER ACTIONS
+   5⃣ CORRECTIONS SUPPLÉMENTAIRES - POST HEADER ACTIONS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Actions en haut du post (Edit, Delete, Pin) */
@@ -4719,7 +4757,7 @@ body.dark-mode .comment-action-btn.delete {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   5⃣ RESPONSIVE DESIGN - CORRECTIONS MOBILES
+   6⃣ RESPONSIVE DESIGN - OPTIMISATION MOBILE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
@@ -4734,31 +4772,64 @@ body.dark-mode .comment-action-btn.delete {
         font-size: 1rem !important;
     }
     
-    /* Actions du post en colonne sur mobile */
+    /* Actions du post - RESTENT EN LIGNE mais plus compactes */
     .post-detail-actions,
     .post-actions-bar {
-        flex-direction: column !important;
-        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 20px 12px !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
     }
     
     .action-btn,
     .like-btn,
     .share-btn,
-    .save-btn {
-        width: 100% !important;
-        justify-content: center !important;
-        padding: 14px 20px !important;
+    .save-btn,
+    #likeBtn,
+    #shareBtn,
+    #saveBtn {
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+    }
+    
+    .action-btn i,
+    .like-btn i,
+    .share-btn i,
+    .save-btn i {
+        font-size: 1rem !important;
+    }
+    
+    /* Masquer le texte sur très petit écran, garder seulement icônes */
+    .action-btn span,
+    .like-btn span,
+    .share-btn span,
+    .save-btn span {
+        display: inline !important;
     }
     
     /* Delete button mobile */
     .comment-delete-btn,
     .delete-comment-btn {
-        padding: 10px 14px !important;
+        padding: 8px 12px !important;
         font-size: 0.8rem !important;
     }
 }
 
 @media (max-width: 480px) {
+    /* Channels encore plus compacts */
+    .channel-chip {
+        padding: 8px 14px !important;
+        font-size: 0.8rem !important;
+        gap: 6px !important;
+    }
+    
+    .channel-chip i {
+        font-size: 0.95rem !important;
+    }
+    
+    /* Channel badge dans posts */
     .post-channel,
     .post-detail-channel {
         padding: 6px 12px !important;
@@ -4766,14 +4837,46 @@ body.dark-mode .comment-action-btn.delete {
         gap: 6px !important;
     }
     
-    .channel-chip {
-        padding: 8px 14px !important;
+    .post-channel i,
+    .post-detail-channel i {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Actions - Version ultra compacte */
+    .post-detail-actions,
+    .post-actions-bar {
+        gap: 6px !important;
+        padding: 16px 8px !important;
+    }
+    
+    .action-btn,
+    .like-btn,
+    .share-btn,
+    .save-btn {
+        padding: 10px 12px !important;
         font-size: 0.8rem !important;
+        gap: 5px !important;
+        border-radius: 10px !important;
+    }
+    
+    .action-btn i,
+    .like-btn i,
+    .share-btn i,
+    .save-btn i {
+        font-size: 0.95rem !important;
+    }
+    
+    /* Optionnel : afficher seulement les icônes sur très petit écran */
+    .action-btn span:not(.count),
+    .like-btn span:not(.count),
+    .share-btn span:not(.count),
+    .save-btn span:not(.count) {
+        display: none !important;
     }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   6⃣ ANIMATIONS & MICRO-INTERACTIONS
+   7⃣ ANIMATIONS & MICRO-INTERACTIONS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* Animation du like */
@@ -4813,6 +4916,62 @@ body.dark-mode .comment-action-btn.delete {
     animation: pulseGlow 0.6s ease-out !important;
 }
 
+/* Animation d'apparition des channels */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.channel-chip {
+    animation: slideInRight 0.4s ease-out backwards !important;
+}
+
+.channel-chip:nth-child(1) { animation-delay: 0.05s !important; }
+.channel-chip:nth-child(2) { animation-delay: 0.1s !important; }
+.channel-chip:nth-child(3) { animation-delay: 0.15s !important; }
+.channel-chip:nth-child(4) { animation-delay: 0.2s !important; }
+.channel-chip:nth-child(5) { animation-delay: 0.25s !important; }
+.channel-chip:nth-child(6) { animation-delay: 0.3s !important; }
+.channel-chip:nth-child(7) { animation-delay: 0.35s !important; }
+.channel-chip:nth-child(8) { animation-delay: 0.4s !important; }
+.channel-chip:nth-child(9) { animation-delay: 0.45s !important; }
+.channel-chip:nth-child(10) { animation-delay: 0.5s !important; }
+.channel-chip:nth-child(11) { animation-delay: 0.55s !important; }
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎯 FIN DES CORRECTIONS
+   8⃣ OPTIMISATIONS PERFORMANCES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* GPU Acceleration */
+.channel-chip,
+.action-btn,
+.like-btn,
+.share-btn,
+.save-btn {
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+}
+
+/* Préférence utilisateur : Réduire les animations */
+@media (prefers-reduced-motion: reduce) {
+    .channel-chip,
+    .action-btn,
+    .like-btn,
+    .share-btn,
+    .save-btn {
+        transition-duration: 0.01ms !important;
+        animation: none !important;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎯 FIN DES CORRECTIONS COMPLÈTES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
