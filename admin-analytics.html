@@ -1886,24 +1886,65 @@
                             </div>
                             
                             <div class="subsection-content collapsed" id="newsletter-content">
-                                <div class="kpis-grid">
-                                    <div class="kpi-card">
-                                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="kpi-content">
-                                            <div class="kpi-label">Total Subscribers</div>
-                                            <div class="kpi-value" id="total-newsletter-subscribers-detail">0</div>
-                                            <div class="kpi-sublabel" id="new-newsletter-subscribers-detail">+0 this week</div>
-                                        </div>
+                            <!-- KPIs -->
+                            <div class="kpis-grid">
+                                <div class="kpi-card">
+                                    <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <div class="kpi-label">Total Subscribers</div>
+                                        <div class="kpi-value" id="total-newsletter-subscribers-detail">0</div>
+                                        <div class="kpi-sublabel" id="new-newsletter-subscribers-detail">+0 this week</div>
                                     </div>
                                 </div>
                                 
-                                <button class='dashboard-btn' id='exportNewsletterBtn' style="margin-top: 16px;">
-                                    <i class='fas fa-file-csv'></i>
-                                    Export Newsletter Subscribers
-                                </button>
+                                <div class="kpi-card">
+                                    <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <div class="kpi-label">Weekly Newsletter</div>
+                                        <div class="kpi-value" id="weekly-newsletter-count">0</div>
+                                        <div class="kpi-sublabel">Active subscriptions</div>
+                                    </div>
+                                </div>
                             </div>
+                            
+                            <!-- 🆕 TABLEAU DES ABONNÉS -->
+                            <div class="table-wrapper" style="margin-top: 24px;">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-users"></i>
+                                    All Newsletter Subscribers
+                                </h4>
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Email</th>
+                                                <th>Subscribed At</th>
+                                                <th>Since</th>
+                                                <th>Source</th>
+                                                <th>Weekly Newsletter</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="newsletter-subscribers-table-body">
+                                            <tr>
+                                                <td colspan="6" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <button class='dashboard-btn' id='exportNewsletterBtn' style="margin-top: 16px;">
+                                <i class='fas fa-file-csv'></i>
+                                Export Newsletter Subscribers
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>

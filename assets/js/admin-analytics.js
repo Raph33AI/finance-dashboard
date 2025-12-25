@@ -4628,6 +4628,7 @@ class AdminAnalyticsPro {
             this.displayWatchlistsStats();
             this.displayPortfoliosStats();
             this.displayNewsletterStats();
+            this.displayNewsletterSubscribers();
             this.displayRealEstateStats();
             this.displayLoginHistoryStats();
             this.displayConversationsStats();
@@ -4879,27 +4880,271 @@ class AdminAnalyticsPro {
         }).addTo(map);
         
         const countryCoords = {
-            'US': [37.0902, -95.7129],
-            'United States': [37.0902, -95.7129],
-            'FR': [46.2276, 2.2137],
-            'France': [46.2276, 2.2137],
-            'GB': [55.3781, -3.4360],
-            'United Kingdom': [55.3781, -3.4360],
-            'DE': [51.1657, 10.4515],
-            'Germany': [51.1657, 10.4515],
-            'CA': [56.1304, -106.3468],
-            'Canada': [56.1304, -106.3468],
-            'JP': [36.2048, 138.2529],
-            'Japan': [36.2048, 138.2529],
-            'CN': [35.8617, 104.1954],
-            'China': [35.8617, 104.1954],
-            'IN': [20.5937, 78.9629],
-            'India': [20.5937, 78.9629],
-            'BR': [-14.2350, -51.9253],
-            'Brazil': [-14.2350, -51.9253],
-            'AU': [-25.2744, 133.7751],
-            'Australia': [-25.2744, 133.7751]
-        };
+        // 🌍 AMÉRIQUE DU NORD
+        'US': [37.0902, -95.7129],
+        'United States': [37.0902, -95.7129],
+        'USA': [37.0902, -95.7129],
+        'CA': [56.1304, -106.3468],
+        'Canada': [56.1304, -106.3468],
+        'MX': [23.6345, -102.5528],
+        'Mexico': [23.6345, -102.5528],
+        
+        // 🌍 AMÉRIQUE CENTRALE & CARAÏBES
+        'CR': [9.7489, -83.7534],
+        'Costa Rica': [9.7489, -83.7534],
+        'PA': [8.5380, -80.7821],
+        'Panama': [8.5380, -80.7821],
+        'JM': [18.1096, -77.2975],
+        'Jamaica': [18.1096, -77.2975],
+        'CU': [21.5218, -77.7812],
+        'Cuba': [21.5218, -77.7812],
+        
+        // 🌍 AMÉRIQUE DU SUD
+        'BR': [-14.2350, -51.9253],
+        'Brazil': [-14.2350, -51.9253],
+        'AR': [-38.4161, -63.6167],
+        'Argentina': [-38.4161, -63.6167],
+        'CL': [-35.6751, -71.5430],
+        'Chile': [-35.6751, -71.5430],
+        'CO': [4.5709, -74.2973],
+        'Colombia': [4.5709, -74.2973],
+        'PE': [-9.1900, -75.0152],
+        'Peru': [-9.1900, -75.0152],
+        'VE': [6.4238, -66.5897],
+        'Venezuela': [6.4238, -66.5897],
+        'EC': [-1.8312, -78.1834],
+        'Ecuador': [-1.8312, -78.1834],
+        'UY': [-32.5228, -55.7658],
+        'Uruguay': [-32.5228, -55.7658],
+        'PY': [-23.4425, -58.4438],
+        'Paraguay': [-23.4425, -58.4438],
+        
+        // 🌍 EUROPE OCCIDENTALE
+        'FR': [46.2276, 2.2137],
+        'France': [46.2276, 2.2137],
+        'GB': [55.3781, -3.4360],
+        'United Kingdom': [55.3781, -3.4360],
+        'UK': [55.3781, -3.4360],
+        'DE': [51.1657, 10.4515],
+        'Germany': [51.1657, 10.4515],
+        'ES': [40.4637, -3.7492],
+        'Spain': [40.4637, -3.7492],
+        'IT': [41.8719, 12.5674],
+        'Italy': [41.8719, 12.5674],
+        'PT': [39.3999, -8.2245],
+        'Portugal': [39.3999, -8.2245],
+        'NL': [52.1326, 5.2913],
+        'Netherlands': [52.1326, 5.2913],
+        'BE': [50.5039, 4.4699],
+        'Belgium': [50.5039, 4.4699],
+        'CH': [46.8182, 8.2275],
+        'Switzerland': [46.8182, 8.2275],
+        'AT': [47.5162, 14.5501],
+        'Austria': [47.5162, 14.5501],
+        'IE': [53.4129, -8.2439],
+        'Ireland': [53.4129, -8.2439],
+        'LU': [49.8153, 6.1296],
+        'Luxembourg': [49.8153, 6.1296],
+        
+        // 🌍 EUROPE DU NORD
+        'SE': [60.1282, 18.6435],
+        'Sweden': [60.1282, 18.6435],
+        'NO': [60.4720, 8.4689],
+        'Norway': [60.4720, 8.4689],
+        'DK': [56.2639, 9.5018],
+        'Denmark': [56.2639, 9.5018],
+        'FI': [61.9241, 25.7482],
+        'Finland': [61.9241, 25.7482],
+        'IS': [64.9631, -19.0208],
+        'Iceland': [64.9631, -19.0208],
+        
+        // 🌍 EUROPE DE L'EST
+        'PL': [51.9194, 19.1451],
+        'Poland': [51.9194, 19.1451],
+        'CZ': [49.8175, 15.4730],
+        'Czech Republic': [49.8175, 15.4730],
+        'HU': [47.1625, 19.5033],
+        'Hungary': [47.1625, 19.5033],
+        'RO': [45.9432, 24.9668],
+        'Romania': [45.9432, 24.9668],
+        'BG': [42.7339, 25.4858],
+        'Bulgaria': [42.7339, 25.4858],
+        'GR': [39.0742, 21.8243],
+        'Greece': [39.0742, 21.8243],
+        'UA': [48.3794, 31.1656],
+        'Ukraine': [48.3794, 31.1656],
+        'RU': [61.5240, 105.3188],
+        'Russia': [61.5240, 105.3188],
+        'HR': [45.1, 15.2],
+        'Croatia': [45.1, 15.2],
+        'RS': [44.0165, 21.0059],
+        'Serbia': [44.0165, 21.0059],
+        'SK': [48.6690, 19.6990],
+        'Slovakia': [48.6690, 19.6990],
+        'SI': [46.1512, 14.9955],
+        'Slovenia': [46.1512, 14.9955],
+        
+        // 🌍 ASIE DE L'EST
+        'CN': [35.8617, 104.1954],
+        'China': [35.8617, 104.1954],
+        'JP': [36.2048, 138.2529],
+        'Japan': [36.2048, 138.2529],
+        'KR': [35.9078, 127.7669],
+        'South Korea': [35.9078, 127.7669],
+        'KP': [40.3399, 127.5101],
+        'North Korea': [40.3399, 127.5101],
+        'TW': [23.6978, 120.9605],
+        'Taiwan': [23.6978, 120.9605],
+        'HK': [22.3193, 114.1694],
+        'Hong Kong': [22.3193, 114.1694],
+        'MO': [22.1987, 113.5439],
+        'Macau': [22.1987, 113.5439],
+        'MN': [46.8625, 103.8467],
+        'Mongolia': [46.8625, 103.8467],
+        
+        // 🌍 ASIE DU SUD-EST
+        'TH': [15.8700, 100.9925],
+        'Thailand': [15.8700, 100.9925],
+        'VN': [14.0583, 108.2772],
+        'Vietnam': [14.0583, 108.2772],
+        'SG': [1.3521, 103.8198],
+        'Singapore': [1.3521, 103.8198],
+        'MY': [4.2105, 101.9758],
+        'Malaysia': [4.2105, 101.9758],
+        'ID': [-0.7893, 113.9213],
+        'Indonesia': [-0.7893, 113.9213],
+        'PH': [12.8797, 121.7740],
+        'Philippines': [12.8797, 121.7740],
+        'MM': [21.9162, 95.9560],
+        'Myanmar': [21.9162, 95.9560],
+        'KH': [12.5657, 104.9910],
+        'Cambodia': [12.5657, 104.9910],
+        'LA': [19.8563, 102.4955],
+        'Laos': [19.8563, 102.4955],
+        'BN': [4.5353, 114.7277],
+        'Brunei': [4.5353, 114.7277],
+        
+        // 🌍 ASIE DU SUD
+        'IN': [20.5937, 78.9629],
+        'India': [20.5937, 78.9629],
+        'PK': [30.3753, 69.3451],
+        'Pakistan': [30.3753, 69.3451],
+        'BD': [23.6850, 90.3563],
+        'Bangladesh': [23.6850, 90.3563],
+        'LK': [7.8731, 80.7718],
+        'Sri Lanka': [7.8731, 80.7718],
+        'NP': [28.3949, 84.1240],
+        'Nepal': [28.3949, 84.1240],
+        'BT': [27.5142, 90.4336],
+        'Bhutan': [27.5142, 90.4336],
+        'MV': [3.2028, 73.2207],
+        'Maldives': [3.2028, 73.2207],
+        'AF': [33.9391, 67.7100],
+        'Afghanistan': [33.9391, 67.7100],
+        
+        // 🌍 MOYEN-ORIENT
+        'SA': [23.8859, 45.0792],
+        'Saudi Arabia': [23.8859, 45.0792],
+        'AE': [23.4241, 53.8478],
+        'United Arab Emirates': [23.4241, 53.8478],
+        'UAE': [23.4241, 53.8478],
+        'IL': [31.0461, 34.8516],
+        'Israel': [31.0461, 34.8516],
+        'TR': [38.9637, 35.2433],
+        'Turkey': [38.9637, 35.2433],
+        'IR': [32.4279, 53.6880],
+        'Iran': [32.4279, 53.6880],
+        'IQ': [33.2232, 43.6793],
+        'Iraq': [33.2232, 43.6793],
+        'SY': [34.8021, 38.9968],
+        'Syria': [34.8021, 38.9968],
+        'JO': [30.5852, 36.2384],
+        'Jordan': [30.5852, 36.2384],
+        'LB': [33.8547, 35.8623],
+        'Lebanon': [33.8547, 35.8623],
+        'KW': [29.3117, 47.4818],
+        'Kuwait': [29.3117, 47.4818],
+        'QA': [25.3548, 51.1839],
+        'Qatar': [25.3548, 51.1839],
+        'BH': [26.0667, 50.5577],
+        'Bahrain': [26.0667, 50.5577],
+        'OM': [21.4735, 55.9754],
+        'Oman': [21.4735, 55.9754],
+        'YE': [15.5527, 48.5164],
+        'Yemen': [15.5527, 48.5164],
+        
+        // 🌍 AFRIQUE DU NORD
+        'EG': [26.8206, 30.8025],
+        'Egypt': [26.8206, 30.8025],
+        'DZ': [28.0339, 1.6596],
+        'Algeria': [28.0339, 1.6596],
+        'MA': [31.7917, -7.0926],
+        'Morocco': [31.7917, -7.0926],
+        'TN': [33.8869, 9.5375],
+        'Tunisia': [33.8869, 9.5375],
+        'LY': [26.3351, 17.2283],
+        'Libya': [26.3351, 17.2283],
+        
+        // 🌍 AFRIQUE SUBSAHARIENNE
+        'ZA': [-30.5595, 22.9375],
+        'South Africa': [-30.5595, 22.9375],
+        'NG': [9.0820, 8.6753],
+        'Nigeria': [9.0820, 8.6753],
+        'KE': [-0.0236, 37.9062],
+        'Kenya': [-0.0236, 37.9062],
+        'ET': [9.1450, 40.4897],
+        'Ethiopia': [9.1450, 40.4897],
+        'GH': [7.9465, -1.0232],
+        'Ghana': [7.9465, -1.0232],
+        'TZ': [-6.3690, 34.8888],
+        'Tanzania': [-6.3690, 34.8888],
+        'UG': [1.3733, 32.2903],
+        'Uganda': [1.3733, 32.2903],
+        'SN': [14.4974, -14.4524],
+        'Senegal': [14.4974, -14.4524],
+        'CM': [7.3697, 12.3547],
+        'Cameroon': [7.3697, 12.3547],
+        'CI': [7.5400, -5.5471],
+        'Ivory Coast': [7.5400, -5.5471],
+        'AO': [-11.2027, 17.8739],
+        'Angola': [-11.2027, 17.8739],
+        'MZ': [-18.6657, 35.5296],
+        'Mozambique': [-18.6657, 35.5296],
+        'ZW': [-19.0154, 29.1549],
+        'Zimbabwe': [-19.0154, 29.1549],
+        'BW': [-22.3285, 24.6849],
+        'Botswana': [-22.3285, 24.6849],
+        'NA': [-22.9576, 18.4904],
+        'Namibia': [-22.9576, 18.4904],
+        'RW': [-1.9403, 29.8739],
+        'Rwanda': [-1.9403, 29.8739],
+        
+        // 🌍 OCÉANIE
+        'AU': [-25.2744, 133.7751],
+        'Australia': [-25.2744, 133.7751],
+        'NZ': [-40.9006, 174.8860],
+        'New Zealand': [-40.9006, 174.8860],
+        'FJ': [-17.7134, 178.0650],
+        'Fiji': [-17.7134, 178.0650],
+        'PG': [-6.3150, 143.9555],
+        'Papua New Guinea': [-6.3150, 143.9555],
+        'NC': [-20.9043, 165.6180],
+        'New Caledonia': [-20.9043, 165.6180],
+        'PF': [-17.6797, -149.4068],
+        'French Polynesia': [-17.6797, -149.4068],
+        
+        // 🌍 ASIE CENTRALE
+        'KZ': [48.0196, 66.9237],
+        'Kazakhstan': [48.0196, 66.9237],
+        'UZ': [41.3775, 64.5853],
+        'Uzbekistan': [41.3775, 64.5853],
+        'TM': [38.9697, 59.5563],
+        'Turkmenistan': [38.9697, 59.5563],
+        'KG': [41.2044, 74.7661],
+        'Kyrgyzstan': [41.2044, 74.7661],
+        'TJ': [38.8610, 71.2761],
+        'Tajikistan': [38.8610, 71.2761]
+    };
         
         this.cloudflareGeo.forEach(country => {
             const coords = countryCoords[country.country] || countryCoords[country.countryCode];
@@ -6311,7 +6556,94 @@ class AdminAnalyticsPro {
     displayNewsletterStats() {
         console.log('📊 Displaying newsletter stats...');
         
-        // Déjà affiché dans loadNewsletterData()
+        // Compter les abonnés au weekly newsletter
+        const weeklyCount = this.allNewsletterSubscribers.filter(sub => sub.weeklyNewsletter).length;
+        this.updateStat('weekly-newsletter-count', weeklyCount);
+    }
+
+    displayNewsletterSubscribers() {
+        console.log('📧 Displaying newsletter subscribers table...');
+        
+        const tbody = document.getElementById('newsletter-subscribers-table-body');
+        if (!tbody) {
+            console.warn('⚠ Newsletter subscribers table not found');
+            return;
+        }
+        
+        if (this.allNewsletterSubscribers.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0; font-weight: 600;">No Newsletter Subscribers</p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">No one has subscribed yet.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Trier par date d'inscription (plus récent en premier)
+        const sortedSubscribers = [...this.allNewsletterSubscribers].sort((a, b) => {
+            const dateA = a.subscribedAt ? 
+                (a.subscribedAt instanceof Date ? a.subscribedAt : 
+                a.subscribedAt.toDate ? a.subscribedAt.toDate() : 
+                new Date(a.subscribedAt)) : new Date(0);
+            const dateB = b.subscribedAt ? 
+                (b.subscribedAt instanceof Date ? b.subscribedAt : 
+                b.subscribedAt.toDate ? b.subscribedAt.toDate() : 
+                new Date(b.subscribedAt)) : new Date(0);
+            return dateB - dateA;
+        });
+        
+        sortedSubscribers.forEach((subscriber, index) => {
+            const email = subscriber.email || 'N/A';
+            
+            const subscribedDate = subscriber.subscribedAt ? 
+                (subscriber.subscribedAt instanceof Date ? subscriber.subscribedAt : 
+                subscriber.subscribedAt.toDate ? subscriber.subscribedAt.toDate() : 
+                new Date(subscriber.subscribedAt)).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }) : 'N/A';
+            
+            const source = subscriber.source || 'Unknown';
+            const weeklyNewsletter = subscriber.weeklyNewsletter ? '✅ Yes' : '❌ No';
+            
+            // Calculer depuis combien de temps
+            const daysSinceSubscription = subscriber.subscribedAt ? 
+                Math.floor((new Date() - (subscriber.subscribedAt instanceof Date ? subscriber.subscribedAt : 
+                        subscriber.subscribedAt.toDate ? subscriber.subscribedAt.toDate() : 
+                        new Date(subscriber.subscribedAt))) / (1000 * 60 * 60 * 24)) : 0;
+            
+            const daysDisplay = daysSinceSubscription === 0 ? 'Today' : 
+                            daysSinceSubscription === 1 ? '1 day ago' : 
+                            daysSinceSubscription < 30 ? `${daysSinceSubscription} days ago` :
+                            daysSinceSubscription < 365 ? `${Math.floor(daysSinceSubscription / 30)} months ago` :
+                            `${Math.floor(daysSinceSubscription / 365)} years ago`;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">
+                    ${email}
+                </td>
+                <td>${subscribedDate}</td>
+                <td style="color: #64748b;">${daysDisplay}</td>
+                <td>
+                    <span class="source-badge source-${source.toLowerCase().replace('_', '-')}">
+                        ${source}
+                    </span>
+                </td>
+                <td style="text-align: center;">${weeklyNewsletter}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Newsletter subscribers table populated (${sortedSubscribers.length} subscribers)`);
     }
 
     displayRealEstateStats() {
