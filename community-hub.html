@@ -301,6 +301,11 @@
                             <span>Analytics Dashboard</span>
                         </a>
                     </div>
+                    <!-- Bouton pour générer manuellement la newsletter -->
+                    <button class="dashboard-btn" onclick="window.autoNewsletterSystem?.forceGenerate()" 
+                            style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="fas fa-newspaper"></i> Generate Weekly Newsletter
+                    </button>
                 </div>
             </nav>
             
@@ -541,6 +546,8 @@
     <script src='assets/js/channel-manager.js'></script>
     <script src='assets/js/community-hub.js'></script>
     <script src="assets/js/admin-visibility.js"></script>
+    <!-- ✅ AUTO-NEWSLETTER SYSTEM -->
+    <script src="assets/js/auto-newsletter.js"></script>
 
     <!-- User Menu Init -->
     <script>
