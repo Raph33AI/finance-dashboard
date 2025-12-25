@@ -787,7 +787,7 @@ class PostManager {
                             <!-- X -->
                             <a href="#" class="share-platform-btn twitter" data-platform="twitter">
                                 <div class="platform-icon">
-                                    <i class="fab fa-X"></i>
+                                    <i class="fab fa-x"></i>
                                 </div>
                                 <span>X</span>
                             </a>
