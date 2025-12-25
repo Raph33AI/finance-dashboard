@@ -1,10 +1,9 @@
 // // ========================================
-// // ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v5.1
-// // ✅ Système de Cache & Rate Limiting intégré
-// // ✅ Correction complète des erreurs
-// // ✅ Tableau général des utilisateurs avec actions admin
-// // ✅ Système de gestion d'accès
-// // ✅ Menu principal restructuré
+// // ADMIN ANALYTICS PRO - ULTRA POWERFUL DASHBOARD v6.0
+// // ✅ Adapté au Worker v4.4 avec toutes les données Cloudflare
+// // ✅ Ajout de TOUTES les collections Firestore manquantes
+// // ✅ Nouveaux graphiques et KPIs
+// // ✅ Cache & Rate Limiting optimisé
 // // ========================================
 
 // // 🔐 CONFIGURATION
@@ -14,27 +13,18 @@
 
 // // 🆕 CONFIGURATION DU CACHE & RATE LIMITING
 // const CACHE_CONFIG = {
-//     // Durée de validité du cache (en millisecondes)
-//     // Par défaut: 6 heures = 6 * 60 * 60 * 1000
-//     CACHE_DURATION: 6 * 60 * 60 * 1000, // ⬅ 6 heures (modifiable)
-    
-//     // Nombre maximum d'appels Worker autorisés par jour
-//     MAX_DAILY_CALLS: 50, // ⬅ Limite quotidienne (modifiable)
-    
-//     // Activer/désactiver le cache
-//     ENABLE_CACHE: true, // ⬅ Mettre à false pour désactiver le cache
-    
-//     // Activer/désactiver le rate limiting
-//     ENABLE_RATE_LIMIT: true, // ⬅ Mettre à false pour désactiver la limite
-    
-//     // Endpoints à mettre en cache (tous par défaut)
+//     CACHE_DURATION: 6 * 60 * 60 * 1000, // 6 heures
+//     MAX_DAILY_CALLS: 50,
+//     ENABLE_CACHE: true,
+//     ENABLE_RATE_LIMIT: true,
 //     CACHED_ENDPOINTS: [
 //         'stripe-analytics',
 //         'cloudflare-analytics',
 //         'cloudflare-geo',
 //         'cloudflare-devices',
 //         'cloudflare-pages',
-//         'cloudflare-visitors'
+//         'cloudflare-cache',
+//         'cloudflare-referrers'
 //     ]
 // };
 
@@ -50,17 +40,14 @@
 //         this.callsDateKey = 'admin_calls_date';
 //     }
     
-//     // Vérifier si le cache est activé
 //     isCacheEnabled() {
 //         return this.config.ENABLE_CACHE;
 //     }
     
-//     // Vérifier si le rate limiting est activé
 //     isRateLimitEnabled() {
 //         return this.config.ENABLE_RATE_LIMIT;
 //     }
     
-//     // Obtenir des données du cache
 //     get(key) {
 //         if (!this.isCacheEnabled()) return null;
         
@@ -71,7 +58,6 @@
 //             const { data, timestamp } = JSON.parse(cachedItem);
 //             const now = Date.now();
             
-//             // Vérifier si le cache est encore valide
 //             if (now - timestamp < this.config.CACHE_DURATION) {
 //                 const ageMinutes = Math.floor((now - timestamp) / 60000);
 //                 console.log(`✅ Cache HIT for ${key} (age: ${ageMinutes} min)`);
@@ -87,7 +73,6 @@
 //         }
 //     }
     
-//     // Stocker des données dans le cache
 //     set(key, data) {
 //         if (!this.isCacheEnabled()) return;
         
@@ -103,12 +88,10 @@
 //         }
 //     }
     
-//     // Supprimer une entrée du cache
 //     remove(key) {
 //         localStorage.removeItem(this.storagePrefix + key);
 //     }
     
-//     // Vider tout le cache
 //     clearAll() {
 //         const keys = Object.keys(localStorage);
 //         keys.forEach(key => {
@@ -116,13 +99,11 @@
 //                 localStorage.removeItem(key);
 //             }
 //         });
-//         // Réinitialiser aussi le compteur d'appels
 //         localStorage.removeItem(this.callsCountKey);
 //         localStorage.removeItem(this.callsDateKey);
 //         console.log('🗑 All cache cleared');
 //     }
     
-//     // Vérifier le nombre d'appels aujourd'hui
 //     canMakeCall() {
 //         if (!this.isRateLimitEnabled()) return true;
         
@@ -130,7 +111,6 @@
 //         const storedDate = localStorage.getItem(this.callsDateKey);
 //         let callsCount = parseInt(localStorage.getItem(this.callsCountKey) || '0');
         
-//         // Réinitialiser le compteur si on est un nouveau jour
 //         if (storedDate !== today) {
 //             callsCount = 0;
 //             localStorage.setItem(this.callsDateKey, today);
@@ -145,7 +125,6 @@
 //         return true;
 //     }
     
-//     // Incrémenter le compteur d'appels
 //     incrementCallCount() {
 //         if (!this.isRateLimitEnabled()) return;
         
@@ -164,7 +143,6 @@
 //         console.log(`📞 API Calls today: ${callsCount}/${this.config.MAX_DAILY_CALLS}`);
 //     }
     
-//     // Obtenir les statistiques de cache
 //     getStats() {
 //         const today = new Date().toDateString();
 //         const storedDate = localStorage.getItem(this.callsDateKey);
@@ -180,7 +158,7 @@
 //             remaining: Math.max(0, this.config.MAX_DAILY_CALLS - callsCount),
 //             cacheEnabled: this.isCacheEnabled(),
 //             rateLimitEnabled: this.isRateLimitEnabled(),
-//             cacheDuration: this.config.CACHE_DURATION / (60 * 60 * 1000) // en heures
+//             cacheDuration: this.config.CACHE_DURATION / (60 * 60 * 1000)
 //         };
 //     }
 // }
@@ -229,11 +207,9 @@
         
 //         tbody.innerHTML = '';
         
-//         // Calculer les indices de début et fin
 //         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
 //         const endIndex = Math.min(startIndex + this.itemsPerPage, this.data.length);
         
-//         // Afficher les données de la page actuelle
 //         const pageData = this.data.slice(startIndex, endIndex);
         
 //         if (pageData.length === 0) {
@@ -253,7 +229,6 @@
 //             this.renderRowCallback(item, globalIndex, tbody);
 //         });
         
-//         // Mettre à jour les contrôles de pagination
 //         this.renderControls();
 //     }
     
@@ -262,7 +237,6 @@
 //         let controlsContainer = document.getElementById(controlsId);
         
 //         if (!controlsContainer) {
-//             // Créer le conteneur de contrôles
 //             const tbody = document.getElementById(this.tableId);
 //             if (!tbody) return;
             
@@ -338,7 +312,6 @@
 //     }
 // }
 
-// // Global registry for pagination managers
 // window.paginationManagers = {};
 
 // // ========================================
@@ -352,7 +325,6 @@
 //         this.charts = {};
 //         this.maps = {};
         
-//         // 🆕 CACHE MANAGER
 //         this.cache = new CacheManager(CACHE_CONFIG);
         
 //         // Third-Party Data
@@ -361,18 +333,31 @@
 //         this.cloudflareGeo = null;
 //         this.cloudflareDevices = null;
 //         this.cloudflarePages = null;
-//         this.cloudflareVisitors = null;
+//         this.cloudflareCache = null;
+//         this.cloudflareReferrers = null;
         
-//         // Internal Analytics Data
+//         // Firebase Core Data
 //         this.allUsersData = [];
-//         this.allUsersDetailedData = []; // 🆕 Données utilisateurs enrichies
+//         this.allUsersDetailedData = [];
 //         this.allVisitsData = [];
 //         this.allPaymentsData = [];
 //         this.allActivityData = [];
+        
+//         // 🆕 NOUVELLES COLLECTIONS FIRESTORE
+//         this.allWatchlistsData = [];
+//         this.allPortfoliosData = [];
+//         this.allNewsletterSubscribers = [];
+//         this.allApiUsageData = [];
+//         this.allFeedbackData = [];
+//         this.allAlertsData = [];
+//         // 🆕 NOUVELLES DONNÉES
+//         this.allRealEstateSimulations = [];
+//         this.allLoginHistory = [];
+//         this.allConversations = [];
+        
+//         // Analytics Data
 //         this.nonCustomerVisitors = [];
 //         this.potentialCustomers = [];
-        
-//         // Advanced Metrics
 //         this.sessionData = [];
 //         this.conversionPaths = [];
 //         this.bounceRateData = {};
@@ -386,17 +371,14 @@
 //             conversionDrop: 2
 //         };
         
-//         // Current section
 //         this.currentSection = 'dashboard';
-        
-//         // Current MRR
 //         this.currentMRR = 0;
         
 //         this.init();
 //     }
 
 //     async init() {
-//         console.log('🔐 Initializing Admin Analytics PRO v5.1...');
+//         console.log('🔐 Initializing Admin Analytics PRO v6.0...');
         
 //         this.auth.onAuthStateChanged(async (user) => {
 //             if (!user) {
@@ -418,28 +400,19 @@
 //             const displays = document.querySelectorAll('[data-admin-email]');
 //             displays.forEach(el => el.textContent = user.email);
             
-//             // 🆕 AFFICHER LE DASHBOARD AVANT DE CHARGER
 //             document.getElementById('loading-screen')?.style.setProperty('display', 'none');
 //             document.getElementById('admin-dashboard')?.style.setProperty('display', 'block');
             
-//             // Load Leaflet.js for maps
 //             await this.loadLeafletLibrary();
             
-//             // 🆕 Afficher les stats de cache
 //             this.displayCacheStats();
-            
-//             // 🆕 INITIALISER LES SECTIONS AVANT LE CHARGEMENT
 //             this.initSectionTabs();
-            
-//             // 🆕 AFFICHER LA SECTION DASHBOARD PAR DÉFAUT
 //             this.showSection('dashboard');
             
-//             // 🔥 CHARGER TOUTES LES DONNÉES
 //             console.log('📊 Starting data loading...');
 //             await this.loadAllData();
 //             console.log('✅ Data loading complete');
             
-//             // 🆕 AFFICHER EXPLICITEMENT LES TABLEAUX/GRAPHIQUES
 //             await this.refreshAllDisplays();
             
 //             this.initEventListeners();
@@ -473,7 +446,6 @@
 //     initEventListeners() {
 //         console.log('🎯 Initializing event listeners...');
         
-//         // Export buttons
 //         const exportButtons = {
 //             'exportDataBtn': () => this.exportAllData(),
 //             'exportUsersBtn': () => this.exportData('users'),
@@ -486,7 +458,10 @@
 //             'exportConversionPathsBtn': () => this.exportData('conversion-paths'),
 //             'exportActivityBtn': () => this.exportData('activity'),
 //             'exportVisitsBtn': () => this.exportData('visits'),
-//             'exportPaymentsBtn': () => this.exportData('payments')
+//             'exportPaymentsBtn': () => this.exportData('payments'),
+//             'exportWatchlistsBtn': () => this.exportData('watchlists'),
+//             'exportPortfoliosBtn': () => this.exportData('portfolios'),
+//             'exportNewsletterBtn': () => this.exportData('newsletter')
 //         };
         
 //         Object.entries(exportButtons).forEach(([id, handler]) => {
@@ -497,20 +472,18 @@
 //             }
 //         });
         
-//         // Refresh button
 //         const refreshBtn = document.getElementById('refreshDataBtn');
 //         if (refreshBtn) {
 //             refreshBtn.addEventListener('click', async () => {
 //                 refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
 //                 refreshBtn.disabled = true;
 //                 await this.loadAllData();
-//                 this.displayCacheStats(); // 🆕 Mettre à jour les stats
+//                 this.displayCacheStats();
 //                 refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
 //                 refreshBtn.disabled = false;
 //             });
 //         }
         
-//         // 🆕 BOUTON POUR VIDER LE CACHE
 //         const clearCacheBtn = document.getElementById('clearCacheBtn');
 //         if (clearCacheBtn) {
 //             clearCacheBtn.addEventListener('click', () => {
@@ -525,7 +498,6 @@
 //         console.log('✅ Event listeners initialized');
 //     }
 
-//     // 🆕 AFFICHER LES STATS DE CACHE
 //     displayCacheStats() {
 //         const stats = this.cache.getStats();
         
@@ -535,7 +507,6 @@
 //         console.log(`   - Cache enabled: ${stats.cacheEnabled}`);
 //         console.log(`   - Cache duration: ${stats.cacheDuration}h`);
         
-//         // Afficher dans l'UI si l'élément existe
 //         const cacheStatsEl = document.getElementById('cache-stats');
 //         if (cacheStatsEl) {
 //             const percentUsed = (stats.callsToday / stats.maxCalls) * 100;
@@ -571,7 +542,6 @@
 //         }
 //     }
 
-//     // 🆕 SYSTÈME DE NAVIGATION PAR SECTIONS
 //     initSectionTabs() {
 //         const tabButtons = document.querySelectorAll('.section-tab, [data-section]');
 //         const sections = document.querySelectorAll('.analytics-section, [data-section-content]');
@@ -600,7 +570,6 @@
         
 //         this.currentSection = sectionName;
         
-//         // Update active tab
 //         document.querySelectorAll('.section-tab, .main-tab, [data-section]').forEach(btn => {
 //             if (btn.dataset.section === sectionName) {
 //                 btn.classList.add('active');
@@ -609,7 +578,6 @@
 //             }
 //         });
         
-//         // Show target section, hide others
 //         let sectionFound = false;
 //         document.querySelectorAll('.analytics-section, .tab-section, [data-section-content]').forEach(section => {
 //             const sectionId = section.id || section.dataset.sectionContent;
@@ -625,12 +593,10 @@
 //             }
 //         });
         
-//         // 🆕 VÉRIFIER SI LA SECTION EXISTE
 //         if (!sectionFound) {
 //             console.warn(`⚠ Section "${sectionName}" NOT FOUND in DOM`);
 //         }
         
-//         // 🆕 Charger les données spécifiques si nécessaire
 //         if (sectionName === 'users-management') {
 //             console.log('📋 Loading users management data...');
 //             this.loadUsersManagementTable();
@@ -653,12 +619,13 @@
 //                 this.loadCloudflareGeo(),
 //                 this.loadCloudflareDevices(),
 //                 this.loadCloudflarePages(),
-//                 this.loadCloudflareVisitors()
+//                 this.loadCloudflareCache(),
+//                 this.loadCloudflareReferrers()
 //             ]);
 //             console.log('✅ Third-party analytics loaded');
             
-//             // SECTION 2: FIREBASE INTERNAL ANALYTICS
-//             console.log('🔥 Loading Firebase data...');
+//             // SECTION 2: FIREBASE CORE ANALYTICS
+//             console.log('🔥 Loading Firebase core data...');
 //             await Promise.all([
 //                 this.loadUsersStats(),
 //                 this.loadVisitsStats(),
@@ -667,12 +634,35 @@
 //             ]);
 //             console.log('✅ Firebase core stats loaded');
             
+//             // 🆕 SECTION 3: NOUVELLES COLLECTIONS FIRESTORE
+//             console.log('📦 Loading new Firestore collections...');
+//             await Promise.all([
+//                 this.loadWatchlistsData(),
+//                 this.loadPortfoliosData(),
+//                 this.loadNewsletterData(),
+//                 this.loadApiUsageData(),
+//                 this.loadFeedbackData(),
+//                 this.loadAlertsData(),
+//                 // 🆕 NOUVELLES FONCTIONS
+//                 this.loadRealEstateSimulations(),
+//                 this.loadLoginHistory(),
+//                 this.loadConversationsData(),
+//                 this.loadSocialStats()
+//             ]);
+//             console.log('✅ New Firestore collections loaded');
+
 //             console.log(`📊 Total users loaded: ${this.allUsersData.length}`);
 //             console.log(`📊 Total visits loaded: ${this.allVisitsData.length}`);
 //             console.log(`📊 Total payments loaded: ${this.allPaymentsData.length}`);
 //             console.log(`📊 Total activities loaded: ${this.allActivityData.length}`);
+//             console.log(`📊 Total watchlists: ${this.allWatchlistsData.length}`);
+//             console.log(`📊 Total portfolios: ${this.allPortfoliosData.length}`);
+//             console.log(`📊 Newsletter subscribers: ${this.allNewsletterSubscribers.length}`);
+//             console.log(`📊 Real estate simulations: ${this.allRealEstateSimulations?.length || 0}`);
+//             console.log(`📊 Login history entries: ${this.allLoginHistory?.length || 0}`);
+//             console.log(`📊 AI conversations: ${this.allConversations?.length || 0}`);
             
-//             // SECTION 3: ADVANCED ANALYTICS
+//             // SECTION 4: ADVANCED ANALYTICS
 //             console.log('📈 Loading advanced analytics...');
 //             await Promise.all([
 //                 this.loadSessionAnalytics(),
@@ -682,7 +672,7 @@
 //             ]);
 //             console.log('✅ Advanced analytics loaded');
             
-//             // SECTION 4: CHARTS
+//             // SECTION 5: CHARTS
 //             console.log('📊 Loading charts...');
 //             await Promise.all([
 //                 this.loadRegistrationsChart(),
@@ -694,7 +684,7 @@
 //             ]);
 //             console.log('✅ Charts loaded');
             
-//             // SECTION 5: TABLES
+//             // SECTION 6: TABLES
 //             console.log('📋 Loading tables...');
 //             await Promise.all([
 //                 this.loadRecentUsers(),
@@ -704,7 +694,7 @@
 //             ]);
 //             console.log('✅ Tables loaded');
             
-//             // SECTION 6: ADVANCED FEATURES
+//             // SECTION 7: ADVANCED FEATURES
 //             console.log('🤖 Loading advanced features...');
 //             await Promise.all([
 //                 this.loadConversionFunnel(),
@@ -713,13 +703,13 @@
 //             ]);
 //             console.log('✅ Advanced features loaded');
             
-//             // SECTION 7: NON-CUSTOMERS
+//             // SECTION 8: NON-CUSTOMERS
 //             console.log('👥 Loading non-customer data...');
 //             await this.loadNonCustomerVisitors();
 //             await this.loadPotentialCustomers();
 //             console.log('✅ Non-customer data loaded');
             
-//             // SECTION 8: DETAILED USERS
+//             // SECTION 9: DETAILED USERS
 //             console.log('📋 Loading detailed users data...');
 //             await this.loadUsersDetailedData();
 //             console.log('✅ Detailed users data loaded');
@@ -738,15 +728,12 @@
 //         }
 //     }
 
-//     // 🆕 FONCTION POUR RAFRAÎCHIR TOUS LES AFFICHAGES
 //     async refreshAllDisplays() {
 //         console.log('🔄 Refreshing all displays...');
         
 //         try {
-//             // Rafraîchir les stats affichées
 //             this.displayCacheStats();
             
-//             // 🆕 AFFICHER LES MÉTRIQUES THIRD-PARTY
 //             if (this.stripeData) {
 //                 this.displayStripeMetrics(this.stripeData);
 //             }
@@ -755,28 +742,31 @@
 //                 this.displayCloudflareAnalytics(this.cloudflareData);
 //             }
 
-//             if (this.cloudflareData) {
-//                 this.displayCloudflareAnalytics(this.cloudflareData);
-//             }
-
-//             // 🔥 APPELER displayCloudflareExtras() APRÈS QUE TOUTES LES DONNÉES CLOUDFLARE SOIENT CHARGÉES
 //             if (this.cloudflareGeo || this.cloudflarePages) {
 //                 this.displayCloudflareExtras();
 //             }
 
-//             // Créer la carte géographique
 //             if (this.cloudflareGeo && this.cloudflareGeo.length > 0) {
 //                 this.createGeoMap();
 //             }
             
-//             // Rafraîchir les tableaux
 //             await this.loadRecentUsers();
 //             await this.loadRecentActivity();
 //             await this.loadTopUsers();
-//             // 🆕 FORCER L'AFFICHAGE DES VISITEURS NON-CLIENTS
+            
 //             this.displayNonCustomerVisitors();
 //             this.displayPotentialCustomers();
-//             this.createLeadsCharts(); // 🆕 AJOUTER ICI
+//             this.createLeadsCharts();
+            
+//             // 🆕 AFFICHER LES NOUVELLES DONNÉES
+//             this.displayWatchlistsStats();
+//             this.displayPortfoliosStats();
+//             this.displayNewsletterStats();
+//             this.displayNewsletterSubscribers();
+//             this.displayRealEstateStats();
+//             this.displayLoginHistoryStats();
+//             this.displayConversationsStats();
+//             this.displaySocialStatsByUser();
             
 //             console.log('✅ All displays refreshed successfully');
             
@@ -786,14 +776,13 @@
 //     }
 
 //     // ========================================
-//     // SECTION 1: THIRD-PARTY ANALYTICS (avec Cache & Rate Limiting)
+//     // 🔥 SECTION 1: THIRD-PARTY ANALYTICS (Worker v4.4)
 //     // ========================================
     
 //     async loadStripeMetrics() {
 //         try {
 //             console.log('💳 Loading Stripe metrics...');
             
-//             // 🆕 VÉRIFIER LE CACHE
 //             const cacheKey = 'stripe-analytics';
 //             const cachedData = this.cache.get(cacheKey);
             
@@ -803,13 +792,11 @@
 //                 return;
 //             }
             
-//             // 🆕 VÉRIFIER LE RATE LIMIT
 //             if (!this.cache.canMakeCall()) {
 //                 console.warn('⚠ Rate limit reached - using cached data only');
 //                 return;
 //             }
             
-//             // APPEL API RÉEL
 //             this.cache.incrementCallCount();
             
 //             const response = await fetch(`${WORKER_URL}/stripe-analytics`);
@@ -820,7 +807,6 @@
             
 //             const data = await response.json();
             
-//             // 🆕 SAUVEGARDER DANS LE CACHE
 //             this.cache.set(cacheKey, data);
             
 //             this.stripeData = data;
@@ -860,7 +846,6 @@
 //             console.log(`💰 Stripe Revenue - MRR: $${mrr}, ARR: $${arr}`);
 //         }
         
-//         // 🆕 CRÉER UN GRAPHIQUE STRIPE SI L'ÉLÉMENT EXISTE
 //         this.createStripeChart(data);
         
 //         console.log('✅ Stripe metrics displayed');
@@ -870,7 +855,6 @@
 //         try {
 //             console.log('☁ Loading Cloudflare analytics...');
             
-//             // 🆕 VÉRIFIER LE CACHE
 //             const cacheKey = 'cloudflare-analytics';
 //             const cachedData = this.cache.get(cacheKey);
             
@@ -880,15 +864,14 @@
 //                 return;
 //             }
             
-//             // 🆕 VÉRIFIER LE RATE LIMIT
 //             if (!this.cache.canMakeCall()) {
 //                 console.warn('⚠ Rate limit reached - skipping Cloudflare analytics');
 //                 return;
 //             }
             
-//             // APPEL API RÉEL
 //             this.cache.incrementCallCount();
             
+//             // 🔥 ADAPTATION AU WORKER v4.4 - UTILISER ?days=30
 //             const response = await fetch(`${WORKER_URL}/cloudflare-analytics?days=30`);
             
 //             if (!response.ok) {
@@ -897,13 +880,14 @@
             
 //             const result = await response.json();
             
-//             // 🆕 SAUVEGARDER DANS LE CACHE
+//             // 🔥 WORKER RETOURNE result.data
 //             this.cache.set(cacheKey, result.data);
             
 //             this.cloudflareData = result.data;
 //             this.displayCloudflareAnalytics(result.data);
             
 //             console.log('✅ Cloudflare analytics loaded from API');
+//             console.log('📊 Cloudflare data structure:', result);
             
 //         } catch (error) {
 //             console.error('❌ Error loading Cloudflare analytics:', error);
@@ -929,23 +913,16 @@
         
 //         console.log(`📊 Cloudflare Stats - Requests: ${overview.totalRequests}, Pageviews: ${overview.totalPageViews}, Uniques: ${overview.totalUniques}`);
         
-//         // 🔥 CRÉER DES GRAPHIQUES CLOUDFLARE
 //         this.createCloudflareCharts(data);
-        
-//         // ❌ NE PLUS APPELER displayCloudflareExtras() ICI
         
 //         console.log('✅ Cloudflare analytics displayed');
 //     }
 
-//     // 🆕 AFFICHER TOP COUNTRY & TOP PAGES
 //     displayCloudflareExtras() {
 //         console.log('📊 Displaying Cloudflare extras (Top Country & Pages)...');
         
-//         // ============================================
 //         // TOP COUNTRY KPI
-//         // ============================================
 //         if (this.cloudflareGeo && this.cloudflareGeo.length > 0) {
-//             // Trier par nombre de requêtes (décroissant)
 //             const sortedCountries = [...this.cloudflareGeo].sort((a, b) => b.requests - a.requests);
 //             const topCountry = sortedCountries[0];
             
@@ -959,9 +936,7 @@
 //             this.updateStat('cf-top-country-requests', '0');
 //         }
         
-//         // ============================================
 //         // TOP PAGES TABLE
-//         // ============================================
 //         const tbody = document.getElementById('cf-pages-table-body');
 //         if (!tbody) {
 //             console.warn('⚠ Top Pages table body not found');
@@ -983,40 +958,36 @@
         
 //         tbody.innerHTML = '';
         
-//         // Trier par nombre de requêtes (décroissant)
 //         const sortedPages = [...this.cloudflarePages].sort((a, b) => b.requests - a.requests);
 //         const topPages = sortedPages.slice(0, 10);
         
 //         console.log(`📄 Displaying top ${topPages.length} pages`);
         
 //         topPages.forEach((page, index) => {
-//         const row = document.createElement('tr');
-        
-//         // 🔥 TRANSFORMER "/" EN "Home Page"
-//         let pageName = page.path || 'N/A';
-//         if (pageName === '/') {
-//             pageName = '🏠 Home Page';
-//         } else if (pageName.endsWith('.html')) {
-//             // Nettoyer les noms de fichiers HTML
-//             pageName = pageName.replace('.html', '').replace(/\//g, '');
-//         }
-        
-//         row.innerHTML = `
-//             <td style="width: 40px; text-align: center;">${index + 1}</td>
-//             <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-//                 ${pageName}
-//             </td>
-//             <td style="width: 120px; text-align: right; font-weight: 600;">
-//                 ${page.requests.toLocaleString()}
-//             </td>
-//         `;
-//         tbody.appendChild(row);
-//     });
+//             const row = document.createElement('tr');
+            
+//             let pageName = page.path || 'N/A';
+//             if (pageName === '/') {
+//                 pageName = '🏠 Home Page';
+//             } else if (pageName.endsWith('.html')) {
+//                 pageName = pageName.replace('.html', '').replace(/\//g, '');
+//             }
+            
+//             row.innerHTML = `
+//                 <td style="width: 40px; text-align: center;">${index + 1}</td>
+//                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+//                     ${pageName}
+//                 </td>
+//                 <td style="width: 120px; text-align: right; font-weight: 600;">
+//                     ${page.requests.toLocaleString()}
+//                 </td>
+//             `;
+//             tbody.appendChild(row);
+//         });
         
 //         console.log('✅ Top Pages table populated');
 //     }
 
-//     // 🆕 CRÉER LA CARTE GÉOGRAPHIQUE
 //     createGeoMap() {
 //         const mapContainer = document.getElementById('geo-map');
 //         if (!mapContainer) {
@@ -1031,52 +1002,289 @@
         
 //         console.log('🗺 Creating geographic map...');
         
-//         // Détruire la carte existante si elle existe
 //         if (this.maps.geoMap) {
 //             this.maps.geoMap.remove();
 //         }
         
-//         // Créer la carte
 //         const map = L.map('geo-map').setView([20, 0], 2);
         
-//         // Ajouter la couche de tuiles
 //         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 //             attribution: '© OpenStreetMap contributors',
 //             maxZoom: 18
 //         }).addTo(map);
         
-//         // Coordonnées approximatives des pays
 //         const countryCoords = {
-//             'US': [37.0902, -95.7129],
-//             'United States': [37.0902, -95.7129],
-//             'FR': [46.2276, 2.2137],
-//             'France': [46.2276, 2.2137],
-//             'GB': [55.3781, -3.4360],
-//             'United Kingdom': [55.3781, -3.4360],
-//             'DE': [51.1657, 10.4515],
-//             'Germany': [51.1657, 10.4515],
-//             'CA': [56.1304, -106.3468],
-//             'Canada': [56.1304, -106.3468],
-//             'JP': [36.2048, 138.2529],
-//             'Japan': [36.2048, 138.2529],
-//             'CN': [35.8617, 104.1954],
-//             'China': [35.8617, 104.1954],
-//             'IN': [20.5937, 78.9629],
-//             'India': [20.5937, 78.9629],
-//             'BR': [-14.2350, -51.9253],
-//             'Brazil': [-14.2350, -51.9253],
-//             'AU': [-25.2744, 133.7751],
-//             'Australia': [-25.2744, 133.7751]
-//         };
+//         // 🌍 AMÉRIQUE DU NORD
+//         'US': [37.0902, -95.7129],
+//         'United States': [37.0902, -95.7129],
+//         'USA': [37.0902, -95.7129],
+//         'CA': [56.1304, -106.3468],
+//         'Canada': [56.1304, -106.3468],
+//         'MX': [23.6345, -102.5528],
+//         'Mexico': [23.6345, -102.5528],
         
-//         // Ajouter des marqueurs pour chaque pays
+//         // 🌍 AMÉRIQUE CENTRALE & CARAÏBES
+//         'CR': [9.7489, -83.7534],
+//         'Costa Rica': [9.7489, -83.7534],
+//         'PA': [8.5380, -80.7821],
+//         'Panama': [8.5380, -80.7821],
+//         'JM': [18.1096, -77.2975],
+//         'Jamaica': [18.1096, -77.2975],
+//         'CU': [21.5218, -77.7812],
+//         'Cuba': [21.5218, -77.7812],
+        
+//         // 🌍 AMÉRIQUE DU SUD
+//         'BR': [-14.2350, -51.9253],
+//         'Brazil': [-14.2350, -51.9253],
+//         'AR': [-38.4161, -63.6167],
+//         'Argentina': [-38.4161, -63.6167],
+//         'CL': [-35.6751, -71.5430],
+//         'Chile': [-35.6751, -71.5430],
+//         'CO': [4.5709, -74.2973],
+//         'Colombia': [4.5709, -74.2973],
+//         'PE': [-9.1900, -75.0152],
+//         'Peru': [-9.1900, -75.0152],
+//         'VE': [6.4238, -66.5897],
+//         'Venezuela': [6.4238, -66.5897],
+//         'EC': [-1.8312, -78.1834],
+//         'Ecuador': [-1.8312, -78.1834],
+//         'UY': [-32.5228, -55.7658],
+//         'Uruguay': [-32.5228, -55.7658],
+//         'PY': [-23.4425, -58.4438],
+//         'Paraguay': [-23.4425, -58.4438],
+        
+//         // 🌍 EUROPE OCCIDENTALE
+//         'FR': [46.2276, 2.2137],
+//         'France': [46.2276, 2.2137],
+//         'GB': [55.3781, -3.4360],
+//         'United Kingdom': [55.3781, -3.4360],
+//         'UK': [55.3781, -3.4360],
+//         'DE': [51.1657, 10.4515],
+//         'Germany': [51.1657, 10.4515],
+//         'ES': [40.4637, -3.7492],
+//         'Spain': [40.4637, -3.7492],
+//         'IT': [41.8719, 12.5674],
+//         'Italy': [41.8719, 12.5674],
+//         'PT': [39.3999, -8.2245],
+//         'Portugal': [39.3999, -8.2245],
+//         'NL': [52.1326, 5.2913],
+//         'Netherlands': [52.1326, 5.2913],
+//         'BE': [50.5039, 4.4699],
+//         'Belgium': [50.5039, 4.4699],
+//         'CH': [46.8182, 8.2275],
+//         'Switzerland': [46.8182, 8.2275],
+//         'AT': [47.5162, 14.5501],
+//         'Austria': [47.5162, 14.5501],
+//         'IE': [53.4129, -8.2439],
+//         'Ireland': [53.4129, -8.2439],
+//         'LU': [49.8153, 6.1296],
+//         'Luxembourg': [49.8153, 6.1296],
+        
+//         // 🌍 EUROPE DU NORD
+//         'SE': [60.1282, 18.6435],
+//         'Sweden': [60.1282, 18.6435],
+//         'NO': [60.4720, 8.4689],
+//         'Norway': [60.4720, 8.4689],
+//         'DK': [56.2639, 9.5018],
+//         'Denmark': [56.2639, 9.5018],
+//         'FI': [61.9241, 25.7482],
+//         'Finland': [61.9241, 25.7482],
+//         'IS': [64.9631, -19.0208],
+//         'Iceland': [64.9631, -19.0208],
+        
+//         // 🌍 EUROPE DE L'EST
+//         'PL': [51.9194, 19.1451],
+//         'Poland': [51.9194, 19.1451],
+//         'CZ': [49.8175, 15.4730],
+//         'Czech Republic': [49.8175, 15.4730],
+//         'HU': [47.1625, 19.5033],
+//         'Hungary': [47.1625, 19.5033],
+//         'RO': [45.9432, 24.9668],
+//         'Romania': [45.9432, 24.9668],
+//         'BG': [42.7339, 25.4858],
+//         'Bulgaria': [42.7339, 25.4858],
+//         'GR': [39.0742, 21.8243],
+//         'Greece': [39.0742, 21.8243],
+//         'UA': [48.3794, 31.1656],
+//         'Ukraine': [48.3794, 31.1656],
+//         'RU': [61.5240, 105.3188],
+//         'Russia': [61.5240, 105.3188],
+//         'HR': [45.1, 15.2],
+//         'Croatia': [45.1, 15.2],
+//         'RS': [44.0165, 21.0059],
+//         'Serbia': [44.0165, 21.0059],
+//         'SK': [48.6690, 19.6990],
+//         'Slovakia': [48.6690, 19.6990],
+//         'SI': [46.1512, 14.9955],
+//         'Slovenia': [46.1512, 14.9955],
+        
+//         // 🌍 ASIE DE L'EST
+//         'CN': [35.8617, 104.1954],
+//         'China': [35.8617, 104.1954],
+//         'JP': [36.2048, 138.2529],
+//         'Japan': [36.2048, 138.2529],
+//         'KR': [35.9078, 127.7669],
+//         'South Korea': [35.9078, 127.7669],
+//         'KP': [40.3399, 127.5101],
+//         'North Korea': [40.3399, 127.5101],
+//         'TW': [23.6978, 120.9605],
+//         'Taiwan': [23.6978, 120.9605],
+//         'HK': [22.3193, 114.1694],
+//         'Hong Kong': [22.3193, 114.1694],
+//         'MO': [22.1987, 113.5439],
+//         'Macau': [22.1987, 113.5439],
+//         'MN': [46.8625, 103.8467],
+//         'Mongolia': [46.8625, 103.8467],
+        
+//         // 🌍 ASIE DU SUD-EST
+//         'TH': [15.8700, 100.9925],
+//         'Thailand': [15.8700, 100.9925],
+//         'VN': [14.0583, 108.2772],
+//         'Vietnam': [14.0583, 108.2772],
+//         'SG': [1.3521, 103.8198],
+//         'Singapore': [1.3521, 103.8198],
+//         'MY': [4.2105, 101.9758],
+//         'Malaysia': [4.2105, 101.9758],
+//         'ID': [-0.7893, 113.9213],
+//         'Indonesia': [-0.7893, 113.9213],
+//         'PH': [12.8797, 121.7740],
+//         'Philippines': [12.8797, 121.7740],
+//         'MM': [21.9162, 95.9560],
+//         'Myanmar': [21.9162, 95.9560],
+//         'KH': [12.5657, 104.9910],
+//         'Cambodia': [12.5657, 104.9910],
+//         'LA': [19.8563, 102.4955],
+//         'Laos': [19.8563, 102.4955],
+//         'BN': [4.5353, 114.7277],
+//         'Brunei': [4.5353, 114.7277],
+        
+//         // 🌍 ASIE DU SUD
+//         'IN': [20.5937, 78.9629],
+//         'India': [20.5937, 78.9629],
+//         'PK': [30.3753, 69.3451],
+//         'Pakistan': [30.3753, 69.3451],
+//         'BD': [23.6850, 90.3563],
+//         'Bangladesh': [23.6850, 90.3563],
+//         'LK': [7.8731, 80.7718],
+//         'Sri Lanka': [7.8731, 80.7718],
+//         'NP': [28.3949, 84.1240],
+//         'Nepal': [28.3949, 84.1240],
+//         'BT': [27.5142, 90.4336],
+//         'Bhutan': [27.5142, 90.4336],
+//         'MV': [3.2028, 73.2207],
+//         'Maldives': [3.2028, 73.2207],
+//         'AF': [33.9391, 67.7100],
+//         'Afghanistan': [33.9391, 67.7100],
+        
+//         // 🌍 MOYEN-ORIENT
+//         'SA': [23.8859, 45.0792],
+//         'Saudi Arabia': [23.8859, 45.0792],
+//         'AE': [23.4241, 53.8478],
+//         'United Arab Emirates': [23.4241, 53.8478],
+//         'UAE': [23.4241, 53.8478],
+//         'IL': [31.0461, 34.8516],
+//         'Israel': [31.0461, 34.8516],
+//         'TR': [38.9637, 35.2433],
+//         'Turkey': [38.9637, 35.2433],
+//         'IR': [32.4279, 53.6880],
+//         'Iran': [32.4279, 53.6880],
+//         'IQ': [33.2232, 43.6793],
+//         'Iraq': [33.2232, 43.6793],
+//         'SY': [34.8021, 38.9968],
+//         'Syria': [34.8021, 38.9968],
+//         'JO': [30.5852, 36.2384],
+//         'Jordan': [30.5852, 36.2384],
+//         'LB': [33.8547, 35.8623],
+//         'Lebanon': [33.8547, 35.8623],
+//         'KW': [29.3117, 47.4818],
+//         'Kuwait': [29.3117, 47.4818],
+//         'QA': [25.3548, 51.1839],
+//         'Qatar': [25.3548, 51.1839],
+//         'BH': [26.0667, 50.5577],
+//         'Bahrain': [26.0667, 50.5577],
+//         'OM': [21.4735, 55.9754],
+//         'Oman': [21.4735, 55.9754],
+//         'YE': [15.5527, 48.5164],
+//         'Yemen': [15.5527, 48.5164],
+        
+//         // 🌍 AFRIQUE DU NORD
+//         'EG': [26.8206, 30.8025],
+//         'Egypt': [26.8206, 30.8025],
+//         'DZ': [28.0339, 1.6596],
+//         'Algeria': [28.0339, 1.6596],
+//         'MA': [31.7917, -7.0926],
+//         'Morocco': [31.7917, -7.0926],
+//         'TN': [33.8869, 9.5375],
+//         'Tunisia': [33.8869, 9.5375],
+//         'LY': [26.3351, 17.2283],
+//         'Libya': [26.3351, 17.2283],
+        
+//         // 🌍 AFRIQUE SUBSAHARIENNE
+//         'ZA': [-30.5595, 22.9375],
+//         'South Africa': [-30.5595, 22.9375],
+//         'NG': [9.0820, 8.6753],
+//         'Nigeria': [9.0820, 8.6753],
+//         'KE': [-0.0236, 37.9062],
+//         'Kenya': [-0.0236, 37.9062],
+//         'ET': [9.1450, 40.4897],
+//         'Ethiopia': [9.1450, 40.4897],
+//         'GH': [7.9465, -1.0232],
+//         'Ghana': [7.9465, -1.0232],
+//         'TZ': [-6.3690, 34.8888],
+//         'Tanzania': [-6.3690, 34.8888],
+//         'UG': [1.3733, 32.2903],
+//         'Uganda': [1.3733, 32.2903],
+//         'SN': [14.4974, -14.4524],
+//         'Senegal': [14.4974, -14.4524],
+//         'CM': [7.3697, 12.3547],
+//         'Cameroon': [7.3697, 12.3547],
+//         'CI': [7.5400, -5.5471],
+//         'Ivory Coast': [7.5400, -5.5471],
+//         'AO': [-11.2027, 17.8739],
+//         'Angola': [-11.2027, 17.8739],
+//         'MZ': [-18.6657, 35.5296],
+//         'Mozambique': [-18.6657, 35.5296],
+//         'ZW': [-19.0154, 29.1549],
+//         'Zimbabwe': [-19.0154, 29.1549],
+//         'BW': [-22.3285, 24.6849],
+//         'Botswana': [-22.3285, 24.6849],
+//         'NA': [-22.9576, 18.4904],
+//         'Namibia': [-22.9576, 18.4904],
+//         'RW': [-1.9403, 29.8739],
+//         'Rwanda': [-1.9403, 29.8739],
+        
+//         // 🌍 OCÉANIE
+//         'AU': [-25.2744, 133.7751],
+//         'Australia': [-25.2744, 133.7751],
+//         'NZ': [-40.9006, 174.8860],
+//         'New Zealand': [-40.9006, 174.8860],
+//         'FJ': [-17.7134, 178.0650],
+//         'Fiji': [-17.7134, 178.0650],
+//         'PG': [-6.3150, 143.9555],
+//         'Papua New Guinea': [-6.3150, 143.9555],
+//         'NC': [-20.9043, 165.6180],
+//         'New Caledonia': [-20.9043, 165.6180],
+//         'PF': [-17.6797, -149.4068],
+//         'French Polynesia': [-17.6797, -149.4068],
+        
+//         // 🌍 ASIE CENTRALE
+//         'KZ': [48.0196, 66.9237],
+//         'Kazakhstan': [48.0196, 66.9237],
+//         'UZ': [41.3775, 64.5853],
+//         'Uzbekistan': [41.3775, 64.5853],
+//         'TM': [38.9697, 59.5563],
+//         'Turkmenistan': [38.9697, 59.5563],
+//         'KG': [41.2044, 74.7661],
+//         'Kyrgyzstan': [41.2044, 74.7661],
+//         'TJ': [38.8610, 71.2761],
+//         'Tajikistan': [38.8610, 71.2761]
+//     };
+        
 //         this.cloudflareGeo.forEach(country => {
 //             const coords = countryCoords[country.country] || countryCoords[country.countryCode];
             
 //             if (coords) {
 //                 const requests = country.requests || 0;
-                
-//                 // Taille du cercle proportionnelle aux requêtes
 //                 const radius = Math.max(5, Math.min(50, Math.sqrt(requests) / 10));
                 
 //                 L.circleMarker(coords, {
@@ -1090,7 +1298,7 @@
 //                 .bindPopup(`
 //                     <b>${country.country}</b><br>
 //                     Requests: ${requests.toLocaleString()}<br>
-//                     Uniques: ${(country.uniques || 0).toLocaleString()}
+//                     Percentage: ${country.percentage}%
 //                 `)
 //                 .addTo(map);
 //             }
@@ -1164,8 +1372,9 @@
             
 //             const result = await response.json();
             
-//             this.cache.set(cacheKey, result.devices);
-//             this.cloudflareDevices = result.devices;
+//             // 🔥 WORKER RETOURNE result.devices, result.browsers, result.operatingSystems
+//             this.cache.set(cacheKey, result);
+//             this.cloudflareDevices = result;
             
 //             console.log('✅ Cloudflare Devices loaded from API');
             
@@ -1211,45 +1420,96 @@
 //         }
 //     }
 
-//     async loadCloudflareVisitors() {
+//     // 🆕 NOUVEAU ENDPOINT CACHE
+//     async loadCloudflareCache() {
 //         try {
-//             console.log('👥 Loading Cloudflare Visitors...');
+//             console.log('💾 Loading Cloudflare Cache stats...');
             
-//             const cacheKey = 'cloudflare-visitors';
+//             const cacheKey = 'cloudflare-cache';
 //             const cachedData = this.cache.get(cacheKey);
             
 //             if (cachedData) {
-//                 this.cloudflareVisitors = cachedData;
+//                 this.cloudflareCache = cachedData;
 //                 return;
 //             }
             
 //             if (!this.cache.canMakeCall()) {
-//                 console.warn('⚠ Rate limit reached - skipping Cloudflare Visitors');
+//                 console.warn('⚠ Rate limit reached - skipping Cloudflare Cache');
 //                 return;
 //             }
             
 //             this.cache.incrementCallCount();
             
-//             const response = await fetch(`${WORKER_URL}/cloudflare-visitors?days=30`);
+//             const response = await fetch(`${WORKER_URL}/cloudflare-cache`);
             
 //             if (!response.ok) {
-//                 throw new Error(`Cloudflare Visitors error: ${response.status}`);
+//                 throw new Error(`Cloudflare Cache error: ${response.status}`);
 //             }
             
 //             const result = await response.json();
             
-//             this.cache.set(cacheKey, result.visitors);
-//             this.cloudflareVisitors = result.visitors;
+//             this.cache.set(cacheKey, result.cacheStats);
+//             this.cloudflareCache = result.cacheStats;
             
-//             console.log('✅ Cloudflare Visitors loaded from API');
+//             console.log('✅ Cloudflare Cache stats loaded from API');
+//             console.log('📊 Cache data:', this.cloudflareCache);
             
 //         } catch (error) {
-//             console.error('❌ Error loading Cloudflare Visitors:', error);
+//             console.error('❌ Error loading Cloudflare Cache:', error);
+//         }
+//     }
+
+//     // 🆕 NOUVEAU ENDPOINT REFERRERS
+//     async loadCloudflareReferrers() {
+//         try {
+//             console.log('🔗 Loading Cloudflare Referrers...');
+            
+//             const cacheKey = 'cloudflare-referrers';
+//             const cachedData = this.cache.get(cacheKey);
+            
+//             if (cachedData) {
+//                 this.cloudflareReferrers = cachedData;
+//                 return;
+//             }
+            
+//             if (!this.cache.canMakeCall()) {
+//                 console.warn('⚠ Rate limit reached - skipping Cloudflare Referrers');
+//                 return;
+//             }
+            
+//             this.cache.incrementCallCount();
+            
+//             const response = await fetch(`${WORKER_URL}/cloudflare-referrers`);
+            
+//             if (!response.ok) {
+//                 // 🔥 SI ERREUR 403 = PLAN FREE (PAS ACCÈS À clientRefererHost)
+//                 if (response.status === 403) {
+//                     console.warn('⚠ Referrers tracking requires Cloudflare Pro plan');
+//                     this.cloudflareReferrers = [];
+//                     return;
+//                 }
+//                 throw new Error(`Cloudflare Referrers error: ${response.status}`);
+//             }
+            
+//             const result = await response.json();
+            
+//             if (result.success) {
+//                 this.cache.set(cacheKey, result.referrers);
+//                 this.cloudflareReferrers = result.referrers;
+//                 console.log('✅ Cloudflare Referrers loaded from API');
+//             } else {
+//                 console.warn('⚠ Referrers not available:', result.message);
+//                 this.cloudflareReferrers = [];
+//             }
+            
+//         } catch (error) {
+//             console.error('❌ Error loading Cloudflare Referrers:', error);
+//             this.cloudflareReferrers = [];
 //         }
 //     }
 
 //     // ========================================
-//     // SECTION 2: INTERNAL ANALYTICS (FIREBASE)
+//     // 🔥 SECTION 2: INTERNAL ANALYTICS (FIREBASE)
 //     // ========================================
     
 //     async loadUsersStats() {
@@ -1418,23 +1678,15 @@
 //                 }
 //             });
 
-//             // 🔥 CALCULER LES SUBSCRIPTIONS ACTIVES DEPUIS LES USERS
 //             console.log('📊 Calculating active subscriptions from users...');
 
 //             this.allUsersData.forEach(user => {
 //                 const plan = user.plan || 'basic';
                 
-//                 // Debug : Logger chaque user avec son plan
-//                 console.log(`   User ${user.email}: plan="${plan}"`);
-                
-//                 // Compter TOUS les users avec un plan (basic, pro, platinum)
-//                 // Un user est considéré comme "actif" s'il a un plan assigné
 //                 if (plan && (plan === 'basic' || plan === 'pro' || plan === 'platinum')) {
 //                     activeSubscriptions++;
 //                     const planPrice = planPrices[plan] || 0;
 //                     mrr += planPrice;
-                    
-//                     console.log(`   ✅ Counted as active: ${plan} (MRR contribution: $${planPrice})`);
 //                 }
 //             });
 
@@ -1518,6 +1770,1296 @@
 //             console.error('❌ Error loading engagement stats:', error);
 //         }
 //     }
+
+//     // ========================================
+//     // 🆕 SECTION 3: NOUVELLES COLLECTIONS FIRESTORE
+//     // ========================================
+
+//     async loadWatchlistsData() {
+//         try {
+//             console.log('📋 Loading watchlists data...');
+            
+//             this.allWatchlistsData = [];
+            
+//             // 🔥 MÉTHODE 1 : Collection globale /watchlists (si elle existe)
+//             try {
+//                 const watchlistsSnapshot = await this.db.collection('watchlists').get();
+//                 console.log(`   Found ${watchlistsSnapshot.size} global watchlists`);
+                
+//                 watchlistsSnapshot.forEach(doc => {
+//                     this.allWatchlistsData.push({
+//                         id: doc.id,
+//                         ...doc.data(),
+//                         source: 'global'
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No global /watchlists collection');
+//             }
+            
+//             // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/watchlist (SINGULIER)
+//             for (const user of this.allUsersData) {
+//                 try {
+//                     // 🔥 CORRECTION : watchlist (SINGULIER, pas watchlists)
+//                     const userWatchlistSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('watchlist')
+//                         .get();
+                    
+//                     console.log(`   User ${user.email}: ${userWatchlistSnapshot.size} watchlist items`);
+                    
+//                     userWatchlistSnapshot.forEach(doc => {
+//                         this.allWatchlistsData.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...doc.data(),
+//                             source: 'user'
+//                         });
+//                     });
+//                 } catch (e) {
+//                     // User n'a pas de watchlist
+//                 }
+//             }
+            
+//             console.log(`✅ Watchlists loaded: ${this.allWatchlistsData.length} total`);
+            
+//             // Calculer les stats
+//             const totalWatchlists = this.allWatchlistsData.length;
+//             const usersWithWatchlists = new Set(this.allWatchlistsData.map(w => w.userId)).size;
+//             const avgWatchlistsPerUser = usersWithWatchlists > 0 ? (totalWatchlists / usersWithWatchlists).toFixed(1) : 0;
+            
+//             this.updateStat('total-watchlists', totalWatchlists);
+//             this.updateStat('users-with-watchlists', usersWithWatchlists);
+//             this.updateStat('avg-watchlists-per-user', avgWatchlistsPerUser);
+//             this.updateStat('total-watchlists-detail', totalWatchlists); // Pour la section détail
+            
+//         } catch (error) {
+//             console.error('❌ Error loading watchlists:', error);
+//         }
+//     }
+
+//     async loadPortfoliosData() {
+//         try {
+//             console.log('💼 Loading portfolios data...');
+            
+//             this.allPortfoliosData = [];
+            
+//             // 🔥 MÉTHODE 1 : Collection globale /portfolios (si elle existe)
+//             try {
+//                 const portfoliosSnapshot = await this.db.collection('portfolios').get();
+//                 console.log(`   Found ${portfoliosSnapshot.size} global portfolios`);
+                
+//                 portfoliosSnapshot.forEach(doc => {
+//                     this.allPortfoliosData.push({
+//                         id: doc.id,
+//                         ...doc.data(),
+//                         source: 'global'
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No global /portfolios collection');
+//             }
+            
+//             // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/portfolios/{portfolioId}
+//             for (const user of this.allUsersData) {
+//                 try {
+//                     const userPortfoliosSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('portfolios')
+//                         .get();
+                    
+//                     console.log(`   User ${user.email}: ${userPortfoliosSnapshot.size} portfolios`);
+                    
+//                     userPortfoliosSnapshot.forEach(doc => {
+//                         const data = doc.data();
+                        
+//                         // 🔥 EXTRAIRE LES SYMBOLES DU CHAMP "watchlist"
+//                         let symbols = [];
+//                         if (data.watchlist && Array.isArray(data.watchlist)) {
+//                             symbols = data.watchlist;
+//                         } else if (data.symbols && Array.isArray(data.symbols)) {
+//                             symbols = data.symbols;
+//                         }
+                        
+//                         this.allPortfoliosData.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...data,
+//                             symbols: symbols, // 🔥 Normaliser le champ
+//                             source: 'user'
+//                         });
+//                     });
+//                 } catch (e) {
+//                     // User n'a pas de portfolio
+//                 }
+//             }
+            
+//             console.log(`✅ Portfolios loaded: ${this.allPortfoliosData.length} total`);
+            
+//             // Calculer les stats
+//             const totalPortfolios = this.allPortfoliosData.length;
+//             const usersWithPortfolios = new Set(this.allPortfoliosData.map(p => p.userId)).size;
+//             const avgPortfoliosPerUser = usersWithPortfolios > 0 ? (totalPortfolios / usersWithPortfolios).toFixed(1) : 0;
+            
+//             this.updateStat('total-portfolios', totalPortfolios);
+//             this.updateStat('users-with-portfolios', usersWithPortfolios);
+//             this.updateStat('avg-portfolios-per-user', avgPortfoliosPerUser);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading portfolios:', error);
+//         }
+//     }
+
+//     async loadNewsletterData() {
+//         try {
+//             console.log('📧 Loading newsletter subscribers...');
+            
+//             this.allNewsletterSubscribers = [];
+            
+//             // 🔥 MÉTHODE 1 : Collection globale /newsletter_subscribers
+//             try {
+//                 const newsletterSnapshot = await this.db.collection('newsletter_subscribers').get();
+//                 console.log(`   Found ${newsletterSnapshot.size} newsletter subscribers`);
+                
+//                 newsletterSnapshot.forEach(doc => {
+//                     this.allNewsletterSubscribers.push({
+//                         id: doc.id,
+//                         ...doc.data()
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No /newsletter_subscribers collection');
+//             }
+            
+//             // 🔥 MÉTHODE 2 : Lire depuis les champs users
+//             this.allUsersData.forEach(user => {
+//                 // Vérifier si l'utilisateur a le champ newsletterSubscribedAt ou weeklyNewsletter
+//                 if (user.newsletterSubscribedAt || user.weeklyNewsletter) {
+//                     this.allNewsletterSubscribers.push({
+//                         id: user.id,
+//                         email: user.email,
+//                         subscribedAt: user.newsletterSubscribedAt ? 
+//                             (typeof user.newsletterSubscribedAt === 'string' ? 
+//                                 new Date(user.newsletterSubscribedAt) : 
+//                                 user.newsletterSubscribedAt) : 
+//                             user.createdAt,
+//                         weeklyNewsletter: user.weeklyNewsletter,
+//                         source: 'user_field'
+//                     });
+//                 }
+//             });
+            
+//             // Dédupliquer par email
+//             const uniqueSubscribers = new Map();
+//             this.allNewsletterSubscribers.forEach(sub => {
+//                 if (!uniqueSubscribers.has(sub.email)) {
+//                     uniqueSubscribers.set(sub.email, sub);
+//                 }
+//             });
+            
+//             this.allNewsletterSubscribers = Array.from(uniqueSubscribers.values());
+            
+//             console.log(`✅ Newsletter subscribers loaded: ${this.allNewsletterSubscribers.length} total`);
+            
+//             // Calculer les stats
+//             const totalSubscribers = this.allNewsletterSubscribers.length;
+//             const weekAgo = new Date();
+//             weekAgo.setDate(weekAgo.getDate() - 7);
+            
+//             const newSubscribers = this.allNewsletterSubscribers.filter(sub => {
+//                 if (!sub.subscribedAt) return false;
+//                 const subDate = sub.subscribedAt instanceof Date ? sub.subscribedAt : 
+//                             (sub.subscribedAt.toDate ? sub.subscribedAt.toDate() : new Date(sub.subscribedAt));
+//                 return subDate > weekAgo;
+//             }).length;
+            
+//             this.updateStat('total-newsletter-subscribers', totalSubscribers);
+//             this.updateStat('new-newsletter-subscribers', `+${newSubscribers} this week`);
+//             this.updateStat('total-newsletter-subscribers-detail', totalSubscribers);
+//             this.updateStat('new-newsletter-subscribers-detail', `+${newSubscribers} this week`);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading newsletter data:', error);
+//         }
+//     }
+
+//     async loadApiUsageData() {
+//         try {
+//             console.log('⚡ Loading API usage data...');
+            
+//             this.allApiUsageData = [];
+            
+//             // 🔥 COLLECTION /api_requests OU /api_usage
+//             try {
+//                 const apiUsageSnapshot = await this.db.collection('api_requests').get();
+//                 console.log(`   Found ${apiUsageSnapshot.size} API requests`);
+                
+//                 apiUsageSnapshot.forEach(doc => {
+//                     this.allApiUsageData.push({
+//                         id: doc.id,
+//                         ...doc.data()
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No /api_requests collection');
+//             }
+            
+//             // 🔥 ALTERNATIVE : Sous-collections users/{userId}/api_requests
+//             for (const user of this.allUsersData.slice(0, 10)) { // Limiter à 10 users pour perf
+//                 try {
+//                     const userApiSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('api_requests')
+//                         .limit(100)
+//                         .get();
+                    
+//                     userApiSnapshot.forEach(doc => {
+//                         this.allApiUsageData.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...doc.data()
+//                         });
+//                     });
+//                 } catch (e) {
+//                     // User n'a pas d'API requests
+//                 }
+//             }
+            
+//             console.log(`✅ API usage loaded: ${this.allApiUsageData.length} requests`);
+            
+//             // Calculer les stats
+//             const totalApiRequests = this.allApiUsageData.length;
+//             const today = new Date();
+//             today.setHours(0, 0, 0, 0);
+            
+//             const todayRequests = this.allApiUsageData.filter(req => {
+//                 if (!req.timestamp) return false;
+//                 const reqDate = req.timestamp.toDate ? req.timestamp.toDate() : new Date(req.timestamp);
+//                 return reqDate >= today;
+//             }).length;
+            
+//             this.updateStat('total-api-requests', totalApiRequests.toLocaleString());
+//             this.updateStat('api-requests-today', todayRequests);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading API usage:', error);
+//         }
+//     }
+
+//     async loadFeedbackData() {
+//         try {
+//             console.log('💬 Loading feedback data...');
+            
+//             this.allFeedbackData = [];
+            
+//             try {
+//                 const feedbackSnapshot = await this.db.collection('feedback').get();
+//                 console.log(`   Found ${feedbackSnapshot.size} feedback entries`);
+                
+//                 feedbackSnapshot.forEach(doc => {
+//                     this.allFeedbackData.push({
+//                         id: doc.id,
+//                         ...doc.data()
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No /feedback collection');
+//             }
+            
+//             console.log(`✅ Feedback loaded: ${this.allFeedbackData.length} entries`);
+            
+//             // Calculer les stats
+//             const totalFeedback = this.allFeedbackData.length;
+//             const positiveFeedback = this.allFeedbackData.filter(f => f.sentiment === 'positive' || f.rating >= 4).length;
+//             const negativeFeedback = this.allFeedbackData.filter(f => f.sentiment === 'negative' || f.rating <= 2).length;
+            
+//             this.updateStat('total-feedback', totalFeedback);
+//             this.updateStat('positive-feedback', positiveFeedback);
+//             this.updateStat('negative-feedback', negativeFeedback);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading feedback:', error);
+//         }
+//     }
+
+//     async loadAlertsData() {
+//         try {
+//             console.log('🔔 Loading user alerts data...');
+            
+//             this.allAlertsData = [];
+            
+//             try {
+//                 const alertsSnapshot = await this.db.collection('user_alerts').get();
+//                 console.log(`   Found ${alertsSnapshot.size} user alerts`);
+                
+//                 alertsSnapshot.forEach(doc => {
+//                     this.allAlertsData.push({
+//                         id: doc.id,
+//                         ...doc.data()
+//                     });
+//                 });
+//             } catch (e) {
+//                 console.warn('⚠ No /user_alerts collection');
+//             }
+            
+//             console.log(`✅ User alerts loaded: ${this.allAlertsData.length} alerts`);
+            
+//             // Calculer les stats
+//             const totalAlerts = this.allAlertsData.length;
+//             const activeAlerts = this.allAlertsData.filter(a => a.active || a.enabled).length;
+            
+//             this.updateStat('total-user-alerts', totalAlerts);
+//             this.updateStat('active-user-alerts', activeAlerts);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading alerts:', error);
+//         }
+//     }
+
+//     // ========================================
+//     // 🆕 SECTION 3B: NOUVELLES DONNÉES FIRESTORE
+//     // ========================================
+
+//     async loadRealEstateSimulations() {
+//         try {
+//             console.log('🏠 Loading real estate simulations...');
+            
+//             this.allRealEstateSimulations = [];
+            
+//             for (const user of this.allUsersData) {
+//                 try {
+//                     const realEstateSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('realEstateSimulations')
+//                         .get();
+                    
+//                     realEstateSnapshot.forEach(doc => {
+//                         this.allRealEstateSimulations.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...doc.data()
+//                         });
+//                     });
+//                 } catch (e) {
+//                     this.updateStat('total-real-estate-simulations-detail', totalSimulations);
+//                     this.updateStat('users-with-real-estate-detail', usersWithSimulations);
+//                     this.updateStat('avg-real-estate-per-user-detail', avgPerUser);
+//                 }
+//             }
+            
+//             console.log(`✅ Real estate simulations loaded: ${this.allRealEstateSimulations.length} total`);
+            
+//             // Stats
+//             const totalSimulations = this.allRealEstateSimulations.length;
+//             const usersWithSimulations = new Set(this.allRealEstateSimulations.map(s => s.userId)).size;
+//             const avgPerUser = usersWithSimulations > 0 ? (totalSimulations / usersWithSimulations).toFixed(1) : 0;
+            
+//             this.updateStat('total-real-estate-simulations', totalSimulations);
+//             this.updateStat('users-with-real-estate', usersWithSimulations);
+//             this.updateStat('avg-real-estate-per-user', avgPerUser);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading real estate simulations:', error);
+//         }
+//     }
+
+//     async loadLoginHistory() {
+//         try {
+//             console.log('🔐 Loading login history...');
+            
+//             this.allLoginHistory = [];
+            
+//             for (const user of this.allUsersData) {
+//                 try {
+//                     const loginSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('login_history')
+//                         .orderBy('timestamp', 'desc')
+//                         .limit(50) // Limiter pour ne pas surcharger
+//                         .get();
+                    
+//                     loginSnapshot.forEach(doc => {
+//                         this.allLoginHistory.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...doc.data()
+//                         });
+//                     });
+//                 } catch (e) {
+//                     this.updateStat('total-logins-detail', totalLogins);
+//                     this.updateStat('avg-logins-per-user-detail', avgLoginsPerUser);
+//                     this.updateStat('top-login-method-detail', topMethod ? `${topMethod[0]}` : 'N/A');
+//                 }
+//             }
+            
+//             console.log(`✅ Login history loaded: ${this.allLoginHistory.length} total logins`);
+            
+//             // Stats
+//             const totalLogins = this.allLoginHistory.length;
+//             const uniqueUsers = new Set(this.allLoginHistory.map(l => l.userId)).size;
+//             const avgLoginsPerUser = uniqueUsers > 0 ? (totalLogins / uniqueUsers).toFixed(1) : 0;
+            
+//             // Méthodes de connexion
+//             const loginMethods = {};
+//             this.allLoginHistory.forEach(login => {
+//                 const method = login.method || login.loginMethod || 'unknown';
+//                 loginMethods[method] = (loginMethods[method] || 0) + 1;
+//             });
+            
+//             const topMethod = Object.entries(loginMethods)
+//                 .sort((a, b) => b[1] - a[1])[0];
+            
+//             this.updateStat('total-logins', totalLogins);
+//             this.updateStat('avg-logins-per-user', avgLoginsPerUser);
+//             this.updateStat('top-login-method', topMethod ? `${topMethod[0]} (${topMethod[1]})` : 'N/A');
+            
+//         } catch (error) {
+//             console.error('❌ Error loading login history:', error);
+//         }
+//     }
+
+//     async loadConversationsData() {
+//         try {
+//             console.log('💬 Loading AI conversations...');
+            
+//             this.allConversations = [];
+//             let totalMessages = 0;
+            
+//             for (const user of this.allUsersData) {
+//                 try {
+//                     const conversationsSnapshot = await this.db
+//                         .collection('users')
+//                         .doc(user.id)
+//                         .collection('conversations')
+//                         .get();
+                    
+//                     conversationsSnapshot.forEach(doc => {
+//                         const data = doc.data();
+//                         this.allConversations.push({
+//                             id: doc.id,
+//                             userId: user.id,
+//                             userEmail: user.email,
+//                             ...data
+//                         });
+                        
+//                         totalMessages += data.messageCount || (data.messages ? data.messages.length : 0);
+//                     });
+//                 } catch (e) {
+//                     this.updateStat('total-conversations-detail', totalConversations);
+//                     this.updateStat('avg-conversations-per-user-detail', avgConversationsPerUser);
+//                     this.updateStat('total-ai-messages-detail', totalMessages);
+//                     this.updateStat('avg-messages-per-conversation-detail', avgMessagesPerConversation);
+//                 }
+//             }
+            
+//             console.log(`✅ AI conversations loaded: ${this.allConversations.length} conversations`);
+            
+//             // Stats
+//             const totalConversations = this.allConversations.length;
+//             const usersWithConversations = new Set(this.allConversations.map(c => c.userId)).size;
+//             const avgConversationsPerUser = usersWithConversations > 0 ? 
+//                 (totalConversations / usersWithConversations).toFixed(1) : 0;
+//             const avgMessagesPerConversation = totalConversations > 0 ? 
+//                 (totalMessages / totalConversations).toFixed(1) : 0;
+            
+//             this.updateStat('total-conversations', totalConversations);
+//             this.updateStat('total-ai-messages', totalMessages);
+//             this.updateStat('avg-conversations-per-user', avgConversationsPerUser);
+//             this.updateStat('avg-messages-per-conversation', avgMessagesPerConversation);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading conversations:', error);
+//         }
+//     }
+
+//     async loadSocialStats() {
+//         try {
+//             console.log('👥 Loading social stats...');
+            
+//             let totalFollowers = 0;
+//             let totalFollowing = 0;
+//             let totalPosts = 0;
+//             let totalComments = 0;
+//             let totalPoints = 0;
+//             let totalReputation = 0;
+//             let totalLikesReceived = 0;
+            
+//             this.allUsersData.forEach(user => {
+//                 totalFollowers += user.followersCount || 0;
+//                 totalFollowing += user.followingCount || 0;
+//                 totalPosts += user.postsCount || user.postCount || 0;
+//                 totalComments += user.commentsCount || 0;
+//                 totalPoints += user.points || 0;
+//                 totalReputation += user.reputation || 0;
+//                 totalLikesReceived += user.likesReceived || 0;
+//             });
+            
+//             const totalUsers = this.allUsersData.length || 1;
+            
+//             this.updateStat('total-followers', totalFollowers);
+//             this.updateStat('total-following', totalFollowing);
+//             this.updateStat('total-posts', totalPosts);
+//             this.updateStat('total-comments', totalComments);
+//             this.updateStat('avg-points-per-user', (totalPoints / totalUsers).toFixed(1));
+//             this.updateStat('avg-reputation-per-user', (totalReputation / totalUsers).toFixed(1));
+//             this.updateStat('total-likes-received', totalLikesReceived);
+            
+//             console.log(`✅ Social stats loaded`);
+            
+//         } catch (error) {
+//             console.error('❌ Error loading social stats:', error);
+//         }
+//     }
+
+//     displaySocialStatsByUser() {
+//         console.log('📊 Displaying social stats by user...');
+        
+//         const tbody = document.getElementById('social-stats-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Social stats users table not found');
+//             return;
+//         }
+        
+//         if (this.allUsersData.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No users data</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Trier par reputation décroissante
+//         const sortedUsers = [...this.allUsersData]
+//             .sort((a, b) => (b.reputation || 0) - (a.reputation || 0));
+        
+//         sortedUsers.forEach((user, index) => {
+//             const followers = user.followersCount || 0;
+//             const following = user.followingCount || 0;
+//             const posts = user.postsCount || user.postCount || 0;
+//             const comments = user.commentsCount || 0;
+//             const points = user.points || 0;
+//             const reputation = user.reputation || 0;
+//             const likes = user.likesReceived || 0;
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${index + 1}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${user.email || 'N/A'}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #3b82f6;">${followers}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #8b5cf6;">${following}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #10b981;">${posts}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #f59e0b;">${comments}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #ef4444;">${points}</td>
+//                 <td style="text-align: center; font-weight: 700; color: #667eea;">${reputation}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Social stats by user table populated (${sortedUsers.length} users)`);
+//     }
+
+//     // 🆕 AFFICHAGE DES NOUVELLES STATISTIQUES
+
+//     displayWatchlistsStats() {
+//         console.log('📊 Displaying watchlists stats...');
+        
+//         // 🔥 MISE À JOUR DES STATS GLOBALES
+//         const totalWatchlists = this.allWatchlistsData.length;
+//         const usersWithWatchlists = new Set(this.allWatchlistsData.map(w => w.userId)).size;
+//         const avgPerUser = usersWithWatchlists > 0 ? (totalWatchlists / usersWithWatchlists).toFixed(1) : 0;
+        
+//         this.updateStat('total-watchlists', totalWatchlists);
+//         this.updateStat('users-with-watchlists', usersWithWatchlists);
+//         this.updateStat('avg-watchlists-per-user', avgPerUser);
+//         this.updateStat('total-watchlists-detail', totalWatchlists);
+        
+//         // 🔥 VÉRIFIER SI AUCUNE DONNÉE
+//         if (this.allWatchlistsData.length === 0 && this.allPortfoliosData.length === 0) {
+//             console.warn('⚠ No watchlists or portfolios data available');
+            
+//             const tbody = document.getElementById('top-watchlist-symbols-body');
+//             if (tbody) {
+//                 tbody.innerHTML = `
+//                     <tr>
+//                         <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+//                             <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                             <p style="margin: 0; font-weight: 600;">No Watchlists Data</p>
+//                             <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Users haven't created watchlists yet.</p>
+//                         </td>
+//                     </tr>
+//                 `;
+//             }
+            
+//             const usersTableBody = document.getElementById('watchlists-users-table-body');
+//             if (usersTableBody) {
+//                 usersTableBody.innerHTML = `
+//                     <tr>
+//                         <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+//                             <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                             <p style="margin: 0;">No data available</p>
+//                         </td>
+//                     </tr>
+//                 `;
+//             }
+//             return;
+//         }
+        
+//         // 🔥 TOP SYMBOLES DEPUIS WATCHLISTS + PORTFOLIOS
+//         const symbolCounts = {};
+        
+//         // Depuis watchlists
+//         this.allWatchlistsData.forEach(watchlist => {
+//             let symbols = [];
+            
+//             if (watchlist.symbols && Array.isArray(watchlist.symbols)) {
+//                 symbols = watchlist.symbols;
+//             } else if (watchlist.watchlist && Array.isArray(watchlist.watchlist)) {
+//                 symbols = watchlist.watchlist;
+//             } else if (watchlist.symbol) {
+//                 symbols = [watchlist.symbol];
+//             } else if (watchlist.ticker) {
+//                 symbols = [watchlist.ticker];
+//             }
+            
+//             symbols.forEach(symbol => {
+//                 if (symbol) {
+//                     symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+//                 }
+//             });
+//         });
+        
+//         // 🔥 DEPUIS PORTFOLIOS (champ watchlist)
+//         this.allPortfoliosData.forEach(portfolio => {
+//             let symbols = [];
+            
+//             // 🔥 PRIORITÉ AU CHAMP "watchlist" (array)
+//             if (portfolio.watchlist && Array.isArray(portfolio.watchlist)) {
+//                 symbols = portfolio.watchlist;
+//             } else if (portfolio.symbols && Array.isArray(portfolio.symbols)) {
+//                 symbols = portfolio.symbols;
+//             }
+            
+//             symbols.forEach(symbol => {
+//                 if (symbol) {
+//                     symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+//                 }
+//             });
+//         });
+        
+//         const topSymbols = Object.entries(symbolCounts)
+//             .sort((a, b) => b[1] - a[1])
+//             .slice(0, 10);
+        
+//         const tbody = document.getElementById('top-watchlist-symbols-body');
+//         if (tbody) {
+//             if (topSymbols.length > 0) {
+//                 tbody.innerHTML = '';
+//                 topSymbols.forEach(([symbol, count], index) => {
+//                     const row = document.createElement('tr');
+//                     row.innerHTML = `
+//                         <td style="width: 40px; text-align: center;">${index + 1}</td>
+//                         <td style="font-weight: 600; color: #1e293b;">${symbol}</td>
+//                         <td style="width: 100px; text-align: right; font-weight: 600; color: #667eea;">${count}</td>
+//                     `;
+//                     tbody.appendChild(row);
+//                 });
+//                 console.log(`✅ Top symbols table populated with ${topSymbols.length} symbols`);
+//             } else {
+//                 tbody.innerHTML = `
+//                     <tr>
+//                         <td colspan="3" style="text-align: center; padding: 20px;">
+//                             No symbols tracked yet
+//                         </td>
+//                     </tr>
+//                 `;
+//             }
+//         }
+        
+//         // 🔥 TABLEAU DÉTAILLÉ PAR USER
+//         this.displayWatchlistsByUser();
+//     }
+
+//     displayWatchlistsByUser() {
+//         console.log('📋 Displaying watchlists by user...');
+        
+//         const tbody = document.getElementById('watchlists-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Watchlists users table not found');
+//             return;
+//         }
+        
+//         if (this.allWatchlistsData.length === 0 && this.allPortfoliosData.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No watchlists data</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // 🔥 COMBINER WATCHLISTS + PORTFOLIOS PAR USER
+//         const dataByUser = {};
+        
+//         // Depuis watchlists
+//         this.allWatchlistsData.forEach(watchlist => {
+//             const userId = watchlist.userId || 'unknown';
+//             if (!dataByUser[userId]) {
+//                 dataByUser[userId] = { watchlists: [], portfolios: [], symbols: new Set() };
+//             }
+//             dataByUser[userId].watchlists.push(watchlist);
+            
+//             // Extraire symboles
+//             let symbols = [];
+//             if (watchlist.symbols && Array.isArray(watchlist.symbols)) {
+//                 symbols = watchlist.symbols;
+//             } else if (watchlist.watchlist && Array.isArray(watchlist.watchlist)) {
+//                 symbols = watchlist.watchlist;
+//             } else if (watchlist.symbol) {
+//                 symbols = [watchlist.symbol];
+//             }
+            
+//             symbols.forEach(s => dataByUser[userId].symbols.add(s));
+//         });
+        
+//         // 🔥 DEPUIS PORTFOLIOS
+//         this.allPortfoliosData.forEach(portfolio => {
+//             const userId = portfolio.userId || 'unknown';
+//             if (!dataByUser[userId]) {
+//                 dataByUser[userId] = { watchlists: [], portfolios: [], symbols: new Set() };
+//             }
+//             dataByUser[userId].portfolios.push(portfolio);
+            
+//             // 🔥 EXTRAIRE DEPUIS LE CHAMP "watchlist"
+//             let symbols = [];
+//             if (portfolio.watchlist && Array.isArray(portfolio.watchlist)) {
+//                 symbols = portfolio.watchlist;
+//             } else if (portfolio.symbols && Array.isArray(portfolio.symbols)) {
+//                 symbols = portfolio.symbols;
+//             }
+            
+//             symbols.forEach(s => dataByUser[userId].symbols.add(s));
+//         });
+        
+//         // Afficher une ligne par user
+//         let index = 0;
+//         Object.entries(dataByUser).forEach(([userId, data]) => {
+//             const user = this.allUsersData.find(u => u.id === userId);
+//             const userEmail = user?.email || 
+//                             data.watchlists[0]?.userEmail || 
+//                             data.portfolios[0]?.userEmail || 
+//                             'N/A';
+            
+//             const totalItems = data.watchlists.length + data.portfolios.length;
+//             const symbolsList = Array.from(data.symbols).join(', ');
+//             const displaySymbols = symbolsList.length > 50 ? 
+//                 symbolsList.substring(0, 50) + '...' : 
+//                 symbolsList;
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${++index}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #667eea;">${totalItems}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #10b981;">${data.symbols.size}</td>
+//                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${symbolsList}">${displaySymbols || 'N/A'}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Watchlists by user table populated (${index} users)`);
+//     }
+
+//     displayPortfoliosStats() {
+//         console.log('📊 Displaying portfolios stats...');
+        
+//         // 🔥 CALCULER LES STATS
+//         const totalPortfolios = this.allPortfoliosData.length;
+//         const usersWithPortfolios = new Set(this.allPortfoliosData.map(p => p.userId)).size;
+//         const avgPerUser = usersWithPortfolios > 0 ? (totalPortfolios / usersWithPortfolios).toFixed(1) : 0;
+        
+//         let totalValue = 0;
+//         this.allPortfoliosData.forEach(portfolio => {
+//             if (portfolio.totalValue) {
+//                 totalValue += parseFloat(portfolio.totalValue);
+//             } else if (portfolio.value) {
+//                 totalValue += parseFloat(portfolio.value);
+//             }
+//         });
+        
+//         // 🔥 METTRE À JOUR LES STATS
+//         this.updateStat('total-portfolios', totalPortfolios);
+//         this.updateStat('users-with-portfolios', usersWithPortfolios);
+//         this.updateStat('avg-portfolios-per-user', avgPerUser);
+//         this.updateStat('total-portfolios-detail', totalPortfolios);
+//         this.updateStat('total-portfolios-value', `$${totalValue.toLocaleString()}`);
+        
+//         console.log(`💼 Portfolios: ${totalPortfolios} total, $${totalValue.toLocaleString()} value`);
+        
+//         // 🔥 TABLEAU DÉTAILLÉ PAR USER
+//         this.displayPortfoliosByUser();
+//     }
+
+//     displayPortfoliosByUser() {
+//         console.log('📋 Displaying portfolios by user...');
+        
+//         const tbody = document.getElementById('portfolios-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Portfolios users table not found');
+//             return;
+//         }
+        
+//         if (this.allPortfoliosData.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No portfolios data</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Grouper par user
+//         const portfoliosByUser = {};
+//         this.allPortfoliosData.forEach(portfolio => {
+//             const userId = portfolio.userId || 'unknown';
+//             if (!portfoliosByUser[userId]) {
+//                 portfoliosByUser[userId] = [];
+//             }
+//             portfoliosByUser[userId].push(portfolio);
+//         });
+        
+//         // Afficher une ligne par user
+//         let index = 0;
+//         Object.entries(portfoliosByUser).forEach(([userId, portfolios]) => {
+//             const user = this.allUsersData.find(u => u.id === userId);
+//             const userEmail = user?.email || portfolios[0]?.userEmail || 'N/A';
+            
+//             // Calculer la valeur totale des portfolios de ce user
+//             let userTotalValue = 0;
+//             portfolios.forEach(p => {
+//                 userTotalValue += parseFloat(p.totalValue || p.value || 0);
+//             });
+            
+//             // Récupérer les noms des portfolios
+//             const portfolioNames = portfolios
+//                 .map(p => p.name || p.portfolioName || 'Unnamed')
+//                 .join(', ');
+//             const displayNames = portfolioNames.length > 50 ? 
+//                 portfolioNames.substring(0, 50) + '...' : 
+//                 portfolioNames;
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${++index}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #667eea;">${portfolios.length}</td>
+//                 <td style="text-align: right; font-weight: 600; color: #10b981;">$${userTotalValue.toLocaleString()}</td>
+//                 <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${portfolioNames}">${displayNames}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Portfolios by user table populated (${index} users)`);
+//     }
+
+//     displayNewsletterStats() {
+//         console.log('📊 Displaying newsletter stats...');
+        
+//         // Compter les abonnés au weekly newsletter
+//         const weeklyCount = this.allNewsletterSubscribers.filter(sub => sub.weeklyNewsletter).length;
+//         this.updateStat('weekly-newsletter-count', weeklyCount);
+//     }
+
+//     displayNewsletterSubscribers() {
+//         console.log('📧 Displaying newsletter subscribers table...');
+        
+//         const tbody = document.getElementById('newsletter-subscribers-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Newsletter subscribers table not found');
+//             return;
+//         }
+        
+//         if (this.allNewsletterSubscribers.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0; font-weight: 600;">No Newsletter Subscribers</p>
+//                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">No one has subscribed yet.</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Trier par date d'inscription (plus récent en premier)
+//         const sortedSubscribers = [...this.allNewsletterSubscribers].sort((a, b) => {
+//             const dateA = a.subscribedAt ? 
+//                 (a.subscribedAt instanceof Date ? a.subscribedAt : 
+//                 a.subscribedAt.toDate ? a.subscribedAt.toDate() : 
+//                 new Date(a.subscribedAt)) : new Date(0);
+//             const dateB = b.subscribedAt ? 
+//                 (b.subscribedAt instanceof Date ? b.subscribedAt : 
+//                 b.subscribedAt.toDate ? b.subscribedAt.toDate() : 
+//                 new Date(b.subscribedAt)) : new Date(0);
+//             return dateB - dateA;
+//         });
+        
+//         sortedSubscribers.forEach((subscriber, index) => {
+//             const email = subscriber.email || 'N/A';
+            
+//             const subscribedDate = subscriber.subscribedAt ? 
+//                 (subscriber.subscribedAt instanceof Date ? subscriber.subscribedAt : 
+//                 subscriber.subscribedAt.toDate ? subscriber.subscribedAt.toDate() : 
+//                 new Date(subscriber.subscribedAt)).toLocaleDateString('en-US', {
+//                     year: 'numeric',
+//                     month: 'short',
+//                     day: 'numeric'
+//                 }) : 'N/A';
+            
+//             const source = subscriber.source || 'Unknown';
+//             const weeklyNewsletter = subscriber.weeklyNewsletter ? '✅ Yes' : '❌ No';
+            
+//             // Calculer depuis combien de temps
+//             const daysSinceSubscription = subscriber.subscribedAt ? 
+//                 Math.floor((new Date() - (subscriber.subscribedAt instanceof Date ? subscriber.subscribedAt : 
+//                         subscriber.subscribedAt.toDate ? subscriber.subscribedAt.toDate() : 
+//                         new Date(subscriber.subscribedAt))) / (1000 * 60 * 60 * 24)) : 0;
+            
+//             const daysDisplay = daysSinceSubscription === 0 ? 'Today' : 
+//                             daysSinceSubscription === 1 ? '1 day ago' : 
+//                             daysSinceSubscription < 30 ? `${daysSinceSubscription} days ago` :
+//                             daysSinceSubscription < 365 ? `${Math.floor(daysSinceSubscription / 30)} months ago` :
+//                             `${Math.floor(daysSinceSubscription / 365)} years ago`;
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${index + 1}</td>
+//                 <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">
+//                     ${email}
+//                 </td>
+//                 <td>${subscribedDate}</td>
+//                 <td style="color: #64748b;">${daysDisplay}</td>
+//                 <td>
+//                     <span class="source-badge source-${source.toLowerCase().replace('_', '-')}">
+//                         ${source}
+//                     </span>
+//                 </td>
+//                 <td style="text-align: center;">${weeklyNewsletter}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Newsletter subscribers table populated (${sortedSubscribers.length} subscribers)`);
+//     }
+
+//     displayRealEstateStats() {
+//         console.log('📊 Displaying real estate stats...');
+    
+//         // 🔥 METTRE À JOUR LES KPI CARDS
+//         const totalSimulations = this.allRealEstateSimulations?.length || 0;
+//         const usersWithSimulations = totalSimulations > 0 ? 
+//             new Set(this.allRealEstateSimulations.map(s => s.userId)).size : 0;
+//         const avgPerUser = usersWithSimulations > 0 ? 
+//             (totalSimulations / usersWithSimulations).toFixed(1) : 0;
+        
+//         this.updateStat('total-real-estate-simulations-detail', totalSimulations);
+//         this.updateStat('users-with-real-estate-detail', usersWithSimulations);
+//         this.updateStat('avg-real-estate-per-user-detail', avgPerUser);
+        
+//         console.log(`🏠 Real Estate: ${totalSimulations} simulations, ${usersWithSimulations} users`);
+        
+//         const tbody = document.getElementById('real-estate-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Real estate users table not found');
+//             return;
+//         }
+        
+//         if (!this.allRealEstateSimulations || this.allRealEstateSimulations.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No real estate simulations</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Grouper par user
+//         const simulationsByUser = {};
+//         this.allRealEstateSimulations.forEach(sim => {
+//             const userId = sim.userId || 'unknown';
+//             if (!simulationsByUser[userId]) {
+//                 simulationsByUser[userId] = [];
+//             }
+//             simulationsByUser[userId].push(sim);
+//         });
+        
+//         // Afficher une ligne par user
+//         let index = 0;
+//         Object.entries(simulationsByUser).forEach(([userId, sims]) => {
+//             const user = this.allUsersData.find(u => u.id === userId);
+//             const userEmail = user?.email || sims[0]?.userEmail || 'N/A';
+            
+//             // Récupérer la dernière simulation
+//             const latestSim = sims.sort((a, b) => {
+//                 const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+//                 const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+//                 return dateB - dateA;
+//             })[0];
+            
+//             const lastSimDate = latestSim.createdAt ? 
+//                 (latestSim.createdAt.toDate ? latestSim.createdAt.toDate() : new Date(latestSim.createdAt)).toLocaleDateString('en-US') : 
+//                 'N/A';
+            
+//             const propertyTypes = [...new Set(sims.map(s => s.propertyType || s.type || 'Unknown'))].join(', ');
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${++index}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #667eea;">${sims.length}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${propertyTypes}</td>
+//                 <td>${lastSimDate}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Real estate by user table populated (${index} users)`);
+//     }
+
+//     displayLoginHistoryStats() {
+//         console.log('📊 Displaying login history stats...');
+    
+//         // 🔥 METTRE À JOUR LES KPI CARDS
+//         const totalLogins = this.allLoginHistory?.length || 0;
+//         const uniqueUsers = totalLogins > 0 ? 
+//             new Set(this.allLoginHistory.map(l => l.userId)).size : 0;
+//         const avgLoginsPerUser = uniqueUsers > 0 ? 
+//             (totalLogins / uniqueUsers).toFixed(1) : 0;
+        
+//         // Trouver la méthode la plus utilisée
+//         const methods = {};
+//         if (this.allLoginHistory) {
+//             this.allLoginHistory.forEach(l => {
+//                 const method = l.method || l.loginMethod || 'unknown';
+//                 methods[method] = (methods[method] || 0) + 1;
+//             });
+//         }
+        
+//         const topMethod = Object.entries(methods)
+//             .sort((a, b) => b[1] - a[1])[0];
+        
+//         this.updateStat('total-logins-detail', totalLogins);
+//         this.updateStat('avg-logins-per-user-detail', avgLoginsPerUser);
+//         this.updateStat('top-login-method-detail', topMethod ? topMethod[0] : 'N/A');
+        
+//         console.log(`🔐 Login History: ${totalLogins} logins, ${uniqueUsers} users, top method: ${topMethod?.[0]}`);
+        
+//         const tbody = document.getElementById('login-history-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Login history users table not found');
+//             return;
+//         }
+        
+//         if (!this.allLoginHistory || this.allLoginHistory.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No login history</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Grouper par user
+//         const loginsByUser = {};
+//         this.allLoginHistory.forEach(login => {
+//             const userId = login.userId || 'unknown';
+//             if (!loginsByUser[userId]) {
+//                 loginsByUser[userId] = [];
+//             }
+//             loginsByUser[userId].push(login);
+//         });
+        
+//         // Afficher une ligne par user
+//         let index = 0;
+//         Object.entries(loginsByUser).forEach(([userId, logins]) => {
+//             const user = this.allUsersData.find(u => u.id === userId);
+//             const userEmail = user?.email || logins[0]?.userEmail || 'N/A';
+            
+//             // Trouver le dernier login
+//             const latestLogin = logins.sort((a, b) => {
+//                 const dateA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp)) : new Date(0);
+//                 const dateB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp)) : new Date(0);
+//                 return dateB - dateA;
+//             })[0];
+            
+//             const lastLoginDate = latestLogin.timestamp ? 
+//                 (latestLogin.timestamp.toDate ? latestLogin.timestamp.toDate() : new Date(latestLogin.timestamp)).toLocaleString('en-US') : 
+//                 'N/A';
+            
+//             // Compter les méthodes
+//             const methods = {};
+//             logins.forEach(l => {
+//                 const method = l.method || l.loginMethod || 'unknown';
+//                 methods[method] = (methods[method] || 0) + 1;
+//             });
+            
+//             const topMethod = Object.entries(methods).sort((a, b) => b[1] - a[1])[0];
+//             const methodDisplay = topMethod ? `${topMethod[0]} (${topMethod[1]})` : 'N/A';
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${++index}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #667eea;">${logins.length}</td>
+//                 <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${methodDisplay}</td>
+//                 <td>${lastLoginDate}</td>
+//                 <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${latestLogin.ip || 'N/A'}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Login history by user table populated (${index} users)`);
+//     }
+
+//     displayConversationsStats() {
+//         console.log('📊 Displaying conversations stats...');
+    
+//         // 🔥 METTRE À JOUR LES KPI CARDS
+//         const totalConversations = this.allConversations?.length || 0;
+//         const usersWithConversations = totalConversations > 0 ? 
+//             new Set(this.allConversations.map(c => c.userId)).size : 0;
+//         const avgConversationsPerUser = usersWithConversations > 0 ? 
+//             (totalConversations / usersWithConversations).toFixed(1) : 0;
+        
+//         // Calculer total messages
+//         let totalMessages = 0;
+//         if (this.allConversations) {
+//             this.allConversations.forEach(c => {
+//                 totalMessages += c.messageCount || (c.messages ? c.messages.length : 0);
+//             });
+//         }
+        
+//         const avgMessagesPerConversation = totalConversations > 0 ? 
+//             (totalMessages / totalConversations).toFixed(1) : 0;
+        
+//         this.updateStat('total-conversations-detail', totalConversations);
+//         this.updateStat('avg-conversations-per-user-detail', avgConversationsPerUser);
+//         this.updateStat('total-ai-messages-detail', totalMessages);
+//         this.updateStat('avg-messages-per-conversation-detail', avgMessagesPerConversation);
+        
+//         console.log(`💬 Conversations: ${totalConversations} total, ${totalMessages} messages`);
+        
+//         const tbody = document.getElementById('conversations-users-table-body');
+//         if (!tbody) {
+//             console.warn('⚠ Conversations users table not found');
+//             return;
+//         }
+        
+//         if (!this.allConversations || this.allConversations.length === 0) {
+//             tbody.innerHTML = `
+//                 <tr>
+//                     <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+//                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+//                         <p style="margin: 0;">No AI conversations</p>
+//                     </td>
+//                 </tr>
+//             `;
+//             return;
+//         }
+        
+//         tbody.innerHTML = '';
+        
+//         // Grouper par user
+//         const conversationsByUser = {};
+//         this.allConversations.forEach(conv => {
+//             const userId = conv.userId || 'unknown';
+//             if (!conversationsByUser[userId]) {
+//                 conversationsByUser[userId] = [];
+//             }
+//             conversationsByUser[userId].push(conv);
+//         });
+        
+//         // Afficher une ligne par user
+//         let index = 0;
+//         Object.entries(conversationsByUser).forEach(([userId, conversations]) => {
+//             const user = this.allUsersData.find(u => u.id === userId);
+//             const userEmail = user?.email || conversations[0]?.userEmail || 'N/A';
+            
+//             // Compter total messages
+//             let totalMessages = 0;
+//             conversations.forEach(c => {
+//                 totalMessages += c.messageCount || (c.messages ? c.messages.length : 0);
+//             });
+            
+//             const avgMessages = conversations.length > 0 ? (totalMessages / conversations.length).toFixed(1) : 0;
+            
+//             // Trouver la dernière conversation
+//             const latestConv = conversations.sort((a, b) => {
+//                 const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+//                 const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+//                 return dateB - dateA;
+//             })[0];
+            
+//             const lastConvDate = latestConv.createdAt ? 
+//                 (latestConv.createdAt.toDate ? latestConv.createdAt.toDate() : new Date(latestConv.createdAt)).toLocaleDateString('en-US') : 
+//                 'N/A';
+            
+//             const row = document.createElement('tr');
+//             row.innerHTML = `
+//                 <td>${++index}</td>
+//                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #667eea;">${conversations.length}</td>
+//                 <td style="text-align: center; font-weight: 600; color: #10b981;">${totalMessages}</td>
+//                 <td style="text-align: center; color: #64748b;">${avgMessages}</td>
+//                 <td>${lastConvDate}</td>
+//             `;
+//             tbody.appendChild(row);
+//         });
+        
+//         console.log(`✅ Conversations by user table populated (${index} users)`);
+//     }
+
+//     // ========================================
+//     // SECTION 4: ADVANCED ANALYTICS
+//     // ========================================
 
 //     async loadSessionAnalytics() {
 //         try {
@@ -1711,7 +3253,7 @@
 //     }
 
 //     // ========================================
-//     // CHARTS
+//     // SECTION 5: CHARTS
 //     // ========================================
     
 //     async loadRegistrationsChart() {
@@ -2049,8 +3591,158 @@
 //         }
 //     }
 
+//     createStripeChart(data) {
+//         if (!data || !data.subscriptions) return;
+        
+//         const canvas = document.getElementById('stripe-subscriptions-chart');
+//         if (!canvas) {
+//             console.warn('⚠ Stripe chart canvas not found');
+//             return;
+//         }
+        
+//         console.log('📊 Creating Stripe subscriptions chart...');
+        
+//         this.createChart('stripe-subscriptions-chart', 'doughnut', {
+//             labels: ['Active', 'Trialing', 'Canceled', 'Past Due'],
+//             datasets: [{
+//                 data: [
+//                     data.subscriptions.active || 0,
+//                     data.subscriptions.trialing || 0,
+//                     data.subscriptions.canceled || 0,
+//                     data.subscriptions.past_due || 0
+//                 ],
+//                 backgroundColor: [
+//                     'rgba(16, 185, 129, 0.8)',
+//                     'rgba(59, 130, 246, 0.8)',
+//                     'rgba(239, 68, 68, 0.8)',
+//                     'rgba(245, 158, 11, 0.8)'
+//                 ],
+//                 borderWidth: 2,
+//                 borderColor: '#fff'
+//             }]
+//         }, {
+//             plugins: {
+//                 legend: {
+//                     display: true,
+//                     position: 'bottom'
+//                 },
+//                 title: {
+//                     display: true,
+//                     text: 'Stripe Subscriptions Status'
+//                 }
+//             }
+//         });
+        
+//         console.log('✅ Stripe chart created');
+//     }
+
+//     createCloudflareCharts(data) {
+//         if (!data || !data.overview) return;
+        
+//         // Graphique 1 : Requests Over Time
+//         const requestsCanvas = document.getElementById('cf-requests-chart');
+//         if (requestsCanvas && data.overview.requestsByDate) {
+//             console.log('📊 Creating Cloudflare requests chart...');
+            
+//             const dates = Object.keys(data.overview.requestsByDate).sort();
+//             const requests = dates.map(date => data.overview.requestsByDate[date]);
+            
+//             this.createChart('cf-requests-chart', 'line', {
+//                 labels: dates.map(d => {
+//                     const date = new Date(d);
+//                     return `${date.getDate()}/${date.getMonth() + 1}`;
+//                 }),
+//                 datasets: [{
+//                     label: 'Daily Requests',
+//                     data: requests,
+//                     borderColor: 'rgb(249, 115, 22)',
+//                     backgroundColor: 'rgba(249, 115, 22, 0.1)',
+//                     tension: 0.4,
+//                     fill: true,
+//                     borderWidth: 3
+//                 }]
+//             }, {
+//                 scales: {
+//                     y: {
+//                         beginAtZero: true
+//                     }
+//                 },
+//                 plugins: {
+//                     title: {
+//                         display: true,
+//                         text: 'Cloudflare Requests Over Time'
+//                     }
+//                 }
+//             });
+            
+//             console.log('✅ Cloudflare requests chart created');
+//         }
+        
+//         // Graphique 2 : Geo Distribution
+//         const geoCanvas = document.getElementById('cf-geo-chart');
+//         if (geoCanvas && this.cloudflareGeo && this.cloudflareGeo.length > 0) {
+//             console.log('📊 Creating Cloudflare geo chart...');
+            
+//             const topCountries = this.cloudflareGeo.slice(0, 6);
+            
+//             this.createChart('cf-geo-chart', 'bar', {
+//                 labels: topCountries.map(c => c.country),
+//                 datasets: [{
+//                     label: 'Requests by Country',
+//                     data: topCountries.map(c => c.requests),
+//                     backgroundColor: 'rgba(139, 92, 246, 0.8)',
+//                     borderRadius: 8
+//                 }]
+//             }, {
+//                 indexAxis: 'y',
+//                 plugins: {
+//                     title: {
+//                         display: true,
+//                         text: 'Top Countries by Requests'
+//                     }
+//                 }
+//             });
+            
+//             console.log('✅ Cloudflare geo chart created');
+//         }
+        
+//         // Graphique 3 : Device Distribution
+//         const deviceCanvas = document.getElementById('cf-devices-chart');
+//         if (deviceCanvas && this.cloudflareDevices && this.cloudflareDevices.devices) {
+//             console.log('📊 Creating Cloudflare devices chart...');
+            
+//             this.createChart('cf-devices-chart', 'pie', {
+//                 labels: this.cloudflareDevices.devices.map(d => d.type),
+//                 datasets: [{
+//                     data: this.cloudflareDevices.devices.map(d => d.requests),
+//                     backgroundColor: [
+//                         'rgba(59, 130, 246, 0.8)',
+//                         'rgba(16, 185, 129, 0.8)',
+//                         'rgba(245, 158, 11, 0.8)',
+//                         'rgba(239, 68, 68, 0.8)'
+//                     ],
+//                     borderWidth: 2,
+//                     borderColor: '#fff'
+//                 }]
+//             }, {
+//                 plugins: {
+//                     legend: {
+//                         display: true,
+//                         position: 'bottom'
+//                     },
+//                     title: {
+//                         display: true,
+//                         text: 'Requests by Device Type'
+//                     }
+//                 }
+//             });
+            
+//             console.log('✅ Cloudflare devices chart created');
+//         }
+//     }
+
 //     // ========================================
-//     // TABLES
+//     // SECTION 6: TABLES
 //     // ========================================
     
 //     async loadRecentUsers() {
@@ -2101,7 +3793,6 @@
             
 //             tbody.innerHTML = '';
             
-//             // 🔥 UTILISER LES VISITES COMME ACTIVITÉ RÉELLE
 //             if (this.allVisitsData.length === 0) {
 //                 tbody.innerHTML = `
 //                     <tr>
@@ -2115,7 +3806,6 @@
 //                 return;
 //             }
             
-//             // Trier par timestamp (plus récent en premier)
 //             const recentVisits = this.allVisitsData
 //                 .filter(v => v.timestamp)
 //                 .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())
@@ -2126,7 +3816,6 @@
 //             recentVisits.forEach(visit => {
 //                 const row = document.createElement('tr');
                 
-//                 // User : Email si userId existe, sinon IP ou "Anonymous"
 //                 let userDisplay = 'Anonymous';
 //                 if (visit.userId) {
 //                     const user = this.allUsersData.find(u => u.id === visit.userId);
@@ -2135,10 +3824,8 @@
 //                     userDisplay = `IP: ${visit.ip}`;
 //                 }
                 
-//                 // Action : Type de visite
 //                 const action = visit.page ? 'Page View' : 'Visit';
                 
-//                 // Page : Nettoyer le nom de la page
 //                 let page = visit.page || visit.url || 'N/A';
 //                 if (page.includes('.html')) {
 //                     page = page.replace('.html', '').replace(/\//g, '');
@@ -2147,7 +3834,6 @@
 //                     page = page.substring(0, 30) + '...';
 //                 }
                 
-//                 // Timestamp
 //                 const timestamp = visit.timestamp.toDate().toLocaleString('en-US', {
 //                     month: 'short',
 //                     day: 'numeric',
@@ -2327,7 +4013,7 @@
 //     }
 
 //     // ========================================
-//     // ML PREDICTIONS
+//     // SECTION 7: ML PREDICTIONS
 //     // ========================================
     
 //     async loadMLPredictions() {
@@ -2473,7 +4159,7 @@
 //     }
 
 //     // ========================================
-//     // 🆕 USERS MANAGEMENT (DETAILED DATA)
+//     // SECTION 8: USERS MANAGEMENT
 //     // ========================================
     
 //     async loadUsersDetailedData() {
@@ -2483,27 +4169,21 @@
 //             this.allUsersDetailedData = [];
             
 //             for (const user of this.allUsersData) {
-//                 // Récupérer les simulations
 //                 const simulationsSnapshot = await this.db
 //                     .collection('users')
 //                     .doc(user.id)
 //                     .collection('simulations')
 //                     .get();
                 
-//                 // Compter les visites
 //                 const userVisits = this.allVisitsData.filter(v => v.userId === user.id).length;
-                
-//                 // Compter les activités
 //                 const userActivities = this.allActivityData.filter(a => a.userId === user.id).length;
                 
-//                 // Compter les requêtes API (si disponible)
 //                 const apiRequestsSnapshot = await this.db
 //                     .collection('users')
 //                     .doc(user.id)
 //                     .collection('api_requests')
 //                     .get();
                 
-//                 // Récupérer le statut de ban
 //                 const userDoc = await this.db.collection('users').doc(user.id).get();
 //                 const userData = userDoc.data();
                 
@@ -2545,7 +4225,6 @@
 //                 return;
 //             }
             
-//             // Trier par date d'inscription (plus récent en premier)
 //             const sortedUsers = this.allUsersDetailedData
 //                 .sort((a, b) => {
 //                     if (!a.createdAt) return 1;
@@ -2558,11 +4237,9 @@
 //                 return;
 //             }
             
-//             // 🆕 CRÉER LE PAGINATION MANAGER
 //             const renderUserRow = (user, index, tbody) => {
 //                 const row = document.createElement('tr');
                 
-//                 // Appliquer un style si l'utilisateur est banni
 //                 if (user.isBanned) {
 //                     row.style.backgroundColor = '#fee2e2';
 //                     row.style.opacity = '0.7';
@@ -2571,10 +4248,8 @@
 //                 const createdAt = user.createdAt ? user.createdAt.toDate().toLocaleDateString('en-US') : 'N/A';
 //                 const lastLogin = user.lastLogin ? user.lastLogin.toDate().toLocaleDateString('en-US') : 'Never';
                 
-//                 // Badge de plan
 //                 const planBadge = `<span class="plan-badge plan-${user.plan}">${user.plan.toUpperCase()}</span>`;
                 
-//                 // Badge de statut
 //                 let statusBadge = '';
 //                 if (user.isBanned) {
 //                     statusBadge = '<span class="status-badge status-banned">🚫 BANNED</span>';
@@ -2584,7 +4259,6 @@
 //                     statusBadge = '<span class="status-badge status-inactive">❌ Inactive</span>';
 //                 }
                 
-//                 // Bouton d'action
 //                 const actionButton = user.isBanned
 //                     ? `<button class="btn-action btn-unban" onclick="adminAnalytics.unbanUser('${user.id}')">
 //                         <i class="fas fa-unlock"></i> Unban
@@ -2619,7 +4293,6 @@
 //                 tbody.appendChild(row);
 //             };
             
-//             // Créer ou mettre à jour le pagination manager
 //             if (!window.paginationManagers['users-management-body']) {
 //                 window.paginationManagers['users-management-body'] = new PaginationManager(
 //                     'users-management-body',
@@ -2631,10 +4304,8 @@
 //                 window.paginationManagers['users-management-body'].updateData(sortedUsers);
 //             }
             
-//             // Rendre la première page
 //             window.paginationManagers['users-management-body'].render();
             
-//             // Mettre à jour les statistiques
 //             this.updateUsersManagementStats();
             
 //             console.log(`✅ Users management table loaded with pagination (${sortedUsers.length} users)`);
@@ -2659,15 +4330,8 @@
 //     async banUser(userId) {
 //         try {
 //             console.log(`🚫 Attempting to ban user: ${userId}`);
-//             console.log(`👤 Current admin: ${this.auth.currentUser?.email}`);
             
-//             // Vérifier que l'utilisateur admin est bien connecté
-//             if (!this.auth.currentUser) {
-//                 alert('❌ Erreur : Vous n\'êtes pas connecté');
-//                 return;
-//             }
-            
-//             if (this.auth.currentUser.email !== ADMIN_EMAIL) {
+//             if (!this.auth.currentUser || this.auth.currentUser.email !== ADMIN_EMAIL) {
 //                 alert('❌ Erreur : Accès admin refusé');
 //                 return;
 //             }
@@ -2676,7 +4340,7 @@
             
 //             if (reason === null) {
 //                 console.log('❌ Ban canceled by user');
-//                 return; // Annulé
+//                 return;
 //             }
             
 //             const confirmBan = confirm(
@@ -2696,7 +4360,6 @@
             
 //             console.log(`🔄 Banning user ${userId}...`);
             
-//             // 🔥 METTRE À JOUR FIRESTORE
 //             await this.db.collection('users').doc(userId).update({
 //                 isBanned: true,
 //                 bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2707,7 +4370,6 @@
             
 //             console.log('✅ User document updated');
             
-//             // 🔥 ENREGISTRER DANS LES LOGS ADMIN
 //             await this.db.collection('admin_actions').add({
 //                 action: 'ban_user',
 //                 userId: userId,
@@ -2720,7 +4382,6 @@
             
 //             alert('✅ Utilisateur banni avec succès !');
             
-//             // 🔄 RECHARGER LES DONNÉES
 //             console.log('🔄 Reloading user data...');
 //             await this.loadUsersDetailedData();
 //             await this.loadUsersManagementTable();
@@ -2729,8 +4390,6 @@
             
 //         } catch (error) {
 //             console.error('❌ Error banning user:', error);
-//             console.error('Error code:', error.code);
-//             console.error('Error message:', error.message);
             
 //             let errorMessage = '⚠ Erreur lors du bannissement :\n\n';
             
@@ -2751,15 +4410,8 @@
 //     async unbanUser(userId) {
 //         try {
 //             console.log(`✅ Attempting to unban user: ${userId}`);
-//             console.log(`👤 Current admin: ${this.auth.currentUser?.email}`);
             
-//             // Vérifier que l'utilisateur admin est bien connecté
-//             if (!this.auth.currentUser) {
-//                 alert('❌ Erreur : Vous n\'êtes pas connecté');
-//                 return;
-//             }
-            
-//             if (this.auth.currentUser.email !== ADMIN_EMAIL) {
+//             if (!this.auth.currentUser || this.auth.currentUser.email !== ADMIN_EMAIL) {
 //                 alert('❌ Erreur : Accès admin refusé');
 //                 return;
 //             }
@@ -2780,7 +4432,6 @@
             
 //             console.log(`🔄 Unbanning user ${userId}...`);
             
-//             // 🔥 METTRE À JOUR FIRESTORE
 //             await this.db.collection('users').doc(userId).update({
 //                 isBanned: false,
 //                 bannedAt: null,
@@ -2792,7 +4443,6 @@
             
 //             console.log('✅ User document updated');
             
-//             // 🔥 ENREGISTRER DANS LES LOGS ADMIN
 //             await this.db.collection('admin_actions').add({
 //                 action: 'unban_user',
 //                 userId: userId,
@@ -2804,7 +4454,6 @@
             
 //             alert('✅ Utilisateur débanni avec succès !');
             
-//             // 🔄 RECHARGER LES DONNÉES
 //             console.log('🔄 Reloading user data...');
 //             await this.loadUsersDetailedData();
 //             await this.loadUsersManagementTable();
@@ -2813,8 +4462,6 @@
             
 //         } catch (error) {
 //             console.error('❌ Error unbanning user:', error);
-//             console.error('Error code:', error.code);
-//             console.error('Error message:', error.message);
             
 //             let errorMessage = '⚠ Erreur lors du débannissement :\n\n';
             
@@ -2830,7 +4477,7 @@
 //     }
 
 //     // ========================================
-//     // NON-CUSTOMER VISITORS & POTENTIAL
+//     // SECTION 9: NON-CUSTOMER VISITORS & POTENTIAL
 //     // ========================================
     
 //     async loadNonCustomerVisitors() {
@@ -3010,7 +4657,6 @@
 //             return;
 //         }
         
-//         // 🆕 CRÉER LE PAGINATION MANAGER
 //         const renderLeadRow = (lead, index, tbody) => {
 //             const row = document.createElement('tr');
             
@@ -3035,7 +4681,6 @@
 //             tbody.appendChild(row);
 //         };
         
-//         // Créer ou mettre à jour le pagination manager
 //         if (!window.paginationManagers['potential-customers-body']) {
 //             window.paginationManagers['potential-customers-body'] = new PaginationManager(
 //                 'potential-customers-body',
@@ -3047,15 +4692,12 @@
 //             window.paginationManagers['potential-customers-body'].updateData(this.potentialCustomers);
 //         }
         
-//         // Rendre la première page
 //         window.paginationManagers['potential-customers-body'].render();
         
 //         console.log(`✅ Potential customers displayed with pagination (${this.potentialCustomers.length} leads)`);
 //     }
 
-//     // 🆕 CRÉER LES GRAPHIQUES LEADS
 //     createLeadsCharts() {
-//         // Graphique 1 : Lead Score Distribution
 //         const scoreCanvas = document.getElementById('potential-customers-chart');
 //         if (scoreCanvas && this.potentialCustomers && this.potentialCustomers.length > 0) {
 //             console.log('📊 Creating lead score distribution chart...');
@@ -3069,9 +4711,9 @@
 //                 datasets: [{
 //                     data: [hotLeads, warmLeads, coldLeads],
 //                     backgroundColor: [
-//                         'rgba(239, 68, 68, 0.8)',    // Red for hot
-//                         'rgba(245, 158, 11, 0.8)',   // Orange for warm
-//                         'rgba(6, 182, 212, 0.8)'     // Cyan for cold
+//                         'rgba(239, 68, 68, 0.8)',
+//                         'rgba(245, 158, 11, 0.8)',
+//                         'rgba(6, 182, 212, 0.8)'
 //                     ],
 //                     borderWidth: 2,
 //                     borderColor: '#fff'
@@ -3092,19 +4734,16 @@
 //             console.log('✅ Lead score chart created');
 //         }
         
-//         // Graphique 2 : Non-Customers by Country
 //         const countryCanvas = document.getElementById('non-customer-countries-chart');
 //         if (countryCanvas && this.nonCustomerVisitors && this.nonCustomerVisitors.length > 0) {
 //             console.log('📊 Creating non-customers by country chart...');
             
-//             // Compter par pays
 //             const countryVisits = {};
 //             this.nonCustomerVisitors.forEach(visitor => {
 //                 const country = visitor.country || 'Unknown';
 //                 countryVisits[country] = (countryVisits[country] || 0) + visitor.visits;
 //             });
             
-//             // Top 6 pays
 //             const topCountries = Object.entries(countryVisits)
 //                 .sort((a, b) => b[1] - a[1])
 //                 .slice(0, 6);
@@ -3130,7 +4769,6 @@
 //             console.log('✅ Non-customers country chart created');
 //         }
         
-//         // Calculer et afficher Avg Lead Score
 //         if (this.potentialCustomers && this.potentialCustomers.length > 0) {
 //             const avgScore = this.potentialCustomers.reduce((sum, c) => sum + c.score, 0) / this.potentialCustomers.length;
 //             this.updateStat('avg-lead-score', avgScore.toFixed(1));
@@ -3138,7 +4776,7 @@
 //     }
 
 //     // ========================================
-//     // ALERTS
+//     // SECTION 10: ALERTS SYSTEM
 //     // ========================================
     
 //     async checkAlerts() {
@@ -3161,8 +4799,6 @@
             
 //             if (alerts.length > 0) {
 //                 console.log(`⚠ ${alerts.length} alert(s) detected:`, alerts);
-//                 // Note: Envoi d'email désactivé par défaut (économie d'appels)
-//                 // await this.sendAlertEmail(alerts);
 //             } else {
 //                 console.log('✅ No alerts - all metrics are healthy');
 //             }
@@ -3294,7 +4930,6 @@
 //         try {
 //             console.log('📧 Sending alert email...');
             
-//             // 🆕 VÉRIFIER LE RATE LIMIT
 //             if (!this.cache.canMakeCall()) {
 //                 console.warn('⚠ Rate limit reached - skipping alert email');
 //                 return;
@@ -3327,7 +4962,7 @@
 //     }
 
 //     // ========================================
-//     // CSV EXPORT
+//     // SECTION 11: CSV EXPORT
 //     // ========================================
     
 //     async exportAllData() {
@@ -3341,7 +4976,10 @@
 //             this.exportData('non-customers'),
 //             this.exportData('potential-customers'),
 //             this.exportData('sessions'),
-//             this.exportData('conversion-paths')
+//             this.exportData('conversion-paths'),
+//             this.exportData('watchlists'),
+//             this.exportData('portfolios'),
+//             this.exportData('newsletter')
 //         ]);
         
 //         alert('✅ All data has been exported to CSV files!');
@@ -3481,6 +5119,47 @@
 //                     ]);
 //                     break;
                 
+//                 case 'watchlists':
+//                     data = this.allWatchlistsData;
+//                     filename = 'watchlists';
+//                     headers = ['ID', 'User ID', 'User Email', 'Symbols', 'Created At', 'Source'];
+//                     data = data.map(w => [
+//                         w.id,
+//                         w.userId || 'N/A',
+//                         w.userEmail || 'N/A',
+//                         w.symbols ? w.symbols.join('; ') : '',
+//                         w.createdAt ? (w.createdAt.toDate ? w.createdAt.toDate().toISOString() : w.createdAt) : 'N/A',
+//                         w.source || 'N/A'
+//                     ]);
+//                     break;
+                
+//                 case 'portfolios':
+//                     data = this.allPortfoliosData;
+//                     filename = 'portfolios';
+//                     headers = ['ID', 'User ID', 'User Email', 'Name', 'Total Value', 'Created At', 'Source'];
+//                     data = data.map(p => [
+//                         p.id,
+//                         p.userId || 'N/A',
+//                         p.userEmail || 'N/A',
+//                         p.name || 'N/A',
+//                         p.totalValue || 0,
+//                         p.createdAt ? (p.createdAt.toDate ? p.createdAt.toDate().toISOString() : p.createdAt) : 'N/A',
+//                         p.source || 'N/A'
+//                     ]);
+//                     break;
+                
+//                 case 'newsletter':
+//                     data = this.allNewsletterSubscribers;
+//                     filename = 'newsletter_subscribers';
+//                     headers = ['ID', 'Email', 'Subscribed At', 'Source'];
+//                     data = data.map(n => [
+//                         n.id,
+//                         n.email || 'N/A',
+//                         n.subscribedAt ? (n.subscribedAt.toDate ? n.subscribedAt.toDate().toISOString() : n.subscribedAt) : 'N/A',
+//                         n.source || 'N/A'
+//                     ]);
+//                     break;
+                
 //                 case 'cloudflare':
 //                     if (!this.cloudflareData || !this.cloudflareData.overview) {
 //                         alert('⚠ No Cloudflare data available to export.');
@@ -3577,15 +5256,13 @@
 //     }
 
 //     // ========================================
-//     // HELPER FUNCTIONS
+//     // SECTION 12: HELPER FUNCTIONS
 //     // ========================================
     
 //     updateStat(elementId, value) {
 //         const element = document.getElementById(elementId);
 //         if (element) {
 //             element.textContent = value;
-//         } else {
-//             // console.warn(`⚠ Element not found: ${elementId}`);
 //         }
 //     }
 
@@ -3622,164 +5299,6 @@
 //         });
 //     }
 
-//     // 🆕 CRÉER GRAPHIQUE STRIPE
-//     createStripeChart(data) {
-//         if (!data || !data.subscriptions) return;
-        
-//         const canvas = document.getElementById('stripe-subscriptions-chart');
-//         if (!canvas) {
-//             console.warn('⚠ Stripe chart canvas not found (id: stripe-subscriptions-chart)');
-//             return;
-//         }
-        
-//         console.log('📊 Creating Stripe subscriptions chart...');
-        
-//         this.createChart('stripe-subscriptions-chart', 'doughnut', {
-//             labels: ['Active', 'Trialing', 'Canceled', 'Past Due'],
-//             datasets: [{
-//                 data: [
-//                     data.subscriptions.active || 0,
-//                     data.subscriptions.trialing || 0,
-//                     data.subscriptions.canceled || 0,
-//                     data.subscriptions.past_due || 0
-//                 ],
-//                 backgroundColor: [
-//                     'rgba(16, 185, 129, 0.8)',  // Green for active
-//                     'rgba(59, 130, 246, 0.8)',   // Blue for trialing
-//                     'rgba(239, 68, 68, 0.8)',    // Red for canceled
-//                     'rgba(245, 158, 11, 0.8)'    // Orange for past due
-//                 ],
-//                 borderWidth: 2,
-//                 borderColor: '#fff'
-//             }]
-//         }, {
-//             plugins: {
-//                 legend: {
-//                     display: true,
-//                     position: 'bottom'
-//                 },
-//                 title: {
-//                     display: true,
-//                     text: 'Stripe Subscriptions Status'
-//                 }
-//             }
-//         });
-        
-//         console.log('✅ Stripe chart created');
-//     }
-
-//     // 🆕 CRÉER GRAPHIQUES CLOUDFLARE
-//     createCloudflareCharts(data) {
-//         if (!data || !data.overview) return;
-        
-//         // Graphique 1 : Requests Over Time
-//         const requestsCanvas = document.getElementById('cf-requests-chart');
-//         if (requestsCanvas && data.overview.requestsByDate) {
-//             console.log('📊 Creating Cloudflare requests chart...');
-            
-//             const dates = Object.keys(data.overview.requestsByDate).sort();
-//             const requests = dates.map(date => data.overview.requestsByDate[date]);
-            
-//             this.createChart('cf-requests-chart', 'line', {
-//                 labels: dates.map(d => {
-//                     const date = new Date(d);
-//                     return `${date.getDate()}/${date.getMonth() + 1}`;
-//                 }),
-//                 datasets: [{
-//                     label: 'Daily Requests',
-//                     data: requests,
-//                     borderColor: 'rgb(249, 115, 22)',
-//                     backgroundColor: 'rgba(249, 115, 22, 0.1)',
-//                     tension: 0.4,
-//                     fill: true,
-//                     borderWidth: 3
-//                 }]
-//             }, {
-//                 scales: {
-//                     y: {
-//                         beginAtZero: true
-//                     }
-//                 },
-//                 plugins: {
-//                     title: {
-//                         display: true,
-//                         text: 'Cloudflare Requests Over Time'
-//                     }
-//                 }
-//             });
-            
-//             console.log('✅ Cloudflare requests chart created');
-//         } else {
-//             console.warn('⚠ Cloudflare requests chart canvas not found (id: cf-requests-chart)');
-//         }
-        
-//         // Graphique 2 : Geo Distribution
-//         const geoCanvas = document.getElementById('cf-geo-chart');
-//         if (geoCanvas && this.cloudflareGeo && this.cloudflareGeo.length > 0) {
-//             console.log('📊 Creating Cloudflare geo chart...');
-            
-//             const topCountries = this.cloudflareGeo.slice(0, 6);
-            
-//             this.createChart('cf-geo-chart', 'bar', {
-//                 labels: topCountries.map(c => c.country),
-//                 datasets: [{
-//                     label: 'Requests by Country',
-//                     data: topCountries.map(c => c.requests),
-//                     backgroundColor: 'rgba(139, 92, 246, 0.8)',
-//                     borderRadius: 8
-//                 }]
-//             }, {
-//                 indexAxis: 'y',
-//                 plugins: {
-//                     title: {
-//                         display: true,
-//                         text: 'Top Countries by Requests'
-//                     }
-//                 }
-//             });
-            
-//             console.log('✅ Cloudflare geo chart created');
-//         } else {
-//             console.warn('⚠ Cloudflare geo chart canvas not found (id: cf-geo-chart)');
-//         }
-        
-//         // Graphique 3 : Device Distribution
-//         const deviceCanvas = document.getElementById('cf-devices-chart');
-//         if (deviceCanvas && this.cloudflareDevices && this.cloudflareDevices.length > 0) {
-//             console.log('📊 Creating Cloudflare devices chart...');
-            
-//             this.createChart('cf-devices-chart', 'pie', {
-//                 labels: this.cloudflareDevices.map(d => d.type),
-//                 datasets: [{
-//                     data: this.cloudflareDevices.map(d => d.requests),
-//                     backgroundColor: [
-//                         'rgba(59, 130, 246, 0.8)',
-//                         'rgba(16, 185, 129, 0.8)',
-//                         'rgba(245, 158, 11, 0.8)',
-//                         'rgba(239, 68, 68, 0.8)'
-//                     ],
-//                     borderWidth: 2,
-//                     borderColor: '#fff'
-//                 }]
-//             }, {
-//                 plugins: {
-//                     legend: {
-//                         display: true,
-//                         position: 'bottom'
-//                     },
-//                     title: {
-//                         display: true,
-//                         text: 'Requests by Device Type'
-//                     }
-//                 }
-//             });
-            
-//             console.log('✅ Cloudflare devices chart created');
-//         } else {
-//             console.warn('⚠ Cloudflare devices chart canvas not found (id: cf-devices-chart)');
-//         }
-//     }
-
 //     formatBytes(bytes) {
 //         if (bytes === 0) return '0 Bytes';
         
@@ -3796,16 +5315,17 @@
 // // ========================================
 
 // document.addEventListener('DOMContentLoaded', () => {
-//     console.log('🚀 Starting Admin Analytics PRO v5.1...');
+//     console.log('🚀 Starting Admin Analytics PRO v6.0...');
 //     console.log('📊 Initializing comprehensive analytics dashboard...');
 //     console.log('🗄 Cache & Rate Limiting enabled');
+//     console.log('🔥 Worker v4.4 compatible');
     
 //     window.adminAnalytics = new AdminAnalyticsPro();
     
 //     console.log('✅ Admin Analytics instance created and attached to window.adminAnalytics');
 // });
 
-// // 🔍 DIAGNOSTIC TOOL - À SUPPRIMER APRÈS LE DEBUG
+// // 🔍 DIAGNOSTIC TOOL
 // function diagnoseData() {
 //     console.log('🔍 ========================================');
 //     console.log('🔍 DATA DIAGNOSTIC');
@@ -3824,20 +5344,24 @@
 //     console.log(`📊 Visits: ${analytics.allVisitsData.length}`);
 //     console.log(`📊 Payments: ${analytics.allPaymentsData.length}`);
 //     console.log(`📊 Activities: ${analytics.allActivityData.length}`);
+//     console.log(`📊 Watchlists: ${analytics.allWatchlistsData.length}`);
+//     console.log(`📊 Portfolios: ${analytics.allPortfoliosData.length}`);
+//     console.log(`📊 Newsletter: ${analytics.allNewsletterSubscribers.length}`);
 //     console.log(`📊 Sessions: ${analytics.sessionData.length}`);
 //     console.log(`📊 Non-customers: ${analytics.nonCustomerVisitors.length}`);
 //     console.log(`📊 Potential customers: ${analytics.potentialCustomers.length}`);
 //     console.log(`📊 Stripe data:`, analytics.stripeData ? '✅ Loaded' : '❌ NULL');
 //     console.log(`📊 Cloudflare data:`, analytics.cloudflareData ? '✅ Loaded' : '❌ NULL');
     
-//     // Vérifier les éléments DOM
 //     console.log('🔍 Checking DOM elements...');
 //     const elementsToCheck = [
 //         'total-users',
 //         'recent-users-body',
 //         'users-management-body',
 //         'registrations-chart',
-//         'plans-chart'
+//         'plans-chart',
+//         'cf-requests-chart',
+//         'stripe-subscriptions-chart'
 //     ];
     
 //     elementsToCheck.forEach(id => {
@@ -3848,13 +5372,12 @@
 //     console.log('🔍 ========================================');
 // }
 
-// // Appeler le diagnostic après 5 secondes
 // setTimeout(() => {
 //     console.log('⏰ Running automatic diagnostic...');
 //     diagnoseData();
 // }, 5000);
 
-// // Global function for export (called from HTML buttons)
+// // Global function for export
 // function exportAnalyticsData(type) {
 //     if (window.adminAnalytics) {
 //         window.adminAnalytics.exportData(type);
@@ -4220,6 +5743,33 @@ class AdminAnalyticsPro {
         this.allRealEstateSimulations = [];
         this.allLoginHistory = [];
         this.allConversations = [];
+
+        // ========================================
+        // 🆕 FINANCE HUB API & GEMINI AI ANALYTICS
+        // ========================================
+
+        // Twelve Data Analytics
+        this.allTwelveDataRequests = [];
+        this.topStocksQueried = [];
+        this.technicalIndicatorsUsage = [];
+        this.twelveDataEndpointsStats = {};
+
+        // FinnHub Analytics
+        this.allFinnhubRequests = [];
+        this.topNewsRequests = [];
+        this.sentimentAnalysisData = [];
+        this.finnhubEndpointsStats = {};
+
+        // Gemini AI Analytics
+        this.allGeminiRequests = [];
+        this.geminiTokensConsumed = 0;
+        this.topGeminiPrompts = [];
+        this.geminiUsageByModel = {};
+
+        // API Management (Phase 2)
+        this.apiUsageByUser = [];
+        this.apiAbusers = [];
+        this.blockedAPIUsers = [];
         
         // Analytics Data
         this.nonCustomerVisitors = [];
@@ -4327,7 +5877,11 @@ class AdminAnalyticsPro {
             'exportPaymentsBtn': () => this.exportData('payments'),
             'exportWatchlistsBtn': () => this.exportData('watchlists'),
             'exportPortfoliosBtn': () => this.exportData('portfolios'),
-            'exportNewsletterBtn': () => this.exportData('newsletter')
+            'exportNewsletterBtn': () => this.exportData('newsletter'),
+            'exportTwelveDataBtn': () => this.exportData('twelve-data'),
+            'exportFinnhubBtn': () => this.exportData('finnhub'),
+            'exportGeminiBtn': () => this.exportData('gemini'),
+            'exportAPIUsageBtn': () => this.exportData('api-usage'),
         };
         
         Object.entries(exportButtons).forEach(([id, handler]) => {
@@ -4527,6 +6081,21 @@ class AdminAnalyticsPro {
             console.log(`📊 Real estate simulations: ${this.allRealEstateSimulations?.length || 0}`);
             console.log(`📊 Login history entries: ${this.allLoginHistory?.length || 0}`);
             console.log(`📊 AI conversations: ${this.allConversations?.length || 0}`);
+
+            // 🆕 SECTION 4: FINANCE HUB API & GEMINI AI ANALYTICS
+            console.log('📊 Loading Finance Hub API & Gemini AI analytics...');
+            await Promise.all([
+                this.loadTwelveDataUsage(),
+                this.loadFinnhubUsage(),
+                this.loadGeminiUsage(),
+                this.loadAPIUsageByUser()
+            ]);
+            console.log('✅ Finance & AI analytics loaded');
+
+            console.log(`📊 Twelve Data requests: ${this.allTwelveDataRequests.length}`);
+            console.log(`📊 FinnHub requests: ${this.allFinnhubRequests.length}`);
+            console.log(`📊 Gemini requests: ${this.allGeminiRequests.length}`);
+            console.log(`📊 Total API usage entries: ${this.apiUsageByUser.length}`);
             
             // SECTION 4: ADVANCED ANALYTICS
             console.log('📈 Loading advanced analytics...');
@@ -4633,6 +6202,13 @@ class AdminAnalyticsPro {
             this.displayLoginHistoryStats();
             this.displayConversationsStats();
             this.displaySocialStatsByUser();
+
+            // 🆕 AFFICHER LES ANALYTICS FINANCE & AI
+            this.displayTwelveDataStats();
+            this.displayFinnhubStats();
+            this.displayGeminiStats();
+            this.displayAPIUsageTable();
+            this.createFinanceAICharts();
             
             console.log('✅ All displays refreshed successfully');
             
@@ -9025,6 +10601,67 @@ class AdminAnalyticsPro {
                         n.source || 'N/A'
                     ]);
                     break;
+
+                case 'twelve-data':
+                    data = this.allTwelveDataRequests;
+                    filename = 'twelve_data_requests';
+                    headers = ['ID', 'User ID', 'User Email', 'Endpoint', 'Symbol', 'Timestamp', 'Source'];
+                    data = data.map(r => [
+                        r.id,
+                        r.userId || 'N/A',
+                        r.userEmail || 'N/A',
+                        r.endpoint || 'N/A',
+                        r.symbol || 'N/A',
+                        r.timestamp ? (r.timestamp.toDate ? r.timestamp.toDate().toISOString() : r.timestamp) : 'N/A',
+                        r.source || 'N/A'
+                    ]);
+                    break;
+
+                case 'finnhub':
+                    data = this.allFinnhubRequests;
+                    filename = 'finnhub_requests';
+                    headers = ['ID', 'User ID', 'User Email', 'Endpoint', 'Symbol', 'Timestamp', 'Source'];
+                    data = data.map(r => [
+                        r.id,
+                        r.userId || 'N/A',
+                        r.userEmail || 'N/A',
+                        r.endpoint || 'N/A',
+                        r.symbol || 'N/A',
+                        r.timestamp ? (r.timestamp.toDate ? r.timestamp.toDate().toISOString() : r.timestamp) : 'N/A',
+                        r.source || 'N/A'
+                    ]);
+                    break;
+
+                case 'gemini':
+                    data = this.allGeminiRequests;
+                    filename = 'gemini_requests';
+                    headers = ['ID', 'User ID', 'User Email', 'Prompt', 'Tokens', 'Model', 'Timestamp', 'Source'];
+                    data = data.map(r => [
+                        r.id,
+                        r.userId || 'N/A',
+                        r.userEmail || 'N/A',
+                        r.prompt ? r.prompt.substring(0, 200) : 'N/A',
+                        r.tokens || 0,
+                        r.model || 'N/A',
+                        r.timestamp ? (r.timestamp.toDate ? r.timestamp.toDate().toISOString() : r.timestamp) : 'N/A',
+                        r.source || 'N/A'
+                    ]);
+                    break;
+
+                case 'api-usage':
+                    data = this.apiUsageByUser;
+                    filename = 'api_usage_by_user';
+                    headers = ['User ID', 'User Email', 'Twelve Data', 'FinnHub', 'Gemini', 'Total', 'Last Request'];
+                    data = data.map(u => [
+                        u.userId,
+                        u.userEmail,
+                        u.twelveData,
+                        u.finnhub,
+                        u.gemini,
+                        u.total,
+                        u.lastRequest ? u.lastRequest.toISOString() : 'N/A'
+                    ]);
+                    break;
                 
                 case 'cloudflare':
                     if (!this.cloudflareData || !this.cloudflareData.overview) {
@@ -9173,6 +10810,980 @@ class AdminAnalyticsPro {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // ========================================
+    // 🆕 SECTION 13: TWELVE DATA ANALYTICS
+    // ========================================
+
+    async loadTwelveDataUsage() {
+        try {
+            console.log('📊 Loading Twelve Data API usage...');
+            
+            this.allTwelveDataRequests = [];
+            this.topStocksQueried = [];
+            this.technicalIndicatorsUsage = [];
+            this.twelveDataEndpointsStats = {};
+            
+            // 🔥 MÉTHODE 1 : Collection globale /api_requests avec filter provider
+            try {
+                const twelveDataSnapshot = await this.db
+                    .collection('api_requests')
+                    .where('provider', '==', 'twelve_data')
+                    .get();
+                
+                console.log(`   Found ${twelveDataSnapshot.size} Twelve Data requests (global)`);
+                
+                twelveDataSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.allTwelveDataRequests.push({
+                        id: doc.id,
+                        ...data,
+                        source: 'global'
+                    });
+                });
+            } catch (e) {
+                console.warn('⚠ No global Twelve Data requests collection');
+            }
+            
+            // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/api_requests
+            for (const user of this.allUsersData.slice(0, 50)) { // Limiter pour perf
+                try {
+                    const userTwelveDataSnapshot = await this.db
+                        .collection('users')
+                        .doc(user.id)
+                        .collection('api_requests')
+                        .where('provider', '==', 'twelve_data')
+                        .limit(200)
+                        .get();
+                    
+                    userTwelveDataSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        this.allTwelveDataRequests.push({
+                            id: doc.id,
+                            userId: user.id,
+                            userEmail: user.email,
+                            ...data,
+                            source: 'user'
+                        });
+                    });
+                } catch (e) {
+                    // User n'a pas de requêtes Twelve Data
+                }
+            }
+            
+            console.log(`✅ Twelve Data requests loaded: ${this.allTwelveDataRequests.length} total`);
+            
+            // 🔥 ANALYSER LES DONNÉES
+            this.analyzeTwelveDataRequests();
+            
+        } catch (error) {
+            console.error('❌ Error loading Twelve Data usage:', error);
+        }
+    }
+
+    analyzeTwelveDataRequests() {
+        console.log('🔍 Analyzing Twelve Data requests...');
+        
+        // Compteurs par endpoint
+        const endpointCounts = {};
+        const symbolCounts = {};
+        const indicatorCounts = {};
+        
+        this.allTwelveDataRequests.forEach(req => {
+            const endpoint = req.endpoint || req.path || 'unknown';
+            const symbol = req.symbol || req.params?.symbol;
+            const indicator = req.indicator || req.params?.indicator;
+            
+            // Endpoints
+            endpointCounts[endpoint] = (endpointCounts[endpoint] || 0) + 1;
+            
+            // Symboles
+            if (symbol) {
+                symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+            }
+            
+            // Indicateurs techniques
+            if (indicator) {
+                indicatorCounts[indicator] = (indicatorCounts[indicator] || 0) + 1;
+            }
+        });
+        
+        this.twelveDataEndpointsStats = endpointCounts;
+        
+        // Top 10 symboles
+        this.topStocksQueried = Object.entries(symbolCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([symbol, count]) => ({ symbol, count }));
+        
+        // Top indicateurs
+        this.technicalIndicatorsUsage = Object.entries(indicatorCounts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([indicator, count]) => ({ indicator, count }));
+        
+        console.log(`✅ Analysis complete - ${this.topStocksQueried.length} top stocks, ${this.technicalIndicatorsUsage.length} indicators`);
+    }
+
+    displayTwelveDataStats() {
+        console.log('📊 Displaying Twelve Data stats...');
+        
+        const totalRequests = this.allTwelveDataRequests.length;
+        const uniqueUsers = new Set(this.allTwelveDataRequests.map(r => r.userId)).size;
+        const avgRequestsPerUser = uniqueUsers > 0 ? (totalRequests / uniqueUsers).toFixed(1) : 0;
+        
+        // Calculer les requêtes aujourd'hui
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayRequests = this.allTwelveDataRequests.filter(r => {
+            if (!r.timestamp) return false;
+            const reqDate = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+            return reqDate >= today;
+        }).length;
+        
+        this.updateStat('total-twelve-data-requests', totalRequests.toLocaleString());
+        this.updateStat('twelve-data-requests-today', todayRequests);
+        this.updateStat('twelve-data-unique-users', uniqueUsers);
+        this.updateStat('twelve-data-avg-per-user', avgRequestsPerUser);
+        
+        // Top endpoint
+        const topEndpoint = Object.entries(this.twelveDataEndpointsStats)
+            .sort((a, b) => b[1] - a[1])[0];
+        
+        if (topEndpoint) {
+            this.updateStat('twelve-data-top-endpoint', `${topEndpoint[0]} (${topEndpoint[1]})`);
+        }
+        
+        // 🔥 TABLEAU TOP STOCKS
+        const tbody = document.getElementById('twelve-data-top-stocks-body');
+        if (tbody) {
+            if (this.topStocksQueried.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No stock data available</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = '';
+                this.topStocksQueried.forEach((stock, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="width: 40px; text-align: center;">${index + 1}</td>
+                        <td style="font-weight: 600; color: #1e293b;">${stock.symbol}</td>
+                        <td style="width: 120px; text-align: right; font-weight: 600; color: #667eea;">${stock.count.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        // 🔥 TABLEAU INDICATEURS TECHNIQUES
+        const indicatorsTbody = document.getElementById('twelve-data-indicators-body');
+        if (indicatorsTbody) {
+            if (this.technicalIndicatorsUsage.length === 0) {
+                indicatorsTbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No indicators data</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                indicatorsTbody.innerHTML = '';
+                this.technicalIndicatorsUsage.slice(0, 10).forEach((indicator, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="width: 40px; text-align: center;">${index + 1}</td>
+                        <td style="font-weight: 600; color: #1e293b;">${indicator.indicator.toUpperCase()}</td>
+                        <td style="width: 120px; text-align: right; font-weight: 600; color: #10b981;">${indicator.count.toLocaleString()}</td>
+                    `;
+                    indicatorsTbody.appendChild(row);
+                });
+            }
+        }
+        
+        console.log(`✅ Twelve Data stats displayed - ${totalRequests} total requests`);
+    }
+
+    // ========================================
+    // 🆕 SECTION 14: FINNHUB ANALYTICS
+    // ========================================
+
+    async loadFinnhubUsage() {
+        try {
+            console.log('📊 Loading FinnHub API usage...');
+            
+            this.allFinnhubRequests = [];
+            this.topNewsRequests = [];
+            this.sentimentAnalysisData = [];
+            this.finnhubEndpointsStats = {};
+            
+            // 🔥 MÉTHODE 1 : Collection globale
+            try {
+                const finnhubSnapshot = await this.db
+                    .collection('api_requests')
+                    .where('provider', '==', 'finnhub')
+                    .get();
+                
+                console.log(`   Found ${finnhubSnapshot.size} FinnHub requests (global)`);
+                
+                finnhubSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.allFinnhubRequests.push({
+                        id: doc.id,
+                        ...data,
+                        source: 'global'
+                    });
+                });
+            } catch (e) {
+                console.warn('⚠ No global FinnHub requests collection');
+            }
+            
+            // 🔥 MÉTHODE 2 : Sous-collections users
+            for (const user of this.allUsersData.slice(0, 50)) {
+                try {
+                    const userFinnhubSnapshot = await this.db
+                        .collection('users')
+                        .doc(user.id)
+                        .collection('api_requests')
+                        .where('provider', '==', 'finnhub')
+                        .limit(200)
+                        .get();
+                    
+                    userFinnhubSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        this.allFinnhubRequests.push({
+                            id: doc.id,
+                            userId: user.id,
+                            userEmail: user.email,
+                            ...data,
+                            source: 'user'
+                        });
+                    });
+                } catch (e) {
+                    // User n'a pas de requêtes FinnHub
+                }
+            }
+            
+            console.log(`✅ FinnHub requests loaded: ${this.allFinnhubRequests.length} total`);
+            
+            // 🔥 ANALYSER
+            this.analyzeFinnhubRequests();
+            
+        } catch (error) {
+            console.error('❌ Error loading FinnHub usage:', error);
+        }
+    }
+
+    analyzeFinnhubRequests() {
+        console.log('🔍 Analyzing FinnHub requests...');
+        
+        const endpointCounts = {};
+        const newsCounts = {};
+        const sentiments = [];
+        
+        this.allFinnhubRequests.forEach(req => {
+            const endpoint = req.endpoint || req.path || 'unknown';
+            endpointCounts[endpoint] = (endpointCounts[endpoint] || 0) + 1;
+            
+            // News
+            if (endpoint.includes('news') || endpoint.includes('company-news')) {
+                const symbol = req.symbol || req.params?.symbol;
+                if (symbol) {
+                    newsCounts[symbol] = (newsCounts[symbol] || 0) + 1;
+                }
+            }
+            
+            // Sentiment
+            if (endpoint.includes('sentiment') && req.response?.sentiment) {
+                sentiments.push({
+                    symbol: req.symbol,
+                    sentiment: req.response.sentiment,
+                    timestamp: req.timestamp
+                });
+            }
+        });
+        
+        this.finnhubEndpointsStats = endpointCounts;
+        
+        this.topNewsRequests = Object.entries(newsCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([symbol, count]) => ({ symbol, count }));
+        
+        this.sentimentAnalysisData = sentiments;
+        
+        console.log(`✅ FinnHub analysis complete - ${this.topNewsRequests.length} top news symbols`);
+    }
+
+    displayFinnhubStats() {
+        console.log('📊 Displaying FinnHub stats...');
+        
+        const totalRequests = this.allFinnhubRequests.length;
+        const uniqueUsers = new Set(this.allFinnhubRequests.map(r => r.userId)).size;
+        const avgRequestsPerUser = uniqueUsers > 0 ? (totalRequests / uniqueUsers).toFixed(1) : 0;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayRequests = this.allFinnhubRequests.filter(r => {
+            if (!r.timestamp) return false;
+            const reqDate = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+            return reqDate >= today;
+        }).length;
+        
+        this.updateStat('total-finnhub-requests', totalRequests.toLocaleString());
+        this.updateStat('finnhub-requests-today', todayRequests);
+        this.updateStat('finnhub-unique-users', uniqueUsers);
+        this.updateStat('finnhub-avg-per-user', avgRequestsPerUser);
+        
+        // Top endpoint
+        const topEndpoint = Object.entries(this.finnhubEndpointsStats)
+            .sort((a, b) => b[1] - a[1])[0];
+        
+        if (topEndpoint) {
+            this.updateStat('finnhub-top-endpoint', `${topEndpoint[0]} (${topEndpoint[1]})`);
+        }
+        
+        // 🔥 TABLEAU TOP NEWS
+        const tbody = document.getElementById('finnhub-top-news-body');
+        if (tbody) {
+            if (this.topNewsRequests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No news data available</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = '';
+                this.topNewsRequests.forEach((news, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="width: 40px; text-align: center;">${index + 1}</td>
+                        <td style="font-weight: 600; color: #1e293b;">${news.symbol}</td>
+                        <td style="width: 120px; text-align: right; font-weight: 600; color: #f59e0b;">${news.count.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        console.log(`✅ FinnHub stats displayed - ${totalRequests} total requests`);
+    }
+
+    // ========================================
+    // 🆕 SECTION 15: GEMINI AI ANALYTICS
+    // ========================================
+
+    async loadGeminiUsage() {
+        try {
+            console.log('📊 Loading Gemini AI usage...');
+            
+            this.allGeminiRequests = [];
+            this.geminiTokensConsumed = 0;
+            this.topGeminiPrompts = [];
+            this.geminiUsageByModel = {};
+            
+            // 🔥 COLLECTION /gemini_requests OU depuis conversations
+            try {
+                const geminiSnapshot = await this.db
+                    .collection('gemini_requests')
+                    .get();
+                
+                console.log(`   Found ${geminiSnapshot.size} Gemini requests (global)`);
+                
+                geminiSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.allGeminiRequests.push({
+                        id: doc.id,
+                        ...data,
+                        source: 'global'
+                    });
+                });
+            } catch (e) {
+                console.warn('⚠ No global Gemini requests collection');
+            }
+            
+            // 🔥 DEPUIS LES CONVERSATIONS (messages avec AI)
+            if (this.allConversations && this.allConversations.length > 0) {
+                console.log('   Extracting Gemini usage from conversations...');
+                
+                this.allConversations.forEach(conv => {
+                    if (conv.messages && Array.isArray(conv.messages)) {
+                        conv.messages.forEach(msg => {
+                            if (msg.role === 'model' || msg.sender === 'ai') {
+                                this.allGeminiRequests.push({
+                                    id: `conv-${conv.id}-${msg.timestamp}`,
+                                    userId: conv.userId,
+                                    userEmail: conv.userEmail,
+                                    prompt: msg.userPrompt || msg.prompt,
+                                    response: msg.text || msg.content,
+                                    tokens: msg.tokens || 0,
+                                    model: msg.model || 'gemini-2.5-flash',
+                                    timestamp: msg.timestamp || conv.createdAt,
+                                    source: 'conversation'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            console.log(`✅ Gemini requests loaded: ${this.allGeminiRequests.length} total`);
+            
+            // 🔥 ANALYSER
+            this.analyzeGeminiRequests();
+            
+        } catch (error) {
+            console.error('❌ Error loading Gemini usage:', error);
+        }
+    }
+
+    analyzeGeminiRequests() {
+        console.log('🔍 Analyzing Gemini requests...');
+        
+        let totalTokens = 0;
+        const modelCounts = {};
+        const promptCounts = {};
+        
+        this.allGeminiRequests.forEach(req => {
+            // Tokens
+            const tokens = req.tokens || req.totalTokenCount || 0;
+            totalTokens += tokens;
+            
+            // Modèles
+            const model = req.model || 'gemini-2.5-flash';
+            modelCounts[model] = (modelCounts[model] || 0) + 1;
+            
+            // Prompts (premiers 100 caractères comme clé)
+            if (req.prompt) {
+                const promptKey = req.prompt.substring(0, 100);
+                promptCounts[promptKey] = (promptCounts[promptKey] || 0) + 1;
+            }
+        });
+        
+        this.geminiTokensConsumed = totalTokens;
+        this.geminiUsageByModel = modelCounts;
+        
+        this.topGeminiPrompts = Object.entries(promptCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([prompt, count]) => ({ prompt, count }));
+        
+        console.log(`✅ Gemini analysis complete - ${totalTokens.toLocaleString()} tokens consumed`);
+    }
+
+    displayGeminiStats() {
+        console.log('📊 Displaying Gemini AI stats...');
+        
+        const totalRequests = this.allGeminiRequests.length;
+        const uniqueUsers = new Set(this.allGeminiRequests.map(r => r.userId)).size;
+        const avgRequestsPerUser = uniqueUsers > 0 ? (totalRequests / uniqueUsers).toFixed(1) : 0;
+        const avgTokensPerRequest = totalRequests > 0 ? (this.geminiTokensConsumed / totalRequests).toFixed(0) : 0;
+        
+        this.updateStat('total-gemini-requests', totalRequests.toLocaleString());
+        this.updateStat('gemini-tokens-consumed', this.geminiTokensConsumed.toLocaleString());
+        this.updateStat('gemini-unique-users', uniqueUsers);
+        this.updateStat('gemini-avg-tokens-per-request', avgTokensPerRequest);
+        
+        // Top modèle
+        const topModel = Object.entries(this.geminiUsageByModel)
+            .sort((a, b) => b[1] - a[1])[0];
+        
+        if (topModel) {
+            this.updateStat('gemini-top-model', `${topModel[0]} (${topModel[1]})`);
+        }
+        
+        // 🔥 TABLEAU TOP PROMPTS
+        const tbody = document.getElementById('gemini-top-prompts-body');
+        if (tbody) {
+            if (this.topGeminiPrompts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                            <p style="margin: 0;">No AI prompts data</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = '';
+                this.topGeminiPrompts.forEach((prompt, index) => {
+                    const row = document.createElement('tr');
+                    const displayPrompt = prompt.prompt.length > 80 ? 
+                        prompt.prompt.substring(0, 80) + '...' : 
+                        prompt.prompt;
+                    
+                    row.innerHTML = `
+                        <td style="width: 40px; text-align: center;">${index + 1}</td>
+                        <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${prompt.prompt}">${displayPrompt}</td>
+                        <td style="width: 100px; text-align: right; font-weight: 600; color: #8b5cf6;">${prompt.count.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        console.log(`✅ Gemini stats displayed - ${totalRequests} total requests, ${this.geminiTokensConsumed.toLocaleString()} tokens`);
+    }
+
+    // ========================================
+    // 🆕 SECTION 16: API MANAGEMENT (PHASE 2 PRÉPARATION)
+    // ========================================
+
+    async loadAPIUsageByUser() {
+        try {
+            console.log('📊 Loading API usage by user...');
+            
+            this.apiUsageByUser = [];
+            this.apiAbusers = [];
+            
+            // Combiner toutes les requêtes API par utilisateur
+            const userAPIStats = {};
+            
+            // Depuis Twelve Data
+            this.allTwelveDataRequests.forEach(req => {
+                const userId = req.userId || 'anonymous';
+                if (!userAPIStats[userId]) {
+                    userAPIStats[userId] = {
+                        userId: userId,
+                        userEmail: req.userEmail || 'N/A',
+                        twelveData: 0,
+                        finnhub: 0,
+                        gemini: 0,
+                        total: 0,
+                        lastRequest: null
+                    };
+                }
+                userAPIStats[userId].twelveData++;
+                userAPIStats[userId].total++;
+                
+                if (req.timestamp) {
+                    const reqDate = req.timestamp.toDate ? req.timestamp.toDate() : new Date(req.timestamp);
+                    if (!userAPIStats[userId].lastRequest || reqDate > userAPIStats[userId].lastRequest) {
+                        userAPIStats[userId].lastRequest = reqDate;
+                    }
+                }
+            });
+            
+            // Depuis FinnHub
+            this.allFinnhubRequests.forEach(req => {
+                const userId = req.userId || 'anonymous';
+                if (!userAPIStats[userId]) {
+                    userAPIStats[userId] = {
+                        userId: userId,
+                        userEmail: req.userEmail || 'N/A',
+                        twelveData: 0,
+                        finnhub: 0,
+                        gemini: 0,
+                        total: 0,
+                        lastRequest: null
+                    };
+                }
+                userAPIStats[userId].finnhub++;
+                userAPIStats[userId].total++;
+                
+                if (req.timestamp) {
+                    const reqDate = req.timestamp.toDate ? req.timestamp.toDate() : new Date(req.timestamp);
+                    if (!userAPIStats[userId].lastRequest || reqDate > userAPIStats[userId].lastRequest) {
+                        userAPIStats[userId].lastRequest = reqDate;
+                    }
+                }
+            });
+            
+            // Depuis Gemini
+            this.allGeminiRequests.forEach(req => {
+                const userId = req.userId || 'anonymous';
+                if (!userAPIStats[userId]) {
+                    userAPIStats[userId] = {
+                        userId: userId,
+                        userEmail: req.userEmail || 'N/A',
+                        twelveData: 0,
+                        finnhub: 0,
+                        gemini: 0,
+                        total: 0,
+                        lastRequest: null
+                    };
+                }
+                userAPIStats[userId].gemini++;
+                userAPIStats[userId].total++;
+                
+                if (req.timestamp) {
+                    const reqDate = req.timestamp.toDate ? req.timestamp.toDate() : new Date(req.timestamp);
+                    if (!userAPIStats[userId].lastRequest || reqDate > userAPIStats[userId].lastRequest) {
+                        userAPIStats[userId].lastRequest = reqDate;
+                    }
+                }
+            });
+            
+            this.apiUsageByUser = Object.values(userAPIStats)
+                .sort((a, b) => b.total - a.total);
+            
+            // 🔥 DÉTECTER LES ABUSEURS (> 1000 requêtes total)
+            this.apiAbusers = this.apiUsageByUser.filter(user => user.total > 1000);
+            
+            console.log(`✅ API usage by user loaded - ${this.apiUsageByUser.length} users, ${this.apiAbusers.length} potential abusers`);
+            
+            // Stats
+            const totalAPIRequests = this.apiUsageByUser.reduce((sum, u) => sum + u.total, 0);
+            this.updateStat('total-api-requests-all', totalAPIRequests.toLocaleString());
+            this.updateStat('api-abusers-count', this.apiAbusers.length);
+            
+        } catch (error) {
+            console.error('❌ Error loading API usage by user:', error);
+        }
+    }
+
+    displayAPIUsageTable() {
+        console.log('📊 Displaying API usage table with pagination...');
+        
+        const tbody = document.getElementById('api-usage-by-user-body');
+        if (!tbody) {
+            console.warn('⚠ API usage table not found');
+            return;
+        }
+        
+        if (this.apiUsageByUser.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No API usage data</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const renderAPIUsageRow = (user, index, tbody) => {
+            const row = document.createElement('tr');
+            
+            // 🔥 HIGHLIGHT ABUSERS
+            const isAbuser = user.total > 1000;
+            if (isAbuser) {
+                row.style.backgroundColor = '#fee2e2';
+            }
+            
+            const lastRequest = user.lastRequest ? 
+                user.lastRequest.toLocaleDateString('en-US') : 
+                'N/A';
+            
+            const actionButton = isAbuser 
+                ? `<button class="btn-action btn-ban" onclick="adminAnalytics.blockUserAPIAccess('${user.userId}')">
+                    <i class="fas fa-ban"></i> Block API
+                </button>`
+                : `<span style="color: #10b981;">✅ Normal</span>`;
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${user.userEmail}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${user.twelveData.toLocaleString()}</td>
+                <td style="text-align: center; font-weight: 600; color: #f59e0b;">${user.finnhub.toLocaleString()}</td>
+                <td style="text-align: center; font-weight: 600; color: #8b5cf6;">${user.gemini.toLocaleString()}</td>
+                <td style="text-align: center; font-weight: 700; ${isAbuser ? 'color: #ef4444;' : 'color: #10b981;'}">${user.total.toLocaleString()}</td>
+                <td>${lastRequest}</td>
+                <td>${actionButton}</td>
+            `;
+            
+            tbody.appendChild(row);
+        };
+        
+        // 🔥 PAGINATION
+        if (!window.paginationManagers['api-usage-by-user-body']) {
+            window.paginationManagers['api-usage-by-user-body'] = new PaginationManager(
+                'api-usage-by-user-body',
+                this.apiUsageByUser,
+                renderAPIUsageRow,
+                [10, 25, 50, 100]
+            );
+        } else {
+            window.paginationManagers['api-usage-by-user-body'].updateData(this.apiUsageByUser);
+        }
+        
+        window.paginationManagers['api-usage-by-user-body'].render();
+        
+        console.log(`✅ API usage table displayed with pagination (${this.apiUsageByUser.length} users)`);
+    }
+
+    async blockUserAPIAccess(userId) {
+        try {
+            console.log(`🚫 Blocking API access for user: ${userId}`);
+            
+            if (!this.auth.currentUser || this.auth.currentUser.email !== ADMIN_EMAIL) {
+                alert('❌ Erreur : Accès admin refusé');
+                return;
+            }
+            
+            const reason = prompt('Raison du blocage API (optionnel):');
+            
+            if (reason === null) {
+                console.log('❌ Block canceled');
+                return;
+            }
+            
+            const confirmBlock = confirm(
+                `⚠ BLOQUER L'ACCÈS API ?\n\n` +
+                `Cette action va :\n` +
+                `✓ Bloquer toutes les requêtes API de cet utilisateur\n` +
+                `✓ Être enregistrée dans les logs admin\n\n` +
+                `Raison : ${reason || 'Aucune raison fournie'}\n\n` +
+                `Confirmer le blocage ?`
+            );
+            
+            if (!confirmBlock) {
+                console.log('❌ Block canceled');
+                return;
+            }
+            
+            console.log(`🔄 Blocking API access for ${userId}...`);
+            
+            await this.db.collection('users').doc(userId).update({
+                apiAccessBlocked: true,
+                apiBlockedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                apiBlockReason: reason || 'No reason provided',
+                apiBlockedBy: ADMIN_EMAIL
+            });
+            
+            console.log('✅ User API access blocked');
+            
+            await this.db.collection('admin_actions').add({
+                action: 'block_api_access',
+                userId: userId,
+                adminEmail: ADMIN_EMAIL,
+                reason: reason || 'No reason provided',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ Admin action logged');
+            
+            alert('✅ Accès API bloqué avec succès !');
+            
+            // Reload data
+            await this.loadAPIUsageByUser();
+            this.displayAPIUsageTable();
+            
+        } catch (error) {
+            console.error('❌ Error blocking API access:', error);
+            alert(`⚠ Erreur : ${error.message}`);
+        }
+    }
+
+    async unblockUserAPIAccess(userId) {
+        try {
+            console.log(`✅ Unblocking API access for user: ${userId}`);
+            
+            if (!this.auth.currentUser || this.auth.currentUser.email !== ADMIN_EMAIL) {
+                alert('❌ Erreur : Accès admin refusé');
+                return;
+            }
+            
+            const confirmUnblock = confirm(
+                `✅ DÉBLOQUER L'ACCÈS API ?\n\n` +
+                `Cette action va restaurer l'accès API complet.\n\n` +
+                `Confirmer le déblocage ?`
+            );
+            
+            if (!confirmUnblock) {
+                console.log('❌ Unblock canceled');
+                return;
+            }
+            
+            await this.db.collection('users').doc(userId).update({
+                apiAccessBlocked: false,
+                apiBlockedAt: null,
+                apiBlockReason: null,
+                apiUnblockedBy: ADMIN_EMAIL,
+                apiUnblockedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            await this.db.collection('admin_actions').add({
+                action: 'unblock_api_access',
+                userId: userId,
+                adminEmail: ADMIN_EMAIL,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            alert('✅ Accès API débloqué avec succès !');
+            
+            await this.loadAPIUsageByUser();
+            this.displayAPIUsageTable();
+            
+        } catch (error) {
+            console.error('❌ Error unblocking API access:', error);
+            alert(`⚠ Erreur : ${error.message}`);
+        }
+    }
+
+    // ========================================
+    // 🆕 SECTION 17: COMBINED FINANCE & AI CHARTS
+    // ========================================
+
+    createFinanceAICharts() {
+        console.log('📊 Creating Finance & AI charts...');
+        
+        // 🔥 GRAPHIQUE 1 : API USAGE OVERVIEW (Bar Chart)
+        const apiOverviewCanvas = document.getElementById('api-usage-overview-chart');
+        if (apiOverviewCanvas) {
+            const totalTwelveData = this.allTwelveDataRequests.length;
+            const totalFinnhub = this.allFinnhubRequests.length;
+            const totalGemini = this.allGeminiRequests.length;
+            
+            this.createChart('api-usage-overview-chart', 'bar', {
+                labels: ['Twelve Data', 'FinnHub', 'Gemini AI'],
+                datasets: [{
+                    label: 'Total API Requests',
+                    data: [totalTwelveData, totalFinnhub, totalGemini],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(139, 92, 246, 0.8)'
+                    ],
+                    borderRadius: 8
+                }]
+            }, {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'API Usage Overview'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            });
+            
+            console.log('✅ API usage overview chart created');
+        }
+        
+        // 🔥 GRAPHIQUE 2 : TOP STOCKS POPULARITY (Pie Chart)
+        const topStocksCanvas = document.getElementById('top-stocks-chart');
+        if (topStocksCanvas && this.topStocksQueried.length > 0) {
+            const topStocks = this.topStocksQueried.slice(0, 6);
+            
+            this.createChart('top-stocks-chart', 'doughnut', {
+                labels: topStocks.map(s => s.symbol),
+                datasets: [{
+                    data: topStocks.map(s => s.count),
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            }, {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Most Queried Stocks'
+                    }
+                }
+            });
+            
+            console.log('✅ Top stocks chart created');
+        }
+        
+        // 🔥 GRAPHIQUE 3 : GEMINI TOKENS CONSUMPTION (Line Chart)
+        const geminiTokensCanvas = document.getElementById('gemini-tokens-chart');
+        if (geminiTokensCanvas && this.allGeminiRequests.length > 0) {
+            // Grouper par jour
+            const tokensByDay = {};
+            
+            this.allGeminiRequests.forEach(req => {
+                if (req.timestamp) {
+                    const date = req.timestamp.toDate ? req.timestamp.toDate() : new Date(req.timestamp);
+                    const dateKey = date.toISOString().split('T')[0];
+                    
+                    const tokens = req.tokens || req.totalTokenCount || 100; // Default 100 si non spécifié
+                    tokensByDay[dateKey] = (tokensByDay[dateKey] || 0) + tokens;
+                }
+            });
+            
+            const sortedDates = Object.keys(tokensByDay).sort().slice(-30); // 30 derniers jours
+            
+            this.createChart('gemini-tokens-chart', 'line', {
+                labels: sortedDates.map(d => {
+                    const date = new Date(d);
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
+                }),
+                datasets: [{
+                    label: 'Daily Tokens Consumed',
+                    data: sortedDates.map(d => tokensByDay[d]),
+                    borderColor: 'rgb(139, 92, 246)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
+            }, {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Gemini AI - Daily Tokens Consumption'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            });
+            
+            console.log('✅ Gemini tokens chart created');
+        }
+        
+        // 🔥 GRAPHIQUE 4 : ENDPOINTS HEATMAP (Horizontal Bar)
+        const endpointsCanvas = document.getElementById('endpoints-heatmap-chart');
+        if (endpointsCanvas) {
+            const allEndpoints = {
+                ...this.twelveDataEndpointsStats,
+                ...this.finnhubEndpointsStats
+            };
+            
+            const topEndpoints = Object.entries(allEndpoints)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            if (topEndpoints.length > 0) {
+                this.createChart('endpoints-heatmap-chart', 'bar', {
+                    labels: topEndpoints.map(e => e[0]),
+                    datasets: [{
+                        label: 'API Calls',
+                        data: topEndpoints.map(e => e[1]),
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderRadius: 8
+                    }]
+                }, {
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 10 API Endpoints'
+                        }
+                    }
+                });
+                
+                console.log('✅ Endpoints heatmap created');
+            }
+        }
+        
+        console.log('✅ All Finance & AI charts created');
     }
 }
 
