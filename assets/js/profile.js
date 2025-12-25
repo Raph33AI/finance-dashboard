@@ -1426,108 +1426,90 @@ async function handleAvatarChange(e) {
     }
     
     try {
-        showToast('info', 'Upload in progress...', 'Uploading your photo');
+        showToast('info', 'Upload in progress...', 'Uploading your photo to Cloudflare R2');
         
-        // ✅ CORRECTION : Utiliser une approche différente
-        const storage = firebase.storage();
+        console.log('📤 Starting R2 upload...');
         
-        // ✅ Nom de fichier ULTRA-SIMPLE (sans caractères spéciaux)
-        const timestamp = Date.now();
-        const extension = file.name.split('.').pop().toLowerCase();
-        const fileName = `avatar_${timestamp}.${extension}`;
+        // ✅ VÉRIFIER QUE LE MODULE R2 EST CHARGÉ
+        if (!window.r2ProfileUpload) {
+            throw new Error('R2 Upload module not loaded. Make sure r2-profile-upload.js is included.');
+        }
         
-        console.log('📤 Uploading file:', fileName);
-        console.log('📁 User ID:', currentUserData.uid);
-        console.log('📦 File size:', file.size, 'bytes');
-        console.log('🎨 File type:', file.type);
+        // ✅ UPLOADER VERS CLOUDFLARE R2
+        const uploadResult = await window.r2ProfileUpload.uploadProfilePicture(file, currentUserData.uid);
         
-        // ✅ MÉTHODE 1 : Utiliser uploadBytesResumable (avec monitoring)
-        const storageRef = storage.ref(`users/${currentUserData.uid}/profile/${fileName}`);
+        if (!uploadResult.success) {
+            throw new Error('Upload failed');
+        }
         
-        const uploadTask = storageRef.put(file, {
-            contentType: file.type,
-            cacheControl: 'public,max-age=31536000',
+        const downloadURL = uploadResult.imageUrl;
+        
+        console.log('✅ R2 upload successful:', downloadURL);
+        
+        // ✅ Supprimer l'ancienne photo R2 si elle existe
+        if (currentUserData.photoURL && 
+            currentUserData.photoURL.includes('workers.dev') && 
+            currentUserData.photoURL !== downloadURL) {
+            
+            try {
+                // Extraire le fileName de l'ancienne URL
+                const oldFileName = currentUserData.photoURL.split('/images/')[1];
+                if (oldFileName) {
+                    await window.r2ProfileUpload.deleteProfilePicture(oldFileName, currentUserData.uid);
+                }
+            } catch (deleteError) {
+                console.warn('⚠ Could not delete old photo:', deleteError);
+            }
+        }
+        
+        // ✅ Mettre à jour Firestore
+        await firebase.firestore().collection('users').doc(currentUserData.uid).update({
+            photoURL: downloadURL,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        // Monitoring de l'upload
-        uploadTask.on('state_changed', 
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('📊 Upload progress:', progress.toFixed(2) + '%');
-            }, 
-            (error) => {
-                // Erreur détaillée
-                console.error('❌ Upload error:', {
-                    code: error.code,
-                    message: error.message,
-                    name: error.name,
-                    serverResponse: error.serverResponse
-                });
-                
-                throw error;
-            }, 
-            async () => {
-                // Upload réussi
-                console.log('✅ Upload complete!');
-                
-                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                console.log('✅ Download URL obtained:', downloadURL);
-                
-                // ✅ IMPORTANT : Mettre à jour Firestore EN PREMIER
-                await firebase.firestore().collection('users').doc(currentUserData.uid).update({
-                    photoURL: downloadURL,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                console.log('✅ Firestore updated');
-                
-                // Mettre à jour Auth
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    await user.updateProfile({
-                        photoURL: downloadURL
-                    });
-                    console.log('✅ Auth profile updated');
-                }
-                
-                // ✅ Mettre à jour les données locales
-                currentUserData.photoURL = downloadURL;
-                
-                // Mettre à jour toutes les images [data-user-photo]
-                document.querySelectorAll('[data-user-photo]').forEach(img => {
-                    img.src = downloadURL;
-                });
-                
-                // ✅ Forcer le refresh des images dans la sidebar
-                const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
-                if (sidebarAvatar) {
-                    sidebarAvatar.src = downloadURL;
-                }
-                
-                showToast('success', 'Success!', 'Your profile picture has been updated');
-                
-                console.log('✅ Avatar updated successfully');
-            }
-        );
+        console.log('✅ Firestore updated with new photo URL');
+        
+        // Mettre à jour Auth
+        const user = firebase.auth().currentUser;
+        if (user) {
+            await user.updateProfile({
+                photoURL: downloadURL
+            });
+            console.log('✅ Auth profile updated');
+        }
+        
+        // ✅ Mettre à jour les données locales
+        currentUserData.photoURL = downloadURL;
+        
+        // Mettre à jour toutes les images [data-user-photo]
+        document.querySelectorAll('[data-user-photo]').forEach(img => {
+            img.src = downloadURL;
+        });
+        
+        // ✅ Forcer le refresh des images dans la sidebar
+        const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
+        if (sidebarAvatar) {
+            sidebarAvatar.src = downloadURL;
+        }
+        
+        showToast('success', 'Success!', 'Your profile picture has been updated on Cloudflare R2');
+        
+        console.log('✅ Profile picture updated successfully');
         
     } catch (error) {
-        console.error('❌ Upload error details:', {
-            code: error.code,
-            message: error.message,
-            stack: error.stack
-        });
+        console.error('❌ Upload error:', error);
         
-        // Messages d'erreur détaillés
         let errorMessage = 'Failed to upload photo';
         
-        if (error.code === 'storage/unauthorized') {
-            errorMessage = 'Permission denied. Check Firebase Storage rules.';
-        } else if (error.code === 'storage/canceled') {
-            errorMessage = 'Upload canceled';
-        } else if (error.code === 'storage/unknown') {
-            errorMessage = 'Network error. Check your connection.';
-        } else if (error.message && error.message.includes('CORS')) {
-            errorMessage = 'CORS error. Please contact support.';
+        if (error.message.includes('not loaded')) {
+            errorMessage = 'Upload service not available. Please refresh the page.';
+        } else if (error.message.includes('not authenticated')) {
+            errorMessage = 'You must be logged in to upload a photo.';
+        } else if (error.message.includes('File too large')) {
+            errorMessage = 'Image too large. Maximum 5MB.';
+        } else if (error.message.includes('Invalid file type')) {
+            errorMessage = 'Invalid file format. Use JPG, PNG, GIF or WebP.';
         }
         
         showToast('error', 'Error', errorMessage);
