@@ -479,168 +479,60 @@ body.dark-mode .user-dropdown-divider {
 }
 
 /* ============================================
-   BOUTONS FOLLOWING/FOLLOWERS - MOBILE FIX
+   FIX TEMPORAIRE - BOUTONS FOLLOWING/FOLLOWERS
    ============================================ */
 
-/* Tablettes et smartphones (≤768px) */
+/* Ciblage par ID des listes */
 @media (max-width: 768px) {
     
-    /* ✅ Boutons dans les cartes Following/Followers */
-    .following-item button,
-    .follower-item button,
-    [class*="following"] button,
-    [class*="follower"] button {
-        font-size: 0.8125rem !important; /* 13px */
-        padding: 0.5rem 0.875rem !important; /* 8px 14px */
-        min-width: auto !important;
-        height: auto !important;
-        white-space: nowrap !important;
-    }
-    
-    /* ✅ Bouton "Unfollow" spécifique */
-    button[onclick*="unfollow"],
-    .btn-unfollow,
-    button:has(.fa-user-minus) {
-        font-size: 0.8125rem !important;
-        padding: 0.5rem 0.875rem !important;
-        min-height: 36px !important;
-    }
-    
-    /* ✅ Bouton "Remove" spécifique */
-    button[onclick*="removeFollower"],
-    .btn-remove-follower,
-    button:has(.fa-user-times) {
-        font-size: 0.8125rem !important;
-        padding: 0.5rem 0.875rem !important;
-        min-height: 36px !important;
-    }
-    
-    /* ✅ Icônes dans ces boutons */
-    .following-item button i,
-    .follower-item button i {
-        font-size: 0.875rem !important;
-        margin-right: 0.375rem !important;
-    }
-    
-    /* ✅ Conteneur des cartes utilisateur */
-    .following-item,
-    .follower-item {
-        padding: 0.875rem !important;
-        gap: 0.75rem !important;
-    }
-    
-    /* ✅ Actions à droite des cartes */
-    .following-item > div:last-child,
-    .follower-item > div:last-child {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        flex-shrink: 0;
-    }
-}
-
-/* Smartphones (≤480px) - Réduction supplémentaire */
-@media (max-width: 480px) {
-    
-    /* ✅ Boutons ultra-compacts */
-    .following-item button,
-    .follower-item button,
-    button[onclick*="unfollow"],
-    button[onclick*="removeFollower"],
-    .btn-unfollow,
-    .btn-remove-follower {
-        font-size: 0.75rem !important; /* 12px */
-        padding: 0.4rem 0.75rem !important; /* 6.4px 12px */
-        min-height: 32px !important;
-        border-width: 1.5px !important;
-    }
-    
-    /* ✅ Icônes réduites */
-    .following-item button i,
-    .follower-item button i {
-        font-size: 0.8125rem !important;
-        margin-right: 0.25rem !important;
-    }
-    
-    /* ✅ Cartes plus compactes */
-    .following-item,
-    .follower-item {
-        padding: 0.75rem !important;
-        gap: 0.625rem !important;
-    }
-    
-    /* ✅ Avatar plus petit */
-    .following-item img,
-    .follower-item img,
-    .following-item .avatar,
-    .follower-item .avatar {
-        width: 44px !important;
-        height: 44px !important;
-    }
-    
-    /* ✅ Infos utilisateur */
-    .following-item .user-info,
-    .follower-item .user-info {
-        font-size: 0.875rem !important;
-    }
-    
-    .following-item .user-stats,
-    .follower-item .user-stats {
-        font-size: 0.75rem !important;
-    }
-}
-
-/* Très petits écrans (≤360px) - Optimisation maximale */
-@media (max-width: 360px) {
-    
-    /* ✅ Boutons minimaux */
-    .following-item button,
-    .follower-item button,
-    button[onclick*="unfollow"],
-    button[onclick*="removeFollower"] {
-        font-size: 0.6875rem !important; /* 11px */
-        padding: 0.375rem 0.625rem !important; /* 6px 10px */
-        min-height: 30px !important;
-    }
-    
-    /* ✅ Icônes ultra-réduites */
-    .following-item button i,
-    .follower-item button i {
-        font-size: 0.75rem !important;
-        margin-right: 0.2rem !important;
-    }
-    
-    /* ✅ Option : Masquer le texte, garder icône seule */
-    .following-item button span,
-    .follower-item button span {
-        display: none;
-    }
-    
-    .following-item button i,
-    .follower-item button i {
-        margin-right: 0 !important;
-    }
-}
-
-/* ============================================
-   STRUCTURE ALTERNATIVE (si nécessaire)
-   ============================================ */
-
-/* Si vos cartes utilisent des divs avec classes différentes */
-@media (max-width: 768px) {
-    
-    /* Ciblage par structure HTML */
+    /* ✅ TOUS les boutons dans ces sections */
     #followingList button,
     #followersList button {
         font-size: 0.8125rem !important;
         padding: 0.5rem 0.875rem !important;
         min-width: auto !important;
+        max-width: fit-content !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
     }
     
-    /* Ciblage par data-attribute (si utilisé) */
-    button[data-action="unfollow"],
-    button[data-action="remove-follower"] {
-        font-size: 0.8125rem !important;
-        padding: 0.5rem 0.875rem !important;
+    /* ✅ Conteneur parent des cartes */
+    #followingList > div,
+    #followersList > div {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.75rem !important;
+        padding: 0.875rem !important;
+    }
+    
+    /* ✅ Infos utilisateur (à gauche) */
+    #followingList > div > div:first-child,
+    #followersList > div > div:first-child {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+    
+    /* ✅ Bouton (à droite) */
+    #followingList > div > button,
+    #followersList > div > button {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #followingList button,
+    #followersList button {
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.75rem !important;
+    }
+}
+
+@media (max-width: 360px) {
+    #followingList button,
+    #followersList button {
+        font-size: 0.6875rem !important;
+        padding: 0.375rem 0.625rem !important;
     }
 }
