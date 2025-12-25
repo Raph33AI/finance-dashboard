@@ -95,8 +95,8 @@
     </div>
 
     <script>
-        const app = firebase.app();
-        const projectId = app.options.projectId;
+        // ✅ CORRECTION : Utiliser firebase.app() au lieu de const app
+        const projectId = firebase.app().options.projectId;
         const databaseId = '(default)';
 
         console.log('🔥 Firebase Project ID:', projectId);
