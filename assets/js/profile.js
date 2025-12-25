@@ -683,6 +683,7 @@
 /* ============================================
    PROFILE.JS - Gestion de la page profil v3.0
    ✅ Avec gestion Bio + Following
+   ✅ CORRECTION : Redirection vers ?id= (compatible avec public-profile.js)
    ============================================ */
 
 // Variables globales
@@ -723,7 +724,7 @@ window.addEventListener('userDataLoaded', (e) => {
     // ✅ Charger la liste des abonnements
     loadFollowingList();
 
-    // ✅ NOUVEAU : Charger la liste des followers
+    // ✅ Charger la liste des followers
     loadFollowersList();
 });
 
@@ -824,10 +825,9 @@ async function loadUserStats(userId) {
 }
 
 // ============================================
-// ✅ GESTION DE LA LISTE DES ABONNEMENTS
+// ✅ GESTION DE LA LISTE DES ABONNEMENTS (CORRIGÉ)
 // ============================================
 
-// ✅ NOUVELLE VERSION AVEC LISTENER TEMPS RÉEL
 async function loadFollowingList() {
     const followingList = document.getElementById('followingList');
     const followingCountEl = document.getElementById('followingCount');
@@ -902,10 +902,10 @@ async function loadFollowingList() {
                                 src="${avatar}" 
                                 alt="${escapeHtml(displayName)}" 
                                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(59, 130, 246, 0.3); cursor: pointer;"
-                                onclick="window.location.href='public-profile.html?uid=${user.uid}'"
+                                onclick="window.location.href='public-profile.html?id=${user.uid}'"
                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
                             >
-                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
+                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?id=${user.uid}'">
                                 <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
                                     ${escapeHtml(displayName)}
                                 </h4>
@@ -1001,10 +1001,9 @@ async function unfollowUser(userId) {
 }
 
 // ============================================
-// ✅ GESTION DE LA LISTE DES FOLLOWERS
+// ✅ GESTION DE LA LISTE DES FOLLOWERS (CORRIGÉ)
 // ============================================
 
-// ✅ LISTENER TEMPS RÉEL POUR FOLLOWERS
 async function loadFollowersList() {
     const followersList = document.getElementById('followersList');
     const followersCountEl = document.getElementById('followersCount');
@@ -1077,10 +1076,10 @@ async function loadFollowersList() {
                                 src="${avatar}" 
                                 alt="${escapeHtml(displayName)}" 
                                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer;"
-                                onclick="window.location.href='public-profile.html?uid=${user.uid}'"
+                                onclick="window.location.href='public-profile.html?id=${user.uid}'"
                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
                             >
-                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?uid=${user.uid}'">
+                            <div style="flex: 1; min-width: 0; cursor: pointer;" onclick="window.location.href='public-profile.html?id=${user.uid}'">
                                 <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary);">
                                     ${escapeHtml(displayName)}
                                 </h4>
@@ -1681,4 +1680,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('✅ Script de profil chargé (v3.0 - avec Bio + Following)');
+console.log('✅ Script de profil chargé (v3.0 - avec Bio + Following - CORRIGÉ)');

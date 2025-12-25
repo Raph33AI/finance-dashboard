@@ -319,14 +319,19 @@ class PublicProfile {
             const currentUser = firebase.auth().currentUser;
             this.isOwnProfile = currentUser && currentUser.uid === this.userId;
 
+            // ✅ CORRECTION : Charger les données utilisateur SANS rendre le header
             await this.loadUserData();
             
-            // Vérifier le statut de suivi (sauf si c'est son propre profil)
+            // ✅ Vérifier le statut de suivi AVANT de rendre le header
             if (!this.isOwnProfile && currentUser) {
                 this.isFollowing = await window.followSystem.isFollowing(this.userId);
+                console.log('✅ Follow status checked:', this.isFollowing);
             }
             
-            // ✅ Charger toutes les activités
+            // ✅ MAINTENANT rendre le header avec le bon statut
+            this.renderProfileHeader();
+            
+            // Charger toutes les activités
             await this.loadAllActivities();
             
             console.log('✅ Public Profile initialized');
@@ -347,7 +352,8 @@ class PublicProfile {
         }
 
         this.userData = { uid: this.userId, ...userDoc.data() };
-        this.renderProfileHeader();
+        // ✅ NE PLUS RENDRE LE HEADER ICI (on le fait dans initialize après vérification du statut)
+        // this.renderProfileHeader(); ← SUPPRIMÉ
     }
 
     // ✅ CHARGER TOUTES LES ACTIVITÉS
@@ -707,19 +713,23 @@ class PublicProfile {
             
             if (!followBtn) return;
             
+            // Désactiver le bouton pendant l'opération
             followBtn.disabled = true;
+            const originalHTML = followBtn.innerHTML;
             followBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
             if (this.isFollowing) {
                 // Unfollow
                 await window.followSystem.unfollowUser(this.userId);
                 
-                // ✅ VÉRIFIER LE STATUT RÉEL APRÈS L'ACTION
-                this.isFollowing = await window.followSystem.isFollowing(this.userId);
+                // ✅ Mettre à jour l'état local
+                this.isFollowing = false;
                 
+                // Mettre à jour le bouton
                 followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
                 followBtn.style.background = '';
                 
+                // Décrémenter le compteur
                 if (followersCountEl) {
                     const currentCount = parseInt(followersCountEl.textContent) || 0;
                     followersCountEl.textContent = Math.max(0, currentCount - 1);
@@ -730,12 +740,14 @@ class PublicProfile {
                 // Follow
                 await window.followSystem.followUser(this.userId);
                 
-                // ✅ VÉRIFIER LE STATUT RÉEL APRÈS L'ACTION
-                this.isFollowing = await window.followSystem.isFollowing(this.userId);
+                // ✅ Mettre à jour l'état local
+                this.isFollowing = true;
                 
+                // Mettre à jour le bouton
                 followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
                 followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
                 
+                // Incrémenter le compteur
                 if (followersCountEl) {
                     const currentCount = parseInt(followersCountEl.textContent) || 0;
                     followersCountEl.textContent = currentCount + 1;
@@ -744,14 +756,19 @@ class PublicProfile {
                 console.log('✅ User followed');
             }
 
+            // Réactiver le bouton
             followBtn.disabled = false;
 
         } catch (error) {
             console.error('❌ Error toggling follow:', error);
             
-            // ✅ EN CAS D'ERREUR, RECHARGER LE STATUT RÉEL
-            this.isFollowing = await window.followSystem.isFollowing(this.userId);
+            // ✅ EN CAS D'ERREUR, RE-VÉRIFIER le statut réel
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                this.isFollowing = await window.followSystem.isFollowing(this.userId);
+            }
             
+            // Restaurer le bouton avec le bon état
             const followBtn = document.getElementById('followBtn');
             if (followBtn) {
                 followBtn.disabled = false;
@@ -763,7 +780,7 @@ class PublicProfile {
                     : '';
             }
             
-            alert('Failed to update follow status. Please refresh the page.');
+            alert('Failed to update follow status. Please try again.');
         }
     }
 
