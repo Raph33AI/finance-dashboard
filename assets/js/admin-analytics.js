@@ -4631,6 +4631,7 @@ class AdminAnalyticsPro {
             this.displayRealEstateStats();
             this.displayLoginHistoryStats();
             this.displayConversationsStats();
+            this.displaySocialStatsByUser();
             
             console.log('✅ All displays refreshed successfully');
             
@@ -5466,7 +5467,7 @@ class AdminAnalyticsPro {
             
             this.allPortfoliosData = [];
             
-            // 🔥 MÉTHODE 1 : Collection globale /portfolios
+            // 🔥 MÉTHODE 1 : Collection globale /portfolios (si elle existe)
             try {
                 const portfoliosSnapshot = await this.db.collection('portfolios').get();
                 console.log(`   Found ${portfoliosSnapshot.size} global portfolios`);
@@ -5482,7 +5483,7 @@ class AdminAnalyticsPro {
                 console.warn('⚠ No global /portfolios collection');
             }
             
-            // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/portfolios
+            // 🔥 MÉTHODE 2 : Sous-collections users/{userId}/portfolios/{portfolioId}
             for (const user of this.allUsersData) {
                 try {
                     const userPortfoliosSnapshot = await this.db
@@ -5491,12 +5492,25 @@ class AdminAnalyticsPro {
                         .collection('portfolios')
                         .get();
                     
+                    console.log(`   User ${user.email}: ${userPortfoliosSnapshot.size} portfolios`);
+                    
                     userPortfoliosSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        
+                        // 🔥 EXTRAIRE LES SYMBOLES DU CHAMP "watchlist"
+                        let symbols = [];
+                        if (data.watchlist && Array.isArray(data.watchlist)) {
+                            symbols = data.watchlist;
+                        } else if (data.symbols && Array.isArray(data.symbols)) {
+                            symbols = data.symbols;
+                        }
+                        
                         this.allPortfoliosData.push({
                             id: doc.id,
                             userId: user.id,
                             userEmail: user.email,
-                            ...doc.data(),
+                            ...data,
+                            symbols: symbols, // 🔥 Normaliser le champ
                             source: 'user'
                         });
                     });
@@ -5928,6 +5942,59 @@ class AdminAnalyticsPro {
         }
     }
 
+    displaySocialStatsByUser() {
+        console.log('📊 Displaying social stats by user...');
+        
+        const tbody = document.getElementById('social-stats-users-table-body');
+        if (!tbody) {
+            console.warn('⚠ Social stats users table not found');
+            return;
+        }
+        
+        if (this.allUsersData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No users data</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        
+        // Trier par reputation décroissante
+        const sortedUsers = [...this.allUsersData]
+            .sort((a, b) => (b.reputation || 0) - (a.reputation || 0));
+        
+        sortedUsers.forEach((user, index) => {
+            const followers = user.followersCount || 0;
+            const following = user.followingCount || 0;
+            const posts = user.postsCount || user.postCount || 0;
+            const comments = user.commentsCount || 0;
+            const points = user.points || 0;
+            const reputation = user.reputation || 0;
+            const likes = user.likesReceived || 0;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${user.email || 'N/A'}</td>
+                <td style="text-align: center; font-weight: 600; color: #3b82f6;">${followers}</td>
+                <td style="text-align: center; font-weight: 600; color: #8b5cf6;">${following}</td>
+                <td style="text-align: center; font-weight: 600; color: #10b981;">${posts}</td>
+                <td style="text-align: center; font-weight: 600; color: #f59e0b;">${comments}</td>
+                <td style="text-align: center; font-weight: 600; color: #ef4444;">${points}</td>
+                <td style="text-align: center; font-weight: 700; color: #667eea;">${reputation}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Social stats by user table populated (${sortedUsers.length} users)`);
+    }
+
     // 🆕 AFFICHAGE DES NOUVELLES STATISTIQUES
 
     displayWatchlistsStats() {
@@ -5944,8 +6011,8 @@ class AdminAnalyticsPro {
         this.updateStat('total-watchlists-detail', totalWatchlists);
         
         // 🔥 VÉRIFIER SI AUCUNE DONNÉE
-        if (this.allWatchlistsData.length === 0) {
-            console.warn('⚠ No watchlists data available');
+        if (this.allWatchlistsData.length === 0 && this.allPortfoliosData.length === 0) {
+            console.warn('⚠ No watchlists or portfolios data available');
             
             const tbody = document.getElementById('top-watchlist-symbols-body');
             if (tbody) {
@@ -5960,7 +6027,6 @@ class AdminAnalyticsPro {
                 `;
             }
             
-            // 🔥 VIDER LE TABLEAU DES USERS
             const usersTableBody = document.getElementById('watchlists-users-table-body');
             if (usersTableBody) {
                 usersTableBody.innerHTML = `
@@ -5975,18 +6041,39 @@ class AdminAnalyticsPro {
             return;
         }
         
-        // 🔥 TOP SYMBOLES DANS LES WATCHLISTS
+        // 🔥 TOP SYMBOLES DEPUIS WATCHLISTS + PORTFOLIOS
         const symbolCounts = {};
+        
+        // Depuis watchlists
         this.allWatchlistsData.forEach(watchlist => {
-            // Gérer différentes structures de données
             let symbols = [];
             
             if (watchlist.symbols && Array.isArray(watchlist.symbols)) {
                 symbols = watchlist.symbols;
+            } else if (watchlist.watchlist && Array.isArray(watchlist.watchlist)) {
+                symbols = watchlist.watchlist;
             } else if (watchlist.symbol) {
                 symbols = [watchlist.symbol];
             } else if (watchlist.ticker) {
                 symbols = [watchlist.ticker];
+            }
+            
+            symbols.forEach(symbol => {
+                if (symbol) {
+                    symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+                }
+            });
+        });
+        
+        // 🔥 DEPUIS PORTFOLIOS (champ watchlist)
+        this.allPortfoliosData.forEach(portfolio => {
+            let symbols = [];
+            
+            // 🔥 PRIORITÉ AU CHAMP "watchlist" (array)
+            if (portfolio.watchlist && Array.isArray(portfolio.watchlist)) {
+                symbols = portfolio.watchlist;
+            } else if (portfolio.symbols && Array.isArray(portfolio.symbols)) {
+                symbols = portfolio.symbols;
             }
             
             symbols.forEach(symbol => {
@@ -6038,7 +6125,7 @@ class AdminAnalyticsPro {
             return;
         }
         
-        if (this.allWatchlistsData.length === 0) {
+        if (this.allWatchlistsData.length === 0 && this.allPortfoliosData.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
@@ -6052,35 +6139,60 @@ class AdminAnalyticsPro {
         
         tbody.innerHTML = '';
         
-        // Grouper par user
-        const watchlistsByUser = {};
+        // 🔥 COMBINER WATCHLISTS + PORTFOLIOS PAR USER
+        const dataByUser = {};
+        
+        // Depuis watchlists
         this.allWatchlistsData.forEach(watchlist => {
             const userId = watchlist.userId || 'unknown';
-            if (!watchlistsByUser[userId]) {
-                watchlistsByUser[userId] = [];
+            if (!dataByUser[userId]) {
+                dataByUser[userId] = { watchlists: [], portfolios: [], symbols: new Set() };
             }
-            watchlistsByUser[userId].push(watchlist);
+            dataByUser[userId].watchlists.push(watchlist);
+            
+            // Extraire symboles
+            let symbols = [];
+            if (watchlist.symbols && Array.isArray(watchlist.symbols)) {
+                symbols = watchlist.symbols;
+            } else if (watchlist.watchlist && Array.isArray(watchlist.watchlist)) {
+                symbols = watchlist.watchlist;
+            } else if (watchlist.symbol) {
+                symbols = [watchlist.symbol];
+            }
+            
+            symbols.forEach(s => dataByUser[userId].symbols.add(s));
+        });
+        
+        // 🔥 DEPUIS PORTFOLIOS
+        this.allPortfoliosData.forEach(portfolio => {
+            const userId = portfolio.userId || 'unknown';
+            if (!dataByUser[userId]) {
+                dataByUser[userId] = { watchlists: [], portfolios: [], symbols: new Set() };
+            }
+            dataByUser[userId].portfolios.push(portfolio);
+            
+            // 🔥 EXTRAIRE DEPUIS LE CHAMP "watchlist"
+            let symbols = [];
+            if (portfolio.watchlist && Array.isArray(portfolio.watchlist)) {
+                symbols = portfolio.watchlist;
+            } else if (portfolio.symbols && Array.isArray(portfolio.symbols)) {
+                symbols = portfolio.symbols;
+            }
+            
+            symbols.forEach(s => dataByUser[userId].symbols.add(s));
         });
         
         // Afficher une ligne par user
         let index = 0;
-        Object.entries(watchlistsByUser).forEach(([userId, watchlists]) => {
+        Object.entries(dataByUser).forEach(([userId, data]) => {
             const user = this.allUsersData.find(u => u.id === userId);
-            const userEmail = user?.email || watchlists[0]?.userEmail || 'N/A';
+            const userEmail = user?.email || 
+                            data.watchlists[0]?.userEmail || 
+                            data.portfolios[0]?.userEmail || 
+                            'N/A';
             
-            // Récupérer tous les symboles uniques
-            const allSymbols = new Set();
-            watchlists.forEach(w => {
-                if (w.symbols && Array.isArray(w.symbols)) {
-                    w.symbols.forEach(s => allSymbols.add(s));
-                } else if (w.symbol) {
-                    allSymbols.add(w.symbol);
-                } else if (w.ticker) {
-                    allSymbols.add(w.ticker);
-                }
-            });
-            
-            const symbolsList = Array.from(allSymbols).join(', ');
+            const totalItems = data.watchlists.length + data.portfolios.length;
+            const symbolsList = Array.from(data.symbols).join(', ');
             const displaySymbols = symbolsList.length > 50 ? 
                 symbolsList.substring(0, 50) + '...' : 
                 symbolsList;
@@ -6089,8 +6201,8 @@ class AdminAnalyticsPro {
             row.innerHTML = `
                 <td>${++index}</td>
                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${userEmail}</td>
-                <td style="text-align: center; font-weight: 600; color: #667eea;">${watchlists.length}</td>
-                <td style="text-align: center; font-weight: 600; color: #10b981;">${allSymbols.size}</td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${totalItems}</td>
+                <td style="text-align: center; font-weight: 600; color: #10b981;">${data.symbols.size}</td>
                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${symbolsList}">${displaySymbols || 'N/A'}</td>
             `;
             tbody.appendChild(row);
@@ -6204,6 +6316,19 @@ class AdminAnalyticsPro {
 
     displayRealEstateStats() {
         console.log('📊 Displaying real estate stats...');
+    
+        // 🔥 METTRE À JOUR LES KPI CARDS
+        const totalSimulations = this.allRealEstateSimulations?.length || 0;
+        const usersWithSimulations = totalSimulations > 0 ? 
+            new Set(this.allRealEstateSimulations.map(s => s.userId)).size : 0;
+        const avgPerUser = usersWithSimulations > 0 ? 
+            (totalSimulations / usersWithSimulations).toFixed(1) : 0;
+        
+        this.updateStat('total-real-estate-simulations-detail', totalSimulations);
+        this.updateStat('users-with-real-estate-detail', usersWithSimulations);
+        this.updateStat('avg-real-estate-per-user-detail', avgPerUser);
+        
+        console.log(`🏠 Real Estate: ${totalSimulations} simulations, ${usersWithSimulations} users`);
         
         const tbody = document.getElementById('real-estate-users-table-body');
         if (!tbody) {
@@ -6270,6 +6395,31 @@ class AdminAnalyticsPro {
 
     displayLoginHistoryStats() {
         console.log('📊 Displaying login history stats...');
+    
+        // 🔥 METTRE À JOUR LES KPI CARDS
+        const totalLogins = this.allLoginHistory?.length || 0;
+        const uniqueUsers = totalLogins > 0 ? 
+            new Set(this.allLoginHistory.map(l => l.userId)).size : 0;
+        const avgLoginsPerUser = uniqueUsers > 0 ? 
+            (totalLogins / uniqueUsers).toFixed(1) : 0;
+        
+        // Trouver la méthode la plus utilisée
+        const methods = {};
+        if (this.allLoginHistory) {
+            this.allLoginHistory.forEach(l => {
+                const method = l.method || l.loginMethod || 'unknown';
+                methods[method] = (methods[method] || 0) + 1;
+            });
+        }
+        
+        const topMethod = Object.entries(methods)
+            .sort((a, b) => b[1] - a[1])[0];
+        
+        this.updateStat('total-logins-detail', totalLogins);
+        this.updateStat('avg-logins-per-user-detail', avgLoginsPerUser);
+        this.updateStat('top-login-method-detail', topMethod ? topMethod[0] : 'N/A');
+        
+        console.log(`🔐 Login History: ${totalLogins} logins, ${uniqueUsers} users, top method: ${topMethod?.[0]}`);
         
         const tbody = document.getElementById('login-history-users-table-body');
         if (!tbody) {
@@ -6345,6 +6495,31 @@ class AdminAnalyticsPro {
 
     displayConversationsStats() {
         console.log('📊 Displaying conversations stats...');
+    
+        // 🔥 METTRE À JOUR LES KPI CARDS
+        const totalConversations = this.allConversations?.length || 0;
+        const usersWithConversations = totalConversations > 0 ? 
+            new Set(this.allConversations.map(c => c.userId)).size : 0;
+        const avgConversationsPerUser = usersWithConversations > 0 ? 
+            (totalConversations / usersWithConversations).toFixed(1) : 0;
+        
+        // Calculer total messages
+        let totalMessages = 0;
+        if (this.allConversations) {
+            this.allConversations.forEach(c => {
+                totalMessages += c.messageCount || (c.messages ? c.messages.length : 0);
+            });
+        }
+        
+        const avgMessagesPerConversation = totalConversations > 0 ? 
+            (totalMessages / totalConversations).toFixed(1) : 0;
+        
+        this.updateStat('total-conversations-detail', totalConversations);
+        this.updateStat('avg-conversations-per-user-detail', avgConversationsPerUser);
+        this.updateStat('total-ai-messages-detail', totalMessages);
+        this.updateStat('avg-messages-per-conversation-detail', avgMessagesPerConversation);
+        
+        console.log(`💬 Conversations: ${totalConversations} total, ${totalMessages} messages`);
         
         const tbody = document.getElementById('conversations-users-table-body');
         if (!tbody) {
