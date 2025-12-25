@@ -5546,5 +5546,368 @@ body.dark-mode .share-link-input {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   ✅ FIN DU MODAL DE PARTAGE
+   📱 RESPONSIVE MOBILE - MODAL DE PARTAGE (CORRECTION COMPLÈTE)
+   ════════════════════════════════════════════════════════════════ */
+
+/* Tablette (768px et moins) */
+@media (max-width: 768px) {
+    .share-modal-content {
+        width: 92%;
+        max-width: none;
+        margin: 20px;
+    }
+
+    .share-modal-header {
+        padding: 22px 24px;
+    }
+
+    .share-modal-header h3 {
+        font-size: 1.3rem;
+        gap: 10px;
+    }
+
+    .share-modal-close {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .share-modal-body {
+        padding: 24px 20px;
+    }
+
+    /* Grille 3 colonnes sur tablette */
+    .share-platforms {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .share-platform-btn {
+        padding: 18px 12px;
+        font-size: 0.85rem;
+        gap: 10px;
+    }
+
+    .platform-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.6rem;
+    }
+
+    .share-link-input {
+        font-size: 0.9rem;
+        padding: 12px 16px;
+    }
+
+    .share-copy-btn {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mobile (600px et moins) */
+@media (max-width: 600px) {
+    /* Modal prend presque tout l'écran */
+    .share-modal {
+        padding: 10px;
+    }
+
+    .share-modal-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .share-modal-header {
+        padding: 18px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+    }
+
+    body.dark-mode .share-modal-header {
+        background: rgba(30, 41, 59, 0.95);
+    }
+
+    .share-modal-header h3 {
+        font-size: 1.15rem;
+        gap: 8px;
+    }
+
+    .share-modal-header h3 i {
+        font-size: 1rem;
+    }
+
+    .share-modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .share-modal-body {
+        padding: 20px 16px;
+    }
+
+    /* Grille 2 colonnes sur mobile */
+    .share-platforms {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .share-platform-btn {
+        padding: 16px 10px;
+        font-size: 0.8rem;
+        gap: 8px;
+        border-radius: 14px;
+    }
+
+    .platform-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.4rem;
+        border-radius: 12px;
+    }
+
+    /* Section lien en colonne */
+    .share-link-section {
+        padding-top: 20px;
+    }
+
+    .share-link-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .share-link-input {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 12px 14px;
+    }
+
+    .share-copy-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Très petit mobile (420px et moins) */
+@media (max-width: 420px) {
+    .share-modal {
+        padding: 5px;
+    }
+
+    .share-modal-content {
+        border-radius: 16px;
+        max-height: 92vh;
+    }
+
+    .share-modal-header {
+        padding: 16px 18px;
+    }
+
+    .share-modal-header h3 {
+        font-size: 1.05rem;
+        gap: 6px;
+    }
+
+    .share-modal-close {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+    }
+
+    .share-modal-body {
+        padding: 18px 14px;
+    }
+
+    .share-platforms {
+        gap: 10px;
+    }
+
+    .share-platform-btn {
+        padding: 14px 8px;
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+
+    .platform-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+    }
+
+    .share-link-input {
+        font-size: 0.8rem;
+        padding: 11px 12px;
+    }
+
+    .share-copy-btn {
+        padding: 12px 18px;
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+}
+
+/* Landscape mobile (orientation paysage) */
+@media (max-width: 768px) and (orientation: landscape) {
+    .share-modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .share-modal-header {
+        padding: 16px 20px;
+    }
+
+    .share-modal-body {
+        padding: 20px 18px;
+    }
+
+    .share-platforms {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .share-platform-btn {
+        padding: 14px 10px;
+        font-size: 0.75rem;
+    }
+
+    .platform-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+    }
+}
+
+/* iPhone SE / petits écrans (375px et moins) */
+@media (max-width: 375px) {
+    .share-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .share-modal-close {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .share-platforms {
+        gap: 8px;
+    }
+
+    .share-platform-btn {
+        padding: 12px 6px;
+        font-size: 0.7rem;
+    }
+
+    .platform-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Fix pour scroll smooth sur iOS */
+.share-modal-content {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Empêcher le zoom sur les inputs iOS */
+@media (max-width: 768px) {
+    .share-link-input {
+        font-size: 16px !important; /* iOS zoom prevention */
+    }
+}
+
+/* Amélioration du touch sur mobile */
+@media (hover: none) and (pointer: coarse) {
+    .share-platform-btn {
+        min-height: 48px; /* Accessible touch target */
+    }
+
+    .share-modal-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .share-copy-btn {
+        min-height: 48px;
+    }
+
+    /* Désactiver les animations de hover sur mobile */
+    .share-platform-btn:hover {
+        transform: none;
+    }
+
+    .share-platform-btn:active {
+        transform: scale(0.98);
+    }
+
+    .platform-icon {
+        transition: none;
+    }
+
+    .share-platform-btn:active .platform-icon {
+        transform: scale(0.95);
+    }
+}
+
+/* Safe area pour iPhone X et plus (notch) */
+@supports (padding: max(0px)) {
+    .share-modal-content {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+
+    .share-modal-header {
+        padding-left: max(20px, calc(20px + env(safe-area-inset-left)));
+        padding-right: max(20px, calc(20px + env(safe-area-inset-right)));
+    }
+
+    .share-modal-body {
+        padding-left: max(16px, calc(16px + env(safe-area-inset-left)));
+        padding-right: max(16px, calc(16px + env(safe-area-inset-right)));
+    }
+}
+
+/* Fix pour Safari iOS (bounce effect) */
+@media (max-width: 768px) {
+    .share-modal.active {
+        position: fixed;
+        overflow: hidden;
+    }
+
+    .share-modal-content {
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
+/* Amélioration de la lisibilité sur petits écrans */
+@media (max-width: 480px) {
+    .share-platform-btn span {
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    /* S'assurer que le texte ne déborde pas */
+    .share-link-input {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ FIN DES CORRECTIONS RESPONSIVE MOBILE
    ════════════════════════════════════════════════════════════════ */
