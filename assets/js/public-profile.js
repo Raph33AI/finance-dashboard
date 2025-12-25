@@ -324,20 +324,21 @@ class PublicProfile {
             const currentUser = firebase.auth().currentUser;
             this.isOwnProfile = currentUser && currentUser.uid === this.userId;
 
-            // ✅ Charger les données utilisateur SANS rendre le header
+            // ✅ Charger les données utilisateur
             await this.loadUserData();
             
-            // ✅ CORRECTION : Vérifier le statut de suivi avec listener temps réel
+            // ✅ CORRECTION : Vérifier ET ATTENDRE le statut de suivi AVANT de rendre
             if (!this.isOwnProfile && currentUser) {
-                // Vérification initiale
+                // ✅ IMPORTANT : ATTENDRE la vérification complète
+                console.log('🔍 Vérification du statut de suivi...');
                 this.isFollowing = await window.followSystem.isFollowing(this.userId);
-                console.log('✅ Initial follow status:', this.isFollowing);
+                console.log('✅ Statut de suivi confirmé:', this.isFollowing);
                 
-                // ✅ AJOUTER UN LISTENER TEMPS RÉEL pour détecter les changements
+                // ✅ ENSUITE mettre en place le listener
                 this.setupFollowListener();
             }
             
-            // ✅ MAINTENANT rendre le header avec le bon statut
+            // ✅ MAINTENANT rendre le header avec le VRAI statut
             this.renderProfileHeader();
             
             // Charger toutes les activités
@@ -350,7 +351,7 @@ class PublicProfile {
         }
     }
 
-    // ✅ NOUVELLE MÉTHODE : Listener temps réel pour le statut de suivi
+    // ✅ CORRECTION : Listener temps réel avec vérification immédiate
     setupFollowListener() {
         const currentUser = firebase.auth().currentUser;
         if (!currentUser || this.isOwnProfile) return;
@@ -366,12 +367,22 @@ class PublicProfile {
             .onSnapshot((doc) => {
                 const newFollowStatus = doc.exists;
                 
-                console.log('🔔 Follow status changed:', newFollowStatus);
+                console.log('🔔 Follow status update from Firestore:', {
+                    docExists: doc.exists,
+                    previousStatus: this.isFollowing,
+                    newStatus: newFollowStatus
+                });
                 
-                // Si le statut a changé, mettre à jour l'UI
-                if (this.isFollowing !== newFollowStatus) {
-                    this.isFollowing = newFollowStatus;
-                    this.updateFollowButton();
+                // ✅ IMPORTANT : Toujours mettre à jour, même si identique (pour le premier rendu)
+                const statusChanged = this.isFollowing !== newFollowStatus;
+                
+                this.isFollowing = newFollowStatus;
+                
+                // Mettre à jour le bouton
+                this.updateFollowButton();
+                
+                if (statusChanged) {
+                    console.log('✅ Follow status changed:', this.isFollowing);
                 }
             }, (error) => {
                 console.error('❌ Error in follow listener:', error);

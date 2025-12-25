@@ -1428,87 +1428,106 @@ async function handleAvatarChange(e) {
     try {
         showToast('info', 'Upload in progress...', 'Uploading your photo');
         
+        // ✅ CORRECTION : Utiliser une approche différente
         const storage = firebase.storage();
-        const storageRef = storage.ref();
         
-        // ✅ CORRECTION : Nom de fichier sans espaces ni caractères spéciaux
+        // ✅ Nom de fichier ULTRA-SIMPLE (sans caractères spéciaux)
         const timestamp = Date.now();
-        const sanitizedFileName = file.name
-            .replace(/\s+/g, '_')           // Remplacer espaces par underscores
-            .replace(/[^a-zA-Z0-9._-]/g, '') // Supprimer caractères spéciaux
-            .toLowerCase();
-        
-        const fileName = `avatar_${timestamp}_${sanitizedFileName}`;
-        const avatarRef = storageRef.child(`users/${currentUserData.uid}/profile/${fileName}`);
+        const extension = file.name.split('.').pop().toLowerCase();
+        const fileName = `avatar_${timestamp}.${extension}`;
         
         console.log('📤 Uploading file:', fileName);
+        console.log('📁 User ID:', currentUserData.uid);
+        console.log('📦 File size:', file.size, 'bytes');
+        console.log('🎨 File type:', file.type);
         
-        // ✅ UTILISER uploadBytes au lieu de put (plus moderne et fiable)
-        const snapshot = await avatarRef.put(file, {
+        // ✅ MÉTHODE 1 : Utiliser uploadBytesResumable (avec monitoring)
+        const storageRef = storage.ref(`users/${currentUserData.uid}/profile/${fileName}`);
+        
+        const uploadTask = storageRef.put(file, {
             contentType: file.type,
-            customMetadata: {
-                uploadedBy: currentUserData.uid,
-                uploadedAt: new Date().toISOString()
+            cacheControl: 'public,max-age=31536000',
+        });
+        
+        // Monitoring de l'upload
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('📊 Upload progress:', progress.toFixed(2) + '%');
+            }, 
+            (error) => {
+                // Erreur détaillée
+                console.error('❌ Upload error:', {
+                    code: error.code,
+                    message: error.message,
+                    name: error.name,
+                    serverResponse: error.serverResponse
+                });
+                
+                throw error;
+            }, 
+            async () => {
+                // Upload réussi
+                console.log('✅ Upload complete!');
+                
+                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                console.log('✅ Download URL obtained:', downloadURL);
+                
+                // ✅ IMPORTANT : Mettre à jour Firestore EN PREMIER
+                await firebase.firestore().collection('users').doc(currentUserData.uid).update({
+                    photoURL: downloadURL,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log('✅ Firestore updated');
+                
+                // Mettre à jour Auth
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    await user.updateProfile({
+                        photoURL: downloadURL
+                    });
+                    console.log('✅ Auth profile updated');
+                }
+                
+                // ✅ Mettre à jour les données locales
+                currentUserData.photoURL = downloadURL;
+                
+                // Mettre à jour toutes les images [data-user-photo]
+                document.querySelectorAll('[data-user-photo]').forEach(img => {
+                    img.src = downloadURL;
+                });
+                
+                // ✅ Forcer le refresh des images dans la sidebar
+                const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
+                if (sidebarAvatar) {
+                    sidebarAvatar.src = downloadURL;
+                }
+                
+                showToast('success', 'Success!', 'Your profile picture has been updated');
+                
+                console.log('✅ Avatar updated successfully');
             }
-        });
-        
-        console.log('✅ Upload complete, getting download URL...');
-        
-        const downloadURL = await snapshot.ref.getDownloadURL();
-        
-        console.log('✅ Download URL obtained:', downloadURL);
-        
-        // ✅ IMPORTANT : Mettre à jour Firestore EN PREMIER
-        await firebase.firestore().collection('users').doc(currentUserData.uid).update({
-            photoURL: downloadURL,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        console.log('✅ Firestore updated');
-        
-        // Mettre à jour Auth
-        const user = firebase.auth().currentUser;
-        if (user) {
-            await user.updateProfile({
-                photoURL: downloadURL
-            });
-            console.log('✅ Auth profile updated');
-        }
-        
-        // ✅ Mettre à jour les données locales
-        currentUserData.photoURL = downloadURL;
-        
-        // Mettre à jour toutes les images [data-user-photo]
-        document.querySelectorAll('[data-user-photo]').forEach(img => {
-            img.src = downloadURL;
-        });
-        
-        // ✅ FORCER LE REFRESH DES IMAGES DANS LA SIDEBAR (si présente)
-        const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
-        if (sidebarAvatar) {
-            sidebarAvatar.src = downloadURL;
-        }
-        
-        showToast('success', 'Success!', 'Your profile picture has been updated');
-        
-        console.log('✅ Avatar updated successfully:', downloadURL);
+        );
         
     } catch (error) {
         console.error('❌ Upload error details:', {
             code: error.code,
             message: error.message,
-            serverResponse: error.serverResponse
+            stack: error.stack
         });
         
-        // Messages d'erreur plus détaillés
+        // Messages d'erreur détaillés
         let errorMessage = 'Failed to upload photo';
         
         if (error.code === 'storage/unauthorized') {
-            errorMessage = 'Permission denied. Please check Firebase Storage rules.';
+            errorMessage = 'Permission denied. Check Firebase Storage rules.';
         } else if (error.code === 'storage/canceled') {
             errorMessage = 'Upload canceled';
         } else if (error.code === 'storage/unknown') {
-            errorMessage = 'Unknown error. Please check your internet connection.';
+            errorMessage = 'Network error. Check your connection.';
+        } else if (error.message && error.message.includes('CORS')) {
+            errorMessage = 'CORS error. Please contact support.';
         }
         
         showToast('error', 'Error', errorMessage);
