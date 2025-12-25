@@ -8,6 +8,7 @@ const ADMIN_EMAIL = 'raphnardone@gmail.com';
 class AdminVisibility {
     constructor() {
         this.adminSection = null;
+        this.adminNewsletterSection = null; // ✅ NOUVEAU
         this.init();
     }
 
@@ -21,16 +22,24 @@ class AdminVisibility {
             return;
         }
 
-        // Récupérer la section admin
+        // Récupérer les sections admin
         this.adminSection = document.getElementById('adminSection');
+        this.adminNewsletterSection = document.getElementById('adminNewsletterSection'); // ✅ NOUVEAU
         
-        if (!this.adminSection) {
+        if (!this.adminSection && !this.adminNewsletterSection) {
             console.log('ℹ Aucune section admin trouvée sur cette page (normal pour certaines pages)');
             return;
         }
 
-        // S'assurer que la section est bien masquée au départ
-        this.adminSection.style.display = 'none';
+        // S'assurer que les sections sont bien masquées au départ
+        if (this.adminSection) {
+            this.adminSection.style.display = 'none';
+        }
+        
+        // ✅ NOUVEAU : Masquer la section newsletter par défaut
+        if (this.adminNewsletterSection) {
+            this.adminNewsletterSection.style.display = 'none';
+        }
 
         // Écouter les changements d'authentification
         firebase.auth().onAuthStateChanged((user) => {
@@ -39,23 +48,36 @@ class AdminVisibility {
     }
 
     checkAdminAccess(user) {
-        if (!this.adminSection) {
-            return;
+        const isAdmin = user && user.email === ADMIN_EMAIL;
+
+        // ✅ GESTION DE LA SECTION ADMIN (SIDEBAR)
+        if (this.adminSection) {
+            if (isAdmin) {
+                this.adminSection.style.display = 'block';
+                this.adminSection.style.removeProperty('display');
+                console.log('✅ Section Admin (Sidebar) visible pour:', user.email);
+            } else {
+                this.adminSection.style.display = 'none';
+                if (user) {
+                    console.log('🔒 Section Admin (Sidebar) masquée pour:', user.email, '(pas autorisé)');
+                } else {
+                    console.log('🔒 Section Admin (Sidebar) masquée (utilisateur non connecté)');
+                }
+            }
         }
 
-        if (user && user.email === ADMIN_EMAIL) {
-            // ✅ C'EST L'ADMIN - AFFICHER LA SECTION
-            this.adminSection.style.display = 'block';
-            this.adminSection.style.removeProperty('display'); // Enlever le style inline
-            console.log('✅ Section Admin visible pour:', user.email);
-        } else {
-            // ❌ PAS L'ADMIN - MASQUER TOTALEMENT LA SECTION
-            this.adminSection.style.display = 'none';
-            
-            if (user) {
-                console.log('🔒 Section Admin masquée pour:', user.email, '(pas autorisé)');
+        // ✅ NOUVEAU : GESTION DE LA SECTION NEWSLETTER (COMMUNITY HUB)
+        if (this.adminNewsletterSection) {
+            if (isAdmin) {
+                this.adminNewsletterSection.style.display = 'block';
+                console.log('✅ Newsletter Button visible pour:', user.email);
             } else {
-                console.log('🔒 Section Admin masquée (utilisateur non connecté)');
+                this.adminNewsletterSection.style.display = 'none';
+                if (user) {
+                    console.log('🔒 Newsletter Button masqué pour:', user.email, '(pas autorisé)');
+                } else {
+                    console.log('🔒 Newsletter Button masqué (utilisateur non connecté)');
+                }
             }
         }
     }
