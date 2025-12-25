@@ -892,37 +892,69 @@ class PublicProfile {
     // ✅ CHARGER LES POSTS LIKÉS
     async loadLikedPosts() {
         try {
-            const likesSnapshot = await firebase.firestore()
+            console.log('📥 Loading liked posts for user:', this.userId);
+            
+            // ✅ Vérifier que la collection existe
+            const likesRef = firebase.firestore()
                 .collection('users')
                 .doc(this.userId)
-                .collection('likedPosts')
+                .collection('likedPosts');
+            
+            console.log('📂 Likes collection path:', likesRef.path);
+            
+            const likesSnapshot = await likesRef
                 .orderBy('likedAt', 'desc')
                 .limit(50)
                 .get();
 
+            console.log('📊 Liked posts snapshot:', {
+                empty: likesSnapshot.empty,
+                size: likesSnapshot.size,
+                docs: likesSnapshot.docs.length
+            });
+
             if (likesSnapshot.empty) {
+                console.warn('⚠ No liked posts found in subcollection users/' + this.userId + '/likedPosts');
+                console.warn('💡 Verify that likes are correctly saved to this subcollection');
                 this.likedPosts = [];
                 const countEl = document.getElementById('likedTabCount');
                 if (countEl) countEl.textContent = '0';
                 return;
             }
 
-            const postIds = likesSnapshot.docs.map(doc => doc.id);
+            const postIds = likesSnapshot.docs.map(doc => {
+                const data = doc.data();
+                console.log('   ✓ Liked post:', {
+                    postId: doc.id,
+                    likedAt: data.likedAt?.toDate(),
+                    data: data
+                });
+                return doc.id;
+            });
             
+            console.log('📋 Total post IDs to fetch:', postIds.length);
+
             const batchSize = 10;
             const batches = [];
             
             for (let i = 0; i < postIds.length; i += batchSize) {
                 const batchIds = postIds.slice(i, i + batchSize);
+                console.log(`📦 Fetching batch ${Math.floor(i/batchSize) + 1}:`, batchIds);
+                
                 const batchSnapshot = await firebase.firestore()
                     .collection('posts')
                     .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
                     .get();
                 
+                console.log(`   ✓ Batch ${Math.floor(i/batchSize) + 1} fetched:`, batchSnapshot.size, 'posts');
                 batches.push(...batchSnapshot.docs);
             }
 
             this.likedPosts = batches.map(doc => {
+                if (!doc.exists) {
+                    console.warn('⚠ Post not found:', doc.id);
+                    return null;
+                }
                 const postData = doc.data();
                 return {
                     id: doc.id,
@@ -934,9 +966,16 @@ class PublicProfile {
             const countEl = document.getElementById('likedTabCount');
             if (countEl) countEl.textContent = this.likedPosts.length;
             
-            console.log(`✅ ${this.likedPosts.length} posts likés chargés`);
+            console.log(`✅ ${this.likedPosts.length} liked posts loaded successfully`);
+            console.log('📊 Liked posts:', this.likedPosts.map(p => ({ id: p.id, title: p.title })));
+            
         } catch (error) {
             console.error('❌ Error loading liked posts:', error);
+            console.error('❌ Error details:', {
+                code: error.code,
+                message: error.message,
+                userId: this.userId
+            });
             this.likedPosts = [];
             const countEl = document.getElementById('likedTabCount');
             if (countEl) countEl.textContent = '0';

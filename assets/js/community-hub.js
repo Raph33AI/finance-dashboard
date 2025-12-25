@@ -727,7 +727,6 @@ class CommunityHub {
 
     async loadPosts() {
         try {
-            // ✅ CORRECTION : Utiliser postsGrid au lieu de postsContainer
             const postsGrid = document.getElementById('postsGrid');
             if (!postsGrid) {
                 console.error('❌ Posts grid not found');
@@ -742,51 +741,74 @@ class CommunityHub {
                 </div>
             `;
 
-            // Options de requête
-            const options = {
-                limit: 50
-            };
+            // ✅ CORRECTION : Construire la requête Firestore directement
+            let query = firebase.firestore().collection('posts');
 
-            // Tri selon le filtre actif
-            if (this.currentFilter === 'trending') {
-                options.sortBy = 'views';
-                options.sortOrder = 'desc';
-            } else if (this.currentFilter === 'latest') {
-                options.sortBy = 'createdAt';
-                options.sortOrder = 'desc';
-            } else if (this.currentFilter === 'top') {
-                options.sortBy = 'likes';
-                options.sortOrder = 'desc';
-            }
-
-            // Filtre par channel
+            // ✅ Filtre par channel (AVANT le tri pour éviter les erreurs d'index)
             if (this.currentChannel !== 'all') {
-                options.channelId = this.currentChannel;
+                console.log('🔍 Filtering by channel:', this.currentChannel);
+                query = query.where('channelId', '==', this.currentChannel);
             }
 
-            // Filtre par tag
+            // ✅ Filtre par tag
             if (this.currentTag) {
-                options.tag = this.currentTag;
+                console.log('🏷 Filtering by tag:', this.currentTag);
+                query = query.where('tags', 'array-contains', this.currentTag);
             }
 
-            this.posts = await window.communityService.getPosts(options);
-
-            if (!this.posts) {
-                this.posts = [];
+            // ✅ Tri selon le filtre actif
+            if (this.currentFilter === 'trending') {
+                query = query.orderBy('views', 'desc');
+            } else if (this.currentFilter === 'latest') {
+                query = query.orderBy('createdAt', 'desc');
+            } else if (this.currentFilter === 'top') {
+                // ⚠ NOTE : Firestore ne peut pas trier par array.length
+                // Solution : ajouter un champ "likesCount" dans vos posts
+                // OU trier côté client après récupération
+                query = query.orderBy('createdAt', 'desc'); // Fallback sur date
             }
 
-            console.log('✅ Posts loaded:', this.posts.length);
+            query = query.limit(50);
+
+            console.log('📡 Executing Firestore query...');
+            const snapshot = await query.get();
+
+            this.posts = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // ✅ Si filtre "top", trier côté client par nombre de likes
+            if (this.currentFilter === 'top') {
+                this.posts.sort((a, b) => {
+                    const likesA = (a.likes && Array.isArray(a.likes)) ? a.likes.length : 0;
+                    const likesB = (b.likes && Array.isArray(b.likes)) ? b.likes.length : 0;
+                    return likesB - likesA;
+                });
+            }
+
+            console.log(`✅ Posts loaded: ${this.posts.length}`);
+            console.log('📊 Posts data:', this.posts.map(p => ({ id: p.id, title: p.title, channelId: p.channelId })));
 
             this.renderPosts();
 
         } catch (error) {
             console.error('❌ Error loading posts:', error);
+            console.error('❌ Error details:', {
+                code: error.code,
+                message: error.message,
+                currentChannel: this.currentChannel,
+                currentFilter: this.currentFilter,
+                currentTag: this.currentTag
+            });
+
             const postsGrid = document.getElementById('postsGrid');
             if (postsGrid) {
                 postsGrid.innerHTML = `
                     <div style="text-align: center; padding: 60px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #EF4444;"></i>
                         <p style="margin-top: 16px; color: var(--text-secondary);">Failed to load posts</p>
+                        <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">${error.message}</p>
                         <button class="filter-btn" onclick="location.reload()" style="margin-top: 16px;">
                             <i class="fas fa-redo"></i> Retry
                         </button>
