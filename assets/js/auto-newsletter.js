@@ -154,7 +154,7 @@ class AutoNewsletterSystem {
                 tags: ['newsletter', 'weekly-recap', 'market-intelligence', 'premium', ...this.extractTopTags(topNews)],
                 images: this.extractTopImages(topNews),
                 authorId: currentUser.uid,
-                authorName: 'Raphaël Nardone',
+                authorName: 'AlphaVault AI',
                 authorPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=AlphaVault+AI&background=667eea&color=fff&bold=true',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 views: 0,
@@ -263,20 +263,20 @@ class AutoNewsletterSystem {
         let md = '';
 
         // ═══════════════════════════════════════════════════════
-        // BANNIÈRE PREMIUM
+        // ✅ BANNIÈRE PREMIUM (TEXTE BLANC)
         // ═══════════════════════════════════════════════════════
-        md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; color: white; margin-bottom: 40px; box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);">\n\n`;
-        md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff; text-shadow: 0 4px 12px rgba(0,0,0,0.2);">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
-        md += `<h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 20px 0; color: rgba(255,255,255,0.95);">Premium Financial Digest</h3>\n\n`;
-        md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff;">${weekRange}</p>\n\n`;
-        md += `<p style="font-size: 1rem; margin: 0; color: rgba(255,255,255,0.9);">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);">\n\n`;
+        md += `<h1 style="font-size: 2.8rem; font-weight: 900; margin: 0 0 16px 0; color: #ffffff; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
+        md += `<h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 20px 0; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">Premium Financial Digest</h3>\n\n`;
+        md += `<p style="font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.2);">${weekRange}</p>\n\n`;
+        md += `<p style="font-size: 1rem; margin: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.2);">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
         md += `</div>\n\n`;
 
-        // SÉPARATEUR
-        md += this.createSeparator();
+        // ✅ SÉPARATEUR SIMPLE
+        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // EXECUTIVE SUMMARY
+        // ✅ EXECUTIVE SUMMARY (SANS DOUBLONS)
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #667eea;">Executive Summary</h2>\n\n`;
@@ -292,8 +292,7 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
-        // SÉPARATEUR
-        md += this.createSeparator();
+        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
         // BREAKING NEWS
@@ -319,7 +318,7 @@ class AutoNewsletterSystem {
             md += `</div>\n\n`;
             md += `</div>\n\n`;
 
-            md += this.createSeparator();
+            md += this.createSimpleSeparator();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -348,7 +347,7 @@ class AutoNewsletterSystem {
             
             md += `</div>\n\n`;
 
-            md += this.createSeparator();
+            md += this.createSimpleSeparator();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -375,7 +374,7 @@ class AutoNewsletterSystem {
             md += `</div>\n\n`;
             md += `</div>\n\n`;
 
-            md += this.createSeparator();
+            md += this.createSimpleSeparator();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -399,7 +398,7 @@ class AutoNewsletterSystem {
             
             md += `</div>\n\n`;
 
-            md += this.createSeparator();
+            md += this.createSimpleSeparator();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -427,8 +426,7 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
-        // SÉPARATEUR
-        md += this.createSeparator();
+        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
         // TOP MOVERS
@@ -450,7 +448,7 @@ class AutoNewsletterSystem {
             md += `<span style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">${ticker.count} mentions</span>\n\n`;
             md += `</div>\n\n`;
             md += `<div style="background: rgba(236, 72, 153, 0.15); height: 10px; border-radius: 10px; overflow: hidden;">\n\n`;
-            md += `<div style="background: linear-gradient(90deg, #ec4899, #db2777); height: 100%; width: ${barWidth}%; border-radius: 10px; transition: width 0.5s ease;"></div>\n\n`;
+            md += `<div style="background: linear-gradient(90deg, #ec4899, #db2777); height: 100%; width: ${barWidth}%; border-radius: 10px;"></div>\n\n`;
             md += `</div>\n\n`;
             md += `</div>\n\n`;
             md += `</div>\n\n`;
@@ -459,11 +457,10 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
-        // SÉPARATEUR
-        md += this.createSeparator();
+        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // 📰 SECTION COMPLÈTE : 10 ARTICLES DÉTAILLÉS
+        // ✅ SECTION COMPLÈTE : 10 ARTICLES COMPACTS
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">Complete News Coverage</h2>\n\n`;
@@ -485,49 +482,51 @@ class AutoNewsletterSystem {
                 'linear-gradient(135deg, #ff6e7f, #bfe9ff)'
             ];
             
-            md += `<div style="background: white; border-radius: 20px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); border: 3px solid rgba(102, 126, 234, 0.2);">\n\n`;
+            // ✅ CARDS PLUS COMPACTES
+            md += `<div style="background: white; border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: 2px solid rgba(102, 126, 234, 0.2);">\n\n`;
             
-            // Header avec numéro
-            md += `<div style="background: ${cardColors[index]}; padding: 20px 32px; display: flex; align-items: center; gap: 16px;">\n\n`;
-            md += `<div style="background: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; color: #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">${index + 1}</div>\n\n`;
+            // Header compact
+            md += `<div style="background: ${cardColors[index]}; padding: 16px 24px; display: flex; align-items: center; gap: 12px;">\n\n`;
+            md += `<div style="background: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${index + 1}</div>\n\n`;
             md += `<div style="flex: 1;">\n\n`;
-            md += `<p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px;">${article.sourceName}</p>\n\n`;
-            md += `<p style="margin: 4px 0 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">${this.getTimeAgo(article.timestamp)}</p>\n\n`;
+            md += `<p style="margin: 0; font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 0.5px;">${article.sourceName}</p>\n\n`;
+            md += `<p style="margin: 4px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.85);">${this.getTimeAgo(article.timestamp)}</p>\n\n`;
             md += `</div>\n\n`;
             md += `</div>\n\n`;
             
-            // Image si disponible
+            // ✅ Image réduite (180px au lieu de 300px)
             if (article.image) {
-                md += `<div style="width: 100%; height: 300px; overflow: hidden; background: #f1f5f9;">\n\n`;
+                md += `<div style="width: 100%; height: 180px; overflow: hidden; background: #f1f5f9;">\n\n`;
                 md += `<img src="${article.image}" alt="${this.escapeHtml(article.title)}" style="width: 100%; height: 100%; object-fit: cover;">\n\n`;
                 md += `</div>\n\n`;
             }
             
-            // Contenu
-            md += `<div style="padding: 32px;">\n\n`;
-            md += `<h3 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; margin: 0 0 16px 0; line-height: 1.3;">${article.title}</h3>\n\n`;
+            // ✅ Contenu plus compact
+            md += `<div style="padding: 20px;">\n\n`;
+            md += `<h3 style="font-size: 1.3rem; font-weight: 800; color: #1e293b; margin: 0 0 12px 0; line-height: 1.3;">${article.title}</h3>\n\n`;
             
             if (article.description) {
-                md += `<p style="font-size: 1.05rem; color: #475569; line-height: 1.8; margin: 0 0 20px 0;">${article.description}</p>\n\n`;
+                // ✅ Description tronquée à 120 caractères
+                const shortDesc = article.description.length > 120 ? article.description.substring(0, 120) + '...' : article.description;
+                md += `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0 0 16px 0;">${shortDesc}</p>\n\n`;
             }
             
-            // Tickers
+            // Tickers compacts
             if (article.tickers && article.tickers.length > 0) {
-                md += `<div style="margin: 0 0 20px 0;">\n\n`;
-                md += `<p style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">Related Tickers</p>\n\n`;
-                md += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">\n\n`;
-                article.tickers.forEach(ticker => {
-                    md += `<code style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">${ticker}</code>\n\n`;
+                md += `<div style="margin: 0 0 16px 0;">\n\n`;
+                md += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">\n\n`;
+                article.tickers.slice(0, 4).forEach(ticker => {
+                    md += `<code style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">${ticker}</code>\n\n`;
                 });
                 md += `</div>\n\n`;
                 md += `</div>\n\n`;
             }
             
-            // Footer avec lien
-            md += `<div style="padding-top: 20px; border-top: 2px solid #e2e8f0;">\n\n`;
-            md += `<a href="${article.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1rem; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;">\n\n`;
+            // Footer compact
+            md += `<div style="padding-top: 16px; border-top: 2px solid #e2e8f0;">\n\n`;
+            md += `<a href="${article.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">\n\n`;
             md += `Read Full Article\n\n`;
-            md += `<span style="font-size: 1.2rem;">→</span>\n\n`;
+            md += `<span style="font-size: 1rem;">→</span>\n\n`;
             md += `</a>\n\n`;
             md += `</div>\n\n`;
             
@@ -537,8 +536,7 @@ class AutoNewsletterSystem {
         
         md += `</div>\n\n`;
 
-        // SÉPARATEUR FINAL
-        md += this.createSeparator();
+        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
         // PREMIUM FOOTER
@@ -572,13 +570,10 @@ class AutoNewsletterSystem {
         };
     }
 
-    // Créer un séparateur esthétique
-    createSeparator() {
-        return `<div style="height: 80px; margin: 40px 0; position: relative; overflow: hidden;">\n\n` +
-               `<div style="position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent 0%, #667eea 20%, #764ba2 50%, #667eea 80%, transparent 100%); transform: translateY(-50%);"></div>\n\n` +
-               `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);"></div>\n\n` +
-               `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%;"></div>\n\n` +
-               `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%;"></div>\n\n` +
+    // ✅ SÉPARATEUR SIMPLE (JUSTE UN TRAIT)
+    createSimpleSeparator() {
+        return `<div style="height: 40px; margin: 30px 0; position: relative; display: flex; align-items: center;">\n\n` +
+               `<div style="flex: 1; height: 3px; background: linear-gradient(90deg, transparent 0%, #667eea 30%, #764ba2 50%, #667eea 70%, transparent 100%); border-radius: 2px;"></div>\n\n` +
                `</div>\n\n`;
     }
 
