@@ -975,7 +975,7 @@ class CommunityHub {
         const container = document.getElementById('leaderboardList');
         if (!container) return;
 
-        const medals = ['🥇', '🥈', '🥉', '4⃣', '5⃣'];
+        const medals = ['🥇', '🥈', '🥉', '4', '5'];
 
         container.innerHTML = users.map((user, index) => `
             <div class="leaderboard-item" 
