@@ -5874,3 +5874,98 @@ body.modal-open {
 /* ════════════════════════════════════════════════════════════════
    ✅ FIN DU CSS MODAL DE PARTAGE
    ════════════════════════════════════════════════════════════════ */
+
+   /* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTION - SUPPRESSION DU CERCLE SUR BOUTON PUBLISH
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1⃣ Masquer le spinner par défaut (pas en état loading) */
+.btn-publish .spinner,
+.btn-publish i.fa-spinner,
+.btn-publish i.fa-circle-notch {
+    display: none !important;
+}
+
+/* Le spinner ne s'affiche QUE en état loading */
+.btn-publish.loading .spinner,
+.btn-publish.loading i.fa-spinner,
+.btn-publish.loading i.fa-circle-notch {
+    display: inline-block !important;
+    animation: none !important; /* Pas de rotation */
+}
+
+/* 2⃣ Supprimer tout pseudo-élément circulaire */
+.btn-publish::before,
+.btn-publish::after {
+    display: none !important;
+}
+
+/* 3⃣ Supprimer le cercle sur l'icône */
+.btn-publish i::before,
+.btn-publish i::after {
+    display: none !important;
+}
+
+/* 4⃣ Style propre du bouton sans cercle */
+.btn-publish {
+    padding: 14px 32px !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* 5⃣ Icône sans cercle */
+.btn-publish i {
+    font-size: 1.1rem !important;
+    color: white !important;
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-block !important;
+}
+
+/* 6⃣ Supprimer tout cercle de Font Awesome */
+.btn-publish .fa-stack,
+.btn-publish .fa-circle,
+.btn-publish [class*="fa-circle"] {
+    display: none !important;
+}
+
+/* 7⃣ État hover propre */
+.btn-publish:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* 8⃣ État disabled */
+.btn-publish:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* Dark mode */
+body.dark-mode .btn-publish {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5) !important;
+}
+
+body.dark-mode .btn-publish:hover {
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.7) !important;
+}
