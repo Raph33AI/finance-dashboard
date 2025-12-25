@@ -6,27 +6,103 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="assets/js/firebase-config.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        p {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+        button {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #progress {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+        .warning { background: #fef3c7; color: #92400e; }
+    </style>
 </head>
-<body style="font-family: sans-serif; padding: 40px; background: #f5f5f5;">
-    <h1>🔧 Migration - User Points</h1>
-    <p>Ce script va recalculer les points de tous les utilisateurs existants.</p>
-    
-    <button id="startMigration" style="padding: 12px 24px; background: #3B82F6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700;">
-        ▶ Démarrer la Migration
-    </button>
-    
-    <div id="progress" style="margin-top: 24px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+<body>
+    <div class="container">
+        <h1>🔧 Migration - Initialisation des Points</h1>
+        <p>
+            Ce script va recalculer les points de tous les utilisateurs existants.<br>
+            <strong>Formule :</strong> (Posts × 10) + (Likes reçus × 2) + (Commentaires × 3)
+        </p>
+        
+        <button id="startMigration">🚀 Démarrer la Migration</button>
+        
+        <div id="progress"></div>
+    </div>
 
     <script>
-        const db = firebase.firestore();
+        // ✅ CORRECTION : Utiliser firebase.firestore() directement
+        const progressDiv = document.getElementById('progress');
+        const btn = document.getElementById('startMigration');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.textContent = message;
+            progressDiv.appendChild(div);
+            progressDiv.scrollTop = progressDiv.scrollHeight;
+        }
 
         async function recalculateUserPoints(userId) {
-            const userRef = db.collection('users').doc(userId);
+            const userRef = firebase.firestore().collection('users').doc(userId);
             const userDoc = await userRef.get();
 
-            if (!userDoc.exists) return 0;
+            if (!userDoc.exists) return { points: 0, error: 'User not found' };
 
-            const postsSnapshot = await db.collection('posts')
+            const postsSnapshot = await firebase.firestore().collection('posts')
                 .where('authorId', '==', userId)
                 .get();
 
@@ -36,7 +112,7 @@
                 totalLikes += (post.likes?.length || 0);
             });
 
-            const commentsSnapshot = await db.collection('comments')
+            const commentsSnapshot = await firebase.firestore().collection('comments')
                 .where('authorId', '==', userId)
                 .get();
 
@@ -53,33 +129,68 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            return points;
+            return {
+                points,
+                postsCount: postsSnapshot.size,
+                commentsCount: commentsSnapshot.size,
+                likesReceived: totalLikes
+            };
         }
 
-        document.getElementById('startMigration').addEventListener('click', async () => {
-            const progressDiv = document.getElementById('progress');
-            progressDiv.innerHTML = '<p>⏳ Migration en cours...</p>';
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            progressDiv.innerHTML = '';
+            
+            log('🚀 Démarrage de la migration...', 'info');
+            log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
 
             try {
-                const usersSnapshot = await db.collection('users').get();
+                const usersSnapshot = await firebase.firestore().collection('users').get();
                 const totalUsers = usersSnapshot.size;
-                let processed = 0;
 
-                progressDiv.innerHTML += `<p>👥 ${totalUsers} utilisateurs trouvés</p>`;
+                if (totalUsers === 0) {
+                    log('⚠ Aucun utilisateur trouvé !', 'warning');
+                    btn.disabled = false;
+                    return;
+                }
+
+                log(`👥 ${totalUsers} utilisateur(s) trouvé(s)`, 'info');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+                let processed = 0;
+                let totalPoints = 0;
 
                 for (const userDoc of usersSnapshot.docs) {
                     const userId = userDoc.id;
-                    const points = await recalculateUserPoints(userId);
-                    processed++;
+                    const userData = userDoc.data();
+                    const displayName = userData.displayName || userData.email || userId;
 
-                    progressDiv.innerHTML += `<p>✅ ${userDoc.data().displayName || userId}: ${points} points (${processed}/${totalUsers})</p>`;
+                    try {
+                        const result = await recalculateUserPoints(userId);
+                        processed++;
+                        totalPoints += result.points;
+
+                        log(
+                            `✅ ${displayName}: ${result.points} pts (${result.postsCount} posts, ${result.likesReceived} likes, ${result.commentsCount} comments) [${processed}/${totalUsers}]`,
+                            'success'
+                        );
+
+                    } catch (error) {
+                        log(`❌ Erreur pour ${displayName}: ${error.message}`, 'error');
+                    }
                 }
 
-                progressDiv.innerHTML += '<p style="color: #10B981; font-weight: 700; font-size: 1.2rem;">🎉 Migration terminée !</p>';
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                log(`🎉 Migration terminée ! ${processed}/${totalUsers} utilisateurs traités`, 'success');
+                log(`🏆 Total de points distribués: ${totalPoints}`, 'info');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                log('✅ Vous pouvez maintenant aller sur community-hub.html', 'success');
 
             } catch (error) {
-                progressDiv.innerHTML += `<p style="color: #EF4444;">❌ Erreur: ${error.message}</p>`;
+                log(`❌ Erreur fatale: ${error.message}`, 'error');
                 console.error(error);
+            } finally {
+                btn.disabled = false;
             }
         });
     </script>
