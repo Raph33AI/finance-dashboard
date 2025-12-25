@@ -840,18 +840,135 @@ class CommunityFirebaseService {
     
     async getChannels() {
         try {
-            const snapshot = await this.db.collection('channels')
+            console.log('📂 Loading channels...');
+            
+            // ✅ Récupérer les channels depuis Firestore
+            const channelsSnapshot = await firebase.firestore()
+                .collection('channels')
                 .orderBy('order', 'asc')
                 .get();
 
-            return snapshot.docs.map(doc => ({
+            if (channelsSnapshot.empty) {
+                console.warn('⚠ No channels found in Firestore collection "channels"');
+                console.warn('💡 Creating default channels...');
+                
+                // Créer des channels par défaut si la collection est vide
+                await this.createDefaultChannels();
+                
+                // Rappeler la fonction récursivement
+                return this.getChannels();
+            }
+
+            const channels = channelsSnapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                postCount: 0 // Valeur par défaut
             }));
+
+            console.log(`✅ ${channels.length} channels loaded`);
+
+            // ✅ CORRECTION CRITIQUE : Calculer le nombre de posts pour chaque channel
+            console.log('🔢 Calculating post counts...');
+            
+            for (const channel of channels) {
+                try {
+                    // Requête pour compter les posts de ce channel
+                    const postsSnapshot = await firebase.firestore()
+                        .collection('posts')
+                        .where('channelId', '==', channel.id)
+                        .get();
+
+                    channel.postCount = postsSnapshot.size;
+                    
+                    console.log(`   📊 Channel "${channel.name}" (${channel.id}): ${postsSnapshot.size} posts`);
+                    
+                    // ✅ DEBUG : Afficher les posts trouvés
+                    if (postsSnapshot.size > 0) {
+                        console.log(`      Posts found:`, postsSnapshot.docs.map(doc => ({
+                            id: doc.id,
+                            title: doc.data().title,
+                            channelId: doc.data().channelId
+                        })));
+                    }
+                    
+                } catch (countError) {
+                    console.error(`   ❌ Error counting posts for channel "${channel.id}":`, countError);
+                    console.error(`      Error details:`, {
+                        code: countError.code,
+                        message: countError.message
+                    });
+                    
+                    // ⚠ Si erreur d'index manquant
+                    if (countError.code === 'failed-precondition') {
+                        console.error('      🔗 Index required! Check console for link to create it.');
+                    }
+                    
+                    channel.postCount = 0;
+                }
+            }
+
+            console.log('✅ Post counts calculated:', channels.map(c => ({
+                id: c.id,
+                name: c.name,
+                postCount: c.postCount
+            })));
+
+            return channels;
+
         } catch (error) {
-            console.error('❌ Error getting channels:', error);
-            throw error;
+            console.error('❌ Error loading channels:', error);
+            
+            // Retourner des channels par défaut en cas d'erreur fatale
+            return this.getDefaultChannels();
         }
+    }
+
+    // ✅ Méthode pour créer les channels par défaut dans Firestore
+    async createDefaultChannels() {
+        const defaultChannels = [
+            { id: 'market-analysis', name: 'Market Analysis', icon: '📊', order: 1, description: 'Market trends and analysis' },
+            { id: 'trading-strategies', name: 'Trading Strategies', icon: '📈', order: 2, description: 'Trading techniques and strategies' },
+            { id: 'ai-quant', name: 'AI & Quant', icon: '🤖', order: 3, description: 'AI and quantitative finance' },
+            { id: 'ipo-watch', name: 'IPO Watch', icon: '🚀', order: 4, description: 'IPO analysis and tracking' },
+            { id: 'ma-intelligence', name: 'M&A Intelligence', icon: '🤝', order: 5, description: 'Mergers and acquisitions insights' },
+            { id: 'portfolio-reviews', name: 'Portfolio Reviews', icon: '💼', order: 6, description: 'Portfolio analysis and reviews' },
+            { id: 'ideas-insights', name: 'Ideas & Insights', icon: '💡', order: 7, description: 'Investment ideas and insights' },
+            { id: 'news-events', name: 'News & Events', icon: '📰', order: 8, description: 'Market news and events' },
+            { id: 'education', name: 'Education', icon: '📚', order: 9, description: 'Educational resources' },
+            { id: 'success-stories', name: 'Success Stories', icon: '🏆', order: 10, description: 'Community success stories' }
+        ];
+
+        const batch = firebase.firestore().batch();
+
+        defaultChannels.forEach(channel => {
+            const channelRef = firebase.firestore().collection('channels').doc(channel.id);
+            batch.set(channelRef, {
+                name: channel.name,
+                icon: channel.icon,
+                order: channel.order,
+                description: channel.description,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+
+        await batch.commit();
+        console.log('✅ Default channels created in Firestore');
+    }
+
+    // ✅ Méthode pour retourner des channels statiques (fallback)
+    getDefaultChannels() {
+        return [
+            { id: 'market-analysis', name: 'Market Analysis', icon: '📊', order: 1, postCount: 0 },
+            { id: 'trading-strategies', name: 'Trading Strategies', icon: '📈', order: 2, postCount: 0 },
+            { id: 'ai-quant', name: 'AI & Quant', icon: '🤖', order: 3, postCount: 0 },
+            { id: 'ipo-watch', name: 'IPO Watch', icon: '🚀', order: 4, postCount: 0 },
+            { id: 'ma-intelligence', name: 'M&A Intelligence', icon: '🤝', order: 5, postCount: 0 },
+            { id: 'portfolio-reviews', name: 'Portfolio Reviews', icon: '💼', order: 6, postCount: 0 },
+            { id: 'ideas-insights', name: 'Ideas & Insights', icon: '💡', order: 7, postCount: 0 },
+            { id: 'news-events', name: 'News & Events', icon: '📰', order: 8, postCount: 0 },
+            { id: 'education', name: 'Education', icon: '📚', order: 9, postCount: 0 },
+            { id: 'success-stories', name: 'Success Stories', icon: '🏆', order: 10, postCount: 0 }
+        ];
     }
 
     async getChannel(channelId) {
