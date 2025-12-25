@@ -284,9 +284,11 @@
 // });
 
 /* ============================================
-   PUBLIC-PROFILE.JS - Profil Public v3.0
+   PUBLIC-PROFILE.JS - Profil Public v3.2
    ✅ Avec Bio + Activity Tabs (Posts/Liked/Commented)
    ✅ CORRECTION : Photo de profil avec multiples fallbacks
+   ✅ CORRECTION : Listener temps réel pour le statut Follow/Unfollow
+   ✅ CORRECTION : Persistance du bouton Follow après refresh
    ============================================ */
 
 class PublicProfile {
@@ -301,6 +303,9 @@ class PublicProfile {
         this.userPosts = [];
         this.likedPosts = [];
         this.commentedPosts = [];
+        
+        // Listener unsubscribe
+        this.followUnsubscribe = null;
     }
 
     async initialize() {
@@ -319,13 +324,17 @@ class PublicProfile {
             const currentUser = firebase.auth().currentUser;
             this.isOwnProfile = currentUser && currentUser.uid === this.userId;
 
-            // ✅ CORRECTION : Charger les données utilisateur SANS rendre le header
+            // ✅ Charger les données utilisateur SANS rendre le header
             await this.loadUserData();
             
-            // ✅ Vérifier le statut de suivi AVANT de rendre le header
+            // ✅ CORRECTION : Vérifier le statut de suivi avec listener temps réel
             if (!this.isOwnProfile && currentUser) {
+                // Vérification initiale
                 this.isFollowing = await window.followSystem.isFollowing(this.userId);
-                console.log('✅ Follow status checked:', this.isFollowing);
+                console.log('✅ Initial follow status:', this.isFollowing);
+                
+                // ✅ AJOUTER UN LISTENER TEMPS RÉEL pour détecter les changements
+                this.setupFollowListener();
             }
             
             // ✅ MAINTENANT rendre le header avec le bon statut
@@ -341,6 +350,53 @@ class PublicProfile {
         }
     }
 
+    // ✅ NOUVELLE MÉTHODE : Listener temps réel pour le statut de suivi
+    setupFollowListener() {
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser || this.isOwnProfile) return;
+        
+        console.log('👂 Setting up follow status listener...');
+        
+        // Écouter les changements dans la sous-collection "following"
+        this.followUnsubscribe = firebase.firestore()
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('following')
+            .doc(this.userId)
+            .onSnapshot((doc) => {
+                const newFollowStatus = doc.exists;
+                
+                console.log('🔔 Follow status changed:', newFollowStatus);
+                
+                // Si le statut a changé, mettre à jour l'UI
+                if (this.isFollowing !== newFollowStatus) {
+                    this.isFollowing = newFollowStatus;
+                    this.updateFollowButton();
+                }
+            }, (error) => {
+                console.error('❌ Error in follow listener:', error);
+            });
+    }
+
+    // ✅ NOUVELLE MÉTHODE : Mettre à jour uniquement le bouton Follow
+    updateFollowButton() {
+        const followBtn = document.getElementById('followBtn');
+        
+        if (!followBtn) return;
+        
+        console.log('🔄 Updating follow button, isFollowing:', this.isFollowing);
+        
+        if (this.isFollowing) {
+            followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
+            followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+        } else {
+            followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+            followBtn.style.background = '';
+        }
+        
+        followBtn.disabled = false;
+    }
+
     async loadUserData() {
         const userDoc = await firebase.firestore()
             .collection('users')
@@ -352,8 +408,7 @@ class PublicProfile {
         }
 
         this.userData = { uid: this.userId, ...userDoc.data() };
-        // ✅ NE PLUS RENDRE LE HEADER ICI (on le fait dans initialize après vérification du statut)
-        // this.renderProfileHeader(); ← SUPPRIMÉ
+        console.log('✅ User data loaded:', this.userData);
     }
 
     // ✅ CHARGER TOUTES LES ACTIVITÉS
@@ -377,14 +432,14 @@ class PublicProfile {
                 .limit(50)
                 .get();
 
-            this.userPosts = await Promise.all(snapshot.docs.map(async doc => {
+            this.userPosts = snapshot.docs.map(doc => {
                 const postData = doc.data();
                 return {
                     id: doc.id,
                     ...postData,
                     createdAt: postData.createdAt?.toDate()
                 };
-            }));
+            });
 
             document.getElementById('postsTabCount').textContent = this.userPosts.length;
             
@@ -392,6 +447,7 @@ class PublicProfile {
         } catch (error) {
             console.error('❌ Error loading user posts:', error);
             this.userPosts = [];
+            document.getElementById('postsTabCount').textContent = '0';
         }
     }
 
@@ -453,7 +509,7 @@ class PublicProfile {
         try {
             // Récupérer tous les commentaires de l'utilisateur
             const commentsSnapshot = await firebase.firestore()
-                .collection('comments')  // ✅ CORRECTION : collection au lieu de collectionGroup
+                .collection('comments')
                 .where('authorId', '==', this.userId)
                 .orderBy('createdAt', 'desc')
                 .limit(100)
@@ -580,16 +636,16 @@ class PublicProfile {
                 </p>
                 <div class="user-post-meta" style="display: flex; gap: 20px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; flex-wrap: wrap;">
                     <span style="display: flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-arrow-up" style="color: #10B981;"></i> 
-                        ${post.upvotes || 0}
+                        <i class="fas fa-heart" style="color: #EF4444;"></i> 
+                        ${post.likes?.length || 0}
                     </span>
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <i class="fas fa-comment" style="color: #3B82F6;"></i> 
-                        ${post.commentCount || 0}
+                        ${post.commentsCount || 0}
                     </span>
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <i class="fas fa-eye" style="color: #8B5CF6;"></i> 
-                        ${post.viewCount || 0}
+                        ${post.views || 0}
                     </span>
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <i class="fas fa-clock"></i> 
@@ -642,7 +698,7 @@ class PublicProfile {
             `;
         }).join('');
 
-        // Bouton Follow/Unfollow (masqué si propre profil)
+        // ✅ Bouton Follow/Unfollow (masqué si propre profil)
         const followButtonHTML = !this.isOwnProfile ? `
             <button 
                 id="followBtn" 
@@ -722,7 +778,7 @@ class PublicProfile {
                 // Unfollow
                 await window.followSystem.unfollowUser(this.userId);
                 
-                // ✅ Mettre à jour l'état local
+                // ✅ Mettre à jour l'état local (sera confirmé par le listener)
                 this.isFollowing = false;
                 
                 // Mettre à jour le bouton
@@ -740,7 +796,7 @@ class PublicProfile {
                 // Follow
                 await window.followSystem.followUser(this.userId);
                 
-                // ✅ Mettre à jour l'état local
+                // ✅ Mettre à jour l'état local (sera confirmé par le listener)
                 this.isFollowing = true;
                 
                 // Mettre à jour le bouton
@@ -788,7 +844,9 @@ class PublicProfile {
         const badges = {
             'verified-analyst': { name: 'Verified Analyst', icon: 'fas fa-badge-check', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
             'top-contributor': { name: 'Top Contributor', icon: 'fas fa-trophy', gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)' },
-            'platinum-member': { name: 'Platinum Member', icon: 'fas fa-star', gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)' }
+            'platinum-member': { name: 'Platinum Member', icon: 'fas fa-star', gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)' },
+            'gold-member': { name: 'Gold Member', icon: 'fas fa-star', gradient: 'linear-gradient(135deg, #EAB308, #F59E0B)' },
+            'expert': { name: 'Expert', icon: 'fas fa-graduation-cap', gradient: 'linear-gradient(135deg, #10B981, #059669)' }
         };
         return badges[badge] || { name: badge, icon: 'fas fa-award', gradient: 'linear-gradient(135deg, #6b7280, #4b5563)' };
     }
@@ -805,6 +863,7 @@ class PublicProfile {
     }
 
     createExcerpt(content, maxLength) {
+        if (!content) return '';
         const text = content.replace(/[#*`]/g, '').trim();
         return text.length <= maxLength ? this.escapeHtml(text) : this.escapeHtml(text.substring(0, maxLength)) + '...';
     }
@@ -817,15 +876,26 @@ class PublicProfile {
     }
 
     showError(message) {
-        document.getElementById('profileHeader').innerHTML = `
-            <div style="text-align: center; padding: 60px; color: #EF4444; width: 100%;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                <h3 style="font-size: 1.5rem; font-weight: 800;">${message}</h3>
-                <button class="filter-btn" onclick="history.back()" style="margin-top: 24px;">
-                    <i class="fas fa-arrow-left"></i> Go Back
-                </button>
-            </div>
-        `;
+        const profileHeader = document.getElementById('profileHeader');
+        if (profileHeader) {
+            profileHeader.innerHTML = `
+                <div style="text-align: center; padding: 60px; color: #EF4444; width: 100%;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                    <h3 style="font-size: 1.5rem; font-weight: 800;">${message}</h3>
+                    <button class="filter-btn" onclick="history.back()" style="margin-top: 24px;">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // ✅ Nettoyer les listeners
+    cleanup() {
+        if (this.followUnsubscribe) {
+            this.followUnsubscribe();
+            console.log('🧹 Follow listener cleaned up');
+        }
     }
 }
 
@@ -835,4 +905,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.publicProfile.initialize();
 });
 
-console.log('✅ public-profile.js chargé (v3.1 - Photo + Permissions FIXED)');
+// ✅ Nettoyer lors du changement de page
+window.addEventListener('beforeunload', () => {
+    if (window.publicProfile) {
+        window.publicProfile.cleanup();
+    }
+});
+
+console.log('✅ public-profile.js chargé (v3.2 - FULLY CORRECTED)');

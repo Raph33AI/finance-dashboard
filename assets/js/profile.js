@@ -1297,8 +1297,8 @@ function toggleEditPersonalInfo(enable) {
 async function handlePersonalInfoSubmit(e) {
     e.preventDefault();
     
-    if (!currentUserData) {
-        showToast('error', 'Erreur', 'Aucune donnée utilisateur disponible');
+    if (!currentUserData || !currentUserData.uid) {
+        showToast('error', 'Error', 'No user data available');
         return;
     }
     
@@ -1311,20 +1311,32 @@ async function handlePersonalInfoSubmit(e) {
     
     // Validation
     if (!firstName || !lastName) {
-        showToast('error', 'Erreur', 'Le prénom et le nom sont obligatoires');
+        showToast('error', 'Error', 'First name and last name are required');
         return;
     }
     
+    console.log('💾 Saving user info:', { firstName, lastName, bio, company, phone });
+    
     try {
-        // ✅ Mettre à jour dans Firestore (avec bio)
-        await firebase.firestore().collection('users').doc(currentUserData.uid).update({
+        // ✅ CORRECTION : Sauvegarder avec confirmation
+        const updateData = {
             firstName: firstName,
             lastName: lastName,
+            displayName: `${firstName} ${lastName}`, // ✅ IMPORTANT : Ajouter displayName
             bio: bio,
             company: company,
             phone: phone,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        
+        console.log('📤 Updating Firestore with:', updateData);
+        
+        await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .update(updateData);
+        
+        console.log('✅ Firestore updated successfully');
         
         // Mettre à jour le displayName dans Auth
         const user = firebase.auth().currentUser;
@@ -1332,11 +1344,13 @@ async function handlePersonalInfoSubmit(e) {
             await user.updateProfile({
                 displayName: `${firstName} ${lastName}`
             });
+            console.log('✅ Auth displayName updated');
         }
         
-        // Mettre à jour les données locales
+        // ✅ IMPORTANT : Mettre à jour les données locales IMMÉDIATEMENT
         currentUserData.firstName = firstName;
         currentUserData.lastName = lastName;
+        currentUserData.displayName = `${firstName} ${lastName}`;
         currentUserData.bio = bio;
         currentUserData.company = company;
         currentUserData.phone = phone;
@@ -1346,16 +1360,49 @@ async function handlePersonalInfoSubmit(e) {
             el.textContent = `${firstName} ${lastName}`;
         });
         
+        // ✅ FORCER LA MISE À JOUR DE LA SIDEBAR (si présente)
+        const sidebarUserName = document.querySelector('.sidebar-user-name');
+        if (sidebarUserName) {
+            sidebarUserName.textContent = `${firstName} ${lastName}`;
+        }
+        
         // Désactiver le mode édition
         toggleEditPersonalInfo(false);
         
-        showToast('success', 'Succès !', 'Vos informations ont été mises à jour');
+        showToast('success', 'Success!', 'Your information has been updated');
         
-        console.log('✅ Informations personnelles mises à jour');
+        console.log('✅ Personal information updated successfully');
+        
+        // ✅ RECHARGER LES DONNÉES DEPUIS FIRESTORE POUR CONFIRMATION
+        setTimeout(async () => {
+            try {
+                const userDoc = await firebase.firestore()
+                    .collection('users')
+                    .doc(currentUserData.uid)
+                    .get();
+                
+                if (userDoc.exists) {
+                    const freshData = userDoc.data();
+                    console.log('🔄 Fresh data from Firestore:', freshData);
+                    
+                    if (freshData.firstName !== firstName || freshData.lastName !== lastName) {
+                        console.warn('⚠ Data mismatch detected! Reloading page...');
+                        location.reload();
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error verifying data:', error);
+            }
+        }, 1000);
         
     } catch (error) {
-        console.error('❌ Erreur lors de la mise à jour:', error);
-        showToast('error', 'Erreur', 'Impossible de mettre à jour vos informations');
+        console.error('❌ Error updating information:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message
+        });
+        
+        showToast('error', 'Error', `Failed to update your information: ${error.message}`);
     }
 }
 
@@ -1369,29 +1416,47 @@ async function handleAvatarChange(e) {
     if (!file) return;
     
     if (!file.type.startsWith('image/')) {
-        showToast('error', 'Erreur', 'Veuillez sélectionner une image');
+        showToast('error', 'Error', 'Please select an image file');
         return;
     }
     
     if (file.size > 5 * 1024 * 1024) {
-        showToast('error', 'Erreur', "L'image ne doit pas dépasser 5 Mo");
+        showToast('error', 'Error', 'Image must not exceed 5 MB');
         return;
     }
     
     try {
-        showToast('info', 'Upload en cours...', 'Téléchargement de votre photo');
+        showToast('info', 'Upload in progress...', 'Uploading your photo');
         
         const storage = firebase.storage();
         const storageRef = storage.ref();
         
-        // ✅ Nom de fichier unique avec timestamp
+        // ✅ CORRECTION : Nom de fichier sans espaces ni caractères spéciaux
         const timestamp = Date.now();
-        const fileName = `avatar_${timestamp}_${file.name}`;
+        const sanitizedFileName = file.name
+            .replace(/\s+/g, '_')           // Remplacer espaces par underscores
+            .replace(/[^a-zA-Z0-9._-]/g, '') // Supprimer caractères spéciaux
+            .toLowerCase();
+        
+        const fileName = `avatar_${timestamp}_${sanitizedFileName}`;
         const avatarRef = storageRef.child(`users/${currentUserData.uid}/profile/${fileName}`);
         
-        // Upload du fichier
-        const uploadTask = await avatarRef.put(file);
-        const downloadURL = await uploadTask.ref.getDownloadURL();
+        console.log('📤 Uploading file:', fileName);
+        
+        // ✅ UTILISER uploadBytes au lieu de put (plus moderne et fiable)
+        const snapshot = await avatarRef.put(file, {
+            contentType: file.type,
+            customMetadata: {
+                uploadedBy: currentUserData.uid,
+                uploadedAt: new Date().toISOString()
+            }
+        });
+        
+        console.log('✅ Upload complete, getting download URL...');
+        
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        
+        console.log('✅ Download URL obtained:', downloadURL);
         
         // ✅ IMPORTANT : Mettre à jour Firestore EN PREMIER
         await firebase.firestore().collection('users').doc(currentUserData.uid).update({
@@ -1399,12 +1464,15 @@ async function handleAvatarChange(e) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
+        console.log('✅ Firestore updated');
+        
         // Mettre à jour Auth
         const user = firebase.auth().currentUser;
         if (user) {
             await user.updateProfile({
                 photoURL: downloadURL
             });
+            console.log('✅ Auth profile updated');
         }
         
         // ✅ Mettre à jour les données locales
@@ -1415,13 +1483,35 @@ async function handleAvatarChange(e) {
             img.src = downloadURL;
         });
         
-        showToast('success', 'Succès !', 'Votre photo de profil a été mise à jour');
+        // ✅ FORCER LE REFRESH DES IMAGES DANS LA SIDEBAR (si présente)
+        const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
+        if (sidebarAvatar) {
+            sidebarAvatar.src = downloadURL;
+        }
         
-        console.log('✅ Avatar mis à jour:', downloadURL);
+        showToast('success', 'Success!', 'Your profile picture has been updated');
+        
+        console.log('✅ Avatar updated successfully:', downloadURL);
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'upload:', error);
-        showToast('error', 'Erreur', 'Impossible de télécharger la photo');
+        console.error('❌ Upload error details:', {
+            code: error.code,
+            message: error.message,
+            serverResponse: error.serverResponse
+        });
+        
+        // Messages d'erreur plus détaillés
+        let errorMessage = 'Failed to upload photo';
+        
+        if (error.code === 'storage/unauthorized') {
+            errorMessage = 'Permission denied. Please check Firebase Storage rules.';
+        } else if (error.code === 'storage/canceled') {
+            errorMessage = 'Upload canceled';
+        } else if (error.code === 'storage/unknown') {
+            errorMessage = 'Unknown error. Please check your internet connection.';
+        }
+        
+        showToast('error', 'Error', errorMessage);
     }
 }
 
