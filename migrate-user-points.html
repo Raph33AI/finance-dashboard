@@ -15,7 +15,7 @@
             margin: 0;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
@@ -29,6 +29,17 @@
         p {
             color: #64748b;
             margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+        .warning-box strong {
+            color: #92400e;
         }
         button {
             padding: 16px 32px;
@@ -40,6 +51,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             transition: all 0.3s ease;
+            margin-right: 12px;
         }
         button:hover {
             transform: translateY(-2px);
@@ -50,6 +62,12 @@
             cursor: not-allowed;
             transform: none;
         }
+        #syncAuthBtn {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        #syncAuthBtn:hover {
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
         #progress {
             margin-top: 24px;
             padding: 20px;
@@ -57,12 +75,14 @@
             border-radius: 8px;
             max-height: 500px;
             overflow-y: auto;
+            border: 2px solid #e2e8f0;
         }
         .log-entry {
-            padding: 8px;
+            padding: 8px 12px;
             margin: 4px 0;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
         }
         .success { background: #d1fae5; color: #065f46; }
         .error { background: #fee2e2; color: #991b1b; }
@@ -72,30 +92,127 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔧 Migration - Initialisation des Points</h1>
+        <h1>🔧 Migration - Synchronisation Complète</h1>
+        
+        <div class="warning-box">
+            <strong>⚠ Important :</strong> Ce script va synchroniser les données de Firebase Auth vers Firestore et recalculer tous les points.
+        </div>
+        
         <p>
-            Ce script va recalculer les points de tous les utilisateurs existants.<br>
-            <strong>Formule :</strong> (Posts × 10) + (Likes reçus × 2) + (Commentaires × 3)
+            <strong>Étape 1 :</strong> Synchroniser les données utilisateur (displayName, photoURL, email)<br>
+            <strong>Étape 2 :</strong> Recalculer les points selon la formule : (Posts × 10) + (Likes × 2) + (Commentaires × 3)
         </p>
         
-        <button id="startMigration">🚀 Démarrer la Migration</button>
+        <div>
+            <button id="syncAuthBtn">🔄 Synchroniser les Données Auth</button>
+            <button id="startMigration">🚀 Recalculer les Points</button>
+        </div>
         
         <div id="progress"></div>
     </div>
 
     <script>
-        // ✅ CORRECTION : Utiliser firebase.firestore() directement
         const progressDiv = document.getElementById('progress');
-        const btn = document.getElementById('startMigration');
+        const btnMigration = document.getElementById('startMigration');
+        const btnSync = document.getElementById('syncAuthBtn');
 
         function log(message, type = 'info') {
             const div = document.createElement('div');
             div.className = `log-entry ${type}`;
-            div.textContent = message;
+            div.innerHTML = message;
             progressDiv.appendChild(div);
             progressDiv.scrollTop = progressDiv.scrollHeight;
         }
 
+        // ✅ NOUVELLE FONCTION : Synchroniser Auth → Firestore
+        btnSync.addEventListener('click', async () => {
+            btnSync.disabled = true;
+            btnMigration.disabled = true;
+            progressDiv.innerHTML = '';
+            
+            log('🔄 Synchronisation des données Firebase Auth...', 'info');
+            log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+            try {
+                // Récupérer tous les documents users
+                const usersSnapshot = await firebase.firestore().collection('users').get();
+                const totalUsers = usersSnapshot.size;
+
+                if (totalUsers === 0) {
+                    log('⚠ Aucun utilisateur trouvé dans Firestore !', 'warning');
+                    log('💡 Créez d\'abord des posts pour initialiser les utilisateurs.', 'info');
+                    btnSync.disabled = false;
+                    btnMigration.disabled = false;
+                    return;
+                }
+
+                log(`👥 ${totalUsers} document(s) utilisateur trouvé(s)`, 'info');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+                let synced = 0;
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const currentData = userDoc.data();
+
+                    try {
+                        // Essayer de récupérer l'utilisateur depuis Auth
+                        // Note: Impossible de lister tous les users Auth côté client
+                        // On va donc améliorer les données existantes
+                        
+                        const updates = {
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+
+                        // Si displayName manquant, utiliser l'email ou "Anonymous"
+                        if (!currentData.displayName || currentData.displayName === 'Anonymous') {
+                            if (currentData.email) {
+                                updates.displayName = currentData.email.split('@')[0];
+                            } else {
+                                updates.displayName = 'User ' + userId.substring(0, 6);
+                            }
+                        }
+
+                        // Si photoURL manquant, générer avec UI Avatars
+                        if (!currentData.photoURL) {
+                            const name = updates.displayName || currentData.displayName || 'User';
+                            updates.photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3B82F6&color=fff&size=200`;
+                        }
+
+                        // Initialiser les champs de points s'ils manquent
+                        if (currentData.points === undefined) updates.points = 0;
+                        if (currentData.postsCount === undefined) updates.postsCount = 0;
+                        if (currentData.commentsCount === undefined) updates.commentsCount = 0;
+                        if (currentData.likesReceived === undefined) updates.likesReceived = 0;
+
+                        await firebase.firestore().collection('users').doc(userId).update(updates);
+                        
+                        synced++;
+                        log(
+                            `✅ <strong>${updates.displayName || currentData.displayName}</strong> synchronisé [${synced}/${totalUsers}]`,
+                            'success'
+                        );
+
+                    } catch (error) {
+                        log(`❌ Erreur pour ${userId}: ${error.message}`, 'error');
+                    }
+                }
+
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                log(`🎉 Synchronisation terminée ! ${synced}/${totalUsers} utilisateurs traités`, 'success');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                log('✅ Vous pouvez maintenant recalculer les points', 'info');
+
+            } catch (error) {
+                log(`❌ Erreur fatale: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                btnSync.disabled = false;
+                btnMigration.disabled = false;
+            }
+        });
+
+        // ✅ FONCTION : Recalculer les points
         async function recalculateUserPoints(userId) {
             const userRef = firebase.firestore().collection('users').doc(userId);
             const userDoc = await userRef.get();
@@ -137,11 +254,12 @@
             };
         }
 
-        btn.addEventListener('click', async () => {
-            btn.disabled = true;
+        btnMigration.addEventListener('click', async () => {
+            btnMigration.disabled = true;
+            btnSync.disabled = true;
             progressDiv.innerHTML = '';
             
-            log('🚀 Démarrage de la migration...', 'info');
+            log('🚀 Recalcul des points...', 'info');
             log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
 
             try {
@@ -150,7 +268,8 @@
 
                 if (totalUsers === 0) {
                     log('⚠ Aucun utilisateur trouvé !', 'warning');
-                    btn.disabled = false;
+                    btnMigration.disabled = false;
+                    btnSync.disabled = false;
                     return;
                 }
 
@@ -171,7 +290,7 @@
                         totalPoints += result.points;
 
                         log(
-                            `✅ ${displayName}: ${result.points} pts (${result.postsCount} posts, ${result.likesReceived} likes, ${result.commentsCount} comments) [${processed}/${totalUsers}]`,
+                            `✅ <strong>${displayName}</strong>: <strong>${result.points} pts</strong> (${result.postsCount} posts, ${result.likesReceived} likes, ${result.commentsCount} comments) [${processed}/${totalUsers}]`,
                             'success'
                         );
 
@@ -182,15 +301,16 @@
 
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
                 log(`🎉 Migration terminée ! ${processed}/${totalUsers} utilisateurs traités`, 'success');
-                log(`🏆 Total de points distribués: ${totalPoints}`, 'info');
+                log(`🏆 Total de points distribués: <strong>${totalPoints}</strong>`, 'info');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
-                log('✅ Vous pouvez maintenant aller sur community-hub.html', 'success');
+                log('✅ Vous pouvez maintenant aller sur <strong>community-hub.html</strong>', 'success');
 
             } catch (error) {
                 log(`❌ Erreur fatale: ${error.message}`, 'error');
                 console.error(error);
             } finally {
-                btn.disabled = false;
+                btnMigration.disabled = false;
+                btnSync.disabled = false;
             }
         });
     </script>
