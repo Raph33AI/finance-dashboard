@@ -742,18 +742,186 @@ class PostManager {
 
     handleShare() {
         const postUrl = window.location.href;
+        const postTitle = this.post.title;
+        const postDescription = this.stripMarkdown(this.post.content).substring(0, 200);
 
-        if (navigator.share) {
-            navigator.share({
-                title: this.post.title,
-                text: 'Check out this post on AlphaVault AI Community',
-                url: postUrl
-            }).catch(err => console.log('Share cancelled'));
-        } else {
-            navigator.clipboard.writeText(postUrl).then(() => {
-                alert('Link copied to clipboard!');
+        this.openShareModal(postUrl, postTitle, postDescription);
+    }
+
+    openShareModal(url, title, description) {
+        // Créer le modal s'il n'existe pas
+        let modal = document.getElementById('shareModal');
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'shareModal';
+            modal.className = 'share-modal';
+            modal.innerHTML = `
+                <div class="share-modal-overlay"></div>
+                <div class="share-modal-content">
+                    <div class="share-modal-header">
+                        <h3><i class="fas fa-share-alt"></i> Share this post</h3>
+                        <button class="share-modal-close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="share-modal-body">
+                        <div class="share-platforms">
+                            <!-- WhatsApp -->
+                            <a href="#" class="share-platform-btn whatsapp" data-platform="whatsapp">
+                                <div class="platform-icon">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <span>WhatsApp</span>
+                            </a>
+
+                            <!-- X (Twitter) -->
+                            <a href="#" class="share-platform-btn twitter" data-platform="twitter">
+                                <div class="platform-icon">
+                                    <i class="fab fa-x-twitter"></i>
+                                </div>
+                                <span>X (Twitter)</span>
+                            </a>
+
+                            <!-- LinkedIn -->
+                            <a href="#" class="share-platform-btn linkedin" data-platform="linkedin">
+                                <div class="platform-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </div>
+                                <span>LinkedIn</span>
+                            </a>
+
+                            <!-- Facebook -->
+                            <a href="#" class="share-platform-btn facebook" data-platform="facebook">
+                                <div class="platform-icon">
+                                    <i class="fab fa-facebook-f"></i>
+                                </div>
+                                <span>Facebook</span>
+                            </a>
+
+                            <!-- Telegram -->
+                            <a href="#" class="share-platform-btn telegram" data-platform="telegram">
+                                <div class="platform-icon">
+                                    <i class="fab fa-telegram-plane"></i>
+                                </div>
+                                <span>Telegram</span>
+                            </a>
+
+                            <!-- Email -->
+                            <a href="#" class="share-platform-btn email" data-platform="email">
+                                <div class="platform-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <span>Email</span>
+                            </a>
+                        </div>
+
+                        <div class="share-link-section">
+                            <div class="share-link-wrapper">
+                                <input type="text" class="share-link-input" readonly value="">
+                                <button class="share-copy-btn">
+                                    <i class="fas fa-copy"></i>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Event listeners
+            const overlay = modal.querySelector('.share-modal-overlay');
+            const closeBtn = modal.querySelector('.share-modal-close');
+            const copyBtn = modal.querySelector('.share-copy-btn');
+            
+            overlay.addEventListener('click', () => this.closeShareModal());
+            closeBtn.addEventListener('click', () => this.closeShareModal());
+            copyBtn.addEventListener('click', () => this.copyShareLink());
+
+            // Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    this.closeShareModal();
+                }
             });
         }
+
+        // Remplir les liens
+        const linkInput = modal.querySelector('.share-link-input');
+        linkInput.value = url;
+
+        const encodedUrl = encodeURIComponent(url);
+        const encodedTitle = encodeURIComponent(title);
+        const encodedDescription = encodeURIComponent(description);
+
+        // WhatsApp
+        const whatsappBtn = modal.querySelector('[data-platform="whatsapp"]');
+        whatsappBtn.href = `https://wa.me/?text=${encodedTitle}%0A%0A${encodedDescription}%0A%0A${encodedUrl}`;
+        whatsappBtn.target = '_blank';
+
+        // X (Twitter)
+        const twitterBtn = modal.querySelector('[data-platform="twitter"]');
+        twitterBtn.href = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+        twitterBtn.target = '_blank';
+
+        // LinkedIn
+        const linkedinBtn = modal.querySelector('[data-platform="linkedin"]');
+        linkedinBtn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        linkedinBtn.target = '_blank';
+
+        // Facebook
+        const facebookBtn = modal.querySelector('[data-platform="facebook"]');
+        facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        facebookBtn.target = '_blank';
+
+        // Telegram
+        const telegramBtn = modal.querySelector('[data-platform="telegram"]');
+        telegramBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+        telegramBtn.target = '_blank';
+
+        // Email
+        const emailBtn = modal.querySelector('[data-platform="email"]');
+        emailBtn.href = `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0ARead more: ${encodedUrl}`;
+
+        // Afficher le modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeShareModal() {
+        const modal = document.getElementById('shareModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    copyShareLink() {
+        const linkInput = document.querySelector('.share-link-input');
+        const copyBtn = document.querySelector('.share-copy-btn');
+        
+        linkInput.select();
+        document.execCommand('copy');
+        
+        // Feedback visuel
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        
+        setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+            copyBtn.style.background = '';
+        }, 2000);
+    }
+
+    stripMarkdown(text) {
+        if (!text) return '';
+        return text
+            .replace(/[#*_~`]/g, '')
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+            .replace(/\n/g, ' ');
     }
 
     openImageLightbox(imageUrl) {
