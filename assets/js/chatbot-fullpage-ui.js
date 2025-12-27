@@ -1,6 +1,8 @@
 // // ============================================
-// // CHATBOT FULL PAGE UI v3.2 - VERSION WALL STREET PRO
-// // ✅ NOUVEAU v3.2: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
+// // CHATBOT FULL PAGE UI v4.1 - VERSION FIREBASE + WALL STREET PRO
+// // ✅ NOUVEAU v4.1: Firebase Serialization Fix (Nested Arrays)
+// // ✅ v4.0: Firebase Integration (Cloud Storage)
+// // ✅ v3.2: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
 // // ✅ v3.1: Sauvegarde et restauration des graphiques
 // // Visual Cards + Metrics Tables + Comparison Charts
 // // No emojis version
@@ -22,7 +24,12 @@
 //         this.conversations = [];
 //         this.currentConversationId = null;
         
-//         // Clés de stockage
+//         // ✅ FIREBASE: Variables
+//         this.db = null;
+//         this.currentUser = null;
+//         this.firebaseReady = false;
+        
+//         // Clés de stockage (fallback)
 //         this.conversationsKey = 'alphy_conversations';
 //         this.chartsDataKey = 'alphy_charts_data';
         
@@ -33,7 +40,10 @@
 
 //     async init() {
 //         try {
-//             console.log('Initializing Full Page UI v3.2 (with user profile photo)...');
+//             console.log('🚀 Initializing Full Page UI v4.1 (Firebase + Serialization Fix)...');
+            
+//             // ✅ FIREBASE: Attendre l'initialisation
+//             await this.waitForFirebase();
             
 //             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -42,22 +52,63 @@
 //             this.attachEventListeners();
 //             await this.initializeComponents();
             
-//             this.loadConversations();
+//             // ✅ FIREBASE: Charger depuis Firebase ou localStorage
+//             await this.loadConversations();
+            
 //             this.applySidebarState();
             
 //             if (typeof initializeParticles === 'function') {
 //                 initializeParticles();
 //             }
             
-//             console.log('Full Page UI v3.2 initialized successfully');
+//             console.log('✅ Full Page UI v4.1 initialized successfully');
             
 //         } catch (error) {
-//             console.error('Full Page UI initialization error:', error);
+//             console.error('❌ Full Page UI initialization error:', error);
 //         }
 //     }
 
 //     // ============================================
-//     // USER PROFILE PHOTO MANAGEMENT (NEW v3.2 - LOGIQUE LANDING.JS)
+//     // ✅ FIREBASE: INITIALIZATION
+//     // ============================================
+    
+//     /**
+//      * Attendre que Firebase et ChatbotModals soient prêts
+//      */
+//     async waitForFirebase() {
+//         return new Promise((resolve) => {
+//             const maxWait = 5000; // 5 secondes max
+//             const startTime = Date.now();
+            
+//             const checkFirebase = () => {
+//                 // Vérifier si chatbotModals existe et est initialisé
+//                 if (window.chatbotModals && window.chatbotModals.currentUser) {
+//                     this.db = window.chatbotModals.db;
+//                     this.currentUser = window.chatbotModals.currentUser;
+//                     this.firebaseReady = true;
+//                     console.log('✅ Firebase ready for chatbot UI');
+//                     resolve();
+//                     return;
+//                 }
+                
+//                 // Timeout après 5 secondes
+//                 if (Date.now() - startTime > maxWait) {
+//                     console.warn('⚠ Firebase timeout - using localStorage fallback');
+//                     this.firebaseReady = false;
+//                     resolve();
+//                     return;
+//                 }
+                
+//                 // Réessayer dans 200ms
+//                 setTimeout(checkFirebase, 200);
+//             };
+            
+//             checkFirebase();
+//         });
+//     }
+
+//     // ============================================
+//     // USER PROFILE PHOTO MANAGEMENT (v3.2 - LOGIQUE LANDING.JS)
 //     // ============================================
     
 //     /**
@@ -67,11 +118,8 @@
 //      */
 //     getUserProfilePhoto() {
 //         try {
-//             console.log('Getting user profile photo...');
-            
 //             // Vérifier si Firebase Auth est disponible
 //             if (typeof firebase === 'undefined' || !firebase.auth) {
-//                 console.warn('Firebase Auth not available');
 //                 return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
 //             }
             
@@ -79,26 +127,19 @@
 //             const user = firebase.auth().currentUser;
             
 //             if (!user) {
-//                 console.warn('No user logged in');
 //                 return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
 //             }
             
-//             console.log('User found:', user.email);
-            
 //             // MÊME LOGIQUE QUE LANDING.JS
 //             const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-//             console.log('Display name:', displayName);
             
 //             // Si photoURL existe, l'utiliser (priorité 1)
 //             if (user.photoURL) {
-//                 console.log('Using Firebase photoURL:', user.photoURL);
 //                 return user.photoURL;
 //             }
             
-//             // Sinon, générer un avatar avec ui-avatars.com (MÊMES PARAMÈTRES QUE LANDING.JS)
-//             const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=128`;
-//             console.log('Generated avatar URL:', avatarUrl);
-//             return avatarUrl;
+//             // Sinon, générer un avatar avec ui-avatars.com
+//             return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=128`;
             
 //         } catch (error) {
 //             console.error('Error getting user profile photo:', error);
@@ -304,35 +345,189 @@
 //     }
 
 //     // ============================================
-//     // CONVERSATIONS MANAGEMENT
+//     // ✅ FIREBASE: CONVERSATIONS MANAGEMENT
 //     // ============================================
     
-//     loadConversations() {
-//         const saved = localStorage.getItem(this.conversationsKey);
-//         if (saved) {
-//             this.conversations = JSON.parse(saved);
-//             console.log('Conversations loaded:', this.conversations.length);
+//     /**
+//      * ✅ FIREBASE: Charger les conversations (Firebase ou localStorage)
+//      */
+//     async loadConversations() {
+//         if (this.firebaseReady && this.currentUser) {
+//             console.log('📚 Loading conversations from Firebase...');
+//             await this.loadConversationsFromFirebase();
 //         } else {
-//             this.conversations = [];
+//             console.log('📚 Loading conversations from localStorage (fallback)...');
+//             this.loadConversationsFromLocalStorage();
 //         }
         
 //         if (this.conversations.length === 0) {
 //             this.startNewConversation();
 //         } else {
 //             this.currentConversationId = this.conversations[0].id;
-//             this.loadConversation(this.currentConversationId);
+//             await this.loadConversation(this.currentConversationId);
 //         }
         
 //         this.renderConversations();
 //     }
 
-//     saveConversations() {
-//         localStorage.setItem(this.conversationsKey, JSON.stringify(this.conversations));
-//         console.log('Conversations saved');
+//     /**
+//      * ✅ FIREBASE: Charger depuis Firebase (avec désérialisation - v4.1)
+//      */
+//     async loadConversationsFromFirebase() {
+//         if (!this.firebaseReady || !this.currentUser) return;
+        
+//         try {
+//             const snapshot = await this.db.collection('users')
+//                 .doc(this.currentUser.uid)
+//                 .collection('conversations')
+//                 .orderBy('updatedAt', 'desc')
+//                 .limit(50)
+//                 .get();
+            
+//             this.conversations = [];
+            
+//             snapshot.forEach(doc => {
+//                 const data = doc.data();
+                
+//                 // ✅ v4.1: Désérialiser les messages
+//                 const deserializedMessages = (data.messages || []).map(msg => {
+//                     const deserializedMsg = {
+//                         type: msg.type,
+//                         content: msg.content,
+//                         timestamp: msg.timestamp
+//                     };
+                    
+//                     // Désérialiser chartRequests et visualCards depuis JSON strings
+//                     if (msg.chartRequests) {
+//                         try {
+//                             deserializedMsg.chartRequests = typeof msg.chartRequests === 'string' 
+//                                 ? JSON.parse(msg.chartRequests) 
+//                                 : msg.chartRequests;
+//                         } catch (e) {
+//                             console.warn('Failed to parse chartRequests:', e);
+//                             deserializedMsg.chartRequests = null;
+//                         }
+//                     }
+                    
+//                     if (msg.visualCards) {
+//                         try {
+//                             deserializedMsg.visualCards = typeof msg.visualCards === 'string'
+//                                 ? JSON.parse(msg.visualCards)
+//                                 : msg.visualCards;
+//                         } catch (e) {
+//                             console.warn('Failed to parse visualCards:', e);
+//                             deserializedMsg.visualCards = null;
+//                         }
+//                     }
+                    
+//                     return deserializedMsg;
+//                 });
+                
+//                 this.conversations.push({
+//                     id: doc.id,
+//                     title: data.title || 'New Conversation',
+//                     messages: deserializedMessages, // ✅ Messages désérialisés
+//                     createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
+//                     updatedAt: data.updatedAt?.toMillis ? data.updatedAt.toMillis() : Date.now()
+//                 });
+//             });
+            
+//             console.log(`✅ Loaded ${this.conversations.length} conversations from Firebase`);
+//         } catch (error) {
+//             console.error('❌ Firebase load error:', error);
+//             this.loadConversationsFromLocalStorage();
+//         }
 //     }
 
-//     startNewConversation() {
-//         console.log('Starting new conversation...');
+//     /**
+//      * Charger depuis localStorage (fallback)
+//      */
+//     loadConversationsFromLocalStorage() {
+//         const saved = localStorage.getItem(this.conversationsKey);
+//         if (saved) {
+//             this.conversations = JSON.parse(saved);
+//             console.log(`Loaded ${this.conversations.length} conversations from localStorage`);
+//         } else {
+//             this.conversations = [];
+//         }
+//     }
+
+//     /**
+//      * ✅ FIREBASE: Sauvegarder les conversations
+//      */
+//     async saveConversations() {
+//         if (this.firebaseReady && this.currentUser) {
+//             await this.saveConversationsToFirebase();
+//         } else {
+//             this.saveConversationsToLocalStorage();
+//         }
+//     }
+
+//     /**
+//      * ✅ FIREBASE: Sauvegarder dans Firebase (avec sérialisation - v4.1)
+//      */
+//     async saveConversationsToFirebase() {
+//         if (!this.firebaseReady || !this.currentUser) return;
+        
+//         const conv = this.getCurrentConversation();
+//         if (!conv) return;
+        
+//         try {
+//             const docRef = this.db.collection('users')
+//                 .doc(this.currentUser.uid)
+//                 .collection('conversations')
+//                 .doc(conv.id);
+            
+//             // ✅ v4.1: Sérialiser les messages pour éviter "nested arrays"
+//             const serializedMessages = conv.messages.map(msg => {
+//                 const serializedMsg = {
+//                     type: msg.type,
+//                     content: msg.content,
+//                     timestamp: msg.timestamp
+//                 };
+                
+//                 // Sérialiser chartRequests et visualCards en JSON strings
+//                 if (msg.chartRequests) {
+//                     serializedMsg.chartRequests = JSON.stringify(msg.chartRequests);
+//                 }
+                
+//                 if (msg.visualCards) {
+//                     serializedMsg.visualCards = JSON.stringify(msg.visualCards);
+//                 }
+                
+//                 return serializedMsg;
+//             });
+            
+//             await docRef.set({
+//                 id: conv.id,
+//                 title: conv.title,
+//                 messages: serializedMessages, // ✅ Messages sérialisés
+//                 createdAt: firebase.firestore.Timestamp.fromMillis(conv.createdAt),
+//                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+//                 messageCount: conv.messages.length
+//             });
+            
+//             console.log('💾 Conversation saved to Firebase:', conv.id);
+//         } catch (error) {
+//             console.error('❌ Firebase save error:', error);
+//             this.saveConversationsToLocalStorage();
+//         }
+//     }
+
+//     /**
+//      * Sauvegarder dans localStorage (fallback)
+//      */
+//     saveConversationsToLocalStorage() {
+//         try {
+//             localStorage.setItem(this.conversationsKey, JSON.stringify(this.conversations));
+//             console.log('💾 Conversations saved to localStorage');
+//         } catch (e) {
+//             console.warn('Could not save to localStorage:', e);
+//         }
+//     }
+
+//     async startNewConversation() {
+//         console.log('✨ Starting new conversation...');
         
 //         const newConv = {
 //             id: 'conv-' + Date.now(),
@@ -347,7 +542,7 @@
         
 //         this.resetInterface();
         
-//         this.saveConversations();
+//         await this.saveConversations();
 //         this.renderConversations();
         
 //         console.log('New conversation started:', newConv.id);
@@ -380,7 +575,7 @@
 //         const conv = this.conversations.find(c => c.id === id);
 //         if (!conv) return;
         
-//         console.log(`Loading conversation: ${id}`);
+//         console.log(`📖 Loading conversation: ${id}`);
         
 //         this.currentConversationId = id;
         
@@ -413,22 +608,43 @@
 //         console.log('Conversation loaded successfully');
 //     }
 
-//     deleteConversation(id) {
-//         if (confirm('Delete this conversation?')) {
-//             this.conversations = this.conversations.filter(c => c.id !== id);
-            
-//             if (this.currentConversationId === id) {
-//                 if (this.conversations.length > 0) {
-//                     this.loadConversation(this.conversations[0].id);
-//                 } else {
-//                     this.startNewConversation();
-//                 }
+//     /**
+//      * ✅ FIREBASE: Supprimer une conversation
+//      */
+//     async deleteConversation(id) {
+//         if (!confirm('Delete this conversation?')) return;
+        
+//         // Supprimer localement
+//         this.conversations = this.conversations.filter(c => c.id !== id);
+        
+//         // ✅ FIREBASE: Supprimer de Firebase
+//         if (this.firebaseReady && this.currentUser) {
+//             try {
+//                 await this.db.collection('users')
+//                     .doc(this.currentUser.uid)
+//                     .collection('conversations')
+//                     .doc(id)
+//                     .delete();
+                
+//                 console.log('🗑 Conversation deleted from Firebase:', id);
+//             } catch (error) {
+//                 console.error('❌ Firebase delete error:', error);
 //             }
-            
-//             this.saveConversations();
-//             this.renderConversations();
-//             console.log('Conversation deleted:', id);
 //         }
+        
+//         // Supprimer de localStorage aussi (fallback)
+//         this.saveConversationsToLocalStorage();
+        
+//         if (this.currentConversationId === id) {
+//             if (this.conversations.length > 0) {
+//                 await this.loadConversation(this.conversations[0].id);
+//             } else {
+//                 this.startNewConversation();
+//             }
+//         }
+        
+//         this.renderConversations();
+//         console.log('Conversation deleted:', id);
 //     }
 
 //     getCurrentConversation() {
@@ -491,6 +707,15 @@
 //             </div>`;
 //         }
         
+//         if (html === '') {
+//             html = `
+//                 <div style="padding: 20px; text-align: center; color: #64748b; font-size: 14px;">
+//                     <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+//                     No conversations yet
+//                 </div>
+//             `;
+//         }
+        
 //         this.elements.conversationsList.innerHTML = html;
 //     }
 
@@ -514,7 +739,7 @@
 //     }
 
 //     // ============================================
-//     // SEND MESSAGE (WITH CHART PERSISTENCE)
+//     // SEND MESSAGE (WITH FIREBASE AUTO-SAVE)
 //     // ============================================
     
 //     async sendMessage(messageText = null) {
@@ -574,9 +799,11 @@
 //                 if (lastMsg.type === 'bot') {
 //                     lastMsg.chartRequests = response.chartRequests || null;
 //                     lastMsg.visualCards = response.visualCards || null;
-//                     this.saveConversations();
 //                 }
 //             }
+            
+//             // ✅ FIREBASE: Auto-save après chaque message
+//             await this.saveConversations();
             
 //             if (response.suggestions && response.suggestions.length > 0) {
 //                 this.showSuggestions(response.suggestions);
@@ -612,7 +839,7 @@
 //         const avatar = document.createElement('div');
 //         avatar.className = `message-avatar ${type}-avatar`;
         
-//         // NEW v3.2: User profile photo for user messages (LOGIQUE LANDING.JS)
+//         // v3.2: User profile photo for user messages (LOGIQUE LANDING.JS)
 //         if (type === 'user') {
 //             avatar.innerHTML = this.getUserAvatarHTML();
 //         } else {
@@ -657,7 +884,6 @@
 //                     timestamp: Date.now()
 //                 });
 //                 conv.updatedAt = Date.now();
-//                 this.saveConversations();
 //             }
 //         }
 //     }
@@ -847,7 +1073,7 @@
             
 //             this.elements.messages.appendChild(chartContainer);
             
-//             const chartId = await this.charts.createChart(request, chartContainer);
+//             const chartId = await this.charts.createChartFromRequest(request, chartContainer);
             
 //             if (chartId) {
 //                 this.charts.chartDataStore.set(chartId, {
@@ -880,7 +1106,7 @@
 //             this.elements.messages.appendChild(chartContainer);
             
 //             try {
-//                 const chartId = await this.charts.createChart(request, chartContainer);
+//                 const chartId = await this.charts.createChartFromRequest(request, chartContainer);
                 
 //                 if (chartId) {
 //                     this.charts.chartDataStore.set(chartId, {
@@ -953,18 +1179,18 @@
 // // INITIALIZATION
 // // ============================================
 // document.addEventListener('DOMContentLoaded', function() {
-//     console.log('Initializing Chatbot Full Page v3.2...');
+//     console.log('🚀 Initializing Chatbot Full Page v4.1 (Firebase + Serialization Fix)...');
     
 //     if (typeof ChatbotConfig === 'undefined') {
-//         console.error('ChatbotConfig not defined!');
+//         console.error('❌ ChatbotConfig not defined!');
 //         return;
 //     }
     
 //     try {
 //         window.financialChatbotFullPage = new ChatbotFullPageUI(ChatbotConfig);
-//         console.log('Chatbot Full Page v3.2 ready! (Wall Street Pro + User Photo)');
+//         console.log('✅ Chatbot Full Page v4.1 ready! (Firebase + Wall Street Pro + User Photo)');
 //     } catch (error) {
-//         console.error('Initialization error:', error);
+//         console.error('❌ Initialization error:', error);
 //     }
 // });
 
@@ -974,6 +1200,7 @@
 // ✅ v4.0: Firebase Integration (Cloud Storage)
 // ✅ v3.2: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
 // ✅ v3.1: Sauvegarde et restauration des graphiques
+// ✅ FIX: Chart routing method added
 // Visual Cards + Metrics Tables + Comparison Charts
 // No emojis version
 // ============================================
@@ -2026,6 +2253,96 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
+    // ✅ CHART ROUTER - Maps chart requests to ChatbotCharts methods
+    // ============================================
+
+    /**
+     * Crée un graphique à partir d'une requête
+     * @param {Object} request - Requête de graphique avec type, data, options
+     * @param {HTMLElement} container - Conteneur DOM pour le graphique
+     * @returns {Promise<string|null>} - ID du graphique créé ou null
+     */
+    async createChartFromRequest(request, container) {
+        if (!this.charts) {
+            console.error('❌ ChatbotCharts not initialized');
+            return null;
+        }
+
+        try {
+            console.log(`📊 Creating chart of type: ${request.type}`);
+            
+            // Générer un ID unique pour le container
+            if (!container.id) {
+                container.id = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            }
+
+            let chart = null;
+
+            // ✅ ROUTER : Appeler la bonne méthode selon le type
+            switch (request.type) {
+                case 'performance-index':
+                    chart = await this.charts.createPerformanceIndexChart(
+                        container,
+                        request.data,
+                        request.options || {}
+                    );
+                    break;
+
+                case 'comparison':
+                case 'comparison-line':
+                    chart = await this.charts.createComparisonChart(
+                        container,
+                        request.data,
+                        request.options || {}
+                    );
+                    break;
+
+                case 'alphavault-scores-bar':
+                case 'scores-bar':
+                    chart = await this.charts.createScoresBarChart(
+                        container,
+                        request.data,
+                        request.options || {}
+                    );
+                    break;
+
+                case 'scores-radar':
+                case 'comparison-radar':
+                    chart = await this.charts.createScoresRadarChart(
+                        container,
+                        request.data,
+                        request.options || {}
+                    );
+                    break;
+
+                case 'risk-distribution':
+                    chart = await this.charts.createRiskDistributionChart(
+                        container,
+                        request.data,
+                        request.options || {}
+                    );
+                    break;
+
+                default:
+                    console.warn(`⚠ Unknown chart type: ${request.type}`);
+                    return null;
+            }
+
+            if (chart) {
+                console.log(`✅ Chart created successfully: ${request.type}`);
+                return container.id;
+            } else {
+                console.error(`❌ Failed to create chart: ${request.type}`);
+                return null;
+            }
+
+        } catch (error) {
+            console.error(`❌ Error creating chart from request:`, error);
+            return null;
+        }
+    }
+
+    // ============================================
     // CHARTS GENERATION (WITH PERSISTENCE)
     // ============================================
     
@@ -2043,9 +2360,14 @@ class ChatbotFullPageUI {
             
             this.elements.messages.appendChild(chartContainer);
             
-            const chartId = await this.charts.createChartFromRequest(request, chartContainer);
+            // ✅ CORRECTION : Appeler createChartFromRequest (router)
+            const chartId = await this.createChartFromRequest(request, chartContainer);
             
             if (chartId) {
+                // Store chart metadata (optionnel - pour la restauration)
+                if (!this.charts.chartDataStore) {
+                    this.charts.chartDataStore = new Map();
+                }
                 this.charts.chartDataStore.set(chartId, {
                     chartRequest: request,
                     containerId: containerId
@@ -2076,9 +2398,13 @@ class ChatbotFullPageUI {
             this.elements.messages.appendChild(chartContainer);
             
             try {
-                const chartId = await this.charts.createChartFromRequest(request, chartContainer);
+                // ✅ CORRECTION : Appeler createChartFromRequest (router)
+                const chartId = await this.createChartFromRequest(request, chartContainer);
                 
                 if (chartId) {
+                    if (!this.charts.chartDataStore) {
+                        this.charts.chartDataStore = new Map();
+                    }
                     this.charts.chartDataStore.set(chartId, {
                         chartRequest: request,
                         containerId: containerId
