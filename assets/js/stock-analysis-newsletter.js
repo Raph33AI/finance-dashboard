@@ -1,14 +1,15 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * STOCK ANALYSIS NEWSLETTER SYSTEM V1.0
- * Deep Technical Analysis for Individual Stocks
- * Premium Design - Based on 14 Technical Indicators
+ * STOCK ANALYSIS NEWSLETTER SYSTEM V2.0 - ULTRA-PROFESSIONAL
+ * Reuses Advanced Analysis Methods for Identical Results
+ * 6 Months Data + 14 Technical Indicators + AI Recommendations
  * ════════════════════════════════════════════════════════════════
  */
 
 class StockAnalysisNewsletter {
     constructor() {
         this.LAST_POST_KEY = 'lastStockAnalysisPost';
+        this.DEFAULT_PERIOD = '6M'; // ✅ 6 mois comme advanced-analysis.js
         this.advancedAnalysis = null;
         this.stockData = null;
         this.technicalSignals = null;
@@ -16,11 +17,8 @@ class StockAnalysisNewsletter {
     }
 
     async initialize() {
-        console.log('📊 Initializing Stock Analysis Newsletter System...');
-        
-        // Attendre que AdvancedAnalysis soit disponible
+        console.log('📊 Initializing Stock Analysis Newsletter System V2.0...');
         await this.waitForAdvancedAnalysis();
-        
         console.log('✅ Stock Analysis Newsletter System ready');
     }
 
@@ -32,9 +30,9 @@ class StockAnalysisNewsletter {
             const checkAnalysis = setInterval(() => {
                 attempts++;
 
-                if (window.AdvancedAnalysis || window.advancedAnalysis) {
+                if (window.AdvancedAnalysis) {
                     console.log('✅ AdvancedAnalysis module found');
-                    this.advancedAnalysis = window.AdvancedAnalysis || window.advancedAnalysis;
+                    this.advancedAnalysis = window.AdvancedAnalysis;
                     clearInterval(checkAnalysis);
                     resolve();
                     return;
@@ -58,9 +56,7 @@ class StockAnalysisNewsletter {
             const currentUser = firebase.auth().currentUser;
             if (!currentUser) {
                 console.error('❌ No user authenticated');
-                if (forceManual) {
-                    this.showNotification('Please log in to generate analysis', 'error');
-                }
+                if (forceManual) this.showNotification('Please log in to generate analysis', 'error');
                 return;
             }
 
@@ -70,41 +66,54 @@ class StockAnalysisNewsletter {
             }
 
             symbol = symbol.trim().toUpperCase();
-
             this.showNotification(`📊 Generating deep analysis for ${symbol}...`, 'info');
 
-            console.log(`🔍 Loading comprehensive data for ${symbol}...`);
-
-            // ✅ Charger les données via AdvancedAnalysis
             if (!this.advancedAnalysis) {
                 throw new Error('Advanced Analysis module not available');
             }
 
-            // Charger le stock
+            // ✅ ÉTAPE 1 : Charger les données (6 mois = 180 jours)
             await this.loadStockData(symbol);
 
             if (!this.stockData || !this.stockData.prices || this.stockData.prices.length < 30) {
                 throw new Error(`Insufficient data for ${symbol} (minimum 30 days required)`);
             }
 
-            console.log(`✅ Data loaded: ${this.stockData.prices.length} data points`);
+            console.log(`✅ Data loaded: ${this.stockData.prices.length} data points (6 months)`);
 
-            // ✅ Calculer tous les indicateurs techniques
-            this.technicalSignals = this.calculateAllTechnicalIndicators(this.stockData.prices);
+            // ✅ ÉTAPE 2 : Calculer les indicateurs techniques (RÉUTILISE advanced-analysis.js)
+            this.technicalSignals = this.advancedAnalysis.collectAllTechnicalSignals(this.stockData.prices);
 
-            // ✅ Générer les recommandations AI
-            this.aiRecommendations = this.generateAIRecommendations(this.stockData.prices, this.technicalSignals);
+            // ✅ ÉTAPE 3 : Générer les recommandations AI (RÉUTILISE advanced-analysis.js)
+            const trendAnalysis = this.advancedAnalysis.analyzeTrendsByHorizon(this.stockData.prices);
+            const aiScore = this.advancedAnalysis.calculateAIConfidenceScore(this.technicalSignals);
+            const horizonRecommendations = this.advancedAnalysis.generateHorizonRecommendations(
+                aiScore,
+                this.technicalSignals,
+                trendAnalysis
+            );
 
-            // ✅ Générer le contenu premium
+            this.aiRecommendations = {
+                globalScore: aiScore.score.toFixed(1),
+                rating: aiScore.rating,
+                bullishSignals: aiScore.bullishSignals,
+                neutralSignals: aiScore.neutralSignals,
+                bearishSignals: aiScore.bearishSignals,
+                horizons: horizonRecommendations
+            };
+
+            console.log(`✅ AI Score: ${this.aiRecommendations.globalScore}/100 (${this.aiRecommendations.rating})`);
+
+            // ✅ ÉTAPE 4 : Générer le contenu premium avec graphiques
             const postContent = this.generatePremiumContent(symbol);
 
-            // ✅ Publier sur Firestore
+            // ✅ ÉTAPE 5 : Publier sur Firestore
             const postData = {
                 title: `📊 Deep Analysis: ${symbol} - AlphaVault Intelligence Report`,
                 content: postContent.markdown,
-                channelId: 'technical-analysis',
+                channelId: 'market-analysis',
                 tags: ['stock-analysis', 'technical-indicators', 'ai-recommendation', symbol.toLowerCase()],
-                images: this.stockData.quote?.image ? [this.stockData.quote.image] : [],
+                images: [],
                 authorId: currentUser.uid,
                 authorName: 'AlphaVault AI',
                 authorPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=AlphaVault+AI&background=667eea&color=fff&bold=true',
@@ -115,14 +124,15 @@ class StockAnalysisNewsletter {
                 isPinned: false,
                 isAutoGenerated: true,
                 stockSymbol: symbol,
-                analysisDate: new Date().toISOString()
+                analysisDate: new Date().toISOString(),
+                aiScore: this.aiRecommendations.globalScore,
+                aiRating: this.aiRecommendations.rating
             };
 
             console.log('📤 Publishing stock analysis to Firestore...');
             const docRef = await firebase.firestore().collection('posts').add(postData);
 
             console.log(`✅ Analysis published successfully! ID: ${docRef.id}`);
-
             localStorage.setItem(this.LAST_POST_KEY, Date.now().toString());
 
             this.showNotification(`✅ Analysis for ${symbol} published!`, 'success');
@@ -138,28 +148,13 @@ class StockAnalysisNewsletter {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // CHARGEMENT DES DONNÉES DU STOCK
+    // CHARGEMENT DES DONNÉES (6 MOIS = 180 JOURS)
     // ════════════════════════════════════════════════════════════════
 
     async loadStockData(symbol) {
-        // ✅ CRÉER SON PROPRE API CLIENT SI NÉCESSAIRE
-        let apiClient = null;
+        let apiClient = this.advancedAnalysis.apiClient || window.apiClient;
         
-        // Méthode 1 : Utiliser l'API client de AdvancedAnalysis
-        if (this.advancedAnalysis && this.advancedAnalysis.apiClient) {
-            apiClient = this.advancedAnalysis.apiClient;
-            console.log('✅ Using AdvancedAnalysis.apiClient');
-        }
-        // Méthode 2 : Utiliser l'API client global
-        else if (window.apiClient) {
-            apiClient = window.apiClient;
-            console.log('✅ Using window.apiClient');
-        }
-        // Méthode 3 : Créer un nouveau client
-        else if (typeof FinanceAPIClient !== 'undefined') {
-            console.log('⚠ Creating new FinanceAPIClient instance...');
-            
-            // Vérifier si APP_CONFIG existe
+        if (!apiClient && typeof FinanceAPIClient !== 'undefined') {
             const baseURL = typeof APP_CONFIG !== 'undefined' 
                 ? APP_CONFIG.API_BASE_URL 
                 : 'https://financial-data-api.raphnardone.workers.dev';
@@ -170,20 +165,19 @@ class StockAnalysisNewsletter {
                 maxRetries: 2
             });
             
-            // Stocker pour réutilisation
             window.apiClient = apiClient;
-            console.log('✅ New FinanceAPIClient created');
         }
-        else {
-            throw new Error('FinanceAPIClient class not available');
+
+        if (!apiClient) {
+            throw new Error('API Client not available');
         }
 
         try {
-            console.log(`📡 Fetching data for ${symbol}...`);
+            console.log(`📡 Fetching 6 months data for ${symbol}...`);
             
             const [quote, timeSeries] = await Promise.all([
                 apiClient.getQuote(symbol),
-                apiClient.getTimeSeries(symbol, '1day', 365)
+                apiClient.getTimeSeries(symbol, '1day', 180) // ✅ 6 mois = 180 jours
             ]);
 
             if (!quote || !timeSeries || !timeSeries.data) {
@@ -197,426 +191,14 @@ class StockAnalysisNewsletter {
                 quote: quote
             };
 
-            console.log(`✅ Stock data loaded for ${symbol}: ${this.stockData.prices.length} data points`);
-
         } catch (error) {
             console.warn('⚠ API call failed, using demo data:', error.message);
-            this.stockData = this.generateDemoData(symbol);
-            console.log('✅ Demo data generated successfully');
+            this.stockData = this.generateDemoData(symbol, 180);
         }
     }
 
     // ════════════════════════════════════════════════════════════════
-    // CALCUL DE TOUS LES INDICATEURS TECHNIQUES
-    // ════════════════════════════════════════════════════════════════
-
-    calculateAllTechnicalIndicators(prices) {
-        console.log('📊 Calculating 14 technical indicators...');
-
-        const signals = {
-            momentum: [],
-            trend: [],
-            volume: [],
-            volatility: [],
-            composite: []
-        };
-
-        // 1⃣ RSI
-        try {
-            const rsi = this.advancedAnalysis.calculateRSI(prices);
-            if (rsi.length > 0) {
-                const lastRSI = rsi[rsi.length - 1][1];
-                let strength = 0;
-                if (lastRSI < 30) strength = 2.0;
-                else if (lastRSI > 70) strength = -2.0;
-                else if (lastRSI < 40) strength = 1.0;
-                else if (lastRSI > 60) strength = -1.0;
-
-                signals.momentum.push({
-                    name: 'RSI',
-                    value: lastRSI.toFixed(2),
-                    signal: strength,
-                    status: lastRSI < 30 ? 'Oversold' : lastRSI > 70 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('RSI calc failed:', e); }
-
-        // 2⃣ MACD
-        try {
-            const macd = this.advancedAnalysis.calculateMACD(prices);
-            if (macd.histogram.length > 0) {
-                const lastHist = macd.histogram[macd.histogram.length - 1][1];
-                const prevHist = macd.histogram[macd.histogram.length - 2]?.[1] || 0;
-                
-                let strength = 0;
-                if (lastHist > 0 && prevHist <= 0) strength = 2.5;
-                else if (lastHist < 0 && prevHist >= 0) strength = -2.5;
-                else if (lastHist > 0) strength = 1.0;
-                else if (lastHist < 0) strength = -1.0;
-
-                signals.trend.push({
-                    name: 'MACD',
-                    value: lastHist.toFixed(4),
-                    signal: strength,
-                    status: lastHist > 0 && prevHist <= 0 ? 'Bullish Cross' : 
-                           lastHist < 0 && prevHist >= 0 ? 'Bearish Cross' :
-                           lastHist > 0 ? 'Positive' : 'Negative'
-                });
-            }
-        } catch (e) { console.warn('MACD calc failed:', e); }
-
-        // 3⃣ Stochastic
-        try {
-            const stochastic = this.advancedAnalysis.calculateStochastic(prices);
-            if (stochastic.k.length > 0) {
-                const lastK = stochastic.k[stochastic.k.length - 1][1];
-                
-                let strength = 0;
-                if (lastK < 20) strength = 1.5;
-                else if (lastK > 80) strength = -1.5;
-
-                signals.momentum.push({
-                    name: 'Stochastic',
-                    value: lastK.toFixed(2),
-                    signal: strength,
-                    status: lastK < 20 ? 'Oversold' : lastK > 80 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('Stochastic calc failed:', e); }
-
-        // 4⃣ Williams %R
-        try {
-            const williams = this.advancedAnalysis.calculateWilliams(prices);
-            if (williams.length > 0) {
-                const lastWR = williams[williams.length - 1][1];
-                
-                let strength = 0;
-                if (lastWR < -80) strength = 1.5;
-                else if (lastWR > -20) strength = -1.5;
-
-                signals.momentum.push({
-                    name: 'Williams %R',
-                    value: lastWR.toFixed(2),
-                    signal: strength,
-                    status: lastWR < -80 ? 'Oversold' : lastWR > -20 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('Williams calc failed:', e); }
-
-        // 5⃣ ADX
-        try {
-            const adx = this.advancedAnalysis.calculateADX(prices);
-            if (adx.adx.length > 0) {
-                const lastADX = adx.adx[adx.adx.length - 1][1];
-                const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
-                const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
-                
-                let strength = 0;
-                if (lastADX > 25) {
-                    strength = lastPlusDI > lastMinusDI ? 2.0 : -2.0;
-                }
-
-                signals.trend.push({
-                    name: 'ADX',
-                    value: lastADX.toFixed(2),
-                    signal: strength,
-                    status: lastADX > 25 ? (lastPlusDI > lastMinusDI ? 'Strong Uptrend' : 'Strong Downtrend') : 'Weak Trend'
-                });
-            }
-        } catch (e) { console.warn('ADX calc failed:', e); }
-
-        // 6⃣ OBV
-        try {
-            const obv = this.advancedAnalysis.calculateOBV(prices);
-            if (obv.length >= 20) {
-                const recentOBV = obv.slice(-20);
-                const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
-                
-                let strength = obvTrend > 0 ? 1.5 : -1.5;
-
-                signals.volume.push({
-                    name: 'OBV',
-                    value: obvTrend > 0 ? 'Rising' : 'Falling',
-                    signal: strength,
-                    status: obvTrend > 0 ? 'Accumulation' : 'Distribution'
-                });
-            }
-        } catch (e) { console.warn('OBV calc failed:', e); }
-
-        // 7⃣ ATR
-        try {
-            const atr = this.advancedAnalysis.calculateATR(prices);
-            if (atr.length > 0) {
-                const lastATR = atr[atr.length - 1][1];
-                const avgATR = atr.slice(-30).reduce((sum, val) => sum + val[1], 0) / Math.min(30, atr.length);
-                const atrRatio = lastATR / avgATR;
-
-                signals.volatility.push({
-                    name: 'ATR',
-                    value: lastATR.toFixed(2),
-                    signal: 0,
-                    status: atrRatio > 1.3 ? 'High Volatility' : atrRatio < 0.8 ? 'Low Volatility' : 'Normal'
-                });
-            }
-        } catch (e) { console.warn('ATR calc failed:', e); }
-
-        // 8⃣ MFI
-        try {
-            const mfi = this.advancedAnalysis.calculateMFI(prices);
-            if (mfi.length > 0) {
-                const lastMFI = mfi[mfi.length - 1][1];
-                
-                let strength = 0;
-                if (lastMFI < 20) strength = 2.0;
-                else if (lastMFI > 80) strength = -2.0;
-
-                signals.momentum.push({
-                    name: 'MFI',
-                    value: lastMFI.toFixed(2),
-                    signal: strength,
-                    status: lastMFI < 20 ? 'Oversold' : lastMFI > 80 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('MFI calc failed:', e); }
-
-        // 9⃣ CCI
-        try {
-            const cci = this.advancedAnalysis.calculateCCI(prices);
-            if (cci.length > 0) {
-                const lastCCI = cci[cci.length - 1][1];
-                
-                let strength = 0;
-                if (lastCCI < -100) strength = 1.5;
-                else if (lastCCI > 100) strength = -1.5;
-
-                signals.composite.push({
-                    name: 'CCI',
-                    value: lastCCI.toFixed(2),
-                    signal: strength,
-                    status: lastCCI < -100 ? 'Oversold' : lastCCI > 100 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('CCI calc failed:', e); }
-
-        // 🔟 Ultimate Oscillator
-        try {
-            const ultimate = this.advancedAnalysis.calculateUltimateOscillator(prices);
-            if (ultimate.length > 0) {
-                const lastUO = ultimate[ultimate.length - 1][1];
-                
-                let strength = 0;
-                if (lastUO < 30) strength = 1.8;
-                else if (lastUO > 70) strength = -1.8;
-
-                signals.composite.push({
-                    name: 'Ultimate Oscillator',
-                    value: lastUO.toFixed(2),
-                    signal: strength,
-                    status: lastUO < 30 ? 'Oversold' : lastUO > 70 ? 'Overbought' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('Ultimate Osc calc failed:', e); }
-
-        // 1⃣1⃣ ROC
-        try {
-            const roc = this.advancedAnalysis.calculateROC(prices);
-            if (roc.length > 0) {
-                const lastROC = roc[roc.length - 1][1];
-                
-                let strength = 0;
-                if (lastROC > 10) strength = 2.0;
-                else if (lastROC < -10) strength = -2.0;
-                else if (lastROC > 0) strength = 0.5;
-                else if (lastROC < 0) strength = -0.5;
-
-                signals.momentum.push({
-                    name: 'ROC',
-                    value: lastROC.toFixed(2) + '%',
-                    signal: strength,
-                    status: lastROC > 5 ? 'Strong Momentum' : lastROC < -5 ? 'Weak Momentum' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('ROC calc failed:', e); }
-
-        // 1⃣2⃣ Aroon
-        try {
-            const aroon = this.advancedAnalysis.calculateAroon(prices);
-            if (aroon.up.length > 0) {
-                const lastUp = aroon.up[aroon.up.length - 1][1];
-                const lastDown = aroon.down[aroon.down.length - 1][1];
-                const diff = lastUp - lastDown;
-                
-                let strength = 0;
-                if (diff > 50) strength = 2.0;
-                else if (diff < -50) strength = -2.0;
-
-                signals.trend.push({
-                    name: 'Aroon',
-                    value: `Up: ${lastUp.toFixed(0)}, Down: ${lastDown.toFixed(0)}`,
-                    signal: strength,
-                    status: diff > 50 ? 'Strong Uptrend' : diff < -50 ? 'Strong Downtrend' : 'Consolidation'
-                });
-            }
-        } catch (e) { console.warn('Aroon calc failed:', e); }
-
-        // 1⃣3⃣ CMF
-        try {
-            const cmf = this.advancedAnalysis.calculateCMF(prices);
-            if (cmf.length > 0) {
-                const lastCMF = cmf[cmf.length - 1][1];
-                
-                let strength = 0;
-                if (lastCMF > 0.15) strength = 2.0;
-                else if (lastCMF < -0.15) strength = -2.0;
-                else if (lastCMF > 0) strength = 0.8;
-                else if (lastCMF < 0) strength = -0.8;
-
-                signals.volume.push({
-                    name: 'CMF',
-                    value: lastCMF.toFixed(4),
-                    signal: strength,
-                    status: lastCMF > 0.15 ? 'Strong Accumulation' : lastCMF < -0.15 ? 'Strong Distribution' : 'Neutral'
-                });
-            }
-        } catch (e) { console.warn('CMF calc failed:', e); }
-
-        // 1⃣4⃣ Elder Ray
-        try {
-            const elderRay = this.advancedAnalysis.calculateElderRay(prices);
-            if (elderRay.bullPower.length > 0) {
-                const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
-                const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
-                
-                let strength = 0;
-                if (lastBull > 0 && lastBear > 0) strength = 2.0;
-                else if (lastBull < 0 && lastBear < 0) strength = -2.0;
-
-                signals.composite.push({
-                    name: 'Elder Ray',
-                    value: `Bull: ${lastBull.toFixed(2)}, Bear: ${lastBear.toFixed(2)}`,
-                    signal: strength,
-                    status: lastBull > 0 && lastBear > 0 ? 'Bulls Control' : lastBull < 0 && lastBear < 0 ? 'Bears Control' : 'Mixed'
-                });
-            }
-        } catch (e) { console.warn('Elder Ray calc failed:', e); }
-
-        console.log(`✅ ${Object.values(signals).flat().length} indicators calculated`);
-
-        return signals;
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // GÉNÉRATION DES RECOMMANDATIONS AI
-    // ════════════════════════════════════════════════════════════════
-
-    generateAIRecommendations(prices, signals) {
-        console.log('🤖 Generating AI recommendations...');
-
-        // Calculer le score global
-        let totalScore = 0;
-        let totalWeight = 0;
-
-        Object.values(signals).forEach(category => {
-            category.forEach(indicator => {
-                const signal = indicator.signal || 0;
-                const weight = 1.5;
-                
-                totalScore += signal * weight;
-                totalWeight += weight;
-            });
-        });
-
-        const maxPossible = totalWeight * 2.5;
-        const minPossible = totalWeight * -2.5;
-        const normalizedScore = ((totalScore - minPossible) / (maxPossible - minPossible)) * 100;
-        const globalScore = Math.max(0, Math.min(100, normalizedScore));
-
-        // Générer recommandations par horizon
-        const recommendations = {
-            '1y': this.generateHorizonRec(globalScore, signals, 'short'),
-            '2y': this.generateHorizonRec(globalScore, signals, 'medium'),
-            '5y': this.generateHorizonRec(globalScore, signals, 'long')
-        };
-
-        console.log(`✅ AI Score: ${globalScore.toFixed(1)}/100`);
-
-        return {
-            globalScore: globalScore.toFixed(1),
-            rating: this.getScoreRating(globalScore),
-            horizons: recommendations
-        };
-    }
-
-    generateHorizonRec(baseScore, signals, horizon) {
-        let adjustedScore = baseScore;
-
-        if (horizon === 'short') {
-            const momentumScore = this.getCategoryScore(signals.momentum);
-            adjustedScore = (baseScore * 0.6) + (momentumScore * 0.4);
-        } else if (horizon === 'medium') {
-            const trendScore = this.getCategoryScore(signals.trend);
-            adjustedScore = (baseScore * 0.5) + (trendScore * 0.5);
-        } else {
-            const compositeScore = this.getCategoryScore(signals.composite);
-            adjustedScore = (baseScore * 0.6) + (compositeScore * 0.4);
-        }
-
-        adjustedScore = Math.max(0, Math.min(100, adjustedScore));
-
-        let recommendation = '';
-        let confidence = 0;
-
-        if (adjustedScore >= 70) {
-            recommendation = 'BUY';
-            confidence = 70 + (adjustedScore - 70) * 0.8;
-        } else if (adjustedScore >= 55) {
-            recommendation = 'BUY';
-            confidence = 55 + (adjustedScore - 55);
-        } else if (adjustedScore >= 45) {
-            recommendation = 'HOLD';
-            confidence = 50;
-        } else if (adjustedScore >= 30) {
-            recommendation = 'SELL';
-            confidence = 50 + (45 - adjustedScore);
-        } else {
-            recommendation = 'SELL';
-            confidence = 70 + (30 - adjustedScore) * 0.8;
-        }
-
-        const potentialMove = (adjustedScore - 50) * (horizon === 'short' ? 0.3 : horizon === 'medium' ? 0.6 : 1.2);
-
-        return {
-            recommendation,
-            confidence: Math.round(confidence),
-            potentialMove: potentialMove.toFixed(1)
-        };
-    }
-
-    getCategoryScore(categorySignals) {
-        if (!categorySignals || categorySignals.length === 0) return 50;
-
-        let total = 0;
-        categorySignals.forEach(s => {
-            total += s.signal || 0;
-        });
-
-        const avg = total / categorySignals.length;
-        const normalized = ((avg + 2.5) / 5) * 100;
-        return Math.max(0, Math.min(100, normalized));
-    }
-
-    getScoreRating(score) {
-        if (score >= 80) return 'VERY BULLISH';
-        if (score >= 65) return 'BULLISH';
-        if (score >= 55) return 'MODERATELY BULLISH';
-        if (score >= 45) return 'NEUTRAL';
-        if (score >= 35) return 'MODERATELY BEARISH';
-        if (score >= 20) return 'BEARISH';
-        return 'VERY BEARISH';
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // GÉNÉRATION DU CONTENU PREMIUM (STYLE IDENTIQUE WEEKLY NEWSLETTER)
+    // GÉNÉRATION DU CONTENU PREMIUM AVEC GRAPHIQUES
     // ════════════════════════════════════════════════════════════════
 
     generatePremiumContent(symbol) {
@@ -628,24 +210,19 @@ class StockAnalysisNewsletter {
         let md = '';
 
         // ═══════════════════════════════════════════════════════
-        // ✅ HEADER PREMIUM - DÉGRADÉ CYAN/ROSE
+        // ✅ HEADER PREMIUM
         // ═══════════════════════════════════════════════════════
         md += `<div style="background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%); padding: 60px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);">\n\n`;
-        
         md += `<h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; margin: 0 0 20px 0; color: #ffffff; letter-spacing: 1px; line-height: 1.2;">DEEP ANALYSIS: ${symbol}</h1>\n\n`;
-        
         md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 700; margin: 0 0 24px 0; color: #ffffff; letter-spacing: 0.5px;">AlphaVault Intelligence Report</h3>\n\n`;
-        
         md += `<p style="font-size: clamp(1rem, 2.5vw, 1.3rem); font-weight: 700; margin: 0 0 16px 0; color: #ffffff;">${quote.name || symbol}</p>\n\n`;
-        
-        md += `<p style="font-size: clamp(0.9rem, 2vw, 1.1rem); margin: 0; color: #ffffff;">Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>\n\n`;
-        
+        md += `<p style="font-size: clamp(0.9rem, 2vw, 1.1rem); margin: 0; color: #ffffff;">Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} | 6-Month Analysis (${this.stockData.prices.length} data points)</p>\n\n`;
         md += `</div>\n\n`;
 
         md += this.createSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // EXECUTIVE SUMMARY - ALPHAVAULT SCORE
+        // ✅ ALPHAVAULT SCORE
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">AlphaVault Intelligence Score</h2>\n\n`;
@@ -661,15 +238,35 @@ class StockAnalysisNewsletter {
         md += `<div style="background: linear-gradient(90deg, #06b6d4, #ec4899); height: 100%; width: ${scoreBarWidth}%; border-radius: 10px; transition: width 0.3s ease;"></div>\n\n`;
         md += `</div>\n\n`;
         
-        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; text-align: center; line-height: 1.7; margin: 20px 0 0 0;">Based on 14 professional technical indicators analyzed by AlphaVault AI</p>\n\n`;
+        md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin: 24px 0;">\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 12px;">\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #10b981; margin: 0 0 4px 0;">${this.aiRecommendations.bullishSignals}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bullish</p>\n\n`;
+        md += `</div>\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px;">\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #f59e0b; margin: 0 0 4px 0;">${this.aiRecommendations.neutralSignals}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Neutral</p>\n\n`;
+        md += `</div>\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px;">\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #ef4444; margin: 0 0 4px 0;">${this.aiRecommendations.bearishSignals}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bearish</p>\n\n`;
+        md += `</div>\n\n`;
+        md += `</div>\n\n`;
         
+        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; text-align: center; line-height: 1.7; margin: 20px 0 0 0;">Based on 14 professional technical indicators analyzed by AlphaVault AI</p>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
         md += this.createSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // AI RECOMMENDATIONS PAR HORIZON
+        // ✅ GRAPHIQUES DES INDICATEURS CLÉS
+        // ═══════════════════════════════════════════════════════
+        md += this.generateChartsSection();
+        md += this.createSeparator();
+
+        // ═══════════════════════════════════════════════════════
+        // ✅ AI RECOMMENDATIONS PAR HORIZON
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #8b5cf6;">AI Recommendations by Time Horizon</h2>\n\n`;
@@ -683,7 +280,6 @@ class StockAnalysisNewsletter {
 
         horizonData.forEach(h => {
             const rec = horizons[h.key];
-            const recClass = rec.recommendation === 'BUY' ? 'buy' : rec.recommendation === 'SELL' ? 'sell' : 'hold';
             const recColor = rec.recommendation === 'BUY' ? '#10b981' : rec.recommendation === 'SELL' ? '#ef4444' : '#f59e0b';
             
             md += `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.05)); padding: clamp(20px, 4vw, 28px); border-radius: 16px; border: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
@@ -703,7 +299,17 @@ class StockAnalysisNewsletter {
             md += `<div style="background: ${h.gradient}; height: 100%; width: ${rec.confidence}%; border-radius: 10px;"></div>\n\n`;
             md += `</div>\n\n`;
             
-            md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; margin: 0;"><strong>Potential Move:</strong> ${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%</p>\n\n`;
+            md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; margin: 0 0 12px 0;"><strong>Potential Move:</strong> ${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%</p>\n\n`;
+            
+            // ✅ Key Drivers
+            if (rec.drivers && rec.drivers.length > 0) {
+                md += `<div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
+                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Key Drivers:</p>\n\n`;
+                rec.drivers.forEach(driver => {
+                    md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #475569; margin: 0 0 8px 0; padding-left: 16px; border-left: 3px solid ${h.gradient.includes('10b981') ? '#10b981' : h.gradient.includes('3b82f6') ? '#3b82f6' : '#8b5cf6'};">✓ ${driver}</p>\n\n`;
+                });
+                md += `</div>\n\n`;
+            }
             
             md += `</div>\n\n`;
         });
@@ -714,125 +320,18 @@ class StockAnalysisNewsletter {
         md += this.createSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // TECHNICAL INDICATORS BREAKDOWN
+        // ✅ TECHNICAL INDICATORS BREAKDOWN
         // ═══════════════════════════════════════════════════════
-        md += `<div style="margin: 40px 0;">\n\n`;
-        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ef4444;">Technical Indicators Breakdown</h2>\n\n`;
-        
-        // MOMENTUM
-        if (this.technicalSignals.momentum.length > 0) {
-            md += `<div style="margin-bottom: 32px;">\n\n`;
-            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">📊 Momentum Indicators</h3>\n\n`;
-            md += `<div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(239, 68, 68, 0.2);">\n\n`;
-            
-            this.technicalSignals.momentum.forEach((ind, i) => {
-                const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
-                const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
-                
-                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < this.technicalSignals.momentum.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < this.technicalSignals.momentum.length - 1 ? '1px solid rgba(239, 68, 68, 0.15)' : 'none'};">\n\n`;
-                md += `<div>\n\n`;
-                md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
-                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status}</p>\n\n`;
-                md += `</div>\n\n`;
-                md += `<div style="text-align: right;">\n\n`;
-                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
-                md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
-                md += `</div>\n\n`;
-                md += `</div>\n\n`;
-            });
-            
-            md += `</div>\n\n`;
-            md += `</div>\n\n`;
-        }
-
-        // TREND
-        if (this.technicalSignals.trend.length > 0) {
-            md += `<div style="margin-bottom: 32px;">\n\n`;
-            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">📈 Trend Indicators</h3>\n\n`;
-            md += `<div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(16, 185, 129, 0.2);">\n\n`;
-            
-            this.technicalSignals.trend.forEach((ind, i) => {
-                const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
-                const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
-                
-                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < this.technicalSignals.trend.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < this.technicalSignals.trend.length - 1 ? '1px solid rgba(16, 185, 129, 0.15)' : 'none'};">\n\n`;
-                md += `<div>\n\n`;
-                md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
-                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status}</p>\n\n`;
-                md += `</div>\n\n`;
-                md += `<div style="text-align: right;">\n\n`;
-                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
-                md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
-                md += `</div>\n\n`;
-                md += `</div>\n\n`;
-            });
-            
-            md += `</div>\n\n`;
-            md += `</div>\n\n`;
-        }
-
-        // VOLUME
-        if (this.technicalSignals.volume.length > 0) {
-            md += `<div style="margin-bottom: 32px;">\n\n`;
-            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">💹 Volume Indicators</h3>\n\n`;
-            md += `<div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(37, 99, 235, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(59, 130, 246, 0.2);">\n\n`;
-            
-            this.technicalSignals.volume.forEach((ind, i) => {
-                const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
-                const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
-                
-                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < this.technicalSignals.volume.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < this.technicalSignals.volume.length - 1 ? '1px solid rgba(59, 130, 246, 0.15)' : 'none'};">\n\n`;
-                md += `<div>\n\n`;
-                md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
-                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status}</p>\n\n`;
-                md += `</div>\n\n`;
-                md += `<div style="text-align: right;">\n\n`;
-                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
-                md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
-                md += `</div>\n\n`;
-                md += `</div>\n\n`;
-            });
-            
-            md += `</div>\n\n`;
-            md += `</div>\n\n`;
-        }
-
-        // COMPOSITE
-        if (this.technicalSignals.composite.length > 0) {
-            md += `<div style="margin-bottom: 32px;">\n\n`;
-            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">🔮 Composite Indicators</h3>\n\n`;
-            md += `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
-            
-            this.technicalSignals.composite.forEach((ind, i) => {
-                const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
-                const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
-                
-                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < this.technicalSignals.composite.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < this.technicalSignals.composite.length - 1 ? '1px solid rgba(139, 92, 246, 0.15)' : 'none'};">\n\n`;
-                md += `<div>\n\n`;
-                md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
-                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status}</p>\n\n`;
-                md += `</div>\n\n`;
-                md += `<div style="text-align: right;">\n\n`;
-                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
-                md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
-                md += `</div>\n\n`;
-                md += `</div>\n\n`;
-            });
-            
-            md += `</div>\n\n`;
-            md += `</div>\n\n`;
-        }
-
-        md += `</div>\n\n`;
+        md += this.generateTechnicalIndicatorsSection();
 
         md += this.createSeparator();
 
         // ═══════════════════════════════════════════════════════
-        // PREMIUM FOOTER
+        // ✅ PREMIUM FOOTER
         // ═══════════════════════════════════════════════════════
         md += `<div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: clamp(30px, 6vw, 40px); border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">\n\n`;
         md += `<h3 style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 800; color: white; margin: 0 0 16px 0; line-height: 1.2;">Advanced Technical Analysis</h3>\n\n`;
-        md += `<p style="font-size: clamp(0.9rem, 2.2vw, 1.05rem); color: rgba(255,255,255,0.9); line-height: 1.7; margin: 0 0 24px 0; max-width: 700px; margin-left: auto; margin-right: auto;">This analysis is based on 14 professional technical indicators powered by <strong style="color: #06b6d4;">AlphaVault AI</strong>. Not financial advice.</p>\n\n`;
+        md += `<p style="font-size: clamp(0.9rem, 2.2vw, 1.05rem); color: rgba(255,255,255,0.9); line-height: 1.7; margin: 0 0 24px 0; max-width: 700px; margin-left: auto; margin-right: auto;">This analysis is based on 14 professional technical indicators powered by <strong style="color: #06b6d4;">AlphaVault AI</strong>. Same methodology as our Advanced Analysis platform. Not financial advice.</p>\n\n`;
         
         md += `<div style="display: flex; justify-content: center; gap: clamp(20px, 5vw, 32px); flex-wrap: wrap; margin: 24px 0;">\n\n`;
         md += `<div style="text-align: center;">\n\n`;
@@ -845,7 +344,7 @@ class StockAnalysisNewsletter {
         md += `</div>\n\n`;
         md += `<div style="text-align: center;">\n\n`;
         md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">📈</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Multi-Horizon</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">6 Months Data</p>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
         
@@ -855,11 +354,256 @@ class StockAnalysisNewsletter {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
-        return {
-            markdown: md,
-            html: md
-        };
+        return { markdown: md, html: md };
     }
+
+    // ════════════════════════════════════════════════════════════════
+    // ✅ GÉNÉRATION DE LA SECTION GRAPHIQUES
+    // ════════════════════════════════════════════════════════════════
+
+    generateChartsSection() {
+        let md = '';
+        
+        md += `<div style="margin: 40px 0;">\n\n`;
+        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #667eea;">Key Technical Indicators</h2>\n\n`;
+        
+        // ✅ RSI Chart
+        const rsiData = this.advancedAnalysis.calculateRSI(this.stockData.prices);
+        if (rsiData.length > 0) {
+            const rsiChartUrl = this.generateChartImage('RSI', rsiData, { min: 0, max: 100, zones: [30, 70] });
+            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
+            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); border-bottom: 2px solid rgba(102, 126, 234, 0.2);">\n\n`;
+            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">RSI (Relative Strength Index)</h3>\n\n`;
+            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">Current: ${rsiData[rsiData.length - 1][1].toFixed(2)}</p>\n\n`;
+            md += `</div>\n\n`;
+            md += `<img src="${rsiChartUrl}" alt="RSI Chart" style="width: 100%; height: auto; display: block;">\n\n`;
+            md += `</div>\n\n`;
+        }
+
+        // ✅ MACD Chart
+        const macdData = this.advancedAnalysis.calculateMACD(this.stockData.prices);
+        if (macdData.histogram.length > 0) {
+            const macdChartUrl = this.generateMACDChartImage(macdData);
+            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
+            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05)); border-bottom: 2px solid rgba(59, 130, 246, 0.2);">\n\n`;
+            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">MACD (Moving Average Convergence Divergence)</h3>\n\n`;
+            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">Histogram: ${macdData.histogram[macdData.histogram.length - 1][1].toFixed(4)}</p>\n\n`;
+            md += `</div>\n\n`;
+            md += `<img src="${macdChartUrl}" alt="MACD Chart" style="width: 100%; height: auto; display: block;">\n\n`;
+            md += `</div>\n\n`;
+        }
+
+        // ✅ Stochastic Chart
+        const stochasticData = this.advancedAnalysis.calculateStochastic(this.stockData.prices);
+        if (stochasticData.k.length > 0) {
+            const stochChartUrl = this.generateStochasticChartImage(stochasticData);
+            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
+            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(124, 58, 237, 0.05)); border-bottom: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
+            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">Stochastic Oscillator</h3>\n\n`;
+            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">%K: ${stochasticData.k[stochasticData.k.length - 1][1].toFixed(2)} | %D: ${stochasticData.d[stochasticData.d.length - 1][1].toFixed(2)}</p>\n\n`;
+            md += `</div>\n\n`;
+            md += `<img src="${stochChartUrl}" alt="Stochastic Chart" style="width: 100%; height: auto; display: block;">\n\n`;
+            md += `</div>\n\n`;
+        }
+
+        md += `</div>\n\n`;
+        
+        return md;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // ✅ GÉNÉRATION DES URLs DE GRAPHIQUES (QuickChart.io)
+    // ════════════════════════════════════════════════════════════════
+
+    generateChartImage(title, data, options = {}) {
+        const labels = data.slice(-60).map((d, i) => i); // 60 derniers points
+        const values = data.slice(-60).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: title,
+                    data: values,
+                    borderColor: 'rgb(102, 126, 234)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    y: {
+                        min: options.min || undefined,
+                        max: options.max || undefined
+                    },
+                    x: { display: false }
+                },
+                annotation: options.zones ? {
+                    annotations: options.zones.map(zone => ({
+                        type: 'line',
+                        yMin: zone,
+                        yMax: zone,
+                        borderColor: 'rgba(255, 99, 132, 0.5)',
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }))
+                } : undefined
+            }
+        };
+        
+        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+    }
+
+    generateMACDChartImage(macdData) {
+        const labels = macdData.histogram.slice(-60).map((d, i) => i);
+        const macdLine = macdData.macdLine.slice(-60).map(d => d[1]);
+        const signalLine = macdData.signalLine.slice(-60).map(d => d[1]);
+        const histogram = macdData.histogram.slice(-60).map(d => d[1]);
+        
+        const config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'MACD',
+                        data: macdLine,
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        type: 'line',
+                        label: 'Signal',
+                        data: signalLine,
+                        borderColor: 'rgb(239, 68, 68)',
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Histogram',
+                        data: histogram,
+                        backgroundColor: histogram.map(v => v > 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)')
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { x: { display: false } }
+            }
+        };
+        
+        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+    }
+
+    generateStochasticChartImage(stochasticData) {
+        const labels = stochasticData.k.slice(-60).map((d, i) => i);
+        const kValues = stochasticData.k.slice(-60).map(d => d[1]);
+        const dValues = stochasticData.d.slice(-60).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '%K',
+                        data: kValues,
+                        borderColor: 'rgb(102, 126, 234)',
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: '%D',
+                        data: dValues,
+                        borderColor: 'rgb(239, 68, 68)',
+                        borderWidth: 2,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { min: 0, max: 100 },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // ✅ GÉNÉRATION DE LA SECTION TECHNICAL INDICATORS
+    // ════════════════════════════════════════════════════════════════
+
+    generateTechnicalIndicatorsSection() {
+        let md = '';
+        
+        md += `<div style="margin: 40px 0;">\n\n`;
+        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ef4444;">Complete Technical Indicators Breakdown</h2>\n\n`;
+        
+        const categories = [
+            { key: 'momentum', name: 'Momentum Indicators', icon: '📊', color: '#ef4444' },
+            { key: 'trend', name: 'Trend Indicators', icon: '📈', color: '#10b981' },
+            { key: 'volume', name: 'Volume Indicators', icon: '💹', color: '#3b82f6' },
+            { key: 'composite', name: 'Composite Indicators', icon: '🔮', color: '#8b5cf6' }
+        ];
+
+        categories.forEach(cat => {
+            const indicators = this.technicalSignals[cat.key];
+            if (!indicators || indicators.length === 0) return;
+
+            md += `<div style="margin-bottom: 32px;">\n\n`;
+            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">${cat.icon} ${cat.name}</h3>\n\n`;
+            md += `<div style="background: linear-gradient(135deg, rgba(${this.hexToRgb(cat.color)}, 0.08), rgba(${this.hexToRgb(cat.color)}, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(${this.hexToRgb(cat.color)}, 0.2);">\n\n`;
+            
+            indicators.forEach((ind, i) => {
+                const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
+                const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
+                
+                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < indicators.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < indicators.length - 1 ? `1px solid rgba(${this.hexToRgb(cat.color)}, 0.15)` : 'none'};">\n\n`;
+                md += `<div style="flex: 1; min-width: 200px;">\n\n`;
+                md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
+                md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status || ind.description || ''}</p>\n\n`;
+                md += `</div>\n\n`;
+                md += `<div style="text-align: right;">\n\n`;
+                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
+                md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
+                md += `</div>\n\n`;
+                md += `</div>\n\n`;
+            });
+            
+            md += `</div>\n\n`;
+            md += `</div>\n\n`;
+        });
+
+        md += `</div>\n\n`;
+        
+        return md;
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // UTILITY FUNCTIONS
+    // ════════════════════════════════════════════════════════════════
 
     createSeparator() {
         return `<div style="height: 40px; margin: 30px 0; position: relative; display: flex; align-items: center;">\n\n` +
@@ -867,13 +611,8 @@ class StockAnalysisNewsletter {
                `</div>\n\n`;
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // UTILITY FUNCTIONS
-    // ════════════════════════════════════════════════════════════════
-
-    generateDemoData(symbol) {
-        console.log('📊 Generating demo data for', symbol);
-        const days = 365;
+    generateDemoData(symbol, days = 180) {
+        console.log(`📊 Generating demo data for ${symbol} (${days} days)`);
         const prices = [];
         let price = 150;
         
@@ -950,17 +689,13 @@ window.stockAnalysisNewsletter = null;
 
 async function initStockAnalysisNewsletter() {
     if (!window.stockAnalysisNewsletter) {
-        console.log('📊 Initializing Stock Analysis Newsletter System...');
+        console.log('📊 Initializing Stock Analysis Newsletter System V2.0...');
         window.stockAnalysisNewsletter = new StockAnalysisNewsletter();
         await window.stockAnalysisNewsletter.initialize();
     }
     
     return window.stockAnalysisNewsletter;
 }
-
-// ════════════════════════════════════════════════════════════════
-// ✅ FONCTION MANUELLE - VIA BOUTON ADMIN
-// ════════════════════════════════════════════════════════════════
 
 async function generateStockAnalysisNewsletter() {
     try {
@@ -990,10 +725,6 @@ async function generateStockAnalysisNewsletter() {
 
 window.generateStockAnalysisNewsletter = generateStockAnalysisNewsletter;
 
-// ════════════════════════════════════════════════════════════════
-// ✅ INITIALISATION PASSIVE
-// ════════════════════════════════════════════════════════════════
-
 document.addEventListener('DOMContentLoaded', async () => {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
@@ -1003,4 +734,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-console.log('✅ Stock Analysis Newsletter System - Script Loaded');
+console.log('✅ Stock Analysis Newsletter System V2 - Script Loaded (Reuses Advanced Analysis Methods)');
