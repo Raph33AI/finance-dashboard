@@ -10444,6 +10444,9 @@ document.addEventListener('DOMContentLoaded', () => {
     AdvancedAnalysis.init();
 });
 
+// ✅ EXPORT GLOBAL POUR UTILISATION PAR D'AUTRES MODULES
+window.AdvancedAnalysis = AdvancedAnalysis;
+
 // ============================================
 // SIDEBAR USER MENU - Toggle
 // ============================================
