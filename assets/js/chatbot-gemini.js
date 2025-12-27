@@ -879,18 +879,31 @@
 class GeminiAI {
     constructor(config) {
         this.config = config;
-        this.apiKey = config.gemini?.apiKey || '';
-        this.model = config.gemini?.model || 'gemini-1.5-flash-latest';
-        this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+        
+        this.workerUrl = config.api.gemini.workerUrl;
+        this.model = config.api.gemini.model || 'gemini-2.5-flash';
+        this.apiKey = null;
         
         this.conversationHistory = [];
-        this.maxHistoryLength = 10;
+        this.maxHistorySize = 20;
         
-        this.systemPrompt = this.buildAlphaVaultSystemPrompt();
+        this.userContext = {
+            preferredStocks: [],
+            investmentGoals: null,
+            riskTolerance: null,
+            conversationTopic: null
+        };
         
-        console.log('🤖 Gemini AI v5.0 - ALPHAVAULT COMPLIANT initialized');
-        console.log('🏆 AI trained to discuss AlphaVault proprietary scores only');
-        console.log('🔒 Legal compliance: No raw API data mentioned');
+        this.requestCount = 0;
+        this.totalTokens = 0;
+        this.lastRequestTime = 0;
+        this.minRequestInterval = 1000;
+        
+        console.log(`🤖 Gemini AI initialized (v3.6 - HTML Fixed + Few-Shot Enhanced)`);
+        console.log(`📡 Model: ${this.model}`);
+        console.log(`📡 Worker URL: ${this.workerUrl}`);
+        
+        this.initializeSystemPrompt();
     }
 
     // ============================================
