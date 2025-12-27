@@ -2043,7 +2043,7 @@ class ChatbotFullPageUI {
             
             this.elements.messages.appendChild(chartContainer);
             
-            const chartId = await this.charts.createChart(request, chartContainer);
+            const chartId = await this.charts.createChartFromRequest(request, chartContainer);
             
             if (chartId) {
                 this.charts.chartDataStore.set(chartId, {
@@ -2076,7 +2076,7 @@ class ChatbotFullPageUI {
             this.elements.messages.appendChild(chartContainer);
             
             try {
-                const chartId = await this.charts.createChart(request, chartContainer);
+                const chartId = await this.charts.createChartFromRequest(request, chartContainer);
                 
                 if (chartId) {
                     this.charts.chartDataStore.set(chartId, {
