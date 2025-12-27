@@ -60,17 +60,46 @@ class ChatbotAIEngine {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * INITIALIZE
+     * INITIALIZE (v5.3 - Use Pre-Initialized Global Clients)
      * ═══════════════════════════════════════════════════════════
      */
     async initialize() {
-        if (typeof GeminiAI === 'undefined') {
-            console.error('❌ GeminiAI not loaded');
-            throw new Error('GeminiAI class not available');
+        console.log('🤖 Initializing ChatbotAIEngine v5.3...');
+
+        // ✅ 1. VERIFY GLOBAL API CLIENTS (already initialized by api-clients-init.js)
+        console.log('🔍 Verifying global API clients...');
+        console.log('   - apiClient:', window.apiClient ? '✅' : '❌');
+        console.log('   - economicDataClient:', window.economicDataClient ? '✅' : '❌');
+        console.log('   - secAPIClient:', window.secAPIClient ? '✅' : '❌');
+        console.log('   - secMAClient:', window.secMAClient ? '✅' : '❌');
+
+        // ✅ 2. INITIALIZE ANALYTICS (will use global clients)
+        if (typeof ChatbotAnalytics !== 'undefined') {
+            this.analytics = new ChatbotAnalytics(this.config);
+            await this.analytics.initialize();
+            console.log('✅ ChatbotAnalytics initialized');
+        } else {
+            console.error('❌ ChatbotAnalytics not found');
         }
 
-        this.geminiAPI = new GeminiAI(this.config);
-        console.log('✅ ChatbotAIEngine initialized with GeminiAI');
+        // ✅ 3. INITIALIZE AI (Gemini)
+        if (typeof GeminiAI !== 'undefined') {
+            this.ai = new GeminiAI(this.config);
+            console.log('✅ Gemini AI initialized');
+        } else {
+            console.error('❌ GeminiAI not found');
+        }
+
+        // ✅ 4. VERIFY ALL ANALYZERS
+        console.log('🔍 Verifying analyzers...');
+        console.log('   - IPO Analyzer:', this.analytics?.ipoAnalyzer ? '✅' : '❌');
+        console.log('   - M&A Analyzer:', this.analytics?.maAnalyzer ? '✅' : '❌');
+        console.log('   - Forex Analyzer:', this.analytics?.forexAnalyzer ? '✅' : '❌');
+        console.log('   - Insider Analyzer:', this.analytics?.insiderAnalyzer ? '✅' : '❌');
+        console.log('   - Budget Manager:', this.analytics?.budgetManager ? '✅' : '❌');
+        console.log('   - Investment Manager:', this.analytics?.investmentManager ? '✅' : '❌');
+
+        console.log('✅ ChatbotAIEngine v5.3 initialized');
     }
 
     /**
