@@ -1755,18 +1755,25 @@ class ChatbotAnalytics {
     /**
      * ═══════════════════════════════════════════════════════════
      * INITIALIZE
+     * ✅ CORRIGÉ : Crée FinanceAPIClient comme dans advanced-analysis
      * ═══════════════════════════════════════════════════════════
      */
     async initialize() {
         if (typeof FinanceAPIClient !== 'undefined') {
             this.apiClient = new FinanceAPIClient({
                 baseURL: this.config.apiBaseURL || APP_CONFIG.API_BASE_URL,
-                cacheDuration: 300000
+                cacheDuration: 300000,
+                maxRetries: 2
             });
+            
+            console.log('✅ FinanceAPIClient initialized');
+        } else {
+            console.warn('⚠ FinanceAPIClient not available - will try to use window.apiClient');
         }
 
         if (typeof ChatbotCharts !== 'undefined') {
             this.chartsEngine = new ChatbotCharts();
+            console.log('✅ Charts engine initialized');
         }
 
         console.log('✅ ChatbotAnalytics initialized');
@@ -1775,17 +1782,35 @@ class ChatbotAnalytics {
     /**
      * ═══════════════════════════════════════════════════════════
      * ANALYZE STOCK (MAIN METHOD)
+     * ✅ CORRIGÉ : Initialisation API + Utilise Twelve Data comme advanced-analysis
      * ═══════════════════════════════════════════════════════════
      */
     async analyzeStock(symbol, entities = {}) {
         try {
+            // ✅ CORRECTION : Initialiser l'API client si nécessaire
             if (!this.apiClient) {
                 await this.initialize();
             }
 
+            // ✅ VÉRIFICATION : Si toujours null, utiliser window.apiClient (comme advanced-analysis)
+            if (!this.apiClient && window.apiClient) {
+                console.log('📡 Using global apiClient from window');
+                this.apiClient = window.apiClient;
+            }
+
+            // ✅ DERNIÈRE VÉRIFICATION
+            if (!this.apiClient) {
+                console.error('❌ API Client not available');
+                return {
+                    text: `❌ Unable to fetch data for ${symbol}. API client not initialized.\n\nPlease check that FinanceAPIClient is properly loaded.`,
+                    charts: [],
+                    data: null
+                };
+            }
+
             console.log(`📊 Analyzing ${symbol}...`);
 
-            // Fetch data
+            // ✅ UTILISE LA MÊME LOGIQUE QUE ADVANCED-ANALYSIS
             const [quote, timeSeries] = await Promise.all([
                 this.apiClient.getQuote(symbol).catch(() => null),
                 this.apiClient.getTimeSeries(symbol, '1day', 365).catch(() => null)
@@ -1816,7 +1841,7 @@ class ChatbotAnalytics {
             // Generate charts
             const charts = this.generateCharts(technicalIndicators, symbol);
 
-            // Build response text
+            // ✅ BUILD RESPONSE (SANS MENTIONNER LES PRIX BRUTS)
             const responseText = this.buildAnalysisResponse(symbol, quote, alphaVaultScore, technicalIndicators, riskMetrics, aiRecommendation);
 
             return {

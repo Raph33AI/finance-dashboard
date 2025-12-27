@@ -2244,6 +2244,7 @@ class ChatbotAIEngine {
     /**
      * ═══════════════════════════════════════════════════════════
      * EXTRACT ENTITIES (Symbols, Timeframes, Metrics)
+     * ✅ CORRIGÉ : Meilleur filtrage des faux symboles
      * ═══════════════════════════════════════════════════════════
      */
     extractEntities(message) {
@@ -2259,12 +2260,19 @@ class ChatbotAIEngine {
 
         // ========== SYMBOL EXTRACTION (IMPROVED) ==========
         
-        // Method 1: Uppercase words (traditional)
-        const upperWords = upperMessage.match(/\b[A-Z]{1,5}\b/g) || [];
+        // Liste étendue de mots à exclure
+        const excludedWords = [
+            'IPO', 'THE', 'AND', 'FOR', 'ARE', 'BUT', 'NOT', 'YOU', 'ALL', 'CAN', 'HER', 'WAS', 'ONE', 'OUR', 'OUT', 'DAY', 'GET', 'HAS', 'HIM', 'HIS', 'HOW', 'ITS', 'MAY', 'NEW', 'NOW', 'OLD', 'SEE', 'TWO', 'WAY', 'WHO', 'BOY', 'DID', 'LET', 'PUT', 'SAY', 'SHE', 'TOO', 'USE',
+            'SHOW', 'TELL', 'WHAT', 'WHEN', 'WHERE', 'WHICH', 'WHILE', 'WITH', 'ABOUT', 'AFTER', 'AGAIN', 'ALSO', 'BACK', 'BEEN', 'BEFORE', 'BETWEEN', 'BOTH', 'COULD', 'DOES', 'DONE', 'DOWN', 'EACH', 'EVEN', 'FIND', 'FIRST', 'FROM', 'GIVE', 'GOING', 'GOOD', 'GREAT', 'HAVE', 'HERE', 'INTO', 'JUST', 'KNOW', 'LAST', 'LIKE', 'LONG', 'MADE', 'MAKE', 'MANY', 'MORE', 'MOST', 'MUCH', 'MUST', 'NEVER', 'NEXT', 'ONLY', 'OTHER', 'OVER', 'PART', 'SAME', 'SHOULD', 'SOME', 'STILL', 'SUCH', 'TAKE', 'THAN', 'THAT', 'THEIR', 'THEM', 'THEN', 'THERE', 'THESE', 'THEY', 'THIS', 'THOSE', 'THROUGH', 'TIME', 'UNDER', 'UNTIL', 'VERY', 'WANT', 'WELL', 'WERE', 'WHAT', 'WHEN', 'WHERE', 'WHICH', 'WILL', 'WITH', 'WORK', 'WOULD', 'YEAR', 'YOUR',
+            'ANALYZE', 'ANALYSIS', 'TECHNICAL', 'INDICATORS', 'STOCK', 'STOCKS', 'SHARE', 'SHARES', 'PRICE', 'CHART', 'COMPARE', 'PERFORMANCE'
+        ];
+        
+        // Method 1: Uppercase words (traditional) - AVEC MEILLEUR FILTRAGE
+        const upperWords = upperMessage.match(/\b[A-Z]{2,5}\b/g) || [];
         const filteredUpperSymbols = upperWords.filter(word => 
-            word.length >= 1 && 
+            word.length >= 2 && 
             word.length <= 5 &&
-            !['IPO', 'THE', 'AND', 'FOR', 'ARE', 'BUT', 'NOT', 'YOU', 'ALL', 'CAN', 'HER', 'WAS', 'ONE', 'OUR', 'OUT', 'DAY', 'GET', 'HAS', 'HIM', 'HIS', 'HOW', 'ITS', 'MAY', 'NEW', 'NOW', 'OLD', 'SEE', 'TWO', 'WAY', 'WHO', 'BOY', 'DID', 'ITS', 'LET', 'PUT', 'SAY', 'SHE', 'TOO', 'USE'].includes(word)
+            !excludedWords.includes(word)
         );
 
         // Method 2: Known stocks (case insensitive)
@@ -2278,9 +2286,8 @@ class ChatbotAIEngine {
 
         // Method 3: Pattern matching (e.g., "stock NVDA", "share aapl", "NVDA stock")
         const patterns = [
-            /(?:stock|share|equity)\s+([a-z]{1,5})\b/gi,
-            /\b([a-z]{1,5})\s+(?:stock|share|equity)\b/gi,
-            /\b([a-z]{2,5})\s+(?:price|chart|analysis)\b/gi
+            /(?:stock|share|equity|analyze|analysis)\s+([a-z]{2,5})\b/gi,
+            /\b([a-z]{2,5})\s+(?:stock|share|equity|price|chart|analysis|indicators|technical)\b/gi
         ];
 
         const patternMatches = [];
@@ -2288,17 +2295,27 @@ class ChatbotAIEngine {
             const matches = message.matchAll(pattern);
             for (const match of matches) {
                 if (match[1]) {
-                    patternMatches.push(match[1].toUpperCase());
+                    const symbol = match[1].toUpperCase();
+                    // Vérifier que ce n'est pas un mot exclu
+                    if (!excludedWords.includes(symbol)) {
+                        patternMatches.push(symbol);
+                    }
                 }
             }
         });
 
-        // Combine all methods
-        entities.symbols = [...new Set([
-            ...filteredUpperSymbols,
-            ...knownStocksFound,
-            ...patternMatches
-        ])];
+        // ✅ PRIORITÉ : Known stocks > Pattern matches > Upper symbols
+        let finalSymbols = [];
+        
+        if (knownStocksFound.length > 0) {
+            finalSymbols = knownStocksFound;
+        } else if (patternMatches.length > 0) {
+            finalSymbols = patternMatches;
+        } else if (filteredUpperSymbols.length > 0) {
+            finalSymbols = filteredUpperSymbols;
+        }
+
+        entities.symbols = [...new Set(finalSymbols)];
 
         console.log('🔍 Symbol detection:');
         console.log('   Upper symbols:', filteredUpperSymbols);
