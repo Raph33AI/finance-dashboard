@@ -142,18 +142,52 @@ class StockAnalysisNewsletter {
     // ════════════════════════════════════════════════════════════════
 
     async loadStockData(symbol) {
-        if (!this.advancedAnalysis.apiClient) {
-            throw new Error('API Client not available');
+        // ✅ CRÉER SON PROPRE API CLIENT SI NÉCESSAIRE
+        let apiClient = null;
+        
+        // Méthode 1 : Utiliser l'API client de AdvancedAnalysis
+        if (this.advancedAnalysis && this.advancedAnalysis.apiClient) {
+            apiClient = this.advancedAnalysis.apiClient;
+            console.log('✅ Using AdvancedAnalysis.apiClient');
+        }
+        // Méthode 2 : Utiliser l'API client global
+        else if (window.apiClient) {
+            apiClient = window.apiClient;
+            console.log('✅ Using window.apiClient');
+        }
+        // Méthode 3 : Créer un nouveau client
+        else if (typeof FinanceAPIClient !== 'undefined') {
+            console.log('⚠ Creating new FinanceAPIClient instance...');
+            
+            // Vérifier si APP_CONFIG existe
+            const baseURL = typeof APP_CONFIG !== 'undefined' 
+                ? APP_CONFIG.API_BASE_URL 
+                : 'https://financial-data-api.raphnardone.workers.dev';
+            
+            apiClient = new FinanceAPIClient({
+                baseURL: baseURL,
+                cacheDuration: 300000,
+                maxRetries: 2
+            });
+            
+            // Stocker pour réutilisation
+            window.apiClient = apiClient;
+            console.log('✅ New FinanceAPIClient created');
+        }
+        else {
+            throw new Error('FinanceAPIClient class not available');
         }
 
         try {
+            console.log(`📡 Fetching data for ${symbol}...`);
+            
             const [quote, timeSeries] = await Promise.all([
-                this.advancedAnalysis.apiClient.getQuote(symbol),
-                this.advancedAnalysis.apiClient.getTimeSeries(symbol, '1day', 365)
+                apiClient.getQuote(symbol),
+                apiClient.getTimeSeries(symbol, '1day', 365)
             ]);
 
             if (!quote || !timeSeries || !timeSeries.data) {
-                throw new Error('Failed to load stock data');
+                throw new Error('Failed to load stock data from API');
             }
 
             this.stockData = {
@@ -163,11 +197,12 @@ class StockAnalysisNewsletter {
                 quote: quote
             };
 
-            console.log(`✅ Stock data loaded for ${symbol}`);
+            console.log(`✅ Stock data loaded for ${symbol}: ${this.stockData.prices.length} data points`);
 
         } catch (error) {
-            console.warn('⚠ API call failed, using demo data:', error);
+            console.warn('⚠ API call failed, using demo data:', error.message);
             this.stockData = this.generateDemoData(symbol);
+            console.log('✅ Demo data generated successfully');
         }
     }
 
