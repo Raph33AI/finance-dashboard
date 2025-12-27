@@ -1,9 +1,7 @@
 // /* ============================================
-//    PUBLIC-PROFILE.JS - Profil Public v3.2
-//    ✅ Avec Bio + Activity Tabs (Posts/Liked/Commented)
-//    ✅ CORRECTION : Photo de profil avec multiples fallbacks
-//    ✅ CORRECTION : Listener temps réel pour le statut Follow/Unfollow
-//    ✅ CORRECTION : Persistance du bouton Follow après refresh
+//    PUBLIC-PROFILE.JS - Profil Public v3.3
+//    ✅ CORRECTION TIMING : Attente de l'authentification
+//    ✅ CORRECTION : Listener temps réel persistant
 //    ============================================ */
 
 // class PublicProfile {
@@ -21,6 +19,7 @@
         
 //         // Listener unsubscribe
 //         this.followUnsubscribe = null;
+//         this.authUnsubscribe = null;
 //     }
 
 //     async initialize() {
@@ -35,25 +34,55 @@
 //                 return;
 //             }
 
+//             // ✅ CORRECTION CRITIQUE : Attendre l'authentification complète
+//             console.log('⏳ Waiting for authentication...');
+//             const currentUser = await this.waitForAuth();
+            
+//             if (currentUser) {
+//                 console.log('✅ Authenticated as:', currentUser.email, '(UID:', currentUser.uid + ')');
+//             } else {
+//                 console.log('⚠ No authenticated user');
+//             }
+
 //             // Vérifier si c'est son propre profil
-//             const currentUser = firebase.auth().currentUser;
 //             this.isOwnProfile = currentUser && currentUser.uid === this.userId;
+//             console.log('🔍 Is own profile?', this.isOwnProfile);
 
 //             // ✅ Charger les données utilisateur
 //             await this.loadUserData();
             
-//             // ✅ CORRECTION : Vérifier ET ATTENDRE le statut de suivi AVANT de rendre
+//             // ✅ CORRECTION : Vérifier le statut de suivi AVEC LOGS DÉTAILLÉS
 //             if (!this.isOwnProfile && currentUser) {
-//                 // ✅ IMPORTANT : ATTENDRE la vérification complète
 //                 console.log('🔍 Vérification du statut de suivi...');
-//                 this.isFollowing = await window.followSystem.isFollowing(this.userId);
-//                 console.log('✅ Statut de suivi confirmé:', this.isFollowing);
+//                 console.log('   - Current user UID:', currentUser.uid);
+//                 console.log('   - Profile user UID:', this.userId);
                 
-//                 // ✅ ENSUITE mettre en place le listener
-//                 this.setupFollowListener();
+//                 // Vérifier que followSystem existe
+//                 if (!window.followSystem) {
+//                     console.error('❌ window.followSystem is not defined!');
+//                     console.error('   Make sure follow-system.js is loaded BEFORE public-profile.js');
+//                 } else {
+//                     console.log('✅ window.followSystem is available');
+                    
+//                     try {
+//                         this.isFollowing = await window.followSystem.isFollowing(this.userId);
+//                         console.log('✅ Statut de suivi confirmé:', this.isFollowing);
+                        
+//                         // ✅ Mettre en place le listener temps réel
+//                         this.setupFollowListener();
+//                     } catch (error) {
+//                         console.error('❌ Error checking follow status:', error);
+//                         this.isFollowing = false;
+//                     }
+//                 }
+//             } else {
+//                 console.log('ℹ Skipping follow check:', {
+//                     isOwnProfile: this.isOwnProfile,
+//                     hasCurrentUser: !!currentUser
+//                 });
 //             }
             
-//             // ✅ MAINTENANT rendre le header avec le VRAI statut
+//             // ✅ Rendre le header avec le statut correct
 //             this.renderProfileHeader();
             
 //             // Charger toutes les activités
@@ -66,12 +95,43 @@
 //         }
 //     }
 
-//     // ✅ CORRECTION : Listener temps réel avec vérification immédiate
+//     // ✅ NOUVELLE MÉTHODE : Attendre l'authentification
+//     waitForAuth() {
+//         return new Promise((resolve) => {
+//             // Si déjà authentifié, résoudre immédiatement
+//             const currentUser = firebase.auth().currentUser;
+//             if (currentUser) {
+//                 console.log('✅ User already authenticated');
+//                 resolve(currentUser);
+//                 return;
+//             }
+
+//             // Sinon, attendre le changement d'état d'authentification
+//             console.log('⏳ Waiting for auth state change...');
+//             this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+//                 if (this.authUnsubscribe) {
+//                     this.authUnsubscribe(); // Se désabonner immédiatement
+//                     this.authUnsubscribe = null;
+//                 }
+//                 console.log('🔔 Auth state changed:', user ? user.email : 'No user');
+//                 resolve(user);
+//             });
+//         });
+//     }
+
+//     // ✅ CORRECTION : Listener temps réel avec logs détaillés
 //     setupFollowListener() {
 //         const currentUser = firebase.auth().currentUser;
-//         if (!currentUser || this.isOwnProfile) return;
+//         if (!currentUser || this.isOwnProfile) {
+//             console.log('⚠ Skipping follow listener setup:', {
+//                 hasCurrentUser: !!currentUser,
+//                 isOwnProfile: this.isOwnProfile
+//             });
+//             return;
+//         }
         
 //         console.log('👂 Setting up follow status listener...');
+//         console.log('   - Listening to: users/' + currentUser.uid + '/following/' + this.userId);
         
 //         // Écouter les changements dans la sous-collection "following"
 //         this.followUnsubscribe = firebase.firestore()
@@ -83,34 +143,40 @@
 //                 const newFollowStatus = doc.exists;
                 
 //                 console.log('🔔 Follow status update from Firestore:', {
+//                     docPath: doc.ref.path,
 //                     docExists: doc.exists,
+//                     docData: doc.data(),
 //                     previousStatus: this.isFollowing,
 //                     newStatus: newFollowStatus
 //                 });
                 
-//                 // ✅ IMPORTANT : Toujours mettre à jour, même si identique (pour le premier rendu)
+//                 // Mettre à jour le statut
 //                 const statusChanged = this.isFollowing !== newFollowStatus;
-                
 //                 this.isFollowing = newFollowStatus;
                 
 //                 // Mettre à jour le bouton
 //                 this.updateFollowButton();
                 
 //                 if (statusChanged) {
-//                     console.log('✅ Follow status changed:', this.isFollowing);
+//                     console.log('✅ Follow status CHANGED:', this.isFollowing);
+//                 } else {
+//                     console.log('ℹ Follow status unchanged:', this.isFollowing);
 //                 }
 //             }, (error) => {
 //                 console.error('❌ Error in follow listener:', error);
 //             });
 //     }
 
-//     // ✅ NOUVELLE MÉTHODE : Mettre à jour uniquement le bouton Follow
+//     // ✅ Mettre à jour uniquement le bouton Follow
 //     updateFollowButton() {
 //         const followBtn = document.getElementById('followBtn');
         
-//         if (!followBtn) return;
+//         if (!followBtn) {
+//             console.warn('⚠ Follow button not found in DOM');
+//             return;
+//         }
         
-//         console.log('🔄 Updating follow button, isFollowing:', this.isFollowing);
+//         console.log('🔄 Updating follow button UI, isFollowing:', this.isFollowing);
         
 //         if (this.isFollowing) {
 //             followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
@@ -124,6 +190,8 @@
 //     }
 
 //     async loadUserData() {
+//         console.log('📥 Loading user data for:', this.userId);
+        
 //         const userDoc = await firebase.firestore()
 //             .collection('users')
 //             .doc(this.userId)
@@ -167,51 +235,84 @@
 //                 };
 //             });
 
-//             document.getElementById('postsTabCount').textContent = this.userPosts.length;
+//             const countEl = document.getElementById('postsTabCount');
+//             if (countEl) countEl.textContent = this.userPosts.length;
             
 //             console.log(`✅ ${this.userPosts.length} posts chargés`);
 //         } catch (error) {
 //             console.error('❌ Error loading user posts:', error);
 //             this.userPosts = [];
-//             document.getElementById('postsTabCount').textContent = '0';
+//             const countEl = document.getElementById('postsTabCount');
+//             if (countEl) countEl.textContent = '0';
 //         }
 //     }
 
 //     // ✅ CHARGER LES POSTS LIKÉS
 //     async loadLikedPosts() {
 //         try {
-//             // Récupérer les IDs des posts likés
-//             const likesSnapshot = await firebase.firestore()
+//             console.log('📥 Loading liked posts for user:', this.userId);
+            
+//             // ✅ Vérifier que la collection existe
+//             const likesRef = firebase.firestore()
 //                 .collection('users')
 //                 .doc(this.userId)
-//                 .collection('likedPosts')
+//                 .collection('likedPosts');
+            
+//             console.log('📂 Likes collection path:', likesRef.path);
+            
+//             const likesSnapshot = await likesRef
 //                 .orderBy('likedAt', 'desc')
 //                 .limit(50)
 //                 .get();
 
+//             console.log('📊 Liked posts snapshot:', {
+//                 empty: likesSnapshot.empty,
+//                 size: likesSnapshot.size,
+//                 docs: likesSnapshot.docs.length
+//             });
+
 //             if (likesSnapshot.empty) {
+//                 console.warn('⚠ No liked posts found in subcollection users/' + this.userId + '/likedPosts');
+//                 console.warn('💡 Verify that likes are correctly saved to this subcollection');
 //                 this.likedPosts = [];
-//                 document.getElementById('likedTabCount').textContent = '0';
+//                 const countEl = document.getElementById('likedTabCount');
+//                 if (countEl) countEl.textContent = '0';
 //                 return;
 //             }
 
-//             const postIds = likesSnapshot.docs.map(doc => doc.id);
+//             const postIds = likesSnapshot.docs.map(doc => {
+//                 const data = doc.data();
+//                 console.log('   ✓ Liked post:', {
+//                     postId: doc.id,
+//                     likedAt: data.likedAt?.toDate(),
+//                     data: data
+//                 });
+//                 return doc.id;
+//             });
             
-//             // Charger les posts par lots de 10 (limitation Firestore)
+//             console.log('📋 Total post IDs to fetch:', postIds.length);
+
 //             const batchSize = 10;
 //             const batches = [];
             
 //             for (let i = 0; i < postIds.length; i += batchSize) {
 //                 const batchIds = postIds.slice(i, i + batchSize);
+//                 console.log(`📦 Fetching batch ${Math.floor(i/batchSize) + 1}:`, batchIds);
+                
 //                 const batchSnapshot = await firebase.firestore()
 //                     .collection('posts')
 //                     .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
 //                     .get();
                 
+//                 console.log(`   ✓ Batch ${Math.floor(i/batchSize) + 1} fetched:`, batchSnapshot.size, 'posts');
 //                 batches.push(...batchSnapshot.docs);
 //             }
 
 //             this.likedPosts = batches.map(doc => {
+//                 if (!doc.exists) {
+//                     console.warn('⚠ Post not found:', doc.id);
+//                     return null;
+//                 }
 //                 const postData = doc.data();
 //                 return {
 //                     id: doc.id,
@@ -220,20 +321,28 @@
 //                 };
 //             }).filter(post => post !== null);
 
-//             document.getElementById('likedTabCount').textContent = this.likedPosts.length;
+//             const countEl = document.getElementById('likedTabCount');
+//             if (countEl) countEl.textContent = this.likedPosts.length;
             
-//             console.log(`✅ ${this.likedPosts.length} posts likés chargés`);
+//             console.log(`✅ ${this.likedPosts.length} liked posts loaded successfully`);
+//             console.log('📊 Liked posts:', this.likedPosts.map(p => ({ id: p.id, title: p.title })));
+            
 //         } catch (error) {
 //             console.error('❌ Error loading liked posts:', error);
+//             console.error('❌ Error details:', {
+//                 code: error.code,
+//                 message: error.message,
+//                 userId: this.userId
+//             });
 //             this.likedPosts = [];
-//             document.getElementById('likedTabCount').textContent = '0';
+//             const countEl = document.getElementById('likedTabCount');
+//             if (countEl) countEl.textContent = '0';
 //         }
 //     }
 
 //     // ✅ CHARGER LES POSTS COMMENTÉS
 //     async loadCommentedPosts() {
 //         try {
-//             // Récupérer tous les commentaires de l'utilisateur
 //             const commentsSnapshot = await firebase.firestore()
 //                 .collection('comments')
 //                 .where('authorId', '==', this.userId)
@@ -243,11 +352,11 @@
 
 //             if (commentsSnapshot.empty) {
 //                 this.commentedPosts = [];
-//                 document.getElementById('commentedTabCount').textContent = '0';
+//                 const countEl = document.getElementById('commentedTabCount');
+//                 if (countEl) countEl.textContent = '0';
 //                 return;
 //             }
 
-//             // Extraire les IDs de posts uniques depuis le champ 'postId'
 //             const postIdsSet = new Set();
 //             commentsSnapshot.docs.forEach(doc => {
 //                 const comment = doc.data();
@@ -260,11 +369,11 @@
 
 //             if (postIds.length === 0) {
 //                 this.commentedPosts = [];
-//                 document.getElementById('commentedTabCount').textContent = '0';
+//                 const countEl = document.getElementById('commentedTabCount');
+//                 if (countEl) countEl.textContent = '0';
 //                 return;
 //             }
 
-//             // Charger les posts par lots de 10
 //             const batchSize = 10;
 //             const batches = [];
             
@@ -287,13 +396,15 @@
 //                 };
 //             }).filter(post => post !== null);
 
-//             document.getElementById('commentedTabCount').textContent = this.commentedPosts.length;
+//             const countEl = document.getElementById('commentedTabCount');
+//             if (countEl) countEl.textContent = this.commentedPosts.length;
             
 //             console.log(`✅ ${this.commentedPosts.length} posts commentés chargés`);
 //         } catch (error) {
 //             console.error('❌ Error loading commented posts:', error);
 //             this.commentedPosts = [];
-//             document.getElementById('commentedTabCount').textContent = '0';
+//             const countEl = document.getElementById('commentedTabCount');
+//             if (countEl) countEl.textContent = '0';
 //         }
 //     }
 
@@ -301,7 +412,6 @@
 //     switchTab(tabName) {
 //         this.currentTab = tabName;
         
-//         // Mettre à jour les boutons
 //         document.querySelectorAll('[data-tab]').forEach(btn => {
 //             btn.classList.remove('active');
 //             if (btn.dataset.tab === tabName) {
@@ -309,12 +419,13 @@
 //             }
 //         });
         
-//         // Afficher le contenu correspondant
 //         this.renderTabContent();
 //     }
 
 //     renderTabContent() {
 //         const activityContent = document.getElementById('activityContent');
+//         if (!activityContent) return;
+        
 //         let posts = [];
 //         let emptyMessage = '';
         
@@ -383,7 +494,6 @@
 //     }
 
 //     renderProfileHeader() {
-//         // ✅ Récupération des données avec prénom/nom/bio
 //         const firstName = this.userData.firstName || '';
 //         const lastName = this.userData.lastName || '';
 //         const displayName = `${firstName} ${lastName}`.trim() || 
@@ -398,7 +508,6 @@
 //         const followersCount = this.userData.followersCount || 0;
 //         const followingCount = this.userData.followingCount || 0;
 
-//         // ✅ CORRECTION : Photo de profil avec multiples fallbacks (comme post-manager.js)
 //         const userAvatar = this.userData.photoURL || 
 //                           this.userData.authorPhoto || 
 //                           this.userData.avatar || 
@@ -424,7 +533,6 @@
 //             `;
 //         }).join('');
 
-//         // ✅ Bouton Follow/Unfollow (masqué si propre profil)
 //         const followButtonHTML = !this.isOwnProfile ? `
 //             <button 
 //                 id="followBtn" 
@@ -484,7 +592,11 @@
 //             </div>
 //         `;
 
-//         document.getElementById('profileHeader').innerHTML = profileHTML;
+//         const profileHeaderEl = document.getElementById('profileHeader');
+//         if (profileHeaderEl) {
+//             profileHeaderEl.innerHTML = profileHTML;
+//         }
+        
 //         document.title = `${displayName} - AlphaVault AI`;
 //     }
 
@@ -495,23 +607,13 @@
             
 //             if (!followBtn) return;
             
-//             // Désactiver le bouton pendant l'opération
 //             followBtn.disabled = true;
-//             const originalHTML = followBtn.innerHTML;
 //             followBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
 //             if (this.isFollowing) {
-//                 // Unfollow
 //                 await window.followSystem.unfollowUser(this.userId);
-                
-//                 // ✅ Mettre à jour l'état local (sera confirmé par le listener)
 //                 this.isFollowing = false;
                 
-//                 // Mettre à jour le bouton
-//                 followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
-//                 followBtn.style.background = '';
-                
-//                 // Décrémenter le compteur
 //                 if (followersCountEl) {
 //                     const currentCount = parseInt(followersCountEl.textContent) || 0;
 //                     followersCountEl.textContent = Math.max(0, currentCount - 1);
@@ -519,17 +621,9 @@
                 
 //                 console.log('✅ User unfollowed');
 //             } else {
-//                 // Follow
 //                 await window.followSystem.followUser(this.userId);
-                
-//                 // ✅ Mettre à jour l'état local (sera confirmé par le listener)
 //                 this.isFollowing = true;
                 
-//                 // Mettre à jour le bouton
-//                 followBtn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
-//                 followBtn.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
-                
-//                 // Incrémenter le compteur
 //                 if (followersCountEl) {
 //                     const currentCount = parseInt(followersCountEl.textContent) || 0;
 //                     followersCountEl.textContent = currentCount + 1;
@@ -538,30 +632,17 @@
 //                 console.log('✅ User followed');
 //             }
 
-//             // Réactiver le bouton
-//             followBtn.disabled = false;
+//             this.updateFollowButton();
 
 //         } catch (error) {
 //             console.error('❌ Error toggling follow:', error);
             
-//             // ✅ EN CAS D'ERREUR, RE-VÉRIFIER le statut réel
 //             const currentUser = firebase.auth().currentUser;
 //             if (currentUser) {
 //                 this.isFollowing = await window.followSystem.isFollowing(this.userId);
 //             }
             
-//             // Restaurer le bouton avec le bon état
-//             const followBtn = document.getElementById('followBtn');
-//             if (followBtn) {
-//                 followBtn.disabled = false;
-//                 followBtn.innerHTML = this.isFollowing 
-//                     ? '<i class="fas fa-user-minus"></i> Unfollow' 
-//                     : '<i class="fas fa-user-plus"></i> Follow';
-//                 followBtn.style.background = this.isFollowing 
-//                     ? 'linear-gradient(135deg, #6b7280, #4b5563)' 
-//                     : '';
-//             }
-            
+//             this.updateFollowButton();
 //             alert('Failed to update follow status. Please try again.');
 //         }
 //     }
@@ -616,11 +697,14 @@
 //         }
 //     }
 
-//     // ✅ Nettoyer les listeners
 //     cleanup() {
 //         if (this.followUnsubscribe) {
 //             this.followUnsubscribe();
 //             console.log('🧹 Follow listener cleaned up');
+//         }
+//         if (this.authUnsubscribe) {
+//             this.authUnsubscribe();
+//             console.log('🧹 Auth listener cleaned up');
 //         }
 //     }
 // }
@@ -638,10 +722,11 @@
 //     }
 // });
 
-// console.log('✅ public-profile.js chargé (v3.2 - FULLY CORRECTED)');
+// console.log('✅ public-profile.js chargé (v3.3 - AUTH TIMING FIXED)');
 
 /* ============================================
-   PUBLIC-PROFILE.JS - Profil Public v3.3
+   PUBLIC-PROFILE.JS - Profil Public v3.4
+   ✅ Intégration du système de chat privé
    ✅ CORRECTION TIMING : Attente de l'authentification
    ✅ CORRECTION : Listener temps réel persistant
    ============================================ */
@@ -889,12 +974,10 @@ class PublicProfile {
         }
     }
 
-    // ✅ CHARGER LES POSTS LIKÉS
     async loadLikedPosts() {
         try {
             console.log('📥 Loading liked posts for user:', this.userId);
             
-            // ✅ Vérifier que la collection existe
             const likesRef = firebase.firestore()
                 .collection('users')
                 .doc(this.userId)
@@ -915,7 +998,6 @@ class PublicProfile {
 
             if (likesSnapshot.empty) {
                 console.warn('⚠ No liked posts found in subcollection users/' + this.userId + '/likedPosts');
-                console.warn('💡 Verify that likes are correctly saved to this subcollection');
                 this.likedPosts = [];
                 const countEl = document.getElementById('likedTabCount');
                 if (countEl) countEl.textContent = '0';
@@ -967,22 +1049,15 @@ class PublicProfile {
             if (countEl) countEl.textContent = this.likedPosts.length;
             
             console.log(`✅ ${this.likedPosts.length} liked posts loaded successfully`);
-            console.log('📊 Liked posts:', this.likedPosts.map(p => ({ id: p.id, title: p.title })));
             
         } catch (error) {
             console.error('❌ Error loading liked posts:', error);
-            console.error('❌ Error details:', {
-                code: error.code,
-                message: error.message,
-                userId: this.userId
-            });
             this.likedPosts = [];
             const countEl = document.getElementById('likedTabCount');
             if (countEl) countEl.textContent = '0';
         }
     }
 
-    // ✅ CHARGER LES POSTS COMMENTÉS
     async loadCommentedPosts() {
         try {
             const commentsSnapshot = await firebase.firestore()
@@ -1175,16 +1250,28 @@ class PublicProfile {
             `;
         }).join('');
 
-        const followButtonHTML = !this.isOwnProfile ? `
-            <button 
-                id="followBtn" 
-                class="create-post-btn" 
-                onclick="window.publicProfile.toggleFollow()"
-                style="margin-top: 24px; ${this.isFollowing ? 'background: linear-gradient(135deg, #6b7280, #4b5563);' : ''}"
-            >
-                <i class="fas ${this.isFollowing ? 'fa-user-minus' : 'fa-user-plus'}"></i>
-                ${this.isFollowing ? 'Unfollow' : 'Follow'}
-            </button>
+        // ✅ BOUTONS D'ACTION (Follow + Message)
+        const actionButtonsHTML = !this.isOwnProfile ? `
+            <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+                <button 
+                    id="followBtn" 
+                    class="create-post-btn" 
+                    onclick="window.publicProfile.toggleFollow()"
+                    style="${this.isFollowing ? 'background: linear-gradient(135deg, #6b7280, #4b5563);' : ''}"
+                >
+                    <i class="fas ${this.isFollowing ? 'fa-user-minus' : 'fa-user-plus'}"></i>
+                    ${this.isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+                
+                <button 
+                    class="create-post-btn" 
+                    onclick="window.publicProfile.openChat()"
+                    style="background: linear-gradient(135deg, #10b981, #059669);"
+                >
+                    <i class="fas fa-comment-dots"></i>
+                    Send Message
+                </button>
+            </div>
         ` : `
             <a href="user-profile.html" class="create-post-btn" style="margin-top: 24px; text-decoration: none;">
                 <i class="fas fa-edit"></i>
@@ -1229,7 +1316,7 @@ class PublicProfile {
 
                     ${badges.length > 0 ? `<div class="profile-badges">${badgesHTML}</div>` : ''}
                     
-                    ${followButtonHTML}
+                    ${actionButtonsHTML}
                 </div>
             </div>
         `;
@@ -1240,6 +1327,24 @@ class PublicProfile {
         }
         
         document.title = `${displayName} - AlphaVault AI`;
+    }
+
+    // ✅ NOUVELLE MÉTHODE : Ouvrir le chat privé
+    async openChat() {
+        if (!window.privateChatSystem) {
+            console.error('❌ Private chat system not loaded');
+            alert('Chat system is not available. Please refresh the page.');
+            return;
+        }
+
+        if (!this.userData) {
+            console.error('❌ User data not loaded');
+            alert('Cannot open chat. User data not loaded.');
+            return;
+        }
+
+        console.log('💬 Opening chat with user:', this.userData);
+        await window.privateChatSystem.openChatWith(this.userId, this.userData);
     }
 
     async toggleFollow() {
@@ -1364,4 +1469,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ public-profile.js chargé (v3.3 - AUTH TIMING FIXED)');
+console.log('✅ public-profile.js chargé (v3.4 - CHAT INTEGRATION)');

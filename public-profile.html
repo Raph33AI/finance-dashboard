@@ -405,6 +405,42 @@
                     </div>
                 </div>
 
+                <!-- ============================================
+                    CHAT MODAL - Private Messaging
+                    ============================================ -->
+                <div id="chatModal" class="chat-modal" style="display: none;">
+                    <div class="chat-modal-content">
+                        <!-- Chat Header -->
+                        <div class="chat-header" id="chatHeader">
+                            <div style="text-align: center; padding: 20px; color: white;">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </div>
+                        </div>
+                        
+                        <!-- Messages Container -->
+                        <div class="chat-messages" id="chatMessagesContainer">
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="fas fa-comments" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i>
+                                <p>No messages yet</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Input Area -->
+                        <div class="chat-input-wrapper">
+                            <input 
+                                type="text" 
+                                id="chatMessageInput" 
+                                class="chat-input" 
+                                placeholder="Type your message..."
+                                maxlength="1000"
+                            >
+                            <button class="chat-send-btn" onclick="sendChatMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <footer>
                     <p><i class='fas fa-users'></i> AlphaVault AI Community</p>
                 </footer>
@@ -419,6 +455,7 @@
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/community-firebase.js'></script>
     <script src='assets/js/follow-system.js'></script>
+    <script src='assets/js/private-chat.js'></script>
     <script src='assets/js/public-profile.js'></script>
 
     <!-- User Menu Script -->
