@@ -631,13 +631,14 @@
 /**
  * ════════════════════════════════════════════════════════════════
  * NEWS TERMINAL - OPTIMIZED VERSION (MAX Articles Support)
- * WITH COMPANY NAMES & COUNTRIES EXTRACTION (NO MORE CDATA!)
+ * WITH COMPANY NAMES & COUNTRIES EXTRACTION
  * ════════════════════════════════════════════════════════════════
  */
 
 class NewsTerminal {
     constructor() {
         this.rssClient = new RSSClient();
+        this.entityDB = window.entityDB || new EntityDatabase();
         
         this.allArticles = [];
         this.filteredArticles = [];
@@ -648,112 +649,6 @@ class NewsTerminal {
         
         this.loadingInProgress = false;
         this.autoLoadMore = false;
-
-        // ✅ NOUVEAU : Dictionnaire Entreprises (Nom -> Ticker)
-        this.companyDatabase = {
-            // Tech Giants
-            'Apple': 'AAPL',
-            'Microsoft': 'MSFT',
-            'Google': 'GOOGL',
-            'Alphabet': 'GOOGL',
-            'Amazon': 'AMZN',
-            'Meta': 'META',
-            'Facebook': 'META',
-            'Tesla': 'TSLA',
-            'Nvidia': 'NVDA',
-            'AMD': 'AMD',
-            'Intel': 'INTC',
-            'Oracle': 'ORCL',
-            'Salesforce': 'CRM',
-            'Adobe': 'ADBE',
-            'Netflix': 'NFLX',
-            'PayPal': 'PYPL',
-            'Uber': 'UBER',
-            'Airbnb': 'ABNB',
-            'Shopify': 'SHOP',
-            'Snap': 'SNAP',
-            'Twitter': 'TWTR',
-            'X Corp': 'TWTR',
-            'IBM': 'IBM',
-            'Cisco': 'CSCO',
-            'Qualcomm': 'QCOM',
-            'Broadcom': 'AVGO',
-            
-            // Finance
-            'JPMorgan': 'JPM',
-            'Goldman Sachs': 'GS',
-            'Morgan Stanley': 'MS',
-            'Bank of America': 'BAC',
-            'Wells Fargo': 'WFC',
-            'Citigroup': 'C',
-            'American Express': 'AXP',
-            'Visa': 'V',
-            'Mastercard': 'MA',
-            'BlackRock': 'BLK',
-            'Charles Schwab': 'SCHW',
-            
-            // Consumer
-            'Coca-Cola': 'KO',
-            'PepsiCo': 'PEP',
-            'Nike': 'NKE',
-            'Starbucks': 'SBUX',
-            'McDonald\'s': 'MCD',
-            'Walmart': 'WMT',
-            'Target': 'TGT',
-            'Costco': 'COST',
-            'Procter & Gamble': 'PG',
-            'Johnson & Johnson': 'JNJ',
-            
-            // Energy
-            'ExxonMobil': 'XOM',
-            'Chevron': 'CVX',
-            'ConocoPhillips': 'COP',
-            'Shell': 'SHEL',
-            'BP': 'BP',
-            'TotalEnergies': 'TTE',
-            
-            // Healthcare
-            'Pfizer': 'PFE',
-            'Moderna': 'MRNA',
-            'AstraZeneca': 'AZN',
-            'Merck': 'MRK',
-            'Eli Lilly': 'LLY',
-            'Abbott': 'ABT',
-            'Bristol Myers': 'BMY',
-            
-            // Automotive
-            'Ford': 'F',
-            'General Motors': 'GM',
-            'Ferrari': 'RACE',
-            'Volkswagen': 'VWAGY',
-            'Toyota': 'TM',
-            'Honda': 'HMC',
-            
-            // Aerospace
-            'Boeing': 'BA',
-            'Lockheed Martin': 'LMT',
-            'Raytheon': 'RTX',
-            'Airbus': 'EADSY',
-            
-            // Retail
-            'Home Depot': 'HD',
-            'Lowe\'s': 'LOW',
-            'Best Buy': 'BBY',
-            'Macy\'s': 'M',
-            'Gap': 'GPS'
-        };
-
-        // ✅ NOUVEAU : Liste des pays (pour détection géographique)
-        this.countries = [
-            'United States', 'USA', 'America', 'U.S.',
-            'China', 'Japan', 'Germany', 'United Kingdom', 'UK', 'Britain',
-            'France', 'India', 'Italy', 'Brazil', 'Canada',
-            'Russia', 'South Korea', 'Spain', 'Australia', 'Mexico',
-            'Indonesia', 'Netherlands', 'Saudi Arabia', 'Turkey', 'Switzerland',
-            'Poland', 'Belgium', 'Sweden', 'Ireland', 'Norway',
-            'Austria', 'Denmark', 'Singapore', 'Israel', 'Hong Kong',
-            'Finland', 'Portugal', 'Greece', 'New Zealand', 'Europe', 'Asia'
-        ];
 
         this.init();
     }
@@ -768,7 +663,6 @@ class NewsTerminal {
     }
 
     setupEventListeners() {
-        // Search avec debounce
         let searchTimeout;
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
@@ -930,59 +824,9 @@ class NewsTerminal {
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // ✨ NOUVELLE MÉTHODE : EXTRACTION INTELLIGENTE DES ENTITÉS
-    // ════════════════════════════════════════════════════════════════
-
     extractEntities(article) {
-        const fullText = `${article.title} ${article.description}`.toLowerCase();
-        
-        const entities = {
-            companies: [],
-            countries: [],
-            tickers: [] // Conservé pour compatibilité
-        };
-
-        // ✅ EXTRACTION DES ENTREPRISES (avec détection intelligente)
-        Object.keys(this.companyDatabase).forEach(companyName => {
-            const regex = new RegExp(`\\b${companyName.toLowerCase()}\\b`, 'gi');
-            if (regex.test(fullText)) {
-                entities.companies.push({
-                    name: companyName,
-                    ticker: this.companyDatabase[companyName]
-                });
-                entities.tickers.push(this.companyDatabase[companyName]); // Pour compatibilité
-            }
-        });
-
-        // ✅ EXTRACTION DES PAYS
-        this.countries.forEach(country => {
-            const regex = new RegExp(`\\b${country.toLowerCase()}\\b`, 'gi');
-            if (regex.test(fullText)) {
-                if (!entities.countries.includes(country)) {
-                    entities.countries.push(country);
-                }
-            }
-        });
-
-        // ✅ DÉDOUBLONNAGE
-        entities.companies = entities.companies.filter((company, index, self) =>
-            index === self.findIndex((c) => c.ticker === company.ticker)
-        );
-        entities.tickers = [...new Set(entities.tickers)];
-
-        // ✅ FILTRAGE ANTI-CDATA (supprime les artefacts XML)
-        const invalidEntities = ['CDATA', 'XML', 'RSS', 'HTML', 'HTTP', 'HTTPS', 'WWW'];
-        entities.companies = entities.companies.filter(c => !invalidEntities.includes(c.name.toUpperCase()));
-        entities.countries = entities.countries.filter(c => !invalidEntities.includes(c.toUpperCase()));
-        entities.tickers = entities.tickers.filter(t => !invalidEntities.includes(t.toUpperCase()));
-
-        return entities;
+        return this.entityDB.extractEntities(article);
     }
-
-    // ════════════════════════════════════════════════════════════════
-    // CHARGEMENT DES ARTICLES (AVEC EXTRACTION DES ENTITÉS)
-    // ════════════════════════════════════════════════════════════════
 
     changeArticleLimit(limit) {
         console.log(`📊 Changing article limit to: ${limit >= 999999 ? 'ALL' : limit}`);
@@ -1000,19 +844,18 @@ class NewsTerminal {
                 maxPerSource: 100
             });
             
-            // ✅ ENRICHISSEMENT DES ARTICLES AVEC LES ENTITÉS
             this.allArticles = data.articles.map(article => {
                 const entities = this.extractEntities(article);
                 return {
                     ...article,
                     companies: entities.companies,
                     countries: entities.countries,
-                    tickers: entities.tickers // Pour compatibilité avec l'ancien système
+                    tickers: entities.tickers
                 };
             });
             
             console.log(`✅ Loaded ${this.allArticles.length} articles`);
-            console.log(`📊 Extracted entities from first article:`, this.allArticles[0]);
+            console.log(`📊 Sample entities:`, this.allArticles[0]);
             
             this.applyFilters();
             this.updateStats();
@@ -1057,14 +900,13 @@ class NewsTerminal {
                         Loading MAXIMUM articles...
                     </p>
                     <p style='font-size: 14px; color: var(--text-secondary); margin-top: 8px;'>
-                        Fetching up to 200 articles per source + Extracting company names...
+                        Extracting company names & countries...
                     </p>
                 </div>
             `;
             
             const data = await this.rssClient.loadMaxArticles();
             
-            // ✅ ENRICHISSEMENT AVEC EXTRACTION DES ENTITÉS
             this.allArticles = data.articles.map(article => {
                 const entities = this.extractEntities(article);
                 return {
@@ -1090,10 +932,6 @@ class NewsTerminal {
             this.loadingInProgress = false;
         }
     }
-
-    // ════════════════════════════════════════════════════════════════
-    // FILTRAGE ET TRI
-    // ════════════════════════════════════════════════════════════════
 
     applyFilters() {
         const searchQuery = document.getElementById('searchInput')?.value.toLowerCase() || '';
@@ -1145,7 +983,6 @@ class NewsTerminal {
         if (article.source.includes('marketwatch-realtime')) score += 8;
         if (article.source.includes('cnbc-tech')) score += 7;
         
-        // ✅ NOUVEAU : Score basé sur le nombre d'entreprises mentionnées
         score += article.companies.length * 5;
         score += article.countries.length * 3;
         if (article.image) score += 3;
@@ -1175,10 +1012,6 @@ class NewsTerminal {
         
         return 'all';
     }
-
-    // ════════════════════════════════════════════════════════════════
-    // AFFICHAGE DES ARTICLES (AVEC NOMS D'ENTREPRISES)
-    // ════════════════════════════════════════════════════════════════
 
     displayArticles() {
         const container = document.getElementById('articlesContainer');
@@ -1286,13 +1119,11 @@ class NewsTerminal {
         }
     }
 
-    // ✅ NOUVELLE MÉTHODE : Filtre par entité (entreprise ou pays)
     filterByEntity(entity) {
         document.getElementById('searchInput').value = entity;
         this.applyFilters();
     }
 
-    // Ancienne méthode conservée pour compatibilité
     filterByTicker(ticker) {
         document.getElementById('searchInput').value = ticker;
         this.applyFilters();
@@ -1319,7 +1150,6 @@ class NewsTerminal {
         const totalElement = document.getElementById('totalArticles');
         if (totalElement) totalElement.textContent = total;
 
-        // ✅ STATISTIQUES BASÉES SUR LES ENTREPRISES
         const companyCount = {};
         this.allArticles.forEach(article => {
             article.companies.forEach(company => {
@@ -1423,7 +1253,6 @@ class NewsTerminal {
     }
 }
 
-// Initialisation
 let newsTerminal;
 document.addEventListener('DOMContentLoaded', () => {
     newsTerminal = new NewsTerminal();
