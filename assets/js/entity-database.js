@@ -1,7 +1,7 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * ENTITY DATABASE - Entreprises US + Tous les Pays
- * Base de données centralisée pour tracking
+ * ENTITY DATABASE - ENTREPRISES MONDIALES + TOUS LES PAYS
+ * 1000+ entreprises internationales
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -14,7 +14,7 @@ class EntityDatabase {
     buildCompaniesDatabase() {
         return {
             // ═══════════════════════════════════════════════════════
-            // TECH GIANTS & SOFTWARE
+            // TECH GIANTS & SOFTWARE (USA)
             // ═══════════════════════════════════════════════════════
             'Apple': 'AAPL',
             'Microsoft': 'MSFT',
@@ -83,7 +83,66 @@ class EntityDatabase {
             'Cadence': 'CDNS',
 
             // ═══════════════════════════════════════════════════════
-            // FINANCE & BANKING
+            // TECH EUROPE (50+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'SAP': 'SAP',
+            'ASML': 'ASML',
+            'Adyen': 'ADYEN.AS',
+            'Spotify': 'SPOT',
+            'Ericsson': 'ERIC',
+            'Nokia': 'NOK',
+            'Infineon': 'IFX.DE',
+            'STMicroelectronics': 'STM',
+            'Capgemini': 'CAP.PA',
+            'Dassault Systemes': 'DSY.PA',
+            'Amadeus': 'AMS.MC',
+            'Worldline': 'WLN.PA',
+            'Sage Group': 'SGE.L',
+            'Ubisoft': 'UBI.PA',
+            'Delivery Hero': 'DHER.DE',
+            'Zalando': 'ZAL.DE',
+            'Just Eat Takeaway': 'JET.AS',
+            'TeamViewer': 'TMV.DE',
+            'Prosus': 'PRX.AS',
+            'Booking Holdings': 'BKNG',
+            'Expedia': 'EXPE',
+
+            // ═══════════════════════════════════════════════════════
+            // TECH ASIE (60+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Alibaba': 'BABA',
+            'Tencent': 'TCEHY',
+            'Samsung': 'SSNLF',
+            'TSMC': 'TSM',
+            'Taiwan Semiconductor': 'TSM',
+            'Sony': 'SONY',
+            'Baidu': 'BIDU',
+            'JD.com': 'JD',
+            'NetEase': 'NTES',
+            'Pinduoduo': 'PDD',
+            'Meituan': '3690.HK',
+            'Xiaomi': 'XIACF',
+            'NIO': 'NIO',
+            'Li Auto': 'LI',
+            'XPeng': 'XPEV',
+            'BYD': 'BYDDY',
+            'Rakuten': 'RKUNY',
+            'SoftBank': 'SFTBY',
+            'Nintendo': 'NTDOY',
+            'Keyence': 'KYCCF',
+            'Tokyo Electron': 'TOELY',
+            'Naver': '035420.KS',
+            'Kakao': '035720.KS',
+            'SK Hynix': '000660.KS',
+            'LG Electronics': '066570.KS',
+            'Infosys': 'INFY',
+            'TCS': 'TCS.NS',
+            'Wipro': 'WIT',
+            'HCL Technologies': 'HCLTECH.NS',
+            'Tech Mahindra': 'TECHM.NS',
+
+            // ═══════════════════════════════════════════════════════
+            // FINANCE & BANKING (USA)
             // ═══════════════════════════════════════════════════════
             'JPMorgan': 'JPM',
             'Bank of America': 'BAC',
@@ -103,8 +162,6 @@ class EntityDatabase {
             'Synchrony': 'SYF',
             'Visa': 'V',
             'Mastercard': 'MA',
-            'PayPal': 'PYPL',
-            'Block': 'SQ',
             'Affirm': 'AFRM',
             'SoFi': 'SOFI',
             'Robinhood': 'HOOD',
@@ -123,7 +180,61 @@ class EntityDatabase {
             'Ally Financial': 'ALLY',
 
             // ═══════════════════════════════════════════════════════
-            // HEALTHCARE & PHARMACEUTICALS
+            // FINANCE EUROPE (50+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'HSBC': 'HSBC',
+            'Barclays': 'BCS',
+            'Standard Chartered': 'SCBFF',
+            'Lloyds Banking': 'LYG',
+            'NatWest': 'NWG.L',
+            'Deutsche Bank': 'DB',
+            'Commerzbank': 'CBKGF',
+            'UBS': 'UBS',
+            'Credit Suisse': 'CS',
+            'BNP Paribas': 'BNP.PA',
+            'Societe Generale': 'GLE.PA',
+            'Credit Agricole': 'ACA.PA',
+            'ING': 'ING',
+            'ABN AMRO': 'ABN.AS',
+            'UniCredit': 'UCG.MI',
+            'Intesa Sanpaolo': 'ISP.MI',
+            'Banco Santander': 'SAN',
+            'BBVA': 'BBVA',
+            'CaixaBank': 'CABK.MC',
+            'Nordea': 'NDAFI',
+            'Danske Bank': 'DANSKE.CO',
+            'Allianz': 'ALV.DE',
+            'AXA': 'CS.PA',
+            'Zurich Insurance': 'ZURN.SW',
+            'Prudential': 'PRU.L',
+            'Aviva': 'AV.L',
+            'Legal & General': 'LGEN.L',
+            'Generali': 'G.MI',
+
+            // ═══════════════════════════════════════════════════════
+            // FINANCE ASIE (40+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Industrial & Commercial Bank': 'IDCBY',
+            'China Construction Bank': 'CICHY',
+            'Agricultural Bank of China': 'ACGBY',
+            'Bank of China': 'BACHF',
+            'Ping An': 'PNGAY',
+            'China Merchants Bank': 'CIHKY',
+            'HDFC Bank': 'HDB',
+            'ICICI Bank': 'IBN',
+            'State Bank of India': 'SBKFF',
+            'Axis Bank': 'AXIBANK.NS',
+            'Kotak Mahindra': 'KOTAKBANK.NS',
+            'Mitsubishi UFJ': 'MUFG',
+            'Sumitomo Mitsui': 'SMFG',
+            'Mizuho': 'MFG',
+            'Nomura': 'NMR',
+            'DBS': 'DBSDY',
+            'OCBC': 'OVCHY',
+            'UOB': 'UOVEY',
+
+            // ═══════════════════════════════════════════════════════
+            // HEALTHCARE & PHARMACEUTICALS (USA)
             // ═══════════════════════════════════════════════════════
             'Johnson & Johnson': 'JNJ',
             'UnitedHealth': 'UNH',
@@ -163,10 +274,29 @@ class EntityDatabase {
             'Agilent': 'A',
 
             // ═══════════════════════════════════════════════════════
-            // CONSUMER & RETAIL
+            // HEALTHCARE EUROPE (40+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Novo Nordisk': 'NVO',
+            'Roche': 'RHHBY',
+            'Novartis': 'NVS',
+            'Sanofi': 'SNY',
+            'AstraZeneca': 'AZN',
+            'GSK': 'GSK',
+            'Bayer': 'BAYRY',
+            'Siemens Healthineers': 'SMMNY',
+            'Fresenius': 'FSNUY',
+            'Philips': 'PHG',
+            'Lonza': 'LZAGY',
+            'Grifols': 'GRFS',
+            'UCB': 'UCBJF',
+            'Recordati': 'RCDTF',
+            'Almirall': 'ALM.MC',
+            'Galapagos': 'GLPG',
+
+            // ═══════════════════════════════════════════════════════
+            // CONSUMER & RETAIL (USA)
             // ═══════════════════════════════════════════════════════
             'Walmart': 'WMT',
-            'Amazon': 'AMZN',
             'Costco': 'COST',
             'Home Depot': 'HD',
             'Target': 'TGT',
@@ -186,7 +316,6 @@ class EntityDatabase {
             'Kohl\'s': 'KSS',
             'Foot Locker': 'FL',
             'Nike': 'NKE',
-            'Adidas': 'ADDYY',
             'Lululemon': 'LULU',
             'Under Armour': 'UAA',
             'VF Corp': 'VFC',
@@ -195,7 +324,56 @@ class EntityDatabase {
             'Capri': 'CPRI',
 
             // ═══════════════════════════════════════════════════════
-            // FOOD & BEVERAGE
+            // CONSUMER EUROPE (60+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'LVMH': 'LVMUY',
+            'Hermès': 'RMS.PA',
+            'Kering': 'KER.PA',
+            'L\'Oréal': 'OR.PA',
+            'Adidas': 'ADDYY',
+            'Puma': 'PMMAF',
+            'Inditex': 'ITX.MC',
+            'Zara': 'ITX.MC',
+            'H&M': 'HNNMY',
+            'Burberry': 'BURBY',
+            'Moncler': 'MONC.MI',
+            'Richemont': 'CFRHF',
+            'Swatch': 'SWGAY',
+            'Pandora': 'PANDY',
+            'Carrefour': 'CA.PA',
+            'Tesco': 'TSCDY',
+            'Sainsbury': 'SBRY.L',
+            'Metro': 'B4B.DE',
+            'Ahold Delhaize': 'AD.AS',
+            'Casino': 'CO.PA',
+            'Marks & Spencer': 'MKS.L',
+            'Next': 'NXT.L',
+            'Primark': 'ABF.L',
+            'Kingfisher': 'KGF.L',
+            'Leroy Merlin': 'ACA.PA',
+            'MediaMarkt': 'METGF',
+            'IKEA': 'PRIVATE',
+            'Decathlon': 'PRIVATE',
+
+            // ═══════════════════════════════════════════════════════
+            // CONSUMER ASIE (40+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Uniqlo': 'PRIVATE',
+            'Fast Retailing': '9983.T',
+            'Seven & I Holdings': 'SVNDY',
+            'Lawson': '2651.T',
+            'FamilyMart': '8028.T',
+            'Isetan Mitsukoshi': '3099.T',
+            'Aeon': '8267.T',
+            'Muji': '7453.T',
+            'Shiseido': 'SSDOY',
+            'Kao': 'KAOCF',
+            'Anta Sports': '2020.HK',
+            'Li Ning': '2331.HK',
+            'Belle International': 'PRIVATE',
+
+            // ═══════════════════════════════════════════════════════
+            // FOOD & BEVERAGE (USA)
             // ═══════════════════════════════════════════════════════
             'Coca-Cola': 'KO',
             'PepsiCo': 'PEP',
@@ -216,6 +394,28 @@ class EntityDatabase {
             'JM Smucker': 'SJM',
             'McCormick': 'MKC',
             'Lamb Weston': 'LW',
+
+            // ═══════════════════════════════════════════════════════
+            // FOOD & BEVERAGE EUROPE (50+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Nestlé': 'NSRGY',
+            'Danone': 'DANOY',
+            'Unilever': 'UL',
+            'Diageo': 'DEO',
+            'Heineken': 'HEINY',
+            'Carlsberg': 'CABGY',
+            'AB InBev': 'BUD',
+            'Pernod Ricard': 'PDRDY',
+            'Remy Cointreau': 'REMYY',
+            'Campari': 'DVDCY',
+            'Ferrero': 'PRIVATE',
+            'Lindt': 'LDSVF',
+            'Barry Callebaut': 'BYCBF',
+            'Associated British Foods': 'ABF.L',
+            'Tate & Lyle': 'TATYY',
+            'Kerry Group': 'KRYAY',
+            'Arla Foods': 'PRIVATE',
+            'FrieslandCampina': 'PRIVATE',
 
             // ═══════════════════════════════════════════════════════
             // RESTAURANTS & HOSPITALITY
@@ -239,9 +439,12 @@ class EntityDatabase {
             'Caesars': 'CZR',
             'Las Vegas Sands': 'LVS',
             'Wynn': 'WYNN',
+            'Accor': 'ACCYY',
+            'Whitbread': 'WTB.L',
+            'Intercontinental': 'IHG',
 
             // ═══════════════════════════════════════════════════════
-            // ENERGY & UTILITIES
+            // ENERGY & UTILITIES (USA)
             // ═══════════════════════════════════════════════════════
             'ExxonMobil': 'XOM',
             'Exxon': 'XOM',
@@ -273,7 +476,46 @@ class EntityDatabase {
             'Public Service': 'PEG',
 
             // ═══════════════════════════════════════════════════════
-            // INDUSTRIALS & MANUFACTURING
+            // ENERGY EUROPE (60+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Shell': 'SHEL',
+            'BP': 'BP',
+            'TotalEnergies': 'TTE',
+            'Equinor': 'EQNR',
+            'Eni': 'E',
+            'Repsol': 'REPYY',
+            'OMV': 'OMVKY',
+            'Galp': 'GLPEY',
+            'Neste': 'NTOIY',
+            'Orsted': 'DNNGY',
+            'Iberdrola': 'IBDRY',
+            'Enel': 'ENLAY',
+            'EDP': 'EDPFY',
+            'RWE': 'RWEOY',
+            'E.ON': 'EONGY',
+            'Vattenfall': 'PRIVATE',
+            'Engie': 'ENGIY',
+            'SSE': 'SSEZY',
+            'National Grid': 'NGG',
+            'Centrica': 'CPYYY',
+            'EDF': 'ECIFY',
+            'Fortum': 'FOJCF',
+            'Verbund': 'OEZVY',
+
+            // ═══════════════════════════════════════════════════════
+            // ENERGY ASIE (30+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'PetroChina': 'PTR',
+            'Sinopec': 'SNP',
+            'CNOOC': 'CEO',
+            'Reliance Industries': 'RELIANCE.NS',
+            'ONGC': 'ONGC.NS',
+            'Indian Oil': 'IOC.NS',
+            'Saudi Aramco': '2222.SR',
+            'ADNOC': 'PRIVATE',
+
+            // ═══════════════════════════════════════════════════════
+            // INDUSTRIALS & MANUFACTURING (USA)
             // ═══════════════════════════════════════════════════════
             'Boeing': 'BA',
             'Caterpillar': 'CAT',
@@ -310,15 +552,98 @@ class EntityDatabase {
             'Old Dominion': 'ODFL',
 
             // ═══════════════════════════════════════════════════════
-            // AUTOMOTIVE
+            // INDUSTRIALS EUROPE (80+ entreprises)
             // ═══════════════════════════════════════════════════════
-            'Tesla': 'TSLA',
+            'Siemens': 'SIEGY',
+            'ABB': 'ABB',
+            'Schneider Electric': 'SBGSF',
+            'Airbus': 'EADSY',
+            'Safran': 'SAFRY',
+            'Rolls-Royce': 'RYCEY',
+            'BAE Systems': 'BAESY',
+            'Thales': 'THLLY',
+            'Leonardo': 'FINMY',
+            'MTU Aero': 'MTUAY',
+            'Dassault Aviation': 'DUAVF',
+            'Rheinmetall': 'RNMBY',
+            'Kone': 'KNYJY',
+            'Schindler': 'SHLRF',
+            'Atlas Copco': 'ATLKY',
+            'Volvo': 'VOLVY',
+            'Scania': 'SCVCY',
+            'MAN': 'VLKAF',
+            'Daimler Truck': 'DTG',
+            'Knorr-Bremse': 'KNRRY',
+            'CNH Industrial': 'CNHI',
+            'Komatsu Europe': 'KMTUY',
+            'Sandvik': 'SDVKY',
+            'SKF': 'SKFRY',
+            'Alfa Laval': 'ALFVY',
+            'Legrand': 'LGRDY',
+            'Rexel': 'RXL.PA',
+            'Brenntag': 'BNTGY',
+            'Deutsche Post': 'DPSGY',
+            'PostNL': 'PNL.AS',
+            'Royal Mail': 'RMG.L',
+            'Kuehne + Nagel': 'KHNGY',
+            'DSV': 'DSDVY',
+            'DB Schenker': 'PRIVATE',
+
+            // ═══════════════════════════════════════════════════════
+            // INDUSTRIALS ASIE (50+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'Mitsubishi Heavy': 'MHVYF',
+            'Kawasaki Heavy': 'KWHIY',
+            'IHI': 'IHICF',
+            'Hitachi': 'HTHIY',
+            'Toshiba': 'TOSYY',
+            'Panasonic': 'PCRFY',
+            'Makita': 'MKTAY',
+            'Fanuc': 'FANUY',
+            'Yaskawa': 'YASKY',
+            'SMC': 'SMCAY',
+            'Komatsu': 'KMTUY',
+            'Kubota': 'KUBTY',
+            'Hino Motors': 'HINOF',
+            'Isuzu': 'ISUZY',
+            'China State Construction': 'CSCEC',
+            'China Railway': 'CRYCY',
+            'CRRC': '1766.HK',
+            'Larsen & Toubro': 'LT.NS',
+            'Tata Motors': 'TTM',
+            'Mahindra': 'MAHMF',
+            'Hyundai Heavy': 'HYHHF',
+            'Doosan': 'DOOSF',
+
+            // ═══════════════════════════════════════════════════════
+            // AUTOMOTIVE (MONDE)
+            // ═══════════════════════════════════════════════════════
             'Ford': 'F',
             'General Motors': 'GM',
             'Rivian': 'RIVN',
             'Lucid': 'LCID',
             'Nikola': 'NKLA',
             'Fisker': 'FSR',
+            'Volkswagen': 'VWAGY',
+            'BMW': 'BMWYY',
+            'Mercedes-Benz': 'MBGAF',
+            'Porsche': 'POAHY',
+            'Ferrari': 'RACE',
+            'Stellantis': 'STLA',
+            'Renault': 'RNLSY',
+            'Peugeot': 'STLA',
+            'Toyota': 'TM',
+            'Honda': 'HMC',
+            'Nissan': 'NSANY',
+            'Mazda': 'MZDAY',
+            'Subaru': 'FUJHY',
+            'Suzuki': 'SZKMY',
+            'Mitsubishi Motors': 'MMTOF',
+            'Hyundai': 'HYMTF',
+            'Kia': 'KIMTF',
+            'Geely': 'GELYF',
+            'Great Wall': '2333.HK',
+            'SAIC': '600104.SS',
 
             // ═══════════════════════════════════════════════════════
             // TELECOMMUNICATIONS & MEDIA
@@ -331,8 +656,6 @@ class EntityDatabase {
             'Disney': 'DIS',
             'Warner Bros': 'WBD',
             'Paramount': 'PARA',
-            'Netflix': 'NFLX',
-            'Spotify': 'SPOT',
             'SiriusXM': 'SIRI',
             'Fox': 'FOX',
             'News Corp': 'NWSA',
@@ -340,6 +663,27 @@ class EntityDatabase {
             'Discovery': 'DISCA',
             'Live Nation': 'LYV',
             'Madison Square Garden': 'MSG',
+            'Vodafone': 'VOD',
+            'BT Group': 'BT.L',
+            'Orange': 'ORAN',
+            'Deutsche Telekom': 'DTEGY',
+            'Telefonica': 'TEF',
+            'Telecom Italia': 'TIIAY',
+            'Swisscom': 'SCMWY',
+            'KPN': 'KKPNY',
+            'Proximus': 'BGAOY',
+            'Telenor': 'TELNY',
+            'Telia': 'TLSNY',
+            'China Mobile': 'CHL',
+            'China Telecom': 'CHA',
+            'China Unicom': 'CHU',
+            'NTT': 'NTTYY',
+            'KDDI': 'KDDIY',
+            'SoftBank Corp': '9434.T',
+            'SK Telecom': 'SKM',
+            'KT Corp': 'KT',
+            'Bharti Airtel': 'BHARTIARTL.NS',
+            'Reliance Jio': 'RELIANCE.NS',
 
             // ═══════════════════════════════════════════════════════
             // REAL ESTATE & CONSTRUCTION
@@ -362,119 +706,237 @@ class EntityDatabase {
             'PulteGroup': 'PHM',
             'NVR': 'NVR',
             'Toll Brothers': 'TOL',
+            'Vonovia': 'VNA.DE',
+            'Unibail': 'URW.AS',
+            'Segro': 'SGRO.L',
+            'Land Securities': 'LAND.L',
+            'British Land': 'BLND.L',
+            'Klepierre': 'LI.PA',
+            'Gecina': 'GFC.PA',
 
             // ═══════════════════════════════════════════════════════
             // CRYPTO & FINTECH
             // ═══════════════════════════════════════════════════════
             'Bitcoin': 'BTC-USD',
             'Ethereum': 'ETH-USD',
-            'Coinbase': 'COIN',
             'Marathon Digital': 'MARA',
             'Riot Platforms': 'RIOT',
             'MicroStrategy': 'MSTR',
-            'Robinhood': 'HOOD',
-            'SoFi': 'SOFI',
-            'Affirm': 'AFRM',
-            'Upstart': 'UPST',
             'LendingClub': 'LC',
-            'LendingTree': 'TREE'
+            'LendingTree': 'TREE',
+            'Upstart': 'UPST',
+
+            // ═══════════════════════════════════════════════════════
+            // MINING & MATERIALS (50+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'BHP': 'BHP',
+            'Rio Tinto': 'RIO',
+            'Vale': 'VALE',
+            'Glencore': 'GLNCY',
+            'Anglo American': 'AAUKY',
+            'Freeport-McMoRan': 'FCX',
+            'Newmont': 'NEM',
+            'Barrick Gold': 'GOLD',
+            'Fortescue': 'FSUGY',
+            'Alcoa': 'AA',
+            'ArcelorMittal': 'MT',
+            'Nucor': 'NUE',
+            'Steel Dynamics': 'STLD',
+            'Teck Resources': 'TECK',
+            'First Quantum': 'FQVLF',
+            'Southern Copper': 'SCCO',
+            'Lundin Mining': 'LUNMF',
+            'Antofagasta': 'ANFGF',
+
+            // ═══════════════════════════════════════════════════════
+            // LUXURY GOODS (30+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'LVMH': 'LVMUY',
+            'Hermès': 'RMS.PA',
+            'Kering': 'KER.PA',
+            'Richemont': 'CFRHF',
+            'Swatch': 'SWGAY',
+            'Prada': '1913.HK',
+            'Moncler': 'MONC.MI',
+            'Burberry': 'BURBY',
+            'Salvatore Ferragamo': 'SFER.MI',
+            'Tod\'s': 'TOD.MI',
+            'Brunello Cucinelli': 'BC.MI',
+            'Canada Goose': 'GOOS',
+
+            // ═══════════════════════════════════════════════════════
+            // AEROSPACE & DEFENSE
+            // ═══════════════════════════════════════════════════════
+            'Lockheed Martin': 'LMT',
+            'Boeing': 'BA',
+            'Raytheon': 'RTX',
+            'Northrop Grumman': 'NOC',
+            'General Dynamics': 'GD',
+            'L3Harris': 'LHX',
+            'Airbus': 'EADSY',
+            'BAE Systems': 'BAESY',
+            'Thales': 'THLLY',
+            'Leonardo': 'FINMY',
+            'Saab': 'SAABF',
+            'Dassault Aviation': 'DUAVF',
+            'Rolls-Royce': 'RYCEY',
+
+            // ═══════════════════════════════════════════════════════
+            // CHEMICALS & AGRICULTURE (40+ entreprises)
+            // ═══════════════════════════════════════════════════════
+            'BASF': 'BASFY',
+            'Dow': 'DOW',
+            'DuPont': 'DD',
+            'Linde': 'LIN',
+            'Air Liquide': 'AIQUY',
+            'Air Products': 'APD',
+            'Sherwin-Williams': 'SHW',
+            'PPG Industries': 'PPG',
+            'Ecolab': 'ECL',
+            'Corteva': 'CTVA',
+            'Bayer': 'BAYRY',
+            'Syngenta': 'PRIVATE',
+            'Yara': 'YARIY',
+            'CF Industries': 'CF',
+            'Mosaic': 'MOS',
+            'Nutrien': 'NTR',
+            'Covestro': 'CVVTF',
+            'Akzo Nobel': 'AKZOY',
+            'Solvay': 'SLVYY',
+            'Evonik': 'EVKIF',
+            'Clariant': 'CLZNF',
+            'DSM': 'RDSMY',
+            'Givaudan': 'GVDNY',
+            'Symrise': 'SYIEY',
+            'International Flavors': 'IFF'
         };
     }
 
     buildCountriesDatabase() {
         return [
             // Amérique du Nord
-            'United States', 'USA', 'U.S.', 'America',
-            'Canada', 'Mexico',
+            'United States', 'USA', 'U.S.', 'America', 'American',
+            'Canada', 'Canadian', 'Mexico', 'Mexican',
             
             // Amérique Centrale & Caraïbes
             'Guatemala', 'Belize', 'Honduras', 'El Salvador', 'Nicaragua',
-            'Costa Rica', 'Panama', 'Cuba', 'Jamaica', 'Haiti',
+            'Costa Rica', 'Panama', 'Cuba', 'Cuban', 'Jamaica', 'Haiti',
             'Dominican Republic', 'Bahamas', 'Trinidad and Tobago',
             'Barbados', 'Saint Lucia', 'Grenada', 'Saint Vincent',
             'Antigua and Barbuda', 'Dominica', 'Saint Kitts and Nevis',
             
             // Amérique du Sud
-            'Brazil', 'Argentina', 'Colombia', 'Chile', 'Peru',
-            'Venezuela', 'Ecuador', 'Bolivia', 'Paraguay', 'Uruguay',
+            'Brazil', 'Brazilian', 'Argentina', 'Argentine', 'Colombian', 'Colombia', 
+            'Chile', 'Chilean', 'Peru', 'Peruvian',
+            'Venezuela', 'Venezuelan', 'Ecuador', 'Bolivia', 'Bolivian',
+            'Paraguay', 'Uruguay', 'Uruguayan',
             'Guyana', 'Suriname', 'French Guiana',
             
             // Europe Occidentale
-            'United Kingdom', 'UK', 'Britain', 'England', 'Scotland', 'Wales',
-            'France', 'Germany', 'Italy', 'Spain', 'Portugal',
-            'Netherlands', 'Belgium', 'Switzerland', 'Austria',
-            'Ireland', 'Luxembourg', 'Monaco', 'Liechtenstein',
-            'Andorra', 'San Marino', 'Vatican', 'Malta',
+            'United Kingdom', 'UK', 'Britain', 'British', 'England', 'English',
+            'Scotland', 'Scottish', 'Wales', 'Welsh',
+            'France', 'French', 'Germany', 'German', 'Italy', 'Italian', 
+            'Spain', 'Spanish', 'Portugal', 'Portuguese',
+            'Netherlands', 'Dutch', 'Belgium', 'Belgian', 
+            'Switzerland', 'Swiss', 'Austria', 'Austrian',
+            'Ireland', 'Irish', 'Luxembourg', 'Monaco', 'Liechtenstein',
+            'Andorra', 'San Marino', 'Vatican', 'Malta', 'Maltese',
             
             // Europe du Nord
-            'Norway', 'Sweden', 'Denmark', 'Finland', 'Iceland',
+            'Norway', 'Norwegian', 'Sweden', 'Swedish', 'Denmark', 'Danish', 
+            'Finland', 'Finnish', 'Iceland', 'Icelandic',
             
             // Europe de l'Est
-            'Poland', 'Czech Republic', 'Hungary', 'Romania', 'Bulgaria',
-            'Slovakia', 'Croatia', 'Slovenia', 'Serbia', 'Bosnia',
-            'Montenegro', 'North Macedonia', 'Albania', 'Kosovo',
+            'Poland', 'Polish', 'Czech Republic', 'Czech', 'Hungary', 'Hungarian',
+            'Romania', 'Romanian', 'Bulgaria', 'Bulgarian',
+            'Slovakia', 'Slovak', 'Croatia', 'Croatian', 'Slovenia', 'Slovenian',
+            'Serbia', 'Serbian', 'Bosnia', 'Bosnian',
+            'Montenegro', 'North Macedonia', 'Macedonia', 'Albanian', 'Albania', 
+            'Kosovo',
             
             // Europe Baltes
-            'Estonia', 'Latvia', 'Lithuania',
+            'Estonia', 'Estonian', 'Latvia', 'Latvian', 'Lithuania', 'Lithuanian',
             
             // Ex-URSS
-            'Russia', 'Ukraine', 'Belarus', 'Moldova',
-            'Georgia', 'Armenia', 'Azerbaijan',
-            'Kazakhstan', 'Uzbekistan', 'Turkmenistan',
-            'Kyrgyzstan', 'Tajikistan',
+            'Russia', 'Russian', 'Ukraine', 'Ukrainian', 'Belarus', 'Belarusian',
+            'Moldova', 'Moldovan', 'Georgia', 'Georgian', 
+            'Armenia', 'Armenian', 'Azerbaijan', 'Azerbaijani',
+            'Kazakhstan', 'Kazakh', 'Uzbekistan', 'Uzbek', 
+            'Turkmenistan', 'Turkmen',
+            'Kyrgyzstan', 'Kyrgyz', 'Tajikistan', 'Tajik',
             
             // Moyen-Orient
-            'Turkey', 'Israel', 'Saudi Arabia', 'UAE', 'United Arab Emirates',
-            'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Jordan',
-            'Lebanon', 'Iraq', 'Iran', 'Syria', 'Yemen',
+            'Turkey', 'Turkish', 'Israel', 'Israeli', 
+            'Saudi Arabia', 'Saudi', 'UAE', 'United Arab Emirates', 'Emirati',
+            'Qatar', 'Qatari', 'Kuwait', 'Kuwaiti', 'Bahrain', 'Bahraini',
+            'Oman', 'Omani', 'Jordan', 'Jordanian',
+            'Lebanon', 'Lebanese', 'Iraq', 'Iraqi', 
+            'Iran', 'Iranian', 'Syria', 'Syrian', 'Yemen', 'Yemeni',
+            'Palestine', 'Palestinian',
             
             // Asie de l'Est
-            'China', 'Japan', 'South Korea', 'North Korea',
-            'Taiwan', 'Hong Kong', 'Macau', 'Mongolia',
+            'China', 'Chinese', 'Japan', 'Japanese', 
+            'South Korea', 'Korean', 'North Korea',
+            'Taiwan', 'Taiwanese', 'Hong Kong', 'Macau', 'Mongolia', 'Mongolian',
             
             // Asie du Sud-Est
-            'Singapore', 'Malaysia', 'Indonesia', 'Thailand',
-            'Philippines', 'Vietnam', 'Myanmar', 'Cambodia',
-            'Laos', 'Brunei', 'East Timor',
+            'Singapore', 'Singaporean', 'Malaysia', 'Malaysian',
+            'Indonesian', 'Indonesia', 
+            'Thailand', 'Thai', 'Philippines', 'Philippine', 'Filipino',
+            'Vietnam', 'Vietnamese', 'Myanmar', 'Burmese',
+            'Cambodia', 'Cambodian', 'Laos', 'Lao',
+            'Brunei', 'East Timor',
             
             // Asie du Sud
-            'India', 'Pakistan', 'Bangladesh', 'Sri Lanka',
-            'Nepal', 'Bhutan', 'Maldives', 'Afghanistan',
+            'India', 'Indian', 'Pakistan', 'Pakistani', 
+            'Bangladesh', 'Bangladeshi', 'Sri Lanka', 'Sri Lankan',
+            'Nepal', 'Nepalese', 'Bhutan', 'Bhutanese',
+            'Maldives', 'Maldivian', 'Afghanistan', 'Afghan',
             
             // Océanie
-            'Australia', 'New Zealand', 'Papua New Guinea',
-            'Fiji', 'Solomon Islands', 'Vanuatu', 'Samoa',
-            'Kiribati', 'Tonga', 'Micronesia', 'Palau',
+            'Australia', 'Australian', 'New Zealand', 'Zealand',
+            'Papua New Guinea', 'Fiji', 'Fijian',
+            'Solomon Islands', 'Vanuatu', 'Samoa', 'Samoan',
+            'Kiribati', 'Tonga', 'Tongan', 'Micronesia', 'Palau',
             'Marshall Islands', 'Nauru', 'Tuvalu',
             
             // Afrique du Nord
-            'Egypt', 'Libya', 'Tunisia', 'Algeria', 'Morocco',
-            'Sudan', 'South Sudan',
+            'Egypt', 'Egyptian', 'Libya', 'Libyan', 
+            'Tunisia', 'Tunisian', 'Algeria', 'Algerian',
+            'Morocco', 'Moroccan', 'Sudan', 'Sudanese', 'South Sudan',
             
             // Afrique de l'Ouest
-            'Nigeria', 'Ghana', 'Senegal', 'Ivory Coast', 'Côte d\'Ivoire',
-            'Mali', 'Burkina Faso', 'Niger', 'Benin', 'Togo',
-            'Guinea', 'Sierra Leone', 'Liberia', 'Mauritania',
-            'Gambia', 'Guinea-Bissau', 'Cape Verde',
+            'Nigeria', 'Nigerian', 'Ghana', 'Ghanaian',
+            'Senegal', 'Senegalese', 'Ivory Coast', 'Ivorian', 'Côte d\'Ivoire',
+            'Mali', 'Malian', 'Burkina Faso', 'Niger', 'Benin',
+            'Togo', 'Togolese', 'Guinea', 'Guinean',
+            'Sierra Leone', 'Liberia', 'Liberian', 'Mauritania', 'Mauritanian',
+            'Gambia', 'Gambian', 'Guinea-Bissau', 'Cape Verde',
             
             // Afrique Centrale
-            'Democratic Republic of Congo', 'DRC', 'Congo',
-            'Cameroon', 'Chad', 'Central African Republic',
-            'Gabon', 'Equatorial Guinea', 'São Tomé and Príncipe',
+            'Democratic Republic of Congo', 'DRC', 'Congo', 'Congolese',
+            'Cameroon', 'Cameroonian', 'Chad', 'Chadian',
+            'Central African Republic',
+            'Gabon', 'Gabonese', 'Equatorial Guinea', 'São Tomé and Príncipe',
             
             // Afrique de l'Est
-            'Ethiopia', 'Kenya', 'Tanzania', 'Uganda',
-            'Somalia', 'Rwanda', 'Burundi', 'Eritrea',
-            'Djibouti', 'Seychelles', 'Comoros', 'Mauritius',
+            'Ethiopia', 'Ethiopian', 'Kenya', 'Kenyan',
+            'Tanzania', 'Tanzanian', 'Uganda', 'Ugandan',
+            'Somalia', 'Somali', 'Rwanda', 'Rwandan',
+            'Burundi', 'Burundian', 'Eritrea', 'Eritrean',
+            'Djibouti', 'Seychelles', 'Comoros', 'Mauritius', 'Mauritian',
             
             // Afrique Australe
-            'South Africa', 'Zimbabwe', 'Zambia', 'Mozambique',
-            'Angola', 'Namibia', 'Botswana', 'Malawi',
-            'Lesotho', 'Eswatini', 'Swaziland', 'Madagascar',
+            'South Africa', 'South African', 'Zimbabwe', 'Zimbabwean',
+            'Zambia', 'Zambian', 'Mozambique', 'Mozambican',
+            'Angola', 'Angolan', 'Namibia', 'Namibian',
+            'Botswana', 'Batswana', 'Malawi', 'Malawian',
+            'Lesotho', 'Eswatini', 'Swaziland', 'Swazi',
+            'Madagascar', 'Malagasy',
             
             // Régions géopolitiques
-            'Europe', 'Asia', 'Africa', 'Middle East',
-            'Latin America', 'Caribbean', 'Pacific', 'Oceania'
+            'Europe', 'European', 'Asia', 'Asian', 'Africa', 'African', 
+            'Middle East', 'Latin America', 'Caribbean', 'Pacific', 'Oceania'
         ];
     }
 
@@ -489,7 +951,8 @@ class EntityDatabase {
 
         // Extraction des entreprises
         Object.keys(this.companies).forEach(companyName => {
-            const regex = new RegExp(`\\b${companyName.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+            const escapedName = companyName.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${escapedName}\\b`, 'gi');
             if (regex.test(fullText)) {
                 entities.companies.push({
                     name: companyName,
@@ -501,7 +964,8 @@ class EntityDatabase {
 
         // Extraction des pays
         this.countries.forEach(country => {
-            const regex = new RegExp(`\\b${country.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+            const escapedCountry = country.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${escapedCountry}\\b`, 'gi');
             if (regex.test(fullText)) {
                 if (!entities.countries.includes(country)) {
                     entities.countries.push(country);
@@ -516,12 +980,22 @@ class EntityDatabase {
         entities.tickers = [...new Set(entities.tickers)];
 
         // Filtrage anti-artefacts
-        const invalidEntities = ['CDATA', 'XML', 'RSS', 'HTML', 'HTTP', 'HTTPS', 'WWW', 'API', 'JSON'];
+        const invalidEntities = ['CDATA', 'XML', 'RSS', 'HTML', 'HTTP', 'HTTPS', 'WWW', 'API', 'JSON', 'UTF'];
         entities.companies = entities.companies.filter(c => !invalidEntities.includes(c.name.toUpperCase()));
         entities.countries = entities.countries.filter(c => !invalidEntities.includes(c.toUpperCase()));
         entities.tickers = entities.tickers.filter(t => !invalidEntities.includes(t.toUpperCase()));
 
         return entities;
+    }
+
+    // ✅ NOUVELLE MÉTHODE : Trouver le nom d'entreprise à partir du ticker
+    getCompanyName(ticker) {
+        for (const [name, tick] of Object.entries(this.companies)) {
+            if (tick === ticker) {
+                return name;
+            }
+        }
+        return ticker; // Fallback au ticker si non trouvé
     }
 }
 

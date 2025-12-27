@@ -2,6 +2,7 @@
  * ════════════════════════════════════════════════════════════════
  * AUTO-NEWSLETTER SYSTEM V2.0 - Manual Edition
  * Weekly Market Intelligence - Premium Design
+ * WITH COMPANY NAMES (NOT TICKERS)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -12,6 +13,7 @@ class AutoNewsletterSystem {
         this.LAST_POST_WEEK_KEY = 'lastAutoNewsletterWeek';
         this.rssClient = null;
         this.communityService = null;
+        this.entityDB = window.entityDB || null;
     }
 
     async initialize() {
@@ -38,6 +40,7 @@ class AutoNewsletterSystem {
                     console.log('✅ Using existing newsTerminal.rssClient');
                     this.rssClient = window.newsTerminal.rssClient;
                     this.communityService = window.communityService;
+                    this.entityDB = window.entityDB;
                     clearInterval(checkServices);
                     resolve();
                     return;
@@ -47,6 +50,7 @@ class AutoNewsletterSystem {
                     console.log('✅ Creating new RSSClient instance');
                     this.rssClient = new RSSClient();
                     this.communityService = window.communityService;
+                    this.entityDB = window.entityDB;
                     clearInterval(checkServices);
                     resolve();
                     return;
@@ -102,14 +106,26 @@ class AutoNewsletterSystem {
                 return;
             }
 
-            // ✅ Élimination des doublons par titre similaire
             const uniqueNews = this.removeDuplicates(weeklyNews);
             console.log(`✅ ${uniqueNews.length} unique articles after deduplication`);
 
-            const topNews = this.selectTopNews(uniqueNews, 15);
+            // ✅ ENRICHISSEMENT AVEC ENTITY DATABASE
+            const enrichedNews = uniqueNews.map(article => {
+                if (this.entityDB) {
+                    const entities = this.entityDB.extractEntities(article);
+                    return {
+                        ...article,
+                        companies: entities.companies,
+                        countries: entities.countries
+                    };
+                }
+                return article;
+            });
+
+            const topNews = this.selectTopNews(enrichedNews, 15);
             const categorizedNews = this.categorizeNews(topNews);
 
-            const postContent = this.generatePremiumContent(categorizedNews, topNews, uniqueNews);
+            const postContent = this.generatePremiumContent(categorizedNews, topNews, enrichedNews);
 
             const postData = {
                 title: `Weekly Market Intelligence - ${this.getWeekRange()}`,
@@ -150,20 +166,16 @@ class AutoNewsletterSystem {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // ✅ NOUVELLE FONCTION : ÉLIMINATION DES DOUBLONS
-    // ═══════════════════════════════════════════════════════════
     removeDuplicates(articles) {
         const seen = new Map();
         const unique = [];
 
         for (const article of articles) {
-            // Normalisation du titre pour détecter les doublons
             const normalizedTitle = article.title
                 .toLowerCase()
                 .replace(/[^\w\s]/g, '')
                 .trim()
-                .substring(0, 50); // Compare les 50 premiers caractères
+                .substring(0, 50);
 
             if (!seen.has(normalizedTitle)) {
                 seen.set(normalizedTitle, true);
@@ -225,7 +237,6 @@ class AutoNewsletterSystem {
             other: []
         };
 
-        // ✅ Set pour éviter les doublons dans chaque catégorie
         const usedArticles = new Set();
 
         news.forEach(article => {
@@ -280,39 +291,27 @@ class AutoNewsletterSystem {
         
         let md = '';
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ HEADER PREMIUM - DÉGRADÉ CYAN/ROSE + TEXTE BLANC LISIBLE
-        // ═══════════════════════════════════════════════════════
         md += `<div style="background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%); padding: 60px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);">\n\n`;
-        
-        // ✅ Titre principal - BLANC PUR, sans effet, parfaitement lisible
         md += `<h1 style="font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; margin: 0 0 20px 0; color: #ffffff; letter-spacing: 1px; line-height: 1.2;">WEEKLY MARKET INTELLIGENCE</h1>\n\n`;
-        
-        // ✅ Sous-titre - BLANC PUR
         md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 700; margin: 0 0 24px 0; color: #ffffff; letter-spacing: 0.5px;">Premium Financial Digest</h3>\n\n`;
-        
-        // ✅ Date range - BLANC PUR
         md += `<p style="font-size: clamp(1rem, 2.5vw, 1.3rem); font-weight: 700; margin: 0 0 16px 0; color: #ffffff;">${weekRange}</p>\n\n`;
-        
-        // ✅ Métadonnées - BLANC PUR
         md += `<p style="font-size: clamp(0.9rem, 2vw, 1.1rem); margin: 0; color: #ffffff;">Curated by AlphaVault AI | ${allNews.length} Stories Analyzed</p>\n\n`;
-        
         md += `</div>\n\n`;
 
         md += this.createSimpleSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // EXECUTIVE SUMMARY
-        // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">Executive Summary</h2>\n\n`;
         md += `<div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(236, 72, 153, 0.08)); padding: clamp(20px, 4vw, 32px); border-radius: 20px; border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
         
         const sectors = this.getTopSectors(allNews);
-        const topTickers = this.getTopTickers(allNews);
+        const topCompanies = this.getTopCompanies(allNews);
         
         md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 12px 0; line-height: 1.6;">Hot Sectors: <span style="color: #06b6d4;">${sectors.join(' • ')}</span></p>\n\n`;
-        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 12px 0; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">Most Mentioned: ${topTickers.slice(0, 5).map(t => `<code style="background: #06b6d4; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: clamp(0.8rem, 1.8vw, 0.9rem); white-space: nowrap;">${t.ticker}</code>`).join(' ')}</p>\n\n`;
+        
+        // ✅ AFFICHAGE DES NOMS D'ENTREPRISES (au lieu des tickers)
+        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 12px 0; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">Most Tracked: ${topCompanies.slice(0, 5).map(c => `<code style="background: #06b6d4; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: clamp(0.8rem, 1.8vw, 0.9rem); white-space: nowrap;">${c.name}</code>`).join(' ')}</p>\n\n`;
+        
         md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 12px 0; line-height: 1.6;">Total Coverage: <span style="color: #10b981;">${allNews.length} premium articles</span></p>\n\n`;
         md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0; line-height: 1.6;">Global Reach: <span style="color: #ec4899;">${this.countUniqueSources(allNews)} authoritative sources</span></p>\n\n`;
         md += `</div>\n\n`;
@@ -320,9 +319,6 @@ class AutoNewsletterSystem {
 
         md += this.createSimpleSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // BREAKING NEWS
-        // ═══════════════════════════════════════════════════════
         if (categorizedNews.breaking.length > 0) {
             md += `<div style="margin: 40px 0;">\n\n`;
             md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ef4444;">Breaking Stories</h2>\n\n`;
@@ -347,9 +343,6 @@ class AutoNewsletterSystem {
             md += this.createSimpleSeparator();
         }
 
-        // ═══════════════════════════════════════════════════════
-        // EARNINGS HIGHLIGHTS
-        // ═══════════════════════════════════════════════════════
         if (categorizedNews.earnings.length > 0) {
             md += `<div style="margin: 40px 0;">\n\n`;
             md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #10b981;">Earnings Spotlight</h2>\n\n`;
@@ -376,9 +369,6 @@ class AutoNewsletterSystem {
             md += this.createSimpleSeparator();
         }
 
-        // ═══════════════════════════════════════════════════════
-        // TECH & INNOVATION
-        // ═══════════════════════════════════════════════════════
         if (categorizedNews.tech.length > 0) {
             md += `<div style="margin: 40px 0;">\n\n`;
             md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #8b5cf6;">Tech & Innovation</h2>\n\n`;
@@ -403,9 +393,6 @@ class AutoNewsletterSystem {
             md += this.createSimpleSeparator();
         }
 
-        // ═══════════════════════════════════════════════════════
-        // FINANCE & MARKETS
-        // ═══════════════════════════════════════════════════════
         if (categorizedNews.finance.length > 0 || categorizedNews.market.length > 0) {
             md += `<div style="margin: 40px 0;">\n\n`;
             md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #f59e0b;">Finance & Markets</h2>\n\n`;
@@ -427,9 +414,6 @@ class AutoNewsletterSystem {
             md += this.createSimpleSeparator();
         }
 
-        // ═══════════════════════════════════════════════════════
-        // THIS WEEK IN NUMBERS - COMPACT VERSION
-        // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 20px 0; padding-left: 20px; border-left: 6px solid #3b82f6;">This Week in Numbers</h2>\n\n`;
         md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0;">\n\n`;
@@ -440,7 +424,7 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         
         md += `<div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: clamp(16px, 3vw, 20px); border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">\n\n`;
-        md += `<p style="font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; color: white; margin: 0 0 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${this.countUniqueTickers(allNews)}</p>\n\n`;
+        md += `<p style="font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; color: white; margin: 0 0 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${this.countUniqueCompanies(allNews)}</p>\n\n`;
         md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.3;">Companies</p>\n\n`;
         md += `</div>\n\n`;
         
@@ -452,24 +436,22 @@ class AutoNewsletterSystem {
         md += `</div>\n\n`;
         md += `</div>\n\n`;
 
-        // ═══════════════════════════════════════════════════════
-        // TOP MOVERS
-        // ═══════════════════════════════════════════════════════
+        // ✅ TOP MOVERS - AVEC NOMS D'ENTREPRISES
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ec4899;">Top Movers - Most Mentioned</h2>\n\n`;
         md += `<div style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(219, 39, 119, 0.05)); padding: clamp(20px, 4vw, 32px); border-radius: 20px; border: 2px solid rgba(236, 72, 153, 0.2);">\n\n`;
         
-        topTickers.slice(0, 8).forEach((ticker, i) => {
+        topCompanies.slice(0, 8).forEach((company, i) => {
             const medals = ['🥇', '🥈', '🥉'];
             const medal = i < 3 ? medals[i] : `<span style="display: inline-block; width: 32px; text-align: center; font-weight: 900; color: #06b6d4; font-size: clamp(1rem, 2.5vw, 1.2rem);">${i + 1}</span>`;
-            const barWidth = Math.max(20, (ticker.count / topTickers[0].count) * 100);
+            const barWidth = Math.max(20, (company.count / topCompanies[0].count) * 100);
             
             md += `<div style="margin-bottom: ${i < 7 ? '16px' : '0'}; display: flex; align-items: center; gap: clamp(10px, 2vw, 16px);">\n\n`;
             md += `<span style="font-size: clamp(1.2rem, 3vw, 1.5rem); flex-shrink: 0;">${medal}</span>\n\n`;
             md += `<div style="flex: 1; min-width: 0;">\n\n`;
             md += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">\n\n`;
-            md += `<code style="background: #ec4899; color: white; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: clamp(0.9rem, 2vw, 1.1rem);">${ticker.ticker}</code>\n\n`;
-            md += `<span style="font-weight: 800; color: #1e293b; font-size: clamp(0.9rem, 2vw, 1.1rem); white-space: nowrap;">${ticker.count} mentions</span>\n\n`;
+            md += `<code style="background: #ec4899; color: white; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: clamp(0.9rem, 2vw, 1.1rem);">${company.name}</code>\n\n`;
+            md += `<span style="font-weight: 800; color: #1e293b; font-size: clamp(0.9rem, 2vw, 1.1rem); white-space: nowrap;">${company.count} mentions</span>\n\n`;
             md += `</div>\n\n`;
             md += `<div style="background: rgba(236, 72, 153, 0.15); height: 10px; border-radius: 10px; overflow: hidden;">\n\n`;
             md += `<div style="background: linear-gradient(90deg, #ec4899, #db2777); height: 100%; width: ${barWidth}%; border-radius: 10px; transition: width 0.3s ease;"></div>\n\n`;
@@ -483,14 +465,10 @@ class AutoNewsletterSystem {
 
         md += this.createSimpleSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ 10 ARTICLES COMPLETS - DÉGRADÉ CYAN/ROSE + RESPONSIVE
-        // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">Complete News Coverage</h2>\n\n`;
         md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; margin: 0 0 32px 0; font-weight: 600; line-height: 1.6;">Deep dive into the top 10 stories that shaped the market this week</p>\n\n`;
         
-        // ✅ Sélectionne 10 articles UNIQUES (sans doublons)
         const top10Articles = this.selectTopNews(allNews, 10);
         
         top10Articles.forEach((article, index) => {
@@ -498,7 +476,6 @@ class AutoNewsletterSystem {
             
             md += `<div style="background: white; border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
             
-            // ✅ Header - Dégradé cyan/rose
             md += `<div style="background: ${headerGradient}; padding: clamp(14px, 3vw, 16px) clamp(18px, 4vw, 24px); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">\n\n`;
             md += `<div style="background: white; width: clamp(36px, 8vw, 40px); height: clamp(36px, 8vw, 40px); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: clamp(1.1rem, 3vw, 1.4rem); font-weight: 900; color: #06b6d4; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0;">${index + 1}</div>\n\n`;
             md += `<div style="flex: 1; min-width: 0;">\n\n`;
@@ -507,14 +484,12 @@ class AutoNewsletterSystem {
             md += `</div>\n\n`;
             md += `</div>\n\n`;
             
-            // ✅ Image responsive
             if (article.image) {
                 md += `<div style="width: 100%; height: clamp(140px, 30vw, 200px); overflow: hidden; background: #f1f5f9;">\n\n`;
                 md += `<img src="${article.image}" alt="${this.escapeHtml(article.title)}" style="width: 100%; height: 100%; object-fit: cover;">\n\n`;
                 md += `</div>\n\n`;
             }
             
-            // ✅ Contenu responsive
             md += `<div style="padding: clamp(16px, 3.5vw, 20px);">\n\n`;
             md += `<h3 style="font-size: clamp(1.1rem, 3vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0 0 12px 0; line-height: 1.3;">${article.title}</h3>\n\n`;
             
@@ -523,7 +498,6 @@ class AutoNewsletterSystem {
                 md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #475569; line-height: 1.6; margin: 0 0 16px 0;">${shortDesc}</p>\n\n`;
             }
             
-            // ✅ Tickers responsive
             if (article.tickers && article.tickers.length > 0) {
                 md += `<div style="margin: 0 0 16px 0;">\n\n`;
                 md += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">\n\n`;
@@ -534,7 +508,6 @@ class AutoNewsletterSystem {
                 md += `</div>\n\n`;
             }
             
-            // ✅ Bouton responsive
             md += `<div style="padding-top: 16px; border-top: 2px solid #e2e8f0;">\n\n`;
             md += `<a href="${article.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: ${headerGradient}; color: #ffffff; padding: clamp(8px, 2vw, 10px) clamp(16px, 3vw, 20px); border-radius: 10px; text-decoration: none; font-weight: 700; font-size: clamp(0.8rem, 2vw, 0.9rem); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);">\n\n`;
             md += `<span>Read Full Article</span>\n\n`;
@@ -550,9 +523,6 @@ class AutoNewsletterSystem {
 
         md += this.createSimpleSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // PREMIUM FOOTER RESPONSIVE
-        // ═══════════════════════════════════════════════════════
         md += `<div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: clamp(30px, 6vw, 40px); border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">\n\n`;
         md += `<h3 style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 800; color: white; margin: 0 0 16px 0; line-height: 1.2;">Stay Ahead of the Market</h3>\n\n`;
         md += `<p style="font-size: clamp(0.9rem, 2.2vw, 1.05rem); color: rgba(255,255,255,0.9); line-height: 1.7; margin: 0 0 24px 0; max-width: 700px; margin-left: auto; margin-right: auto;">This premium newsletter is curated by <strong style="color: #06b6d4;">AlphaVault AI</strong> using advanced algorithms and real-time market data analysis.</p>\n\n`;
@@ -612,12 +582,20 @@ class AutoNewsletterSystem {
         return `${Math.floor(hours / 24)}d ago`;
     }
 
-    countUniqueTickers(articles) {
-        const tickers = new Set();
+    // ✅ NOUVELLE MÉTHODE : Compte les entreprises uniques
+    countUniqueCompanies(articles) {
+        const companies = new Set();
         articles.forEach(article => {
-            article.tickers.forEach(ticker => tickers.add(ticker));
+            if (article.companies && article.companies.length > 0) {
+                article.companies.forEach(company => companies.add(company.name));
+            } else {
+                article.tickers.forEach(ticker => {
+                    const companyName = this.entityDB ? this.entityDB.getCompanyName(ticker) : ticker;
+                    companies.add(companyName);
+                });
+            }
         });
-        return tickers.size;
+        return companies.size;
     }
 
     countUniqueSources(articles) {
@@ -626,16 +604,25 @@ class AutoNewsletterSystem {
         return sources.size;
     }
 
-    getTopTickers(articles) {
-        const tickerCount = {};
+    // ✅ NOUVELLE MÉTHODE : Retourne les TOP entreprises (noms + count)
+    getTopCompanies(articles) {
+        const companyCount = {};
+        
         articles.forEach(article => {
-            article.tickers.forEach(ticker => {
-                tickerCount[ticker] = (tickerCount[ticker] || 0) + 1;
-            });
+            if (article.companies && article.companies.length > 0) {
+                article.companies.forEach(company => {
+                    companyCount[company.name] = (companyCount[company.name] || 0) + 1;
+                });
+            } else {
+                article.tickers.forEach(ticker => {
+                    const companyName = this.entityDB ? this.entityDB.getCompanyName(ticker) : ticker;
+                    companyCount[companyName] = (companyCount[companyName] || 0) + 1;
+                });
+            }
         });
 
-        return Object.entries(tickerCount)
-            .map(([ticker, count]) => ({ ticker, count }))
+        return Object.entries(companyCount)
+            .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count);
     }
 
@@ -741,10 +728,6 @@ class AutoNewsletterSystem {
     }
 }
 
-// ════════════════════════════════════════════════════════════════
-// INITIALISATION - MODE MANUEL UNIQUEMENT
-// ════════════════════════════════════════════════════════════════
-
 window.autoNewsletterSystem = null;
 
 async function initAutoNewsletter() {
@@ -759,14 +742,12 @@ async function initAutoNewsletter() {
         }
         
         window.autoNewsletterSystem.communityService = window.communityService;
+        window.autoNewsletterSystem.entityDB = window.entityDB;
     }
     
     return window.autoNewsletterSystem;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ✅ FONCTION MANUELLE - UNIQUEMENT VIA BOUTON ADMIN
-// ═══════════════════════════════════════════════════════════════
 async function generateWeeklyNewsletter() {
     try {
         console.log('🚀 Manual newsletter generation requested...');
@@ -793,9 +774,6 @@ async function generateWeeklyNewsletter() {
 
 window.generateWeeklyNewsletter = generateWeeklyNewsletter;
 
-// ═══════════════════════════════════════════════════════════════
-// ✅ INITIALISATION PASSIVE - PAS D'AUTO-CHECK
-// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
@@ -805,7 +783,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// Animations CSS
 (function() {
     const newsletterStyles = document.createElement('style');
     newsletterStyles.id = 'auto-newsletter-styles';
@@ -819,29 +796,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             to { transform: translateX(400px); opacity: 0; }
         }
         
-        /* ═══════════════════════════════════════════════════════
-           RESPONSIVE MEDIA QUERIES
-           ═══════════════════════════════════════════════════════ */
-        
         @media screen and (max-width: 768px) {
-            /* Mobile: padding réduit */
             .newsletter-container {
                 padding: 20px 16px !important;
             }
             
-            /* Mobile: espacements réduits */
             .newsletter-section {
                 margin: 24px 0 !important;
             }
             
-            /* Mobile: grids en 1 colonne */
             .stats-grid {
                 grid-template-columns: 1fr !important;
             }
         }
         
         @media screen and (max-width: 480px) {
-            /* Très petit écran: texte encore plus compact */
             .newsletter-title {
                 font-size: 1.8rem !important;
                 line-height: 1.1 !important;
