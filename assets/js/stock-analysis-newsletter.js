@@ -3,23 +3,26 @@
  * STOCK ANALYSIS NEWSLETTER SYSTEM V2.0 - ULTRA-PROFESSIONAL
  * Reuses Advanced Analysis Methods for Identical Results
  * 6 Months Data + 14 Technical Indicators + AI Recommendations
+ * Premium Charts with Responsive Design
  * ════════════════════════════════════════════════════════════════
  */
 
 class StockAnalysisNewsletter {
     constructor() {
         this.LAST_POST_KEY = 'lastStockAnalysisPost';
-        this.DEFAULT_PERIOD = '6M'; // ✅ 6 mois comme advanced-analysis.js
+        this.DEFAULT_PERIOD = '6M';
         this.advancedAnalysis = null;
         this.stockData = null;
         this.technicalSignals = null;
         this.aiRecommendations = null;
+        this.CHART_WIDTH = 1200;
+        this.CHART_HEIGHT = 400;
     }
 
     async initialize() {
-        console.log('📊 Initializing Stock Analysis Newsletter System V2.0...');
+        console.log('Initializing Stock Analysis Newsletter System V2.0...');
         await this.waitForAdvancedAnalysis();
-        console.log('✅ Stock Analysis Newsletter System ready');
+        console.log('Stock Analysis Newsletter System ready');
     }
 
     async waitForAdvancedAnalysis() {
@@ -31,7 +34,7 @@ class StockAnalysisNewsletter {
                 attempts++;
 
                 if (window.AdvancedAnalysis) {
-                    console.log('✅ AdvancedAnalysis module found');
+                    console.log('AdvancedAnalysis module found');
                     this.advancedAnalysis = window.AdvancedAnalysis;
                     clearInterval(checkAnalysis);
                     resolve();
@@ -39,7 +42,7 @@ class StockAnalysisNewsletter {
                 }
 
                 if (attempts >= maxAttempts) {
-                    console.warn('⚠ AdvancedAnalysis not available after 5s');
+                    console.warn('AdvancedAnalysis not available after 5s');
                     clearInterval(checkAnalysis);
                     resolve();
                 }
@@ -55,7 +58,7 @@ class StockAnalysisNewsletter {
         try {
             const currentUser = firebase.auth().currentUser;
             if (!currentUser) {
-                console.error('❌ No user authenticated');
+                console.error('No user authenticated');
                 if (forceManual) this.showNotification('Please log in to generate analysis', 'error');
                 return;
             }
@@ -66,25 +69,22 @@ class StockAnalysisNewsletter {
             }
 
             symbol = symbol.trim().toUpperCase();
-            this.showNotification(`📊 Generating deep analysis for ${symbol}...`, 'info');
+            this.showNotification(`Generating deep analysis for ${symbol}...`, 'info');
 
             if (!this.advancedAnalysis) {
                 throw new Error('Advanced Analysis module not available');
             }
 
-            // ✅ ÉTAPE 1 : Charger les données (6 mois = 180 jours)
             await this.loadStockData(symbol);
 
             if (!this.stockData || !this.stockData.prices || this.stockData.prices.length < 30) {
                 throw new Error(`Insufficient data for ${symbol} (minimum 30 days required)`);
             }
 
-            console.log(`✅ Data loaded: ${this.stockData.prices.length} data points (6 months)`);
+            console.log(`Data loaded: ${this.stockData.prices.length} data points (6 months)`);
 
-            // ✅ ÉTAPE 2 : Calculer les indicateurs techniques (RÉUTILISE advanced-analysis.js)
             this.technicalSignals = this.advancedAnalysis.collectAllTechnicalSignals(this.stockData.prices);
 
-            // ✅ ÉTAPE 3 : Générer les recommandations AI (RÉUTILISE advanced-analysis.js)
             const trendAnalysis = this.advancedAnalysis.analyzeTrendsByHorizon(this.stockData.prices);
             const aiScore = this.advancedAnalysis.calculateAIConfidenceScore(this.technicalSignals);
             const horizonRecommendations = this.advancedAnalysis.generateHorizonRecommendations(
@@ -94,7 +94,7 @@ class StockAnalysisNewsletter {
             );
 
             this.aiRecommendations = {
-                globalScore: aiScore.score.toFixed(1),
+                globalScore: parseFloat(aiScore.score).toFixed(2),
                 rating: aiScore.rating,
                 bullishSignals: aiScore.bullishSignals,
                 neutralSignals: aiScore.neutralSignals,
@@ -102,14 +102,12 @@ class StockAnalysisNewsletter {
                 horizons: horizonRecommendations
             };
 
-            console.log(`✅ AI Score: ${this.aiRecommendations.globalScore}/100 (${this.aiRecommendations.rating})`);
+            console.log(`AI Score: ${this.aiRecommendations.globalScore}/100 (${this.aiRecommendations.rating})`);
 
-            // ✅ ÉTAPE 4 : Générer le contenu premium avec graphiques
             const postContent = this.generatePremiumContent(symbol);
 
-            // ✅ ÉTAPE 5 : Publier sur Firestore
             const postData = {
-                title: `📊 Deep Analysis: ${symbol} - AlphaVault Intelligence Report`,
+                title: `Deep Analysis: ${symbol} - AlphaVault Intelligence Report`,
                 content: postContent.markdown,
                 channelId: 'market-analysis',
                 tags: ['stock-analysis', 'technical-indicators', 'ai-recommendation', symbol.toLowerCase()],
@@ -129,20 +127,20 @@ class StockAnalysisNewsletter {
                 aiRating: this.aiRecommendations.rating
             };
 
-            console.log('📤 Publishing stock analysis to Firestore...');
+            console.log('Publishing stock analysis to Firestore...');
             const docRef = await firebase.firestore().collection('posts').add(postData);
 
-            console.log(`✅ Analysis published successfully! ID: ${docRef.id}`);
+            console.log(`Analysis published successfully! ID: ${docRef.id}`);
             localStorage.setItem(this.LAST_POST_KEY, Date.now().toString());
 
-            this.showNotification(`✅ Analysis for ${symbol} published!`, 'success');
+            this.showNotification(`Analysis for ${symbol} published!`, 'success');
 
             if (window.communityHub) {
                 await window.communityHub.loadPosts();
             }
 
         } catch (error) {
-            console.error('❌ Error generating stock analysis:', error);
+            console.error('Error generating stock analysis:', error);
             this.showNotification('Failed to generate analysis: ' + error.message, 'error');
         }
     }
@@ -173,11 +171,11 @@ class StockAnalysisNewsletter {
         }
 
         try {
-            console.log(`📡 Fetching 6 months data for ${symbol}...`);
+            console.log(`Fetching 6 months data for ${symbol}...`);
             
             const [quote, timeSeries] = await Promise.all([
                 apiClient.getQuote(symbol),
-                apiClient.getTimeSeries(symbol, '1day', 180) // ✅ 6 mois = 180 jours
+                apiClient.getTimeSeries(symbol, '1day', 180)
             ]);
 
             if (!quote || !timeSeries || !timeSeries.data) {
@@ -192,7 +190,7 @@ class StockAnalysisNewsletter {
             };
 
         } catch (error) {
-            console.warn('⚠ API call failed, using demo data:', error.message);
+            console.warn('API call failed, using demo data:', error.message);
             this.stockData = this.generateDemoData(symbol, 180);
         }
     }
@@ -209,9 +207,7 @@ class StockAnalysisNewsletter {
         
         let md = '';
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ HEADER PREMIUM
-        // ═══════════════════════════════════════════════════════
+        // HEADER PREMIUM
         md += `<div style="background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%); padding: 60px 40px; border-radius: 24px; text-align: center; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);">\n\n`;
         md += `<h1 style="font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; margin: 0 0 20px 0; color: #ffffff; letter-spacing: 1px; line-height: 1.2;">DEEP ANALYSIS: ${symbol}</h1>\n\n`;
         md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 700; margin: 0 0 24px 0; color: #ffffff; letter-spacing: 0.5px;">AlphaVault Intelligence Report</h3>\n\n`;
@@ -221,9 +217,7 @@ class StockAnalysisNewsletter {
 
         md += this.createSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ ALPHAVAULT SCORE
-        // ═══════════════════════════════════════════════════════
+        // ALPHAVAULT SCORE
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #06b6d4;">AlphaVault Intelligence Score</h2>\n\n`;
         md += `<div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(236, 72, 153, 0.08)); padding: clamp(20px, 4vw, 32px); border-radius: 20px; border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
@@ -239,17 +233,17 @@ class StockAnalysisNewsletter {
         md += `</div>\n\n`;
         
         md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin: 24px 0;">\n\n`;
-        md += `<div style="text-align: center; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 12px;">\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border-radius: 12px;">\n\n`;
         md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #10b981; margin: 0 0 4px 0;">${this.aiRecommendations.bullishSignals}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bullish</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bullish Signals</p>\n\n`;
         md += `</div>\n\n`;
-        md += `<div style="text-align: center; padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 12px;">\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05)); border-radius: 12px;">\n\n`;
         md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #f59e0b; margin: 0 0 4px 0;">${this.aiRecommendations.neutralSignals}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Neutral</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Neutral Signals</p>\n\n`;
         md += `</div>\n\n`;
-        md += `<div style="text-align: center; padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px;">\n\n`;
+        md += `<div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05)); border-radius: 12px;">\n\n`;
         md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900; color: #ef4444; margin: 0 0 4px 0;">${this.aiRecommendations.bearishSignals}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bearish</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: #475569; margin: 0;">Bearish Signals</p>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
         
@@ -259,54 +253,45 @@ class StockAnalysisNewsletter {
 
         md += this.createSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ GRAPHIQUES DES INDICATEURS CLÉS
-        // ═══════════════════════════════════════════════════════
-        md += this.generateChartsSection();
-        md += this.createSeparator();
-
-        // ═══════════════════════════════════════════════════════
-        // ✅ AI RECOMMENDATIONS PAR HORIZON
-        // ═══════════════════════════════════════════════════════
+        // AI RECOMMENDATIONS PAR HORIZON
         md += `<div style="margin: 40px 0;">\n\n`;
         md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #8b5cf6;">AI Recommendations by Time Horizon</h2>\n\n`;
         md += `<div style="display: grid; gap: 20px;">\n\n`;
         
         const horizonData = [
-            { key: '1y', label: '1-Year Horizon', icon: '📊', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
-            { key: '2y', label: '2-Year Horizon', icon: '📈', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
-            { key: '5y', label: '5-Year Horizon', icon: '🚀', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }
+            { key: '1y', label: '1-Year Horizon', gradient: 'linear-gradient(135deg, #10b981, #059669)' },
+            { key: '2y', label: '2-Year Horizon', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
+            { key: '5y', label: '5-Year Horizon', gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }
         ];
 
         horizonData.forEach(h => {
             const rec = horizons[h.key];
             const recColor = rec.recommendation === 'BUY' ? '#10b981' : rec.recommendation === 'SELL' ? '#ef4444' : '#f59e0b';
             
-            md += `<div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.05)); padding: clamp(20px, 4vw, 28px); border-radius: 16px; border: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
+            md += `<div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(236, 72, 153, 0.08)); padding: clamp(20px, 4vw, 28px); border-radius: 16px; border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
             
             md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">\n\n`;
             md += `<div>\n\n`;
-            md += `<p style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 800; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">${h.icon} ${h.label}</p>\n\n`;
+            md += `<p style="font-size: clamp(0.85rem, 2vw, 1rem); font-weight: 800; color: #06b6d4; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">${h.label}</p>\n\n`;
             md += `<p style="font-size: clamp(1.3rem, 3.5vw, 1.8rem); font-weight: 900; color: ${recColor}; margin: 0; text-transform: uppercase; letter-spacing: 1px;">${rec.recommendation}</p>\n\n`;
             md += `</div>\n\n`;
             md += `<div style="text-align: right;">\n\n`;
             md += `<p style="font-size: clamp(0.85rem, 2vw, 1rem); color: #64748b; margin: 0 0 4px 0;">Confidence</p>\n\n`;
-            md += `<p style="font-size: clamp(1.3rem, 3.5vw, 1.6rem); font-weight: 800; color: #1e293b; margin: 0;">${rec.confidence}%</p>\n\n`;
+            md += `<p style="font-size: clamp(1.3rem, 3.5vw, 1.6rem); font-weight: 800; color: #1e293b; margin: 0;">${rec.confidence}.00%</p>\n\n`;
             md += `</div>\n\n`;
             md += `</div>\n\n`;
             
-            md += `<div style="background: rgba(139, 92, 246, 0.1); height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 16px;">\n\n`;
+            md += `<div style="background: rgba(6, 182, 212, 0.1); height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 16px;">\n\n`;
             md += `<div style="background: ${h.gradient}; height: 100%; width: ${rec.confidence}%; border-radius: 10px;"></div>\n\n`;
             md += `</div>\n\n`;
             
-            md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; margin: 0 0 12px 0;"><strong>Potential Move:</strong> ${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%</p>\n\n`;
+            md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: #475569; margin: 0 0 12px 0;"><strong>Potential Move:</strong> ${parseFloat(rec.potentialMove) >= 0 ? '+' : ''}${parseFloat(rec.potentialMove).toFixed(2)}%</p>\n\n`;
             
-            // ✅ Key Drivers
             if (rec.drivers && rec.drivers.length > 0) {
-                md += `<div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
+                md += `<div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
                 md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Key Drivers:</p>\n\n`;
                 rec.drivers.forEach(driver => {
-                    md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #475569; margin: 0 0 8px 0; padding-left: 16px; border-left: 3px solid ${h.gradient.includes('10b981') ? '#10b981' : h.gradient.includes('3b82f6') ? '#3b82f6' : '#8b5cf6'};">✓ ${driver}</p>\n\n`;
+                    md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #475569; margin: 0 0 8px 0; padding-left: 16px; border-left: 3px solid #06b6d4;">✓ ${driver}</p>\n\n`;
                 });
                 md += `</div>\n\n`;
             }
@@ -319,32 +304,32 @@ class StockAnalysisNewsletter {
 
         md += this.createSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ TECHNICAL INDICATORS BREAKDOWN
-        // ═══════════════════════════════════════════════════════
+        // GRAPHIQUES DES INDICATEURS
+        md += this.generateAllChartsSection();
+        md += this.createSeparator();
+
+        // TECHNICAL INDICATORS BREAKDOWN
         md += this.generateTechnicalIndicatorsSection();
 
         md += this.createSeparator();
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ PREMIUM FOOTER
-        // ═══════════════════════════════════════════════════════
+        // PREMIUM FOOTER
         md += `<div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: clamp(30px, 6vw, 40px); border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">\n\n`;
         md += `<h3 style="font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 800; color: white; margin: 0 0 16px 0; line-height: 1.2;">Advanced Technical Analysis</h3>\n\n`;
         md += `<p style="font-size: clamp(0.9rem, 2.2vw, 1.05rem); color: rgba(255,255,255,0.9); line-height: 1.7; margin: 0 0 24px 0; max-width: 700px; margin-left: auto; margin-right: auto;">This analysis is based on 14 professional technical indicators powered by <strong style="color: #06b6d4;">AlphaVault AI</strong>. Same methodology as our Advanced Analysis platform. Not financial advice.</p>\n\n`;
         
         md += `<div style="display: flex; justify-content: center; gap: clamp(20px, 5vw, 32px); flex-wrap: wrap; margin: 24px 0;">\n\n`;
         md += `<div style="text-align: center;">\n\n`;
-        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">📊</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">14 Indicators</p>\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">14</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Technical Indicators</p>\n\n`;
         md += `</div>\n\n`;
         md += `<div style="text-align: center;">\n\n`;
-        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">🤖</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">AI-Powered</p>\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">AI</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Powered Analysis</p>\n\n`;
         md += `</div>\n\n`;
         md += `<div style="text-align: center;">\n\n`;
-        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">📈</p>\n\n`;
-        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">6 Months Data</p>\n\n`;
+        md += `<p style="font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px 0;">6M</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 2vw, 0.95rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Historical Data</p>\n\n`;
         md += `</div>\n\n`;
         md += `</div>\n\n`;
         
@@ -358,53 +343,123 @@ class StockAnalysisNewsletter {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // ✅ GÉNÉRATION DE LA SECTION GRAPHIQUES
+    // GÉNÉRATION DE TOUS LES GRAPHIQUES (14 INDICATEURS)
     // ════════════════════════════════════════════════════════════════
 
-    generateChartsSection() {
+    generateAllChartsSection() {
         let md = '';
         
         md += `<div style="margin: 40px 0;">\n\n`;
-        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #667eea;">Key Technical Indicators</h2>\n\n`;
+        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #667eea;">Technical Indicators - Visual Analysis</h2>\n\n`;
         
-        // ✅ RSI Chart
-        const rsiData = this.advancedAnalysis.calculateRSI(this.stockData.prices);
-        if (rsiData.length > 0) {
-            const rsiChartUrl = this.generateChartImage('RSI', rsiData, { min: 0, max: 100, zones: [30, 70] });
-            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
-            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); border-bottom: 2px solid rgba(102, 126, 234, 0.2);">\n\n`;
-            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">RSI (Relative Strength Index)</h3>\n\n`;
-            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">Current: ${rsiData[rsiData.length - 1][1].toFixed(2)}</p>\n\n`;
-            md += `</div>\n\n`;
-            md += `<img src="${rsiChartUrl}" alt="RSI Chart" style="width: 100%; height: auto; display: block;">\n\n`;
-            md += `</div>\n\n`;
-        }
+        const chartConfigs = [
+            {
+                name: 'RSI (Relative Strength Index)',
+                dataFunc: () => this.advancedAnalysis.calculateRSI(this.stockData.prices),
+                chartFunc: (data) => this.generateRSIChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'MACD (Moving Average Convergence Divergence)',
+                dataFunc: () => this.advancedAnalysis.calculateMACD(this.stockData.prices),
+                chartFunc: (data) => this.generateMACDChart(data),
+                getCurrentValue: (data) => data.histogram && data.histogram.length > 0 ? `Histogram: ${data.histogram[data.histogram.length - 1][1].toFixed(2)}` : 'N/A'
+            },
+            {
+                name: 'Stochastic Oscillator',
+                dataFunc: () => this.advancedAnalysis.calculateStochastic(this.stockData.prices),
+                chartFunc: (data) => this.generateStochasticChart(data),
+                getCurrentValue: (data) => data.k && data.k.length > 0 ? `%K: ${data.k[data.k.length - 1][1].toFixed(2)}` : 'N/A'
+            },
+            {
+                name: 'Williams %R',
+                dataFunc: () => this.advancedAnalysis.calculateWilliams(this.stockData.prices),
+                chartFunc: (data) => this.generateWilliamsChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'ADX (Average Directional Index)',
+                dataFunc: () => this.advancedAnalysis.calculateADX(this.stockData.prices),
+                chartFunc: (data) => this.generateADXChart(data),
+                getCurrentValue: (data) => data.adx && data.adx.length > 0 ? `ADX: ${data.adx[data.adx.length - 1][1].toFixed(2)}` : 'N/A'
+            },
+            {
+                name: 'OBV (On-Balance Volume)',
+                dataFunc: () => this.advancedAnalysis.calculateOBV(this.stockData.prices),
+                chartFunc: (data) => this.generateOBVChart(data),
+                getCurrentValue: (data) => data.length > 0 ? `Current: ${(data[data.length - 1][1] / 1000000).toFixed(2)}M` : 'N/A'
+            },
+            {
+                name: 'ATR (Average True Range)',
+                dataFunc: () => this.advancedAnalysis.calculateATR(this.stockData.prices),
+                chartFunc: (data) => this.generateATRChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'MFI (Money Flow Index)',
+                dataFunc: () => this.advancedAnalysis.calculateMFI(this.stockData.prices),
+                chartFunc: (data) => this.generateMFIChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'CCI (Commodity Channel Index)',
+                dataFunc: () => this.advancedAnalysis.calculateCCI(this.stockData.prices),
+                chartFunc: (data) => this.generateCCIChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'Ultimate Oscillator',
+                dataFunc: () => this.advancedAnalysis.calculateUltimateOscillator(this.stockData.prices),
+                chartFunc: (data) => this.generateUltimateChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'ROC (Rate of Change)',
+                dataFunc: () => this.advancedAnalysis.calculateROC(this.stockData.prices),
+                chartFunc: (data) => this.generateROCChart(data),
+                getCurrentValue: (data) => data.length > 0 ? `${data[data.length - 1][1].toFixed(2)}%` : 'N/A'
+            },
+            {
+                name: 'Aroon Indicator',
+                dataFunc: () => this.advancedAnalysis.calculateAroon(this.stockData.prices),
+                chartFunc: (data) => this.generateAroonChart(data),
+                getCurrentValue: (data) => data.up && data.up.length > 0 ? `Up: ${data.up[data.up.length - 1][1].toFixed(2)}` : 'N/A'
+            },
+            {
+                name: 'CMF (Chaikin Money Flow)',
+                dataFunc: () => this.advancedAnalysis.calculateCMF(this.stockData.prices),
+                chartFunc: (data) => this.generateCMFChart(data),
+                getCurrentValue: (data) => data.length > 0 ? data[data.length - 1][1].toFixed(2) : 'N/A'
+            },
+            {
+                name: 'Elder Ray Index',
+                dataFunc: () => this.advancedAnalysis.calculateElderRay(this.stockData.prices),
+                chartFunc: (data) => this.generateElderRayChart(data),
+                getCurrentValue: (data) => data.bullPower && data.bullPower.length > 0 ? `Bull: ${data.bullPower[data.bullPower.length - 1][1].toFixed(2)}` : 'N/A'
+            }
+        ];
 
-        // ✅ MACD Chart
-        const macdData = this.advancedAnalysis.calculateMACD(this.stockData.prices);
-        if (macdData.histogram.length > 0) {
-            const macdChartUrl = this.generateMACDChartImage(macdData);
-            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
-            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05)); border-bottom: 2px solid rgba(59, 130, 246, 0.2);">\n\n`;
-            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">MACD (Moving Average Convergence Divergence)</h3>\n\n`;
-            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">Histogram: ${macdData.histogram[macdData.histogram.length - 1][1].toFixed(4)}</p>\n\n`;
-            md += `</div>\n\n`;
-            md += `<img src="${macdChartUrl}" alt="MACD Chart" style="width: 100%; height: auto; display: block;">\n\n`;
-            md += `</div>\n\n`;
-        }
-
-        // ✅ Stochastic Chart
-        const stochasticData = this.advancedAnalysis.calculateStochastic(this.stockData.prices);
-        if (stochasticData.k.length > 0) {
-            const stochChartUrl = this.generateStochasticChartImage(stochasticData);
-            md += `<div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">\n\n`;
-            md += `<div style="padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(124, 58, 237, 0.05)); border-bottom: 2px solid rgba(139, 92, 246, 0.2);">\n\n`;
-            md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0;">Stochastic Oscillator</h3>\n\n`;
-            md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 8px 0 0 0;">%K: ${stochasticData.k[stochasticData.k.length - 1][1].toFixed(2)} | %D: ${stochasticData.d[stochasticData.d.length - 1][1].toFixed(2)}</p>\n\n`;
-            md += `</div>\n\n`;
-            md += `<img src="${stochChartUrl}" alt="Stochastic Chart" style="width: 100%; height: auto; display: block;">\n\n`;
-            md += `</div>\n\n`;
-        }
+        chartConfigs.forEach(config => {
+            try {
+                const data = config.dataFunc();
+                if (data) {
+                    const chartUrl = config.chartFunc(data);
+                    const currentValue = config.getCurrentValue(data);
+                    
+                    md += `<div style="margin-bottom: 32px; background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(236, 72, 153, 0.08)); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
+                    md += `<div style="padding: 20px; border-bottom: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
+                    md += `<h3 style="font-size: clamp(1.1rem, 2.8vw, 1.4rem); font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">${config.name}</h3>\n\n`;
+                    md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">Current Value: <strong>${currentValue}</strong></p>\n\n`;
+                    md += `</div>\n\n`;
+                    md += `<div style="padding: 20px; background: white;">\n\n`;
+                    md += `<img src="${chartUrl}" alt="${config.name} Chart" style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;">\n\n`;
+                    md += `</div>\n\n`;
+                    md += `</div>\n\n`;
+                }
+            } catch (error) {
+                console.warn(`Failed to generate chart for ${config.name}:`, error);
+            }
+        });
 
         md += `</div>\n\n`;
         
@@ -412,61 +467,81 @@ class StockAnalysisNewsletter {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // ✅ GÉNÉRATION DES URLs DE GRAPHIQUES (QuickChart.io)
+    // FONCTIONS DE GÉNÉRATION DE GRAPHIQUES INDIVIDUELS (QuickChart.io)
     // ════════════════════════════════════════════════════════════════
 
-    generateChartImage(title, data, options = {}) {
-        const labels = data.slice(-60).map((d, i) => i); // 60 derniers points
-        const values = data.slice(-60).map(d => d[1]);
+    generateRSIChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
         
         const config = {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: title,
+                    label: 'RSI',
                     data: values,
-                    borderColor: 'rgb(102, 126, 234)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 2,
+                    borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 0
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     title: { display: false }
                 },
                 scales: {
                     y: {
-                        min: options.min || undefined,
-                        max: options.max || undefined
+                        min: 0,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: { size: 12, weight: 'bold' }
+                        }
                     },
-                    x: { display: false }
+                    x: {
+                        display: false
+                    }
                 },
-                annotation: options.zones ? {
-                    annotations: options.zones.map(zone => ({
-                        type: 'line',
-                        yMin: zone,
-                        yMax: zone,
-                        borderColor: 'rgba(255, 99, 132, 0.5)',
-                        borderWidth: 2,
-                        borderDash: [5, 5]
-                    }))
-                } : undefined
+                annotation: {
+                    annotations: [
+                        {
+                            type: 'line',
+                            yMin: 70,
+                            yMax: 70,
+                            borderColor: 'rgba(239, 68, 68, 0.7)',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            type: 'line',
+                            yMin: 30,
+                            yMax: 30,
+                            borderColor: 'rgba(16, 185, 129, 0.7)',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                }
             }
         };
         
-        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
     }
 
-    generateMACDChartImage(macdData) {
-        const labels = macdData.histogram.slice(-60).map((d, i) => i);
-        const macdLine = macdData.macdLine.slice(-60).map(d => d[1]);
-        const signalLine = macdData.signalLine.slice(-60).map(d => d[1]);
-        const histogram = macdData.histogram.slice(-60).map(d => d[1]);
+    generateMACDChart(data) {
+        const labels = data.histogram.slice(-90).map((d, i) => '');
+        const macdLine = data.macdLine.slice(-90).map(d => d[1]);
+        const signalLine = data.signalLine.slice(-90).map(d => d[1]);
+        const histogram = data.histogram.slice(-90).map(d => d[1]);
         
         const config = {
             type: 'bar',
@@ -477,40 +552,54 @@ class StockAnalysisNewsletter {
                         type: 'line',
                         label: 'MACD',
                         data: macdLine,
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 2,
-                        fill: false
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
                     },
                     {
                         type: 'line',
                         label: 'Signal',
                         data: signalLine,
-                        borderColor: 'rgb(239, 68, 68)',
-                        borderWidth: 2,
-                        fill: false
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
                     },
                     {
                         type: 'bar',
                         label: 'Histogram',
                         data: histogram,
-                        backgroundColor: histogram.map(v => v > 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)')
+                        backgroundColor: histogram.map(v => v > 0 ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)'),
+                        borderWidth: 0
                     }
                 ]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { x: { display: false } }
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
             }
         };
         
-        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
     }
 
-    generateStochasticChartImage(stochasticData) {
-        const labels = stochasticData.k.slice(-60).map((d, i) => i);
-        const kValues = stochasticData.k.slice(-60).map(d => d[1]);
-        const dValues = stochasticData.d.slice(-60).map(d => d[1]);
+    generateStochasticChart(data) {
+        const labels = data.k.slice(-90).map((d, i) => '');
+        const kValues = data.k.slice(-90).map(d => d[1]);
+        const dValues = data.d.slice(-90).map(d => d[1]);
         
         const config = {
             type: 'line',
@@ -520,47 +609,500 @@ class StockAnalysisNewsletter {
                     {
                         label: '%K',
                         data: kValues,
-                        borderColor: 'rgb(102, 126, 234)',
-                        borderWidth: 2,
-                        fill: false
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
                     },
                     {
                         label: '%D',
                         data: dValues,
-                        borderColor: 'rgb(239, 68, 68)',
-                        borderWidth: 2,
-                        fill: false
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { min: 0, max: 100 },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
                     x: { display: false }
                 }
             }
         };
         
-        return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&width=800&height=300`;
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateWilliamsChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Williams %R',
+                    data: values,
+                    borderColor: 'rgba(139, 92, 246, 1)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: -100,
+                        max: 0,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateADXChart(data) {
+        const labels = data.adx.slice(-90).map((d, i) => '');
+        const adxValues = data.adx.slice(-90).map(d => d[1]);
+        const plusDI = data.plusDI.slice(-90).map(d => d[1]);
+        const minusDI = data.minusDI.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'ADX',
+                        data: adxValues,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 4,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '+DI',
+                        data: plusDI,
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '-DI',
+                        data: minusDI,
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateOBVChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'OBV',
+                    data: values,
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateATRChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'ATR',
+                    data: values,
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateMFIChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'MFI',
+                    data: values,
+                    borderColor: 'rgba(6, 182, 212, 1)',
+                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateCCIChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CCI',
+                    data: values,
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateUltimateChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ultimate Oscillator',
+                    data: values,
+                    borderColor: 'rgba(236, 72, 153, 1)',
+                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateROCChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'ROC',
+                    data: values,
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateAroonChart(data) {
+        const labels = data.up.slice(-90).map((d, i) => '');
+        const upValues = data.up.slice(-90).map(d => d[1]);
+        const downValues = data.down.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Aroon Up',
+                        data: upValues,
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Aroon Down',
+                        data: downValues,
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateCMFChart(data) {
+        const labels = data.slice(-90).map((d, i) => '');
+        const values = data.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CMF',
+                    data: values,
+                    borderColor: 'rgba(6, 182, 212, 1)',
+                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
+    }
+
+    generateElderRayChart(data) {
+        const labels = data.bullPower.slice(-90).map((d, i) => '');
+        const bullValues = data.bullPower.slice(-90).map(d => d[1]);
+        const bearValues = data.bearPower.slice(-90).map(d => d[1]);
+        
+        const config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Bull Power',
+                        data: bullValues,
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        borderWidth: 0
+                    },
+                    {
+                        label: 'Bear Power',
+                        data: bearValues,
+                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    },
+                    x: { display: false }
+                }
+            }
+        };
+        
+        return `https://quickchart.io/chart?bkg=white&c=${encodeURIComponent(JSON.stringify(config))}&width=${this.CHART_WIDTH}&height=${this.CHART_HEIGHT}`;
     }
 
     // ════════════════════════════════════════════════════════════════
-    // ✅ GÉNÉRATION DE LA SECTION TECHNICAL INDICATORS
+    // GÉNÉRATION DE LA SECTION TECHNICAL INDICATORS
     // ════════════════════════════════════════════════════════════════
 
     generateTechnicalIndicatorsSection() {
         let md = '';
         
         md += `<div style="margin: 40px 0;">\n\n`;
-        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ef4444;">Complete Technical Indicators Breakdown</h2>\n\n`;
+        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #ef4444;">Complete Technical Indicators Summary</h2>\n\n`;
         
         const categories = [
-            { key: 'momentum', name: 'Momentum Indicators', icon: '📊', color: '#ef4444' },
-            { key: 'trend', name: 'Trend Indicators', icon: '📈', color: '#10b981' },
-            { key: 'volume', name: 'Volume Indicators', icon: '💹', color: '#3b82f6' },
-            { key: 'composite', name: 'Composite Indicators', icon: '🔮', color: '#8b5cf6' }
+            { key: 'momentum', name: 'Momentum Indicators', color: '#ef4444' },
+            { key: 'trend', name: 'Trend Indicators', color: '#10b981' },
+            { key: 'volume', name: 'Volume Indicators', color: '#3b82f6' },
+            { key: 'composite', name: 'Composite Indicators', color: '#8b5cf6' }
         ];
 
         categories.forEach(cat => {
@@ -568,20 +1110,25 @@ class StockAnalysisNewsletter {
             if (!indicators || indicators.length === 0) return;
 
             md += `<div style="margin-bottom: 32px;">\n\n`;
-            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">${cat.icon} ${cat.name}</h3>\n\n`;
-            md += `<div style="background: linear-gradient(135deg, rgba(${this.hexToRgb(cat.color)}, 0.08), rgba(${this.hexToRgb(cat.color)}, 0.05)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(${this.hexToRgb(cat.color)}, 0.2);">\n\n`;
+            md += `<h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">${cat.name}</h3>\n\n`;
+            md += `<div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(236, 72, 153, 0.08)); padding: clamp(18px, 3.5vw, 24px); border-radius: 16px; border: 2px solid rgba(6, 182, 212, 0.2);">\n\n`;
             
             indicators.forEach((ind, i) => {
                 const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
                 const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
                 
-                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < indicators.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < indicators.length - 1 ? `1px solid rgba(${this.hexToRgb(cat.color)}, 0.15)` : 'none'};">\n\n`;
+                let displayValue = ind.value;
+                if (typeof displayValue === 'string') {
+                    displayValue = displayValue.replace(/(\d+\.\d{3,})/g, (match) => parseFloat(match).toFixed(2));
+                }
+                
+                md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < indicators.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < indicators.length - 1 ? '1px solid rgba(6, 182, 212, 0.15)' : 'none'};">\n\n`;
                 md += `<div style="flex: 1; min-width: 200px;">\n\n`;
                 md += `<p style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">${ind.name}</p>\n\n`;
                 md += `<p style="font-size: clamp(0.85rem, 2vw, 0.95rem); color: #64748b; margin: 0;">${ind.status || ind.description || ''}</p>\n\n`;
                 md += `</div>\n\n`;
                 md += `<div style="text-align: right;">\n\n`;
-                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${ind.value}</p>\n\n`;
+                md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">${displayValue}</p>\n\n`;
                 md += `<span style="background: ${signalColor}; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: clamp(0.75rem, 1.8vw, 0.85rem);">${signalLabel}</span>\n\n`;
                 md += `</div>\n\n`;
                 md += `</div>\n\n`;
@@ -596,11 +1143,6 @@ class StockAnalysisNewsletter {
         return md;
     }
 
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
-    }
-
     // ════════════════════════════════════════════════════════════════
     // UTILITY FUNCTIONS
     // ════════════════════════════════════════════════════════════════
@@ -612,7 +1154,7 @@ class StockAnalysisNewsletter {
     }
 
     generateDemoData(symbol, days = 180) {
-        console.log(`📊 Generating demo data for ${symbol} (${days} days)`);
+        console.log(`Generating demo data for ${symbol} (${days} days)`);
         const prices = [];
         let price = 150;
         
@@ -689,7 +1231,7 @@ window.stockAnalysisNewsletter = null;
 
 async function initStockAnalysisNewsletter() {
     if (!window.stockAnalysisNewsletter) {
-        console.log('📊 Initializing Stock Analysis Newsletter System V2.0...');
+        console.log('Initializing Stock Analysis Newsletter System V2.0...');
         window.stockAnalysisNewsletter = new StockAnalysisNewsletter();
         await window.stockAnalysisNewsletter.initialize();
     }
@@ -702,23 +1244,23 @@ async function generateStockAnalysisNewsletter() {
         const symbol = document.getElementById('stockSymbolInput')?.value;
         
         if (!symbol || symbol.trim() === '') {
-            alert('⚠ Please enter a stock symbol');
+            alert('Please enter a stock symbol');
             return;
         }
 
-        console.log(`🚀 Manual stock analysis generation requested for: ${symbol}`);
+        console.log(`Manual stock analysis generation requested for: ${symbol}`);
         
         const system = await initStockAnalysisNewsletter();
         
         if (!firebase.auth().currentUser) {
-            alert('⚠ Please log in to generate analysis');
+            alert('Please log in to generate analysis');
             return;
         }
         
         await system.generateStockAnalysis(symbol, true);
         
     } catch (error) {
-        console.error('❌ Error generating stock analysis:', error);
+        console.error('Error generating stock analysis:', error);
         alert('Failed to generate stock analysis: ' + error.message);
     }
 }
@@ -729,9 +1271,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             await initStockAnalysisNewsletter();
-            console.log('✅ Stock Analysis Newsletter system initialized - Ready for manual generation');
+            console.log('Stock Analysis Newsletter system initialized - Ready for manual generation');
         }
     });
 });
 
-console.log('✅ Stock Analysis Newsletter System V2 - Script Loaded (Reuses Advanced Analysis Methods)');
+console.log('Stock Analysis Newsletter System V2.0 - Script Loaded (Reuses Advanced Analysis Methods)');
