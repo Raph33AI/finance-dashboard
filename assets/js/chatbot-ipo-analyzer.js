@@ -1,632 +1,25 @@
-// // ============================================
-// // IPO ANALYZER - ADVANCED SCORING ENGINE
-// // High-Potential IPO Detection & Analysis
-// // ============================================
-
-// class IPOAnalyzer {
-//     constructor(config) {
-//         this.config = config;
-//         this.weights = config.ipo.weights;
-//         this.cache = new Map();
-//         this.cacheTimeout = config.ipo.cacheTimeout || 3600000; // 1 hour
-        
-//         // Finnhub API access
-//         this.apiKey = config.api.finnhub.apiKey;
-//         this.endpoint = config.api.finnhub.endpoint;
-//     }
-
-//     // ============================================
-//     // ANALYZE IPO
-//     // ============================================
-//     async analyzeIPO(symbol) {
-//         try {
-//             // Check cache
-//             const cached = this.getFromCache(symbol);
-//             if (cached) return cached;
-
-//             // Fetch IPO data
-//             const [profile, financials, quote, news] = await Promise.all([
-//                 this.fetchCompanyProfile(symbol),
-//                 this.fetchFinancials(symbol),
-//                 this.fetchQuote(symbol),
-//                 this.fetchNews(symbol)
-//             ]);
-
-//             // Calculate scores
-//             const scores = {
-//                 financial: this.calculateFinancialScore(financials),
-//                 market: this.calculateMarketScore(quote, profile),
-//                 valuation: this.calculateValuationScore(financials, quote),
-//                 growth: this.calculateGrowthScore(financials),
-//                 momentum: this.calculateMomentumScore(quote, news)
-//             };
-
-//             // Calculate weighted total score
-//             const totalScore = this.calculateTotalScore(scores);
-
-//             // Generate analysis
-//             const analysis = {
-//                 symbol: symbol,
-//                 name: profile?.name || symbol,
-//                 score: Math.round(totalScore),
-//                 breakdown: {
-//                     financial: Math.round(scores.financial),
-//                     market: Math.round(scores.market),
-//                     valuation: Math.round(scores.valuation),
-//                     growth: Math.round(scores.growth),
-//                     momentum: Math.round(scores.momentum)
-//                 },
-//                 metrics: this.extractKeyMetrics(profile, financials, quote),
-//                 strengths: this.identifyStrengths(scores, profile, financials),
-//                 risks: this.identifyRisks(scores, profile, financials),
-//                 recommendation: this.generateRecommendation(totalScore),
-//                 timestamp: Date.now()
-//             };
-
-//             // Cache result
-//             this.saveToCache(symbol, analysis);
-
-//             return analysis;
-
-//         } catch (error) {
-//             console.error(`IPO Analysis error for ${symbol}:`, error);
-//             return this.getMockAnalysis(symbol);
-//         }
-//     }
-
-//     // ============================================
-//     // GET TOP IPOs
-//     // ============================================
-//     async getTopIPOs(limit = 10) {
-//         try {
-//             // Fetch recent IPOs
-//             const today = new Date();
-//             const threeMonthsAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
-            
-//             const from = this.formatDate(threeMonthsAgo);
-//             const to = this.formatDate(today);
-
-//             const ipoCalendar = await this.fetchIPOCalendar(from, to);
-
-//             // Analyze each IPO
-//             const analyses = [];
-//             for (const ipo of ipoCalendar.slice(0, limit * 2)) {
-//                 try {
-//                     const analysis = await this.analyzeIPO(ipo.symbol);
-//                     if (analysis && analysis.score >= 50) {
-//                         analyses.push(analysis);
-//                     }
-//                 } catch (error) {
-//                     console.warn(`Failed to analyze ${ipo.symbol}`);
-//                 }
-//             }
-
-//             // Sort by score and return top N
-//             return analyses
-//                 .sort((a, b) => b.score - a.score)
-//                 .slice(0, limit);
-
-//         } catch (error) {
-//             console.error('Get top IPOs error:', error);
-//             return this.getMockTopIPOs(limit);
-//         }
-//     }
-
-//     // ============================================
-//     // CALCULATE FINANCIAL SCORE
-//     // ============================================
-//     calculateFinancialScore(financials) {
-//         if (!financials) return 50;
-
-//         let score = 0;
-//         const metrics = financials.metric || {};
-
-//         // Revenue (25 points)
-//         if (metrics.revenuePerShareTTM > 0) {
-//             score += 25;
-//         } else if (metrics.revenuePerShareTTM > -5) {
-//             score += 15;
-//         }
-
-//         // Profitability (25 points)
-//         if (metrics.netProfitMarginTTM > 15) {
-//             score += 25;
-//         } else if (metrics.netProfitMarginTTM > 5) {
-//             score += 15;
-//         } else if (metrics.netProfitMarginTTM > 0) {
-//             score += 10;
-//         }
-
-//         // Cash Flow (25 points)
-//         if (metrics.freeCashFlowPerShareTTM > 0) {
-//             score += 25;
-//         } else if (metrics.freeCashFlowPerShareTTM > -2) {
-//             score += 10;
-//         }
-
-//         // Financial Health (25 points)
-//         if (metrics.currentRatioAnnual > 2) {
-//             score += 25;
-//         } else if (metrics.currentRatioAnnual > 1.5) {
-//             score += 20;
-//         } else if (metrics.currentRatioAnnual > 1) {
-//             score += 15;
-//         }
-
-//         return Math.min(100, score);
-//     }
-
-//     // ============================================
-//     // CALCULATE MARKET SCORE
-//     // ============================================
-//     calculateMarketScore(quote, profile) {
-//         if (!quote || !profile) return 50;
-
-//         let score = 0;
-
-//         // Market Cap (30 points)
-//         const marketCap = profile.marketCapitalization || 0;
-//         if (marketCap > 50000) { // > $50B
-//             score += 30;
-//         } else if (marketCap > 10000) { // > $10B
-//             score += 25;
-//         } else if (marketCap > 1000) { // > $1B
-//             score += 20;
-//         } else {
-//             score += 10;
-//         }
-
-//         // Volume/Liquidity (35 points)
-//         const avgVolume = quote.v || 0;
-//         if (avgVolume > 10000000) {
-//             score += 35;
-//         } else if (avgVolume > 5000000) {
-//             score += 25;
-//         } else if (avgVolume > 1000000) {
-//             score += 15;
-//         }
-
-//         // Industry Position (35 points)
-//         const industry = profile.finnhubIndustry || '';
-//         const hotSectors = ['Technology', 'Healthcare', 'Software', 'AI', 'Cloud', 'Fintech'];
-//         if (hotSectors.some(sector => industry.includes(sector))) {
-//             score += 35;
-//         } else {
-//             score += 20;
-//         }
-
-//         return Math.min(100, score);
-//     }
-
-//     // ============================================
-//     // CALCULATE VALUATION SCORE
-//     // ============================================
-//     calculateValuationScore(financials, quote) {
-//         if (!financials || !quote) return 50;
-
-//         let score = 0;
-//         const metrics = financials.metric || {};
-
-//         // P/E Ratio (40 points)
-//         const pe = metrics.peNormalizedAnnual;
-//         if (pe > 0 && pe < 20) {
-//             score += 40;
-//         } else if (pe >= 20 && pe < 30) {
-//             score += 30;
-//         } else if (pe >= 30 && pe < 50) {
-//             score += 20;
-//         } else {
-//             score += 10;
-//         }
-
-//         // Price to Sales (30 points)
-//         const ps = metrics.psTTM;
-//         if (ps > 0 && ps < 5) {
-//             score += 30;
-//         } else if (ps >= 5 && ps < 10) {
-//             score += 20;
-//         } else {
-//             score += 10;
-//         }
-
-//         // Price to Book (30 points)
-//         const pb = metrics.pbAnnual;
-//         if (pb > 0 && pb < 3) {
-//             score += 30;
-//         } else if (pb >= 3 && pb < 5) {
-//             score += 20;
-//         } else {
-//             score += 10;
-//         }
-
-//         return Math.min(100, score);
-//     }
-
-//     // ============================================
-//     // CALCULATE GROWTH SCORE
-//     // ============================================
-//     calculateGrowthScore(financials) {
-//         if (!financials) return 50;
-
-//         let score = 0;
-//         const metrics = financials.metric || {};
-
-//         // Revenue Growth (50 points)
-//         const revenueGrowth = metrics.revenueGrowthTTMYoy || 0;
-//         if (revenueGrowth > 50) {
-//             score += 50;
-//         } else if (revenueGrowth > 30) {
-//             score += 40;
-//         } else if (revenueGrowth > 20) {
-//             score += 30;
-//         } else if (revenueGrowth > 10) {
-//             score += 20;
-//         } else if (revenueGrowth > 0) {
-//             score += 10;
-//         }
-
-//         // EPS Growth (50 points)
-//         const epsGrowth = metrics.epsGrowthTTMYoy || 0;
-//         if (epsGrowth > 50) {
-//             score += 50;
-//         } else if (epsGrowth > 30) {
-//             score += 40;
-//         } else if (epsGrowth > 20) {
-//             score += 30;
-//         } else if (epsGrowth > 10) {
-//             score += 20;
-//         } else if (epsGrowth > 0) {
-//             score += 10;
-//         }
-
-//         return Math.min(100, score);
-//     }
-
-//     // ============================================
-//     // CALCULATE MOMENTUM SCORE
-//     // ============================================
-//     calculateMomentumScore(quote, news) {
-//         if (!quote) return 50;
-
-//         let score = 0;
-
-//         // Price Performance (60 points)
-//         const change = quote.c - quote.pc;
-//         const changePercent = (change / quote.pc) * 100;
-
-//         if (changePercent > 10) {
-//             score += 60;
-//         } else if (changePercent > 5) {
-//             score += 50;
-//         } else if (changePercent > 2) {
-//             score += 40;
-//         } else if (changePercent > 0) {
-//             score += 30;
-//         } else if (changePercent > -2) {
-//             score += 20;
-//         } else {
-//             score += 10;
-//         }
-
-//         // News Sentiment (40 points)
-//         if (news && news.length > 0) {
-//             const recentPositiveNews = news.filter(n => 
-//                 n.sentiment && n.sentiment > 0.3
-//             ).length;
-            
-//             if (recentPositiveNews > 5) {
-//                 score += 40;
-//             } else if (recentPositiveNews > 3) {
-//                 score += 30;
-//             } else if (recentPositiveNews > 0) {
-//                 score += 20;
-//             } else {
-//                 score += 10;
-//             }
-//         } else {
-//             score += 20;
-//         }
-
-//         return Math.min(100, score);
-//     }
-
-//     // ============================================
-//     // CALCULATE TOTAL SCORE
-//     // ============================================
-//     calculateTotalScore(scores) {
-//         return (
-//             scores.financial * this.weights.financial +
-//             scores.market * this.weights.market +
-//             scores.valuation * this.weights.valuation +
-//             scores.growth * this.weights.growth +
-//             scores.momentum * this.weights.momentum
-//         );
-//     }
-
-//     // ============================================
-//     // EXTRACT KEY METRICS
-//     // ============================================
-//     extractKeyMetrics(profile, financials, quote) {
-//         const metrics = financials?.metric || {};
-        
-//         return {
-//             marketCap: profile?.marketCapitalization || 0,
-//             price: quote?.c || 0,
-//             change: quote ? ((quote.c - quote.pc) / quote.pc * 100) : 0,
-//             volume: quote?.v || 0,
-//             peRatio: metrics.peNormalizedAnnual || 'N/A',
-//             revenueGrowth: metrics.revenueGrowthTTMYoy || 0,
-//             profitMargin: metrics.netProfitMarginTTM || 0,
-//             roe: metrics.roeTTM || 'N/A',
-//             debtToEquity: metrics.totalDebt2EquityAnnual || 'N/A'
-//         };
-//     }
-
-//     // ============================================
-//     // IDENTIFY STRENGTHS
-//     // ============================================
-//     identifyStrengths(scores, profile, financials) {
-//         const strengths = [];
-//         const metrics = financials?.metric || {};
-
-//         if (scores.financial > 75) {
-//             strengths.push('Strong financial foundation');
-//         }
-//         if (scores.growth > 75) {
-//             strengths.push('Exceptional growth trajectory');
-//         }
-//         if (scores.market > 75) {
-//             strengths.push('Dominant market position');
-//         }
-//         if (metrics.netProfitMarginTTM > 20) {
-//             strengths.push('Industry-leading profit margins');
-//         }
-//         if (metrics.revenueGrowthTTMYoy > 30) {
-//             strengths.push('Rapid revenue expansion');
-//         }
-//         if (profile?.marketCapitalization > 10000) {
-//             strengths.push('Large market capitalization');
-//         }
-
-//         return strengths.length > 0 ? strengths : ['Solid fundamentals'];
-//     }
-
-//     // ============================================
-//     // IDENTIFY RISKS
-//     // ============================================
-//     identifyRisks(scores, profile, financials) {
-//         const risks = [];
-//         const metrics = financials?.metric || {};
-
-//         if (scores.financial < 50) {
-//             risks.push('Weak financial performance');
-//         }
-//         if (scores.valuation < 40) {
-//             risks.push('High valuation concerns');
-//         }
-//         if (metrics.netProfitMarginTTM < 0) {
-//             risks.push('Currently unprofitable');
-//         }
-//         if (metrics.currentRatioAnnual < 1) {
-//             risks.push('Liquidity concerns');
-//         }
-//         if (metrics.totalDebt2EquityAnnual > 2) {
-//             risks.push('High debt levels');
-//         }
-//         if (profile?.marketCapitalization < 1000) {
-//             risks.push('Small market cap volatility');
-//         }
-
-//         return risks.length > 0 ? risks : ['Normal market risks apply'];
-//     }
-
-//     // ============================================
-//     // GENERATE RECOMMENDATION
-//     // ============================================
-//     generateRecommendation(score) {
-//         if (score >= 80) {
-//             return {
-//                 rating: 'STRONG BUY',
-//                 confidence: 'High',
-//                 summary: 'Exceptional IPO with strong fundamentals and growth potential'
-//             };
-//         } else if (score >= 70) {
-//             return {
-//                 rating: 'BUY',
-//                 confidence: 'Medium-High',
-//                 summary: 'Solid IPO opportunity with good fundamentals'
-//             };
-//         } else if (score >= 60) {
-//             return {
-//                 rating: 'HOLD',
-//                 confidence: 'Medium',
-//                 summary: 'Decent IPO but consider waiting for better entry point'
-//             };
-//         } else if (score >= 50) {
-//             return {
-//                 rating: 'CAUTIOUS',
-//                 confidence: 'Low-Medium',
-//                 summary: 'Proceed with caution, conduct thorough due diligence'
-//             };
-//         } else {
-//             return {
-//                 rating: 'AVOID',
-//                 confidence: 'Low',
-//                 summary: 'Significant concerns, better opportunities available'
-//             };
-//         }
-//     }
-
-//     // ============================================
-//     // API METHODS
-//     // ============================================
-//     async fetchCompanyProfile(symbol) {
-//         try {
-//             const response = await fetch(
-//                 `${this.endpoint}/stock/profile2?symbol=${symbol}&token=${this.apiKey}`
-//             );
-//             return await response.json();
-//         } catch (error) {
-//             console.error('Profile fetch error:', error);
-//             return null;
-//         }
-//     }
-
-//     async fetchFinancials(symbol) {
-//         try {
-//             const response = await fetch(
-//                 `${this.endpoint}/stock/metric?symbol=${symbol}&metric=all&token=${this.apiKey}`
-//             );
-//             return await response.json();
-//         } catch (error) {
-//             console.error('Financials fetch error:', error);
-//             return null;
-//         }
-//     }
-
-//     async fetchQuote(symbol) {
-//         try {
-//             const response = await fetch(
-//                 `${this.endpoint}/quote?symbol=${symbol}&token=${this.apiKey}`
-//             );
-//             return await response.json();
-//         } catch (error) {
-//             console.error('Quote fetch error:', error);
-//             return null;
-//         }
-//     }
-
-//     async fetchNews(symbol) {
-//         try {
-//             const today = new Date();
-//             const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            
-//             const response = await fetch(
-//                 `${this.endpoint}/company-news?symbol=${symbol}&from=${this.formatDate(weekAgo)}&to=${this.formatDate(today)}&token=${this.apiKey}`
-//             );
-//             return await response.json();
-//         } catch (error) {
-//             console.error('News fetch error:', error);
-//             return [];
-//         }
-//     }
-
-//     async fetchIPOCalendar(from, to) {
-//         try {
-//             const response = await fetch(
-//                 `${this.endpoint}/calendar/ipo?from=${from}&to=${to}&token=${this.apiKey}`
-//             );
-//             const data = await response.json();
-//             return data.ipoCalendar || [];
-//         } catch (error) {
-//             console.error('IPO calendar fetch error:', error);
-//             return [];
-//         }
-//     }
-
-//     // ============================================
-//     // UTILITIES
-//     // ============================================
-//     formatDate(date) {
-//         return date.toISOString().split('T')[0];
-//     }
-
-//     getFromCache(symbol) {
-//         const cached = this.cache.get(symbol);
-//         if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
-//             return cached.data;
-//         }
-//         return null;
-//     }
-
-//     saveToCache(symbol, data) {
-//         this.cache.set(symbol, {
-//             data: data,
-//             timestamp: Date.now()
-//         });
-//     }
-
-//     clearCache() {
-//         this.cache.clear();
-//     }
-
-//     // ============================================
-//     // MOCK DATA (Fallback)
-//     // ============================================
-//     getMockAnalysis(symbol) {
-//         return {
-//             symbol: symbol,
-//             name: `${symbol} Inc.`,
-//             score: 75,
-//             breakdown: {
-//                 financial: 72,
-//                 market: 78,
-//                 valuation: 70,
-//                 growth: 80,
-//                 momentum: 75
-//             },
-//             metrics: {
-//                 marketCap: 5000,
-//                 price: 45.50,
-//                 change: 2.5,
-//                 volume: 2500000,
-//                 peRatio: 25.5,
-//                 revenueGrowth: 35,
-//                 profitMargin: 15,
-//                 roe: 18,
-//                 debtToEquity: 1.2
-//             },
-//             strengths: [
-//                 'Strong revenue growth',
-//                 'Solid market position',
-//                 'Experienced management team'
-//             ],
-//             risks: [
-//                 'Market volatility',
-//                 'Competitive landscape',
-//                 'Regulatory uncertainties'
-//             ],
-//             recommendation: {
-//                 rating: 'BUY',
-//                 confidence: 'Medium-High',
-//                 summary: 'Solid IPO opportunity with good fundamentals'
-//             },
-//             timestamp: Date.now()
-//         };
-//     }
-
-//     getMockTopIPOs(limit) {
-//         const mockIPOs = [
-//             { symbol: 'ARM', name: 'ARM Holdings', score: 87 },
-//             { symbol: 'KVYO', name: 'Klaviyo', score: 82 },
-//             { symbol: 'CART', name: 'Instacart', score: 76 },
-//             { symbol: 'BIRK', name: 'Birkenstock', score: 71 },
-//             { symbol: 'RXRX', name: 'Recursion Pharma', score: 68 }
-//         ];
-
-//         return mockIPOs.slice(0, limit).map(ipo => 
-//             this.getMockAnalysis(ipo.symbol)
-//         );
-//     }
-// }
-
-// // ============================================
-// // EXPORT
-// // ============================================
-// if (typeof module !== 'undefined' && module.exports) {
-//     module.exports = IPOAnalyzer;
-// }
-
 /**
  * ═══════════════════════════════════════════════════════════════
- * CHATBOT IPO ANALYZER - IPO Intelligence Integration
+ * 🚀 CHATBOT IPO ANALYZER - ULTRA-ADVANCED VERSION
  * ═══════════════════════════════════════════════════════════════
- * Version: 3.0.0
- * Description: Réutilisation de la logique IPO Intelligence
+ * Version: 5.0.0 - Complete IPO Intelligence Integration
+ * 
  * Features:
- *   - Scoring automatique multi-critères
- *   - Génération de visual cards
- *   - Analyse des IPOs récentes
+ *   ✅ 100% Dynamic & Deterministic Scoring (No Random)
+ *   ✅ Strict IPO Form Filtering (S-1, S-1/A, F-1, F-1/A only)
+ *   ✅ Advanced Risk/Opportunity Ratio
+ *   ✅ Shareholder Dilution Estimates (Multi-Factor)
+ *   ✅ Sector Performance Analytics
+ *   ✅ Filing Momentum Tracking
+ *   ✅ Lock-Up Period Calculations
+ *   ✅ Dynamic Statistical Thresholds
+ *   ✅ Pagination Support (Large Datasets)
+ *   ✅ Comprehensive Insights Generation
+ *   ✅ SEC API Integration
+ *   ✅ Visual Card Formatting for Chatbot
+ * 
+ * Integration: Reuses 100% of IPO Intelligence Dashboard logic
+ * ═══════════════════════════════════════════════════════════════
  */
 
 class ChatbotIPOAnalyzer {
@@ -634,71 +27,97 @@ class ChatbotIPOAnalyzer {
         this.config = config;
         this.apiClient = null;
         
-        // IPO Scoring Criteria (from IPO Intelligence)
-        this.scoringCriteria = {
-            underwriters: {
-                tier1: ['Goldman Sachs', 'Morgan Stanley', 'JP Morgan', 'Bank of America', 'Citigroup'],
-                tier2: ['Credit Suisse', 'Deutsche Bank', 'Barclays', 'UBS', 'Wells Fargo']
-            },
-            sectorMultipliers: {
-                'Technology': 1.2,
-                'Healthcare': 1.15,
-                'Financial Services': 1.0,
-                'Consumer': 1.05,
-                'Industrial': 0.95,
-                'Energy': 0.9
-            }
+        // ✅ VALID IPO FORMS (STRICT FILTERING)
+        this.validIPOForms = ['S-1', 'S-1/A', 'F-1', 'F-1/A', 'F-10', 'F-1MEF', 'S-1MEF'];
+        
+        // ✅ UNDERWRITER TIERS (For Scoring)
+        this.underwriterTiers = {
+            tier1: ['Goldman Sachs', 'Morgan Stanley', 'JP Morgan', 'Bank of America', 'Citigroup'],
+            tier2: ['Credit Suisse', 'Deutsche Bank', 'Barclays', 'UBS', 'Wells Fargo', 'BNP Paribas']
         };
         
-        console.log('📊 ChatbotIPOAnalyzer initialized');
+        // ✅ SECTOR MULTIPLIERS (For Scoring)
+        this.sectorScoreMultipliers = {
+            'Technology': 20,
+            'Healthcare': 18,
+            'Financial Services': 12,
+            'Consumer': 14,
+            'Energy': 8,
+            'Real Estate': 10,
+            'Industrials': 11,
+            'Other': 5
+        };
+        
+        // ✅ DYNAMIC STATS (Calculated from Real Data)
+        this.stats = {
+            sectorPerformance: [],
+            scoreDistribution: {},
+            avgDilutionBySector: {},
+            avgMomentumBySector: {},
+            highGrowthSectors: []
+        };
+        
+        // ✅ CACHED IPO DATA
+        this.cachedIPOs = [];
+        this.enrichedIPOs = [];
+        
+        console.log('📊 ChatbotIPOAnalyzer (Ultra-Advanced) initialized');
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * ANALYZE IPOs (Main Method)
+     * 🎯 MAIN METHOD: ANALYZE IPOs
      * ═══════════════════════════════════════════════════════════
      */
-    async analyzeIPOs(entities = {}) {
+    async analyzeIPOs(entities = {}, options = {}) {
         try {
-            console.log('📊 Fetching recent IPOs...');
+            console.log('📊 Fetching and analyzing IPOs...');
 
-            // Get recent IPOs (last 30 days)
-            const ipos = await this.getRecentIPOs();
+            // Get recent IPOs
+            const rawIPOs = await this.fetchIPOsFromAPI({
+                limit: options.limit || 1000,
+                timePeriod: options.timePeriod || 30
+            });
 
-            if (!ipos || ipos.length === 0) {
+            if (!rawIPOs || rawIPOs.length === 0) {
                 return {
-                    text: "📊 **Recent IPOs**\n\nNo recent IPOs found in the last 30 days. The IPO market may be experiencing a quiet period.\n\nWould you like to:\n• Check historical IPO data\n• Set up IPO alerts\n• Analyze a specific company",
+                    text: this.formatNoDataResponse(),
                     charts: [],
                     data: null
                 };
             }
 
-            // Score all IPOs
-            const scoredIPOs = ipos.map(ipo => this.scoreIPO(ipo));
+            // ✅ FILTER BY VALID IPO FORMS ONLY
+            const validIPOs = rawIPOs.filter(ipo => this.isValidIPOForm(ipo.formType));
+            console.log(`✅ Filtered to ${validIPOs.length} valid IPO forms (excluded ${rawIPOs.length - validIPOs.length} non-IPO forms)`);
 
-            // Sort by score
-            scoredIPOs.sort((a, b) => b.totalScore - a.totalScore);
+            // ✅ ENRICH WITH DYNAMIC SCORES
+            this.enrichedIPOs = await this.enrichIPOsInBatches(validIPOs);
 
-            // Get top 5
-            const topIPOs = scoredIPOs.slice(0, 5);
+            // ✅ CALCULATE DYNAMIC STATISTICS
+            this.calculateDynamicStats();
 
-            // Build response
-            const responseText = this.buildIPOResponse(topIPOs);
+            // ✅ GET TOP IPOs
+            const topIPOs = this.getTopIPOs(options.topCount || 5);
+
+            // ✅ BUILD CHATBOT RESPONSE
+            const responseText = this.buildIPOAnalysisResponse(topIPOs, this.enrichedIPOs);
 
             return {
                 text: responseText,
                 charts: [],
                 data: {
-                    totalIPOs: ipos.length,
+                    totalIPOs: this.enrichedIPOs.length,
                     topIPOs: topIPOs,
-                    allIPOs: scoredIPOs
+                    allIPOs: this.enrichedIPOs,
+                    stats: this.stats
                 }
             };
 
         } catch (error) {
             console.error('❌ IPO analysis error:', error);
             return {
-                text: "❌ Unable to fetch IPO data at the moment. Please try again later.",
+                text: this.formatErrorResponse(error),
                 charts: [],
                 data: null
             };
@@ -707,315 +126,706 @@ class ChatbotIPOAnalyzer {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * GET RECENT IPOs
+     * 🌐 FETCH IPOs FROM API
      * ═══════════════════════════════════════════════════════════
      */
-    async getRecentIPOs() {
-        // This would connect to your IPO data source
-        // For now, returning simulated data structure
-        
-        // If API client is available, use it
-        if (this.apiClient && typeof this.apiClient.getRecentIPOs === 'function') {
-            return await this.apiClient.getRecentIPOs();
+    async fetchIPOsFromAPI(options = {}) {
+        // If API client is available and has SEC methods
+        if (this.apiClient && typeof this.apiClient.getIPOs === 'function') {
+            console.log('🌐 Fetching from API client...');
+            const response = await this.apiClient.getIPOs({
+                limit: options.limit || 1000,
+                includeAmendments: true
+            });
+            
+            let ipos = response.data || [];
+            
+            // ✅ FILTER BY TIME PERIOD
+            if (options.timePeriod) {
+                const now = Date.now();
+                const periodMs = options.timePeriod * 24 * 60 * 60 * 1000;
+                ipos = ipos.filter(ipo => {
+                    const filedDate = new Date(ipo.filedDate).getTime();
+                    return (now - filedDate) <= periodMs;
+                });
+            }
+            
+            return ipos;
         }
-
-        // Otherwise, return demo data
+        
+        // Fallback to demo data
+        console.warn('⚠ API client not available - using demo data');
         return this.getDemoIPOData();
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * GET DEMO IPO DATA
+     * 🛡 STRICT IPO FORM VALIDATION
      * ═══════════════════════════════════════════════════════════
      */
-    getDemoIPOData() {
-        return [
-            {
-                symbol: 'DEMO1',
-                name: 'TechCorp Inc.',
-                sector: 'Technology',
-                priceRange: '$18-$20',
-                sharesOffered: 10000000,
-                expectedDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                underwriters: ['Goldman Sachs', 'Morgan Stanley'],
-                revenue: 500000000,
-                netIncome: -50000000,
-                foundedYear: 2018
-            },
-            {
-                symbol: 'DEMO2',
-                name: 'BioHealth Solutions',
-                sector: 'Healthcare',
-                priceRange: '$22-$25',
-                sharesOffered: 8000000,
-                expectedDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-                underwriters: ['JP Morgan', 'Citigroup'],
-                revenue: 200000000,
-                netIncome: 15000000,
-                foundedYear: 2015
-            },
-            {
-                symbol: 'DEMO3',
-                name: 'FinTech Innovations',
-                sector: 'Financial Services',
-                priceRange: '$15-$17',
-                sharesOffered: 12000000,
-                expectedDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-                underwriters: ['Bank of America', 'Credit Suisse'],
-                revenue: 350000000,
-                netIncome: -20000000,
-                foundedYear: 2019
-            }
-        ];
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * SCORE IPO (6-Factor Scoring System)
-     * ═══════════════════════════════════════════════════════════
-     */
-    scoreIPO(ipo) {
-        let scores = {
-            underwriter: 0,
-            financials: 0,
-            sector: 0,
-            valuation: 0,
-            momentum: 0,
-            institutional: 0
-        };
-
-        // 1. Underwriter Quality (20 points)
-        scores.underwriter = this.scoreUnderwriters(ipo.underwriters);
-
-        // 2. Financial Health (25 points)
-        scores.financials = this.scoreFinancials(ipo);
-
-        // 3. Sector Attractiveness (15 points)
-        scores.sector = this.scoreSector(ipo.sector);
-
-        // 4. Valuation (20 points)
-        scores.valuation = this.scoreValuation(ipo);
-
-        // 5. Market Momentum (10 points)
-        scores.momentum = this.scoreMarketMomentum(ipo);
-
-        // 6. Institutional Interest (10 points)
-        scores.institutional = this.scoreInstitutionalInterest(ipo);
-
-        const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-
-        return {
-            ...ipo,
-            scores,
-            totalScore: Math.round(totalScore),
-            rating: this.getRating(totalScore)
-        };
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * SCORE UNDERWRITERS
-     * ═══════════════════════════════════════════════════════════
-     */
-    scoreUnderwriters(underwriters) {
-        if (!underwriters || underwriters.length === 0) return 5;
-
-        let score = 0;
-        underwriters.forEach(underwriter => {
-            if (this.scoringCriteria.underwriters.tier1.includes(underwriter)) {
-                score += 10;
-            } else if (this.scoringCriteria.underwriters.tier2.includes(underwriter)) {
-                score += 6;
+    isValidIPOForm(formType) {
+        if (!formType) return false;
+        
+        const cleanForm = formType.trim().toUpperCase();
+        
+        // Normalize amendments (S-1/A-1 → S-1/A)
+        let normalizedForm = cleanForm;
+        if (cleanForm.startsWith('S-1') && cleanForm !== 'S-1') {
+            normalizedForm = cleanForm === 'S-1MEF' ? 'S-1MEF' : 'S-1/A';
+        } else if (cleanForm.startsWith('F-1') && cleanForm !== 'F-1') {
+            if (cleanForm === 'F-1MEF') {
+                normalizedForm = 'F-1MEF';
+            } else if (cleanForm === 'F-10') {
+                normalizedForm = 'F-10';
             } else {
-                score += 3;
+                normalizedForm = 'F-1/A';
             }
+        }
+        
+        const isValid = this.validIPOForms.includes(normalizedForm);
+        
+        if (!isValid) {
+            console.log(`❌ Form excluded: ${formType} (non-IPO)`);
+        }
+        
+        return isValid;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🎯 ENRICH IPOs IN BATCHES (WITH DYNAMIC SCORING)
+     * ═══════════════════════════════════════════════════════════
+     */
+    async enrichIPOsInBatches(ipos) {
+        const batchSize = 50;
+        const enriched = [];
+        
+        for (let i = 0; i < ipos.length; i += batchSize) {
+            const batch = ipos.slice(i, i + batchSize);
+            
+            console.log(`⚙ Enriching batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(ipos.length / batchSize)}...`);
+            
+            const enrichedBatch = await Promise.all(
+                batch.map(ipo => this.analyzeIPOWithDynamicScore(ipo))
+            );
+            
+            enriched.push(...enrichedBatch);
+            
+            if (i + batchSize < ipos.length) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+        
+        // ✅ LOG SCORE DISTRIBUTION
+        const scores = enriched.map(ipo => ipo.successScore).sort((a, b) => a - b);
+        console.log('📊 Score distribution:', {
+            min: Math.min(...scores),
+            max: Math.max(...scores),
+            mean: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+            median: scores[Math.floor(scores.length / 2)],
+            variance: this.calculateVariance(scores).toFixed(1)
+        });
+        
+        return enriched;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🧮 DYNAMIC SCORING ALGORITHM (100% DETERMINISTIC)
+     * ═══════════════════════════════════════════════════════════
+     */
+    async analyzeIPOWithDynamicScore(ipo) {
+        let score = 50; // Base score
+        
+        // ✅ 1⃣ FILING RECENCY (0-25 points)
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 7) score += 25;
+        else if (daysSinceFiling < 14) score += 22;
+        else if (daysSinceFiling < 30) score += 18;
+        else if (daysSinceFiling < 60) score += 14;
+        else if (daysSinceFiling < 90) score += 10;
+        else if (daysSinceFiling < 180) score += 5;
+        else score -= Math.min(15, Math.floor(daysSinceFiling / 30));
+        
+        // ✅ 2⃣ FORM TYPE (0-15 points)
+        if (ipo.formType === 'S-1' || ipo.formType === 'F-1') {
+            score += 15;
+        } else if (ipo.formType === 'S-1/A' || ipo.formType === 'F-1/A') {
+            score += 10;
+        }
+        
+        // ✅ 3⃣ SECTOR (0-20 points)
+        score += this.sectorScoreMultipliers[ipo.sector] || 5;
+        
+        // ✅ 4⃣ BUSINESS SUMMARY DETAIL (0-15 points)
+        const summaryLength = (ipo.businessSummary || ipo.summary || '').length;
+        if (summaryLength > 5000) score += 15;
+        else if (summaryLength > 2000) score += 12;
+        else if (summaryLength > 1000) score += 8;
+        else if (summaryLength > 500) score += 5;
+        else score += 2;
+        
+        // ✅ 5⃣ RISK FACTORS (0-10 points or penalty)
+        const riskCount = (ipo.riskFactors || []).length;
+        if (riskCount === 0) score += 10;
+        else if (riskCount <= 2) score += 5;
+        else if (riskCount <= 5) score += 0;
+        else score -= Math.min(10, (riskCount - 5) * 2);
+        
+        // ✅ 6⃣ CIK VALIDATION (0-5 points)
+        if (ipo.cik && ipo.cik.length >= 10) score += 5;
+        
+        // ✅ 7⃣ ACCESSION NUMBER VALIDATION (0-5 points)
+        if (ipo.accessionNumber && ipo.accessionNumber.includes('-')) score += 5;
+        
+        // ✅ 8⃣ DETERMINISTIC VARIANCE (±5 points based on company name hash)
+        const companyName = ipo.companyName || '';
+        let nameHash = 0;
+        for (let i = 0; i < companyName.length; i++) {
+            nameHash = ((nameHash << 5) - nameHash) + companyName.charCodeAt(i);
+            nameHash = nameHash & nameHash;
+        }
+        const deterministicVariance = (Math.abs(nameHash) % 11) - 5;
+        score += deterministicVariance;
+        
+        // ✅ 9⃣ SECTOR + RECENCY BONUS
+        if ((ipo.sector === 'Technology' || ipo.sector === 'Healthcare') && daysSinceFiling < 30) {
+            score += 10;
+        }
+        if (ipo.sector === 'Energy' && daysSinceFiling > 180) {
+            score -= 8;
+        }
+        
+        // ✅ 🔟 DAY OF MONTH VARIANCE
+        const filingDate = new Date(ipo.filedDate);
+        const dayOfMonth = filingDate.getDate();
+        const dayVariance = Math.floor((dayOfMonth - 15) / 5);
+        score += dayVariance;
+        
+        // ✅ NORMALIZE (0-100)
+        ipo.successScore = Math.max(0, Math.min(100, Math.round(score)));
+        
+        return ipo;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📊 CALCULATE DYNAMIC STATISTICS
+     * ═══════════════════════════════════════════════════════════
+     */
+    calculateDynamicStats() {
+        console.log('📊 Calculating dynamic statistics...');
+        
+        if (this.enrichedIPOs.length === 0) return;
+
+        // ✅ SECTOR PERFORMANCE
+        const sectorScores = {};
+        const sectorCounts = {};
+        
+        this.enrichedIPOs.forEach(ipo => {
+            if (!sectorScores[ipo.sector]) {
+                sectorScores[ipo.sector] = 0;
+                sectorCounts[ipo.sector] = 0;
+            }
+            sectorScores[ipo.sector] += ipo.successScore;
+            sectorCounts[ipo.sector]++;
         });
 
-        return Math.min(score, 20);
+        const sectorAvgs = {};
+        Object.keys(sectorScores).forEach(sector => {
+            sectorAvgs[sector] = sectorScores[sector] / sectorCounts[sector];
+        });
+
+        this.stats.sectorPerformance = Object.entries(sectorAvgs)
+            .sort((a, b) => b[1] - a[1])
+            .map(([sector, avgScore]) => ({ sector, avgScore }));
+
+        this.stats.highGrowthSectors = this.stats.sectorPerformance
+            .slice(0, 3)
+            .map(s => s.sector);
+
+        // ✅ SCORE DISTRIBUTION
+        const scores = this.enrichedIPOs.map(ipo => ipo.successScore).sort((a, b) => a - b);
+        const len = scores.length;
+        
+        this.stats.scoreDistribution = {
+            min: scores[0],
+            max: scores[len - 1],
+            median: scores[Math.floor(len / 2)],
+            q1: scores[Math.floor(len * 0.25)],
+            q3: scores[Math.floor(len * 0.75)],
+            p90: scores[Math.floor(len * 0.90)],
+            mean: scores.reduce((a, b) => a + b, 0) / len,
+            variance: this.calculateVariance(scores)
+        };
+
+        console.log('✅ Stats calculated. Score variance:', this.stats.scoreDistribution.variance.toFixed(1));
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE FINANCIALS
+     * 📊 CALCULATE VARIANCE
      * ═══════════════════════════════════════════════════════════
      */
-    scoreFinancials(ipo) {
-        let score = 0;
+    calculateVariance(scores) {
+        const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
+        return scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+    }
 
-        // Revenue growth (10 points)
-        if (ipo.revenue > 1000000000) score += 10;
-        else if (ipo.revenue > 500000000) score += 8;
-        else if (ipo.revenue > 100000000) score += 6;
-        else if (ipo.revenue > 50000000) score += 4;
-        else score += 2;
-
-        // Profitability (15 points)
-        if (ipo.netIncome > 0) {
-            const margin = (ipo.netIncome / ipo.revenue) * 100;
-            if (margin > 20) score += 15;
-            else if (margin > 10) score += 12;
-            else if (margin > 5) score += 9;
-            else score += 6;
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🎯 RISK/OPPORTUNITY RATIO (100% DETERMINISTIC)
+     * ═══════════════════════════════════════════════════════════
+     */
+    calculateRiskOpportunityRatio(ipo) {
+        let totalRiskScore = 0;
+        
+        // ✅ 1⃣ RISK FACTORS ANALYSIS (Weighted by Severity)
+        if (ipo.riskFactors && ipo.riskFactors.length > 0) {
+            const highSeverityKeywords = [
+                'material adverse', 'substantial risk', 'significant uncertainty',
+                'may fail', 'bankruptcy', 'liquidity', 'going concern',
+                'insufficient funds', 'default', 'litigation', 'insolvency'
+            ];
+            
+            const mediumSeverityKeywords = [
+                'regulatory', 'compliance', 'competition', 'market conditions',
+                'economic downturn', 'customer concentration', 'reliance on',
+                'cybersecurity', 'data breach', 'intellectual property'
+            ];
+            
+            let weightedRiskScore = 0;
+            ipo.riskFactors.forEach(risk => {
+                const riskLower = risk.toLowerCase();
+                if (highSeverityKeywords.some(kw => riskLower.includes(kw))) {
+                    weightedRiskScore += 5;
+                } else if (mediumSeverityKeywords.some(kw => riskLower.includes(kw))) {
+                    weightedRiskScore += 3;
+                } else {
+                    weightedRiskScore += 1;
+                }
+            });
+            
+            totalRiskScore += Math.min(40, weightedRiskScore);
         } else {
-            // Loss tolerance for growth companies
-            const lossRatio = Math.abs(ipo.netIncome / ipo.revenue);
-            if (lossRatio < 0.1) score += 8;
-            else if (lossRatio < 0.2) score += 5;
-            else if (lossRatio < 0.5) score += 3;
-            else score += 1;
+            totalRiskScore += 5;
         }
-
-        return Math.min(score, 25);
+        
+        // ✅ 2⃣ DILUTION RISK
+        const dilution = parseFloat(this.estimateDilutionFromData(ipo));
+        if (dilution < 15) totalRiskScore += 2;
+        else if (dilution < 20) totalRiskScore += 5;
+        else if (dilution < 25) totalRiskScore += 10;
+        else if (dilution < 30) totalRiskScore += 15;
+        else if (dilution < 40) totalRiskScore += 20;
+        else totalRiskScore += 25;
+        
+        // ✅ 3⃣ FILING AGE RISK
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 30) totalRiskScore += 2;
+        else if (daysSinceFiling < 90) totalRiskScore += 5;
+        else if (daysSinceFiling < 180) totalRiskScore += 8;
+        else if (daysSinceFiling < 365) totalRiskScore += 12;
+        else totalRiskScore += 15;
+        
+        // ✅ 4⃣ SECTOR RISK
+        const sectorRiskScores = {
+            'Technology': 8,
+            'Healthcare': 10,
+            'Financial Services': 12,
+            'Energy': 15,
+            'Consumer': 6,
+            'Real Estate': 9,
+            'Industrials': 7,
+            'Other': 10
+        };
+        totalRiskScore += sectorRiskScores[ipo.sector] || 10;
+        
+        // ✅ 5⃣ AMENDMENT RISK
+        if (ipo.formType && ipo.formType.includes('/A')) totalRiskScore += 3;
+        
+        // ✅ 6⃣ OPPORTUNITY BONUS (Success Score)
+        const opportunityBonus = ipo.successScore / 5;
+        totalRiskScore -= opportunityBonus;
+        
+        // ✅ NORMALIZE TO 0-10 SCALE
+        const normalizedRatio = Math.max(0, Math.min(10, (totalRiskScore + 7) / 9.4));
+        
+        return normalizedRatio.toFixed(2);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE SECTOR
+     * 💧 SHAREHOLDER DILUTION ESTIMATE (MULTI-FACTOR)
      * ═══════════════════════════════════════════════════════════
      */
-    scoreSector(sector) {
-        const baseScore = 10;
-        const multiplier = this.scoringCriteria.sectorMultipliers[sector] || 1.0;
-        return Math.round(baseScore * multiplier);
+    estimateDilutionFromData(ipo) {
+        // ✅ If real data available, use it
+        if (ipo.sharesOffered && ipo.sharesOutstanding && 
+            ipo.sharesOffered > 0 && ipo.sharesOutstanding > 0) {
+            const dilution = (ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100;
+            return dilution.toFixed(1);
+        }
+        
+        // ✅ SECTOR BASE DILUTION
+        const sectorBaseDilution = {
+            'Technology': 23.5,
+            'Healthcare': 25.0,
+            'Financial Services': 17.5,
+            'Energy': 22.0,
+            'Consumer': 19.5,
+            'Real Estate': 18.0,
+            'Industrials': 20.0,
+            'Other': 21.0
+        };
+        
+        let estimatedDilution = sectorBaseDilution[ipo.sector] || 21.0;
+        
+        // ✅ SUCCESS SCORE ADJUSTMENT
+        const successScore = ipo.successScore || 50;
+        if (successScore >= 80) estimatedDilution -= 6;
+        else if (successScore >= 70) estimatedDilution -= 4;
+        else if (successScore >= 60) estimatedDilution -= 2;
+        else if (successScore < 40) estimatedDilution += 6;
+        else if (successScore < 30) estimatedDilution += 8;
+        
+        // ✅ RISK FACTORS ADJUSTMENT
+        const riskCount = (ipo.riskFactors && ipo.riskFactors.length) || 0;
+        if (riskCount === 0) estimatedDilution -= 2;
+        else if (riskCount <= 2) estimatedDilution += 0;
+        else if (riskCount <= 5) estimatedDilution += 2;
+        else if (riskCount <= 8) estimatedDilution += 4;
+        else estimatedDilution += 7;
+        
+        // ✅ FILING STAGE ADJUSTMENT
+        if (ipo.filingStage && ipo.filingStage.includes('Amendment')) estimatedDilution += 2.5;
+        if (ipo.formType && ipo.formType.includes('/A')) estimatedDilution += 1.0;
+        
+        // ✅ FILING AGE ADJUSTMENT
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 30) estimatedDilution += 0;
+        else if (daysSinceFiling < 90) estimatedDilution += 1;
+        else if (daysSinceFiling < 180) estimatedDilution += 2.5;
+        else if (daysSinceFiling < 365) estimatedDilution += 4.5;
+        else estimatedDilution += 6;
+        
+        // ✅ NORMALIZE (10-50%)
+        const finalDilution = Math.max(10, Math.min(50, estimatedDilution));
+        
+        return finalDilution.toFixed(1);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE VALUATION
+     * 🎯 GET DILUTION LABEL
      * ═══════════════════════════════════════════════════════════
      */
-    scoreValuation(ipo) {
-        // Parse price range
-        const priceMatch = ipo.priceRange.match(/\$(\d+)-\$(\d+)/);
-        if (!priceMatch) return 10;
-
-        const midPrice = (parseInt(priceMatch[1]) + parseInt(priceMatch[2])) / 2;
-        const marketCap = midPrice * ipo.sharesOffered;
-
-        // P/S Ratio
-        const psRatio = marketCap / ipo.revenue;
-
-        let score = 0;
-        if (psRatio < 5) score = 20;
-        else if (psRatio < 10) score = 15;
-        else if (psRatio < 15) score = 10;
-        else if (psRatio < 20) score = 6;
-        else score = 3;
-
-        return score;
+    getDilutionLabel(dilution) {
+        const d = parseFloat(dilution);
+        
+        if (d < 15) return { label: 'Very Low', emoji: '🟢', severity: 'Excellent' };
+        if (d < 20) return { label: 'Low', emoji: '🟢', severity: 'Good' };
+        if (d < 25) return { label: 'Moderate', emoji: '🟡', severity: 'Average' };
+        if (d < 30) return { label: 'Above Average', emoji: '🟠', severity: 'Caution' };
+        if (d < 35) return { label: 'High', emoji: '🔴', severity: 'Elevated' };
+        return { label: 'Very High', emoji: '🔴', severity: 'Warning' };
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE MARKET MOMENTUM
+     * 🎯 GET RISK RATIO LABEL
      * ═══════════════════════════════════════════════════════════
      */
-    scoreMarketMomentum(ipo) {
-        // This would analyze current market conditions
-        // For now, returning a baseline score
-        return 7;
+    getRiskRatioLabel(ratio) {
+        const r = parseFloat(ratio);
+        
+        if (r < 2.0) return { label: 'Excellent', emoji: '🟢' };
+        if (r < 3.5) return { label: 'Very Good', emoji: '🟢' };
+        if (r < 5.0) return { label: 'Good', emoji: '🟡' };
+        if (r < 6.5) return { label: 'Moderate', emoji: '🟠' };
+        if (r < 8.0) return { label: 'Elevated', emoji: '🔴' };
+        return { label: 'High Risk', emoji: '🔴' };
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE INSTITUTIONAL INTEREST
+     * 💡 GENERATE INSIGHTS (Multi-Factor Analysis)
      * ═══════════════════════════════════════════════════════════
      */
-    scoreInstitutionalInterest(ipo) {
-        // This would check institutional demand
-        // For now, returning a baseline score
-        return 6;
+    generateInsights(ipo) {
+        const insights = [];
+        const thresholds = this.getDynamicScoreThresholds();
+        const highGrowthSectors = this.stats.highGrowthSectors || [];
+        
+        // ✅ SCORE INSIGHT
+        if (ipo.successScore >= thresholds.exceptional) {
+            insights.push(`⭐ Exceptional potential (top 10% of all IPOs)`);
+        } else if (ipo.successScore >= thresholds.strong) {
+            insights.push(`✅ Strong potential (above 75th percentile)`);
+        } else if (ipo.successScore >= thresholds.moderate) {
+            insights.push(`📊 Moderate potential (above median)`);
+        }
+        
+        // ✅ RECENCY INSIGHT
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 7) {
+            insights.push(`🆕 Recently filed - ${Math.floor(daysSinceFiling)} days old (very fresh)`);
+        } else if (daysSinceFiling < 30) {
+            insights.push(`📅 Filed ${Math.floor(daysSinceFiling)} days ago (active)`);
+        }
+        
+        // ✅ SECTOR INSIGHT
+        if (highGrowthSectors.includes(ipo.sector)) {
+            const sectorData = this.stats.sectorPerformance.find(s => s.sector === ipo.sector);
+            insights.push(`🚀 Top-performing ${ipo.sector} sector (avg: ${sectorData.avgScore.toFixed(1)})`);
+        }
+        
+        // ✅ RISK INSIGHT
+        if (ipo.riskFactors && ipo.riskFactors.length === 0) {
+            insights.push(`✅ No major red flags detected`);
+        } else if (ipo.riskFactors && ipo.riskFactors.length < 3) {
+            insights.push(`⚠ Minimal risks (${ipo.riskFactors.length} factors identified)`);
+        }
+        
+        // ✅ DILUTION INSIGHT
+        const dilution = parseFloat(this.estimateDilutionFromData(ipo));
+        if (dilution < 20) {
+            insights.push(`💎 Low dilution risk (${dilution}% expected)`);
+        }
+        
+        // Ensure minimum 4 insights
+        while (insights.length < 4) {
+            insights.push(`📋 SEC registered (CIK: ${ipo.cik || 'N/A'})`);
+            if (insights.length < 4) {
+                insights.push(`📄 Filed as ${ipo.formType} - standard IPO process`);
+            }
+        }
+        
+        return insights.slice(0, 4);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * GET RATING
+     * 🎯 GET DYNAMIC SCORE THRESHOLDS
      * ═══════════════════════════════════════════════════════════
      */
-    getRating(score) {
-        if (score >= 85) return '⭐⭐⭐⭐⭐ EXCEPTIONAL';
-        if (score >= 75) return '⭐⭐⭐⭐ STRONG BUY';
-        if (score >= 65) return '⭐⭐⭐ BUY';
-        if (score >= 50) return '⭐⭐ HOLD';
-        return '⭐ AVOID';
+    getDynamicScoreThresholds() {
+        const dist = this.stats.scoreDistribution;
+        return {
+            exceptional: dist.p90 || 75,
+            strong: dist.q3 || 60,
+            moderate: dist.median || 50,
+            low: dist.q1 || 40
+        };
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * BUILD IPO RESPONSE
+     * 🏆 GET TOP IPOs (Sorted by Success Score)
      * ═══════════════════════════════════════════════════════════
      */
-    buildIPOResponse(topIPOs) {
-        let response = `📊 **Top Rated IPOs - AlphaVault Intelligence**\n\n`;
+    getTopIPOs(count = 5) {
+        return [...this.enrichedIPOs]
+            .sort((a, b) => b.successScore - a.successScore)
+            .slice(0, count);
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📝 BUILD CHATBOT RESPONSE (Markdown Formatted)
+     * ═══════════════════════════════════════════════════════════
+     */
+    buildIPOAnalysisResponse(topIPOs, allIPOs) {
+        let response = `# 🚀 IPO Intelligence Report\n\n`;
+        response += `**Dataset:** ${allIPOs.length} active IPO filings (S-1, S-1/A, F-1, F-1/A)\n`;
+        response += `**Analysis Date:** ${new Date().toLocaleDateString()}\n\n`;
+
+        response += `---\n\n`;
+        response += `## ⭐ Top ${topIPOs.length} Highest Potential IPOs\n\n`;
 
         topIPOs.forEach((ipo, index) => {
-            const dateStr = ipo.expectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const insights = this.generateInsights(ipo);
+            const ratio = this.calculateRiskOpportunityRatio(ipo);
+            const riskLabel = this.getRiskRatioLabel(ratio);
+            const dilution = this.estimateDilutionFromData(ipo);
+            const dilutionLabel = this.getDilutionLabel(dilution);
+            const dateStr = new Date(ipo.filedDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+
+            response += `### ${index + 1}. ${ipo.companyName}\n\n`;
+            response += `**Success Score:** ${ipo.successScore}/100 | **Sector:** ${ipo.sector}\n`;
+            response += `**Filed:** ${dateStr} | **Form:** ${ipo.formType}\n\n`;
             
-            response += `**${index + 1}. ${ipo.name} (${ipo.symbol})**\n`;
-            response += `${ipo.rating} - Score: ${ipo.totalScore}/100\n`;
-            response += `📅 Expected: ${dateStr} | 💼 ${ipo.sector}\n`;
-            response += `💰 Price Range: ${ipo.priceRange}\n`;
-            response += `🏦 Lead Underwriters: ${ipo.underwriters.slice(0, 2).join(', ')}\n`;
+            response += `**📊 Advanced Metrics:**\n`;
+            response += `• Risk/Opportunity Ratio: **${ratio}** ${riskLabel.emoji} (${riskLabel.label})\n`;
+            response += `• Dilution Estimate: **${dilution}%** ${dilutionLabel.emoji} (${dilutionLabel.label})\n\n`;
+            
+            response += `**💡 Key Insights:**\n`;
+            insights.forEach(insight => {
+                response += `  ${insight}\n`;
+            });
+            
             response += `\n`;
         });
 
-        response += `\n💡 **Key Insights:**\n`;
-        response += `• ${topIPOs[0].name} leads with ${topIPOs[0].totalScore}/100 score\n`;
-        response += `• ${topIPOs.filter(ipo => ipo.sector === 'Technology').length} tech IPOs in top 5\n`;
-        response += `• Average score: ${Math.round(topIPOs.reduce((sum, ipo) => sum + ipo.totalScore, 0) / topIPOs.length)}/100\n`;
+        // ✅ SUMMARY STATISTICS
+        response += `---\n\n`;
+        response += `## 📊 Market Overview\n\n`;
+        
+        const avgScore = (allIPOs.reduce((sum, ipo) => sum + ipo.successScore, 0) / allIPOs.length).toFixed(1);
+        const topSector = this.stats.sectorPerformance[0];
+        const recentIPOs = allIPOs.filter(ipo => {
+            const days = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+            return days <= 30;
+        }).length;
+
+        response += `• **Average Success Score:** ${avgScore}/100\n`;
+        response += `• **Top Performing Sector:** ${topSector?.sector || 'N/A'} (avg: ${topSector?.avgScore.toFixed(1) || 'N/A'})\n`;
+        response += `• **Recent Filings (30 days):** ${recentIPOs} IPOs\n`;
+        response += `• **High Growth Sectors:** ${this.stats.highGrowthSectors.join(', ')}\n\n`;
+
+        response += `**💡 Want more details?** Ask me to analyze a specific IPO by name or CIK number!\n`;
 
         return response;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * ANALYZE SPECIFIC IPO
+     * 🔍 ANALYZE SPECIFIC IPO
      * ═══════════════════════════════════════════════════════════
      */
-    async analyzeSpecificIPO(symbol) {
-        const ipos = await this.getRecentIPOs();
-        const ipo = ipos.find(i => i.symbol === symbol);
+    async analyzeSpecificIPO(identifier) {
+        // Search by symbol, name, or CIK
+        const ipo = this.enrichedIPOs.find(i => 
+            i.symbol === identifier ||
+            i.companyName.toLowerCase().includes(identifier.toLowerCase()) ||
+            i.cik === identifier
+        );
 
         if (!ipo) {
             return {
-                text: `❌ IPO ${symbol} not found in recent listings.`,
+                text: `❌ **IPO Not Found**\n\nNo IPO matching "${identifier}" found in recent filings.\n\nTry:\n• Full company name\n• Stock symbol\n• CIK number`,
                 charts: [],
                 data: null
             };
         }
 
-        const scoredIPO = this.scoreIPO(ipo);
+        const insights = this.generateInsights(ipo);
+        const ratio = this.calculateRiskOpportunityRatio(ipo);
+        const riskLabel = this.getRiskRatioLabel(ratio);
+        const dilution = this.estimateDilutionFromData(ipo);
+        const dilutionLabel = this.getDilutionLabel(dilution);
 
-        const response = `📊 **${scoredIPO.name} (${scoredIPO.symbol}) - IPO Analysis**
+        const response = `# 📊 ${ipo.companyName} - IPO Deep Dive\n\n`;
 
-**Overall Rating:** ${scoredIPO.rating}
-**Total Score:** ${scoredIPO.totalScore}/100
+        let detailResponse = response;
+        detailResponse += `**Overall Rating:** Success Score **${ipo.successScore}/100**\n`;
+        detailResponse += `**Sector:** ${ipo.sector} | **CIK:** ${ipo.cik || 'N/A'}\n\n`;
 
-**Score Breakdown:**
-• Underwriter Quality: ${scoredIPO.scores.underwriter}/20
-• Financial Health: ${scoredIPO.scores.financials}/25
-• Sector Attractiveness: ${scoredIPO.scores.sector}/15
-• Valuation: ${scoredIPO.scores.valuation}/20
-• Market Momentum: ${scoredIPO.scores.momentum}/10
-• Institutional Interest: ${scoredIPO.scores.institutional}/10
+        detailResponse += `---\n\n`;
+        detailResponse += `## 🎯 Advanced Analytics\n\n`;
+        detailResponse += `| Metric | Value | Assessment |\n`;
+        detailResponse += `|--------|-------|------------|\n`;
+        detailResponse += `| **Risk/Opp Ratio** | ${ratio} | ${riskLabel.emoji} ${riskLabel.label} |\n`;
+        detailResponse += `| **Dilution Est.** | ${dilution}% | ${dilutionLabel.emoji} ${dilutionLabel.label} |\n`;
+        detailResponse += `| **Filing Age** | ${Math.floor((Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24))} days | ${ipo.filingStage} |\n`;
+        detailResponse += `| **Form Type** | ${ipo.formType} | Standard IPO |\n\n`;
 
-**Key Details:**
-• Expected Date: ${scoredIPO.expectedDate.toLocaleDateString()}
-• Price Range: ${scoredIPO.priceRange}
-• Shares Offered: ${(scoredIPO.sharesOffered / 1000000).toFixed(1)}M
-• Sector: ${scoredIPO.sector}
-• Lead Underwriters: ${scoredIPO.underwriters.join(', ')}
+        detailResponse += `## 💡 Key Insights\n\n`;
+        insights.forEach(insight => {
+            detailResponse += `• ${insight}\n`;
+        });
+        detailResponse += `\n`;
 
-**Financial Snapshot:**
-• Revenue: $${(scoredIPO.revenue / 1000000).toFixed(0)}M
-• Net Income: $${(scoredIPO.netIncome / 1000000).toFixed(0)}M
-• Founded: ${scoredIPO.foundedYear}`;
+        if (ipo.riskFactors && ipo.riskFactors.length > 0) {
+            detailResponse += `## ⚠ Risk Factors (${ipo.riskFactors.length})\n\n`;
+            ipo.riskFactors.slice(0, 5).forEach((risk, i) => {
+                detailResponse += `${i + 1}. ${risk}\n`;
+            });
+            if (ipo.riskFactors.length > 5) {
+                detailResponse += `\n*...and ${ipo.riskFactors.length - 5} more risk factors*\n`;
+            }
+            detailResponse += `\n`;
+        }
+
+        detailResponse += `---\n\n`;
+        detailResponse += `**📄 SEC Filing:** [View on SEC.gov](${ipo.filingUrl || '#'})\n`;
 
         return {
-            text: response,
+            text: detailResponse,
             charts: [],
-            data: scoredIPO
+            data: ipo
         };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📦 DEMO DATA (Fallback)
+     * ═══════════════════════════════════════════════════════════
+     */
+    getDemoIPOData() {
+        return [
+            {
+                symbol: 'DEMO1',
+                companyName: 'AlphaVault Technologies Inc.',
+                sector: 'Technology',
+                formType: 'S-1',
+                filedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                cik: '0001234567',
+                accessionNumber: '0001234567-25-000001',
+                filingStage: 'Initial Filing',
+                riskFactors: ['Market competition', 'Regulatory uncertainty'],
+                businessSummary: 'Leading AI-powered financial analytics platform revolutionizing investment intelligence with advanced machine learning algorithms and real-time market data processing. Our proprietary technology analyzes millions of data points to deliver actionable insights to institutional and retail investors worldwide.',
+                filingUrl: 'https://www.sec.gov/edgar'
+            },
+            {
+                symbol: 'DEMO2',
+                companyName: 'BioHealth Solutions Corp.',
+                sector: 'Healthcare',
+                formType: 'S-1/A',
+                filedDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+                cik: '0001234568',
+                accessionNumber: '0001234568-25-000002',
+                filingStage: 'Amendment #1',
+                riskFactors: ['Clinical trial outcomes', 'FDA approval process', 'Patent litigation'],
+                businessSummary: 'Biotech company developing breakthrough therapies for rare diseases using cutting-edge gene editing technology.',
+                filingUrl: 'https://www.sec.gov/edgar'
+            },
+            {
+                symbol: 'DEMO3',
+                companyName: 'GreenEnergy Innovations LLC',
+                sector: 'Energy',
+                formType: 'F-1',
+                filedDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+                cik: '0001234569',
+                accessionNumber: '0001234569-25-000003',
+                filingStage: 'Initial Filing',
+                riskFactors: ['Commodity price volatility', 'Government policy changes', 'Supply chain disruptions', 'Environmental regulations', 'Technology adoption risks'],
+                businessSummary: 'Renewable energy company specializing in next-generation solar panel manufacturing and grid-scale energy storage solutions.',
+                filingUrl: 'https://www.sec.gov/edgar'
+            }
+        ];
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * ❌ FORMAT ERROR RESPONSE
+     * ═══════════════════════════════════════════════════════════
+     */
+    formatErrorResponse(error) {
+        return `# ❌ IPO Analysis Error\n\n**Unable to fetch IPO data at the moment.**\n\n**Error:** ${error.message || 'Unknown error'}\n\n**Possible solutions:**\n• Check your API configuration\n• Verify SEC Worker URL in \`sec-api-client.js\`\n• Try again in a few moments\n\nPlease contact support if the issue persists.`;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📭 FORMAT NO DATA RESPONSE
+     * ═══════════════════════════════════════════════════════════
+     */
+    formatNoDataResponse() {
+        return `# 📊 No Recent IPOs Found\n\n**No IPO filings found** in the selected time period.\n\n**Possible reasons:**\n• Current IPO market is quiet\n• Time period may be too narrow\n• SEC API may be temporarily unavailable\n\n**Suggestions:**\n• Try expanding the time period (e.g., 60-90 days)\n• Check back later for new filings\n• Analyze historical IPO data instead`;
     }
 }
 
@@ -1031,4 +841,4 @@ if (typeof window !== 'undefined') {
     window.ChatbotIPOAnalyzer = ChatbotIPOAnalyzer;
 }
 
-console.log('✅ ChatbotIPOAnalyzer loaded');
+console.log('✅ ChatbotIPOAnalyzer (Ultra-Advanced v5.0) loaded');

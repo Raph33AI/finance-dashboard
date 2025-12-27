@@ -1,13 +1,25 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * CHATBOT M&A ANALYZER - M&A Predictor Integration
+ * 🤝 CHATBOT M&A ANALYZER - ULTRA-ADVANCED VERSION
  * ═══════════════════════════════════════════════════════════════
- * Version: 3.0.0
- * Description: Réutilisation de la logique M&A Predictor
+ * Version: 5.0.0 - Complete M&A Predictor Integration
+ * 
  * Features:
- *   - Scoring AI 6 facteurs
- *   - Document parsing SEC
- *   - Analyse des fusions/acquisitions
+ *   ✅ AI 6-Factor Scoring System (100% from M&A Predictor)
+ *   ✅ SEC Document Parsing (S-4 + 8-K Integration)
+ *   ✅ Multi-Source Data Loading (S-4 Mergers + 8-K Events)
+ *   ✅ Advanced Deal Probability Calculation
+ *   ✅ Keyword Signal Detection (Merger, Acquisition, etc.)
+ *   ✅ Company Activity Tracking
+ *   ✅ Filing Complexity Analysis
+ *   ✅ Dynamic Score Breakdown
+ *   ✅ Comprehensive Insights Generation
+ *   ✅ Deal Details with Full Metadata
+ *   ✅ Markdown Formatted Responses
+ *   ✅ Demo Data Fallback
+ * 
+ * Integration: Reuses 100% of M&A Predictor Dashboard logic
+ * ═══════════════════════════════════════════════════════════════
  */
 
 class ChatbotMAAnalyzer {
@@ -15,83 +27,140 @@ class ChatbotMAAnalyzer {
         this.config = config;
         this.apiClient = null;
         
-        // M&A Scoring Factors (from M&A Predictor)
+        // ✅ AI SCORING FACTORS (Exact from M&A Predictor)
         this.scoringFactors = {
             financial: {
                 weight: 0.25,
-                metrics: ['revenue_growth', 'ebitda_margin', 'debt_equity', 'cash_reserves']
+                metrics: ['deal_size', 'sector_premium', 'synergies']
             },
             strategic: {
                 weight: 0.20,
-                metrics: ['market_share', 'product_synergy', 'geographic_overlap']
+                metrics: ['synergy_count', 'horizontal_integration']
             },
             valuation: {
                 weight: 0.20,
-                metrics: ['pe_ratio', 'pb_ratio', 'ev_ebitda', 'premium']
+                metrics: ['premium_analysis', 'deal_value_reasonableness']
             },
             regulatory: {
                 weight: 0.15,
-                metrics: ['antitrust_risk', 'sector_regulation', 'cross_border']
+                metrics: ['sector_risk', 'deal_size_scrutiny']
             },
             market: {
                 weight: 0.10,
-                metrics: ['sector_consolidation', 'market_conditions', 'competitor_activity']
+                metrics: ['sector_consolidation', 'market_conditions']
             },
             insider: {
                 weight: 0.10,
-                metrics: ['sec_filings', 'insider_trades', 'executive_moves']
+                metrics: ['deal_status', 'sec_filings']
             }
         };
         
-        console.log('📊 ChatbotMAAnalyzer initialized');
+        // ✅ FORM TYPE SCORING (S-4 vs 8-K)
+        this.formTypeScores = {
+            'S-4': 100,
+            '8-K-2.01': 90,
+            '8-K-1.01': 80,
+            '8-K-5.02': 60,
+            '8-K': 50
+        };
+        
+        // ✅ KEYWORD SIGNALS (High/Medium/Low Value)
+        this.keywordSignals = {
+            high: [
+                'merger', 'acquisition', 'acquire', 'purchased', 'bought',
+                'definitive agreement', 'tender offer', 'takeover',
+                'combination', 'consolidation', 'amalgamation'
+            ],
+            medium: [
+                'strategic', 'investment', 'partnership', 'joint venture',
+                'equity stake', 'controlling interest', 'majority stake'
+            ],
+            low: [
+                'agreement', 'transaction', 'deal', 'purchase', 'contract'
+            ]
+        };
+        
+        // ✅ 8-K ITEM DESCRIPTIONS
+        this.eightKDescriptions = {
+            '1.01': 'Material Definitive Agreement',
+            '2.01': 'Completion of Acquisition/Disposition',
+            '2.03': 'Creation of Direct Financial Obligation',
+            '5.02': 'Departure/Election of Directors/Officers',
+            '8.01': 'Other Events'
+        };
+        
+        // ✅ SECTOR RISK SCORES (For Regulatory Factor)
+        this.sectorRisks = {
+            'Technology': -20,
+            'Healthcare': -15,
+            'Financial Services': -10,
+            'Energy': -8,
+            'Consumer': -5,
+            'Other': -5
+        };
+        
+        // ✅ CACHED DATA
+        this.cachedDeals = [];
+        this.enrichedDeals = [];
+        
+        console.log('🤝 ChatbotMAAnalyzer (Ultra-Advanced) initialized');
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * ANALYZE MERGERS (Main Method)
+     * 🎯 MAIN METHOD: ANALYZE M&A DEALS
      * ═══════════════════════════════════════════════════════════
      */
-    async analyzeMergers(entities = {}) {
+    async analyzeMergers(entities = {}, options = {}) {
         try {
-            console.log('📊 Fetching recent M&A activity...');
+            console.log('🤝 Fetching and analyzing M&A activity...');
 
-            // Get recent M&A deals
-            const deals = await this.getRecentDeals();
+            // ✅ FETCH DEALS FROM MULTIPLE SOURCES
+            const [s4Deals, eightKDeals] = await Promise.all([
+                this.fetchS4Deals(options),
+                this.fetch8KDeals(options)
+            ]);
 
-            if (!deals || deals.length === 0) {
+            const allDeals = [...s4Deals, ...eightKDeals];
+
+            if (allDeals.length === 0) {
                 return {
-                    text: "📊 **M&A Activity Overview**\n\nNo significant M&A deals announced recently. The market may be in a consolidation phase.\n\nWould you like to:\n• Analyze historical M&A trends\n• Check specific company M&A probability\n• Set up M&A deal alerts",
+                    text: this.formatNoDataResponse(),
                     charts: [],
                     data: null
                 };
             }
 
-            // Score all deals
-            const scoredDeals = deals.map(deal => this.scoreDeal(deal));
+            console.log(`📊 Total deals fetched: ${allDeals.length} (S-4: ${s4Deals.length}, 8-K: ${eightKDeals.length})`);
 
-            // Sort by probability score
-            scoredDeals.sort((a, b) => b.probabilityScore - a.probabilityScore);
+            // ✅ CALCULATE AI SCORES
+            this.enrichedDeals = await this.calculateAIScores(allDeals);
 
-            // Get top 5
-            const topDeals = scoredDeals.slice(0, 5);
+            // ✅ SORT BY PROBABILITY SCORE
+            this.enrichedDeals.sort((a, b) => (b.aiScore?.score || 0) - (a.aiScore?.score || 0));
 
-            // Build response
-            const responseText = this.buildMAResponse(topDeals);
+            // ✅ GET TOP DEALS
+            const topDeals = this.getTopDeals(options.topCount || 5);
+
+            // ✅ BUILD CHATBOT RESPONSE
+            const responseText = this.buildMAAnalysisResponse(topDeals, this.enrichedDeals);
 
             return {
                 text: responseText,
                 charts: [],
                 data: {
-                    totalDeals: deals.length,
+                    totalDeals: this.enrichedDeals.length,
                     topDeals: topDeals,
-                    allDeals: scoredDeals
+                    allDeals: this.enrichedDeals,
+                    s4Count: s4Deals.length,
+                    eightKCount: eightKDeals.length
                 }
             };
 
         } catch (error) {
             console.error('❌ M&A analysis error:', error);
             return {
-                text: "❌ Unable to fetch M&A data at the moment. Please try again later.",
+                text: this.formatErrorResponse(error),
                 charts: [],
                 data: null
             };
@@ -100,342 +169,612 @@ class ChatbotMAAnalyzer {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * GET RECENT DEALS
+     * 📊 FETCH S-4 DEALS (Merger Filings)
      * ═══════════════════════════════════════════════════════════
      */
-    async getRecentDeals() {
-        // This would connect to your M&A data source
-        // For now, returning simulated data structure
-        
-        if (this.apiClient && typeof this.apiClient.getRecentMADeals === 'function') {
-            return await this.apiClient.getRecentMADeals();
-        }
+    async fetchS4Deals(options = {}) {
+        try {
+            // If API client available
+            if (this.apiClient && typeof this.apiClient.getRecentDeals === 'function') {
+                console.log('🌐 Fetching S-4 filings from API...');
+                const response = await this.apiClient.getRecentDeals({
+                    days: options.period || 30,
+                    minValue: 0
+                });
 
-        return this.getDemoMAData();
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * GET DEMO M&A DATA
-     * ═══════════════════════════════════════════════════════════
-     */
-    getDemoMAData() {
-        return [
-            {
-                acquirer: 'TechGiant Corp',
-                acquirerSymbol: 'TGNT',
-                target: 'CloudSoft Inc',
-                targetSymbol: 'CLSD',
-                dealValue: 15000000000,
-                status: 'Rumored',
-                sector: 'Technology',
-                announcedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                synergies: ['Cloud infrastructure', 'Customer base overlap', 'Technology integration'],
-                premium: 35
-            },
-            {
-                acquirer: 'PharmaMerge Ltd',
-                acquirerSymbol: 'PHRM',
-                target: 'BioInnovate Labs',
-                targetSymbol: 'BINV',
-                dealValue: 8500000000,
-                status: 'Pending Approval',
-                sector: 'Healthcare',
-                announcedDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-                synergies: ['R&D pipeline', 'Geographic expansion', 'Patent portfolio'],
-                premium: 42
-            },
-            {
-                acquirer: 'FinServe Group',
-                acquirerSymbol: 'FNSV',
-                target: 'DigitalPay Solutions',
-                targetSymbol: 'DPAY',
-                dealValue: 3200000000,
-                status: 'Announced',
-                sector: 'Financial Services',
-                announcedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
-                synergies: ['Payment processing', 'Digital wallet integration', 'Customer acquisition'],
-                premium: 28
+                const deals = response.deals || [];
+                
+                return deals.map(deal => ({
+                    ...deal,
+                    formType: 'S-4',
+                    source: 'S-4',
+                    description: deal.dealType || 'Merger/Acquisition',
+                    filedDate: deal.filedDate || new Date().toISOString()
+                }));
             }
-        ];
+
+            // Fallback to demo data
+            return this.getDemoS4Data();
+
+        } catch (error) {
+            console.error('❌ S-4 loading failed:', error);
+            return this.getDemoS4Data();
+        }
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE DEAL (6-Factor AI Scoring)
+     * 📊 FETCH 8-K DEALS (Material Events)
      * ═══════════════════════════════════════════════════════════
      */
-    scoreDeal(deal) {
-        let scores = {
-            financial: 0,
-            strategic: 0,
-            valuation: 0,
-            regulatory: 0,
-            market: 0,
-            insider: 0
+    async fetch8KDeals(options = {}) {
+        try {
+            // If API client available
+            if (this.apiClient && typeof this.apiClient.get8KAlerts === 'function') {
+                console.log('🌐 Fetching 8-K filings from API...');
+                const response = await this.apiClient.get8KAlerts(
+                    ['1.01', '2.01', '2.03', '5.02', '8.01'],
+                    options.period || 30
+                );
+
+                const alerts = response.alerts || [];
+                
+                return alerts.map(alert => ({
+                    ...alert,
+                    formType: '8-K',
+                    source: '8-K',
+                    description: this.get8KDescription(alert.items),
+                    filedDate: alert.filedDate || new Date().toISOString()
+                }));
+            }
+
+            // Fallback to demo data
+            return this.getDemo8KData();
+
+        } catch (error) {
+            console.error('❌ 8-K loading failed:', error);
+            return this.getDemo8KData();
+        }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🤖 CALCULATE AI SCORES (6-Factor System)
+     * ═══════════════════════════════════════════════════════════
+     */
+    async calculateAIScores(deals) {
+        console.log('🤖 Calculating AI scores for', deals.length, 'deals...');
+        
+        for (let i = 0; i < deals.length; i++) {
+            deals[i].aiScore = this.calculateDealScore(deals[i], deals);
+        }
+        
+        // ✅ LOG SCORE DISTRIBUTION
+        const scores = deals.map(d => d.aiScore.score).sort((a, b) => a - b);
+        console.log('📊 Score distribution:', {
+            min: Math.min(...scores),
+            max: Math.max(...scores),
+            mean: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+            median: scores[Math.floor(scores.length / 2)]
+        });
+        
+        return deals;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🎯 CALCULATE DEAL SCORE (Main Scoring Logic)
+     * ═══════════════════════════════════════════════════════════
+     */
+    calculateDealScore(deal, allDeals) {
+        const factors = {
+            formTypeRelevance: this.scoreFormType(deal),
+            recency: this.scoreRecency(deal),
+            companyActivity: this.scoreCompanyActivity(deal, allDeals),
+            filingComplexity: this.scoreFilingComplexity(deal),
+            keywordSignals: this.scoreKeywordSignals(deal),
+            itemRelevance: this.scoreItemRelevance(deal)
         };
 
-        // 1. Financial Strength (25%)
-        scores.financial = this.scoreFinancialFactor(deal);
+        const weights = {
+            formTypeRelevance: 30,
+            recency: 20,
+            companyActivity: 15,
+            filingComplexity: 15,
+            keywordSignals: 15,
+            itemRelevance: 5
+        };
 
-        // 2. Strategic Fit (20%)
-        scores.strategic = this.scoreStrategicFactor(deal);
+        let totalScore = 0;
+        let totalWeight = 0;
 
-        // 3. Valuation (20%)
-        scores.valuation = this.scoreValuationFactor(deal);
+        for (const [factor, value] of Object.entries(factors)) {
+            const weight = weights[factor] || 0;
+            totalScore += value * weight;
+            totalWeight += weight;
+        }
 
-        // 4. Regulatory Risk (15%)
-        scores.regulatory = this.scoreRegulatoryFactor(deal);
+        const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
 
-        // 5. Market Conditions (10%)
-        scores.market = this.scoreMarketFactor(deal);
-
-        // 6. Insider Activity (10%)
-        scores.insider = this.scoreInsiderFactor(deal);
-
-        // Calculate weighted total
-        const probabilityScore = 
-            scores.financial * this.scoringFactors.financial.weight +
-            scores.strategic * this.scoringFactors.strategic.weight +
-            scores.valuation * this.scoringFactors.valuation.weight +
-            scores.regulatory * this.scoringFactors.regulatory.weight +
-            scores.market * this.scoringFactors.market.weight +
-            scores.insider * this.scoringFactors.insider.weight;
+        let confidence = 'LOW';
+        let emoji = '🔴';
+        
+        if (finalScore >= 75) {
+            confidence = 'VERY LIKELY';
+            emoji = '🟢';
+        } else if (finalScore >= 60) {
+            confidence = 'LIKELY';
+            emoji = '🟢';
+        } else if (finalScore >= 45) {
+            confidence = 'MODERATE';
+            emoji = '🟡';
+        } else if (finalScore >= 30) {
+            confidence = 'UNCERTAIN';
+            emoji = '🟠';
+        } else {
+            confidence = 'UNLIKELY';
+            emoji = '🔴';
+        }
 
         return {
-            ...deal,
-            scores,
-            probabilityScore: Math.round(probabilityScore),
-            likelihood: this.getLikelihood(probabilityScore)
+            score: finalScore,
+            confidence,
+            emoji,
+            factors,
+            breakdown: this.generateScoreBreakdown(factors, weights)
         };
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE FINANCIAL FACTOR
+     * 📋 SCORING FACTOR 1: FORM TYPE RELEVANCE
      * ═══════════════════════════════════════════════════════════
      */
-    scoreFinancialFactor(deal) {
-        let score = 50;  // Base score
-
-        // Deal size relative to acquirer
-        if (deal.dealValue > 10000000000) score += 20;
-        else if (deal.dealValue > 5000000000) score += 15;
-        else if (deal.dealValue > 1000000000) score += 10;
-        else score += 5;
-
-        // Sector premium (tech deals historically more likely)
-        if (deal.sector === 'Technology') score += 15;
-        else if (deal.sector === 'Healthcare') score += 10;
-        else if (deal.sector === 'Financial Services') score += 8;
-        else score += 5;
-
-        // Synergies
-        if (deal.synergies && deal.synergies.length >= 3) score += 15;
-        else if (deal.synergies && deal.synergies.length >= 2) score += 10;
-        else score += 5;
-
-        return Math.min(score, 100);
+    scoreFormType(deal) {
+        const formType = deal.formType?.toUpperCase() || '';
+        
+        if (formType === 'S-4') return 100;
+        
+        if (formType === '8-K') {
+            if (deal.items?.includes('2.01')) return 90;
+            if (deal.items?.includes('1.01')) return 80;
+            if (deal.items?.includes('5.02')) return 60;
+            return 50;
+        }
+        
+        return 30;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE STRATEGIC FACTOR
+     * 📅 SCORING FACTOR 2: RECENCY
      * ═══════════════════════════════════════════════════════════
      */
-    scoreStrategicFactor(deal) {
-        let score = 50;
+    scoreRecency(deal) {
+        if (!deal.filedDate) return 30;
+        
+        const filedDate = new Date(deal.filedDate);
+        const now = new Date();
+        const daysAgo = Math.floor((now - filedDate) / (1000 * 60 * 60 * 24));
 
-        // Strategic synergies count
-        const synergyCount = deal.synergies ? deal.synergies.length : 0;
-        score += synergyCount * 15;
-
-        // Same sector (horizontal integration)
-        if (deal.sector) score += 20;
-
-        return Math.min(score, 100);
+        if (daysAgo <= 7) return 100;
+        if (daysAgo <= 14) return 90;
+        if (daysAgo <= 30) return 75;
+        if (daysAgo <= 60) return 55;
+        if (daysAgo <= 90) return 35;
+        
+        return 15;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE VALUATION FACTOR
+     * 🏢 SCORING FACTOR 3: COMPANY ACTIVITY
      * ═══════════════════════════════════════════════════════════
      */
-    scoreValuationFactor(deal) {
-        let score = 50;
+    scoreCompanyActivity(deal, allDeals) {
+        const companyCIK = deal.cik;
+        const companyFilings = allDeals.filter(d => d.cik === companyCIK);
+        const count = companyFilings.length;
 
-        // Premium analysis
-        if (deal.premium) {
-            if (deal.premium > 50) score += 10;  // Very high premium = desperation or strategic necessity
-            else if (deal.premium >= 30 && deal.premium <= 45) score += 30;  // Optimal range
-            else if (deal.premium >= 20 && deal.premium < 30) score += 20;
-            else if (deal.premium < 20) score += 5;  // Low premium = may face resistance
+        if (count >= 5) return 95;
+        if (count >= 3) return 75;
+        if (count >= 2) return 55;
+        
+        return 35;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📄 SCORING FACTOR 4: FILING COMPLEXITY
+     * ═══════════════════════════════════════════════════════════
+     */
+    scoreFilingComplexity(deal) {
+        const summary = deal.summary || deal.description || '';
+        const length = summary.length;
+
+        if (length > 500) return 90;
+        if (length > 300) return 75;
+        if (length > 150) return 60;
+        if (length > 50) return 40;
+        
+        return 20;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🔍 SCORING FACTOR 5: KEYWORD SIGNALS
+     * ═══════════════════════════════════════════════════════════
+     */
+    scoreKeywordSignals(deal) {
+        const text = ((deal.summary || '') + ' ' + (deal.description || '')).toLowerCase();
+        
+        let score = 0;
+        
+        // High-value keywords (12 points each)
+        for (const keyword of this.keywordSignals.high) {
+            if (text.includes(keyword)) score += 12;
+        }
+        
+        // Medium-value keywords (6 points each)
+        for (const keyword of this.keywordSignals.medium) {
+            if (text.includes(keyword)) score += 6;
+        }
+        
+        // Low-value keywords (2 points each)
+        for (const keyword of this.keywordSignals.low) {
+            if (text.includes(keyword)) score += 2;
         }
 
-        // Deal value reasonableness
-        if (deal.dealValue > 50000000000) score += 10;  // Mega deals face more scrutiny
-        else if (deal.dealValue >= 1000000000 && deal.dealValue <= 20000000000) score += 20;  // Sweet spot
-        else score += 5;
-
         return Math.min(score, 100);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE REGULATORY FACTOR
+     * 📑 SCORING FACTOR 6: ITEM RELEVANCE (8-K Only)
      * ═══════════════════════════════════════════════════════════
      */
-    scoreRegulatoryFactor(deal) {
-        let score = 70;  // Assume moderate regulatory risk
-
-        // Sector-based regulatory risk
-        if (deal.sector === 'Technology') score -= 20;  // Higher antitrust scrutiny
-        else if (deal.sector === 'Healthcare') score -= 15;  // FDA/regulatory hurdles
-        else if (deal.sector === 'Financial Services') score -= 10;  // Banking regulations
-        else score -= 5;
-
-        // Mega deals face more scrutiny
-        if (deal.dealValue > 20000000000) score -= 15;
-
-        return Math.max(score, 0);
+    scoreItemRelevance(deal) {
+        if (deal.formType !== '8-K' || !deal.items) return 50;
+        
+        const items = Array.isArray(deal.items) ? deal.items : [deal.items];
+        
+        if (items.includes('2.01')) return 100;
+        if (items.includes('1.01')) return 90;
+        if (items.includes('5.02')) return 70;
+        if (items.includes('2.03')) return 60;
+        
+        return 40;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE MARKET FACTOR
+     * 📊 GENERATE SCORE BREAKDOWN
      * ═══════════════════════════════════════════════════════════
      */
-    scoreMarketFactor(deal) {
-        let score = 60;
+    generateScoreBreakdown(factors, weights) {
+        return Object.entries(factors).map(([factor, value]) => ({
+            factor: this.humanizeFactorName(factor),
+            value,
+            weight: weights[factor] || 0,
+            contribution: Math.round(value * (weights[factor] || 0) / 100)
+        })).sort((a, b) => b.contribution - a.contribution);
+    }
 
-        // Current market conditions (would be dynamic in production)
-        // For now, using baseline assumptions
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🏷 HUMANIZE FACTOR NAMES
+     * ═══════════════════════════════════════════════════════════
+     */
+    humanizeFactorName(factor) {
+        const names = {
+            formTypeRelevance: 'Form Type Relevance',
+            recency: 'Filing Recency',
+            companyActivity: 'Company Activity Level',
+            filingComplexity: 'Filing Detail Level',
+            keywordSignals: 'M&A Keyword Signals',
+            itemRelevance: '8-K Item Relevance'
+        };
+        return names[factor] || factor;
+    }
 
-        // Sector consolidation trend
-        if (deal.sector === 'Technology' || deal.sector === 'Healthcare') {
-            score += 20;  // Hot sectors for M&A
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 💡 GENERATE INSIGHTS (Multi-Factor)
+     * ═══════════════════════════════════════════════════════════
+     */
+    generateInsights(deal) {
+        const insights = [];
+        const score = deal.aiScore.score;
+        
+        // ✅ SCORE INSIGHT
+        if (score >= 75) {
+            insights.push(`⭐ Very high probability of M&A completion (${score}/100)`);
+        } else if (score >= 60) {
+            insights.push(`✅ Strong M&A signals detected (${score}/100)`);
+        } else if (score >= 45) {
+            insights.push(`📊 Moderate M&A probability (${score}/100)`);
         } else {
-            score += 10;
+            insights.push(`⚠ Uncertain outcome (${score}/100 score)`);
         }
-
-        return Math.min(score, 100);
+        
+        // ✅ FORM TYPE INSIGHT
+        if (deal.formType === 'S-4') {
+            insights.push(`📄 S-4 merger filing - strongest M&A signal`);
+        } else if (deal.formType === '8-K' && deal.items?.includes('2.01')) {
+            insights.push(`📄 8-K Item 2.01 - Acquisition completed`);
+        } else if (deal.formType === '8-K' && deal.items?.includes('1.01')) {
+            insights.push(`📄 8-K Item 1.01 - Definitive agreement signed`);
+        }
+        
+        // ✅ RECENCY INSIGHT
+        const daysAgo = Math.floor((Date.now() - new Date(deal.filedDate)) / (1000 * 60 * 60 * 24));
+        if (daysAgo <= 7) {
+            insights.push(`🆕 Very recent filing (${daysAgo} days ago)`);
+        } else if (daysAgo <= 30) {
+            insights.push(`📅 Recent filing (${daysAgo} days ago)`);
+        }
+        
+        // ✅ KEYWORD INSIGHT
+        const keywordScore = deal.aiScore.factors.keywordSignals || 0;
+        if (keywordScore >= 70) {
+            insights.push(`🔍 Strong M&A language detected in filing`);
+        }
+        
+        // ✅ ACTIVITY INSIGHT
+        const activityScore = deal.aiScore.factors.companyActivity || 0;
+        if (activityScore >= 75) {
+            insights.push(`🏢 High M&A activity from this company`);
+        }
+        
+        // Ensure minimum 4 insights
+        while (insights.length < 4) {
+            insights.push(`📋 SEC CIK: ${deal.cik || 'N/A'}`);
+            if (insights.length < 4) {
+                insights.push(`🗂 Filed as ${deal.formType} with SEC`);
+            }
+        }
+        
+        return insights.slice(0, 4);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * SCORE INSIDER FACTOR
+     * 🏆 GET TOP DEALS (Sorted by Score)
      * ═══════════════════════════════════════════════════════════
      */
-    scoreInsiderFactor(deal) {
-        let score = 50;
-
-        // Deal status
-        if (deal.status === 'Announced') score += 40;
-        else if (deal.status === 'Pending Approval') score += 30;
-        else if (deal.status === 'Rumored') score += 10;
-
-        return Math.min(score, 100);
+    getTopDeals(count = 5) {
+        return this.enrichedDeals.slice(0, count);
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * GET LIKELIHOOD
+     * 📝 BUILD M&A ANALYSIS RESPONSE (Markdown)
      * ═══════════════════════════════════════════════════════════
      */
-    getLikelihood(score) {
-        if (score >= 85) return '🟢 VERY LIKELY (>85%)';
-        if (score >= 70) return '🟢 LIKELY (70-85%)';
-        if (score >= 55) return '🟡 MODERATE (55-70%)';
-        if (score >= 40) return '🟠 UNCERTAIN (40-55%)';
-        return '🔴 UNLIKELY (<40%)';
-    }
+    buildMAAnalysisResponse(topDeals, allDeals) {
+        let response = `# 🤝 M&A Probability Analysis\n\n`;
+        response += `**Dataset:** ${allDeals.length} M&A filings (S-4 + 8-K)\n`;
+        response += `**Analysis Date:** ${new Date().toLocaleDateString()}\n\n`;
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * BUILD M&A RESPONSE
-     * ═══════════════════════════════════════════════════════════
-     */
-    buildMAResponse(topDeals) {
-        let response = `📊 **M&A Probability Analysis - AlphaVault AI**\n\n`;
+        response += `---\n\n`;
+        response += `## ⭐ Top ${topDeals.length} Highest Probability M&A Deals\n\n`;
 
         topDeals.forEach((deal, index) => {
-            response += `**${index + 1}. ${deal.acquirer} → ${deal.target}**\n`;
-            response += `${deal.likelihood} | Score: ${deal.probabilityScore}/100\n`;
-            response += `💰 Deal Value: $${(deal.dealValue / 1000000000).toFixed(1)}B\n`;
-            response += `📈 Premium: ${deal.premium}% | 🏢 Sector: ${deal.sector}\n`;
-            response += `📅 Status: ${deal.status}\n`;
+            const insights = this.generateInsights(deal);
+            const dateStr = new Date(deal.filedDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+
+            response += `### ${index + 1}. ${deal.companyName || 'Unknown Company'}\n\n`;
+            response += `**Probability:** ${deal.aiScore.emoji} ${deal.aiScore.confidence} (${deal.aiScore.score}/100)\n`;
+            response += `**Filed:** ${dateStr} | **Form:** ${deal.formType} | **CIK:** ${deal.cik}\n\n`;
             
-            if (deal.synergies && deal.synergies.length > 0) {
-                response += `🔗 Key Synergies: ${deal.synergies.slice(0, 2).join(', ')}\n`;
+            if (deal.items && deal.items.length > 0) {
+                const itemsStr = deal.items.map(item => this.eightKDescriptions[item] || `Item ${item}`).join(', ');
+                response += `**8-K Items:** ${itemsStr}\n\n`;
             }
+            
+            response += `**💡 Key Insights:**\n`;
+            insights.forEach(insight => {
+                response += `  ${insight}\n`;
+            });
             
             response += `\n`;
         });
 
-        response += `\n💡 **AI Insights:**\n`;
-        response += `• Highest probability: ${topDeals[0].acquirer} acquiring ${topDeals[0].target} (${topDeals[0].probabilityScore}%)\n`;
-        response += `• Total deal value: $${(topDeals.reduce((sum, d) => sum + d.dealValue, 0) / 1000000000).toFixed(1)}B\n`;
-        response += `• ${topDeals.filter(d => d.sector === 'Technology').length} tech deals in top 5\n`;
+        // ✅ SUMMARY STATISTICS
+        response += `---\n\n`;
+        response += `## 📊 Market Overview\n\n`;
+        
+        const avgScore = (allDeals.reduce((sum, deal) => sum + deal.aiScore.score, 0) / allDeals.length).toFixed(1);
+        const highProbDeals = allDeals.filter(d => d.aiScore.score >= 75).length;
+        const s4Count = allDeals.filter(d => d.formType === 'S-4').length;
+        const eightKCount = allDeals.filter(d => d.formType === '8-K').length;
+
+        response += `• **Average Probability Score:** ${avgScore}/100\n`;
+        response += `• **High Probability Deals (≥75):** ${highProbDeals} deals\n`;
+        response += `• **S-4 Merger Filings:** ${s4Count} filings\n`;
+        response += `• **8-K Material Events:** ${eightKCount} filings\n\n`;
+
+        response += `**💡 Want details?** Ask me to analyze a specific deal by company name or CIK!\n`;
 
         return response;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * ANALYZE SPECIFIC DEAL
+     * 🔍 ANALYZE SPECIFIC DEAL
      * ═══════════════════════════════════════════════════════════
      */
-    async analyzeSpecificDeal(acquirerSymbol, targetSymbol) {
-        const deals = await this.getRecentDeals();
-        const deal = deals.find(d => 
-            d.acquirerSymbol === acquirerSymbol && d.targetSymbol === targetSymbol
+    async analyzeSpecificDeal(identifier) {
+        // Search by company name or CIK
+        const deal = this.enrichedDeals.find(d => 
+            d.companyName?.toLowerCase().includes(identifier.toLowerCase()) ||
+            d.cik === identifier
         );
 
         if (!deal) {
             return {
-                text: `❌ No M&A deal found between ${acquirerSymbol} and ${targetSymbol}.`,
+                text: `❌ **Deal Not Found**\n\nNo M&A deal matching "${identifier}" found in recent filings.\n\nTry:\n• Full company name\n• CIK number`,
                 charts: [],
                 data: null
             };
         }
 
-        const scoredDeal = this.scoreDeal(deal);
+        const insights = this.generateInsights(deal);
 
-        const response = `📊 **${scoredDeal.acquirer} → ${scoredDeal.target} - M&A Analysis**
+        const response = `# 🤝 ${deal.companyName || 'M&A Deal'} - Deep Dive\n\n`;
 
-**Overall Likelihood:** ${scoredDeal.likelihood}
-**Probability Score:** ${scoredDeal.probabilityScore}/100
+        let detailResponse = response;
+        detailResponse += `**Probability:** ${deal.aiScore.emoji} ${deal.aiScore.confidence} (${deal.aiScore.score}/100)\n`;
+        detailResponse += `**Form:** ${deal.formType} | **CIK:** ${deal.cik}\n\n`;
 
-**Score Breakdown:**
-• Financial Strength: ${scoredDeal.scores.financial}/100 (25% weight)
-• Strategic Fit: ${scoredDeal.scores.strategic}/100 (20% weight)
-• Valuation: ${scoredDeal.scores.valuation}/100 (20% weight)
-• Regulatory Risk: ${scoredDeal.scores.regulatory}/100 (15% weight)
-• Market Conditions: ${scoredDeal.scores.market}/100 (10% weight)
-• Insider Activity: ${scoredDeal.scores.insider}/100 (10% weight)
+        detailResponse += `---\n\n`;
+        detailResponse += `## 🎯 AI Score Breakdown\n\n`;
+        detailResponse += `| Factor | Score | Weight | Contribution |\n`;
+        detailResponse += `|--------|-------|--------|---------------|\n`;
+        deal.aiScore.breakdown.forEach(item => {
+            detailResponse += `| ${item.factor} | ${item.value}/100 | ${item.weight}% | ${item.contribution} pts |\n`;
+        });
+        detailResponse += `\n`;
 
-**Deal Details:**
-• Deal Value: $${(scoredDeal.dealValue / 1000000000).toFixed(2)}B
-• Premium: ${scoredDeal.premium}%
-• Sector: ${scoredDeal.sector}
-• Status: ${scoredDeal.status}
-• Announced: ${scoredDeal.announcedDate.toLocaleDateString()}
+        detailResponse += `## 💡 Key Insights\n\n`;
+        insights.forEach(insight => {
+            detailResponse += `• ${insight}\n`;
+        });
+        detailResponse += `\n`;
 
-**Strategic Synergies:**
-${scoredDeal.synergies.map(s => `• ${s}`).join('\n')}
+        detailResponse += `## 📄 Filing Details\n\n`;
+        detailResponse += `• **Filed Date:** ${new Date(deal.filedDate).toLocaleDateString()}\n`;
+        detailResponse += `• **Form Type:** ${deal.formType}\n`;
+        detailResponse += `• **Source:** ${deal.source}\n`;
+        
+        if (deal.items && deal.items.length > 0) {
+            detailResponse += `• **8-K Items:** ${deal.items.map(item => this.eightKDescriptions[item] || item).join(', ')}\n`;
+        }
+        
+        if (deal.description) {
+            detailResponse += `\n**Description:**\n${deal.description}\n`;
+        }
+        
+        detailResponse += `\n`;
 
-**AI Recommendation:**
-${scoredDeal.probabilityScore >= 70 ? 
-  '✅ High probability of completion. Monitor regulatory filings.' : 
-  scoredDeal.probabilityScore >= 55 ? 
-  '⚠ Moderate probability. Watch for due diligence updates.' : 
-  '❌ Uncertain outcome. Consider alternative scenarios.'}`;
+        detailResponse += `---\n\n`;
+        detailResponse += `**📄 SEC Filing:** [View on SEC.gov](${deal.url || '#'})\n`;
 
         return {
-            text: response,
+            text: detailResponse,
             charts: [],
-            data: scoredDeal
+            data: deal
         };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 🗂 GET 8-K DESCRIPTION
+     * ═══════════════════════════════════════════════════════════
+     */
+    get8KDescription(items) {
+        if (!items || items.length === 0) return 'Material Event';
+        
+        return items.map(item => this.eightKDescriptions[item] || `Item ${item}`).join(', ');
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📦 DEMO S-4 DATA (Fallback)
+     * ═══════════════════════════════════════════════════════════
+     */
+    getDemoS4Data() {
+        return [
+            {
+                companyName: 'AlphaVault Technologies Inc.',
+                cik: '0001234567',
+                formType: 'S-4',
+                source: 'S-4',
+                filedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                description: 'Merger agreement between AlphaVault Technologies and CloudSoft Solutions. Strategic combination to create leading AI-powered financial analytics platform.',
+                summary: 'Definitive merger agreement with CloudSoft Solutions. Deal valued at $15B. Expected synergies of $500M annually through technology integration and customer base consolidation.',
+                dealValue: 15000000000,
+                dealType: 'Merger',
+                url: 'https://www.sec.gov/edgar'
+            },
+            {
+                companyName: 'BioHealth Innovations Corp.',
+                cik: '0001234568',
+                formType: 'S-4',
+                source: 'S-4',
+                filedDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+                description: 'Acquisition of GeneTech Laboratories by BioHealth Innovations. Expands rare disease treatment pipeline.',
+                summary: 'Strategic acquisition to strengthen gene therapy portfolio. Deal includes FDA-approved rare disease treatments and promising clinical pipeline.',
+                dealValue: 8500000000,
+                dealType: 'Acquisition',
+                url: 'https://www.sec.gov/edgar'
+            }
+        ];
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📦 DEMO 8-K DATA (Fallback)
+     * ═══════════════════════════════════════════════════════════
+     */
+    getDemo8KData() {
+        return [
+            {
+                companyName: 'FinTech Solutions Group',
+                cik: '0001234569',
+                formType: '8-K',
+                source: '8-K',
+                items: ['2.01'],
+                filedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                description: 'Completion of Acquisition/Disposition - Acquired DigitalPay Technologies',
+                summary: 'Completed acquisition of DigitalPay Technologies for $3.2B. Transaction closed on schedule. Integration expected within 12 months.',
+                url: 'https://www.sec.gov/edgar'
+            },
+            {
+                companyName: 'Global Energy Partners LLC',
+                cik: '0001234570',
+                formType: '8-K',
+                source: '8-K',
+                items: ['1.01'],
+                filedDate: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+                description: 'Material Definitive Agreement - Joint venture with RenewableEnergy Corp',
+                summary: 'Entered into definitive agreement for strategic joint venture. Combined entity will focus on grid-scale renewable energy projects.',
+                url: 'https://www.sec.gov/edgar'
+            },
+            {
+                companyName: 'MediaTech Enterprises',
+                cik: '0001234571',
+                formType: '8-K',
+                source: '8-K',
+                items: ['5.02'],
+                filedDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+                description: 'Departure/Election of Directors/Officers - New CEO appointed following acquisition',
+                summary: 'Announced appointment of former StreamCo CEO as new Chief Executive Officer. Change follows recently completed merger.',
+                url: 'https://www.sec.gov/edgar'
+            }
+        ];
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * ❌ FORMAT ERROR RESPONSE
+     * ═══════════════════════════════════════════════════════════
+     */
+    formatErrorResponse(error) {
+        return `# ❌ M&A Analysis Error\n\n**Unable to fetch M&A data at the moment.**\n\n**Error:** ${error.message || 'Unknown error'}\n\n**Possible solutions:**\n• Check your SEC Worker configuration\n• Verify Worker URL in \`sec-api-client.js\`\n• Try again in a few moments\n\nPlease contact support if the issue persists.`;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * 📭 FORMAT NO DATA RESPONSE
+     * ═══════════════════════════════════════════════════════════
+     */
+    formatNoDataResponse() {
+        return `# 🤝 No Recent M&A Activity Found\n\n**No M&A filings found** in the selected time period.\n\n**Possible reasons:**\n• Current M&A market is quiet\n• Time period may be too narrow\n• SEC API may be temporarily unavailable\n\n**Suggestions:**\n• Try expanding the time period (e.g., 60-90 days)\n• Check back later for new filings\n• Analyze historical M&A trends instead`;
     }
 }
 
@@ -451,4 +790,4 @@ if (typeof window !== 'undefined') {
     window.ChatbotMAAnalyzer = ChatbotMAAnalyzer;
 }
 
-console.log('✅ ChatbotMAAnalyzer loaded');
+console.log('✅ ChatbotMAAnalyzer (Ultra-Advanced v5.0) loaded');
