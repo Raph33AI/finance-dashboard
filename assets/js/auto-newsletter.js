@@ -13,7 +13,7 @@ class AutoNewsletterSystem {
         this.LAST_POST_WEEK_KEY = 'lastAutoNewsletterWeek';
         this.rssClient = null;
         this.communityService = null;
-        this.entityDB = window.entityDB || null;
+        this.entityDB = window.entityDB || new EntityDatabase();
     }
 
     async initialize() {
