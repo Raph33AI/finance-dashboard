@@ -1020,14 +1020,18 @@ class ChatbotAnalytics {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * INITIALIZE ALL COMPONENTS
+     * INITIALIZE ALL COMPONENTS (CORRIGÉ - v5.1)
      * ═══════════════════════════════════════════════════════════
      */
     async initialize() {
-        // API Client
+        console.log('🚀 Initializing ChatbotAnalytics v5.1...');
+
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 1. API CLIENT (Finance API)
+        // ═══════════════════════════════════════════════════════════
         if (typeof FinanceAPIClient !== 'undefined') {
             this.apiClient = new FinanceAPIClient({
-                baseURL: this.config.apiBaseURL || APP_CONFIG?.API_BASE_URL,
+                baseURL: this.config.apiBaseURL || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.API_BASE_URL : ''),
                 cacheDuration: 300000,
                 maxRetries: 2
             });
@@ -1035,55 +1039,95 @@ class ChatbotAnalytics {
         } else if (window.apiClient) {
             this.apiClient = window.apiClient;
             console.log('✅ Using global apiClient');
+        } else {
+            console.warn('⚠ FinanceAPIClient not available');
         }
 
-        // Charts Engine
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 2. ECONOMIC DATA CLIENT (pour Forex)
+        // ═══════════════════════════════════════════════════════════
+        if (typeof EconomicDataClient !== 'undefined') {
+            window.economicDataClient = new EconomicDataClient();
+            console.log('✅ EconomicDataClient initialized (global)');
+        } else if (typeof economicDataClient === 'undefined') {
+            console.warn('⚠ EconomicDataClient not available - Forex will use demo data');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 3. SEC API CLIENT (pour IPO, M&A, Insider)
+        // ═══════════════════════════════════════════════════════════
+        if (typeof SECForm4Client !== 'undefined') {
+            window.secAPIClient = new SECForm4Client();
+            console.log('✅ SECForm4Client initialized (global)');
+        } else if (typeof secAPIClient === 'undefined') {
+            console.warn('⚠ SECForm4Client not available - Insider/IPO/M&A will use demo data');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 4. CHARTS ENGINE
+        // ═══════════════════════════════════════════════════════════
         if (typeof ChatbotCharts !== 'undefined') {
             this.chartsEngine = new ChatbotCharts();
             console.log('✅ ChatbotCharts initialized');
         }
 
-        // ✅ IPO Analyzer
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 5. SPECIALIZED ANALYZERS (avec API Clients)
+        // ═══════════════════════════════════════════════════════════
+
+        // IPO Analyzer
         if (typeof ChatbotIPOAnalyzer !== 'undefined') {
             this.ipoAnalyzer = new ChatbotIPOAnalyzer(this.config);
-            this.ipoAnalyzer.apiClient = this.apiClient;
+            this.ipoAnalyzer.apiClient = this.apiClient; // ✅ IMPORTANT
             console.log('✅ ChatbotIPOAnalyzer initialized');
+        } else {
+            console.warn('⚠ ChatbotIPOAnalyzer not loaded');
         }
 
-        // ✅ M&A Analyzer
+        // M&A Analyzer
         if (typeof ChatbotMAAnalyzer !== 'undefined') {
             this.maAnalyzer = new ChatbotMAAnalyzer(this.config);
-            this.maAnalyzer.apiClient = this.apiClient;
+            this.maAnalyzer.apiClient = this.apiClient; // ✅ IMPORTANT
             console.log('✅ ChatbotMAAnalyzer initialized');
+        } else {
+            console.warn('⚠ ChatbotMAAnalyzer not loaded');
         }
 
-        // ✅ Forex Analyzer
+        // Forex Analyzer
         if (typeof ChatbotForexAnalyzer !== 'undefined') {
             this.forexAnalyzer = new ChatbotForexAnalyzer(this.config);
-            this.forexAnalyzer.apiClient = this.apiClient;
+            this.forexAnalyzer.apiClient = this.apiClient; // ✅ IMPORTANT
             console.log('✅ ChatbotForexAnalyzer initialized');
+        } else {
+            console.warn('⚠ ChatbotForexAnalyzer not loaded');
         }
 
-        // ✅ Insider Analyzer
+        // Insider Analyzer
         if (typeof ChatbotInsiderAnalyzer !== 'undefined') {
             this.insiderAnalyzer = new ChatbotInsiderAnalyzer(this.config);
-            this.insiderAnalyzer.apiClient = this.apiClient;
+            this.insiderAnalyzer.apiClient = this.apiClient; // ✅ IMPORTANT
             console.log('✅ ChatbotInsiderAnalyzer initialized');
+        } else {
+            console.warn('⚠ ChatbotInsiderAnalyzer not loaded');
         }
 
-        // ✅ Budget Manager
+        // Budget Manager
         if (typeof ChatbotBudgetManager !== 'undefined') {
             this.budgetManager = new ChatbotBudgetManager(this.config);
             console.log('✅ ChatbotBudgetManager initialized');
+        } else {
+            console.warn('⚠ ChatbotBudgetManager not loaded');
         }
 
-        // ✅ Investment Manager
+        // Investment Manager
         if (typeof ChatbotInvestmentManager !== 'undefined') {
             this.investmentManager = new ChatbotInvestmentManager(this.config);
             console.log('✅ ChatbotInvestmentManager initialized');
+        } else {
+            console.warn('⚠ ChatbotInvestmentManager not loaded');
         }
 
-        console.log('✅ ChatbotAnalytics fully initialized');
+        console.log('✅ ChatbotAnalytics v5.1 fully initialized');
     }
 
     /**

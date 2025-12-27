@@ -540,33 +540,38 @@
     <!-- ============================================
          CHATBOT SCRIPTS (ORDRE CRITIQUE)
          ============================================ -->
-
-    <!-- 1⃣ Configuration (FIRST) -->
-    <script src='assets/js/config.js'></script>
+    <!-- 1. CONFIGURATION -->
     <script src="assets/js/chatbot-config.js"></script>
-    <script src='assets/js/api-client.js'></script>
 
-    <!-- 2⃣ Gemini API (BEFORE AI Engine) -->
+    <!-- 2. API CLIENTS (CRITIQUES) -->
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/economic-data-client.js"></script>
+    <script src="assets/js/sec-api-client.js"></script>
+
+    <!-- 3. GEMINI AI -->
     <script src="assets/js/chatbot-gemini.js"></script>
 
-    <!-- 3⃣ Core Components -->
+    <!-- 4. CHARTS ENGINE -->
     <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
 
-    <!-- 4⃣ Analyzers -->
+    <!-- 5. SPECIALIZED ANALYZERS -->
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-ma-analyzer.js"></script>
-    <script src="assets/js/chatbot-insider-analyzer.js"></script>
     <script src="assets/js/chatbot-forex-analyzer.js"></script>
+    <script src="assets/js/chatbot-insider-analyzer.js"></script>
     <script src="assets/js/chatbot-budget-manager.js"></script>
     <script src="assets/js/chatbot-investment-manager.js"></script>
 
-    <!-- 5⃣ AI Engine (AFTER Analyzers) -->
+    <!-- 6. ANALYTICS (DOIT ÊTRE APRÈS LES ANALYZERS) -->
+    <script src="assets/js/chatbot-analytics.js"></script>
+
+    <!-- 7. SUGGESTIONS -->
+    <script src="assets/js/chatbot-suggestions.js"></script>
+
+    <!-- 8. AI ENGINE (DOIT ÊTRE APRÈS ANALYTICS) -->
     <script src="assets/js/chatbot-ai-engine.js"></script>
 
-    <!-- 6⃣ UI & 3D Robot (LAST) -->
-    <script src="assets/js/chatbot-robot-3d.js"></script>
+    <!-- 9. UI (EN DERNIER) -->
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
     
     <!-- 7⃣ Particles Background -->
