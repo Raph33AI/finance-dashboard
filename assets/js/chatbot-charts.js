@@ -3296,728 +3296,696 @@
 // console.log('📊 25+ Chart Types Available');
 // console.log('🚀 Ready for Wall Street-grade visualizations');
 
-// ============================================
-// CHATBOT CHARTS v5.0 - ALPHAVAULT COMPLIANT
-// ✅ CONFORMITÉ LÉGALE: Graphiques avec indices normalisés (base 100)
-// Aucun prix brut affiché - Seulement des performances relatives
-// ============================================
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * CHATBOT CHARTS - Legal Compliant Financial Charting Engine
+ * ═══════════════════════════════════════════════════════════════
+ * Version: 3.0.0 - LEGAL COMPLIANT
+ * Description: Génération de graphiques d'oscillateurs techniques UNIQUEMENT
+ * 
+ * ✅ AUTORISÉ:
+ *   - Oscillateurs techniques purs (RSI, MACD, Stochastic, etc.)
+ *   - Indicateurs dérivés (Volume, ATR, etc.)
+ *   - Graphiques radar/heatmap de comparaison
+ * 
+ * ❌ INTERDIT (ToS Compliance):
+ *   - Graphiques de prix (candlestick, line, area)
+ *   - Données OHLC raw
+ *   - Prix historiques bruts
+ */
 
 class ChatbotCharts {
-    constructor(config) {
-        this.config = config;
-        this.charts = new Map();
-        this.chartColors = {
+    constructor() {
+        this.chartInstances = new Map();
+        this.chartCounter = 0;
+        this.defaultColors = {
             primary: '#667eea',
             secondary: '#764ba2',
             success: '#10b981',
             danger: '#ef4444',
             warning: '#f59e0b',
             info: '#3b82f6',
-            purple: '#8b5cf6',
-            pink: '#ec4899',
-            gradient: ['#667eea', '#764ba2', '#f093fb']
+            purple: '#9d5ce6',
+            teal: '#20c997',
+            cyan: '#0dcaf0',
+            indigo: '#6610f2',
+            orange: '#fd7e14',
+            pink: '#d63384'
         };
         
-        console.log('📊 ChatbotCharts v5.0 - ALPHAVAULT COMPLIANT initialized');
-        console.log('🔒 Charts display normalized indices only (Base 100)');
+        console.log('📊 ChatbotCharts (Legal Compliant) initialized');
     }
 
-    // ============================================
-    // 📈 GRAPHIQUE PRINCIPAL: PERFORMANCE INDEX (Base 100)
-    // ============================================
-    
-    async createPerformanceIndexChart(container, data, options = {}) {
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * RSI CHART (Relative Strength Index)
+     * ═══════════════════════════════════════════════════════════
+     */
+    createRSIChart(rsiData, containerId, options = {}) {
         try {
-            console.log(`📊 Creating Performance Index chart (Base 100)...`);
+            const chartId = containerId || `rsi-chart-${++this.chartCounter}`;
             
-            if (!data || !data.normalizedData || data.normalizedData.length === 0) {
-                console.error('❌ No normalized data available for chart');
-                return null;
-            }
-
-            const canvas = this.createCanvas(container);
-            const ctx = canvas.getContext('2d');
-
-            const labels = data.normalizedData.map(d => d.date);
-            const performanceData = data.normalizedData.map(d => parseFloat(d.performanceIndex));
-
             const chartConfig = {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: `${data.symbol} - Performance Index (Base 100)`,
-                        data: performanceData,
-                        borderColor: this.chartColors.primary,
-                        backgroundColor: this.createGradient(ctx, canvas.height),
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: this.chartColors.primary,
-                        pointHoverBorderColor: '#ffffff',
-                        pointHoverBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#64748b',
-                                font: { size: 12, weight: '600' },
-                                padding: 15
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: options.title || `${data.symbol} - AlphaVault Performance Index`,
-                            color: '#1e293b',
-                            font: { size: 16, weight: '700' },
-                            padding: { top: 10, bottom: 20 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e2e8f0',
-                            borderColor: this.chartColors.primary,
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                title: (context) => {
-                                    return `Date: ${context[0].label}`;
-                                },
-                                label: (context) => {
-                                    const value = context.parsed.y.toFixed(2);
-                                    const change = (value - 100).toFixed(2);
-                                    const sign = change >= 0 ? '+' : '';
-                                    return [
-                                        `Performance Index: ${value}`,
-                                        `Total Change: ${sign}${change}%`
-                                    ];
-                                }
-                            }
-                        },
-                        annotation: {
-                            annotations: {
-                                baseline: {
-                                    type: 'line',
-                                    yMin: 100,
-                                    yMax: 100,
-                                    borderColor: 'rgba(100, 116, 139, 0.5)',
-                                    borderWidth: 2,
-                                    borderDash: [6, 6],
-                                    label: {
-                                        display: true,
-                                        content: 'Base 100',
-                                        position: 'end',
-                                        backgroundColor: 'rgba(100, 116, 139, 0.8)',
-                                        color: '#ffffff',
-                                        font: { size: 11, weight: '600' }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 11 },
-                                maxRotation: 45,
-                                minRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 12
-                            }
-                        },
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(203, 213, 225, 0.3)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 11 },
-                                callback: (value) => value.toFixed(0)
-                            },
-                            title: {
-                                display: true,
-                                text: 'Performance Index (Base 100)',
-                                color: '#475569',
-                                font: { size: 12, weight: '600' }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const chart = new Chart(ctx, chartConfig);
-            this.charts.set(container.id, chart);
-
-            console.log(`✅ Performance Index chart created (${performanceData.length} points)`);
-            return chart;
-
-        } catch (error) {
-            console.error('❌ Error creating performance index chart:', error);
-            return null;
-        }
-    }
-
-    // ============================================
-    // 📊 COMPARAISON MULTI-SYMBOLES (Indices Normalisés)
-    // ============================================
-    
-    async createComparisonChart(container, timeSeries, options = {}) {
-        try {
-            console.log(`⚖ Creating comparison chart (Normalized indices)...`);
-            
-            if (!timeSeries || timeSeries.length < 2) {
-                console.error('❌ Need at least 2 time series for comparison');
-                return null;
-            }
-
-            const canvas = this.createCanvas(container);
-            const ctx = canvas.getContext('2d');
-
-            const colors = [
-                this.chartColors.primary,
-                this.chartColors.success,
-                this.chartColors.warning,
-                this.chartColors.info,
-                this.chartColors.purple
-            ];
-
-            // Normalisation des séries à base 100
-            const datasets = timeSeries.map((series, index) => {
-                const normalizedData = this.normalizeToBase100(series);
-                
-                return {
-                    label: `${series.symbol} (Base 100)`,
-                    data: normalizedData.values,
-                    borderColor: colors[index % colors.length],
+                chart: {
+                    type: 'area',
                     backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: colors[index % colors.length],
-                    pointHoverBorderColor: '#ffffff',
-                    pointHoverBorderWidth: 2
-                };
-            });
+                    height: options.height || 350,
+                    borderRadius: 15
+                },
+                title: {
+                    text: options.title || 'RSI - Relative Strength Index',
+                    style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    labels: { style: { color: '#64748b' } }
+                },
+                yAxis: {
+                    title: { text: 'RSI', style: { color: '#1e293b' } },
+                    min: 0,
+                    max: 100,
+                    plotLines: [
+                        {
+                            value: 70,
+                            color: this.defaultColors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (70)', align: 'right', style: { color: this.defaultColors.danger, fontWeight: 'bold' } }
+                        },
+                        {
+                            value: 50,
+                            color: '#999',
+                            dashStyle: 'Dot',
+                            width: 1
+                        },
+                        {
+                            value: 30,
+                            color: this.defaultColors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (30)', align: 'right', style: { color: this.defaultColors.success, fontWeight: 'bold' } }
+                        }
+                    ]
+                },
+                tooltip: {
+                    borderRadius: 10,
+                    valueDecimals: 2,
+                    pointFormat: '<b>RSI:</b> {point.y:.2f}'
+                },
+                series: [{
+                    type: 'area',
+                    name: 'RSI',
+                    data: rsiData,
+                    color: this.defaultColors.secondary,
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, Highcharts.color(this.defaultColors.secondary).setOpacity(0.4).get('rgba')],
+                            [1, Highcharts.color(this.defaultColors.secondary).setOpacity(0.1).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 2,
+                    zones: [
+                        { value: 30, color: this.defaultColors.success },
+                        { value: 70, color: this.defaultColors.secondary },
+                        { color: this.defaultColors.danger }
+                    ]
+                }],
+                credits: { enabled: false },
+                exporting: { 
+                    enabled: true,
+                    buttons: {
+                        contextButton: {
+                            menuItems: ['downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG']
+                        }
+                    }
+                }
+            };
 
-            const labels = timeSeries[0].data.map(d => d.datetime || d.date);
+            return { config: chartConfig, containerId: chartId };
 
-            const chartConfig = {
+        } catch (error) {
+            console.error('❌ RSI chart error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * MACD CHART
+     * ═══════════════════════════════════════════════════════════
+     */
+    createMACDChart(macdData, containerId, options = {}) {
+        const chartId = containerId || `macd-chart-${++this.chartCounter}`;
+
+        const chartConfig = {
+            chart: {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: datasets
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'MACD - Moving Average Convergence Divergence',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'MACD', style: { color: '#1e293b' } },
+                plotLines: [{
+                    value: 0,
+                    color: '#999',
+                    dashStyle: 'Dash',
+                    width: 2
+                }]
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valueDecimals: 4
+            },
+            series: [
+                {
+                    type: 'line',
+                    name: 'MACD Line',
+                    data: macdData.macdLine,
+                    color: this.defaultColors.primary,
+                    lineWidth: 2,
+                    zIndex: 2
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#64748b',
-                                font: { size: 12, weight: '600' },
-                                padding: 15,
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: options.title || 'Performance Comparison (Normalized Base 100)',
-                            color: '#1e293b',
-                            font: { size: 16, weight: '700' },
-                            padding: { top: 10, bottom: 20 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e2e8f0',
-                            borderColor: this.chartColors.primary,
-                            borderWidth: 1,
-                            padding: 12,
-                            callbacks: {
-                                title: (context) => `Date: ${context[0].label}`,
-                                label: (context) => {
-                                    const value = context.parsed.y.toFixed(2);
-                                    const change = (value - 100).toFixed(2);
-                                    const sign = change >= 0 ? '+' : '';
-                                    return `${context.dataset.label}: ${value} (${sign}${change}%)`;
-                                }
-                            }
-                        },
-                        annotation: {
-                            annotations: {
-                                baseline: {
-                                    type: 'line',
-                                    yMin: 100,
-                                    yMax: 100,
-                                    borderColor: 'rgba(100, 116, 139, 0.5)',
-                                    borderWidth: 2,
-                                    borderDash: [6, 6]
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 11 },
-                                maxRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 10
-                            }
-                        },
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(203, 213, 225, 0.3)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 11 },
-                                callback: (value) => value.toFixed(0)
-                            },
-                            title: {
-                                display: true,
-                                text: 'Normalized Performance Index',
-                                color: '#475569',
-                                font: { size: 12, weight: '600' }
-                            }
-                        }
-                    }
+                {
+                    type: 'line',
+                    name: 'Signal Line',
+                    data: macdData.signalLine,
+                    color: this.defaultColors.danger,
+                    lineWidth: 2,
+                    zIndex: 2
+                },
+                {
+                    type: 'column',
+                    name: 'Histogram',
+                    data: macdData.histogram,
+                    color: this.defaultColors.success,
+                    negativeColor: this.defaultColors.danger,
+                    zIndex: 1
                 }
-            };
+            ],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
 
-            const chart = new Chart(ctx, chartConfig);
-            this.charts.set(container.id, chart);
-
-            console.log(`✅ Comparison chart created (${timeSeries.length} symbols)`);
-            return chart;
-
-        } catch (error) {
-            console.error('❌ Error creating comparison chart:', error);
-            return null;
-        }
+        return { config: chartConfig, containerId: chartId };
     }
 
-    // ============================================
-    // 📊 BAR CHART: ALPHAVAULT SCORES
-    // ============================================
-    
-    async createScoresBarChart(container, scoresData, options = {}) {
-        try {
-            console.log(`📊 Creating AlphaVault Scores bar chart...`);
-            
-            const canvas = this.createCanvas(container);
-            const ctx = canvas.getContext('2d');
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * STOCHASTIC OSCILLATOR CHART
+     * ═══════════════════════════════════════════════════════════
+     */
+    createStochasticChart(stochasticData, containerId, options = {}) {
+        const chartId = containerId || `stochastic-chart-${++this.chartCounter}`;
 
-            const labels = scoresData.map(item => item.symbol);
-            const scores = scoresData.map(item => item.alphaVaultScore);
+        const chartConfig = {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Stochastic Oscillator',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'Stochastic', style: { color: '#1e293b' } },
+                min: 0,
+                max: 100,
+                plotLines: [
+                    {
+                        value: 80,
+                        color: this.defaultColors.danger,
+                        dashStyle: 'ShortDash',
+                        width: 2,
+                        label: { text: 'Overbought (80)', align: 'right', style: { color: this.defaultColors.danger } }
+                    },
+                    {
+                        value: 20,
+                        color: this.defaultColors.success,
+                        dashStyle: 'ShortDash',
+                        width: 2,
+                        label: { text: 'Oversold (20)', align: 'right', style: { color: this.defaultColors.success } }
+                    }
+                ]
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valueDecimals: 2
+            },
+            series: [
+                {
+                    type: 'line',
+                    name: '%K (Fast)',
+                    data: stochasticData.k,
+                    color: this.defaultColors.primary,
+                    lineWidth: 2
+                },
+                {
+                    type: 'line',
+                    name: '%D (Slow)',
+                    data: stochasticData.d,
+                    color: this.defaultColors.danger,
+                    lineWidth: 2
+                }
+            ],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
 
-            const backgroundColors = scores.map(score => {
-                if (score >= 80) return this.chartColors.success;
-                if (score >= 60) return this.chartColors.info;
-                if (score >= 40) return this.chartColors.warning;
-                return this.chartColors.danger;
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * ADX CHART (Trend Strength)
+     * ═══════════════════════════════════════════════════════════
+     */
+    createADXChart(adxData, containerId, options = {}) {
+        const chartId = containerId || `adx-chart-${++this.chartCounter}`;
+
+        const chartConfig = {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'ADX - Trend Strength Indicator',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'ADX Value', style: { color: '#1e293b' } },
+                min: 0,
+                max: 100,
+                plotLines: [
+                    {
+                        value: 25,
+                        color: this.defaultColors.success,
+                        dashStyle: 'ShortDash',
+                        width: 2,
+                        label: { text: 'Strong Trend (25)', align: 'right', style: { color: this.defaultColors.success } }
+                    },
+                    {
+                        value: 20,
+                        color: this.defaultColors.warning,
+                        dashStyle: 'Dot',
+                        width: 1,
+                        label: { text: 'Weak Trend (20)', align: 'right' }
+                    }
+                ]
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valueDecimals: 2
+            },
+            series: [
+                {
+                    type: 'line',
+                    name: 'ADX',
+                    data: adxData.adx,
+                    color: this.defaultColors.primary,
+                    lineWidth: 3
+                },
+                {
+                    type: 'line',
+                    name: '+DI',
+                    data: adxData.plusDI,
+                    color: this.defaultColors.success,
+                    lineWidth: 2
+                },
+                {
+                    type: 'line',
+                    name: '-DI',
+                    data: adxData.minusDI,
+                    color: this.defaultColors.danger,
+                    lineWidth: 2
+                }
+            ],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * MULTI-INDICATOR COMPARISON (Radar Chart)
+     * ═══════════════════════════════════════════════════════════
+     */
+    createRadarChart(indicators, containerId, options = {}) {
+        const chartId = containerId || `radar-chart-${++this.chartCounter}`;
+
+        const categories = indicators.map(ind => ind.name);
+        const values = indicators.map(ind => ind.value);
+
+        const chartConfig = {
+            chart: {
+                polar: true,
+                type: 'area',
+                backgroundColor: 'transparent',
+                height: options.height || 400,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Technical Indicators Overview',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            pane: {
+                size: '80%'
+            },
+            xAxis: {
+                categories: categories,
+                tickmarkPlacement: 'on',
+                lineWidth: 0,
+                labels: { style: { color: '#64748b', fontWeight: '600' } }
+            },
+            yAxis: {
+                gridLineInterpolation: 'polygon',
+                lineWidth: 0,
+                min: 0,
+                max: 100,
+                labels: { style: { color: '#64748b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                pointFormat: '<b>{series.name}:</b> {point.y:.1f}/100'
+            },
+            series: [{
+                name: 'Technical Strength',
+                data: values,
+                pointPlacement: 'on',
+                color: this.defaultColors.primary,
+                fillOpacity: 0.3,
+                lineWidth: 2
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * CORRELATION HEATMAP
+     * ═══════════════════════════════════════════════════════════
+     */
+    createHeatmapChart(correlationMatrix, symbols, containerId, options = {}) {
+        const chartId = containerId || `heatmap-chart-${++this.chartCounter}`;
+
+        const data = [];
+        symbols.forEach((symbol1, i) => {
+            symbols.forEach((symbol2, j) => {
+                data.push([i, j, correlationMatrix[i][j]]);
             });
-
-            const chartConfig = {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'AlphaVault Score',
-                        data: scores,
-                        backgroundColor: backgroundColors,
-                        borderColor: backgroundColors,
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        barThickness: 40
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: options.title || 'AlphaVault Score Comparison',
-                            color: '#1e293b',
-                            font: { size: 16, weight: '700' },
-                            padding: { top: 10, bottom: 20 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e2e8f0',
-                            borderColor: this.chartColors.primary,
-                            borderWidth: 1,
-                            padding: 12,
-                            callbacks: {
-                                label: (context) => {
-                                    const score = context.parsed.y;
-                                    let rating = 'Average';
-                                    if (score >= 80) rating = 'Excellent';
-                                    else if (score >= 60) rating = 'Good';
-                                    else if (score < 40) rating = 'Poor';
-                                    
-                                    return [
-                                        `Score: ${score}/100`,
-                                        `Rating: ${rating}`
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 12, weight: '600' }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: 'rgba(203, 213, 225, 0.3)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                font: { size: 11 },
-                                stepSize: 20
-                            },
-                            title: {
-                                display: true,
-                                text: 'Score (0-100)',
-                                color: '#475569',
-                                font: { size: 12, weight: '600' }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const chart = new Chart(ctx, chartConfig);
-            this.charts.set(container.id, chart);
-
-            console.log(`✅ Scores bar chart created`);
-            return chart;
-
-        } catch (error) {
-            console.error('❌ Error creating scores bar chart:', error);
-            return null;
-        }
-    }
-
-    // ============================================
-    // 📊 RADAR CHART: MULTI-DIMENSIONAL SCORES
-    // ============================================
-    
-    async createScoresRadarChart(container, stockData, options = {}) {
-        try {
-            console.log(`📊 Creating AlphaVault Radar chart...`);
-            
-            const canvas = this.createCanvas(container);
-            const ctx = canvas.getContext('2d');
-
-            const chartConfig = {
-                type: 'radar',
-                data: {
-                    labels: [
-                        'AlphaVault Score',
-                        'Momentum Index',
-                        'Value Score',
-                        'Technical Strength',
-                        'Sentiment Index',
-                        'Quality Grade'
-                    ],
-                    datasets: [{
-                        label: stockData.symbol,
-                        data: [
-                            stockData.alphaVaultScore || 50,
-                            stockData.momentumIndex || 50,
-                            stockData.valueScore || 50,
-                            stockData.technicalStrength || 50,
-                            stockData.sentimentIndex || 50,
-                            this.convertGradeToScore(stockData.qualityGrade)
-                        ],
-                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                        borderColor: this.chartColors.primary,
-                        borderWidth: 3,
-                        pointBackgroundColor: this.chartColors.primary,
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#64748b',
-                                font: { size: 12, weight: '600' }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: options.title || `${stockData.symbol} - AlphaVault Score Breakdown`,
-                            color: '#1e293b',
-                            font: { size: 16, weight: '700' },
-                            padding: { top: 10, bottom: 20 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e2e8f0',
-                            padding: 12,
-                            callbacks: {
-                                label: (context) => `${context.label}: ${context.parsed.r}/100`
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                color: '#64748b',
-                                backdropColor: 'transparent'
-                            },
-                            grid: {
-                                color: 'rgba(203, 213, 225, 0.3)'
-                            },
-                            pointLabels: {
-                                color: '#475569',
-                                font: { size: 11, weight: '600' }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const chart = new Chart(ctx, chartConfig);
-            this.charts.set(container.id, chart);
-
-            console.log(`✅ Radar chart created`);
-            return chart;
-
-        } catch (error) {
-            console.error('❌ Error creating radar chart:', error);
-            return null;
-        }
-    }
-
-    // ============================================
-    // 📊 DOUGHNUT CHART: RISK RATING DISTRIBUTION
-    // ============================================
-    
-    async createRiskDistributionChart(container, riskData, options = {}) {
-        try {
-            console.log(`📊 Creating Risk Distribution chart...`);
-            
-            const canvas = this.createCanvas(container);
-            const ctx = canvas.getContext('2d');
-
-            const chartConfig = {
-                type: 'doughnut',
-                data: {
-                    labels: ['Low Risk', 'Medium Risk', 'High Risk', 'Very High Risk'],
-                    datasets: [{
-                        data: [
-                            riskData.low || 0,
-                            riskData.medium || 0,
-                            riskData.high || 0,
-                            riskData.veryHigh || 0
-                        ],
-                        backgroundColor: [
-                            this.chartColors.success,
-                            this.chartColors.info,
-                            this.chartColors.warning,
-                            this.chartColors.danger
-                        ],
-                        borderColor: '#ffffff',
-                        borderWidth: 3,
-                        hoverOffset: 15
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'right',
-                            labels: {
-                                color: '#64748b',
-                                font: { size: 12, weight: '600' },
-                                padding: 15,
-                                usePointStyle: true
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: options.title || 'Risk Distribution',
-                            color: '#1e293b',
-                            font: { size: 16, weight: '700' },
-                            padding: { top: 10, bottom: 20 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e2e8f0',
-                            padding: 12,
-                            callbacks: {
-                                label: (context) => {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const chart = new Chart(ctx, chartConfig);
-            this.charts.set(container.id, chart);
-
-            console.log(`✅ Risk distribution chart created`);
-            return chart;
-
-        } catch (error) {
-            console.error('❌ Error creating risk distribution chart:', error);
-            return null;
-        }
-    }
-
-    // ============================================
-    // 🛠 HELPER METHODS
-    // ============================================
-    
-    normalizeToBase100(timeSeries) {
-        if (!timeSeries || !timeSeries.data || timeSeries.data.length === 0) {
-            return { values: [], symbol: timeSeries?.symbol || 'N/A' };
-        }
-
-        const basePrice = timeSeries.data[0].close;
-        const values = timeSeries.data.map(point => {
-            return ((point.close / basePrice) * 100);
         });
 
-        return {
-            values: values,
-            symbol: timeSeries.symbol,
-            basePrice: basePrice // Gardé en interne uniquement
+        const chartConfig = {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent',
+                height: options.height || 500,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Correlation Matrix',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                categories: symbols,
+                labels: { style: { color: '#64748b', fontWeight: '600' } }
+            },
+            yAxis: {
+                categories: symbols,
+                title: null,
+                labels: { style: { color: '#64748b', fontWeight: '600' } }
+            },
+            colorAxis: {
+                min: -1,
+                max: 1,
+                stops: [
+                    [0, this.defaultColors.danger],
+                    [0.5, '#ffffff'],
+                    [1, this.defaultColors.success]
+                ]
+            },
+            tooltip: {
+                borderRadius: 10,
+                formatter: function() {
+                    return `<b>${symbols[this.point.x]} vs ${symbols[this.point.y]}</b><br/>Correlation: <b>${this.point.value.toFixed(3)}</b>`;
+                }
+            },
+            series: [{
+                name: 'Correlation',
+                borderWidth: 1,
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    format: '{point.value:.2f}'
+                }
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
         };
+
+        return { config: chartConfig, containerId: chartId };
     }
 
-    convertGradeToScore(grade) {
-        const gradeMap = {
-            'A+': 100, 'A': 95, 'A-': 90,
-            'B+': 85, 'B': 80, 'B-': 75,
-            'C+': 70, 'C': 65, 'C-': 60,
-            'D+': 55, 'D': 50, 'D-': 45,
-            'F': 30
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * VOLUME INDICATOR (OBV)
+     * ═══════════════════════════════════════════════════════════
+     */
+    createOBVChart(obvData, containerId, options = {}) {
+        const chartId = containerId || `obv-chart-${++this.chartCounter}`;
+
+        const chartConfig = {
+            chart: {
+                type: 'area',
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'On-Balance Volume (OBV)',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'OBV', style: { color: '#1e293b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                valueDecimals: 0,
+                pointFormat: '<b>OBV:</b> {point.y}'
+            },
+            series: [{
+                type: 'area',
+                name: 'OBV',
+                data: obvData,
+                color: this.defaultColors.secondary,
+                fillOpacity: 0.3,
+                lineWidth: 2
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
         };
-        return gradeMap[grade] || 50;
+
+        return { config: chartConfig, containerId: chartId };
     }
 
-    createCanvas(container) {
-        container.innerHTML = '';
-        const canvas = document.createElement('canvas');
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        container.appendChild(canvas);
-        return canvas;
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * ATR CHART (Volatility)
+     * ═══════════════════════════════════════════════════════════
+     */
+    createATRChart(atrData, containerId, options = {}) {
+        const chartId = containerId || `atr-chart-${++this.chartCounter}`;
+
+        const chartConfig = {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Average True Range (ATR) - Volatility',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'ATR Value', style: { color: '#1e293b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                valueDecimals: 2,
+                pointFormat: '<b>ATR:</b> {point.y:.2f}'
+            },
+            series: [{
+                type: 'line',
+                name: 'ATR',
+                data: atrData,
+                color: this.defaultColors.purple,
+                lineWidth: 2
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
     }
 
-    createGradient(ctx, height) {
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
-        gradient.addColorStop(1, 'rgba(102, 126, 234, 0.01)');
-        return gradient;
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * RENDER CHART (Create HTML container + Initialize)
+     * ═══════════════════════════════════════════════════════════
+     */
+    renderChart(chartData, targetElement) {
+        if (!chartData || !chartData.config || !chartData.containerId) {
+            console.error('❌ Invalid chart data');
+            return null;
+        }
+
+        // Créer le conteneur si nécessaire
+        let container = document.getElementById(chartData.containerId);
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = chartData.containerId;
+            container.className = 'chatbot-chart-container';
+            container.style.marginTop = '20px';
+            container.style.borderRadius = '15px';
+            container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            container.style.padding = '15px';
+            container.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+            
+            if (targetElement) {
+                targetElement.appendChild(container);
+            }
+        }
+
+        // Initialiser le graphique Highcharts
+        try {
+            const chart = Highcharts.chart(chartData.containerId, chartData.config);
+            this.chartInstances.set(chartData.containerId, chart);
+            
+            console.log(`✅ Chart ${chartData.containerId} rendered successfully`);
+            
+            return chart;
+        } catch (error) {
+            console.error(`❌ Error rendering chart ${chartData.containerId}:`, error);
+            return null;
+        }
     }
 
-    destroyChart(containerId) {
-        const chart = this.charts.get(containerId);
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * DESTROY CHART
+     * ═══════════════════════════════════════════════════════════
+     */
+    destroyChart(chartId) {
+        const chart = this.chartInstances.get(chartId);
         if (chart) {
             chart.destroy();
-            this.charts.delete(containerId);
-            console.log(`✅ Chart destroyed: ${containerId}`);
+            this.chartInstances.delete(chartId);
+            console.log(`🗑 Chart ${chartId} destroyed`);
         }
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * EXPORT CHART (PNG/SVG)
+     * ═══════════════════════════════════════════════════════════
+     */
+    exportChart(chartId, format = 'png') {
+        const chart = this.chartInstances.get(chartId);
+        
+        if (!chart) {
+            console.error(`❌ Chart ${chartId} not found`);
+            return;
+        }
+
+        try {
+            if (format === 'png') {
+                chart.exportChart({ type: 'image/png' });
+            } else if (format === 'svg') {
+                chart.exportChart({ type: 'image/svg+xml' });
+            } else if (format === 'pdf') {
+                chart.exportChart({ type: 'application/pdf' });
+            }
+            
+            console.log(`📥 Chart ${chartId} exported as ${format.toUpperCase()}`);
+        } catch (error) {
+            console.error(`❌ Export error for ${chartId}:`, error);
+        }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * GET ALL ACTIVE CHARTS
+     * ═══════════════════════════════════════════════════════════
+     */
+    getAllCharts() {
+        return Array.from(this.chartInstances.keys());
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * DESTROY ALL CHARTS
+     * ═══════════════════════════════════════════════════════════
+     */
     destroyAllCharts() {
-        this.charts.forEach((chart, id) => {
+        this.chartInstances.forEach((chart, id) => {
             chart.destroy();
         });
-        this.charts.clear();
-        console.log('✅ All charts destroyed');
-    }
-
-    getChart(containerId) {
-        return this.charts.get(containerId);
-    }
-
-    getAllCharts() {
-        return Array.from(this.charts.values());
-    }
-
-    getChartsCount() {
-        return this.charts.size;
+        this.chartInstances.clear();
+        console.log('🗑 All charts destroyed');
     }
 }
 
-// ============================================
-// EXPORT & GLOBAL AVAILABILITY
-// ============================================
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotCharts;
 }
 
-window.ChatbotCharts = ChatbotCharts;
+if (typeof window !== 'undefined') {
+    window.ChatbotCharts = ChatbotCharts;
+}
 
-console.log('✅ ChatbotCharts v5.0 - ALPHAVAULT COMPLIANT loaded successfully!');
-console.log('📊 Charts display normalized indices only (Base 100)');
-console.log('🔒 No raw price data shown - Full legal compliance');
+console.log('✅ ChatbotCharts (Legal Compliant) loaded - Oscillators Only');
