@@ -50,7 +50,7 @@ class AutoNewsletterSystem {
                     console.log('✅ Creating new RSSClient instance');
                     this.rssClient = new RSSClient();
                     this.communityService = window.communityService;
-                    this.entityDB = window.entityDB;
+                    this.entityDB = window.entityDB || new EntityDatabase();
                     clearInterval(checkServices);
                     resolve();
                     return;
