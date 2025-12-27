@@ -1755,7 +1755,7 @@ class ChatbotAnalytics {
     /**
      * ═══════════════════════════════════════════════════════════
      * INITIALIZE
-     * ✅ CORRIGÉ : Crée FinanceAPIClient comme dans advanced-analysis
+     * ✅ CORRIGÉ : Crée FinanceAPIClient comme dans advanced-analysiss
      * ═══════════════════════════════════════════════════════════
      */
     async initialize() {

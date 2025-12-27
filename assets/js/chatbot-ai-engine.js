@@ -2104,7 +2104,7 @@ class ChatbotAIEngine {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * INITIALIZE (Must be called before use)
+     * INITIALIZE (Must be called before usee)
      * ✅ CORRIGÉ POUR UTILISER GeminiAI
      * ═══════════════════════════════════════════════════════════
      */
