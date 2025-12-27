@@ -2053,9 +2053,10 @@
 // console.log('✅ API Calls Optimized - No Duplicates');
 
 // ============================================
-// FINANCIAL CHATBOT - AI ENGINE v7.0 ALPHAVAULT PRO
+// FINANCIAL CHATBOT - AI ENGINE v7.1 ALPHAVAULT PRO
 // ✅ CONFORMITÉ LÉGALE: Intégration complète AlphaVault Scoring System
 // 🏆 Aucune donnée brute API exposée - Seulement scores propriétaires
+// 🔧 CORRECTION: Gestion robuste des dépendances manquantes
 // ============================================
 
 class FinancialChatbotEngine {
@@ -2092,37 +2093,82 @@ class FinancialChatbotEngine {
 
     async initialize() {
         try {
-            // Initialisation du système de scoring propriétaire
+            console.log('🚀 Initializing Financial Chatbot Engine v7.1...');
+            
+            // 1⃣ AlphaVault Scoring System
             if (typeof AlphaVaultScoring !== 'undefined') {
-                this.scoringEngine = new AlphaVaultScoring();
-                console.log('✅ AlphaVault Scoring System initialized');
+                try {
+                    this.scoringEngine = new AlphaVaultScoring();
+                    console.log('✅ AlphaVault Scoring System initialized');
+                } catch (error) {
+                    console.error('❌ AlphaVault Scoring initialization failed:', error);
+                }
             } else {
-                console.error('❌ AlphaVaultScoring class not found!');
+                console.warn('⚠ AlphaVaultScoring class not found - scoring features will be limited');
             }
 
+            // 2⃣ Gemini AI
             if (typeof GeminiAI !== 'undefined') {
-                this.geminiAI = new GeminiAI(this.config);
-                console.log('✅ Gemini AI initialized (AlphaVault mode)');
+                try {
+                    this.geminiAI = new GeminiAI(this.config);
+                    console.log('✅ Gemini AI initialized (AlphaVault mode)');
+                } catch (error) {
+                    console.error('❌ Gemini AI initialization failed:', error);
+                    console.error('   Error details:', error.message);
+                }
+            } else {
+                console.error('❌ GeminiAI class not found - chatbot will not be able to generate responses');
             }
 
+            // 3⃣ IPO Analyzer
             if (typeof IPOAnalyzer !== 'undefined') {
-                this.ipoAnalyzer = new IPOAnalyzer(this.config);
-                console.log('✅ IPO Analyzer initialized');
+                try {
+                    this.ipoAnalyzer = new IPOAnalyzer(this.config);
+                    console.log('✅ IPO Analyzer initialized');
+                } catch (error) {
+                    console.error('❌ IPO Analyzer initialization failed:', error);
+                }
+            } else {
+                console.warn('⚠ IPOAnalyzer class not found - IPO features will be disabled');
             }
 
+            // 4⃣ Financial Analytics
             if (typeof FinancialAnalytics !== 'undefined') {
-                this.analytics = new FinancialAnalytics(this.config);
-                console.log('✅ Analytics initialized (AlphaVault mode)');
+                try {
+                    this.analytics = new FinancialAnalytics(this.config);
+                    console.log('✅ Analytics initialized (AlphaVault mode)');
+                } catch (error) {
+                    console.error('❌ Analytics initialization failed:', error);
+                }
+            } else {
+                console.error('❌ FinancialAnalytics class not found - data fetching will be disabled');
             }
 
+            // 5⃣ Charts
             if (typeof ChatbotCharts !== 'undefined') {
-                this.charts = new ChatbotCharts(this.config);
-                console.log('✅ Charts initialized (AlphaVault mode)');
+                try {
+                    this.charts = new ChatbotCharts(this.config);
+                    console.log('✅ Charts initialized (AlphaVault mode)');
+                } catch (error) {
+                    console.error('❌ Charts initialization failed:', error);
+                }
+            } else {
+                console.warn('⚠ ChatbotCharts class not found - charts will be disabled');
             }
 
-            console.log('🎉 Conversational Financial AI v7.0 ALPHAVAULT PRO ready!');
-            console.log('🏆 Proprietary scoring system active');
-            console.log('🔒 Legal compliance: No raw data redistribution');
+            // ✅ Vérification finale
+            const criticalErrors = [];
+            if (!this.geminiAI) criticalErrors.push('GeminiAI');
+            if (!this.analytics) criticalErrors.push('FinancialAnalytics');
+            
+            if (criticalErrors.length > 0) {
+                console.error('❌ CRITICAL: Missing required components:', criticalErrors.join(', '));
+                console.error('   Please check script loading order in your HTML');
+            } else {
+                console.log('🎉 Conversational Financial AI v7.1 ALPHAVAULT PRO ready!');
+                console.log('🏆 Proprietary scoring system active');
+                console.log('🔒 Legal compliance: No raw data redistribution');
+            }
             
         } catch (error) {
             console.error('❌ Engine initialization error:', error);
@@ -2136,6 +2182,15 @@ class FinancialChatbotEngine {
         const startTime = performance.now();
         
         try {
+            // ✅ Vérification des dépendances critiques
+            if (!this.geminiAI) {
+                throw new Error('Gemini AI not initialized. Please reload the page.');
+            }
+            
+            if (!this.analytics) {
+                throw new Error('Analytics system not initialized. Please reload the page.');
+            }
+            
             this.metrics.totalMessages++;
 
             const cachedResponse = this.checkCache(userMessage);
@@ -2193,11 +2248,16 @@ class FinancialChatbotEngine {
             this.updateMetrics(false, performance.now() - startTime);
             
             return {
-                text: `⚠ **An error occurred:** ${error.message}\n\nPlease try again or rephrase your question.`,
+                text: `⚠ **An error occurred:** ${error.message}\n\nPlease try:\n- Reloading the page\n- Checking your internet connection\n- Rephrasing your question`,
                 error: true,
                 visualCards: [],
                 chartRequests: [],
-                suggestions: this.config.suggestions.initial
+                suggestions: this.config?.suggestions?.initial || [
+                    'What is a P/E ratio?',
+                    'Top IPOs this month',
+                    'Market overview',
+                    'Compare AAPL vs MSFT'
+                ]
             };
         }
     }
@@ -2547,6 +2607,12 @@ class FinancialChatbotEngine {
             }
         };
 
+        // ✅ Vérification que analytics est disponible
+        if (!this.analytics) {
+            console.warn('⚠ Analytics not available - returning minimal context');
+            return context;
+        }
+
         // PRIORITÉ 1: Market News
         if (analysis.type === 'MARKET_NEWS_QUERY') {
             console.log('📰 Loading MARKET NEWS data...');
@@ -2701,7 +2767,7 @@ class FinancialChatbotEngine {
                                  analysis.intents.includes('HISTORICAL') ||
                                  /\b(history|historical|evolution|performance|trend|chart)\b/i.test(message);
             
-            if (needsHistory && this.analytics) {
+            if (needsHistory) {
                 console.log('📈 Loading historical time series (AlphaVault Performance Index)...');
                 const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
                 const outputsize = this.getOutputSize(timeframe);
@@ -2754,6 +2820,12 @@ class FinancialChatbotEngine {
             symbols: symbols,
             comparison: []
         };
+        
+        // ✅ Vérification que analytics est disponible
+        if (!this.analytics) {
+            console.error('❌ Analytics not available for comparison');
+            return comparisonData;
+        }
         
         try {
             console.log(`📊 Loading AlphaVault comparison data for ${symbols.length} symbols...`);
@@ -2818,6 +2890,12 @@ class FinancialChatbotEngine {
 
     async generateChartRequests(context, analysis) {
         const chartRequests = [];
+        
+        // ✅ Vérification que charts est disponible
+        if (!this.charts) {
+            console.warn('⚠ Charts not available');
+            return chartRequests;
+        }
         
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('📊 GENERATING CHART REQUESTS (ALPHAVAULT MODE)');
@@ -3200,8 +3278,9 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.FinancialChatbotEngine = FinancialChatbotEngine;
 
-console.log('🚀 Financial Chatbot AI Engine v7.0 ALPHAVAULT PRO loaded successfully!');
+console.log('🚀 Financial Chatbot AI Engine v7.1 ALPHAVAULT PRO loaded successfully!');
 console.log('🏆 AlphaVault Scoring System fully integrated');
 console.log('🔒 Legal compliance: No raw API data redistribution');
 console.log('📊 All charts display Performance Indices (Base 100) and proprietary scores');
+console.log('🔧 Robust error handling for missing dependencies');
 console.log('✅ Ready for production deployment');
