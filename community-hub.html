@@ -458,6 +458,7 @@
 
                 <!-- ✅ NEWSLETTER BUTTON (ADMIN ONLY) -->
                 <div class="section" id="adminNewsletterSection" style="display: none; padding: 16px 0;">
+                    <!-- ✅ PREMIER BOUTON : NEWSLETTER HEBDOMADAIRE -->
                     <div class="newsletter-btn-container">
                         <button class="newsletter-generate-btn-full" onclick="generateWeeklyNewsletter()">
                             <div class="btn-icon-wrapper">
@@ -466,7 +467,6 @@
                                 </div>
                                 <div class="btn-content">
                                     <div class="btn-title">Generate Weekly Newsletter</div>
-                                    <!-- ✅ CHANGEMENT ICI : "Auto-publish" → "Manually publish" -->
                                     <div class="btn-subtitle">Publish market recap to community</div>
                                 </div>
                             </div>
@@ -476,22 +476,50 @@
                             </div>
                         </button>
                     </div>
-                <!-- </div> -->
 
-                <!-- ✅ STOCK ANALYSIS NEWSLETTER BUTTON (ADMIN ONLY) -->
-                <!-- <div class="section" id="adminStockAnalysisSection" style="display: none; padding: 16px 0;"> -->
-                    <div class="newsletter-btn-container">
-                        <div style="margin-bottom: 16px;">
-                            <label for="stockSymbolInput" style="display: block; font-weight: 700; color: #1e293b; margin-bottom: 8px; font-size: 1rem;">
+                    <!-- ✅ DEUXIÈME BOUTON : STOCK ANALYSIS (AVEC ESPACEMENT) -->
+                    <div class="newsletter-btn-container" style="margin-top: 32px;">
+                        <!-- ✅ SECTION DE RECHERCHE DE SYMBOLE AMÉLIORÉE -->
+                        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%); 
+                                    border-radius: 16px; 
+                                    padding: 24px; 
+                                    margin-bottom: 20px; 
+                                    border: 2px solid rgba(102, 126, 234, 0.15);
+                                    backdrop-filter: blur(10px);">
+                            
+                            <label for="stockSymbolInput" style="display: flex; 
+                                                                align-items: center; 
+                                                                gap: 8px;
+                                                                font-weight: 800; 
+                                                                color: #1e293b; 
+                                                                margin-bottom: 12px; 
+                                                                font-size: 1.1rem;
+                                                                letter-spacing: 0.5px;">
+                                <i class="fas fa-search" style="color: #667eea; font-size: 1rem;"></i>
                                 Stock Symbol to Analyze:
                             </label>
+                            
                             <input 
                                 type="text" 
                                 id="stockSymbolInput" 
-                                placeholder="Enter symbol (e.g., AAPL, TSLA, NVDA)" 
-                                style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; font-weight: 600; text-transform: uppercase; transition: all 0.3s ease;"
-                                onfocus="this.style.borderColor='#06b6d4'; this.style.boxShadow='0 0 0 3px rgba(6, 182, 212, 0.1)';"
-                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
+                                placeholder="ENTER SYMBOL (E.G., AAPL, TSLA, NVDA)" 
+                                style="width: 100%; 
+                                    padding: 16px 20px; 
+                                    border: 2px solid #e2e8f0; 
+                                    border-radius: 12px; 
+                                    font-size: 1.05rem; 
+                                    font-weight: 700; 
+                                    text-transform: uppercase; 
+                                    transition: all 0.3s ease;
+                                    background: white;
+                                    color: #1e293b;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);"
+                                onfocus="this.style.borderColor='#06b6d4'; 
+                                        this.style.boxShadow='0 0 0 4px rgba(6, 182, 212, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)'; 
+                                        this.style.transform='translateY(-2px)';"
+                                onblur="this.style.borderColor='#e2e8f0'; 
+                                        this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.06)';
+                                        this.style.transform='translateY(0)';"
                             >
                         </div>
                         
