@@ -871,29 +871,29 @@
 // console.log('📊 8192 tokens output enabled');
 
 // ============================================
-// GEMINI AI INTEGRATION v5.0 - ALPHAVAULT COMPLIANT
+// GEMINI AI INTEGRATION v5.1 - ALPHAVAULT COMPLIANT
 // ✅ CONFORMITÉ LÉGALE: Prompts configurés pour parler uniquement de scores AlphaVault
-// Aucune mention de données brutes API
+// ✅ CONFIGURATION: Utilise config.api.gemini.* (comme l'ancien code)
 // ============================================
 
 class GeminiAI {
     constructor(config) {
         this.config = config;
-        this.apiKey = config.gemini?.apiKey || '';
-        this.model = config.gemini?.model || 'gemini-2.5-flash';
         
-        // ✅ CORRECTION : Utiliser le Worker Proxy
-        this.workerProxyUrl = config.gemini?.workerProxyUrl || 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini';
+        // ✅ ADAPTATION: Utiliser config.api.gemini.* (comme l'ancien code)
+        this.workerUrl = config.api?.gemini?.workerUrl || 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini';
+        this.model = config.api?.gemini?.model || 'gemini-2.5-flash';
+        this.apiKey = null; // ✅ La clé est gérée côté Worker, pas côté client
         
         this.conversationHistory = [];
         this.maxHistoryLength = 10;
         
-        // ✅ CORRECTION : Initialiser le system prompt directement
+        // ✅ Initialiser le system prompt directement
         this.systemPrompt = this.buildAlphaVaultSystemPrompt();
         
-        console.log('🤖 Gemini AI initialized (v3.6 - HTML Fixed + Few-Shot Enhanced)');
+        console.log('🤖 Gemini AI initialized (v5.1 - AlphaVault + Worker Proxy)');
         console.log('📡 Model:', this.model);
-        console.log('📡 Worker URL:', this.workerProxyUrl);
+        console.log('📡 Worker URL:', this.workerUrl);
     }
 
     // ============================================
@@ -1025,17 +1025,17 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
     }
 
     // ============================================
-    // 🤖 GÉNÉRATION DE RÉPONSE
+    // 🤖 GÉNÉRATION DE RÉPONSE (WORKER PROXY)
     // ============================================
     
     async generateResponse(userMessage, context = {}) {
         try {
             console.log('🤖 Gemini AI generating response (AlphaVault mode)...');
             
-            if (!this.apiKey) {
-                console.error('❌ Gemini API key not configured');
+            if (!this.workerUrl) {
+                console.error('❌ Gemini Worker URL not configured');
                 return {
-                    text: '⚠ **AI Configuration Error:** Gemini API key is missing. Please configure your API key in the chatbot settings.',
+                    text: '⚠ **AI Configuration Error:** Gemini Worker URL is missing.\n\nPlease check `chatbot-config.js` and verify that `api.gemini.workerUrl` is properly configured.',
                     error: true
                 };
             }
@@ -1043,6 +1043,7 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
             const enrichedPrompt = this.buildEnrichedPrompt(userMessage, context);
             
             const requestBody = {
+                model: this.model,
                 contents: [
                     {
                         role: 'user',
@@ -1059,13 +1060,13 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
                     }
                 ],
                 generationConfig: {
-                    temperature: 0.85,
-                    topK: 40,
-                    topP: 0.95,
-                    maxOutputTokens: 8192,
+                    temperature: this.config.api?.gemini?.temperature || 0.85,
+                    topK: this.config.api?.gemini?.topK || 40,
+                    topP: this.config.api?.gemini?.topP || 0.95,
+                    maxOutputTokens: this.config.api?.gemini?.maxOutputTokens || 8192,
                     stopSequences: []
                 },
-                safetySettings: [
+                safetySettings: this.config.api?.gemini?.safetySettings || [
                     {
                         category: 'HARM_CATEGORY_HARASSMENT',
                         threshold: 'BLOCK_MEDIUM_AND_ABOVE'
@@ -1085,9 +1086,10 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
                 ]
             };
 
-            const url = `${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`;
+            // ✅ ADAPTATION: Appel au Worker (comme l'ancien code, sans header X-API-Key)
+            console.log('📡 Calling Gemini via Worker:', this.workerUrl);
             
-            const response = await fetch(url, {
+            const response = await fetch(this.workerUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1097,8 +1099,8 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Gemini API error:', errorData);
-                throw new Error(`Gemini API error: ${response.status}`);
+                console.error('❌ Gemini Worker error:', errorData);
+                throw new Error(`Worker Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
             }
 
             const data = await response.json();
@@ -1125,7 +1127,7 @@ Always be helpful, insightful, and data-driven. Use emojis sparingly for emphasi
             console.error('❌ Gemini AI generation error:', error);
             
             return {
-                text: `⚠ **AI Error:** ${error.message}\n\nI'm having trouble connecting to the AI service. Please try again in a moment.`,
+                text: `⚠ **AI Error:** ${error.message}\n\nI'm having trouble connecting to the AI service. Please check:\n1. The Worker URL is accessible (${this.workerUrl})\n2. The Gemini API key is configured in the Worker\n3. Your internet connection`,
                 error: true
             };
         }
@@ -1270,6 +1272,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.GeminiAI = GeminiAI;
 
-console.log('✅ GeminiAI v5.0 - ALPHAVAULT COMPLIANT loaded successfully!');
+console.log('✅ GeminiAI v5.1 - ALPHAVAULT COMPLIANT loaded successfully!');
 console.log('🤖 AI trained to discuss AlphaVault proprietary scores only');
 console.log('🔒 Legal compliance: No raw API data mentioned in responses');
+console.log('📡 Configuration: Using config.api.gemini.* structure');
