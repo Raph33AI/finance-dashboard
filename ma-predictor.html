@@ -16,37 +16,18 @@
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/ma-predictor.css'>
     
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -56,7 +37,6 @@
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
-    <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
 </head>
 <body>
@@ -66,9 +46,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- ========================================
-             SIDEBAR
-             ======================================== -->
+        <!-- SIDEBAR (identique à votre code original) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -258,7 +236,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -277,7 +254,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
@@ -344,9 +320,7 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
-        <!-- ========================================
-             MAIN CONTENT
-             ======================================== -->
+        <!-- MAIN CONTENT -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
@@ -354,7 +328,7 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class='page-title'>
-                        </i> M&A Screening
+                        <i class='fas fa-handshake'></i> M&A Screening
                     </h1>
                 </div>
                 <div class='header-right'>
@@ -366,119 +340,188 @@
             </header>
             
             <div class='container'>
-        
-        <!-- ========================================
-             DATA FILTERS SECTION
-             ======================================== -->
-        <div class='section ma-filters-section'>
-            <h2 class='section-title'>
-                <i class='fas fa-filter'></i> Data Filters
-                <button class='help-icon' onclick='maPredictor.openModal("filtersInfo")'>
-                    <i class='fas fa-question-circle'></i>
-                </button>
-            </h2>
-            
-            <div class='filters-grid'>
-                <div class='filter-group'>
-                    <label class='filter-label'>
-                        <i class='fas fa-calendar'></i> Time Period
-                    </label>
-                    <select id='time-period-filter' class='filter-select'>
-                        <option value='7'>Last Week</option>
-                        <option value='30' selected>Last Month</option>
-                        <option value='90'>Last 3 Months</option>
-                        <option value='180'>Last 6 Months</option>
-                        <option value='365'>Last Year</option>
-                    </select>
+                
+                <!-- ✅ PANNEAU DE CONFIGURATION (NOUVEAU) -->
+                <div class='data-loader-panel' id='dataLoaderPanel'>
+                    <div class='loader-panel-content'>
+                        <div class='loader-panel-header'>
+                            <div class='loader-icon'>
+                                <i class='fas fa-handshake'></i>
+                            </div>
+                            <h2 class='loader-title gradient-title'>Configure M&A Analysis</h2>
+                            <p class='loader-subtitle'>Select analysis parameters before loading M&A data from SEC EDGAR</p>
+                        </div>
+                        
+                        <div class='loader-panel-body'>
+                            <div class='loader-config-grid'>
+                                <!-- Time Period -->
+                                <div class='loader-config-group'>
+                                    <label class='loader-label'>
+                                        <i class='fas fa-calendar-alt'></i>
+                                        Time Period
+                                    </label>
+                                    <select id='configPeriodSelect' class='loader-select'>
+                                        <option value='7'>Last Week</option>
+                                        <option value='30' selected>Last Month</option>
+                                        <option value='90'>Last 3 Months</option>
+                                        <option value='180'>Last 6 Months</option>
+                                        <option value='365'>Last Year</option>
+                                    </select>
+                                    <small class='loader-hint'>
+                                        <i class='fas fa-info-circle'></i>
+                                        Filter M&A filings by date
+                                    </small>
+                                </div>
+                                
+                                <!-- Filing Count -->
+                                <div class='loader-config-group'>
+                                    <label class='loader-label'>
+                                        <i class='fas fa-file-alt'></i>
+                                        Max Filings
+                                    </label>
+                                    <select id='configFilingsSelect' class='loader-select'>
+                                        <option value='100'>100 filings</option>
+                                        <option value='250' selected>250 filings</option>
+                                        <option value='500'>500 filings</option>
+                                        <option value='1000'>1,000 filings</option>
+                                        <option value='2000'>2,000 filings</option>
+                                    </select>
+                                    <small class='loader-hint'>
+                                        <i class='fas fa-info-circle'></i>
+                                        Maximum S-4 + 8-K filings to analyze
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Preview Info -->
+                            <div class='loader-preview'>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-database'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Data Source</span>
+                                        <span class='loader-preview-value'>SEC EDGAR (S-4 Mergers + 8-K Events)</span>
+                                    </div>
+                                </div>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-shield-alt'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Analysis Type</span>
+                                        <span class='loader-preview-value'>AI-Powered Probability Scoring (6+ Factors)</span>
+                                    </div>
+                                </div>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-clock'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Estimated Load Time</span>
+                                        <span class='loader-preview-value' id='estimatedTime'>~5-10 seconds</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Analyze Button -->
+                            <button class='loader-analyze-btn' id='configAnalyzeBtn'>
+                                <i class='fas fa-chart-bar'></i>
+                                <span>Analyze M&A Deals</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class='filter-group'>
-                    <label class='filter-label'>
-                        <i class='fas fa-file-alt'></i> Max Filings
-                    </label>
-                    <select id='max-filings-filter' class='filter-select'>
-                        <option value='100'>100 filings</option>
-                        <option value='250' selected>250 filings</option>
-                        <option value='500'>500 filings</option>
-                        <option value='1000'>1,000 filings</option>
-                        <option value='2000'>2,000 filings</option>
-                    </select>
+                <!-- ✅ DASHBOARD (CACHÉ PAR DÉFAUT) -->
+                <div class='dashboard-content' id='dashboardContent' style='display: none;'>
+                    
+                    <!-- Dataset Info Bar -->
+                    <div class='dataset-info-bar' id='datasetInfoBar'>
+                        <div class='dataset-info-item'>
+                            <i class='fas fa-database'></i>
+                            <span id='datasetInfo'>No data loaded</span>
+                        </div>
+                        <button class='dataset-reconfigure-btn' id='reconfigureBtn'>
+                            <i class='fas fa-cog'></i>
+                            <span>Reconfigure</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Toolbar -->
+                    <div class='dashboard-toolbar'>
+                        <div class='toolbar-left'>
+                            <span class='dashboard-subtitle'>
+                                <i class='fas fa-database'></i>
+                                Real-time M&A detection • AI-powered probability scoring • SEC EDGAR filings
+                            </span>
+                        </div>
+                        <div class='toolbar-right'>
+                            <button class='dashboard-btn-sm' id='refreshData'>
+                                <i class='fas fa-sync-alt'></i>
+                                <span>Refresh</span>
+                            </button>
+                            <button class='dashboard-btn-sm' onclick='maPredictor.openModal("filtersInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                                <span>Help</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ALPHY AI RECOMMENDATIONS -->
+                    <div id='ai-recommendations-section' class='section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-brain'></i> Alphy AI Top M&A Recommendations
+                        </h2>
+                        
+                        <div id='recommendations-container' class='recommendations-grid'>
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- RECENT M&A DEALS TABLE -->
+                    <div id='ma-deals-section' class='section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-handshake'></i> Recent M&A Deals
+                            <span class='count-badge' id='deals-count-badge'>0</span>
+                        </h2>
+                        
+                        <div class='table-container'>
+                            <table class='ma-table'>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Company (CIK)</th>
+                                        <th>Form Type</th>
+                                        <th>Description</th>
+                                        <th>AI Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id='ma-deals-tbody'>
+                                    <!-- Rempli dynamiquement -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div class='pagination-controls' id='pagination-controls'>
+                            <button id='btn-prev-page' class='pagination-btn' disabled>
+                                <i class='fas fa-chevron-left'></i> Previous
+                            </button>
+                            <span id='pagination-info' class='pagination-info'>Page 1 of 1</span>
+                            <button id='btn-next-page' class='pagination-btn' disabled>
+                                Next <i class='fas fa-chevron-right'></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <footer style='text-align: center; padding: 40px 20px; opacity: 0.7;'>
+                        <p>
+                            <i class='fas fa-shield-alt'></i> M&A Predictor powered by SEC EDGAR real-time data
+                        </p>
+                    </footer>
                 </div>
-                
-                <div class='filter-group' style='justify-content: flex-end;'>
-                    <button id='btn-load-data' class='btn-bulk-load'>
-                        <i class='fas fa-cloud-download-alt'></i>
-                        Load M&A Data
-                    </button>
-                </div>
             </div>
         </div>
-
-        <!-- ========================================
-             ALPHY AI RECOMMENDATIONS
-             ======================================== -->
-        <div id='ai-recommendations-section' class='section' style='display: none;'>
-            <h2 class='section-title'>
-                </i> Alphy AI Top M&A Recommendations
-            </h2>
-            
-            <div id='recommendations-container' class='recommendations-grid'>
-                <!-- Rempli dynamiquement par JavaScript -->
-            </div>
-        </div>
-
-        <!-- ========================================
-             RECENT M&A DEALS TABLE
-             ======================================== -->
-        <div id='ma-deals-section' class='section' style='display: none;'>
-            <h2 class='section-title'>
-                <i class='fas fa-handshake'></i> Recent M&A Deals
-                <span class='count-badge' id='deals-count-badge'>0</span>
-            </h2>
-            
-            <div class='table-container'>
-                <table class='ma-table'>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Company (CIK)</th>
-                            <th>Form Type</th>
-                            <th>Description</th>
-                            <th>AI Score</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id='ma-deals-tbody'>
-                        <!-- Rempli dynamiquement par JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination Controls -->
-            <div class='pagination-controls' id='pagination-controls'>
-                <button id='btn-prev-page' class='pagination-btn' disabled>
-                    <i class='fas fa-chevron-left'></i> Previous
-                </button>
-                <span id='pagination-info' class='pagination-info'>Page 1 of 1</span>
-                <button id='btn-next-page' class='pagination-btn' disabled>
-                    Next <i class='fas fa-chevron-right'></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ========================================
-             FOOTER
-             ======================================== -->
-        <footer style='text-align: center; padding: 40px 20px; opacity: 0.7;'>
-            <p>
-                </i> M&A Predictor powered by SEC EDGAR real-time data
-            </p>
-        </footer>
     </div>
 
-    <!-- ========================================
-         MODALS
-         ======================================== -->
+    <!-- MODALS -->
     
     <!-- Filters Info Modal -->
     <div id='filtersInfo' class='modal' style='display: none;'>
@@ -492,7 +535,7 @@
                 <ol>
                     <li>Select your desired <strong>Time Period</strong> (1 week to 1 year)</li>
                     <li>Choose the <strong>Max Filings</strong> to analyze (100 to 2,000)</li>
-                    <li>Click <strong>"Load M&A Data"</strong> to retrieve SEC filings</li>
+                    <li>Click <strong>"Analyze M&A Deals"</strong> to retrieve SEC filings</li>
                     <li>Review <strong>Alphy AI Recommendations</strong> for top merger candidates</li>
                     <li>Click <strong>"View"</strong> on any deal to see the full parsed document</li>
                 </ol>
@@ -531,29 +574,14 @@
                 <button class='modal-close' onclick='maPredictor.closeDealModal()'>&times;</button>
             </div>
             <div class='modal-body' id='modal-deal-body'>
-                <!-- Contenu parsé du document SEC (rempli dynamiquement) -->
+                <!-- Contenu parsé du document SEC -->
             </div>
         </div>
     </div>
 
-    <!-- Progress Modal -->
-    <div id='progressModal' class='progress-modal' style='display: none;'>
-        <div class='progress-modal-content'>
-            <h3>
-                <i class='fas fa-spinner fa-spin'></i> Loading M&A Data...
-            </h3>
-            <div class='progress-bar-container'>
-                <div id='progress-bar' class='progress-bar' style='width: 0%;'></div>
-            </div>
-            <p id='bulk-progress-text'>Initializing...</p>
-        </div>
-    </div>
-
-    <!-- ========================================
-         SCRIPTS (ORDER IS CRITICAL)
-         ======================================== -->
+    <!-- SCRIPTS -->
     
-    <!-- SEC Parsers (si nécessaires) -->
+    <!-- SEC Parsers -->
     <script src="assets/js/form-4-parser.js"></script>
     <script src="assets/js/form-s4-parser.js"></script>
     <script src="assets/js/form-8k-parser.js"></script>
@@ -579,9 +607,7 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ========================================
-         USER MENU INITIALIZATION
-         ======================================== -->
+    <!-- User Menu Init -->
     <script>
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
@@ -590,10 +616,7 @@
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
                 
-                if (!trigger || !dropdown) {
-                    console.error('❌ User menu elements not found');
-                    return;
-                }
+                if (!trigger || !dropdown) return;
                 
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
@@ -601,28 +624,16 @@
                 const freshTrigger = document.getElementById('sidebarUserTrigger');
                 const freshDropdown = document.getElementById('sidebarUserDropdown');
                 
-                console.log('✅ Adding click event to trigger...');
-                
                 freshTrigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('👆 User menu trigger clicked!');
-                    
                     const isActive = freshDropdown.classList.contains('active');
-                    
-                    if (isActive) {
-                        freshDropdown.classList.remove('active');
-                        console.log('🔽 Closing dropdown');
-                    } else {
-                        freshDropdown.classList.add('active');
-                        console.log('🔼 Opening dropdown');
-                    }
+                    freshDropdown.classList.toggle('active');
                     
                     const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
                     if (arrow) {
                         arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
-                        arrow.style.transition = 'transform 0.3s ease';
                     }
                 });
                 
@@ -630,17 +641,11 @@
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
                         const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                        if (arrow) {
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
                     }
                 });
                 
-                freshDropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-                
-                console.log('✅ User menu initialized successfully!');
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
             };
             
             if (document.readyState === 'loading') {
@@ -651,14 +656,12 @@
         })();
     </script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
+    <!-- Chatbot Init -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
             
             if (accessDenied) {
@@ -666,69 +669,33 @@
                 return;
             }
             
-            // Vérifier que ChatbotConfig est chargé
             if (typeof ChatbotConfig === 'undefined') {
                 console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
                 return;
             }
             
             console.log('✅ ChatbotConfig chargé');
             
-            // Vérifier que ChatbotUI est disponible
             if (typeof ChatbotUI === 'undefined') {
                 console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
                 return;
             }
             
             console.log('✅ ChatbotUI chargé');
             
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
                 console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
     });
     </script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            console.log('🔍 BACKGROUND DIAGNOSIS:');
-            
-            const elements = [
-                'body',
-                '.layout-wrapper',
-                '.main-content',
-                '.container',
-                '.section'
-            ];
-            
-            elements.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    const bg = window.getComputedStyle(el).background;
-                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
-                }
-            });
-            
-            console.log('---');
-            console.log('🎨 Canvas background:', 
-                window.getComputedStyle(document.getElementById('particles-canvas')).background);
-        }, 1000);
-    });
-    </script>
-
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
+    <!-- Admin Visibility -->
     <script src="assets/js/admin-visibility.js"></script>
 </body>
 </html>
