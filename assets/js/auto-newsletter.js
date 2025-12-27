@@ -134,7 +134,7 @@ class AutoNewsletterSystem {
                 tags: ['newsletter', 'weekly-recap', 'market-intelligence', 'premium', ...this.extractTopTags(topNews)],
                 images: this.extractTopImages(topNews),
                 authorId: currentUser.uid,
-                authorName: 'AlphaVault AI',
+                authorName: 'Raphaël Nardone',
                 authorPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=AlphaVault+AI&background=667eea&color=fff&bold=true',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 views: 0,

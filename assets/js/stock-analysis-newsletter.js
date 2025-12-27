@@ -106,14 +106,21 @@ class StockAnalysisNewsletter {
 
             const postContent = this.generatePremiumContent(symbol);
 
+            // ✅ Génération de la date au format lisible
+            const analysisDate = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+
             const postData = {
-                title: `Deep Analysis: ${symbol} - AlphaVault Intelligence Report`,
+                title: `Deep Analysis: ${symbol} - ${analysisDate} - AlphaVault Intelligence Report`,
                 content: postContent.markdown,
                 channelId: 'market-analysis',
                 tags: ['stock-analysis', 'technical-indicators', 'ai-recommendation', symbol.toLowerCase()],
                 images: [],
                 authorId: currentUser.uid,
-                authorName: 'AlphaVault AI',
+                authorName: 'Raphaël Nardone',
                 authorPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=AlphaVault+AI&background=667eea&color=fff&bold=true',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 views: 0,
