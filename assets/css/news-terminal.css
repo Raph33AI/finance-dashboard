@@ -855,3 +855,32 @@ select,
         font-size: 1rem;
     }
 }
+
+/* ✅ BADGES ENTREPRISES & PAYS */
+.company-badge {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.company-badge:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    border-color: rgba(59, 130, 246, 0.6);
+    transform: translateY(-2px) scale(1.05);
+}
+
+.country-badge {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.country-badge:hover {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    border-color: rgba(16, 185, 129, 0.6);
+    transform: translateY(-2px) scale(1.05);
+}
+
+.ticker-badge i {
+    margin-right: 6px;
+    font-size: 0.85em;
+    opacity: 0.9;
+}
