@@ -23,37 +23,18 @@
     <link rel='stylesheet' href='assets/css/economic-pages.css'>
     <link rel='stylesheet' href='assets/css/insider-flow-tracker.css'>
     
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 
     <!-- Firebase SDK -->
@@ -68,7 +49,6 @@
     <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
-    <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
 </head>
 <body>
@@ -80,25 +60,8 @@
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
-    <!-- ✅ VERSION ULTRA-SIMPLE GARANTIE -->
-    <div id="loadingState" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.98); z-index: 999999;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-            <div style="width: 80px; height: 80px; margin: 0 auto 20px;">
-                <i class="fas fa-circle-notch" style="font-size: 80px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: spin 1s linear infinite;"></i>
-            </div>
-            <p id="loadingMessage" style="color: #64748b; font-size: 1rem;">Analyzing...</p>
-        </div>
-    </div>
-
-    <style>
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    </style>
-
     <div class='layout-wrapper'>
-        <!-- Sidebar -->
+        <!-- Sidebar (identique à votre code original) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -290,7 +253,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -309,7 +271,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
@@ -387,7 +348,7 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1 class='page-title'></i> Insider Flow Tracker</h1>
+                    <h1 class='page-title'><i class='fas fa-user-secret'></i> Insider Flow Tracker</h1>
                 </div>
                 <div class='header-right'>
                     <button class='dashboard-btn' id='refreshBtn' title='Refresh Analysis'>
@@ -399,185 +360,267 @@
             
             <div class='container'>
                 
-                <!-- Search Bar + Options -->
-                <div class="section">
-                    <div class='dashboard-toolbar' style="margin-bottom: 24px;">
+                <!-- ✅ PANNEAU DE CONFIGURATION (NOUVEAU) -->
+                <div class='data-loader-panel' id='dataLoaderPanel'>
+                    <div class='loader-panel-content'>
+                        <div class='loader-panel-header'>
+                            <div class='loader-icon'>
+                                <i class='fas fa-sliders-h'></i>
+                            </div>
+                            <h2 class='loader-title gradient-title'>Configure Insider Analysis</h2>
+                            <p class='loader-subtitle'>Select analysis parameters before loading insider trading data from SEC EDGAR</p>
+                        </div>
+                        
+                        <div class='loader-panel-body'>
+                            <!-- Ticker Input -->
+                            <div class='loader-config-group'>
+                                <label class='loader-label'>
+                                    <i class='fas fa-tag'></i>
+                                    Company Ticker
+                                </label>
+                                <input 
+                                    type='text' 
+                                    id='configTickerInput' 
+                                    class='loader-input' 
+                                    placeholder='Enter ticker (e.g., AAPL, TSLA, NVDA...)' 
+                                    style='text-transform: uppercase;'
+                                />
+                                <small class='loader-hint'>
+                                    <i class='fas fa-info-circle'></i>
+                                    Enter the stock ticker symbol you want to analyze
+                                </small>
+                            </div>
+                            
+                            <div class='loader-config-grid'>
+                                <!-- Time Period -->
+                                <div class='loader-config-group'>
+                                    <label class='loader-label'>
+                                        <i class='fas fa-calendar-alt'></i>
+                                        Time Period
+                                    </label>
+                                    <select id='configPeriodSelect' class='loader-select'>
+                                        <option value='0.25'>Last week</option>
+                                        <option value='1'>Last month</option>
+                                        <option value='3'>Last 3 months</option>
+                                        <option value='6'>Last 6 months</option>
+                                        <option value='12' selected>1 year</option>
+                                        <option value='24'>2 years</option>
+                                    </select>
+                                    <small class='loader-hint'>
+                                        <i class='fas fa-info-circle'></i>
+                                        Historical period for insider activity
+                                    </small>
+                                </div>
+                                
+                                <!-- Filing Count -->
+                                <div class='loader-config-group'>
+                                    <label class='loader-label'>
+                                        <i class='fas fa-file-alt'></i>
+                                        Number of Filings
+                                    </label>
+                                    <select id='configFilingsSelect' class='loader-select'>
+                                        <option value='25'>25 filings</option>
+                                        <option value='50'>50 filings</option>
+                                        <option value='100' selected>100 filings</option>
+                                        <option value='200'>200 filings</option>
+                                        <option value='500'>500 filings (max)</option>
+                                    </select>
+                                    <small class='loader-hint'>
+                                        <i class='fas fa-info-circle'></i>
+                                        Maximum Form 4 filings to analyze
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Preview Info -->
+                            <div class='loader-preview'>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-database'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Data Source</span>
+                                        <span class='loader-preview-value'>SEC EDGAR (Form 4 - Insider Transactions)</span>
+                                    </div>
+                                </div>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-shield-alt'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Analysis Type</span>
+                                        <span class='loader-preview-value'>Advanced Pattern Detection + AI Insights</span>
+                                    </div>
+                                </div>
+                                <div class='loader-preview-item'>
+                                    <i class='fas fa-clock'></i>
+                                    <div class='loader-preview-content'>
+                                        <span class='loader-preview-label'>Estimated Load Time</span>
+                                        <span class='loader-preview-value' id='estimatedTime'>~3-5 seconds</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Analyze Button -->
+                            <button class='loader-analyze-btn' id='configAnalyzeBtn'>
+                                <i class='fas fa-chart-bar'></i>
+                                <span>Analyze Insider Activity</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ✅ DASHBOARD (CACHÉ PAR DÉFAUT) -->
+                <div class='dashboard-content' id='dashboardContent' style='display: none;'>
+                    
+                    <!-- Dataset Info Bar -->
+                    <div class='dataset-info-bar' id='datasetInfoBar'>
+                        <div class='dataset-info-item'>
+                            <i class='fas fa-database'></i>
+                            <span id='datasetInfo'>No data loaded</span>
+                        </div>
+                        <button class='dataset-reconfigure-btn' id='reconfigureBtn'>
+                            <i class='fas fa-cog'></i>
+                            <span>Reconfigure</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Toolbar -->
+                    <div class='dashboard-toolbar'>
                         <div class='toolbar-left'>
                             <span class='dashboard-subtitle'>
                                 <i class='fas fa-database'></i>
                                 Real-time insider trading detection • Advanced pattern analysis • AI-powered recommendations
                             </span>
                         </div>
-                    </div>
-
-                    <div class="search-container">
-                        <div class="search-box">
-                            <i class="fas fa-search" style="color: var(--text-tertiary); font-size: 1.2rem;"></i>
-                            <input 
-                                type="text" 
-                                id="tickerInput" 
-                                placeholder="Enter a ticker (e.g., AAPL, TSLA, NVDA...)"
-                                autocomplete="off"
-                            >
-                            <button class="search-btn" id="analyzeBtn">
-                                <i class="fas fa-chart-bar"></i> Analyze
+                        <div class='toolbar-right'>
+                            <button class='dashboard-btn-sm' id='refreshData'>
+                                <i class='fas fa-sync-alt'></i>
+                                <span>Refresh</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Results Container -->
+                    <div id="resultsContainer">
                         
-                        <div class="search-options">
-                            <div class="option-group">
-                                <label for="periodSelect">
-                                    <i class="fas fa-calendar-alt"></i> Period
-                                </label>
-                                <select id="periodSelect">
-                                    <option value="0.25">Last week</option>
-                                    <option value="1">Last month</option>
-                                    <option value="3">Last 3 months</option>
-                                    <option value="6">Last 6 months</option>
-                                    <option value="12" selected>1 year</option>
-                                    <option value="24">2 years</option>
-                                </select>
+                        <!-- 🤖 ALPHY AI RECOMMENDATION -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-brain"></i> Alphy AI Recommendation
+                            </h2>
+                            <div id="alphyRecommendationPanel" class="alphy-panel"></div>
+                        </div>
+
+                        <!-- Score Cards -->
+                        <div class="score-container" id="scoreContainer"></div>
+
+                        <!-- Alerts -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-bell"></i> Smart Alerts
+                            </h2>
+                            <div class="alerts-grid" id="alertsContainer"></div>
+                        </div>
+
+                        <!-- Advanced Pattern Analysis -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-brain"></i> Advanced Pattern Analysis
+                            </h2>
+                            <div class="pattern-grid" id="patternContainer"></div>
+                        </div>
+
+                        <!-- Whale Insider Tracker -->
+                        <div class="section" id="whaleSection">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-water"></i> Whale Insider Tracker
+                            </h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                                <i class="fas fa-info-circle"></i> Top insiders ranked by total trading volume
+                            </p>
+                            <div class="whale-grid" id="whaleContainer"></div>
+                        </div>
+
+                        <!-- Cluster Buying -->
+                        <div class="section" id="clusterSection">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-users"></i> Cluster Buying Detected
+                            </h2>
+                            <div class="cluster-grid" id="clusterContainer"></div>
+                        </div>
+
+                        <!-- Role Analysis -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-user-tie"></i> Analysis by Role
+                            </h2>
+                            <div class="chart-wrapper">
+                                <canvas id="roleChart"></canvas>
                             </div>
-                            
-                            <div class="option-group">
-                                <label for="filingsSelect">
-                                    <i class="fas fa-file-alt"></i> Number of filings
-                                </label>
-                                <select id="filingsSelect">
-                                    <option value="25">25 filings</option>
-                                    <option value="50">50 filings</option>
-                                    <option value="100" selected>100 filings</option>
-                                    <option value="200">200 filings</option>
-                                    <option value="500">500 filings</option>
-                                </select>
+                        </div>
+
+                        <!-- Temporal Heatmap -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-fire"></i> Temporal Activity Heatmap
+                            </h2>
+                            <div class="chart-wrapper">
+                                <canvas id="heatmapChart"></canvas>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Results Container -->
-                <div id="resultsContainer" class="hidden">
-                    
-                    <!-- 🤖 ALPHY AI RECOMMENDATION -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-brain"></i> Alphy AI Recommendation
-                        </h2>
-                        <div id="alphyRecommendationPanel" class="alphy-panel"></div>
-                    </div>
+                        <!-- NETWORK ANALYSIS -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-project-diagram"></i> Network Analysis
+                            </h2>
+                            <div class="network-controls">
+                                <button class="network-btn" id="showFirstDegree">
+                                    <i class="fas fa-circle"></i> 1st Degree
+                                </button>
+                                <button class="network-btn" id="showSecondDegree">
+                                    <i class="fas fa-dot-circle"></i> 2nd Degree
+                                </button>
+                                <button class="network-btn" id="showAllNodes">
+                                    <i class="fas fa-globe"></i> All Nodes
+                                </button>
+                            </div>
+                            <div id="networkGraph" class="network-graph-container"></div>
+                            <div id="networkStats" class="network-stats"></div>
+                        </div>
 
-                    <!-- Score Cards -->
-                    <div class="score-container" id="scoreContainer"></div>
-
-                    <!-- Alerts -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-bell"></i> Smart Alerts
-                        </h2>
-                        <div class="alerts-grid" id="alertsContainer"></div>
-                    </div>
-
-                    <!-- Advanced Pattern Analysis -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-brain"></i> Advanced Pattern Analysis
-                        </h2>
-                        <div class="pattern-grid" id="patternContainer"></div>
-                    </div>
-
-                    <!-- Whale Insider Tracker -->
-                    <div class="section" id="whaleSection">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-water"></i> Whale Insider Tracker
-                        </h2>
-                        <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                            <i class="fas fa-info-circle"></i> Top insiders ranked by total trading volume
-                        </p>
-                        <div class="whale-grid" id="whaleContainer"></div>
-                    </div>
-
-                    <!-- Cluster Buying -->
-                    <div class="section" id="clusterSection">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-users"></i> Cluster Buying Detected
-                        </h2>
-                        <div class="cluster-grid" id="clusterContainer"></div>
-                    </div>
-
-                    <!-- Role Analysis -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-user-tie"></i> Analysis by Role
-                        </h2>
-                        <div class="chart-wrapper">
-                            <canvas id="roleChart"></canvas>
+                        <!-- Recent Transactions -->
+                        <div class="section">
+                            <h2 class='section-title gradient-title'>
+                                <i class="fas fa-list"></i> Recent Transactions
+                            </h2>
+                            <div class="table-container" id="transactionsTable"></div>
                         </div>
                     </div>
 
-                    <!-- Temporal Heatmap -->
-                    <div class="section">
+                    <!-- COMPARISON SECTION -->
+                    <div class="section" id="comparisonSection">
                         <h2 class='section-title gradient-title'>
-                            <i class="fas fa-fire"></i> Temporal Activity Heatmap
+                            <i class="fas fa-exchange-alt"></i> Compare Companies
                         </h2>
-                        <div class="chart-wrapper">
-                            <canvas id="heatmapChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- NETWORK ANALYSIS -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-project-diagram"></i> Network Analysis
-                        </h2>
-                        <div class="network-controls">
-                            <button class="network-btn" id="showFirstDegree">
-                                <i class="fas fa-circle"></i> 1st Degree
-                            </button>
-                            <button class="network-btn" id="showSecondDegree">
-                                <i class="fas fa-dot-circle"></i> 2nd Degree
-                            </button>
-                            <button class="network-btn" id="showAllNodes">
-                                <i class="fas fa-globe"></i> All Nodes
+                        <div class="comparison-search">
+                            <input type="text" id="comparisonTickerInput" placeholder="Add tickers (e.g., AAPL, TSLA, MSFT...)" />
+                            <button class="primary-btn" id="addComparisonBtn">
+                                <i class="fas fa-plus"></i> Add
                             </button>
                         </div>
-                        <div id="networkGraph" class="network-graph-container"></div>
-                        <div id="networkStats" class="network-stats"></div>
-                    </div>
-
-                    <!-- Recent Transactions -->
-                    <div class="section">
-                        <h2 class='section-title gradient-title'>
-                            <i class="fas fa-list"></i> Recent Transactions
-                        </h2>
-                        <div class="table-container" id="transactionsTable"></div>
-                    </div>
-                </div>
-
-                <!-- COMPARISON SECTION -->
-                <div class="section" id="comparisonSection">
-                    <h2 class='section-title gradient-title'>
-                        <i class="fas fa-exchange-alt"></i> Compare Companies
-                    </h2>
-                    <div class="comparison-search">
-                        <input type="text" id="comparisonTickerInput" placeholder="Add tickers (e.g., AAPL, TSLA, MSFT...)" />
-                        <button class="primary-btn" id="addComparisonBtn">
-                            <i class="fas fa-plus"></i> Add
+                        <div class="comparison-tags" id="comparisonTags">
+                            <p style="text-align: center; color: var(--text-tertiary); width: 100%;">No tickers added yet</p>
+                        </div>
+                        <button class="primary-btn" id="runComparisonBtn" style="width: 100%; margin-top: 20px;">
+                            <i class="fas fa-chart-bar"></i> Run Comparison
                         </button>
+                        <div id="comparisonResults" class="hidden"></div>
                     </div>
-                    <div class="comparison-tags" id="comparisonTags">
-                        <p style="text-align: center; color: var(--text-tertiary); width: 100%;">No tickers added yet</p>
-                    </div>
-                    <button class="primary-btn" id="runComparisonBtn" style="width: 100%; margin-top: 20px;">
-                        <i class="fas fa-chart-bar"></i> Run Comparison
-                    </button>
-                    <div id="comparisonResults" class="hidden"></div>
-                </div>
 
-                <footer>
-                    <p>
-                        <i class='fas fa-shield-alt'></i> Insider Flow Tracker - Data from SEC EDGAR (U.S. Securities and Exchange Commission)
-                    </p>
-                </footer>
+                    <footer>
+                        <p>
+                            <i class='fas fa-shield-alt'></i> Insider Flow Tracker - Data from SEC EDGAR (U.S. Securities and Exchange Commission)
+                        </p>
+                    </footer>
+                </div>
             </div>
         </div>
     </div>
@@ -652,14 +695,12 @@
         })();
     </script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
+    <!-- Chatbot Init -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
             
             if (accessDenied) {
@@ -667,69 +708,33 @@
                 return;
             }
             
-            // Vérifier que ChatbotConfig est chargé
             if (typeof ChatbotConfig === 'undefined') {
                 console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
                 return;
             }
             
             console.log('✅ ChatbotConfig chargé');
             
-            // Vérifier que ChatbotUI est disponible
             if (typeof ChatbotUI === 'undefined') {
                 console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
                 return;
             }
             
             console.log('✅ ChatbotUI chargé');
             
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
                 console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
     });
     </script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            console.log('🔍 BACKGROUND DIAGNOSIS:');
-            
-            const elements = [
-                'body',
-                '.layout-wrapper',
-                '.main-content',
-                '.container',
-                '.section'
-            ];
-            
-            elements.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    const bg = window.getComputedStyle(el).background;
-                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
-                }
-            });
-            
-            console.log('---');
-            console.log('🎨 Canvas background:', 
-                window.getComputedStyle(document.getElementById('particles-canvas')).background);
-        }, 1000);
-    });
-    </script>
-
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
+    <!-- Admin Visibility -->
     <script src="assets/js/admin-visibility.js"></script>
 
 </body>
