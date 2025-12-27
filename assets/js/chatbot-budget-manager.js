@@ -694,7 +694,8 @@ Need help? Just ask: *"How do I create a budget?"*`,
         response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
         response += `• New Savings Rate: **${newSavingsRate.toFixed(1)}%** (↑${(newSavingsRate - analysis.avgSavingsRate).toFixed(1)}%)\n`;
         response += `• Additional Annual Savings: **€${(recommendations.totalPotential * 12).toLocaleString()}**\n`;
-        response += `• 5-Year Wealth Impact: **€${this.calculateWealth Impact(recommendations.totalPotential, 60, budgetData.monthlyEstYield).toLocaleString()}**\n\n`;
+        response += `• 5-Year Wealth Impact: **€${this.calculateWealthImpact(recommendations.totalPotential, 60, budgetData.monthlyEstYield).toLocaleString()}**\n\n`;
+        //                                                    ↑ Plus d'espace ici !
 
         response += `💬 Need help implementing? Ask: *"How do I ${recommendations.items[0].title.toLowerCase()}?"*`;
 
