@@ -1,5 +1,5 @@
 // ========================================
-// ADMIN VISIBILITY - AFFICHE LE MENU ADMIN UNIQUEMENT POUR L'ADMIN
+// ADMIN VISIBILITY - AFFICHE LES SECTIONS ADMIN UNIQUEMENT POUR L'ADMIN
 // ========================================
 
 // 🔐 EMAIL ADMIN AUTORISÉ (NE PAS MODIFIER SANS RAISON VALABLE)
@@ -8,7 +8,8 @@ const ADMIN_EMAIL = 'raphnardone@gmail.com';
 class AdminVisibility {
     constructor() {
         this.adminSection = null;
-        this.adminNewsletterSection = null; // ✅ NOUVEAU
+        this.adminNewsletterSection = null;
+        this.adminStockAnalysisSection = null; // ✅ NOUVEAU : Section Analyze Stock
         this.init();
     }
 
@@ -24,21 +25,26 @@ class AdminVisibility {
 
         // Récupérer les sections admin
         this.adminSection = document.getElementById('adminSection');
-        this.adminNewsletterSection = document.getElementById('adminNewsletterSection'); // ✅ NOUVEAU
+        this.adminNewsletterSection = document.getElementById('adminNewsletterSection');
+        this.adminStockAnalysisSection = document.getElementById('adminStockAnalysisSection'); // ✅ NOUVEAU
         
-        if (!this.adminSection && !this.adminNewsletterSection) {
+        if (!this.adminSection && !this.adminNewsletterSection && !this.adminStockAnalysisSection) {
             console.log('ℹ Aucune section admin trouvée sur cette page (normal pour certaines pages)');
             return;
         }
 
-        // S'assurer que les sections sont bien masquées au départ
+        // S'assurer que toutes les sections sont bien masquées au départ
         if (this.adminSection) {
             this.adminSection.style.display = 'none';
         }
         
-        // ✅ NOUVEAU : Masquer la section newsletter par défaut
         if (this.adminNewsletterSection) {
             this.adminNewsletterSection.style.display = 'none';
+        }
+        
+        // ✅ NOUVEAU : Masquer la section stock analysis par défaut
+        if (this.adminStockAnalysisSection) {
+            this.adminStockAnalysisSection.style.display = 'none';
         }
 
         // Écouter les changements d'authentification
@@ -50,7 +56,7 @@ class AdminVisibility {
     checkAdminAccess(user) {
         const isAdmin = user && user.email === ADMIN_EMAIL;
 
-        // ✅ GESTION DE LA SECTION ADMIN (SIDEBAR)
+        // ✅ GESTION DE LA SECTION ADMIN (SIDEBAR - Dashboard Analytics)
         if (this.adminSection) {
             if (isAdmin) {
                 this.adminSection.style.display = 'block';
@@ -66,17 +72,32 @@ class AdminVisibility {
             }
         }
 
-        // ✅ NOUVEAU : GESTION DE LA SECTION NEWSLETTER (COMMUNITY HUB)
+        // ✅ GESTION DE LA SECTION NEWSLETTER HEBDOMADAIRE (COMMUNITY HUB)
         if (this.adminNewsletterSection) {
             if (isAdmin) {
                 this.adminNewsletterSection.style.display = 'block';
-                console.log('✅ Newsletter Button visible pour:', user.email);
+                console.log('✅ Weekly Newsletter Button visible pour:', user.email);
             } else {
                 this.adminNewsletterSection.style.display = 'none';
                 if (user) {
-                    console.log('🔒 Newsletter Button masqué pour:', user.email, '(pas autorisé)');
+                    console.log('🔒 Weekly Newsletter Button masqué pour:', user.email, '(pas autorisé)');
                 } else {
-                    console.log('🔒 Newsletter Button masqué (utilisateur non connecté)');
+                    console.log('🔒 Weekly Newsletter Button masqué (utilisateur non connecté)');
+                }
+            }
+        }
+
+        // ✅ NOUVEAU : GESTION DE LA SECTION STOCK ANALYSIS (COMMUNITY HUB)
+        if (this.adminStockAnalysisSection) {
+            if (isAdmin) {
+                this.adminStockAnalysisSection.style.display = 'block';
+                console.log('✅ Stock Analysis Button visible pour:', user.email);
+            } else {
+                this.adminStockAnalysisSection.style.display = 'none';
+                if (user) {
+                    console.log('🔒 Stock Analysis Button masqué pour:', user.email, '(pas autorisé)');
+                } else {
+                    console.log('🔒 Stock Analysis Button masqué (utilisateur non connecté)');
                 }
             }
         }
