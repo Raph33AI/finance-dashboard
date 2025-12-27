@@ -1089,7 +1089,7 @@ class StockAnalysisNewsletter {
     }
 
     // ════════════════════════════════════════════════════════════════
-    // GÉNÉRATION DE LA SECTION TECHNICAL INDICATORS
+    // GÉNÉRATION DE LA SECTION TECHNICAL INDICATORS - CORRECTION DÉCIMALES
     // ════════════════════════════════════════════════════════════════
 
     generateTechnicalIndicatorsSection() {
@@ -1117,9 +1117,19 @@ class StockAnalysisNewsletter {
                 const signalColor = ind.signal > 0.5 ? '#10b981' : ind.signal < -0.5 ? '#ef4444' : '#f59e0b';
                 const signalLabel = ind.signal > 0.5 ? 'BULLISH' : ind.signal < -0.5 ? 'BEARISH' : 'NEUTRAL';
                 
+                // ✅ CORRECTION: Formatage des décimales à 2 chiffres maximum
                 let displayValue = ind.value;
-                if (typeof displayValue === 'string') {
-                    displayValue = displayValue.replace(/(\d+\.\d{3,})/g, (match) => parseFloat(match).toFixed(2));
+                
+                // Si c'est un nombre, limiter à 2 décimales
+                if (typeof displayValue === 'number') {
+                    displayValue = displayValue.toFixed(2);
+                } 
+                // Si c'est une string contenant des nombres, formatter tous les nombres à 2 décimales
+                else if (typeof displayValue === 'string') {
+                    // Remplacer tous les nombres avec 3 décimales ou plus par leur version à 2 décimales
+                    displayValue = displayValue.replace(/(-?\d+\.\d{3,})/g, (match) => {
+                        return parseFloat(match).toFixed(2);
+                    });
                 }
                 
                 md += `<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: ${i < indicators.length - 1 ? '12px 0' : '12px 0 0 0'}; border-bottom: ${i < indicators.length - 1 ? '1px solid rgba(6, 182, 212, 0.15)' : 'none'};">\n\n`;
