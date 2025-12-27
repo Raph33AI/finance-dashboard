@@ -2104,19 +2104,20 @@ class ChatbotAIEngine {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * INITIALIZE GEMINI API
+     * INITIALIZE (Must be called before use)
+     * ✅ CORRIGÉ POUR UTILISER GeminiAI
      * ═══════════════════════════════════════════════════════════
      */
     async initialize() {
-        if (typeof ChatbotGemini === 'undefined') {
-            console.error('❌ ChatbotGemini not loaded');
-            throw new Error('Gemini API client not available');
+        if (typeof GeminiAI === 'undefined') {
+            console.error('❌ GeminiAI not loaded');
+            throw new Error('GeminiAI class not available');
         }
 
-        this.geminiAPI = new ChatbotGemini(this.config.gemini);
-        await this.geminiAPI.initialize();
-        
-        console.log('✅ Gemini API initialized');
+        // ✅ UTILISE TA CLASSE GeminiAI (pas ChatbotGemini)
+        this.geminiAPI = new GeminiAI(this.config);
+
+        console.log('✅ ChatbotAIEngine initialized with GeminiAI');
     }
 
     /**
@@ -2615,6 +2616,7 @@ class ChatbotAIEngine {
     /**
      * ═══════════════════════════════════════════════════════════
      * HANDLE GENERAL QUERY (Gemini AI)
+     * ✅ CORRIGÉ POUR UTILISER generateResponse()
      * ═══════════════════════════════════════════════════════════
      */
     async handleGeneralQuery(userMessage, context) {
@@ -2630,24 +2632,18 @@ class ChatbotAIEngine {
             .map(msg => `${msg.role}: ${msg.content}`)
             .join('\n');
 
-        const enrichedPrompt = `You are Alphy AI, an expert financial assistant for AlphaVault AI platform.
+        const enrichedContext = {
+            conversationHistory: conversationContext || 'No previous context',
+            currentSymbols: this.currentContext.symbols.join(', ') || 'None',
+            timeframe: this.currentContext.timeframe,
+            metrics: this.currentContext.metrics.join(', ') || 'None'
+        };
 
-Context from previous conversation:
-${conversationContext || 'No previous context'}
-
-Current market data context:
-- Available symbols: ${this.currentContext.symbols.join(', ') || 'None'}
-- Timeframe: ${this.currentContext.timeframe}
-- Metrics: ${this.currentContext.metrics.join(', ') || 'None'}
-
-User question: ${userMessage}
-
-Please provide a professional, concise, and actionable response. If the user is asking about specific stocks or financial data, recommend they provide a ticker symbol for detailed analysis.`;
-
-        const response = await this.geminiAPI.sendMessage(enrichedPrompt);
+        // ✅ UTILISE generateResponse() au lieu de sendMessage()
+        const responseData = await this.geminiAPI.generateResponse(userMessage, enrichedContext);
 
         return {
-            text: response,
+            text: responseData.text || responseData,
             intent: 'GENERAL_FINANCE',
             entities: {},
             charts: []

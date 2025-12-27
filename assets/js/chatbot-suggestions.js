@@ -283,7 +283,7 @@
  * ═══════════════════════════════════════════════════════════════
  * CHATBOT SUGGESTIONS - Intelligent Contextual Suggestions
  * ═══════════════════════════════════════════════════════════════
- * Version: 3.0.0
+ * Version: 3.1.0 - CORRECTED (getInitialSuggestions + getContextualSuggestions)
  * Description: Suggestions contextuelles intelligentes adaptées à l'utilisateur
  * Features:
  *   - Suggestions par intent (IPO, Stock, Market, Budget, Forex)
@@ -302,71 +302,126 @@ class ChatbotSuggestions {
         
         this.suggestionsByIntent = {
             INITIAL: [
-                "📊 Analyze a stock (e.g., 'Analyze AAPL')",
-                "📈 Show me recent IPOs",
-                "💱 Check forex rates (e.g., 'EUR/USD analysis')",
-                "📋 Help me with my budget",
-                "🔍 Show insider trading activity"
+                "Analyze a stock (e.g., 'Analyze AAPL')",
+                "Show me recent IPOs",
+                "Check forex rates (e.g., 'EUR/USD analysis')",
+                "Help me with my budget",
+                "Show insider trading activity"
             ],
             STOCK_ANALYSIS: [
-                "📊 Compare with another stock",
-                "📈 Show technical indicators",
-                "💰 What's the AI recommendation?",
-                "⏱ Show 5-year performance",
-                "🎯 Set a price alert"
+                "Compare with another stock",
+                "Show technical indicators",
+                "What's the AI recommendation?",
+                "Show 5-year performance",
+                "Set a price alert"
             ],
             IPO_ANALYSIS: [
-                "📊 Show IPO calendar for this month",
-                "🔥 Which IPOs have the best scores?",
-                "📈 Analyze a specific IPO",
-                "💼 Compare recent IPOs",
-                "⭐ Show top-rated IPOs"
+                "Show IPO calendar for this month",
+                "Which IPOs have the best scores?",
+                "Analyze a specific IPO",
+                "Compare recent IPOs",
+                "Show top-rated IPOs"
             ],
             MA_ANALYSIS: [
-                "📊 Show recent M&A deals",
-                "🎯 Analyze merger probability",
-                "💰 Show deal values",
-                "📈 Compare M&A activity by sector",
-                "🔍 Search for specific company deals"
+                "Show recent M&A deals",
+                "Analyze merger probability",
+                "Show deal values",
+                "Compare M&A activity by sector",
+                "Search for specific company deals"
             ],
             INSIDER_TRADING: [
-                "📊 Show insider buying trends",
-                "🔥 Which stocks have unusual insider activity?",
-                "📈 Show insider transactions for a specific stock",
-                "💼 Compare insider sentiment",
-                "⭐ Show top insider buys this week"
+                "Show insider buying trends",
+                "Which stocks have unusual insider activity?",
+                "Show insider transactions for a specific stock",
+                "Compare insider sentiment",
+                "Show top insider buys this week"
             ],
             FOREX_ANALYSIS: [
-                "💱 Show major currency pairs",
-                "📊 EUR/USD technical analysis",
-                "📈 Show currency strength radar",
-                "🔥 Which currencies are strongest today?",
-                "📉 Show correlation matrix"
+                "Show major currency pairs",
+                "EUR/USD technical analysis",
+                "Show currency strength radar",
+                "Which currencies are strongest today?",
+                "Show correlation matrix"
             ],
             BUDGET_MANAGEMENT: [
-                "💰 Show my budget overview",
-                "📊 Track monthly expenses",
-                "📈 Optimize my savings plan",
-                "🎯 Set investment goals",
-                "💼 Calculate ROI projections"
+                "Show my budget overview",
+                "Track monthly expenses",
+                "Optimize my savings plan",
+                "Set investment goals",
+                "Calculate ROI projections"
             ],
             MARKET_OVERVIEW: [
-                "📊 Show S&P 500 performance",
-                "📈 Analyze tech sector",
-                "🔥 Which sectors are outperforming?",
-                "💼 Show market breadth indicators",
-                "⭐ Top gainers and losers today"
+                "Show S&P 500 performance",
+                "Analyze tech sector",
+                "Which sectors are outperforming?",
+                "Show market breadth indicators",
+                "Top gainers and losers today"
             ],
             TECHNICAL_ANALYSIS: [
-                "📊 Show all technical indicators",
-                "📈 What does RSI indicate?",
-                "🔥 Are we overbought or oversold?",
-                "💼 Show MACD signal",
-                "⭐ Explain Bollinger Bands"
+                "Show all technical indicators",
+                "What does RSI indicate?",
+                "Are we overbought or oversold?",
+                "Show MACD signal",
+                "Explain Bollinger Bands"
+            ],
+            PRICE_HISTORY: [
+                "Show different timeframe",
+                "Compare with benchmark",
+                "Analyze volatility",
+                "Show moving averages",
+                "What caused recent price changes?"
             ]
         };
         
         console.log('💡 ChatbotSuggestions initialized');
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * GET INITIAL SUGGESTIONS (Welcome Screen)
+     * ✅ NOUVELLE MÉTHODE REQUISE PAR chatbot-fullpage-ui.js
+     * ═══════════════════════════════════════════════════════════
+     */
+    getInitialSuggestions() {
+        console.log('💡 Generating initial suggestions (welcome screen)');
+        
+        return this.suggestionsByIntent.INITIAL || [
+            "Analyze a stock (e.g., 'Analyze AAPL')",
+            "Show me recent IPOs",
+            "Check forex rates (e.g., 'EUR/USD analysis')",
+            "Help me with my budget",
+            "Show insider trading activity"
+        ];
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * GET CONTEXTUAL SUGGESTIONS (After AI Response)
+     * ✅ NOUVELLE MÉTHODE REQUISE PAR chatbot-fullpage-ui.js
+     * ═══════════════════════════════════════════════════════════
+     */
+    getContextualSuggestions(intent, entities = {}, response = {}) {
+        console.log(`💡 Generating contextual suggestions for intent: ${intent}`);
+
+        // Get base suggestions for the intent
+        let suggestions = this.getSuggestions(intent, { 
+            symbols: entities.symbols || [],
+            originalMessage: entities.originalMessage || '' 
+        });
+
+        // Personalize based on user history
+        if (this.userHistory.length > 0) {
+            suggestions = this.personalizeWithHistory(suggestions, { 
+                symbols: entities.symbols || [] 
+            });
+        }
+
+        // Add symbol-specific suggestions if available
+        if (entities.symbols && entities.symbols.length > 0) {
+            suggestions = this.addSymbolContextSuggestions(suggestions, entities.symbols);
+        }
+
+        return suggestions.slice(0, 5);
     }
 
     /**
@@ -406,11 +461,11 @@ class ChatbotSuggestions {
             .filter(intent => intent);
 
         // If user frequently analyzes stocks, suggest popular symbols
-        const stockAnalysisCount = recentIntents.filter(i => i === 'STOCK_ANALYSIS').length;
+        const stockAnalysisCount = recentIntents.filter(i => i === 'STOCK_ANALYSIS' || i === 'PRICE_HISTORY').length;
         if (stockAnalysisCount >= 2) {
             const randomSymbol = this.popularSymbols[Math.floor(Math.random() * this.popularSymbols.length)];
             suggestions = [
-                `📊 Analyze ${randomSymbol}`,
+                `Analyze ${randomSymbol}`,
                 ...suggestions.slice(0, 4)
             ];
         }
@@ -419,7 +474,16 @@ class ChatbotSuggestions {
         const ipoCount = recentIntents.filter(i => i === 'IPO_ANALYSIS').length;
         if (ipoCount >= 1) {
             suggestions = [
-                "📈 Show this week's IPO calendar",
+                "Show this week's IPO calendar",
+                ...suggestions.slice(0, 4)
+            ];
+        }
+
+        // If user is interested in Forex
+        const forexCount = recentIntents.filter(i => i === 'FOREX_ANALYSIS').length;
+        if (forexCount >= 1) {
+            suggestions = [
+                "Show major currency pairs",
                 ...suggestions.slice(0, 4)
             ];
         }
@@ -438,10 +502,11 @@ class ChatbotSuggestions {
         const symbol = symbols[0];
 
         const contextualSuggestions = [
-            `📊 Show ${symbol} technical indicators`,
-            `📈 Compare ${symbol} with sector peers`,
-            `💰 What's the price target for ${symbol}?`,
-            `⏱ Show ${symbol} 1-year trend`
+            `Show ${symbol} technical indicators`,
+            `Compare ${symbol} with sector peers`,
+            `What's the price target for ${symbol}?`,
+            `Show ${symbol} 1-year trend`,
+            `Analyze ${symbol} fundamentals`
         ];
 
         // Mix contextual suggestions with base suggestions
@@ -466,6 +531,12 @@ class ChatbotSuggestions {
                 "Should I compare this with another stock?",
                 "Do you want to see insider trading activity?",
                 "Would you like technical indicator details?"
+            ],
+            PRICE_HISTORY: [
+                "Would you like to see technical indicators?",
+                "Should I compare with another stock?",
+                "Do you want to see fundamental analysis?",
+                "Would you like to set a price alert?"
             ],
             IPO_ANALYSIS: [
                 "Would you like to see the IPO scoring breakdown?",
@@ -524,19 +595,19 @@ class ChatbotSuggestions {
      */
     getQuickActions(context = {}) {
         const baseActions = [
-            { text: "📊 Popular Stocks", action: "show_popular_stocks" },
-            { text: "📈 Recent IPOs", action: "show_recent_ipos" },
-            { text: "💱 Forex Rates", action: "show_forex_rates" },
-            { text: "📋 My Budget", action: "show_budget" },
-            { text: "🔍 Insider Activity", action: "show_insider_activity" }
+            { text: "Popular Stocks", action: "show_popular_stocks" },
+            { text: "Recent IPOs", action: "show_recent_ipos" },
+            { text: "Forex Rates", action: "show_forex_rates" },
+            { text: "My Budget", action: "show_budget" },
+            { text: "Insider Activity", action: "show_insider_activity" }
         ];
 
         // Add contextual actions if symbol is present
         if (context.symbols && context.symbols.length > 0) {
             const symbol = context.symbols[0];
             return [
-                { text: `📊 Analyze ${symbol}`, action: `analyze_${symbol}` },
-                { text: `📈 ${symbol} Indicators`, action: `indicators_${symbol}` },
+                { text: `Analyze ${symbol}`, action: `analyze_${symbol}` },
+                { text: `${symbol} Indicators`, action: `indicators_${symbol}` },
                 ...baseActions.slice(0, 3)
             ];
         }
@@ -718,4 +789,4 @@ if (typeof window !== 'undefined') {
     window.ChatbotSuggestions = ChatbotSuggestions;
 }
 
-console.log('✅ ChatbotSuggestions loaded');
+console.log('✅ ChatbotSuggestions v3.1.0 loaded (with getInitialSuggestions + getContextualSuggestions)');

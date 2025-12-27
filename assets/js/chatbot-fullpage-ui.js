@@ -1485,19 +1485,22 @@ class ChatbotFullPageUI {
     }
 
     async initializeComponents() {
-        if (typeof FinancialChatbotEngine !== 'undefined') {
-            this.engine = new FinancialChatbotEngine(this.config);
-            console.log('Engine initialized');
+        if (typeof ChatbotAIEngine !== 'undefined') {
+            this.engine = new ChatbotAIEngine(this.config);
+            await this.engine.initialize(); // ✅ AJOUT CRITIQUE
+            console.log('✅ Engine initialized');
+        } else {
+            console.error('❌ ChatbotAIEngine not found');
         }
         
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
-            console.log('Charts initialized');
+            console.log('✅ Charts initialized');
         }
         
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
-            console.log('Suggestions initialized');
+            console.log('✅ Suggestions initialized');
         }
     }
 

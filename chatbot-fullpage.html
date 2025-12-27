@@ -554,34 +554,31 @@
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- 1⃣ AlphaVault Scoring (EN PREMIER IMPÉRATIVEMENT) -->
-    <script src="assets/js/alphavault-scoring.js"></script>
+    <!-- ========== CHATBOT SCRIPTS (ORDRE CRITIQUE) ========== -->
 
-    <!-- 2⃣ Analytics (dépend d'AlphaVault) -->
-    <script src="assets/js/chatbot-analytics.js"></script>
+    <!-- 1. Configuration (FIRST) -->
+    <script src="assets/js/chatbot-config.js"></script>
 
-    <!-- 3⃣ Charts -->
-    <script src="assets/js/chatbot-charts.js"></script>
-
-    <!-- 4⃣ Gemini AI -->
+    <!-- 2. Gemini API (BEFORE AI Engine) -->
     <script src="assets/js/chatbot-gemini.js"></script>
 
-    <!-- 5⃣ Autres (config, suggestions, etc.) -->
-    <script src="assets/js/chatbot-config.js"></script>
+    <!-- 3. Core Components -->
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
 
-    <!-- 6⃣ IPO Analyzer (optionnel) -->
+    <!-- 4. Analyzers -->
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-ma-analyzer.js"></script>
-    <script src="assets/js/chatbot-budget-manager.js"></script>
     <script src="assets/js/chatbot-insider-analyzer.js"></script>
     <script src="assets/js/chatbot-forex-analyzer.js"></script>
+    <script src="assets/js/chatbot-budget-manager.js"></script>
     <script src="assets/js/chatbot-investment-manager.js"></script>
 
-    <!-- 7⃣ AI Engine (APRÈS tous les autres) -->
+    <!-- 5. AI Engine (AFTER Analyzers) -->
     <script src="assets/js/chatbot-ai-engine.js"></script>
 
-    <!-- 8⃣ UI (DERNIER) -->
+    <!-- 6. UI (LAST) -->
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
     
     <!-- ✅ ROBOT 3D (AVANT chatbot-fullpage-ui.js) -->
