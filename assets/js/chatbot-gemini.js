@@ -879,31 +879,21 @@
 class GeminiAI {
     constructor(config) {
         this.config = config;
+        this.apiKey = config.gemini?.apiKey || '';
+        this.model = config.gemini?.model || 'gemini-2.5-flash';
         
-        this.workerUrl = config.api.gemini.workerUrl;
-        this.model = config.api.gemini.model || 'gemini-2.5-flash';
-        this.apiKey = null;
+        // ✅ CORRECTION : Utiliser le Worker Proxy
+        this.workerProxyUrl = config.gemini?.workerProxyUrl || 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini';
         
         this.conversationHistory = [];
-        this.maxHistorySize = 20;
+        this.maxHistoryLength = 10;
         
-        this.userContext = {
-            preferredStocks: [],
-            investmentGoals: null,
-            riskTolerance: null,
-            conversationTopic: null
-        };
+        // ✅ CORRECTION : Initialiser le system prompt directement
+        this.systemPrompt = this.buildAlphaVaultSystemPrompt();
         
-        this.requestCount = 0;
-        this.totalTokens = 0;
-        this.lastRequestTime = 0;
-        this.minRequestInterval = 1000;
-        
-        console.log(`🤖 Gemini AI initialized (v3.6 - HTML Fixed + Few-Shot Enhanced)`);
-        console.log(`📡 Model: ${this.model}`);
-        console.log(`📡 Worker URL: ${this.workerUrl}`);
-        
-        this.initializeSystemPrompt();
+        console.log('🤖 Gemini AI initialized (v3.6 - HTML Fixed + Few-Shot Enhanced)');
+        console.log('📡 Model:', this.model);
+        console.log('📡 Worker URL:', this.workerProxyUrl);
     }
 
     // ============================================
