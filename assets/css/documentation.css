@@ -1,7 +1,6 @@
 /* ============================================
-   DOCUMENTATION.CSS - Version Ultra-Compacte Mobile
-   Design ultra-professionnel PC & Mobile sans débordement
-   Basé sur la référence resources.css
+   DOCUMENTATION.CSS - Version Ultra-Responsive Mobile
+   Design ultra-professionnel PC & Mobile - ZÉRO DÉBORDEMENT
    ============================================ */
 
 /* ============================================
@@ -30,7 +29,7 @@
 }
 
 html, body {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     width: 100%;
     max-width: 100vw;
     margin: 0;
@@ -40,9 +39,19 @@ html, body {
 .layout-wrapper,
 .main-content,
 .container {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     width: 100%;
     max-width: 100%;
+}
+
+/* ✅ FORCE TOUS LES ENFANTS À RESPECTER LE VIEWPORT */
+.doc-container,
+.doc-article,
+.doc-section,
+.doc-header,
+.doc-footer {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* ============================================
@@ -106,7 +115,7 @@ html, body {
 .top-header {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
 }
 
 .top-header .header-content-wrapper {
@@ -114,9 +123,10 @@ html, body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 100%;
     padding: 0 1rem;
+    flex-wrap: wrap;
 }
 
 .top-header .header-left {
@@ -124,7 +134,8 @@ html, body {
     align-items: center;
     gap: 1rem;
     min-width: 0;
-    flex: 1;
+    flex: 1 1 auto;
+    max-width: 100%;
 }
 
 .top-header .header-right {
@@ -151,6 +162,8 @@ html, body {
     align-items: center;
     gap: 0.75rem;
     line-height: 1.2;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 .page-title i {
@@ -159,6 +172,7 @@ html, body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: pulse-glow 3s ease-in-out infinite;
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -182,6 +196,7 @@ html, body {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .btn-back-dashboard::before {
@@ -215,6 +230,7 @@ html, body {
 .btn-back-dashboard i {
     font-size: 1rem;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .btn-back-dashboard:hover i {
@@ -235,6 +251,8 @@ html, body {
     margin-bottom: 1rem;
     font-size: 0.875rem;
     color: var(--text-secondary, #64748b);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body.dark-mode .breadcrumb {
@@ -255,6 +273,7 @@ body.dark-mode .breadcrumb {
 .breadcrumb i {
     font-size: 0.75rem;
     color: var(--text-tertiary, #94a3b8);
+    flex-shrink: 0;
 }
 
 .breadcrumb span {
@@ -284,6 +303,7 @@ body.dark-mode .breadcrumb span {
     position: relative;
     overflow: hidden;
     animation: fadeInUp 0.6s ease;
+    max-width: 100%;
 }
 
 body.dark-mode .doc-article,
@@ -322,6 +342,7 @@ body.dark-mode .glass-card {
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    max-width: 100%;
 }
 
 body.dark-mode .doc-header {
@@ -352,6 +373,7 @@ body.dark-mode .doc-updated {
 .doc-time i,
 .doc-updated i {
     color: var(--primary-color, #667eea);
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -369,6 +391,8 @@ body.dark-mode .doc-updated {
     display: flex;
     align-items: center;
     gap: 1rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 .section-title:first-of-type {
@@ -381,6 +405,7 @@ body.dark-mode .doc-updated {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: icon-pulse 3s ease-in-out infinite;
+    flex-shrink: 0;
 }
 
 .category-title,
@@ -396,6 +421,7 @@ body.dark-mode .doc-updated {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    max-width: 100%;
 }
 
 .category-title i,
@@ -405,6 +431,7 @@ body.dark-mode .doc-updated {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-size: 1.375rem;
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -417,6 +444,7 @@ body.dark-mode .doc-updated {
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 2rem;
+    max-width: 100%;
 }
 
 body.dark-mode .doc-intro {
@@ -447,6 +475,7 @@ body.dark-mode .doc-intro p {
     margin-bottom: 3rem;
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
+    max-width: 100%;
 }
 
 body.dark-mode .toc-box {
@@ -481,6 +510,8 @@ body.dark-mode .toc-box {
     border-radius: 12px;
     transition: var(--transition-smooth);
     position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .toc-list a {
@@ -519,6 +550,8 @@ body.dark-mode .toc-list a:hover {
     margin-bottom: 3rem;
     padding-bottom: 2.5rem;
     border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body.dark-mode .doc-section {
@@ -536,6 +569,8 @@ body.dark-mode .doc-section {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 1.5rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section p {
@@ -546,6 +581,7 @@ body.dark-mode .doc-section p {
 .doc-section ol {
     margin: 1.5rem 0;
     padding-left: 2rem;
+    max-width: 100%;
 }
 
 .doc-section li {
@@ -553,6 +589,7 @@ body.dark-mode .doc-section p {
     line-height: 1.8;
     color: var(--text-secondary, #64748b);
     margin-bottom: 0.75rem;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section li {
@@ -574,6 +611,7 @@ body.dark-mode .doc-section strong {
     font-weight: 500;
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
+    word-break: break-word;
 }
 
 .doc-section a:hover {
@@ -588,6 +626,7 @@ body.dark-mode .doc-section strong {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     font-weight: 600;
+    word-break: break-word;
 }
 
 body.dark-mode .doc-section code {
@@ -599,6 +638,8 @@ body.dark-mode .doc-section code {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 2rem 0 1rem 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section h3 {
@@ -610,6 +651,8 @@ body.dark-mode .doc-section h3 {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 1.5rem 0 0.75rem 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .doc-section h4 {
@@ -629,6 +672,8 @@ body.dark-mode .doc-section h4 {
     border-radius: 16px;
     margin-bottom: 1.5rem;
     transition: var(--transition-smooth);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body.dark-mode .step-box {
@@ -660,14 +705,20 @@ body.dark-mode .step-box {
 .step-content {
     flex: 1;
     min-width: 0;
+    max-width: 100%;
 }
 
 .step-content p {
     margin-bottom: 1rem;
+    overflow-wrap: break-word;
 }
 
 .step-content ul {
     margin: 0.5rem 0 0 0;
+}
+
+.step-content h4 {
+    overflow-wrap: break-word;
 }
 
 /* ============================================
@@ -685,6 +736,8 @@ body.dark-mode .step-box {
     border-radius: 12px;
     margin: 1.5rem 0;
     border-left: 4px solid;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .info-box {
@@ -754,6 +807,8 @@ body.dark-mode .danger-box {
     margin: 0;
     flex: 1;
     color: var(--text-primary, #1e293b);
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .info-box p,
@@ -782,6 +837,7 @@ body.dark-mode .danger-box p {
     background: rgba(255, 255, 255, 0.5);
     border-radius: 12px;
     overflow: hidden;
+    display: table;
 }
 
 body.dark-mode .comparison-table {
@@ -798,6 +854,7 @@ body.dark-mode .comparison-table {
     font-weight: 700;
     color: white;
     font-size: 0.9375rem;
+    white-space: nowrap;
 }
 
 .comparison-table td {
@@ -805,6 +862,8 @@ body.dark-mode .comparison-table {
     border-bottom: 1px solid rgba(102, 126, 234, 0.1);
     color: var(--text-secondary, #64748b);
     font-size: 0.9375rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .comparison-table td {
@@ -828,7 +887,7 @@ body.dark-mode .comparison-table tbody tr:hover {
     color: #10b981;
 }
 
-/* Wrapper pour scroll horizontal sur mobile */
+/* ✅ WRAPPER POUR SCROLL HORIZONTAL SUR MOBILE */
 .data-table-wrapper {
     overflow-x: auto;
     margin: 2rem 0;
@@ -836,11 +895,18 @@ body.dark-mode .comparison-table tbody tr:hover {
     background: rgba(102, 126, 234, 0.03);
     border: 1px solid rgba(102, 126, 234, 0.1);
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
 }
 
 body.dark-mode .data-table-wrapper {
     background: rgba(255, 255, 255, 0.02);
     border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ✅ FORCE LES TABLES À RESTER DANS LE WRAPPER */
+.data-table-wrapper table {
+    min-width: 600px;
+    margin: 0;
 }
 
 /* ============================================
@@ -852,6 +918,7 @@ body.dark-mode .data-table-wrapper {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
     margin: 2rem 0;
+    max-width: 100%;
 }
 
 .feature-card {
@@ -861,6 +928,7 @@ body.dark-mode .data-table-wrapper {
     padding: 2rem;
     text-align: center;
     transition: var(--transition-smooth);
+    max-width: 100%;
 }
 
 body.dark-mode .feature-card {
@@ -887,6 +955,7 @@ body.dark-mode .feature-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .feature-card h4 {
@@ -898,6 +967,7 @@ body.dark-mode .feature-card h4 {
     color: var(--text-secondary, #64748b);
     margin: 0;
     line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .feature-card p {
@@ -915,6 +985,7 @@ body.dark-mode .feature-card p {
     margin: 1.5rem 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     position: relative;
+    max-width: 100%;
 }
 
 body.dark-mode .code-example {
@@ -928,6 +999,8 @@ body.dark-mode .code-example {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .code-header span {
@@ -945,6 +1018,7 @@ body.dark-mode .code-example {
     border-radius: 6px;
     transition: all 0.3s ease;
     font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .code-copy-btn:hover {
@@ -961,6 +1035,7 @@ body.dark-mode .code-example {
     color: #e2e8f0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
 }
 
 .code-body pre {
@@ -971,6 +1046,8 @@ body.dark-mode .code-example {
     white-space: pre-wrap;
     word-wrap: break-word;
     color: #e2e8f0;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 .numbered-steps {
@@ -986,6 +1063,7 @@ body.dark-mode .code-example {
     padding-left: 2.5rem;
     position: relative;
     color: #e2e8f0;
+    word-wrap: break-word;
 }
 
 .numbered-steps > li::before {
@@ -1003,6 +1081,7 @@ body.dark-mode .code-example {
     justify-content: center;
     font-weight: 700;
     font-size: 0.875rem;
+    flex-shrink: 0;
 }
 
 .numbered-steps ul {
@@ -1013,6 +1092,7 @@ body.dark-mode .code-example {
 .numbered-steps ul li {
     color: #cbd5e1;
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
 }
 
 .numbered-steps strong {
@@ -1026,6 +1106,7 @@ body.dark-mode .code-example {
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
+    word-break: break-word;
 }
 
 /* ============================================
@@ -1037,6 +1118,7 @@ body.dark-mode .code-example {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin: 2rem 0;
+    max-width: 100%;
 }
 
 .next-step-card {
@@ -1047,6 +1129,7 @@ body.dark-mode .code-example {
     text-decoration: none;
     transition: var(--transition-smooth);
     text-align: center;
+    max-width: 100%;
 }
 
 body.dark-mode .next-step-card {
@@ -1073,6 +1156,7 @@ body.dark-mode .next-step-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .next-step-card h4 {
@@ -1084,6 +1168,7 @@ body.dark-mode .next-step-card h4 {
     color: var(--text-secondary, #64748b);
     margin: 0;
     line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .next-step-card p {
@@ -1098,6 +1183,7 @@ body.dark-mode .next-step-card p {
     margin-top: 4rem;
     padding-top: 2rem;
     border-top: 2px solid rgba(102, 126, 234, 0.1);
+    max-width: 100%;
 }
 
 body.dark-mode .doc-footer {
@@ -1111,6 +1197,7 @@ body.dark-mode .doc-footer {
     border-radius: 20px;
     border: 1px solid rgba(102, 126, 234, 0.2);
     transition: all 0.3s ease;
+    max-width: 100%;
 }
 
 body.dark-mode .cta-box {
@@ -1131,12 +1218,14 @@ body.dark-mode .cta-box {
     font-size: 1.5rem;
     font-weight: 800;
     margin: 0 0 0.5rem 0;
+    overflow-wrap: break-word;
 }
 
 .cta-box p {
     font-size: 1rem;
     color: var(--text-secondary, #64748b);
     margin: 0 0 1.5rem 0;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .cta-box p {
@@ -1155,11 +1244,16 @@ body.dark-mode .cta-box p {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     transition: var(--transition-smooth);
+    white-space: nowrap;
 }
 
 .btn-cta:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-cta i {
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -1168,6 +1262,7 @@ body.dark-mode .cta-box p {
 
 .doc-sidebar {
     position: relative;
+    max-width: 100%;
 }
 
 .sidebar-sticky {
@@ -1211,6 +1306,7 @@ body.dark-mode .doc-nav {
     font-size: 0.875rem;
     font-weight: 500;
     transition: var(--transition-smooth);
+    word-wrap: break-word;
 }
 
 body.dark-mode .doc-nav a {
@@ -1239,6 +1335,7 @@ body.dark-mode .doc-nav a.active {
     padding: 1.5rem;
     text-align: center;
     transition: all 0.3s ease;
+    max-width: 100%;
 }
 
 body.dark-mode .help-card {
@@ -1264,6 +1361,7 @@ body.dark-mode .help-card {
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     margin: 0 0 0.5rem 0;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .help-card h5 {
@@ -1275,6 +1373,7 @@ body.dark-mode .help-card h5 {
     color: var(--text-secondary, #64748b);
     margin: 0 0 1rem 0;
     line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 body.dark-mode .help-card p {
@@ -1380,15 +1479,15 @@ body.dark-mode .help-card p {
    ============================================ */
 
 @media (max-width: 768px) {
-    /* ✅ PADDING CONTAINER MINIMAL (CLEF ANTI-DÉBORDEMENT) */
+    /* ✅ PADDING CONTAINER MINIMAL */
     .doc-container {
-        padding: 0.75rem 0.5rem 1.5rem 0.5rem !important;
+        padding: 0.75rem !important;
         gap: 0.75rem;
     }
 
     /* ✅ ARTICLE COMPACT */
     .doc-article {
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         border-radius: 12px;
         margin: 0;
     }
@@ -1467,7 +1566,7 @@ body.dark-mode .help-card p {
 
     /* ✅ TOC BOX COMPACT */
     .toc-box {
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         margin-bottom: 1.5rem;
         border-radius: 12px;
     }
@@ -1491,7 +1590,7 @@ body.dark-mode .help-card p {
     /* ✅ STEP BOX STACK */
     .step-box {
         flex-direction: column;
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         gap: 0.75rem;
         margin-bottom: 1rem;
         border-radius: 12px;
@@ -1573,7 +1672,7 @@ body.dark-mode .help-card p {
     }
 
     .code-header {
-        padding: 0.5rem 0.75rem !important;
+        padding: 0.5rem !important;
     }
 
     .code-header span {
@@ -1629,7 +1728,7 @@ body.dark-mode .help-card p {
 
     .comparison-table th,
     .comparison-table td {
-        padding: 0.625rem 0.75rem !important;
+        padding: 0.625rem !important;
         font-size: 0.75rem !important;
         white-space: nowrap;
     }
@@ -1644,7 +1743,7 @@ body.dark-mode .help-card p {
 
     .feature-card,
     .next-step-card {
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         border-radius: 12px;
     }
 
@@ -1687,11 +1786,13 @@ body.dark-mode .help-card p {
         font-size: 0.8125rem !important;
         gap: 0.5rem;
         border-radius: 8px;
+        width: 100%;
+        justify-content: center;
     }
 
     /* ✅ HELP CARD COMPACT */
     .help-card {
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         border-radius: 12px;
     }
 
@@ -1776,7 +1877,7 @@ body.dark-mode .help-card p {
     }
 
     .doc-nav a {
-        padding: 0.5rem 0.75rem !important;
+        padding: 0.5rem !important;
         font-size: 0.75rem !important;
         border-radius: 6px;
     }
@@ -1795,13 +1896,13 @@ body.dark-mode .help-card p {
 @media (max-width: 480px) {
     /* ✅ PADDING ULTRA-MINIMAL */
     .doc-container {
-        padding: 0.5rem 0.375rem 1rem 0.375rem !important;
+        padding: 0.5rem !important;
         gap: 0.5rem;
     }
 
     /* ✅ ARTICLE ULTRA-COMPACT */
     .doc-article {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.75rem !important;
         border-radius: 10px;
     }
 
@@ -1851,12 +1952,12 @@ body.dark-mode .help-card p {
 
     /* ✅ TOC BOX MICRO */
     .toc-box {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.75rem !important;
         border-radius: 10px;
     }
 
     .toc-list a {
-        padding: 0.375rem 0.5rem;
+        padding: 0.375rem !important;
         font-size: 0.75rem;
         gap: 0.5rem;
     }
@@ -1869,7 +1970,7 @@ body.dark-mode .help-card p {
 
     /* ✅ STEP BOX MICRO */
     .step-box {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.75rem !important;
         gap: 0.5rem;
         border-radius: 8px;
     }
@@ -1926,7 +2027,7 @@ body.dark-mode .help-card p {
 
     /* ✅ CODE MICRO */
     .code-header {
-        padding: 0.375rem 0.5rem !important;
+        padding: 0.375rem !important;
     }
 
     .code-header span {
@@ -1968,14 +2069,14 @@ body.dark-mode .help-card p {
     /* ✅ TABLES MICRO */
     .comparison-table th,
     .comparison-table td {
-        padding: 0.5rem 0.5rem !important;
+        padding: 0.5rem !important;
         font-size: 0.6875rem !important;
     }
 
     /* ✅ CARDS MICRO */
     .feature-card,
     .next-step-card {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.75rem !important;
         border-radius: 10px;
     }
 
@@ -1997,7 +2098,7 @@ body.dark-mode .help-card p {
 
     /* ✅ CTA BOX MICRO */
     .cta-box {
-        padding: 1rem 0.75rem !important;
+        padding: 1rem !important;
         border-radius: 10px;
     }
 
@@ -2017,7 +2118,7 @@ body.dark-mode .help-card p {
 
     /* ✅ HELP CARD MICRO */
     .help-card {
-        padding: 0.75rem 0.5rem !important;
+        padding: 0.75rem !important;
         border-radius: 10px;
     }
 
@@ -2034,7 +2135,7 @@ body.dark-mode .help-card p {
     }
 
     .help-card a {
-        padding: 0.375rem 0.75rem !important;
+        padding: 0.375rem !important;
         font-size: 0.6875rem !important;
     }
 
@@ -2068,7 +2169,7 @@ body.dark-mode .help-card p {
 
     /* ✅ DOC NAV MICRO */
     .doc-nav a {
-        padding: 0.375rem 0.5rem !important;
+        padding: 0.375rem !important;
         font-size: 0.6875rem !important;
     }
 
