@@ -29,8 +29,6 @@
     <!-- ✅ CHATBOT MODALS CSS -->
     <link rel="stylesheet" href="assets/css/chatbot-modals.css">
     
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
     <!-- ═══════════════════════════════════════════════════════════
         FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
         Compatible: Google, Apple, Android, Firefox, Safari, Edge
@@ -75,9 +73,6 @@
     <script src="assets/js/access-control.js"></script>
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
-    
-    <!-- Favicon -->
-    <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>"> -->
 </head>
 <body>
 
@@ -215,27 +210,7 @@
                             <i class='fas fa-handshake'></i>
                             <span>M&A Screening</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
                 <div class='nav-section'>
@@ -400,7 +375,6 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1>
-                        <!-- <span class="title-icon">🤖</span> -->
                         <span>Alphy - AI Financial Assistant</span>
                     </h1>
                 </div>
@@ -534,13 +508,20 @@
     </div>
 
     <!-- ============================================
-         SCRIPTS
+         LIBRARIES - CHARGÉES EN PREMIER
          ============================================ -->
     
-    <!-- ✅ THREE.JS LIBRARY -->
+    <!-- ✅ THREE.JS LIBRARY (Pour robot 3D) -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     
-    <!-- Chart.js -->
+    <!-- ✅ HIGHCHARTS LIBRARY (CRITIQUE - Pour graphiques avancés) -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/stock.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    
+    <!-- ✅ CHART.JS (Pour graphiques simples) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <!-- ✅ HTML2CANVAS - Pour les screenshots -->
@@ -549,27 +530,31 @@
     <!-- ✅ jsPDF - Pour l'export PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- Core Scripts -->
+    <!-- ============================================
+         CORE SCRIPTS
+         ============================================ -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ========== CHATBOT SCRIPTS (ORDRE CRITIQUE) ========== -->
+    <!-- ============================================
+         CHATBOT SCRIPTS (ORDRE CRITIQUE)
+         ============================================ -->
 
-    <!-- 1. Configuration (FIRST) -->
+    <!-- 1⃣ Configuration (FIRST) -->
     <script src='assets/js/config.js'></script>
     <script src="assets/js/chatbot-config.js"></script>
     <script src='assets/js/api-client.js'></script>
 
-    <!-- 2. Gemini API (BEFORE AI Engine) -->
+    <!-- 2⃣ Gemini API (BEFORE AI Engine) -->
     <script src="assets/js/chatbot-gemini.js"></script>
 
-    <!-- 3. Core Components -->
+    <!-- 3⃣ Core Components -->
     <script src="assets/js/chatbot-charts.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
 
-    <!-- 4. Analyzers -->
+    <!-- 4⃣ Analyzers -->
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-ma-analyzer.js"></script>
     <script src="assets/js/chatbot-insider-analyzer.js"></script>
@@ -577,23 +562,21 @@
     <script src="assets/js/chatbot-budget-manager.js"></script>
     <script src="assets/js/chatbot-investment-manager.js"></script>
 
-    <!-- 5. AI Engine (AFTER Analyzers) -->
+    <!-- 5⃣ AI Engine (AFTER Analyzers) -->
     <script src="assets/js/chatbot-ai-engine.js"></script>
 
-    <!-- 6. UI (LAST) -->
+    <!-- 6⃣ UI & 3D Robot (LAST) -->
+    <script src="assets/js/chatbot-robot-3d.js"></script>
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
     
-    <!-- ✅ ROBOT 3D (AVANT chatbot-fullpage-ui.js) -->
-    <script src="assets/js/chatbot-robot-3d.js"></script>
-    
-    <!-- Particles Background -->
+    <!-- 7⃣ Particles Background -->
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ✅ CHATBOT MODALS SCRIPT (Share & Settings) - VERSION AVANCÉE -->
+    <!-- 8⃣ Chatbot Modals (Share & Settings) -->
     <script src="assets/js/chatbot-modals.js"></script>
 
     <!-- ============================================
-         FIX MENU UTILISATEUR - Force l'initialisation
+         FIX MENU UTILISATEUR
          ============================================ -->
     <script>
         /**
@@ -670,7 +653,7 @@
         })();
     </script>
 
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
+    <!-- Admin Visibility -->
     <script src="assets/js/admin-visibility.js"></script>
 
 </body>
