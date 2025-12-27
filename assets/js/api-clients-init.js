@@ -147,7 +147,11 @@
         try {
             if (window.secAPIClient && typeof window.secAPIClient.healthCheck === 'function') {
                 const health = await window.secAPIClient.healthCheck();
-                results.secIPO = { status: health.status === 'ok' ? 'ok' : 'error', message: 'SEC IPO Worker' };
+                // ✅ CORRECTION: Accepter 'operational' comme statut valide
+                results.secIPO = { 
+                    status: (health.status === 'ok' || health.status === 'operational') ? 'ok' : 'error', 
+                    message: `SEC IPO Worker - ${health.version || 'v4.2'}` 
+                };
             }
         } catch (error) {
             results.secIPO = { status: 'error', message: error.message };
@@ -157,7 +161,11 @@
         try {
             if (window.secMAClient && typeof window.secMAClient.healthCheck === 'function') {
                 const health = await window.secMAClient.healthCheck();
-                results.secMA = { status: health.status ? 'ok' : 'error', message: 'SEC M&A Worker' };
+                // ✅ CORRECTION: Accepter 'operational' comme statut valide
+                results.secMA = { 
+                    status: (health.status === 'ok' || health.status === 'operational') ? 'ok' : 'error', 
+                    message: `SEC M&A Worker - ${health.version || 'v4.2'}` 
+                };
             }
         } catch (error) {
             results.secMA = { status: 'error', message: error.message };
