@@ -428,31 +428,29 @@ class AutoNewsletterSystem {
         }
 
         // ═══════════════════════════════════════════════════════
-        // THIS WEEK IN NUMBERS
+        // THIS WEEK IN NUMBERS - COMPACT VERSION
         // ═══════════════════════════════════════════════════════
         md += `<div style="margin: 40px 0;">\n\n`;
-        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 24px 0; padding-left: 20px; border-left: 6px solid #3b82f6;">This Week in Numbers</h2>\n\n`;
-        md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 24px 0;">\n\n`;
+        md += `<h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: #1e293b; margin: 0 0 20px 0; padding-left: 20px; border-left: 6px solid #3b82f6;">This Week in Numbers</h2>\n\n`;
+        md += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0;">\n\n`;
         
-        md += `<div style="background: linear-gradient(135deg, #10b981, #059669); padding: clamp(24px, 4vw, 32px); border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">\n\n`;
-        md += `<p style="font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${allNews.length}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Stories Analyzed</p>\n\n`;
-        md += `</div>\n\n`;
-        
-        md += `<div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: clamp(24px, 4vw, 32px); border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">\n\n`;
-        md += `<p style="font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${this.countUniqueTickers(allNews)}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Companies</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #10b981, #059669); padding: clamp(16px, 3vw, 20px); border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">\n\n`;
+        md += `<p style="font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; color: white; margin: 0 0 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${allNews.length}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.3;">Stories Analyzed</p>\n\n`;
         md += `</div>\n\n`;
         
-        md += `<div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: clamp(24px, 4vw, 32px); border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">\n\n`;
-        md += `<p style="font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; color: white; margin: 0 0 8px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${sectors.length}</p>\n\n`;
-        md += `<p style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0;">Active Sectors</p>\n\n`;
+        md += `<div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: clamp(16px, 3vw, 20px); border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">\n\n`;
+        md += `<p style="font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; color: white; margin: 0 0 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${this.countUniqueTickers(allNews)}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.3;">Companies</p>\n\n`;
+        md += `</div>\n\n`;
+        
+        md += `<div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); padding: clamp(16px, 3vw, 20px); border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">\n\n`;
+        md += `<p style="font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; color: white; margin: 0 0 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${sectors.length}</p>\n\n`;
+        md += `<p style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); font-weight: 700; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.3;">Active Sectors</p>\n\n`;
         md += `</div>\n\n`;
         
         md += `</div>\n\n`;
         md += `</div>\n\n`;
-
-        md += this.createSimpleSeparator();
 
         // ═══════════════════════════════════════════════════════
         // TOP MOVERS
