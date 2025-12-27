@@ -1,19 +1,14 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * CHATBOT CHARTS - Legal Compliant Financial Charting Engine
+ * CHATBOT CHARTS - Ultra Financial Charting Engine
  * ═══════════════════════════════════════════════════════════════
- * Version: 3.0.0 - LEGAL COMPLIANT
- * Description: Génération de graphiques d'oscillateurs techniques UNIQUEMENT
- * 
- * ✅ AUTORISÉ:
- *   - Oscillateurs techniques purs (RSI, MACD, Stochastic, etc.)
- *   - Indicateurs dérivés (Volume, ATR, etc.)
- *   - Graphiques radar/heatmap de comparaison
- * 
- * ❌ INTERDIT (ToS Compliance):
- *   - Graphiques de prix (candlestick, line, area)
- *   - Données OHLC raw
- *   - Prix historiques bruts
+ * Version: 5.0.0 ULTRA
+ * Description: Génération de graphiques pour tous les modules
+ * Features:
+ *   - Technical Oscillators (RSI, MACD, Stochastic, ADX, etc.)
+ *   - Budget Charts (Income vs Expenses, Savings, Portfolio)
+ *   - Investment Charts (Asset Allocation, Efficient Frontier, Backtest)
+ *   - Comparison Charts (Radar, Heatmap, Multi-series)
  */
 
 class ChatbotCharts {
@@ -35,14 +30,13 @@ class ChatbotCharts {
             pink: '#d63384'
         };
         
-        console.log('📊 ChatbotCharts (Legal Compliant) initialized');
+        console.log('📊 ChatbotCharts ULTRA v5.0 initialized');
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * RSI CHART (Relative Strength Index)
-     * ═══════════════════════════════════════════════════════════
-     */
+    // ═══════════════════════════════════════════════════════════
+    // TECHNICAL INDICATORS CHARTS (EXISTING - Keep as is)
+    // ═══════════════════════════════════════════════════════════
+
     createRSIChart(rsiData, containerId, options = {}) {
         try {
             const chartId = containerId || `rsi-chart-${++this.chartCounter}`;
@@ -114,14 +108,7 @@ class ChatbotCharts {
                     ]
                 }],
                 credits: { enabled: false },
-                exporting: { 
-                    enabled: true,
-                    buttons: {
-                        contextButton: {
-                            menuItems: ['downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG']
-                        }
-                    }
-                }
+                exporting: { enabled: true }
             };
 
             return { config: chartConfig, containerId: chartId };
@@ -132,11 +119,6 @@ class ChatbotCharts {
         }
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * MACD CHART
-     * ═══════════════════════════════════════════════════════════
-     */
     createMACDChart(macdData, containerId, options = {}) {
         const chartId = containerId || `macd-chart-${++this.chartCounter}`;
 
@@ -202,11 +184,6 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * STOCHASTIC OSCILLATOR CHART
-     * ═══════════════════════════════════════════════════════════
-     */
     createStochasticChart(stochasticData, containerId, options = {}) {
         const chartId = containerId || `stochastic-chart-${++this.chartCounter}`;
 
@@ -274,11 +251,6 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * ADX CHART (Trend Strength)
-     * ═══════════════════════════════════════════════════════════
-     */
     createADXChart(adxData, containerId, options = {}) {
         const chartId = containerId || `adx-chart-${++this.chartCounter}`;
 
@@ -308,13 +280,6 @@ class ChatbotCharts {
                         dashStyle: 'ShortDash',
                         width: 2,
                         label: { text: 'Strong Trend (25)', align: 'right', style: { color: this.defaultColors.success } }
-                    },
-                    {
-                        value: 20,
-                        color: this.defaultColors.warning,
-                        dashStyle: 'Dot',
-                        width: 1,
-                        label: { text: 'Weak Trend (20)', align: 'right' }
                     }
                 ]
             },
@@ -353,11 +318,445 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
+    // ═══════════════════════════════════════════════════════════
+    // ✅ NEW: BUDGET CHARTS
+    // ═══════════════════════════════════════════════════════════
+
     /**
-     * ═══════════════════════════════════════════════════════════
-     * MULTI-INDICATOR COMPARISON (Radar Chart)
-     * ═══════════════════════════════════════════════════════════
+     * Budget: Income vs Expenses vs Savings
      */
+    createBudgetOverviewChart(budgetData, containerId, options = {}) {
+        const chartId = containerId || `budget-overview-${++this.chartCounter}`;
+
+        const categories = budgetData.months || [];
+        const incomeData = budgetData.income || [];
+        const expensesData = budgetData.expenses || [];
+        const savingsData = budgetData.savings || [];
+
+        const chartConfig = {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent',
+                height: options.height || 400,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Budget Overview - Income vs Expenses vs Savings',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                categories: categories,
+                labels: { style: { color: '#64748b' }, rotation: -45 }
+            },
+            yAxis: {
+                title: { text: 'Amount (EUR)', style: { color: '#1e293b' } },
+                labels: { style: { color: '#64748b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valuePrefix: '€',
+                valueDecimals: 0
+            },
+            series: [
+                {
+                    name: 'Income',
+                    data: incomeData,
+                    color: this.defaultColors.success,
+                    lineWidth: 2,
+                    marker: { enabled: false }
+                },
+                {
+                    name: 'Expenses',
+                    data: expensesData,
+                    color: this.defaultColors.danger,
+                    lineWidth: 2,
+                    marker: { enabled: false }
+                },
+                {
+                    name: 'Savings',
+                    type: 'area',
+                    data: savingsData,
+                    color: this.defaultColors.primary,
+                    fillOpacity: 0.3,
+                    lineWidth: 2,
+                    marker: { enabled: false }
+                }
+            ],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * Budget: Portfolio Evolution
+     */
+    createPortfolioEvolutionChart(portfolioData, containerId, options = {}) {
+        const chartId = containerId || `portfolio-evolution-${++this.chartCounter}`;
+
+        const categories = portfolioData.months || [];
+        const investmentData = portfolioData.investment || [];
+        const gainsData = portfolioData.gains || [];
+        const totalData = portfolioData.total || [];
+
+        const chartConfig = {
+            chart: {
+                type: 'area',
+                backgroundColor: 'transparent',
+                height: options.height || 400,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Portfolio Evolution',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                categories: categories,
+                labels: { style: { color: '#64748b' }, rotation: -45 }
+            },
+            yAxis: {
+                title: { text: 'Value (EUR)', style: { color: '#1e293b' } },
+                labels: { style: { color: '#64748b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valuePrefix: '€',
+                valueDecimals: 0
+            },
+            plotOptions: {
+                area: {
+                    stacking: null,
+                    marker: { enabled: false }
+                }
+            },
+            series: [
+                {
+                    name: 'Investment',
+                    data: investmentData,
+                    color: this.defaultColors.primary,
+                    fillOpacity: 0.3
+                },
+                {
+                    name: 'Gains',
+                    data: gainsData,
+                    color: this.defaultColors.success,
+                    fillOpacity: 0.3
+                },
+                {
+                    name: 'Total Portfolio',
+                    data: totalData,
+                    color: this.defaultColors.secondary,
+                    lineWidth: 3,
+                    fillOpacity: 0.4
+                }
+            ],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * Budget: ROI Evolution
+     */
+    createROIChart(roiData, containerId, options = {}) {
+        const chartId = containerId || `roi-chart-${++this.chartCounter}`;
+
+        const categories = roiData.months || [];
+        const values = roiData.values || [];
+
+        const chartConfig = {
+            chart: {
+                type: 'area',
+                backgroundColor: 'transparent',
+                height: options.height || 350,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'ROI Evolution (%)',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                categories: categories,
+                labels: { style: { color: '#64748b' }, rotation: -45 }
+            },
+            yAxis: {
+                title: { text: 'ROI (%)', style: { color: '#1e293b' } },
+                labels: { style: { color: '#64748b' } },
+                plotLines: [{
+                    value: 0,
+                    color: '#999',
+                    dashStyle: 'Dash',
+                    width: 2
+                }]
+            },
+            tooltip: {
+                borderRadius: 10,
+                valueSuffix: '%',
+                valueDecimals: 2
+            },
+            series: [{
+                name: 'ROI',
+                data: values,
+                color: this.defaultColors.primary,
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, Highcharts.color(this.defaultColors.primary).setOpacity(0.4).get('rgba')],
+                        [1, Highcharts.color(this.defaultColors.primary).setOpacity(0.1).get('rgba')]
+                    ]
+                },
+                lineWidth: 2,
+                marker: { enabled: false }
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ✅ NEW: INVESTMENT CHARTS
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Investment: Asset Allocation Pie Chart
+     */
+    createAssetAllocationChart(allocationData, containerId, options = {}) {
+        const chartId = containerId || `asset-allocation-${++this.chartCounter}`;
+
+        const data = allocationData.map(item => ({
+            name: item.name,
+            y: item.allocation,
+            color: item.color || this.defaultColors.primary
+        }));
+
+        const chartConfig = {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                height: options.height || 450,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Asset Allocation',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            tooltip: {
+                borderRadius: 10,
+                pointFormat: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
+                valueSuffix: '%'
+            },
+            plotOptions: {
+                pie: {
+                    innerSize: '60%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
+                        style: { fontWeight: '600', fontSize: '12px' }
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                name: 'Allocation',
+                colorByPoint: true,
+                data: data
+            }],
+            legend: {
+                itemStyle: { color: '#64748b' }
+            },
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * Investment: Efficient Frontier Scatter Chart
+     */
+    createEfficientFrontierChart(frontierData, containerId, options = {}) {
+        const chartId = containerId || `efficient-frontier-${++this.chartCounter}`;
+
+        const chartConfig = {
+            chart: {
+                type: 'scatter',
+                backgroundColor: 'transparent',
+                height: options.height || 500,
+                borderRadius: 15,
+                zoomType: 'xy'
+            },
+            title: {
+                text: options.title || 'Efficient Frontier - Risk vs Return',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                title: { text: 'Volatility (Risk) %', style: { color: '#1e293b', fontWeight: '600' } },
+                labels: { style: { color: '#64748b' } },
+                gridLineWidth: 1,
+                gridLineColor: '#e5e7eb'
+            },
+            yAxis: {
+                title: { text: 'Expected Return %', style: { color: '#1e293b', fontWeight: '600' } },
+                labels: { style: { color: '#64748b' } },
+                gridLineColor: '#e5e7eb'
+            },
+            tooltip: {
+                borderRadius: 10,
+                formatter: function() {
+                    return `<b>${this.point.name || 'Portfolio'}</b><br/>` +
+                           `Risk: ${this.x.toFixed(2)}%<br/>` +
+                           `Return: ${this.y.toFixed(2)}%<br/>` +
+                           (this.point.sharpe ? `Sharpe: ${this.point.sharpe.toFixed(3)}` : '');
+                }
+            },
+            series: [
+                {
+                    name: 'Efficient Portfolios',
+                    data: frontierData.efficient || [],
+                    color: this.defaultColors.primary,
+                    marker: { radius: 4, symbol: 'circle' }
+                },
+                {
+                    name: 'Current Portfolio',
+                    data: frontierData.current ? [frontierData.current] : [],
+                    color: this.defaultColors.danger,
+                    marker: { radius: 8, symbol: 'diamond' }
+                },
+                {
+                    name: 'Optimized Strategies',
+                    data: frontierData.strategies || [],
+                    color: this.defaultColors.success,
+                    marker: { radius: 7, symbol: 'triangle' }
+                }
+            ],
+            legend: {
+                itemStyle: { color: '#64748b' }
+            },
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * Investment: Backtest Performance Chart
+     */
+    createBacktestChart(backtestData, containerId, options = {}) {
+        const chartId = containerId || `backtest-chart-${++this.chartCounter}`;
+
+        const series = backtestData.strategies.map((strategy, index) => ({
+            name: strategy.name,
+            data: strategy.values,
+            color: [this.defaultColors.success, this.defaultColors.primary, this.defaultColors.danger][index % 3],
+            lineWidth: 2,
+            marker: { enabled: false }
+        }));
+
+        const chartConfig = {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent',
+                height: options.height || 450,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Backtest Performance Comparison',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            xAxis: {
+                title: { text: 'Months', style: { color: '#1e293b' } },
+                labels: { style: { color: '#64748b' } }
+            },
+            yAxis: {
+                title: { text: 'Portfolio Value (EUR)', style: { color: '#1e293b' } },
+                labels: { style: { color: '#64748b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                valuePrefix: '€',
+                valueDecimals: 0
+            },
+            series: series,
+            legend: {
+                itemStyle: { color: '#64748b' }
+            },
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    /**
+     * Investment: Diversification Radar Chart
+     */
+    createDiversificationRadarChart(diversificationData, containerId, options = {}) {
+        const chartId = containerId || `diversification-radar-${++this.chartCounter}`;
+
+        const categories = diversificationData.map(d => d.name);
+        const values = diversificationData.map(d => d.score);
+
+        const chartConfig = {
+            chart: {
+                polar: true,
+                type: 'area',
+                backgroundColor: 'transparent',
+                height: options.height || 400,
+                borderRadius: 15
+            },
+            title: {
+                text: options.title || 'Portfolio Diversification Score',
+                style: { color: '#1e293b', fontWeight: '800', fontSize: '16px' }
+            },
+            pane: {
+                size: '80%'
+            },
+            xAxis: {
+                categories: categories,
+                tickmarkPlacement: 'on',
+                lineWidth: 0,
+                labels: { style: { color: '#64748b', fontWeight: '600' } }
+            },
+            yAxis: {
+                gridLineInterpolation: 'polygon',
+                lineWidth: 0,
+                min: 0,
+                max: 100,
+                labels: { style: { color: '#64748b' } }
+            },
+            tooltip: {
+                borderRadius: 10,
+                shared: true,
+                pointFormat: '<b>{series.name}:</b> {point.y:.1f}/100'
+            },
+            series: [{
+                name: 'Diversification',
+                data: values,
+                pointPlacement: 'on',
+                color: this.defaultColors.primary,
+                fillOpacity: 0.3,
+                lineWidth: 2
+            }],
+            credits: { enabled: false },
+            exporting: { enabled: true }
+        };
+
+        return { config: chartConfig, containerId: chartId };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ✅ EXISTING: COMPARISON CHARTS
+    // ═══════════════════════════════════════════════════════════
+
     createRadarChart(indicators, containerId, options = {}) {
         const chartId = containerId || `radar-chart-${++this.chartCounter}`;
 
@@ -412,11 +811,6 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * CORRELATION HEATMAP
-     * ═══════════════════════════════════════════════════════════
-     */
     createHeatmapChart(correlationMatrix, symbols, containerId, options = {}) {
         const chartId = containerId || `heatmap-chart-${++this.chartCounter}`;
 
@@ -479,11 +873,10 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * VOLUME INDICATOR (OBV)
-     * ═══════════════════════════════════════════════════════════
-     */
+    // ═══════════════════════════════════════════════════════════
+    // UTILITY METHODS
+    // ═══════════════════════════════════════════════════════════
+
     createOBVChart(obvData, containerId, options = {}) {
         const chartId = containerId || `obv-chart-${++this.chartCounter}`;
 
@@ -525,11 +918,6 @@ class ChatbotCharts {
         return { config: chartConfig, containerId: chartId };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * ATR CHART (Volatility)
-     * ═══════════════════════════════════════════════════════════
-     */
     createATRChart(atrData, containerId, options = {}) {
         const chartId = containerId || `atr-chart-${++this.chartCounter}`;
 
@@ -571,9 +959,7 @@ class ChatbotCharts {
     }
 
     /**
-     * ═══════════════════════════════════════════════════════════
-     * RENDER CHART (Create HTML container + Initialize)
-     * ═══════════════════════════════════════════════════════════
+     * Render Chart to DOM
      */
     renderChart(chartData, targetElement) {
         if (!chartData || !chartData.config || !chartData.containerId) {
@@ -581,7 +967,6 @@ class ChatbotCharts {
             return null;
         }
 
-        // Créer le conteneur si nécessaire
         let container = document.getElementById(chartData.containerId);
         
         if (!container) {
@@ -599,7 +984,6 @@ class ChatbotCharts {
             }
         }
 
-        // Initialiser le graphique Highcharts
         try {
             const chart = Highcharts.chart(chartData.containerId, chartData.config);
             this.chartInstances.set(chartData.containerId, chart);
@@ -613,11 +997,6 @@ class ChatbotCharts {
         }
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * DESTROY CHART
-     * ═══════════════════════════════════════════════════════════
-     */
     destroyChart(chartId) {
         const chart = this.chartInstances.get(chartId);
         if (chart) {
@@ -627,11 +1006,6 @@ class ChatbotCharts {
         }
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * EXPORT CHART (PNG/SVG)
-     * ═══════════════════════════════════════════════════════════
-     */
     exportChart(chartId, format = 'png') {
         const chart = this.chartInstances.get(chartId);
         
@@ -655,20 +1029,10 @@ class ChatbotCharts {
         }
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * GET ALL ACTIVE CHARTS
-     * ═══════════════════════════════════════════════════════════
-     */
     getAllCharts() {
         return Array.from(this.chartInstances.keys());
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * DESTROY ALL CHARTS
-     * ═══════════════════════════════════════════════════════════
-     */
     destroyAllCharts() {
         this.chartInstances.forEach((chart, id) => {
             chart.destroy();
@@ -690,4 +1054,4 @@ if (typeof window !== 'undefined') {
     window.ChatbotCharts = ChatbotCharts;
 }
 
-console.log('✅ ChatbotCharts (Legal Compliant) loaded - Oscillators Only');
+console.log('✅ ChatbotCharts ULTRA v5.0 loaded - Budget & Investment integrated');
