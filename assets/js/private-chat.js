@@ -63,15 +63,14 @@ class PrivateChatSystem {
         this.listenToMessages();
     }
 
-    // ✅ Créer la conversation si elle n'existe pas
+    // ✅ Créer la conversation si elle n'existe pas (SANS LECTURE PRÉALABLE)
     async createConversationIfNotExists() {
         const convRef = firebase.firestore()
             .collection('conversations')
             .doc(this.currentConversationId);
 
-        const convDoc = await convRef.get();
-
-        if (!convDoc.exists) {
+        try {
+            // ✅ Créer ou mettre à jour sans lecture préalable
             await convRef.set({
                 participants: [this.currentUser.uid, this.otherUserId],
                 participantsData: {
@@ -86,16 +85,23 @@ class PrivateChatSystem {
                         email: this.otherUserData.email
                     }
                 },
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastMessage: null,
                 lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
                 unreadCount: {
                     [this.currentUser.uid]: 0,
                     [this.otherUserId]: 0
                 }
-            });
+            }, { merge: true });
 
-            console.log('✅ Conversation created:', this.currentConversationId);
+            // ✅ Ajouter createdAt uniquement si nouveau document
+            await convRef.set({
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessage: null
+            }, { merge: true });
+
+            console.log('✅ Conversation ready:', this.currentConversationId);
+        } catch (error) {
+            console.error('❌ Error setting up conversation:', error);
+            throw error;
         }
     }
 
