@@ -1,11 +1,11 @@
 /* ============================================
-   MESSAGES HUB - Layout 2 Colonnes
+   MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
    ============================================ */
 
 /* ===== LAYOUT PRINCIPAL ===== */
 .messages-container {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 320px 1fr; /* 🎯 Panel gauche réduit (320px au lieu de 400px) pour agrandir la zone de conversation */
     gap: 24px;
     height: calc(100vh - 140px);
     max-width: 1600px;
@@ -415,6 +415,24 @@ body.dark-mode .chat-empty-state h3 {
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
+/* 📱 Bouton Retour Mobile (caché sur desktop) */
+.chat-back-btn {
+    display: none; /* Caché par défaut sur desktop */
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    margin-right: 12px;
+}
+
+.chat-back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 .chat-header-user {
     display: flex;
     align-items: center;
@@ -712,37 +730,111 @@ body.dark-mode .chat-input {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
     .messages-container {
-        grid-template-columns: 350px 1fr;
+        grid-template-columns: 300px 1fr; /* Réduction progressive du panel gauche */
     }
 }
 
+/* 📱 ===== MODE MOBILE (STYLE INSTAGRAM) ===== */
 @media (max-width: 968px) {
     .messages-container {
-        grid-template-columns: 1fr;
-        height: auto;
+        grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+        gap: 0;
+        padding: 0;
+        height: 100vh;
     }
     
+    /* Par défaut sur mobile : afficher uniquement la liste des conversations */
     .conversations-panel {
-        height: 600px;
+        display: flex;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
     }
     
     .chat-panel {
-        height: 600px;
-        margin-top: 24px;
+        display: none; /* Caché par défaut sur mobile */
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+    
+    /* 🎯 Quand une conversation est active : basculer l'affichage */
+    .messages-container.mobile-chat-active .conversations-panel {
+        display: none; /* Cacher la liste */
+    }
+    
+    .messages-container.mobile-chat-active .chat-panel {
+        display: flex; /* Afficher le chat en plein écran */
+    }
+    
+    /* 📱 Afficher le bouton retour sur mobile uniquement */
+    .chat-back-btn {
+        display: block !important;
+    }
+    
+    /* Ajustements header mobile */
+    .chat-header {
+        padding: 16px;
+    }
+    
+    .chat-header-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .chat-header-info h3 {
+        font-size: 1rem;
+    }
+    
+    .chat-header-status {
+        font-size: 0.8rem;
+    }
+    
+    /* Messages pleine largeur sur petit écran */
+    .chat-message {
+        max-width: 85%;
+    }
+    
+    /* Input chat ajusté */
+    .chat-input-wrapper {
+        padding: 12px;
     }
 }
 
 @media (max-width: 768px) {
-    .messages-container {
+    /* Ajustements supplémentaires pour très petits écrans */
+    .conversation-card {
+        border-radius: 12px;
         padding: 12px;
     }
     
-    .conversations-panel,
-    .chat-panel {
-        border-radius: 16px;
+    .conversation-avatar {
+        width: 44px;
+        height: 44px;
     }
     
-    .chat-message {
-        max-width: 85%;
+    .filter-btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    
+    .search-users-section {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Optimisations extrême mobile */
+    .chat-header {
+        padding: 12px;
+    }
+    
+    .chat-messages {
+        padding: 16px;
+    }
+    
+    .chat-message-bubble {
+        font-size: 0.9rem;
+        padding: 10px 14px;
     }
 }
