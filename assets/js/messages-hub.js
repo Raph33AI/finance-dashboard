@@ -38,9 +38,9 @@ class MessagesHub {
     }
 
     /* ==========================================
-       ✅ NOUVELLE MÉTHODE : Créer ou récupérer une conversation
-       ========================================== */
-    
+    ✅ MÉTHODE AMÉLIORÉE : Créer ou récupérer une conversation
+    ========================================== */
+
     async getOrCreateConversation(otherUserId, otherUserData) {
         try {
             console.log('🔍 Getting or creating conversation with:', otherUserId);
@@ -53,22 +53,41 @@ class MessagesHub {
             
             // ✅ Vérifier si la conversation existe déjà dans Firestore
             const conversationRef = this.db.collection('conversations').doc(conversationId);
-            const conversationDoc = await conversationRef.get();
             
-            if (conversationDoc.exists) {
+            let conversationDoc;
+            try {
+                conversationDoc = await conversationRef.get();
+            } catch (readError) {
+                console.error('❌ Error reading conversation:', readError);
+                // Si la lecture échoue (permissions), c'est qu'elle est soft-deleted
+                // On va essayer de la restaurer
+                console.log('🔄 Attempting to restore conversation...');
+            }
+            
+            if (conversationDoc && conversationDoc.exists) {
                 console.log('✅ Conversation already exists');
                 
-                // ✅ Vérifier si l'utilisateur l'avait supprimée (soft delete)
                 const convData = conversationDoc.data();
                 const deletedBy = convData.deletedBy || [];
                 
                 if (deletedBy.includes(this.currentUser.uid)) {
                     console.log('🔄 Restoring conversation (removing from deletedBy)...');
                     
-                    // Retirer l'utilisateur de deletedBy pour "restaurer" la conversation
-                    await conversationRef.update({
-                        deletedBy: firebase.firestore.FieldValue.arrayRemove(this.currentUser.uid)
-                    });
+                    try {
+                        // ✅ Retirer l'utilisateur de deletedBy pour "restaurer" la conversation
+                        await conversationRef.update({
+                            deletedBy: firebase.firestore.FieldValue.arrayRemove(this.currentUser.uid),
+                            lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        console.log('✅ Conversation restored');
+                    } catch (updateError) {
+                        console.error('❌ Error restoring conversation:', updateError);
+                        console.error('   Error code:', updateError.code);
+                        console.error('   Error message:', updateError.message);
+                        
+                        throw new Error('Failed to restore conversation. Please check Firestore rules.');
+                    }
                 }
                 
                 return conversationId;
@@ -86,42 +105,51 @@ class MessagesHub {
                 otherUserData = await this.getUserData(otherUserId);
             }
             
-            // Créer la conversation
-            await conversationRef.set({
-                participants: participants,
-                participantsData: {
-                    [this.currentUser.uid]: {
-                        displayName: currentUserData.displayName,
-                        photoURL: currentUserData.photoURL,
-                        email: currentUserData.email,
-                        plan: currentUserData.plan
+            try {
+                // Créer la conversation
+                await conversationRef.set({
+                    participants: participants,
+                    participantsData: {
+                        [this.currentUser.uid]: {
+                            displayName: currentUserData.displayName,
+                            photoURL: currentUserData.photoURL,
+                            email: currentUserData.email,
+                            plan: currentUserData.plan
+                        },
+                        [otherUserId]: {
+                            displayName: otherUserData.displayName,
+                            photoURL: otherUserData.photoURL,
+                            email: otherUserData.email,
+                            plan: otherUserData.plan
+                        }
                     },
-                    [otherUserId]: {
-                        displayName: otherUserData.displayName,
-                        photoURL: otherUserData.photoURL,
-                        email: otherUserData.email,
-                        plan: otherUserData.plan
-                    }
-                },
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastMessage: {
-                    text: '',
-                    senderId: this.currentUser.uid
-                },
-                unreadCount: {
-                    [this.currentUser.uid]: 0,
-                    [otherUserId]: 0
-                },
-                deletedBy: []
-            });
-            
-            console.log('✅ New conversation created:', conversationId);
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastMessage: {
+                        text: '',
+                        senderId: this.currentUser.uid
+                    },
+                    unreadCount: {
+                        [this.currentUser.uid]: 0,
+                        [otherUserId]: 0
+                    },
+                    deletedBy: []
+                });
+                
+                console.log('✅ New conversation created:', conversationId);
+                
+            } catch (createError) {
+                console.error('❌ Error creating conversation:', createError);
+                console.error('   Error code:', createError.code);
+                console.error('   Error message:', createError.message);
+                
+                throw new Error('Failed to create conversation. Please check Firestore rules.');
+            }
             
             return conversationId;
             
         } catch (error) {
-            console.error('❌ Error creating conversation:', error);
+            console.error('❌ Error in getOrCreateConversation:', error);
             throw error;
         }
     }
