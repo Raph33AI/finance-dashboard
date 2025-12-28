@@ -1676,6 +1676,14 @@ class PostManager {
             // Fermer la modal de sélection
             this.closeShareMessageModal();
 
+            // ✅ CORRECTION : Ne plus utiliser window.privateChat
+            // On envoie directement via Firestore
+
+            if (!this.currentUser) {
+                alert('You must be logged in to send messages.');
+                return;
+            }
+
             // Préparer les données du post
             const postData = {
                 postId: this.postId,
@@ -1686,22 +1694,85 @@ class PostManager {
                 url: window.location.href
             };
 
-            // Vérifier que le système de chat privé est chargé
-            if (!window.privateChat) {
-                console.error('❌ Private chat system not loaded');
-                alert('Chat system is not available. Please try again later.');
-                return;
+            // ✅ Créer ou récupérer l'ID de conversation
+            const participants = [this.currentUser.uid, userId].sort();
+            const conversationId = participants.join('_');
+
+            const db = firebase.firestore();
+            const conversationRef = db.collection('conversations').doc(conversationId);
+
+            // Vérifier si la conversation existe
+            const conversationDoc = await conversationRef.get();
+
+            if (!conversationDoc.exists) {
+                // Créer la conversation
+                const currentUserData = {
+                    displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
+                    photoURL: this.currentUser.photoURL || null,
+                    email: this.currentUser.email || null,
+                    plan: window.currentUserData?.plan || 'free'
+                };
+
+                await conversationRef.set({
+                    participants: participants,
+                    participantsData: {
+                        [this.currentUser.uid]: currentUserData,
+                        [userId]: {
+                            displayName: userData.displayName || 'User',
+                            photoURL: userData.photoURL || null,
+                            email: userData.email || null,
+                            plan: userData.plan || 'free'
+                        }
+                    },
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastMessage: {
+                        text: `📌 Shared a post: "${postData.title}"`,
+                        senderId: this.currentUser.uid
+                    },
+                    unreadCount: {
+                        [this.currentUser.uid]: 0,
+                        [userId]: 1
+                    },
+                    deletedBy: []
+                });
+
+                console.log('✅ Conversation created:', conversationId);
             }
 
-            // Vérifier que messagesHub est chargé
-            if (!window.messagesHub) {
-                console.error('❌ Messages hub not loaded');
-                alert('Messaging system is not available. Please try again later.');
-                return;
-            }
+            // ✅ Créer le message avec les données du post
+            const messageData = {
+                type: 'shared_post',
+                text: `📌 Shared a post: "${postData.title}"`,
+                senderId: this.currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                sharedPost: {
+                    postId: postData.postId,
+                    title: postData.title,
+                    excerpt: postData.excerpt,
+                    authorName: postData.authorName,
+                    channelId: postData.channelId,
+                    url: postData.url
+                },
+                attachments: []
+            };
 
-            // Utiliser la méthode de privateChat pour envoyer le post
-            await window.privateChat.sendPostAsMessage(userId, postData, userData);
+            // Ajouter le message à Firestore
+            await conversationRef
+                .collection('messages')
+                .add(messageData);
+
+            // Mettre à jour la conversation
+            await conversationRef.update({
+                lastMessage: {
+                    text: `📌 Shared a post: "${postData.title}"`,
+                    senderId: this.currentUser.uid
+                },
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
+            });
+
+            console.log('✅ Post shared successfully as message');
 
             // Notification de succès
             this.showSuccessNotification(`Post shared with ${userData.displayName || 'user'}!`);
@@ -1723,7 +1794,19 @@ class PostManager {
 
         } catch (error) {
             console.error('❌ Error sending post as message:', error);
-            alert('Failed to send post. Please try again.');
+            
+            // Message d'erreur plus explicite
+            let errorMessage = 'Failed to send post. ';
+            
+            if (error.code === 'permission-denied') {
+                errorMessage += 'Permission denied. Please check your Firestore security rules.';
+            } else if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += 'Please try again.';
+            }
+            
+            alert(errorMessage);
         }
     }
 
