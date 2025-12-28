@@ -155,14 +155,14 @@ class MessagesHub {
     }
 
     /* ==========================================
-       ✅ MÉTHODE MODIFIÉE : Ouvrir une conversation (avec création auto)
-       ========================================== */
-    
+    ✅ MÉTHODE MODIFIÉE : Ouvrir une conversation (avec ID passé)
+    ========================================== */
+
     async openConversation(userId, userData) {
         try {
             console.log('💬 Opening conversation with:', userData);
 
-            // ✅ ÉTAPE 1 : Créer ou récupérer la conversation
+            // ✅ ÉTAPE 1 : Créer ou récupérer la conversation (UNE SEULE FOIS)
             const conversationId = await this.getOrCreateConversation(userId, userData);
             
             console.log('✅ Conversation ID ready:', conversationId);
@@ -186,8 +186,8 @@ class MessagesHub {
                 return;
             }
 
-            // ✅ ÉTAPE 5 : Ouvrir le chat
-            await window.privateChat.openChat(userId, userData);
+            // ✅ ÉTAPE 5 : Ouvrir le chat EN PASSANT L'ID DE CONVERSATION
+            await window.privateChat.openChat(userId, userData, conversationId);
             
             console.log('✅ Chat opened successfully');
 
@@ -384,7 +384,8 @@ class MessagesHub {
                     return;
                 }
 
-                this.conversations = [];
+                // ✅ PROTECTION ANTI-DOUBLONS : Utiliser un Map pour dédupliquer
+                const conversationsMap = new Map();
 
                 for (const doc of snapshot.docs) {
                     const convData = doc.data();
@@ -396,11 +397,17 @@ class MessagesHub {
                         continue;
                     }
                     
+                    // ✅ PROTECTION : Ignorer les doublons (par ID)
+                    if (conversationsMap.has(doc.id)) {
+                        console.warn('⚠ Duplicate conversation detected, skipping:', doc.id);
+                        continue;
+                    }
+                    
                     const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
                     const otherUserData = await this.getUserData(otherUserId);
                     const isOnline = await this.checkUserOnline(otherUserId);
 
-                    this.conversations.push({
+                    conversationsMap.set(doc.id, {
                         id: doc.id,
                         otherUserId: otherUserId,
                         otherUserData: otherUserData,
@@ -412,7 +419,10 @@ class MessagesHub {
                     });
                 }
 
-                console.log('✅ Conversations loaded:', this.conversations.length);
+                // ✅ Convertir le Map en Array (garantit l'unicité)
+                this.conversations = Array.from(conversationsMap.values());
+
+                console.log('✅ Conversations loaded (deduplicated):', this.conversations.length);
                 this.filterConversations(this.currentFilter);
                 this.updateCounters();
                 this.updateUnreadBadges();
