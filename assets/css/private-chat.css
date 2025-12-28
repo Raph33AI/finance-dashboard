@@ -277,3 +277,312 @@ body.dark-mode .chat-input {
         max-width: 85%;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ CORRECTION - BULLES DE MESSAGE ADAPTATIVES
+   Force les bulles à s'adapter à la longueur du contenu
+   ════════════════════════════════════════════════════════════════ */
+
+/* Conteneur du message - Utiliser flex pour le positionnement */
+.chat-message {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+}
+
+.chat-message.own {
+    flex-direction: row-reverse !important;
+    justify-content: flex-start !important;
+}
+
+.chat-message.other {
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+}
+
+/* Avatar - Taille fixe */
+.chat-message-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    object-fit: cover !important;
+    border: 2px solid #667eea !important;
+}
+
+/* Container du contenu - Largeur automatique */
+.chat-message-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    max-width: 70% !important;
+    min-width: 0 !important;
+}
+
+.chat-message.own .chat-message-content {
+    align-items: flex-end !important;
+}
+
+/* Bulle de message - Largeur adaptative au contenu */
+.chat-message-bubble {
+    width: fit-content !important;
+    max-width: 100% !important;
+    min-width: 120px !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Bulles des messages normaux (texte) */
+.chat-message.own .chat-message-bubble {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+.chat-message.other .chat-message-bubble {
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+body.dark-mode .chat-message.other .chat-message-bubble {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+/* Temps du message - Sous la bulle */
+.chat-message-time {
+    font-size: 0.7rem !important;
+    color: #94a3b8 !important;
+    margin-top: 4px !important;
+    padding: 0 4px !important;
+    font-weight: 500 !important;
+}
+
+/* Bouton de suppression - Positionné à côté de la bulle */
+.message-delete-btn {
+    position: static !important;
+    opacity: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.75rem !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+    margin-left: 8px !important;
+}
+
+.chat-message:hover .message-delete-btn {
+    opacity: 1 !important;
+}
+
+.message-delete-btn:hover {
+    background: #ef4444 !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   📨 SHARED POST - Largeur fixe pour cohérence
+   ════════════════════════════════════════════════════════════════ */
+
+/* Post partagé - Largeur fixe optimale */
+.shared-post-message .chat-message-content {
+    max-width: 380px !important;
+}
+
+.shared-post-message .chat-message-bubble {
+    width: 100% !important;
+    min-width: 320px !important;
+    max-width: 380px !important;
+}
+
+/* Post partagé - Responsive */
+@media (max-width: 768px) {
+    .shared-post-message .chat-message-content {
+        max-width: 300px !important;
+    }
+    
+    .shared-post-message .chat-message-bubble {
+        min-width: 260px !important;
+        max-width: 300px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .shared-post-message .chat-message-content {
+        max-width: 260px !important;
+    }
+    
+    .shared-post-message .chat-message-bubble {
+        min-width: 220px !important;
+        max-width: 260px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   📎 ATTACHMENTS - Largeur adaptative
+   ════════════════════════════════════════════════════════════════ */
+
+/* Images attachées */
+.message-attachment img {
+    max-width: 280px !important;
+    max-height: 280px !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* Fichiers attachés */
+.message-attachment-file {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    background: rgba(102, 126, 234, 0.08) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(102, 126, 234, 0.15) !important;
+    min-width: 200px !important;
+}
+
+body.dark-mode .message-attachment-file {
+    background: rgba(102, 126, 234, 0.15) !important;
+    border-color: rgba(102, 126, 234, 0.25) !important;
+}
+
+.message-attachment-icon {
+    font-size: 1.5rem !important;
+    color: #667eea !important;
+    flex-shrink: 0 !important;
+}
+
+.message-attachment-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.message-attachment-name {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.message-attachment-size {
+    font-size: 0.7rem !important;
+    color: var(--text-secondary) !important;
+    margin-top: 2px !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE - Messages adaptatifs
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .chat-message-content {
+        max-width: 80% !important;
+    }
+    
+    .chat-message-bubble {
+        min-width: 100px !important;
+        padding: 9px 12px !important;
+    }
+    
+    .chat-message-avatar {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-message-content {
+        max-width: 85% !important;
+    }
+    
+    .chat-message-bubble {
+        min-width: 80px !important;
+        padding: 8px 11px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .chat-message-time {
+        font-size: 0.65rem !important;
+    }
+    
+    .message-attachment img {
+        max-width: 220px !important;
+        max-height: 220px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✨ ANIMATIONS & MICRO-INTERACTIONS
+   ════════════════════════════════════════════════════════════════ */
+
+@keyframes messageBubbleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.chat-message-bubble {
+    animation: messageBubbleIn 0.3s ease-out !important;
+}
+
+/* Hover sur la bulle */
+.chat-message-bubble:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.chat-message.own .chat-message-bubble:hover {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎯 OPTIMISATIONS PERFORMANCES
+   ════════════════════════════════════════════════════════════════ */
+
+.chat-message,
+.chat-message-bubble,
+.message-delete-btn {
+    will-change: auto !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
+
+/* Désactiver les animations si préférence utilisateur */
+@media (prefers-reduced-motion: reduce) {
+    .chat-message-bubble,
+    .message-delete-btn {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ FIN DES CORRECTIONS - BULLES ADAPTATIVES
+   ════════════════════════════════════════════════════════════════ */
