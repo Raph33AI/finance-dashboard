@@ -391,13 +391,17 @@ class PrivateChat {
     }
 
     /* ==========================================
-       📨 RENDU SPÉCIAL POUR LES POSTS PARTAGÉS
-       ========================================== */
-    /**
-     * Rendu spécial pour les messages de post partagé - VERSION SIMPLIFIÉE
-     */
+    📨 RENDU SPÉCIAL POUR LES POSTS PARTAGÉS (VERSION AMÉLIORÉE)
+    ========================================== */
+
     renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time) {
         const post = message.sharedPost;
+        
+        // ✅ Sécurité : Vérifier que le post existe
+        if (!post) {
+            console.error('❌ Missing sharedPost data in message:', messageId);
+            return this.createMessageBubble(message, messageId); // Fallback vers message normal
+        }
         
         const deleteBtn = isOwn ? `
             <button class="message-delete-btn" 
@@ -409,19 +413,28 @@ class PrivateChat {
 
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
 
-        // ✅ Extraire uniquement le texte du titre (sans HTML)
-        const cleanTitle = this.stripHtml(post.title);
+        // ✅ Nettoyer et valider le titre
+        const rawTitle = post.title || 'Untitled Post';
+        const cleanTitle = this.stripHtml(rawTitle).trim() || 'Untitled Post';
         
-        // ✅ Formater la date si disponible (sinon masquer)
+        // ✅ Nettoyer et valider l'auteur
+        const rawAuthor = post.authorName || 'Unknown Author';
+        const cleanAuthor = this.stripHtml(rawAuthor).trim() || 'Unknown Author';
+        
+        // ✅ Formater la date (si disponible)
         let dateHTML = '';
         if (post.publishedDate) {
-            dateHTML = `<span>• ${post.publishedDate}</span>`;
+            const cleanDate = this.escapeHtml(post.publishedDate.toString());
+            dateHTML = `<span>• ${cleanDate}</span>`;
         }
+        
+        // ✅ Valider l'URL
+        const postUrl = post.url || '#';
 
         return `
             <div class="chat-message ${isOwn ? 'own' : ''} shared-post-message" data-message-id="${messageId}">
                 <img src="${avatar}" 
-                    alt="${displayName}" 
+                    alt="${this.escapeHtml(displayName)}" 
                     class="chat-message-avatar" 
                     onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
                     onerror="this.src='${fallbackAvatar}'"
@@ -436,25 +449,23 @@ class PrivateChat {
                         </div>
                         
                         <!-- Contenu cliquable -->
-                        <div class="shared-post-content" onclick="window.open('${post.url}', '_blank')">
+                        <div class="shared-post-content" onclick="window.open('${postUrl}', '_blank')">
                             
                             <!-- Titre -->
-                            <div class="shared-post-title">
-                                ${this.escapeHtml(cleanTitle)}
-                            </div>
+                            <div class="shared-post-title">${this.escapeHtml(cleanTitle)}</div>
                             
                             <!-- Auteur + Date -->
                             <div class="shared-post-meta">
                                 <span class="shared-post-author">
                                     <i class="fas fa-user"></i>
-                                    ${this.escapeHtml(post.authorName)}
+                                    ${this.escapeHtml(cleanAuthor)}
                                 </span>
                                 ${dateHTML}
                             </div>
                         </div>
                         
                         <!-- Bouton View Post -->
-                        <a href="${post.url}" target="_blank" class="shared-post-view-btn">
+                        <a href="${postUrl}" target="_blank" class="shared-post-view-btn" onclick="event.stopPropagation()">
                             View Post <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
@@ -466,13 +477,20 @@ class PrivateChat {
     }
 
     /**
-     * Nettoyer le HTML d'une chaîne (nouvelle méthode utilitaire)
+     * Nettoyer le HTML d'une chaîne (version améliorée)
      */
     stripHtml(html) {
         if (!html) return '';
+        
+        // Créer un élément temporaire pour parser le HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
-        return tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Extraire le texte brut
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Nettoyer les espaces multiples et retourner
+        return text.replace(/\s+/g, ' ').trim();
     }
 
     /* ==========================================
@@ -711,33 +729,45 @@ class PrivateChat {
      * @param {Object} postData - Données du post partagé
      * @param {Object} userData - Données de l'utilisateur destinataire
      */
+    /**
+     * Envoyer un post partagé comme message privé (VERSION AMÉLIORÉE)
+     */
     async sendPostAsMessage(userId, postData, userData) {
         try {
             console.log('📨 Sending post as message to:', userId);
             console.log('📄 Post data:', postData);
 
-            // ✅ CORRECTION : Demander à messages-hub de gérer la création
+            // ✅ VALIDATION : Vérifier que les données essentielles existent
+            if (!postData || !postData.title || !postData.url) {
+                console.error('❌ Invalid post data:', postData);
+                throw new Error('Missing required post information');
+            }
+
+            // ✅ Créer ou récupérer la conversation
             if (!this.currentConversationId || this.currentChatUser?.uid !== userId) {
                 console.log('🔄 Opening conversation via messages-hub first...');
                 
-                // Demander à messages-hub de créer/récupérer la conversation
                 const conversationId = await window.messagesHub.getOrCreateConversation(userId, userData);
                 this.currentConversationId = conversationId;
                 this.currentChatUser = userData;
             }
 
+            // ✅ Nettoyer le titre pour l'aperçu
+            const cleanTitle = this.stripHtml(postData.title).trim() || 'Untitled Post';
+            const previewText = `📌 Shared a post: "${cleanTitle.substring(0, 50)}${cleanTitle.length > 50 ? '...' : ''}"`;
+
             // Créer le message avec les données du post
             const messageData = {
                 type: 'shared_post',
-                text: `📌 Shared a post: "${postData.title}"`,
+                text: previewText,
                 senderId: this.currentUser.uid,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 sharedPost: {
-                    postId: postData.postId,
+                    postId: postData.postId || null,
                     title: postData.title,
-                    excerpt: postData.excerpt,
-                    authorName: postData.authorName,
-                    channelId: postData.channelId,
+                    excerpt: postData.excerpt || null,
+                    authorName: postData.authorName || 'Unknown Author',
+                    channelId: postData.channelId || null,
                     url: postData.url,
                     publishedDate: postData.publishedDate || null
                 },
@@ -757,7 +787,7 @@ class PrivateChat {
                 .doc(this.currentConversationId)
                 .update({
                     lastMessage: {
-                        text: `📌 Shared a post: "${postData.title}"`,
+                        text: previewText,
                         senderId: this.currentUser.uid
                     },
                     lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -768,6 +798,7 @@ class PrivateChat {
 
         } catch (error) {
             console.error('❌ Error sending post as message:', error);
+            alert(`Failed to share post: ${error.message}`);
             throw error;
         }
     }
