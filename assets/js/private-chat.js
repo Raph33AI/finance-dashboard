@@ -35,12 +35,29 @@ class PrivateChat {
        ========================================== */
     
     /**
-     * ✅ RÉCUPÉRATION ULTRA-ROBUSTE DU PLAN UTILISATEUR
-     * Logique identique à access-control.js
+     * ✅ NOUVELLE MÉTHODE : Utilise window.currentUserData en priorité
      */
     async getUserData(userId) {
         try {
-            console.log('🔍 Fetching user data for:', userId);
+            console.log('🔍 Getting user data for:', userId);
+            
+            // ✅ SI C'EST L'UTILISATEUR ACTUEL : Utiliser window.currentUserData
+            if (userId === this.currentUser?.uid && window.currentUserData) {
+                console.log('✅ Using cached data from auth-guard.js');
+                console.log('📊 Plan:', window.currentUserData.plan);
+                
+                return {
+                    uid: userId,
+                    displayName: window.currentUserData.displayName || window.currentUserData.email?.split('@')[0] || 'You',
+                    photoURL: window.currentUserData.photoURL || null,
+                    email: window.currentUserData.email || null,
+                    plan: window.currentUserData.plan || 'free',
+                    lastLoginAt: window.currentUserData.lastLoginAt || null
+                };
+            }
+            
+            // ✅ SINON : Requête Firestore pour les autres utilisateurs
+            console.log('📥 Fetching from Firestore...');
             
             const userDoc = await this.db.collection('users').doc(userId).get();
             
@@ -58,67 +75,22 @@ class PrivateChat {
 
             const userData = userDoc.data();
             
-            console.log('📄 Raw Firestore data:', userData);
+            console.log('📄 Firestore data:', userData);
             
-            // ✅ LOGIQUE IDENTIQUE À ACCESS-CONTROL.JS
-            let userPlan = (userData.plan || '').toLowerCase();
-            let subscriptionStatus = (userData.subscriptionStatus || 'none').toLowerCase();
-            const promoCode = (userData.promoCode || '').toUpperCase();
-            const trialEndsAt = userData.trialEndsAt || null;
+            // ✅ Récupération du plan (avec fallbacks)
+            const plan = userData.plan || 
+                        userData.subscriptionPlan || 
+                        userData.currentPlan || 
+                        'free';
             
-            console.log('   Plan field:', userPlan);
-            console.log('   Subscription status:', subscriptionStatus);
-            console.log('   Promo code:', promoCode);
-            
-            // ✅ VÉRIFICATION STRICTE : FREE + INACTIVE = NONE
-            if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
-                console.warn('⚠ Plan "free" with inactive status - treating as free');
-                userPlan = 'free';
-            }
-            
-            // ✅ GESTION DU TRIAL
-            if (subscriptionStatus === 'trial' && trialEndsAt) {
-                const now = new Date();
-                const expirationDate = new Date(trialEndsAt);
-                
-                if (now < expirationDate) {
-                    userPlan = 'trial';
-                    console.log('🎁 Trial mode detected - expires:', expirationDate);
-                }
-            }
-            // ✅ CODES PROMO
-            else if (promoCode === 'FREEPRO') {
-                userPlan = 'freepro';
-            } else if (promoCode === 'FREEPLATINUM') {
-                userPlan = 'freeplatinum';
-            }
-            
-            // ✅ FALLBACKS SI PLAN VIDE
-            if (!userPlan || userPlan === 'none' || userPlan === '') {
-                userPlan = (userData.subscriptionPlan || '').toLowerCase();
-                
-                if (!userPlan || userPlan === 'none') {
-                    userPlan = (userData.currentPlan || '').toLowerCase();
-                    
-                    if (!userPlan || userPlan === 'none') {
-                        userPlan = (userData.subscription?.plan || '').toLowerCase();
-                        
-                        if (!userPlan || userPlan === 'none') {
-                            console.warn('⚠ NO plan found - defaulting to "free"');
-                            userPlan = 'free';
-                        }
-                    }
-                }
-            }
-            
-            console.log('✅ Final plan:', userPlan);
+            console.log('📊 Plan:', plan);
 
             return {
                 uid: userId,
                 displayName: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
                 photoURL: userData.photoURL || null,
                 email: userData.email || null,
-                plan: userPlan,
+                plan: plan,
                 lastLoginAt: userData.lastLoginAt || null
             };
 

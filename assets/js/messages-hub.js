@@ -1,7 +1,7 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v2.1
-   💬 Liste des conversations + Statut en ligne
-   🔥 Récupération robuste du plan utilisateur
+   MESSAGES-HUB.JS - Messages Hub System v2.2
+   💬 Utilise window.currentUserData (chargé par auth-guard.js)
+   🔥 Firebase Firestore en temps réel
    ============================================ */
 
 class MessagesHub {
@@ -24,6 +24,9 @@ class MessagesHub {
             if (user) {
                 console.log('✅ User authenticated:', user.email);
                 
+                // Attendre que auth-guard.js charge les données
+                await this.waitForUserData();
+                
                 // Mettre à jour lastLoginAt
                 await this.updateUserLoginTime();
                 
@@ -35,16 +38,61 @@ class MessagesHub {
     }
 
     /* ==========================================
-       👤 RÉCUPÉRATION ROBUSTE DES DONNÉES UTILISATEUR
+       ⏰ ATTENDRE QUE AUTH-GUARD CHARGE LES DONNÉES
+       ========================================== */
+    
+    async waitForUserData() {
+        return new Promise((resolve) => {
+            // Si déjà chargé
+            if (window.currentUserData) {
+                console.log('✅ User data already loaded by auth-guard.js');
+                resolve();
+                return;
+            }
+            
+            // Sinon, attendre l'événement
+            console.log('⏳ Waiting for userDataLoaded event...');
+            window.addEventListener('userDataLoaded', () => {
+                console.log('✅ User data loaded by auth-guard.js');
+                resolve();
+            }, { once: true });
+            
+            // Timeout de sécurité (5 secondes)
+            setTimeout(() => {
+                console.warn('⚠ Timeout waiting for user data - proceeding anyway');
+                resolve();
+            }, 5000);
+        });
+    }
+
+    /* ==========================================
+       👤 RÉCUPÉRATION DES DONNÉES UTILISATEUR
        ========================================== */
     
     /**
-     * ✅ RÉCUPÉRATION ULTRA-ROBUSTE DU PLAN UTILISATEUR
-     * Logique identique à access-control.js
+     * ✅ NOUVELLE MÉTHODE : Utilise window.currentUserData en priorité
      */
     async getUserData(userId) {
         try {
-            console.log('🔍 Fetching user data for:', userId);
+            console.log('🔍 Getting user data for:', userId);
+            
+            // ✅ SI C'EST L'UTILISATEUR ACTUEL : Utiliser window.currentUserData
+            if (userId === this.currentUser?.uid && window.currentUserData) {
+                console.log('✅ Using cached data from auth-guard.js');
+                console.log('📊 Plan:', window.currentUserData.plan);
+                
+                return {
+                    uid: userId,
+                    displayName: window.currentUserData.displayName || window.currentUserData.email?.split('@')[0] || 'You',
+                    photoURL: window.currentUserData.photoURL || null,
+                    email: window.currentUserData.email || null,
+                    plan: window.currentUserData.plan || 'free',
+                    lastLoginAt: window.currentUserData.lastLoginAt || null
+                };
+            }
+            
+            // ✅ SINON : Requête Firestore pour les autres utilisateurs
+            console.log('📥 Fetching from Firestore...');
             
             const userDoc = await this.db.collection('users').doc(userId).get();
             
@@ -56,76 +104,28 @@ class MessagesHub {
                     displayName: 'Unknown User',
                     photoURL: null,
                     email: null,
-                    plan: 'free' // Défaut pour messagerie
+                    plan: 'free'
                 };
             }
 
             const userData = userDoc.data();
             
-            console.log('📄 Raw Firestore data:', userData);
+            console.log('📄 Firestore data:', userData);
             
-            // ✅ LOGIQUE IDENTIQUE À ACCESS-CONTROL.JS
-            let userPlan = (userData.plan || '').toLowerCase();
-            let subscriptionStatus = (userData.subscriptionStatus || 'none').toLowerCase();
-            const promoCode = (userData.promoCode || '').toUpperCase();
-            const trialEndsAt = userData.trialEndsAt || null;
+            // ✅ Récupération du plan (avec fallbacks)
+            const plan = userData.plan || 
+                        userData.subscriptionPlan || 
+                        userData.currentPlan || 
+                        'free';
             
-            console.log('   Plan field:', userPlan);
-            console.log('   Subscription status:', subscriptionStatus);
-            console.log('   Promo code:', promoCode);
-            
-            // ✅ VÉRIFICATION STRICTE : FREE + INACTIVE = NONE
-            if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
-                console.warn('⚠ Plan "free" with inactive status - treating as free');
-                userPlan = 'free';
-            }
-            
-            // ✅ GESTION DU TRIAL
-            if (subscriptionStatus === 'trial' && trialEndsAt) {
-                const now = new Date();
-                const expirationDate = new Date(trialEndsAt);
-                
-                if (now < expirationDate) {
-                    userPlan = 'trial';
-                    console.log('🎁 Trial mode detected - expires:', expirationDate);
-                }
-            }
-            // ✅ CODES PROMO
-            else if (promoCode === 'FREEPRO') {
-                userPlan = 'freepro';
-            } else if (promoCode === 'FREEPLATINUM') {
-                userPlan = 'freeplatinum';
-            }
-            
-            // ✅ FALLBACKS SI PLAN VIDE
-            if (!userPlan || userPlan === 'none' || userPlan === '') {
-                // Vérifier subscriptionPlan (champ alternatif)
-                userPlan = (userData.subscriptionPlan || '').toLowerCase();
-                
-                if (!userPlan || userPlan === 'none') {
-                    // Vérifier currentPlan
-                    userPlan = (userData.currentPlan || '').toLowerCase();
-                    
-                    if (!userPlan || userPlan === 'none') {
-                        // Vérifier subscription.plan
-                        userPlan = (userData.subscription?.plan || '').toLowerCase();
-                        
-                        if (!userPlan || userPlan === 'none') {
-                            console.warn('⚠ NO plan found in any field - defaulting to "free"');
-                            userPlan = 'free';
-                        }
-                    }
-                }
-            }
-            
-            console.log('✅ Final plan:', userPlan);
+            console.log('📊 Plan:', plan);
 
             return {
                 uid: userId,
                 displayName: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
                 photoURL: userData.photoURL || null,
                 email: userData.email || null,
-                plan: userPlan,
+                plan: plan,
                 lastLoginAt: userData.lastLoginAt || null
             };
 
@@ -198,7 +198,7 @@ class MessagesHub {
                     const convData = doc.data();
                     const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
                     
-                    // ✅ CORRECTION : Récupérer les données utilisateur avec la méthode robuste
+                    // ✅ Récupérer les données utilisateur
                     const otherUserData = await this.getUserData(otherUserId);
                     
                     // ✅ Récupérer le statut en ligne
@@ -626,4 +626,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ messages-hub.js loaded (v2.1 - Robust plan retrieval)');
+console.log('✅ messages-hub.js loaded (v2.2 - Uses window.currentUserData)');
