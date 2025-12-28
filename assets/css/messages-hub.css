@@ -1,9 +1,10 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 2.8 - CORRECTIONS FINALES :
+   Version 2.9 - CORRECTIONS FINALES :
    ✅ Bulles adaptatives (width: fit-content)
    ✅ Images avec taille raisonnable (max 280px)
-   ✅ Bouton suppression au survol
+   ✅ Bouton suppression message : survol desktop, clic mobile
+   ✅ Bouton suppression conversation (rouge dans header)
    ✅ Photos cliquables vers profil
    ============================================ */
 
@@ -560,6 +561,20 @@ body.dark-mode .chat-empty-state h3 {
     transform: scale(1.05);
 }
 
+/* ✅ Bouton suppression conversation (rouge dans header) */
+.chat-delete-conversation-btn {
+    background: rgba(239, 68, 68, 0.3) !important;
+}
+
+.chat-delete-conversation-btn:hover {
+    background: rgba(239, 68, 68, 0.5) !important;
+    transform: scale(1.05);
+}
+
+.chat-delete-conversation-btn i {
+    color: #ffffff !important;
+}
+
 /* Chat Messages */
 .chat-messages {
     flex: 1;
@@ -717,7 +732,7 @@ body.dark-mode .message-attachment-file {
     color: var(--text-secondary, #64748b);
 }
 
-/* ✅ CORRECTION 4 : Bouton suppression au survol */
+/* ✅ CORRECTION 4 : Bouton suppression au survol (DESKTOP) */
 .message-delete-btn {
     position: absolute;
     top: 8px;
@@ -742,6 +757,32 @@ body.dark-mode .message-attachment-file {
 .message-delete-btn:hover {
     background: #dc2626;
     transform: scale(1.08);
+}
+
+/* ✅ Indicateur visuel message actif (mobile) */
+.chat-message.message-active {
+    position: relative;
+}
+
+.chat-message.message-active::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--msg-primary);
+    border-radius: 2px;
+    animation: pulseActive 1.5s ease infinite;
+}
+
+@keyframes pulseActive {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.chat-message.message-active .chat-message-bubble {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
 
 /* Attachment Preview (before sending) */
@@ -997,13 +1038,30 @@ body.dark-mode .chat-input {
         right: 12px;
     }
     
-    /* Bouton suppression sur mobile */
+    /* ✅ CORRECTION MOBILE : Bouton suppression caché par défaut */
     .message-delete-btn {
-        right: 4px;
-        top: 4px;
+        opacity: 0;
+        right: -40px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+    
+    /* ✅ Bouton visible uniquement sur message actif (clic) */
+    .chat-message.message-active .message-delete-btn {
         opacity: 1;
-        padding: 5px 8px;
-        font-size: 0.7rem;
+        right: -44px;
+    }
+    
+    /* ✅ Annuler le survol sur mobile */
+    .chat-message:hover .message-delete-btn {
+        opacity: 0;
+    }
+    
+    .chat-message.message-active:hover .message-delete-btn {
+        opacity: 1;
     }
 }
 
@@ -1051,6 +1109,13 @@ body.dark-mode .chat-input {
         max-width: 180px;
         max-height: 180px;
     }
+    
+    /* Ajuster position bouton suppression sur très petits écrans */
+    .chat-message.message-active .message-delete-btn {
+        right: -38px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
 }
 
 /* Scrollbar Styling */
@@ -1091,4 +1156,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v2.8 - Bulles adaptatives + Images 280px + Suppression au survol + Photos cliquables)');
+console.log('✅ messages-hub.css loaded (v2.9 - Suppression conversation + Bouton toggle mobile + Bulles adaptatives)');
