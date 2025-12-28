@@ -767,7 +767,7 @@ body.dark-mode .message-attachment-file {
 }
 
 /* ✅ Indicateur visuel message actif (mobile) */
-.chat-message.message-active {
+/* .chat-message.message-active {
     position: relative;
 }
 
@@ -790,7 +790,7 @@ body.dark-mode .message-attachment-file {
 
 .chat-message.message-active .chat-message-bubble {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-}
+} */
 
 /* Attachment Preview (before sending) */
 .attachment-preview {
