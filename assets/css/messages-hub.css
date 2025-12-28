@@ -1,6 +1,6 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 2.5 - CORRECTIONS : Panel gauche réduit + Bulles adaptatives
+   Version 2.6 - CORRECTIONS : Zone chat agrandie + Nom blanc + Photos cliquables
    ============================================ */
 
 /* ===== VARIABLES COULEURS ===== */
@@ -14,12 +14,12 @@
 /* ===== LAYOUT PRINCIPAL ===== */
 .messages-container {
     display: grid;
-    grid-template-columns: 280px 1fr; /* 🎯 Panel gauche réduit à 280px (au lieu de 320px) */
-    gap: 24px;
+    grid-template-columns: 320px 1fr; /* 🎯 Panel gauche conservé à 320px */
+    gap: 16px; /* 🎯 Gap réduit de 24px à 16px */
     height: calc(100vh - 140px);
-    max-width: 1600px;
+    max-width: 100%; /* 🎯 Changé de 1600px à 100% pour occuper toute la largeur */
     margin: 0 auto;
-    padding: 20px;
+    padding: 12px; /* 🎯 Padding réduit de 20px à 12px */
 }
 
 /* ===== PANEL GAUCHE (Conversations) ===== */
@@ -492,6 +492,7 @@ body.dark-mode .chat-empty-state h3 {
     flex: 1;
 }
 
+/* 🎯 Photo cliquable dans le header */
 .chat-header-avatar {
     width: 50px;
     height: 50px;
@@ -499,6 +500,14 @@ body.dark-mode .chat-empty-state h3 {
     object-fit: cover;
     border: 3px solid rgba(255, 255, 255, 0.3);
     flex-shrink: 0;
+    cursor: pointer; /* 🎯 Curseur pointer ajouté */
+    transition: all 0.3s ease;
+}
+
+.chat-header-avatar:hover {
+    transform: scale(1.08); /* 🎯 Effet hover ajouté */
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
 }
 
 .chat-header-info {
@@ -506,6 +515,7 @@ body.dark-mode .chat-empty-state h3 {
     min-width: 0;
 }
 
+/* 🎯 Nom/Prénom en BLANC (forcé) */
 .chat-header-info h3 {
     font-size: 1.1rem;
     font-weight: 800;
@@ -513,6 +523,7 @@ body.dark-mode .chat-empty-state h3 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: #ffffff !important; /* 🎯 BLANC FORCÉ */
 }
 
 .chat-header-status {
@@ -521,6 +532,7 @@ body.dark-mode .chat-empty-state h3 {
     display: flex;
     align-items: center;
     gap: 6px;
+    color: #ffffff; /* 🎯 Status aussi en blanc */
 }
 
 .chat-header-actions {
@@ -564,7 +576,6 @@ body.dark-mode .chat-messages {
     gap: 12px;
     max-width: 70%;
     animation: fadeInMessage 0.3s ease;
-    /* 🎯 CORRECTION : Ajout de align-items pour éviter l'étirement vertical */
     align-items: flex-start;
 }
 
@@ -578,6 +589,7 @@ body.dark-mode .chat-messages {
     flex-direction: row-reverse;
 }
 
+/* 🎯 Photo cliquable dans les messages */
 .chat-message-avatar {
     width: 36px;
     height: 36px;
@@ -585,6 +597,14 @@ body.dark-mode .chat-messages {
     object-fit: cover;
     flex-shrink: 0;
     border: 2px solid var(--border-color, #e2e8f0);
+    cursor: pointer; /* 🎯 Curseur pointer ajouté */
+    transition: all 0.3s ease;
+}
+
+.chat-message-avatar:hover {
+    transform: scale(1.12); /* 🎯 Effet hover ajouté */
+    border-color: var(--msg-primary);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .chat-message-content {
@@ -592,7 +612,6 @@ body.dark-mode .chat-messages {
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-    /* 🎯 CORRECTION CRITIQUE : Retirer flex: 1 pour permettre l'adaptation au contenu */
 }
 
 .chat-message-bubble {
@@ -605,9 +624,8 @@ body.dark-mode .chat-messages {
     word-wrap: break-word;
     white-space: pre-wrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    /* 🎯 CORRECTION MAJEURE : Adaptation automatique au contenu */
-    width: fit-content;
-    max-width: 100%; /* Limite la largeur max tout en permettant l'adaptation */
+    width: fit-content; /* 🎯 Adaptation automatique au contenu */
+    max-width: 100%;
 }
 
 body.dark-mode .chat-message-bubble {
@@ -857,7 +875,9 @@ body.dark-mode .chat-input {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
     .messages-container {
-        grid-template-columns: 260px 1fr; /* Réduction progressive du panel gauche */
+        grid-template-columns: 300px 1fr;
+        padding: 10px;
+        gap: 12px;
     }
 }
 
@@ -870,7 +890,6 @@ body.dark-mode .chat-input {
         height: calc(100vh - 80px);
     }
     
-    /* Par défaut sur mobile : afficher uniquement la liste des conversations */
     .conversations-panel {
         display: flex;
         height: 100%;
@@ -885,7 +904,6 @@ body.dark-mode .chat-input {
         border: none;
     }
     
-    /* 🎯 Quand une conversation est active : basculer l'affichage */
     .messages-container.mobile-chat-active .conversations-panel {
         display: none;
     }
@@ -894,12 +912,10 @@ body.dark-mode .chat-input {
         display: flex;
     }
     
-    /* 📱 Afficher le bouton retour sur mobile uniquement */
     .chat-back-btn {
         display: block !important;
     }
     
-    /* Ajustements header mobile */
     .chat-header {
         padding: 16px;
     }
@@ -917,7 +933,6 @@ body.dark-mode .chat-input {
         font-size: 0.8rem;
     }
     
-    /* 🎯 Messages adaptés mobile */
     .chat-message {
         max-width: 85%;
     }
@@ -927,12 +942,10 @@ body.dark-mode .chat-input {
         padding: 10px 14px;
     }
     
-    /* Input chat ajusté */
     .chat-input-wrapper {
         padding: 12px 16px;
     }
     
-    /* Search results mobile */
     .user-search-results {
         left: 12px;
         right: 12px;
@@ -940,7 +953,6 @@ body.dark-mode .chat-input {
 }
 
 @media (max-width: 768px) {
-    /* Ajustements supplémentaires pour très petits écrans */
     .conversation-card {
         border-radius: 12px;
         padding: 12px;
@@ -966,7 +978,6 @@ body.dark-mode .chat-input {
 }
 
 @media (max-width: 480px) {
-    /* Optimisations extrême mobile */
     .chat-header {
         padding: 12px;
     }
@@ -1020,4 +1031,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v2.5 - Panel réduit 280px + Bulles adaptatives)');
+console.log('✅ messages-hub.css loaded (v2.6 - Zone chat maximisée + Photos cliquables)');
