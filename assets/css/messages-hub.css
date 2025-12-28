@@ -14,7 +14,7 @@
 /* ===== LAYOUT PRINCIPAL ===== */
 .messages-container {
     display: grid;
-    grid-template-columns: 320px 1fr; /* 🎯 Panel gauche conservé à 320px */
+    grid-template-columns: 350px 1fr; /* 🎯 Panel gauche conservé à 320px */
     gap: 16px; /* 🎯 Gap réduit de 24px à 16px */
     height: calc(100vh - 140px);
     max-width: 100%; /* 🎯 Changé de 1600px à 100% pour occuper toute la largeur */
