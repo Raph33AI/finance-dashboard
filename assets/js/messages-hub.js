@@ -1,6 +1,7 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v2.4
-   ✅ AJOUT : Détection conversation automatique
+   MESSAGES-HUB.JS - Messages Hub System v2.5
+   ✅ Création automatique de conversations
+   ✅ Ouverture intelligente depuis profil public
    ============================================ */
 
 class MessagesHub {
@@ -37,11 +38,142 @@ class MessagesHub {
     }
 
     /* ==========================================
-       ✅ NOUVELLE MÉTHODE : Ouvrir automatiquement une conversation
+       ✅ NOUVELLE MÉTHODE : Créer ou récupérer une conversation
+       ========================================== */
+    
+    async getOrCreateConversation(otherUserId, otherUserData) {
+        try {
+            console.log('🔍 Getting or creating conversation with:', otherUserId);
+            
+            // ✅ Générer l'ID de conversation (participants triés)
+            const participants = [this.currentUser.uid, otherUserId].sort();
+            const conversationId = participants.join('_');
+            
+            console.log('📝 Conversation ID:', conversationId);
+            
+            // ✅ Vérifier si la conversation existe déjà dans Firestore
+            const conversationRef = this.db.collection('conversations').doc(conversationId);
+            const conversationDoc = await conversationRef.get();
+            
+            if (conversationDoc.exists) {
+                console.log('✅ Conversation already exists');
+                
+                // ✅ Vérifier si l'utilisateur l'avait supprimée (soft delete)
+                const convData = conversationDoc.data();
+                const deletedBy = convData.deletedBy || [];
+                
+                if (deletedBy.includes(this.currentUser.uid)) {
+                    console.log('🔄 Restoring conversation (removing from deletedBy)...');
+                    
+                    // Retirer l'utilisateur de deletedBy pour "restaurer" la conversation
+                    await conversationRef.update({
+                        deletedBy: firebase.firestore.FieldValue.arrayRemove(this.currentUser.uid)
+                    });
+                }
+                
+                return conversationId;
+            }
+            
+            // ✅ La conversation n'existe pas, la créer
+            console.log('🆕 Creating new conversation...');
+            
+            // Récupérer les données des deux utilisateurs
+            const currentUserData = await this.getUserData(this.currentUser.uid);
+            
+            // Si otherUserData n'est pas fourni, le récupérer
+            if (!otherUserData || !otherUserData.displayName) {
+                console.log('📥 Fetching other user data...');
+                otherUserData = await this.getUserData(otherUserId);
+            }
+            
+            // Créer la conversation
+            await conversationRef.set({
+                participants: participants,
+                participantsData: {
+                    [this.currentUser.uid]: {
+                        displayName: currentUserData.displayName,
+                        photoURL: currentUserData.photoURL,
+                        email: currentUserData.email,
+                        plan: currentUserData.plan
+                    },
+                    [otherUserId]: {
+                        displayName: otherUserData.displayName,
+                        photoURL: otherUserData.photoURL,
+                        email: otherUserData.email,
+                        plan: otherUserData.plan
+                    }
+                },
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessage: {
+                    text: '',
+                    senderId: this.currentUser.uid
+                },
+                unreadCount: {
+                    [this.currentUser.uid]: 0,
+                    [otherUserId]: 0
+                },
+                deletedBy: []
+            });
+            
+            console.log('✅ New conversation created:', conversationId);
+            
+            return conversationId;
+            
+        } catch (error) {
+            console.error('❌ Error creating conversation:', error);
+            throw error;
+        }
+    }
+
+    /* ==========================================
+       ✅ MÉTHODE MODIFIÉE : Ouvrir une conversation (avec création auto)
+       ========================================== */
+    
+    async openConversation(userId, userData) {
+        try {
+            console.log('💬 Opening conversation with:', userData);
+
+            // ✅ ÉTAPE 1 : Créer ou récupérer la conversation
+            const conversationId = await this.getOrCreateConversation(userId, userData);
+            
+            console.log('✅ Conversation ID ready:', conversationId);
+
+            // ✅ ÉTAPE 2 : Marquer comme conversation active
+            this.activeConversationId = userId;
+            this.renderConversations();
+
+            // ✅ ÉTAPE 3 : Gestion mobile (basculer en mode chat)
+            if (window.innerWidth <= 968) {
+                const container = document.querySelector('.messages-container');
+                if (container) {
+                    container.classList.add('mobile-chat-active');
+                }
+            }
+
+            // ✅ ÉTAPE 4 : Vérifier que le système de chat privé est chargé
+            if (!window.privateChat) {
+                console.error('❌ Private chat system not loaded');
+                alert('Chat system is not available. Please refresh the page.');
+                return;
+            }
+
+            // ✅ ÉTAPE 5 : Ouvrir le chat
+            await window.privateChat.openChat(userId, userData);
+            
+            console.log('✅ Chat opened successfully');
+
+        } catch (error) {
+            console.error('❌ Error opening conversation:', error);
+            alert('Failed to open conversation. Please try again.');
+        }
+    }
+
+    /* ==========================================
+       ✅ MÉTHODE : Ouvrir automatiquement une conversation
        ========================================== */
     
     checkAutoOpenChat() {
-        // Récupérer les données depuis sessionStorage
         const chatDataStr = sessionStorage.getItem('openChat');
         
         if (!chatDataStr) {
@@ -64,13 +196,14 @@ class MessagesHub {
                 return;
             }
 
-            // ✅ Attendre un peu que tout soit chargé, puis ouvrir la conversation
+            // ✅ Attendre que tout soit chargé (1.5s pour le listener Firestore)
             setTimeout(() => {
+                console.log('🚀 Opening conversation with:', chatData.userId);
                 this.openConversation(
                     chatData.userId,
                     chatData.userData || { uid: chatData.userId }
                 );
-            }, 1000); // 1 seconde de délai pour que l'UI soit prête
+            }, 1500);
 
         } catch (error) {
             console.error('❌ Error processing auto-open chat:', error);
@@ -412,29 +545,6 @@ class MessagesHub {
         }
     }
 
-    async openConversation(userId, userData) {
-        console.log('💬 Opening conversation with:', userData);
-
-        this.activeConversationId = userId;
-        this.renderConversations();
-
-        // ✅ GESTION MOBILE : Basculer en mode chat
-        if (window.innerWidth <= 968) {
-            const container = document.querySelector('.messages-container');
-            if (container) {
-                container.classList.add('mobile-chat-active');
-            }
-        }
-
-        if (!window.privateChat) {
-            console.error('❌ Private chat system not loaded');
-            alert('Chat system is not available. Please refresh the page.');
-            return;
-        }
-
-        await window.privateChat.openChat(userId, userData);
-    }
-
     closeChat() {
         this.activeConversationId = null;
         this.renderConversations();
@@ -677,4 +787,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ messages-hub.js loaded (v2.3 - Suppression + Mobile corrigés)');
+console.log('✅ messages-hub.js loaded (v2.5 - Auto-create conversations)');
