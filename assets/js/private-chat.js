@@ -489,33 +489,81 @@ class PrivateChat {
         }
     }
 
-    async renderChatHeader() {
+    // async renderChatHeader() {
+    //     const chatHeader = document.getElementById('chatHeader');
+    //     if (!chatHeader) return;
+
+    //     const displayName = this.currentChatUser.displayName || 'Unknown User';
+    //     const avatar = this.currentChatUser.photoURL || 
+    //                   `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+
+    //     const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
+    //     const statusHTML = isOnline 
+    //         ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
+    //         : 'Offline';
+
+    //     chatHeader.innerHTML = `
+    //         <div class="chat-header-user">
+    //             <img src="${avatar}" alt="${displayName}" class="chat-header-avatar">
+    //             <div class="chat-header-info">
+    //                 <h3>${this.escapeHtml(displayName)}</h3>
+    //                 <div class="chat-header-status">${statusHTML}</div>
+    //             </div>
+    //         </div>
+    //         <div class="chat-header-actions">
+    //             <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close chat">
+    //                 <i class="fas fa-times"></i>
+    //             </button>
+    //         </div>
+    //     `;
+    // }
+
+    // Dans private-chat.js, méthode renderChatHeader() ou similaire
+
+    renderChatHeader(userData) {
         const chatHeader = document.getElementById('chatHeader');
         if (!chatHeader) return;
-
-        const displayName = this.currentChatUser.displayName || 'Unknown User';
-        const avatar = this.currentChatUser.photoURL || 
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
-
-        const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
-        const statusHTML = isOnline 
-            ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
-            : 'Offline';
-
+        
+        const displayName = userData.displayName || 'Unknown User';
+        const avatar = userData.photoURL || 
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+        
         chatHeader.innerHTML = `
+            <!-- ✅ BOUTON RETOUR MOBILE -->
+            <button class="chat-back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
             <div class="chat-header-user">
-                <img src="${avatar}" alt="${displayName}" class="chat-header-avatar">
+                <img src="${avatar}" 
+                    alt="${displayName}" 
+                    class="chat-header-avatar"
+                    onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                
                 <div class="chat-header-info">
-                    <h3>${this.escapeHtml(displayName)}</h3>
-                    <div class="chat-header-status">${statusHTML}</div>
+                    <h3>${displayName}</h3>
+                    <div class="chat-header-status">
+                        <i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i>
+                        Online
+                    </div>
                 </div>
             </div>
+            
             <div class="chat-header-actions">
-                <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close chat">
+                <button class="chat-header-btn" title="Video call">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="chat-header-btn" title="Phone call">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         `;
+        
+        // ✅ RÉINITIALISER le bouton retour après génération du HTML
+        window.messagesHub.setupMobileBackButton();
     }
 
     async checkUserOnline(userId) {

@@ -24,17 +24,38 @@ class MessagesHub {
             if (user) {
                 console.log('✅ User authenticated:', user.email);
                 
-                // Attendre que auth-guard.js charge les données
                 await this.waitForUserData();
-                
-                // Mettre à jour lastLoginAt
                 await this.updateUserLoginTime();
-                
                 await this.loadConversations();
+                
                 this.setupUserSearch();
                 this.updateUnreadBadges();
+                
+                // ✅ NOUVEAU : Initialiser le bouton retour mobile
+                this.setupMobileBackButton();
             }
         });
+    }
+
+    setupMobileBackButton() {
+        // Attendre que le DOM soit prêt
+        setTimeout(() => {
+            const backBtn = document.querySelector('.chat-back-btn');
+            
+            if (backBtn) {
+                // Retirer tout événement existant (si déjà initialisé)
+                const newBackBtn = backBtn.cloneNode(true);
+                backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+                
+                // Ajouter l'événement de retour
+                newBackBtn.addEventListener('click', () => {
+                    console.log('📱 Mobile back button clicked');
+                    this.closeChat();
+                });
+                
+                console.log('✅ Mobile back button initialized');
+            }
+        }, 500);
     }
 
     /* ==========================================
@@ -431,12 +452,19 @@ class MessagesHub {
         }
     }
 
-    // ✅ Ouvrir une conversation
     async openConversation(userId, userData) {
         console.log('💬 Opening conversation with:', userData);
 
         this.activeConversationId = userId;
         this.renderConversations();
+
+        // ✅ GESTION MOBILE : Basculer en mode chat
+        if (window.innerWidth <= 968) {
+            const container = document.querySelector('.messages-container');
+            if (container) {
+                container.classList.add('mobile-chat-active');
+            }
+        }
 
         if (!window.privateChat) {
             console.error('❌ Private chat system not loaded');
@@ -450,6 +478,14 @@ class MessagesHub {
     closeChat() {
         this.activeConversationId = null;
         this.renderConversations();
+        
+        // ✅ GESTION MOBILE : Retour à la liste des conversations
+        if (window.innerWidth <= 968) {
+            const container = document.querySelector('.messages-container');
+            if (container) {
+                container.classList.remove('mobile-chat-active');
+            }
+        }
         
         if (window.privateChat) {
             window.privateChat.closeChat();
