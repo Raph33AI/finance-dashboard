@@ -138,6 +138,19 @@ class StockAnalysisNewsletter {
             const docRef = await firebase.firestore().collection('posts').add(postData);
 
             console.log(`Analysis published successfully! ID: ${docRef.id}`);
+
+            // ✅ 📧 NOUVEAU : Envoyer les notifications par email
+            try {
+                if (window.communityService && window.communityService.sendBlogPostNotification) {
+                    console.log('📧 Sending email notifications to all users...');
+                    await window.communityService.sendBlogPostNotification(postData, docRef.id);
+                } else {
+                    console.warn('⚠ Community service not available - emails not sent');
+                }
+            } catch (emailError) {
+                console.error('⚠ Email notification failed (post still published):', emailError);
+            }
+
             localStorage.setItem(this.LAST_POST_KEY, Date.now().toString());
 
             this.showNotification(`Analysis for ${symbol} published!`, 'success');

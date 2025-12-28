@@ -147,8 +147,20 @@ class AutoNewsletterSystem {
 
             console.log('📤 Publishing premium post to Firestore...');
             const docRef = await firebase.firestore().collection('posts').add(postData);
-            
+
             console.log(`✅ Post published successfully! ID: ${docRef.id}`);
+
+            // ✅ 📧 NOUVEAU : Envoyer les notifications par email
+            try {
+                if (window.communityService && window.communityService.sendBlogPostNotification) {
+                    console.log('📧 Sending email notifications to all users...');
+                    await window.communityService.sendBlogPostNotification(postData, docRef.id);
+                } else {
+                    console.warn('⚠ Community service not available - emails not sent');
+                }
+            } catch (emailError) {
+                console.error('⚠ Email notification failed (post still published):', emailError);
+            }
 
             const currentWeek = this.getWeekNumber(new Date());
             localStorage.setItem(this.LAST_POST_KEY, Date.now().toString());
