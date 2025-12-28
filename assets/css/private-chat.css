@@ -131,7 +131,8 @@ body.dark-mode .chat-messages {
 }
 
 .message-bubble {
-    max-width: 70%;
+    width: fit-content !important;
+    max-width: 100% !important;
     padding: 0.875rem 1.125rem;
     border-radius: 18px;
     position: relative;
@@ -274,7 +275,8 @@ body.dark-mode .chat-input {
     }
     
     .message-bubble {
-        max-width: 85%;
+        width: fit-content !important;
+        max-width: 100% !important;
     }
 }
 
