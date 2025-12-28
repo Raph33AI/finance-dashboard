@@ -703,7 +703,7 @@
 // console.log('✅ private-chat.js loaded (v3.1 - Photos cliquables vers profil public)');
 
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v3.3
+   PRIVATE-CHAT.JS - Private Chat System v3.4
    💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
    ✅ Upload images + documents vers R2
@@ -711,6 +711,8 @@
    🗑 Suppression définitive des messages ET conversations
    💬 Bulles adaptatives au contenu
    📱 Bouton suppression message sur clic (mobile)
+   🖼 Correction affichage photo utilisateur avec fallback
+   🔇 Boutons téléphone et vidéo retirés
    ============================================ */
 
 class PrivateChat {
@@ -730,7 +732,7 @@ class PrivateChat {
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat v3.3...');
+        console.log('💬 Initializing Private Chat v3.4...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -753,6 +755,7 @@ class PrivateChat {
             if (userId === this.currentUser?.uid && window.currentUserData) {
                 console.log('✅ Using cached data from auth-guard.js');
                 console.log('📊 Plan:', window.currentUserData.plan);
+                console.log('🖼 Photo URL:', window.currentUserData.photoURL);
                 
                 return {
                     uid: userId,
@@ -784,6 +787,7 @@ class PrivateChat {
             const userData = userDoc.data();
             
             console.log('📄 Firestore data:', userData);
+            console.log('🖼 Photo URL from Firestore:', userData.photoURL);
             
             const plan = userData.plan || 
                         userData.subscriptionPlan || 
@@ -1057,14 +1061,16 @@ class PrivateChat {
             : this.currentChatUser;
 
         const displayName = senderData.displayName || 'Unknown';
-        const avatar = senderData.photoURL || 
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+        
+        // ✅ CORRECTION : Fallback robuste pour l'avatar
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+        const avatar = senderData.photoURL || fallbackAvatar;
 
         const time = message.createdAt 
             ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
             : 'Now';
 
-        // ✅ CORRECTION : Affichage des attachments avec taille raisonnable
+        // ✅ Affichage des attachments avec taille raisonnable
         let attachmentHTML = '';
         if (message.attachments && message.attachments.length > 0) {
             attachmentHTML = message.attachments.map(att => {
@@ -1096,7 +1102,7 @@ class PrivateChat {
             }).join('');
         }
 
-        // ✅ CORRECTION : Bouton de suppression (visible au survol desktop, sur clic mobile)
+        // ✅ Bouton de suppression (visible au survol desktop, sur clic mobile)
         const deleteBtn = isOwn ? `
             <button class="message-delete-btn" 
                     onclick="event.stopPropagation(); window.privateChat.deleteMessage('${messageId}')"
@@ -1111,6 +1117,7 @@ class PrivateChat {
                      alt="${displayName}" 
                      class="chat-message-avatar" 
                      onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
+                     onerror="this.src='${fallbackAvatar}'"
                      loading="lazy">
                 <div class="chat-message-content">
                     <div class="chat-message-bubble">
@@ -1194,7 +1201,7 @@ class PrivateChat {
     }
 
     /* ==========================================
-       🗑 SUPPRESSION DÉFINITIVE DE CONVERSATION (NOUVEAU)
+       🗑 SUPPRESSION DÉFINITIVE DE CONVERSATION
        ========================================== */
     
     async deleteConversation(conversationId) {
@@ -1484,7 +1491,7 @@ class PrivateChat {
     }
 
     /* ==========================================
-       🎨 RENDER CHAT HEADER
+       🎨 RENDER CHAT HEADER (CORRIGÉ)
        ========================================== */
     
     async renderChatHeader() {
@@ -1498,8 +1505,12 @@ class PrivateChat {
         }
 
         const displayName = this.currentChatUser.displayName || 'Unknown User';
-        const avatar = this.currentChatUser.photoURL || 
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+        
+        // ✅ CORRECTION : Fallback robuste pour l'avatar
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+        const avatar = this.currentChatUser.photoURL || fallbackAvatar;
+        
+        console.log('🖼 Header Avatar URL:', avatar);
 
         const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
         const statusHTML = isOnline 
@@ -1516,7 +1527,8 @@ class PrivateChat {
                      alt="${this.escapeHtml(displayName)}" 
                      class="chat-header-avatar"
                      onclick="window.privateChat.navigateToProfile('${this.currentChatUser.uid}')"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                     onerror="this.src='${fallbackAvatar}'"
+                     loading="eager">
                 
                 <div class="chat-header-info">
                     <h3>${this.escapeHtml(displayName)}</h3>
@@ -1525,14 +1537,7 @@ class PrivateChat {
             </div>
             
             <div class="chat-header-actions">
-                <button class="chat-header-btn" onclick="alert('Video call feature coming soon!')" title="Video call">
-                    <i class="fas fa-video"></i>
-                </button>
-                <button class="chat-header-btn" onclick="alert('Phone call feature coming soon!')" title="Phone call">
-                    <i class="fas fa-phone"></i>
-                </button>
-                
-                <!-- ✅ Bouton suppression conversation -->
+                <!-- ✅ Bouton suppression conversation (rouge) -->
                 <button class="chat-header-btn chat-delete-conversation-btn" 
                         onclick="window.privateChat.deleteConversation('${this.currentConversationId}')" 
                         title="Delete conversation">
@@ -1616,4 +1621,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v3.3 - Suppression conversation définitive + Toggle bouton mobile)');
+console.log('✅ private-chat.js loaded (v3.4 - Photo fallback robuste + Boutons téléphone/vidéo retirés)');
