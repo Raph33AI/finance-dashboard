@@ -1,6 +1,6 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 2.6 - CORRECTIONS : Zone chat agrandie + Nom blanc + Photos cliquables
+   Version 2.7 - CORRECTIONS : Bulles adaptatives + Photos cliquables vers profil
    ============================================ */
 
 /* ===== VARIABLES COULEURS ===== */
@@ -14,12 +14,12 @@
 /* ===== LAYOUT PRINCIPAL ===== */
 .messages-container {
     display: grid;
-    grid-template-columns: 350px 1fr; /* 🎯 Panel gauche conservé à 320px */
-    gap: 16px; /* 🎯 Gap réduit de 24px à 16px */
+    grid-template-columns: 350px 1fr;
+    gap: 16px;
     height: calc(100vh - 140px);
-    max-width: 100%; /* 🎯 Changé de 1600px à 100% pour occuper toute la largeur */
+    max-width: 100%;
     margin: 0 auto;
-    padding: 12px; /* 🎯 Padding réduit de 20px à 12px */
+    padding: 12px;
 }
 
 /* ===== PANEL GAUCHE (Conversations) ===== */
@@ -500,12 +500,12 @@ body.dark-mode .chat-empty-state h3 {
     object-fit: cover;
     border: 3px solid rgba(255, 255, 255, 0.3);
     flex-shrink: 0;
-    cursor: pointer; /* 🎯 Curseur pointer ajouté */
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .chat-header-avatar:hover {
-    transform: scale(1.08); /* 🎯 Effet hover ajouté */
+    transform: scale(1.08);
     border-color: rgba(255, 255, 255, 0.6);
     box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
 }
@@ -523,7 +523,7 @@ body.dark-mode .chat-empty-state h3 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #ffffff !important; /* 🎯 BLANC FORCÉ */
+    color: #ffffff !important;
 }
 
 .chat-header-status {
@@ -532,7 +532,7 @@ body.dark-mode .chat-empty-state h3 {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #ffffff; /* 🎯 Status aussi en blanc */
+    color: #ffffff;
 }
 
 .chat-header-actions {
@@ -571,10 +571,12 @@ body.dark-mode .chat-messages {
     background: rgba(0, 0, 0, 0.2);
 }
 
+/* 🎯 CORRECTION 1 : Bulles adaptatives au contenu */
 .chat-message {
     display: flex;
     gap: 12px;
-    max-width: 70%;
+    width: fit-content; /* ✅ Adaptation automatique au contenu */
+    max-width: 70%; /* ✅ Maximum 70% de largeur */
     animation: fadeInMessage 0.3s ease;
     align-items: flex-start;
 }
@@ -597,12 +599,12 @@ body.dark-mode .chat-messages {
     object-fit: cover;
     flex-shrink: 0;
     border: 2px solid var(--border-color, #e2e8f0);
-    cursor: pointer; /* 🎯 Curseur pointer ajouté */
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .chat-message-avatar:hover {
-    transform: scale(1.12); /* 🎯 Effet hover ajouté */
+    transform: scale(1.12);
     border-color: var(--msg-primary);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
@@ -624,7 +626,7 @@ body.dark-mode .chat-messages {
     word-wrap: break-word;
     white-space: pre-wrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    width: fit-content; /* 🎯 Adaptation automatique au contenu */
+    width: fit-content;
     max-width: 100%;
 }
 
@@ -1031,4 +1033,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v2.6 - Zone chat maximisée + Photos cliquables)');
+console.log('✅ messages-hub.css loaded (v2.7 - Bulles adaptatives + Photos cliquables)');
