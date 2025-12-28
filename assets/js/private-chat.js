@@ -703,13 +703,14 @@
 // console.log('✅ private-chat.js loaded (v3.1 - Photos cliquables vers profil public)');
 
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v3.2
+   PRIVATE-CHAT.JS - Private Chat System v3.3
    💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
    ✅ Upload images + documents vers R2
    🎯 Photos cliquables vers profil public (CORRIGÉ ?id=)
-   🗑 Suppression définitive des messages
+   🗑 Suppression définitive des messages ET conversations
    💬 Bulles adaptatives au contenu
+   📱 Bouton suppression message sur clic (mobile)
    ============================================ */
 
 class PrivateChat {
@@ -729,7 +730,7 @@ class PrivateChat {
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat v3.2...');
+        console.log('💬 Initializing Private Chat v3.3...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -996,6 +997,10 @@ class PrivateChat {
                 }).join('');
 
                 messagesContainer.innerHTML = messagesHTML;
+                
+                // ✅ Ajouter les événements de clic pour toggle le bouton suppression (mobile)
+                this.setupMessageClickListeners();
+                
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, (error) => {
                 console.error('❌ Error loading messages:', error);
@@ -1005,6 +1010,40 @@ class PrivateChat {
                     </div>
                 `;
             });
+    }
+
+    /* ==========================================
+       📱 TOGGLE BOUTON SUPPRESSION SUR CLIC (MOBILE)
+       ========================================== */
+    
+    setupMessageClickListeners() {
+        const messages = document.querySelectorAll('.chat-message.own');
+        
+        messages.forEach(message => {
+            // Retirer les anciens listeners
+            const newMessage = message.cloneNode(true);
+            message.parentNode.replaceChild(newMessage, message);
+            
+            // Ajouter le nouveau listener
+            newMessage.addEventListener('click', (e) => {
+                // Ne pas toggle si on clique sur le bouton suppression ou l'avatar
+                if (e.target.closest('.message-delete-btn') || e.target.closest('.chat-message-avatar')) {
+                    return;
+                }
+                
+                // Fermer tous les autres messages actifs
+                document.querySelectorAll('.chat-message.message-active').forEach(msg => {
+                    if (msg !== newMessage) {
+                        msg.classList.remove('message-active');
+                    }
+                });
+                
+                // Toggle l'état actif
+                newMessage.classList.toggle('message-active');
+            });
+        });
+        
+        console.log('✅ Message click listeners setup');
     }
 
     createMessageBubble(message, messageId) {
@@ -1057,10 +1096,10 @@ class PrivateChat {
             }).join('');
         }
 
-        // ✅ CORRECTION : Bouton de suppression (visible au survol pour les messages de l'utilisateur)
+        // ✅ CORRECTION : Bouton de suppression (visible au survol desktop, sur clic mobile)
         const deleteBtn = isOwn ? `
             <button class="message-delete-btn" 
-                    onclick="window.privateChat.deleteMessage('${messageId}')"
+                    onclick="event.stopPropagation(); window.privateChat.deleteMessage('${messageId}')"
                     title="Delete message">
                 <i class="fas fa-trash-alt"></i>
             </button>
@@ -1151,6 +1190,82 @@ class PrivateChat {
         } catch (error) {
             console.error('❌ Error deleting message:', error);
             alert('Failed to delete message. Please try again.');
+        }
+    }
+
+    /* ==========================================
+       🗑 SUPPRESSION DÉFINITIVE DE CONVERSATION (NOUVEAU)
+       ========================================== */
+    
+    async deleteConversation(conversationId) {
+        const confirmText = 
+            '⚠ WARNING ⚠\n\n' +
+            'Are you sure you want to permanently delete this conversation?\n\n' +
+            '• All messages will be deleted\n' +
+            '• This action cannot be undone\n\n' +
+            'Press OK to confirm deletion.';
+        
+        if (!confirm(confirmText)) {
+            return;
+        }
+
+        try {
+            console.log('🗑 Deleting conversation:', conversationId);
+
+            // ✅ ÉTAPE 1 : Supprimer tous les messages de la conversation
+            const messagesSnapshot = await this.db
+                .collection('conversations')
+                .doc(conversationId)
+                .collection('messages')
+                .get();
+
+            console.log(`📊 Found ${messagesSnapshot.size} messages to delete`);
+
+            // Supprimer par batch (max 500 par batch)
+            const batchSize = 500;
+            let batch = this.db.batch();
+            let operationCount = 0;
+
+            for (const doc of messagesSnapshot.docs) {
+                batch.delete(doc.ref);
+                operationCount++;
+
+                // Si on atteint 500 opérations, commit et créer un nouveau batch
+                if (operationCount === batchSize) {
+                    await batch.commit();
+                    batch = this.db.batch();
+                    operationCount = 0;
+                    console.log(`✅ Deleted batch of ${batchSize} messages`);
+                }
+            }
+
+            // Commit le dernier batch si nécessaire
+            if (operationCount > 0) {
+                await batch.commit();
+                console.log(`✅ Deleted final batch of ${operationCount} messages`);
+            }
+
+            // ✅ ÉTAPE 2 : Supprimer le document conversation
+            await this.db
+                .collection('conversations')
+                .doc(conversationId)
+                .delete();
+
+            console.log('✅ Conversation deleted permanently');
+
+            // ✅ ÉTAPE 3 : Fermer le chat et recharger les conversations
+            this.closeChat();
+
+            // Déclencher un événement pour recharger la liste des conversations
+            if (window.messagesHub) {
+                window.messagesHub.loadConversations();
+            }
+
+            alert('✅ Conversation deleted successfully');
+
+        } catch (error) {
+            console.error('❌ Error deleting conversation:', error);
+            alert(`Failed to delete conversation: ${error.message}`);
         }
     }
 
@@ -1416,6 +1531,14 @@ class PrivateChat {
                 <button class="chat-header-btn" onclick="alert('Phone call feature coming soon!')" title="Phone call">
                     <i class="fas fa-phone"></i>
                 </button>
+                
+                <!-- ✅ Bouton suppression conversation -->
+                <button class="chat-header-btn chat-delete-conversation-btn" 
+                        onclick="window.privateChat.deleteConversation('${this.currentConversationId}')" 
+                        title="Delete conversation">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                
                 <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1493,4 +1616,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v3.2 - Bulles adaptatives + Suppression définitive + Redirection ?id= corrigée)');
+console.log('✅ private-chat.js loaded (v3.3 - Suppression conversation définitive + Toggle bouton mobile)');
