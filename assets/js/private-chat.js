@@ -35,10 +35,13 @@ class PrivateChat {
        ========================================== */
     
     /**
-     * ✅ CORRECTION CRITIQUE : Récupérer les données utilisateur avec fallbacks
+     * ✅ RÉCUPÉRATION ULTRA-ROBUSTE DU PLAN UTILISATEUR
+     * Logique identique à access-control.js
      */
     async getUserData(userId) {
         try {
+            console.log('🔍 Fetching user data for:', userId);
+            
             const userDoc = await this.db.collection('users').doc(userId).get();
             
             if (!userDoc.exists) {
@@ -55,26 +58,67 @@ class PrivateChat {
 
             const userData = userDoc.data();
             
-            // ✅ Vérifier plusieurs champs possibles pour le plan
-            const plan = userData.plan || 
-                        userData.subscriptionPlan || 
-                        userData.currentPlan || 
-                        userData.subscription?.plan ||
-                        'free';
-
-            console.log('✅ User data retrieved:', {
-                uid: userId,
-                displayName: userData.displayName,
-                email: userData.email,
-                plan: plan
-            });
+            console.log('📄 Raw Firestore data:', userData);
+            
+            // ✅ LOGIQUE IDENTIQUE À ACCESS-CONTROL.JS
+            let userPlan = (userData.plan || '').toLowerCase();
+            let subscriptionStatus = (userData.subscriptionStatus || 'none').toLowerCase();
+            const promoCode = (userData.promoCode || '').toUpperCase();
+            const trialEndsAt = userData.trialEndsAt || null;
+            
+            console.log('   Plan field:', userPlan);
+            console.log('   Subscription status:', subscriptionStatus);
+            console.log('   Promo code:', promoCode);
+            
+            // ✅ VÉRIFICATION STRICTE : FREE + INACTIVE = NONE
+            if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
+                console.warn('⚠ Plan "free" with inactive status - treating as free');
+                userPlan = 'free';
+            }
+            
+            // ✅ GESTION DU TRIAL
+            if (subscriptionStatus === 'trial' && trialEndsAt) {
+                const now = new Date();
+                const expirationDate = new Date(trialEndsAt);
+                
+                if (now < expirationDate) {
+                    userPlan = 'trial';
+                    console.log('🎁 Trial mode detected - expires:', expirationDate);
+                }
+            }
+            // ✅ CODES PROMO
+            else if (promoCode === 'FREEPRO') {
+                userPlan = 'freepro';
+            } else if (promoCode === 'FREEPLATINUM') {
+                userPlan = 'freeplatinum';
+            }
+            
+            // ✅ FALLBACKS SI PLAN VIDE
+            if (!userPlan || userPlan === 'none' || userPlan === '') {
+                userPlan = (userData.subscriptionPlan || '').toLowerCase();
+                
+                if (!userPlan || userPlan === 'none') {
+                    userPlan = (userData.currentPlan || '').toLowerCase();
+                    
+                    if (!userPlan || userPlan === 'none') {
+                        userPlan = (userData.subscription?.plan || '').toLowerCase();
+                        
+                        if (!userPlan || userPlan === 'none') {
+                            console.warn('⚠ NO plan found - defaulting to "free"');
+                            userPlan = 'free';
+                        }
+                    }
+                }
+            }
+            
+            console.log('✅ Final plan:', userPlan);
 
             return {
                 uid: userId,
                 displayName: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
                 photoURL: userData.photoURL || null,
                 email: userData.email || null,
-                plan: plan,
+                plan: userPlan,
                 lastLoginAt: userData.lastLoginAt || null
             };
 
