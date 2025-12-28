@@ -1,7 +1,8 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v2.2
+   MESSAGES-HUB.JS - Messages Hub System v2.3
    💬 Utilise window.currentUserData (chargé par auth-guard.js)
    🔥 Firebase Firestore en temps réel
+   ✅ Suppression de conversation corrigée
    ============================================ */
 
 class MessagesHub {
@@ -30,32 +31,8 @@ class MessagesHub {
                 
                 this.setupUserSearch();
                 this.updateUnreadBadges();
-                
-                // ✅ NOUVEAU : Initialiser le bouton retour mobile
-                this.setupMobileBackButton();
             }
         });
-    }
-
-    setupMobileBackButton() {
-        // Attendre que le DOM soit prêt
-        setTimeout(() => {
-            const backBtn = document.querySelector('.chat-back-btn');
-            
-            if (backBtn) {
-                // Retirer tout événement existant (si déjà initialisé)
-                const newBackBtn = backBtn.cloneNode(true);
-                backBtn.parentNode.replaceChild(newBackBtn, backBtn);
-                
-                // Ajouter l'événement de retour
-                newBackBtn.addEventListener('click', () => {
-                    console.log('📱 Mobile back button clicked');
-                    this.closeChat();
-                });
-                
-                console.log('✅ Mobile back button initialized');
-            }
-        }, 500);
     }
 
     /* ==========================================
@@ -64,21 +41,18 @@ class MessagesHub {
     
     async waitForUserData() {
         return new Promise((resolve) => {
-            // Si déjà chargé
             if (window.currentUserData) {
                 console.log('✅ User data already loaded by auth-guard.js');
                 resolve();
                 return;
             }
             
-            // Sinon, attendre l'événement
             console.log('⏳ Waiting for userDataLoaded event...');
             window.addEventListener('userDataLoaded', () => {
                 console.log('✅ User data loaded by auth-guard.js');
                 resolve();
             }, { once: true });
             
-            // Timeout de sécurité (5 secondes)
             setTimeout(() => {
                 console.warn('⚠ Timeout waiting for user data - proceeding anyway');
                 resolve();
@@ -90,9 +64,6 @@ class MessagesHub {
        👤 RÉCUPÉRATION DES DONNÉES UTILISATEUR
        ========================================== */
     
-    /**
-     * ✅ NOUVELLE MÉTHODE : Utilise window.currentUserData en priorité
-     */
     async getUserData(userId) {
         try {
             console.log('🔍 Getting user data for:', userId);
@@ -130,10 +101,8 @@ class MessagesHub {
             }
 
             const userData = userDoc.data();
-            
             console.log('📄 Firestore data:', userData);
             
-            // ✅ Récupération du plan (avec fallbacks)
             const plan = userData.plan || 
                         userData.subscriptionPlan || 
                         userData.currentPlan || 
@@ -163,7 +132,6 @@ class MessagesHub {
         }
     }
 
-    // ✅ Mettre à jour le temps de connexion
     async updateUserLoginTime() {
         try {
             await this.db.collection('users').doc(this.currentUser.uid).set({
@@ -179,7 +147,6 @@ class MessagesHub {
         }
     }
 
-    // ✅ Charger les conversations
     async loadConversations() {
         if (!this.currentUser) return;
 
@@ -198,53 +165,6 @@ class MessagesHub {
         if (this.conversationsListener) {
             this.conversationsListener();
         }
-
-        this.conversationsListener = this.db
-            .collection('conversations')
-            .where('participants', 'array-contains', this.currentUser.uid)
-            .orderBy('lastMessageAt', 'desc')
-            .onSnapshot(async (snapshot) => {
-                console.log(`📊 Received ${snapshot.size} conversations`);
-
-                if (snapshot.empty) {
-                    this.conversations = [];
-                    this.renderEmptyState();
-                    this.updateCounters();
-                    return;
-                }
-
-                this.conversations = [];
-
-                for (const doc of snapshot.docs) {
-                    const convData = doc.data();
-                    const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
-                    
-                    // ✅ Récupérer les données utilisateur
-                    const otherUserData = await this.getUserData(otherUserId);
-                    
-                    // ✅ Récupérer le statut en ligne
-                    const isOnline = await this.checkUserOnline(otherUserId);
-
-                    this.conversations.push({
-                        id: doc.id,
-                        otherUserId: otherUserId,
-                        otherUserData: otherUserData,
-                        lastMessage: convData.lastMessage,
-                        lastMessageAt: convData.lastMessageAt?.toDate(),
-                        unreadCount: convData.unreadCount?.[this.currentUser.uid] || 0,
-                        createdAt: convData.createdAt?.toDate(),
-                        isOnline: isOnline
-                    });
-                }
-
-                console.log('✅ Conversations loaded:', this.conversations.length);
-                this.filterConversations(this.currentFilter);
-                this.updateCounters();
-                this.updateUnreadBadges();
-            }, (error) => {
-                console.error('❌ Error loading conversations:', error);
-                this.renderError('Failed to load conversations');
-            });
 
         this.conversationsListener = this.db
             .collection('conversations')
@@ -298,7 +218,6 @@ class MessagesHub {
             });
     }
 
-    // ✅ Vérifier si un utilisateur est en ligne (< 5 min)
     async checkUserOnline(userId) {
         try {
             const userDoc = await this.db.collection('users').doc(userId).get();
@@ -424,7 +343,6 @@ class MessagesHub {
         `;
     }
 
-    // ✅ Supprimer (soft delete) une conversation
     async deleteConversation(conversationId) {
         if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
             return;
@@ -435,7 +353,6 @@ class MessagesHub {
             
             const conversationRef = this.db.collection('conversations').doc(conversationId);
             
-            // ✅ Ajouter l'UID actuel au tableau deletedBy
             await conversationRef.update({
                 deletedBy: firebase.firestore.FieldValue.arrayUnion(this.currentUser.uid)
             });
@@ -492,7 +409,6 @@ class MessagesHub {
         }
     }
 
-    // ✅ Recherche utilisateurs
     setupUserSearch() {
         const searchInput = document.getElementById('userSearchInput');
         const searchResults = document.getElementById('userSearchResults');
@@ -718,4 +634,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ messages-hub.js loaded (v2.2 - Uses window.currentUserData)');
+console.log('✅ messages-hub.js loaded (v2.3 - Suppression + Mobile corrigés)');

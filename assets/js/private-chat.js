@@ -1,7 +1,8 @@
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v2.1
-   💬 Chat en temps réel avec upload de fichiers
+   PRIVATE-CHAT.JS - Private Chat System v3.0
+   💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
+   ✅ Upload images + documents vers R2
    ============================================ */
 
 class PrivateChat {
@@ -14,12 +15,14 @@ class PrivateChat {
         this.MAX_FILES = 5;
         this.MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
         this.db = firebase.firestore();
-        this.storage = firebase.storage();
         this.auth = firebase.auth();
+        
+        // ✅ URL du Worker R2
+        this.R2_WORKER_URL = 'https://alphavault-image-storage.raphnardone.workers.dev';
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat...');
+        console.log('💬 Initializing Private Chat v3.0...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -34,9 +37,6 @@ class PrivateChat {
        👤 RÉCUPÉRATION ROBUSTE DES DONNÉES UTILISATEUR
        ========================================== */
     
-    /**
-     * ✅ NOUVELLE MÉTHODE : Utilise window.currentUserData en priorité
-     */
     async getUserData(userId) {
         try {
             console.log('🔍 Getting user data for:', userId);
@@ -77,7 +77,6 @@ class PrivateChat {
             
             console.log('📄 Firestore data:', userData);
             
-            // ✅ Récupération du plan (avec fallbacks)
             const plan = userData.plan || 
                         userData.subscriptionPlan || 
                         userData.currentPlan || 
@@ -132,12 +131,16 @@ class PrivateChat {
         }
     }
 
-    // ✅ Ouvrir un chat
+    /* ==========================================
+       💬 OUVRIR UN CHAT
+       ========================================== */
+    
     async openChat(userId, userData) {
         console.log('💬 Opening chat with:', userData);
 
-        // ✅ CORRECTION : Récupérer les données utilisateur avec la méthode robuste
         this.currentChatUser = await this.getUserData(userId);
+        
+        console.log('✅ Chat user data loaded:', this.currentChatUser);
 
         const emptyState = document.getElementById('chatEmptyState');
         const chatActive = document.getElementById('chatActive');
@@ -148,9 +151,32 @@ class PrivateChat {
         const conversationId = await this.getOrCreateConversation(userId);
         this.currentConversationId = conversationId;
 
+        await this.renderChatHeader();
+        
         await this.loadMessages();
         await this.markAsRead();
-        this.renderChatHeader();
+        
+        this.setupMobileBackButton();
+    }
+
+    setupMobileBackButton() {
+        setTimeout(() => {
+            const backBtn = document.querySelector('.chat-back-btn');
+            
+            if (backBtn) {
+                const newBackBtn = backBtn.cloneNode(true);
+                backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+                
+                newBackBtn.addEventListener('click', () => {
+                    console.log('📱 Mobile back button clicked');
+                    if (window.messagesHub) {
+                        window.messagesHub.closeChat();
+                    }
+                });
+                
+                console.log('✅ Mobile back button initialized');
+            }
+        }, 300);
     }
 
     closeChat() {
@@ -175,7 +201,6 @@ class PrivateChat {
         }
     }
 
-    // ✅ Récupérer ou créer une conversation
     async getOrCreateConversation(otherUserId) {
         const participants = [this.currentUser.uid, otherUserId].sort();
         const conversationId = participants.join('_');
@@ -184,7 +209,6 @@ class PrivateChat {
         const doc = await conversationRef.get();
 
         if (!doc.exists) {
-            // ✅ CORRECTION : Récupérer les données des deux utilisateurs avec la méthode robuste
             const currentUserData = await this.getUserData(this.currentUser.uid);
             const otherUserData = await this.getUserData(otherUserId);
 
@@ -223,7 +247,6 @@ class PrivateChat {
         return conversationId;
     }
 
-    // ✅ Charger les messages
     async loadMessages() {
         if (!this.currentConversationId) return;
 
@@ -279,7 +302,10 @@ class PrivateChat {
     createMessageBubble(message) {
         const isOwn = message.senderId === this.currentUser.uid;
         const senderData = isOwn 
-            ? { displayName: 'You', photoURL: this.currentUser.photoURL }
+            ? { 
+                displayName: 'You', 
+                photoURL: this.currentUser.photoURL || window.currentUserData?.photoURL 
+              }
             : this.currentChatUser;
 
         const displayName = senderData.displayName || 'Unknown';
@@ -296,15 +322,16 @@ class PrivateChat {
                 if (att.type === 'image') {
                     return `
                         <div class="message-attachment">
-                            <img src="${att.url}" alt="Image" onclick="window.open('${att.url}', '_blank')">
+                            <img src="${att.url}" alt="Image" onclick="window.open('${att.url}', '_blank')" loading="lazy">
                         </div>
                     `;
                 } else {
+                    const icon = this.getFileIcon(att.name);
                     return `
                         <div class="message-attachment-file">
-                            <i class="fas fa-file message-attachment-icon"></i>
+                            <i class="${icon} message-attachment-icon"></i>
                             <div class="message-attachment-info">
-                                <div class="message-attachment-name">${att.name}</div>
+                                <div class="message-attachment-name">${this.escapeHtml(att.name)}</div>
                                 <div class="message-attachment-size">${this.formatFileSize(att.size)}</div>
                             </div>
                             <a href="${att.url}" target="_blank" download style="color: #667eea;">
@@ -318,7 +345,7 @@ class PrivateChat {
 
         return `
             <div class="chat-message ${isOwn ? 'own' : ''}">
-                <img src="${avatar}" alt="${displayName}" class="chat-message-avatar">
+                <img src="${avatar}" alt="${displayName}" class="chat-message-avatar" loading="lazy">
                 <div class="chat-message-content">
                     <div class="chat-message-bubble">
                         ${this.escapeHtml(message.text)}
@@ -330,7 +357,27 @@ class PrivateChat {
         `;
     }
 
-    // ✅ Envoyer un message
+    getFileIcon(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        const iconMap = {
+            pdf: 'fas fa-file-pdf',
+            doc: 'fas fa-file-word',
+            docx: 'fas fa-file-word',
+            xls: 'fas fa-file-excel',
+            xlsx: 'fas fa-file-excel',
+            ppt: 'fas fa-file-powerpoint',
+            pptx: 'fas fa-file-powerpoint',
+            zip: 'fas fa-file-archive',
+            txt: 'fas fa-file-alt',
+            csv: 'fas fa-file-csv'
+        };
+        return iconMap[ext] || 'fas fa-file';
+    }
+
+    /* ==========================================
+       📤 ENVOYER UN MESSAGE
+       ========================================== */
+    
     async sendMessage() {
         const messageInput = document.getElementById('chatMessageInput');
         if (!messageInput) return;
@@ -349,7 +396,7 @@ class PrivateChat {
         try {
             let attachments = [];
             if (this.attachedFiles.length > 0) {
-                attachments = await this.uploadFiles();
+                attachments = await this.uploadFilesToR2();
             }
 
             const messageData = {
@@ -391,6 +438,58 @@ class PrivateChat {
         }
     }
 
+    /* ==========================================
+       📤 UPLOAD VERS R2 WORKER
+       ========================================== */
+    
+    async uploadFilesToR2() {
+        const uploadPromises = this.attachedFiles.map(async (file) => {
+            try {
+                // Obtenir le token Firebase
+                const token = await this.currentUser.getIdToken();
+
+                // Créer le FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('userId', this.currentUser.uid);
+                formData.append('conversationId', this.currentConversationId);
+
+                console.log('📤 Uploading to R2:', file.name);
+
+                // Envoyer vers le Worker R2
+                const response = await fetch(`${this.R2_WORKER_URL}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Upload failed');
+                }
+
+                const data = await response.json();
+
+                console.log('✅ File uploaded to R2:', data.url);
+
+                return {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type.startsWith('image/') ? 'image' : 'file',
+                    url: data.url
+                };
+
+            } catch (error) {
+                console.error('❌ Error uploading file to R2:', file.name, error);
+                throw error;
+            }
+        });
+
+        return await Promise.all(uploadPromises);
+    }
+
     handleFileSelect(event) {
         const files = Array.from(event.target.files);
 
@@ -429,16 +528,18 @@ class PrivateChat {
                 ${this.attachedFiles.map((file, index) => {
                     const isImage = file.type.startsWith('image/');
                     const previewUrl = isImage ? URL.createObjectURL(file) : null;
+                    const icon = this.getFileIcon(file.name);
 
                     return `
                         <div class="attachment-preview-item">
                             ${isImage 
-                                ? `<img src="${previewUrl}" class="attachment-preview-img">`
-                                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(102, 126, 234, 0.1);">
-                                    <i class="fas fa-file" style="font-size: 2rem; color: #667eea;"></i>
+                                ? `<img src="${previewUrl}" class="attachment-preview-img" alt="${file.name}">`
+                                : `<div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(102, 126, 234, 0.1); padding: 8px;">
+                                    <i class="${icon}" style="font-size: 2rem; color: #667eea; margin-bottom: 4px;"></i>
+                                    <span style="font-size: 0.7rem; color: #667eea; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">${file.name}</span>
                                    </div>`
                             }
-                            <button class="attachment-remove-btn" onclick="window.privateChat.removeFile(${index})">
+                            <button class="attachment-remove-btn" onclick="window.privateChat.removeFile(${index})" title="Remove">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -453,25 +554,6 @@ class PrivateChat {
     removeFile(index) {
         this.attachedFiles.splice(index, 1);
         this.renderAttachmentPreview();
-    }
-
-    async uploadFiles() {
-        const uploadPromises = this.attachedFiles.map(async (file) => {
-            const fileName = `chats/${this.currentConversationId}/${Date.now()}_${file.name}`;
-            const storageRef = this.storage.ref(fileName);
-
-            await storageRef.put(file);
-            const url = await storageRef.getDownloadURL();
-
-            return {
-                name: file.name,
-                size: file.size,
-                type: file.type.startsWith('image/') ? 'image' : 'file',
-                url: url
-            };
-        });
-
-        return await Promise.all(uploadPromises);
     }
 
     async markAsRead() {
@@ -489,71 +571,51 @@ class PrivateChat {
         }
     }
 
-    // async renderChatHeader() {
-    //     const chatHeader = document.getElementById('chatHeader');
-    //     if (!chatHeader) return;
-
-    //     const displayName = this.currentChatUser.displayName || 'Unknown User';
-    //     const avatar = this.currentChatUser.photoURL || 
-    //                   `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
-
-    //     const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
-    //     const statusHTML = isOnline 
-    //         ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
-    //         : 'Offline';
-
-    //     chatHeader.innerHTML = `
-    //         <div class="chat-header-user">
-    //             <img src="${avatar}" alt="${displayName}" class="chat-header-avatar">
-    //             <div class="chat-header-info">
-    //                 <h3>${this.escapeHtml(displayName)}</h3>
-    //                 <div class="chat-header-status">${statusHTML}</div>
-    //             </div>
-    //         </div>
-    //         <div class="chat-header-actions">
-    //             <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close chat">
-    //                 <i class="fas fa-times"></i>
-    //             </button>
-    //         </div>
-    //     `;
-    // }
-
-    // Dans private-chat.js, méthode renderChatHeader() ou similaire
-
-    renderChatHeader(userData) {
+    /* ==========================================
+       🎨 RENDER CHAT HEADER
+       ========================================== */
+    
+    async renderChatHeader() {
         const chatHeader = document.getElementById('chatHeader');
         if (!chatHeader) return;
-        
-        const displayName = userData.displayName || 'Unknown User';
-        const avatar = userData.photoURL || 
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
-        
+
+        if (!this.currentChatUser || !this.currentChatUser.displayName) {
+            console.warn('⚠ Chat user data not ready, retrying...');
+            setTimeout(() => this.renderChatHeader(), 300);
+            return;
+        }
+
+        const displayName = this.currentChatUser.displayName || 'Unknown User';
+        const avatar = this.currentChatUser.photoURL || 
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+
+        const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
+        const statusHTML = isOnline 
+            ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
+            : '<i class="fas fa-circle" style="color: #94a3b8; font-size: 0.6rem;"></i> Offline';
+
         chatHeader.innerHTML = `
-            <!-- ✅ BOUTON RETOUR MOBILE -->
             <button class="chat-back-btn">
                 <i class="fas fa-arrow-left"></i>
             </button>
             
             <div class="chat-header-user">
                 <img src="${avatar}" 
-                    alt="${displayName}" 
-                    class="chat-header-avatar"
-                    onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                     alt="${this.escapeHtml(displayName)}" 
+                     class="chat-header-avatar"
+                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
                 
                 <div class="chat-header-info">
-                    <h3>${displayName}</h3>
-                    <div class="chat-header-status">
-                        <i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i>
-                        Online
-                    </div>
+                    <h3>${this.escapeHtml(displayName)}</h3>
+                    <div class="chat-header-status">${statusHTML}</div>
                 </div>
             </div>
             
             <div class="chat-header-actions">
-                <button class="chat-header-btn" title="Video call">
+                <button class="chat-header-btn" onclick="alert('Video call feature coming soon!')" title="Video call">
                     <i class="fas fa-video"></i>
                 </button>
-                <button class="chat-header-btn" title="Phone call">
+                <button class="chat-header-btn" onclick="alert('Phone call feature coming soon!')" title="Phone call">
                     <i class="fas fa-phone"></i>
                 </button>
                 <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close">
@@ -562,8 +624,7 @@ class PrivateChat {
             </div>
         `;
         
-        // ✅ RÉINITIALISER le bouton retour après génération du HTML
-        window.messagesHub.setupMobileBackButton();
+        console.log('✅ Chat header rendered with:', displayName, statusHTML);
     }
 
     async checkUserOnline(userId) {
@@ -618,4 +679,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v2.1 - Robust plan retrieval)');
+console.log('✅ private-chat.js loaded (v3.0 - R2 Upload Support)');
