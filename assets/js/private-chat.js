@@ -1,9 +1,14 @@
 // /* ============================================
-//    PRIVATE-CHAT.JS - Private Chat System v3.1
+//    PRIVATE-CHAT.JS - Private Chat System v3.4
 //    💬 Chat en temps réel avec upload R2
 //    🔥 Récupération robuste du plan utilisateur
 //    ✅ Upload images + documents vers R2
-//    🎯 Photos cliquables vers profil public
+//    🎯 Photos cliquables vers profil public (CORRIGÉ ?id=)
+//    🗑 Suppression définitive des messages ET conversations
+//    💬 Bulles adaptatives au contenu
+//    📱 Bouton suppression message sur clic (mobile)
+//    🖼 Correction affichage photo utilisateur avec fallback
+//    🔇 Boutons téléphone et vidéo retirés
 //    ============================================ */
 
 // class PrivateChat {
@@ -23,7 +28,7 @@
 //     }
 
 //     async initialize() {
-//         console.log('💬 Initializing Private Chat v3.1...');
+//         console.log('💬 Initializing Private Chat v3.4...');
         
 //         this.auth.onAuthStateChanged((user) => {
 //             this.currentUser = user;
@@ -46,6 +51,7 @@
 //             if (userId === this.currentUser?.uid && window.currentUserData) {
 //                 console.log('✅ Using cached data from auth-guard.js');
 //                 console.log('📊 Plan:', window.currentUserData.plan);
+//                 console.log('🖼 Photo URL:', window.currentUserData.photoURL);
                 
 //                 return {
 //                     uid: userId,
@@ -77,6 +83,7 @@
 //             const userData = userDoc.data();
             
 //             console.log('📄 Firestore data:', userData);
+//             console.log('🖼 Photo URL from Firestore:', userData.photoURL);
             
 //             const plan = userData.plan || 
 //                         userData.subscriptionPlan || 
@@ -285,10 +292,15 @@
 
 //                 const messagesHTML = snapshot.docs.map(doc => {
 //                     const message = doc.data();
-//                     return this.createMessageBubble(message);
+//                     const messageId = doc.id;
+//                     return this.createMessageBubble(message, messageId);
 //                 }).join('');
 
 //                 messagesContainer.innerHTML = messagesHTML;
+                
+//                 // ✅ Ajouter les événements de clic pour toggle le bouton suppression (mobile)
+//                 this.setupMessageClickListeners();
+                
 //                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 //             }, (error) => {
 //                 console.error('❌ Error loading messages:', error);
@@ -300,7 +312,41 @@
 //             });
 //     }
 
-//     createMessageBubble(message) {
+//     /* ==========================================
+//        📱 TOGGLE BOUTON SUPPRESSION SUR CLIC (MOBILE)
+//        ========================================== */
+    
+//     setupMessageClickListeners() {
+//         const messages = document.querySelectorAll('.chat-message.own');
+        
+//         messages.forEach(message => {
+//             // Retirer les anciens listeners
+//             const newMessage = message.cloneNode(true);
+//             message.parentNode.replaceChild(newMessage, message);
+            
+//             // Ajouter le nouveau listener
+//             newMessage.addEventListener('click', (e) => {
+//                 // Ne pas toggle si on clique sur le bouton suppression ou l'avatar
+//                 if (e.target.closest('.message-delete-btn') || e.target.closest('.chat-message-avatar')) {
+//                     return;
+//                 }
+                
+//                 // Fermer tous les autres messages actifs
+//                 document.querySelectorAll('.chat-message.message-active').forEach(msg => {
+//                     if (msg !== newMessage) {
+//                         msg.classList.remove('message-active');
+//                     }
+//                 });
+                
+//                 // Toggle l'état actif
+//                 newMessage.classList.toggle('message-active');
+//             });
+//         });
+        
+//         console.log('✅ Message click listeners setup');
+//     }
+
+//     createMessageBubble(message, messageId) {
 //         const isOwn = message.senderId === this.currentUser.uid;
 //         const senderData = isOwn 
 //             ? { 
@@ -311,20 +357,27 @@
 //             : this.currentChatUser;
 
 //         const displayName = senderData.displayName || 'Unknown';
-//         const avatar = senderData.photoURL || 
-//                       `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+        
+//         // ✅ CORRECTION : Fallback robuste pour l'avatar
+//         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+//         const avatar = senderData.photoURL || fallbackAvatar;
 
 //         const time = message.createdAt 
 //             ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 //             : 'Now';
 
+//         // ✅ Affichage des attachments avec taille raisonnable
 //         let attachmentHTML = '';
 //         if (message.attachments && message.attachments.length > 0) {
 //             attachmentHTML = message.attachments.map(att => {
 //                 if (att.type === 'image') {
 //                     return `
 //                         <div class="message-attachment">
-//                             <img src="${att.url}" alt="Image" onclick="window.open('${att.url}', '_blank')" loading="lazy">
+//                             <img src="${att.url}" 
+//                                  alt="Image" 
+//                                  onclick="window.open('${att.url}', '_blank')" 
+//                                  loading="lazy"
+//                                  style="max-width: 280px; max-height: 280px; width: auto; height: auto; display: block; border-radius: 12px; cursor: pointer; object-fit: contain;">
 //                         </div>
 //                     `;
 //                 } else {
@@ -345,22 +398,178 @@
 //             }).join('');
 //         }
 
+//         // ✅ Bouton de suppression (visible au survol desktop, sur clic mobile)
+//         const deleteBtn = isOwn ? `
+//             <button class="message-delete-btn" 
+//                     onclick="event.stopPropagation(); window.privateChat.deleteMessage('${messageId}')"
+//                     title="Delete message">
+//                 <i class="fas fa-trash-alt"></i>
+//             </button>
+//         ` : '';
+
 //         return `
-//             <div class="chat-message ${isOwn ? 'own' : ''}">
+//             <div class="chat-message ${isOwn ? 'own' : ''}" data-message-id="${messageId}">
 //                 <img src="${avatar}" 
 //                      alt="${displayName}" 
 //                      class="chat-message-avatar" 
 //                      onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
+//                      onerror="this.src='${fallbackAvatar}'"
 //                      loading="lazy">
 //                 <div class="chat-message-content">
 //                     <div class="chat-message-bubble">
-//                         ${this.escapeHtml(message.text)}
+//                         ${message.text ? this.escapeHtml(message.text) : ''}
 //                         ${attachmentHTML}
 //                     </div>
 //                     <div class="chat-message-time">${time}</div>
 //                 </div>
+//                 ${deleteBtn}
 //             </div>
 //         `;
+//     }
+
+//     /* ==========================================
+//        🗑 SUPPRESSION DÉFINITIVE DE MESSAGE
+//        ========================================== */
+    
+//     async deleteMessage(messageId) {
+//         if (!confirm('Are you sure you want to permanently delete this message?')) {
+//             return;
+//         }
+
+//         if (!this.currentConversationId) {
+//             console.error('❌ No active conversation');
+//             return;
+//         }
+
+//         try {
+//             console.log('🗑 Deleting message:', messageId);
+
+//             // ✅ SUPPRESSION DÉFINITIVE du document Firestore
+//             await this.db
+//                 .collection('conversations')
+//                 .doc(this.currentConversationId)
+//                 .collection('messages')
+//                 .doc(messageId)
+//                 .delete();
+
+//             console.log('✅ Message deleted permanently');
+
+//             // ✅ Mettre à jour le dernier message si nécessaire
+//             const messagesSnapshot = await this.db
+//                 .collection('conversations')
+//                 .doc(this.currentConversationId)
+//                 .collection('messages')
+//                 .orderBy('createdAt', 'desc')
+//                 .limit(1)
+//                 .get();
+
+//             if (!messagesSnapshot.empty) {
+//                 const lastMessage = messagesSnapshot.docs[0].data();
+                
+//                 await this.db
+//                     .collection('conversations')
+//                     .doc(this.currentConversationId)
+//                     .update({
+//                         lastMessage: {
+//                             text: lastMessage.text || '📎 Attachment',
+//                             senderId: lastMessage.senderId
+//                         },
+//                         lastMessageAt: lastMessage.createdAt
+//                     });
+//             } else {
+//                 // Si c'était le dernier message, réinitialiser
+//                 await this.db
+//                     .collection('conversations')
+//                     .doc(this.currentConversationId)
+//                     .update({
+//                         lastMessage: {
+//                             text: '',
+//                             senderId: this.currentUser.uid
+//                         },
+//                         lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+//                     });
+//             }
+
+//         } catch (error) {
+//             console.error('❌ Error deleting message:', error);
+//             alert('Failed to delete message. Please try again.');
+//         }
+//     }
+
+//     /* ==========================================
+//        🗑 SUPPRESSION DÉFINITIVE DE CONVERSATION
+//        ========================================== */
+    
+//     async deleteConversation(conversationId) {
+//         const confirmText = 
+//             '⚠ WARNING ⚠\n\n' +
+//             'Are you sure you want to permanently delete this conversation?\n\n' +
+//             '• All messages will be deleted\n' +
+//             '• This action cannot be undone\n\n' +
+//             'Press OK to confirm deletion.';
+        
+//         if (!confirm(confirmText)) {
+//             return;
+//         }
+
+//         try {
+//             console.log('🗑 Deleting conversation:', conversationId);
+
+//             // ✅ ÉTAPE 1 : Supprimer tous les messages de la conversation
+//             const messagesSnapshot = await this.db
+//                 .collection('conversations')
+//                 .doc(conversationId)
+//                 .collection('messages')
+//                 .get();
+
+//             console.log(`📊 Found ${messagesSnapshot.size} messages to delete`);
+
+//             // Supprimer par batch (max 500 par batch)
+//             const batchSize = 500;
+//             let batch = this.db.batch();
+//             let operationCount = 0;
+
+//             for (const doc of messagesSnapshot.docs) {
+//                 batch.delete(doc.ref);
+//                 operationCount++;
+
+//                 // Si on atteint 500 opérations, commit et créer un nouveau batch
+//                 if (operationCount === batchSize) {
+//                     await batch.commit();
+//                     batch = this.db.batch();
+//                     operationCount = 0;
+//                     console.log(`✅ Deleted batch of ${batchSize} messages`);
+//                 }
+//             }
+
+//             // Commit le dernier batch si nécessaire
+//             if (operationCount > 0) {
+//                 await batch.commit();
+//                 console.log(`✅ Deleted final batch of ${operationCount} messages`);
+//             }
+
+//             // ✅ ÉTAPE 2 : Supprimer le document conversation
+//             await this.db
+//                 .collection('conversations')
+//                 .doc(conversationId)
+//                 .delete();
+
+//             console.log('✅ Conversation deleted permanently');
+
+//             // ✅ ÉTAPE 3 : Fermer le chat et recharger les conversations
+//             this.closeChat();
+
+//             // Déclencher un événement pour recharger la liste des conversations
+//             if (window.messagesHub) {
+//                 window.messagesHub.loadConversations();
+//             }
+
+//             alert('✅ Conversation deleted successfully');
+
+//         } catch (error) {
+//             console.error('❌ Error deleting conversation:', error);
+//             alert(`Failed to delete conversation: ${error.message}`);
+//         }
 //     }
 
 //     getFileIcon(fileName) {
@@ -578,7 +787,7 @@
 //     }
 
 //     /* ==========================================
-//        🎨 RENDER CHAT HEADER
+//        🎨 RENDER CHAT HEADER (CORRIGÉ)
 //        ========================================== */
     
 //     async renderChatHeader() {
@@ -592,8 +801,12 @@
 //         }
 
 //         const displayName = this.currentChatUser.displayName || 'Unknown User';
-//         const avatar = this.currentChatUser.photoURL || 
-//                       `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+        
+//         // ✅ CORRECTION : Fallback robuste pour l'avatar
+//         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+//         const avatar = this.currentChatUser.photoURL || fallbackAvatar;
+        
+//         console.log('🖼 Header Avatar URL:', avatar);
 
 //         const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
 //         const statusHTML = isOnline 
@@ -610,7 +823,8 @@
 //                      alt="${this.escapeHtml(displayName)}" 
 //                      class="chat-header-avatar"
 //                      onclick="window.privateChat.navigateToProfile('${this.currentChatUser.uid}')"
-//                      onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+//                      onerror="this.src='${fallbackAvatar}'"
+//                      loading="eager">
                 
 //                 <div class="chat-header-info">
 //                     <h3>${this.escapeHtml(displayName)}</h3>
@@ -619,12 +833,13 @@
 //             </div>
             
 //             <div class="chat-header-actions">
-//                 <button class="chat-header-btn" onclick="alert('Video call feature coming soon!')" title="Video call">
-//                     <i class="fas fa-video"></i>
+//                 <!-- ✅ Bouton suppression conversation (rouge) -->
+//                 <button class="chat-header-btn chat-delete-conversation-btn" 
+//                         onclick="window.privateChat.deleteConversation('${this.currentConversationId}')" 
+//                         title="Delete conversation">
+//                     <i class="fas fa-trash-alt"></i>
 //                 </button>
-//                 <button class="chat-header-btn" onclick="alert('Phone call feature coming soon!')" title="Phone call">
-//                     <i class="fas fa-phone"></i>
-//                 </button>
+                
 //                 <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close">
 //                     <i class="fas fa-times"></i>
 //                 </button>
@@ -635,7 +850,7 @@
 //     }
 
 //     /* ==========================================
-//        🔗 NAVIGATION VERS PROFIL PUBLIC
+//        🔗 NAVIGATION VERS PROFIL PUBLIC (CORRIGÉ)
 //        ========================================== */
     
 //     navigateToProfile(userId) {
@@ -645,7 +860,9 @@
 //         }
         
 //         console.log('🔗 Navigating to public profile:', userId);
-//         window.location.href = `public-profile.html?userId=${userId}`;
+        
+//         // ✅ CORRECTION : Utiliser ?id= comme dans profile.js
+//         window.location.href = `public-profile.html?id=${userId}`;
 //     }
 
 //     async checkUserOnline(userId) {
@@ -700,10 +917,10 @@
 //     }
 // });
 
-// console.log('✅ private-chat.js loaded (v3.1 - Photos cliquables vers profil public)');
+// console.log('✅ private-chat.js loaded (v3.4 - Photo fallback robuste + Boutons téléphone/vidéo retirés)');
 
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v3.4
+   PRIVATE-CHAT.JS - Private Chat System v3.5
    💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
    ✅ Upload images + documents vers R2
@@ -713,6 +930,7 @@
    📱 Bouton suppression message sur clic (mobile)
    🖼 Correction affichage photo utilisateur avec fallback
    🔇 Boutons téléphone et vidéo retirés
+   ✅ PARTAGE DE POST PAR MESSAGE PRIVÉ
    ============================================ */
 
 class PrivateChat {
@@ -732,7 +950,7 @@ class PrivateChat {
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat v3.4...');
+        console.log('💬 Initializing Private Chat v3.5...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -1070,7 +1288,12 @@ class PrivateChat {
             ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
             : 'Now';
 
-        // ✅ Affichage des attachments avec taille raisonnable
+        // ✅ NOUVEAU : Rendu spécial pour les posts partagés
+        if (message.type === 'shared_post' && message.sharedPost) {
+            return this.renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time);
+        }
+
+        // Affichage des attachments normaux
         let attachmentHTML = '';
         if (message.attachments && message.attachments.length > 0) {
             attachmentHTML = message.attachments.map(att => {
@@ -1102,7 +1325,6 @@ class PrivateChat {
             }).join('');
         }
 
-        // ✅ Bouton de suppression (visible au survol desktop, sur clic mobile)
         const deleteBtn = isOwn ? `
             <button class="message-delete-btn" 
                     onclick="event.stopPropagation(); window.privateChat.deleteMessage('${messageId}')"
@@ -1123,6 +1345,70 @@ class PrivateChat {
                     <div class="chat-message-bubble">
                         ${message.text ? this.escapeHtml(message.text) : ''}
                         ${attachmentHTML}
+                    </div>
+                    <div class="chat-message-time">${time}</div>
+                </div>
+                ${deleteBtn}
+            </div>
+        `;
+    }
+
+    /* ==========================================
+       📨 RENDU SPÉCIAL POUR LES POSTS PARTAGÉS
+       ========================================== */
+    
+    /**
+     * Rendu spécial pour les messages de post partagé
+     */
+    renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time) {
+        const post = message.sharedPost;
+        
+        const deleteBtn = isOwn ? `
+            <button class="message-delete-btn" 
+                    onclick="event.stopPropagation(); window.privateChat.deleteMessage('${messageId}')"
+                    title="Delete message">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        ` : '';
+
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+
+        return `
+            <div class="chat-message ${isOwn ? 'own' : ''} shared-post-message" data-message-id="${messageId}">
+                <img src="${avatar}" 
+                     alt="${displayName}" 
+                     class="chat-message-avatar" 
+                     onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
+                     onerror="this.src='${fallbackAvatar}'"
+                     loading="lazy">
+                <div class="chat-message-content">
+                    <div class="chat-message-bubble shared-post-bubble">
+                        <div class="shared-post-header">
+                            <i class="fas fa-share-square"></i>
+                            <span>Shared Post</span>
+                        </div>
+                        
+                        <div class="shared-post-content" onclick="window.open('${post.url}', '_blank')">
+                            <div class="shared-post-title">
+                                ${this.escapeHtml(post.title)}
+                            </div>
+                            
+                            <div class="shared-post-excerpt">
+                                ${this.escapeHtml(post.excerpt)}${post.excerpt.length >= 200 ? '...' : ''}
+                            </div>
+                            
+                            <div class="shared-post-meta">
+                                <span class="shared-post-author">
+                                    <i class="fas fa-user"></i>
+                                    ${this.escapeHtml(post.authorName)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <a href="${post.url}" target="_blank" class="shared-post-view-btn">
+                            <i class="fas fa-external-link-alt"></i>
+                            View Full Post
+                        </a>
                     </div>
                     <div class="chat-message-time">${time}</div>
                 </div>
@@ -1354,6 +1640,71 @@ class PrivateChat {
             alert('Failed to send message. Please try again.');
         } finally {
             if (sendBtn) sendBtn.disabled = false;
+        }
+    }
+
+    /* ==========================================
+       📨 ENVOI DE POST COMME MESSAGE SPÉCIAL
+       ========================================== */
+
+    /**
+     * Envoyer un post partagé comme message privé
+     * @param {string} userId - ID de l'utilisateur destinataire
+     * @param {Object} postData - Données du post partagé
+     * @param {Object} userData - Données de l'utilisateur destinataire
+     */
+    async sendPostAsMessage(userId, postData, userData) {
+        try {
+            console.log('📨 Sending post as message to:', userId);
+            console.log('📄 Post data:', postData);
+
+            // Créer ou récupérer la conversation
+            const conversationId = await this.getOrCreateConversation(userId);
+            this.currentConversationId = conversationId;
+            this.currentChatUser = userData;
+
+            // Créer le message avec les données du post
+            const messageData = {
+                type: 'shared_post', // ✅ Type spécial pour identifier les posts partagés
+                text: `📌 Shared a post: "${postData.title}"`,
+                senderId: this.currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                sharedPost: {
+                    postId: postData.postId,
+                    title: postData.title,
+                    excerpt: postData.excerpt,
+                    authorName: postData.authorName,
+                    channelId: postData.channelId,
+                    url: postData.url
+                },
+                attachments: []
+            };
+
+            // Ajouter le message à Firestore
+            await this.db
+                .collection('conversations')
+                .doc(conversationId)
+                .collection('messages')
+                .add(messageData);
+
+            // Mettre à jour la conversation
+            await this.db
+                .collection('conversations')
+                .doc(conversationId)
+                .update({
+                    lastMessage: {
+                        text: `📌 Shared a post: "${postData.title}"`,
+                        senderId: this.currentUser.uid
+                    },
+                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
+                });
+
+            console.log('✅ Post shared successfully as message');
+
+        } catch (error) {
+            console.error('❌ Error sending post as message:', error);
+            throw error;
         }
     }
 
@@ -1621,4 +1972,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v3.4 - Photo fallback robuste + Boutons téléphone/vidéo retirés)');
+console.log('✅ private-chat.js loaded (v3.5 - Shared Post Support)');
