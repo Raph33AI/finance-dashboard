@@ -12,23 +12,11 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/community.css'>
-    <link rel='stylesheet' href='assets/css/private-chat.css'>
     <link rel='stylesheet' href='assets/css/messages-hub.css'>
     
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
-    <meta name="msapplication-TileColor" content="#667eea">
-    <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -354,101 +342,93 @@
                 </div>
             </header>
             
-            <div class='container'>
+            <!-- ✅ MESSAGES LAYOUT 2 COLONNES -->
+            <div class='messages-container'>
                 
-                <!-- ✅ SEARCH USERS SECTION -->
-                <div class='section'>
-                    <div class='section-header' style="margin-bottom: 20px;">
-                        <h2 class='section-title'>
-                            <i class='fas fa-user-plus'></i> Start New Conversation
-                        </h2>
-                    </div>
+                <!-- ✅ COLONNE GAUCHE : CONVERSATIONS -->
+                <div class='conversations-panel'>
                     
-                    <div class="search-box" style="max-width: 600px;">
-                        <i class="fas fa-search search-icon"></i>
-                        <input 
-                            type="text" 
-                            class="search-input" 
-                            placeholder="Search users by name or email..."
-                            id="userSearchInput"
-                        >
-                    </div>
-                    
-                    <!-- Search Results -->
-                    <div id="userSearchResults" class="user-search-results" style="display: none;">
-                        <!-- Dynamically populated -->
-                    </div>
-                </div>
-
-                <!-- ✅ CONVERSATIONS SECTION -->
-                <div class='section'>
-                    <div class='section-header' style="margin-bottom: 20px;">
-                        <h2 class='section-title'>
-                            <i class='fas fa-inbox'></i> Your Conversations
-                            <span class="conversations-count" id="conversationsCount">(0)</span>
-                        </h2>
-                        
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" data-filter="all" onclick="window.messagesHub.filterConversations('all')">
-                                <i class="fas fa-list"></i> All
-                            </button>
-                            <button class="filter-btn" data-filter="unread" onclick="window.messagesHub.filterConversations('unread')">
-                                <i class="fas fa-envelope"></i> Unread
-                                <span class="filter-badge" id="unreadFilterBadge" style="display: none;">0</span>
-                            </button>
+                    <!-- Search Users -->
+                    <div class='search-users-section'>
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input 
+                                type="text" 
+                                class="search-input" 
+                                placeholder="Search users..."
+                                id="userSearchInput"
+                            >
                         </div>
+                        
+                        <!-- Search Results -->
+                        <div id="userSearchResults" class="user-search-results" style="display: none;"></div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="conversations-filters">
+                        <button class="filter-btn active" data-filter="all" onclick="window.messagesHub.filterConversations('all')">
+                            <i class="fas fa-list"></i> All
+                            <span class="conversations-count" id="conversationsCount">(0)</span>
+                        </button>
+                        <button class="filter-btn" data-filter="unread" onclick="window.messagesHub.filterConversations('unread')">
+                            <i class="fas fa-envelope"></i> Unread
+                            <span class="filter-badge" id="unreadFilterBadge" style="display: none;">0</span>
+                        </button>
                     </div>
                     
                     <!-- Conversations List -->
                     <div class="conversations-list" id="conversationsList">
                         <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
-                            <p style="margin-top: 16px; color: var(--text-secondary);">Loading conversations...</p>
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading conversations...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <footer>
-                    <p>
-                        <i class='fas fa-envelope'></i> AlphaVault AI Messages | 
-                        Connect with the community
-                    </p>
-                </footer>
-            </div>
-        </div>
-    </div>
+                <!-- ✅ COLONNE DROITE : CHAT -->
+                <div class='chat-panel' id="chatPanel">
+                    
+                    <!-- Empty State -->
+                    <div class="chat-empty-state" id="chatEmptyState">
+                        <i class="fas fa-comments"></i>
+                        <h3>Select a conversation</h3>
+                        <p>Choose a conversation from the left to start chatting</p>
+                    </div>
 
-    <!-- ✅ CHAT MODAL (réutilisé de private-chat.js) -->
-    <div id="chatModal" class="chat-modal" style="display: none;">
-        <div class="chat-modal-content">
-            <!-- Chat Header -->
-            <div class="chat-header" id="chatHeader">
-                <div style="text-align: center; padding: 20px; color: white;">
-                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                    <!-- Chat Active (hidden by default) -->
+                    <div class="chat-active" id="chatActive" style="display: none;">
+                        
+                        <!-- Chat Header -->
+                        <div class="chat-header" id="chatHeader"></div>
+                        
+                        <!-- Messages Container -->
+                        <div class="chat-messages" id="chatMessagesContainer"></div>
+                        
+                        <!-- Attachment Preview -->
+                        <div class="attachment-preview" id="attachmentPreview" style="display: none;"></div>
+                        
+                        <!-- Input Area -->
+                        <div class="chat-input-wrapper">
+                            <button class="attach-btn" id="attachBtn" title="Attach file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display: none;">
+                            
+                            <input 
+                                type="text" 
+                                id="chatMessageInput" 
+                                class="chat-input" 
+                                placeholder="Type your message..."
+                                maxlength="2000"
+                            >
+                            <button class="chat-send-btn" id="chatSendBtn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-            
-            <!-- Messages Container -->
-            <div class="chat-messages" id="chatMessagesContainer">
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    <i class="fas fa-comments" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i>
-                    <p>No messages yet</p>
-                </div>
-            </div>
-            
-            <!-- Input Area -->
-            <div class="chat-input-wrapper">
-                <input 
-                    type="text" 
-                    id="chatMessageInput" 
-                    class="chat-input" 
-                    placeholder="Type your message..."
-                    maxlength="1000"
-                >
-                <button class="chat-send-btn" onclick="sendChatMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+
             </div>
         </div>
     </div>
@@ -458,42 +438,60 @@
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/community-firebase.js'></script>
     
-    <!-- ✅ CHAT SYSTEM -->
-    <script src='assets/js/private-chat.js'></script>
-    
-    <!-- ✅ MESSAGES HUB -->
+    <!-- ✅ MESSAGES SYSTEM -->
     <script src='assets/js/messages-hub.js'></script>
+    <script src='assets/js/private-chat.js'></script>
     
     <script src="assets/js/admin-visibility.js"></script>
 
     <!-- User Menu Init -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
             
-            if (sidebarUserTrigger && sidebarUserDropdown) {
-                sidebarUserTrigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebarUserTrigger.classList.toggle('active');
-                    sidebarUserDropdown.classList.toggle('active');
-                });
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
                 
-                document.addEventListener('click', (e) => {
-                    if (!sidebarUserDropdown.contains(e.target) && 
-                        !sidebarUserTrigger.contains(e.target)) {
-                        sidebarUserTrigger.classList.remove('active');
-                        sidebarUserDropdown.classList.remove('active');
+                if (!trigger || !dropdown) return;
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    freshDropdown.classList.toggle('active');
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
                     }
                 });
                 
-                sidebarUserDropdown.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
                 });
+                
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
             }
-        });
+        })();
     </script>
 
 </body>

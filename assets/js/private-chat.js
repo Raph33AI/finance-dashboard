@@ -1,263 +1,294 @@
 /* ============================================
-   PRIVATE-CHAT.JS - Système de Chat Privé v1.0
-   💬 Conversations privées entre utilisateurs
-   🔥 Firebase Firestore en temps réel
+   PRIVATE-CHAT.JS - Private Chat System v2.0
+   💬 Chat en temps réel avec upload de fichiers
+   🔥 Firebase Firestore + Storage
    ============================================ */
 
-class PrivateChatSystem {
+class PrivateChat {
     constructor() {
         this.currentUser = null;
+        this.currentChatUser = null;
         this.currentConversationId = null;
         this.messagesListener = null;
-        this.conversationsListener = null;
-        this.otherUserId = null;
-        this.otherUserData = null;
+        this.attachedFiles = [];
+        this.MAX_FILES = 5;
+        this.MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     }
 
-    // ✅ Initialiser le système
     async initialize() {
-        console.log('💬 Initializing Private Chat System...');
+        console.log('💬 Initializing Private Chat...');
         
-        firebase.auth().onAuthStateChanged(user => {
+        firebase.auth().onAuthStateChanged((user) => {
             this.currentUser = user;
             if (user) {
-                console.log('✅ User authenticated for chat:', user.email);
+                console.log('✅ Chat user authenticated:', user.email);
+                this.setupEventListeners();
             }
         });
     }
 
-    // ✅ Générer un ID de conversation unique (toujours dans le même ordre)
-    getConversationId(userId1, userId2) {
-        return [userId1, userId2].sort().join('_');
+    setupEventListeners() {
+        const messageInput = document.getElementById('chatMessageInput');
+        const sendBtn = document.getElementById('chatSendBtn');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+
+        if (messageInput) {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.sendMessage());
+        }
+
+        if (attachBtn && fileInput) {
+            attachBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+        }
     }
 
-    // ✅ Ouvrir le chat avec un utilisateur
-    async openChatWith(userId, userData) {
-        if (!this.currentUser) {
-            alert('Please log in to send messages');
-            return;
-        }
+    // ✅ Ouvrir un chat (dans la zone de droite)
+    async openChat(userId, userData) {
+        console.log('💬 Opening chat with:', userData);
 
-        if (this.currentUser.uid === userId) {
-            alert('You cannot message yourself');
-            return;
-        }
+        this.currentChatUser = { uid: userId, ...userData };
 
-        this.otherUserId = userId;
-        this.otherUserData = userData;
-        this.currentConversationId = this.getConversationId(this.currentUser.uid, userId);
+        // Masquer l'empty state, afficher le chat
+        const emptyState = document.getElementById('chatEmptyState');
+        const chatActive = document.getElementById('chatActive');
 
-        console.log('💬 Opening chat with:', userData.displayName || userData.email);
-        console.log('📋 Conversation ID:', this.currentConversationId);
+        if (emptyState) emptyState.style.display = 'none';
+        if (chatActive) chatActive.style.display = 'flex';
 
-        // Créer la conversation si elle n'existe pas
-        await this.createConversationIfNotExists();
-
-        // Afficher la modal de chat
-        this.showChatModal();
+        // Récupérer ou créer la conversation
+        const conversationId = await this.getOrCreateConversation(userId);
+        this.currentConversationId = conversationId;
 
         // Charger les messages
         await this.loadMessages();
 
-        // Écouter les nouveaux messages
-        this.listenToMessages();
+        // Marquer comme lu
+        await this.markAsRead();
+
+        // Afficher le header
+        this.renderChatHeader();
     }
 
-    // ✅ Créer la conversation si elle n'existe pas (SANS LECTURE PRÉALABLE)
-    async createConversationIfNotExists() {
-        const convRef = firebase.firestore()
-            .collection('conversations')
-            .doc(this.currentConversationId);
-
-        try {
-            // ✅ Créer ou mettre à jour sans lecture préalable
-            await convRef.set({
-                participants: [this.currentUser.uid, this.otherUserId],
-                participantsData: {
-                    [this.currentUser.uid]: {
-                        displayName: this.currentUser.displayName || this.currentUser.email,
-                        photoURL: this.currentUser.photoURL || null,
-                        email: this.currentUser.email
-                    },
-                    [this.otherUserId]: {
-                        displayName: this.otherUserData.displayName || this.otherUserData.email,
-                        photoURL: this.otherUserData.photoURL || this.otherUserData.avatar || null,
-                        email: this.otherUserData.email
-                    }
-                },
-                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                unreadCount: {
-                    [this.currentUser.uid]: 0,
-                    [this.otherUserId]: 0
-                }
-            }, { merge: true });
-
-            // ✅ Ajouter createdAt uniquement si nouveau document
-            await convRef.set({
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastMessage: null
-            }, { merge: true });
-
-            console.log('✅ Conversation ready:', this.currentConversationId);
-        } catch (error) {
-            console.error('❌ Error setting up conversation:', error);
-            throw error;
-        }
-    }
-
-    // ✅ Afficher la modal de chat
-    showChatModal() {
-        const modal = document.getElementById('chatModal');
-        if (!modal) {
-            console.error('❌ Chat modal not found');
-            return;
-        }
-
-        // Mettre à jour le header
-        const chatHeader = document.getElementById('chatHeader');
-        const otherUserAvatar = this.otherUserData.photoURL || 
-                                this.otherUserData.avatar || 
-                                `https://ui-avatars.com/api/?name=${encodeURIComponent(this.otherUserData.displayName || this.otherUserData.email)}&background=667eea&color=fff`;
-
-        const displayName = this.otherUserData.displayName || 
-                           this.otherUserData.email?.split('@')[0] || 
-                           'User';
-
-        chatHeader.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="${otherUserAvatar}" 
-                     alt="${displayName}" 
-                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);"
-                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
-                <div>
-                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: white;">${this.escapeHtml(displayName)}</h3>
-                    <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">Online</p>
-                </div>
-            </div>
-            <button onclick="window.privateChatSystem.closeChatModal()" 
-                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-
-        modal.style.display = 'flex';
-        document.getElementById('chatMessageInput').focus();
-    }
-
-    // ✅ Fermer la modal de chat
-    closeChatModal() {
-        const modal = document.getElementById('chatModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-
-        // Arrêter l'écoute des messages
+    // ✅ Fermer le chat
+    closeChat() {
         if (this.messagesListener) {
             this.messagesListener();
-            this.messagesListener = null;
         }
 
-        // Réinitialiser
+        this.currentChatUser = null;
         this.currentConversationId = null;
-        this.otherUserId = null;
-        this.otherUserData = null;
+        this.attachedFiles = [];
 
-        const messagesContainer = document.getElementById('chatMessagesContainer');
-        if (messagesContainer) {
-            messagesContainer.innerHTML = '';
+        const emptyState = document.getElementById('chatEmptyState');
+        const chatActive = document.getElementById('chatActive');
+
+        if (emptyState) emptyState.style.display = 'flex';
+        if (chatActive) chatActive.style.display = 'none';
+
+        const attachmentPreview = document.getElementById('attachmentPreview');
+        if (attachmentPreview) {
+            attachmentPreview.style.display = 'none';
+            attachmentPreview.innerHTML = '';
         }
+    }
+
+    // ✅ Récupérer ou créer une conversation
+    async getOrCreateConversation(otherUserId) {
+        const participants = [this.currentUser.uid, otherUserId].sort();
+        const conversationId = participants.join('_');
+
+        const conversationRef = firebase.firestore().collection('conversations').doc(conversationId);
+        const doc = await conversationRef.get();
+
+        if (!doc.exists) {
+            // Créer la conversation
+            const currentUserData = {
+                displayName: this.currentUser.displayName || this.currentUser.email.split('@')[0],
+                photoURL: this.currentUser.photoURL || null,
+                email: this.currentUser.email
+            };
+
+            const otherUserDoc = await firebase.firestore().collection('users').doc(otherUserId).get();
+            const otherUserData = otherUserDoc.exists ? otherUserDoc.data() : {
+                displayName: 'Unknown User',
+                email: ''
+            };
+
+            await conversationRef.set({
+                participants: participants,
+                participantsData: {
+                    [this.currentUser.uid]: currentUserData,
+                    [otherUserId]: otherUserData
+                },
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessage: {
+                    text: '',
+                    senderId: this.currentUser.uid
+                },
+                unreadCount: {
+                    [this.currentUser.uid]: 0,
+                    [otherUserId]: 0
+                }
+            });
+
+            console.log('✅ Conversation created:', conversationId);
+        }
+
+        return conversationId;
     }
 
     // ✅ Charger les messages
     async loadMessages() {
+        if (!this.currentConversationId) return;
+
         const messagesContainer = document.getElementById('chatMessagesContainer');
         if (!messagesContainer) return;
 
         messagesContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
-                <p style="margin-top: 16px;">Loading messages...</p>
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading messages...</p>
             </div>
         `;
-    }
 
-    // ✅ Écouter les messages en temps réel
-    listenToMessages() {
         if (this.messagesListener) {
             this.messagesListener();
         }
 
-        const messagesRef = firebase.firestore()
+        this.messagesListener = firebase.firestore()
             .collection('conversations')
             .doc(this.currentConversationId)
             .collection('messages')
-            .orderBy('createdAt', 'asc');
+            .orderBy('createdAt', 'asc')
+            .onSnapshot((snapshot) => {
+                console.log(`📊 Received ${snapshot.size} messages`);
 
-        this.messagesListener = messagesRef.onSnapshot(snapshot => {
-            const messagesContainer = document.getElementById('chatMessagesContainer');
-            if (!messagesContainer) return;
+                if (snapshot.empty) {
+                    messagesContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-comments" style="font-size: 3rem; opacity: 0.3; margin-bottom: 16px;"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            if (snapshot.empty) {
+                const messagesHTML = snapshot.docs.map(doc => {
+                    const message = doc.data();
+                    return this.createMessageBubble(message);
+                }).join('');
+
+                messagesContainer.innerHTML = messagesHTML;
+
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, (error) => {
+                console.error('❌ Error loading messages:', error);
                 messagesContainer.innerHTML = `
-                    <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
-                        <i class="fas fa-comments" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i>
-                        <p style="font-size: 1.1rem; font-weight: 600;">No messages yet</p>
-                        <p style="font-size: 0.95rem; opacity: 0.8;">Start the conversation!</p>
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <p>Failed to load messages</p>
                     </div>
                 `;
-                return;
-            }
-
-            messagesContainer.innerHTML = '';
-
-            snapshot.forEach(doc => {
-                const message = doc.data();
-                const messageEl = this.createMessageElement(message);
-                messagesContainer.appendChild(messageEl);
             });
-
-            // Scroll vers le bas
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Marquer comme lu
-            this.markAsRead();
-        });
     }
 
-    // ✅ Créer un élément de message
-    createMessageElement(message) {
+    // ✅ Créer une bulle de message
+    createMessageBubble(message) {
         const isOwn = message.senderId === this.currentUser.uid;
-        const messageDiv = document.createElement('div');
-        
-        const time = message.createdAt?.toDate ? 
-                     this.formatMessageTime(message.createdAt.toDate()) : 
-                     'Sending...';
+        const senderData = isOwn 
+            ? { displayName: 'You', photoURL: this.currentUser.photoURL }
+            : this.currentChatUser;
 
-        messageDiv.className = `chat-message ${isOwn ? 'own' : 'other'}`;
-        messageDiv.innerHTML = `
-            <div class="message-bubble ${isOwn ? 'own-bubble' : 'other-bubble'}">
-                <p class="message-text">${this.escapeHtml(message.text)}</p>
-                <span class="message-time">${time}</span>
+        const displayName = senderData.displayName || 'Unknown';
+        const avatar = senderData.photoURL || 
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+
+        const time = message.createdAt 
+            ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            : 'Now';
+
+        let attachmentHTML = '';
+        if (message.attachments && message.attachments.length > 0) {
+            attachmentHTML = message.attachments.map(att => {
+                if (att.type === 'image') {
+                    return `
+                        <div class="message-attachment">
+                            <img src="${att.url}" alt="Image" onclick="window.open('${att.url}', '_blank')">
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="message-attachment-file">
+                            <i class="fas fa-file message-attachment-icon"></i>
+                            <div class="message-attachment-info">
+                                <div class="message-attachment-name">${att.name}</div>
+                                <div class="message-attachment-size">${this.formatFileSize(att.size)}</div>
+                            </div>
+                            <a href="${att.url}" target="_blank" download style="color: #667eea;">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        return `
+            <div class="chat-message ${isOwn ? 'own' : ''}">
+                <img src="${avatar}" alt="${displayName}" class="chat-message-avatar">
+                <div class="chat-message-content">
+                    <div class="chat-message-bubble">
+                        ${this.escapeHtml(message.text)}
+                        ${attachmentHTML}
+                    </div>
+                    <div class="chat-message-time">${time}</div>
+                </div>
             </div>
         `;
-
-        return messageDiv;
     }
 
     // ✅ Envoyer un message
-    async sendMessage(text) {
-        if (!text || !text.trim()) return;
-        if (!this.currentConversationId) return;
+    async sendMessage() {
+        const messageInput = document.getElementById('chatMessageInput');
+        if (!messageInput) return;
+
+        const text = messageInput.value.trim();
+        if (!text && this.attachedFiles.length === 0) return;
+
+        if (!this.currentConversationId) {
+            alert('No active conversation');
+            return;
+        }
+
+        const sendBtn = document.getElementById('chatSendBtn');
+        if (sendBtn) sendBtn.disabled = true;
 
         try {
+            // Uploader les fichiers
+            let attachments = [];
+            if (this.attachedFiles.length > 0) {
+                attachments = await this.uploadFiles();
+            }
+
+            // Créer le message
             const messageData = {
+                text: text,
                 senderId: this.currentUser.uid,
-                text: text.trim(),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                read: false
+                attachments: attachments
             };
 
-            // Ajouter le message
             await firebase.firestore()
                 .collection('conversations')
                 .doc(this.currentConversationId)
@@ -270,30 +301,116 @@ class PrivateChatSystem {
                 .doc(this.currentConversationId)
                 .update({
                     lastMessage: {
-                        text: text.trim(),
-                        senderId: this.currentUser.uid,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        text: text || '📎 Attachment',
+                        senderId: this.currentUser.uid
                     },
                     lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    [`unreadCount.${this.otherUserId}`]: firebase.firestore.FieldValue.increment(1)
+                    [`unreadCount.${this.currentChatUser.uid}`]: firebase.firestore.FieldValue.increment(1)
                 });
 
-            console.log('✅ Message sent');
+            // Clear input
+            messageInput.value = '';
+            this.attachedFiles = [];
+            this.renderAttachmentPreview();
 
-            // Vider l'input
-            const input = document.getElementById('chatMessageInput');
-            if (input) {
-                input.value = '';
-                input.focus();
-            }
+            console.log('✅ Message sent');
 
         } catch (error) {
             console.error('❌ Error sending message:', error);
             alert('Failed to send message. Please try again.');
+        } finally {
+            if (sendBtn) sendBtn.disabled = false;
         }
     }
 
-    // ✅ Marquer les messages comme lus
+    // ✅ Gérer la sélection de fichiers
+    handleFileSelect(event) {
+        const files = Array.from(event.target.files);
+
+        for (const file of files) {
+            if (this.attachedFiles.length >= this.MAX_FILES) {
+                alert(`Maximum ${this.MAX_FILES} files allowed`);
+                break;
+            }
+
+            if (file.size > this.MAX_FILE_SIZE) {
+                alert(`${file.name} is too large (max 10MB)`);
+                continue;
+            }
+
+            this.attachedFiles.push(file);
+        }
+
+        this.renderAttachmentPreview();
+        event.target.value = ''; // Reset input
+    }
+
+    // ✅ Afficher la preview des fichiers
+    renderAttachmentPreview() {
+        const preview = document.getElementById('attachmentPreview');
+        if (!preview) return;
+
+        if (this.attachedFiles.length === 0) {
+            preview.style.display = 'none';
+            preview.innerHTML = '';
+            return;
+        }
+
+        preview.style.display = 'block';
+
+        const previewHTML = `
+            <div class="attachment-preview-grid">
+                ${this.attachedFiles.map((file, index) => {
+                    const isImage = file.type.startsWith('image/');
+                    const previewUrl = isImage ? URL.createObjectURL(file) : null;
+
+                    return `
+                        <div class="attachment-preview-item">
+                            ${isImage 
+                                ? `<img src="${previewUrl}" class="attachment-preview-img">`
+                                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(102, 126, 234, 0.1);">
+                                    <i class="fas fa-file" style="font-size: 2rem; color: #667eea;"></i>
+                                   </div>`
+                            }
+                            <button class="attachment-remove-btn" onclick="window.privateChat.removeFile(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        preview.innerHTML = previewHTML;
+    }
+
+    // ✅ Supprimer un fichier
+    removeFile(index) {
+        this.attachedFiles.splice(index, 1);
+        this.renderAttachmentPreview();
+    }
+
+    // ✅ Uploader les fichiers vers Firebase Storage
+    async uploadFiles() {
+        const uploadPromises = this.attachedFiles.map(async (file) => {
+            const fileName = `chats/${this.currentConversationId}/${Date.now()}_${file.name}`;
+            const storageRef = firebase.storage().ref(fileName);
+
+            await storageRef.put(file);
+            const url = await storageRef.getDownloadURL();
+
+            return {
+                name: file.name,
+                size: file.size,
+                type: file.type.startsWith('image/') ? 'image' : 'file',
+                url: url
+            };
+        });
+
+        return await Promise.all(uploadPromises);
+    }
+
+    // ✅ Marquer comme lu
     async markAsRead() {
         if (!this.currentConversationId) return;
 
@@ -309,29 +426,68 @@ class PrivateChatSystem {
         }
     }
 
-    // ✅ Formater l'heure du message
-    formatMessageTime(date) {
-        const now = new Date();
-        const messageDate = new Date(date);
-        const diffMs = now - messageDate;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
+    // ✅ Afficher le header du chat
+    async renderChatHeader() {
+        const chatHeader = document.getElementById('chatHeader');
+        if (!chatHeader) return;
 
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
+        const displayName = this.currentChatUser.displayName || 
+                           this.currentChatUser.email?.split('@')[0] || 
+                           'Unknown User';
 
-        return messageDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const avatar = this.currentChatUser.photoURL || 
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+
+        // Vérifier le statut en ligne
+        const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
+        const statusHTML = isOnline 
+            ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
+            : 'Offline';
+
+        chatHeader.innerHTML = `
+            <div class="chat-header-user">
+                <img src="${avatar}" alt="${displayName}" class="chat-header-avatar">
+                <div class="chat-header-info">
+                    <h3>${this.escapeHtml(displayName)}</h3>
+                    <div class="chat-header-status">${statusHTML}</div>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="chat-header-btn" onclick="window.messagesHub.closeChat()" title="Close chat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
     }
 
-    // ✅ Échapper le HTML
+    // ✅ Vérifier si un utilisateur est en ligne
+    async checkUserOnline(userId) {
+        try {
+            const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+            if (!userDoc.exists) return false;
+
+            const userData = userDoc.data();
+            if (!userData.lastLoginAt) return false;
+
+            const lastLogin = userData.lastLoginAt.toDate();
+            const now = new Date();
+            const diffMinutes = (now - lastLogin) / 1000 / 60;
+
+            return diffMinutes < 5;
+        } catch (error) {
+            console.error('❌ Error checking online status:', error);
+            return false;
+        }
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -339,42 +495,22 @@ class PrivateChatSystem {
         return div.innerHTML;
     }
 
-    // ✅ Nettoyer les listeners
     cleanup() {
         if (this.messagesListener) {
             this.messagesListener();
         }
-        if (this.conversationsListener) {
-            this.conversationsListener();
-        }
     }
 }
 
-// ✅ Initialiser le système de chat
 document.addEventListener('DOMContentLoaded', () => {
-    window.privateChatSystem = new PrivateChatSystem();
-    window.privateChatSystem.initialize();
+    window.privateChat = new PrivateChat();
+    window.privateChat.initialize();
 });
 
-// ✅ Fonction d'envoi de message (appelée depuis le HTML)
-function sendChatMessage() {
-    const input = document.getElementById('chatMessageInput');
-    if (input && input.value.trim()) {
-        window.privateChatSystem.sendMessage(input.value.trim());
-    }
-}
-
-// ✅ Gérer l'envoi avec Enter
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('chatMessageInput');
-    if (input) {
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendChatMessage();
-            }
-        });
+window.addEventListener('beforeunload', () => {
+    if (window.privateChat) {
+        window.privateChat.cleanup();
     }
 });
 
-console.log('✅ private-chat.js loaded (v1.0)');
+console.log('✅ private-chat.js loaded (v2.0)');

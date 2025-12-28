@@ -1,6 +1,6 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v1.0
-   💬 Liste des conversations + Recherche utilisateurs
+   MESSAGES-HUB.JS - Messages Hub System v2.0
+   💬 Liste des conversations + Statut en ligne
    🔥 Firebase Firestore en temps réel
    ============================================ */
 
@@ -12,9 +12,9 @@ class MessagesHub {
         this.currentFilter = 'all';
         this.conversationsListener = null;
         this.userSearchTimeout = null;
+        this.activeConversationId = null;
     }
 
-    // ✅ Initialiser le système
     async initialize() {
         console.log('💬 Initializing Messages Hub...');
         
@@ -22,11 +22,27 @@ class MessagesHub {
             this.currentUser = user;
             if (user) {
                 console.log('✅ User authenticated:', user.email);
+                
+                // Mettre à jour lastLoginAt
+                await this.updateUserLoginTime();
+                
                 await this.loadConversations();
                 this.setupUserSearch();
                 this.updateUnreadBadges();
             }
         });
+    }
+
+    // ✅ Mettre à jour le temps de connexion
+    async updateUserLoginTime() {
+        try {
+            await firebase.firestore().collection('users').doc(this.currentUser.uid).set({
+                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log('✅ Login time updated');
+        } catch (error) {
+            console.error('❌ Error updating login time:', error);
+        }
     }
 
     // ✅ Charger les conversations
@@ -38,15 +54,13 @@ class MessagesHub {
         const conversationsList = document.getElementById('conversationsList');
         if (!conversationsList) return;
 
-        // Afficher le spinner
         conversationsList.innerHTML = `
             <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
-                <p style="margin-top: 16px; color: var(--text-secondary);">Loading conversations...</p>
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading conversations...</p>
             </div>
         `;
 
-        // Écouter les conversations en temps réel
         if (this.conversationsListener) {
             this.conversationsListener();
         }
@@ -72,6 +86,9 @@ class MessagesHub {
                     const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
                     const otherUserData = convData.participantsData[otherUserId];
 
+                    // ✅ Récupérer le statut en ligne
+                    const isOnline = await this.checkUserOnline(otherUserId);
+
                     this.conversations.push({
                         id: doc.id,
                         otherUserId: otherUserId,
@@ -79,7 +96,8 @@ class MessagesHub {
                         lastMessage: convData.lastMessage,
                         lastMessageAt: convData.lastMessageAt?.toDate(),
                         unreadCount: convData.unreadCount?.[this.currentUser.uid] || 0,
-                        createdAt: convData.createdAt?.toDate()
+                        createdAt: convData.createdAt?.toDate(),
+                        isOnline: isOnline
                     });
                 }
 
@@ -93,11 +111,29 @@ class MessagesHub {
             });
     }
 
-    // ✅ Filtrer les conversations
+    // ✅ Vérifier si un utilisateur est en ligne (< 5 min)
+    async checkUserOnline(userId) {
+        try {
+            const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+            if (!userDoc.exists) return false;
+
+            const userData = userDoc.data();
+            if (!userData.lastLoginAt) return false;
+
+            const lastLogin = userData.lastLoginAt.toDate();
+            const now = new Date();
+            const diffMinutes = (now - lastLogin) / 1000 / 60;
+
+            return diffMinutes < 5;
+        } catch (error) {
+            console.error('❌ Error checking online status:', error);
+            return false;
+        }
+    }
+
     filterConversations(filter) {
         this.currentFilter = filter;
 
-        // Mettre à jour les boutons actifs
         document.querySelectorAll('[data-filter]').forEach(btn => {
             btn.classList.remove('active');
             if (btn.dataset.filter === filter) {
@@ -105,7 +141,6 @@ class MessagesHub {
             }
         });
 
-        // Filtrer
         switch (filter) {
             case 'unread':
                 this.filteredConversations = this.conversations.filter(conv => conv.unreadCount > 0);
@@ -119,7 +154,6 @@ class MessagesHub {
         this.renderConversations();
     }
 
-    // ✅ Afficher les conversations
     renderConversations() {
         const conversationsList = document.getElementById('conversationsList');
         if (!conversationsList) return;
@@ -133,10 +167,9 @@ class MessagesHub {
                 : 'fa-inbox';
 
             conversationsList.innerHTML = `
-                <div class="conversations-empty">
-                    <i class="fas ${icon}"></i>
-                    <h3>${message}</h3>
-                    <p>Search for users above to start a conversation</p>
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <i class="fas ${icon}" style="font-size: 3rem; opacity: 0.3; margin-bottom: 16px;"></i>
+                    <p style="font-weight: 600;">${message}</p>
                 </div>
             `;
             return;
@@ -149,7 +182,6 @@ class MessagesHub {
         conversationsList.innerHTML = conversationsHTML;
     }
 
-    // ✅ Créer une carte de conversation
     createConversationCard(conv) {
         const displayName = conv.otherUserData?.displayName || 
                            conv.otherUserData?.email?.split('@')[0] || 
@@ -159,8 +191,8 @@ class MessagesHub {
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
 
         const lastMessageText = conv.lastMessage?.text || 'No messages yet';
-        const lastMessagePreview = lastMessageText.length > 80 
-            ? lastMessageText.substring(0, 80) + '...' 
+        const lastMessagePreview = lastMessageText.length > 60 
+            ? lastMessageText.substring(0, 60) + '...' 
             : lastMessageText;
 
         const timeAgo = conv.lastMessageAt 
@@ -169,11 +201,17 @@ class MessagesHub {
 
         const isUnread = conv.unreadCount > 0;
         const unreadBadgeHTML = isUnread 
-            ? `<div class="unread-badge">${conv.unreadCount} new</div>` 
+            ? `<div class="unread-badge">${conv.unreadCount}</div>` 
             : '';
 
+        const onlineIndicator = conv.isOnline 
+            ? '<div class="online-indicator"></div>' 
+            : '';
+
+        const isActive = this.activeConversationId === conv.otherUserId;
+
         return `
-            <div class="conversation-card ${isUnread ? 'unread' : ''}" 
+            <div class="conversation-card ${isUnread ? 'unread' : ''} ${isActive ? 'active' : ''}" 
                  onclick="window.messagesHub.openConversation('${conv.otherUserId}', ${JSON.stringify(conv.otherUserData).replace(/"/g, '&quot;')})">
                 
                 <div class="conversation-avatar-wrapper">
@@ -181,6 +219,7 @@ class MessagesHub {
                          alt="${this.escapeHtml(displayName)}" 
                          class="conversation-avatar"
                          onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                    ${onlineIndicator}
                 </div>
                 
                 <div class="conversation-content">
@@ -192,21 +231,65 @@ class MessagesHub {
                 </div>
                 
                 ${unreadBadgeHTML}
+                
+                <button class="delete-conversation-btn" 
+                        onclick="event.stopPropagation(); window.messagesHub.deleteConversation('${conv.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
             </div>
         `;
+    }
+
+    // ✅ Supprimer une conversation
+    async deleteConversation(conversationId) {
+        if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            console.log('🗑 Deleting conversation:', conversationId);
+            
+            await firebase.firestore().collection('conversations').doc(conversationId).delete();
+            
+            console.log('✅ Conversation deleted');
+            
+            // Si c'était la conversation active, fermer le chat
+            const conv = this.conversations.find(c => c.id === conversationId);
+            if (conv && this.activeConversationId === conv.otherUserId) {
+                this.closeChat();
+            }
+        } catch (error) {
+            console.error('❌ Error deleting conversation:', error);
+            alert('Failed to delete conversation. Please try again.');
+        }
     }
 
     // ✅ Ouvrir une conversation
     async openConversation(userId, userData) {
         console.log('💬 Opening conversation with:', userData);
 
-        if (!window.privateChatSystem) {
+        this.activeConversationId = userId;
+
+        // Mettre à jour l'UI
+        this.renderConversations();
+
+        if (!window.privateChat) {
             console.error('❌ Private chat system not loaded');
             alert('Chat system is not available. Please refresh the page.');
             return;
         }
 
-        await window.privateChatSystem.openChatWith(userId, userData);
+        await window.privateChat.openChat(userId, userData);
+    }
+
+    // ✅ Fermer le chat
+    closeChat() {
+        this.activeConversationId = null;
+        this.renderConversations();
+        
+        if (window.privateChat) {
+            window.privateChat.closeChat();
+        }
     }
 
     // ✅ Recherche utilisateurs
@@ -229,7 +312,7 @@ class MessagesHub {
 
             searchResults.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #3B82F6;"></i>
+                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #667eea;"></i>
                 </div>
             `;
             searchResults.style.display = 'block';
@@ -238,19 +321,22 @@ class MessagesHub {
                 this.searchUsers(query);
             }, 300);
         });
+
+        // Fermer les résultats en cliquant ailleurs
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
     }
 
-    // ✅ Rechercher des utilisateurs
     async searchUsers(query) {
         const searchResults = document.getElementById('userSearchResults');
         if (!searchResults) return;
 
         try {
-            console.log('🔍 Searching users:', query);
-
             const queryLower = query.toLowerCase();
 
-            // Recherche par email
             const emailQuery = firebase.firestore()
                 .collection('users')
                 .where('email', '>=', queryLower)
@@ -258,7 +344,6 @@ class MessagesHub {
                 .limit(10)
                 .get();
 
-            // Recherche par displayName
             const nameQuery = firebase.firestore()
                 .collection('users')
                 .where('displayName', '>=', query)
@@ -284,14 +369,10 @@ class MessagesHub {
 
             const users = Array.from(usersMap.values());
 
-            console.log(`✅ Found ${users.length} users`);
-
             if (users.length === 0) {
                 searchResults.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                        <i class="fas fa-user-slash" style="font-size: 3rem; opacity: 0.5; margin-bottom: 16px;"></i>
-                        <p style="font-size: 1.1rem; font-weight: 600;">No users found</p>
-                        <p style="font-size: 0.95rem;">Try a different search term</p>
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <p style="font-weight: 600;">No users found</p>
                     </div>
                 `;
                 return;
@@ -303,24 +384,19 @@ class MessagesHub {
                               `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
 
                 return `
-                    <div class="user-result-card">
+                    <div class="user-result-card" onclick="window.messagesHub.openConversation('${user.uid}', ${JSON.stringify(user).replace(/"/g, '&quot;')}); document.getElementById('userSearchResults').style.display='none';">
                         <img src="${avatar}" 
                              alt="${this.escapeHtml(displayName)}" 
-                             class="user-result-avatar"
-                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                             class="user-result-avatar">
                         
                         <div class="user-result-info">
                             <div class="user-result-name">${this.escapeHtml(displayName)}</div>
                             <div class="user-result-email">${this.escapeHtml(user.email || '')}</div>
                         </div>
                         
-                        <div class="user-result-action">
-                            <button class="start-chat-btn" 
-                                    onclick="window.messagesHub.openConversation('${user.uid}', ${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-comment-dots"></i>
-                                Message
-                            </button>
-                        </div>
+                        <button class="start-chat-btn">
+                            <i class="fas fa-comment-dots"></i>
+                        </button>
                     </div>
                 `;
             }).join('');
@@ -330,16 +406,13 @@ class MessagesHub {
         } catch (error) {
             console.error('❌ Error searching users:', error);
             searchResults.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #EF4444;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px;"></i>
-                    <p style="font-size: 1.1rem; font-weight: 600;">Error searching users</p>
-                    <p style="font-size: 0.95rem;">${error.message}</p>
+                <div style="text-align: center; padding: 20px; color: #ef4444;">
+                    <p>Error searching users</p>
                 </div>
             `;
         }
     }
 
-    // ✅ Mettre à jour les compteurs
     updateCounters() {
         const conversationsCount = document.getElementById('conversationsCount');
         const unreadFilterBadge = document.getElementById('unreadFilterBadge');
@@ -360,7 +433,6 @@ class MessagesHub {
         }
     }
 
-    // ✅ Mettre à jour les badges de notification
     updateUnreadBadges() {
         const totalUnread = this.conversations.filter(conv => conv.unreadCount > 0).length;
         const badge = document.getElementById('unreadMessagesBadge');
@@ -375,35 +447,31 @@ class MessagesHub {
         }
     }
 
-    // ✅ Afficher l'état vide
     renderEmptyState() {
         const conversationsList = document.getElementById('conversationsList');
         if (!conversationsList) return;
 
         conversationsList.innerHTML = `
-            <div class="conversations-empty">
-                <i class="fas fa-inbox"></i>
-                <h3>No conversations yet</h3>
-                <p>Search for users above to start your first conversation</p>
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3; margin-bottom: 16px;"></i>
+                <p style="font-weight: 600;">No conversations yet</p>
+                <p style="font-size: 0.9rem;">Search for users above to start chatting</p>
             </div>
         `;
     }
 
-    // ✅ Afficher une erreur
     renderError(message) {
         const conversationsList = document.getElementById('conversationsList');
         if (!conversationsList) return;
 
         conversationsList.innerHTML = `
-            <div class="conversations-empty">
-                <i class="fas fa-exclamation-triangle" style="color: #EF4444;"></i>
-                <h3 style="color: #EF4444;">${message}</h3>
-                <p>Please try refreshing the page</p>
+            <div style="text-align: center; padding: 60px 20px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 16px;"></i>
+                <p style="font-weight: 600; color: #ef4444;">${message}</p>
             </div>
         `;
     }
 
-    // ✅ Formater le temps
     formatTimeAgo(date) {
         if (!date) return 'Unknown';
         const seconds = Math.floor((new Date() - date) / 1000);
@@ -426,7 +494,6 @@ class MessagesHub {
         return 'Just now';
     }
 
-    // ✅ Échapper le HTML
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -434,7 +501,6 @@ class MessagesHub {
         return div.innerHTML;
     }
 
-    // ✅ Nettoyer les listeners
     cleanup() {
         if (this.conversationsListener) {
             this.conversationsListener();
@@ -442,17 +508,15 @@ class MessagesHub {
     }
 }
 
-// ✅ Initialiser au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     window.messagesHub = new MessagesHub();
     window.messagesHub.initialize();
 });
 
-// ✅ Nettoyer lors du changement de page
 window.addEventListener('beforeunload', () => {
     if (window.messagesHub) {
         window.messagesHub.cleanup();
     }
 });
 
-console.log('✅ messages-hub.js loaded (v1.0)');
+console.log('✅ messages-hub.js loaded (v2.0)');
