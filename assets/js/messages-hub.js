@@ -1,7 +1,7 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v2.0
+   MESSAGES-HUB.JS - Messages Hub System v2.1
    💬 Liste des conversations + Statut en ligne
-   🔥 Firebase Firestore en temps réel
+   🔥 Récupération robuste du plan utilisateur
    ============================================ */
 
 class MessagesHub {
@@ -13,6 +13,7 @@ class MessagesHub {
         this.conversationsListener = null;
         this.userSearchTimeout = null;
         this.activeConversationId = null;
+        this.db = firebase.firestore();
     }
 
     async initialize() {
@@ -33,12 +34,77 @@ class MessagesHub {
         });
     }
 
+    /* ==========================================
+       👤 RÉCUPÉRATION ROBUSTE DES DONNÉES UTILISATEUR
+       ========================================== */
+    
+    /**
+     * ✅ CORRECTION CRITIQUE : Récupérer les données utilisateur avec fallbacks
+     */
+    async getUserData(userId) {
+        try {
+            const userDoc = await this.db.collection('users').doc(userId).get();
+            
+            if (!userDoc.exists) {
+                console.warn('⚠ User document not found:', userId);
+                
+                return {
+                    uid: userId,
+                    displayName: 'Unknown User',
+                    photoURL: null,
+                    email: null,
+                    plan: 'free'
+                };
+            }
+
+            const userData = userDoc.data();
+            
+            // ✅ Vérifier plusieurs champs possibles pour le plan
+            const plan = userData.plan || 
+                        userData.subscriptionPlan || 
+                        userData.currentPlan || 
+                        userData.subscription?.plan ||
+                        'free';
+
+            console.log('✅ User data retrieved:', {
+                uid: userId,
+                displayName: userData.displayName,
+                email: userData.email,
+                plan: plan
+            });
+
+            return {
+                uid: userId,
+                displayName: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
+                photoURL: userData.photoURL || null,
+                email: userData.email || null,
+                plan: plan,
+                lastLoginAt: userData.lastLoginAt || null
+            };
+
+        } catch (error) {
+            console.error('❌ Error getting user data:', error);
+            
+            return {
+                uid: userId,
+                displayName: 'Unknown User',
+                photoURL: null,
+                email: null,
+                plan: 'free'
+            };
+        }
+    }
+
     // ✅ Mettre à jour le temps de connexion
     async updateUserLoginTime() {
         try {
-            await firebase.firestore().collection('users').doc(this.currentUser.uid).set({
-                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+            await this.db.collection('users').doc(this.currentUser.uid).set({
+                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
+                email: this.currentUser.email,
+                displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
+                photoURL: this.currentUser.photoURL || null
             }, { merge: true });
+            
             console.log('✅ Login time updated');
         } catch (error) {
             console.error('❌ Error updating login time:', error);
@@ -65,7 +131,7 @@ class MessagesHub {
             this.conversationsListener();
         }
 
-        this.conversationsListener = firebase.firestore()
+        this.conversationsListener = this.db
             .collection('conversations')
             .where('participants', 'array-contains', this.currentUser.uid)
             .orderBy('lastMessageAt', 'desc')
@@ -84,8 +150,10 @@ class MessagesHub {
                 for (const doc of snapshot.docs) {
                     const convData = doc.data();
                     const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
-                    const otherUserData = convData.participantsData[otherUserId];
-
+                    
+                    // ✅ CORRECTION : Récupérer les données utilisateur avec la méthode robuste
+                    const otherUserData = await this.getUserData(otherUserId);
+                    
                     // ✅ Récupérer le statut en ligne
                     const isOnline = await this.checkUserOnline(otherUserId);
 
@@ -114,7 +182,7 @@ class MessagesHub {
     // ✅ Vérifier si un utilisateur est en ligne (< 5 min)
     async checkUserOnline(userId) {
         try {
-            const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+            const userDoc = await this.db.collection('users').doc(userId).get();
             if (!userDoc.exists) return false;
 
             const userData = userDoc.data();
@@ -183,10 +251,7 @@ class MessagesHub {
     }
 
     createConversationCard(conv) {
-        const displayName = conv.otherUserData?.displayName || 
-                           conv.otherUserData?.email?.split('@')[0] || 
-                           'Unknown User';
-
+        const displayName = conv.otherUserData?.displayName || 'Unknown User';
         const avatar = conv.otherUserData?.photoURL || 
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
 
@@ -249,11 +314,10 @@ class MessagesHub {
         try {
             console.log('🗑 Deleting conversation:', conversationId);
             
-            await firebase.firestore().collection('conversations').doc(conversationId).delete();
+            await this.db.collection('conversations').doc(conversationId).delete();
             
             console.log('✅ Conversation deleted');
             
-            // Si c'était la conversation active, fermer le chat
             const conv = this.conversations.find(c => c.id === conversationId);
             if (conv && this.activeConversationId === conv.otherUserId) {
                 this.closeChat();
@@ -269,8 +333,6 @@ class MessagesHub {
         console.log('💬 Opening conversation with:', userData);
 
         this.activeConversationId = userId;
-
-        // Mettre à jour l'UI
         this.renderConversations();
 
         if (!window.privateChat) {
@@ -282,7 +344,6 @@ class MessagesHub {
         await window.privateChat.openChat(userId, userData);
     }
 
-    // ✅ Fermer le chat
     closeChat() {
         this.activeConversationId = null;
         this.renderConversations();
@@ -322,7 +383,6 @@ class MessagesHub {
             }, 300);
         });
 
-        // Fermer les résultats en cliquant ailleurs
         document.addEventListener('click', (e) => {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.style.display = 'none';
@@ -337,14 +397,14 @@ class MessagesHub {
         try {
             const queryLower = query.toLowerCase();
 
-            const emailQuery = firebase.firestore()
+            const emailQuery = this.db
                 .collection('users')
                 .where('email', '>=', queryLower)
                 .where('email', '<=', queryLower + '\uf8ff')
                 .limit(10)
                 .get();
 
-            const nameQuery = firebase.firestore()
+            const nameQuery = this.db
                 .collection('users')
                 .where('displayName', '>=', query)
                 .where('displayName', '<=', query + '\uf8ff')
@@ -519,4 +579,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ messages-hub.js loaded (v2.0)');
+console.log('✅ messages-hub.js loaded (v2.1 - Robust plan retrieval)');

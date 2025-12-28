@@ -1,7 +1,7 @@
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v2.0
+   PRIVATE-CHAT.JS - Private Chat System v2.1
    💬 Chat en temps réel avec upload de fichiers
-   🔥 Firebase Firestore + Storage
+   🔥 Récupération robuste du plan utilisateur
    ============================================ */
 
 class PrivateChat {
@@ -13,18 +13,82 @@ class PrivateChat {
         this.attachedFiles = [];
         this.MAX_FILES = 5;
         this.MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        this.db = firebase.firestore();
+        this.storage = firebase.storage();
+        this.auth = firebase.auth();
     }
 
     async initialize() {
         console.log('💬 Initializing Private Chat...');
         
-        firebase.auth().onAuthStateChanged((user) => {
+        this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
             if (user) {
                 console.log('✅ Chat user authenticated:', user.email);
                 this.setupEventListeners();
             }
         });
+    }
+
+    /* ==========================================
+       👤 RÉCUPÉRATION ROBUSTE DES DONNÉES UTILISATEUR
+       ========================================== */
+    
+    /**
+     * ✅ CORRECTION CRITIQUE : Récupérer les données utilisateur avec fallbacks
+     */
+    async getUserData(userId) {
+        try {
+            const userDoc = await this.db.collection('users').doc(userId).get();
+            
+            if (!userDoc.exists) {
+                console.warn('⚠ User document not found:', userId);
+                
+                return {
+                    uid: userId,
+                    displayName: 'Unknown User',
+                    photoURL: null,
+                    email: null,
+                    plan: 'free'
+                };
+            }
+
+            const userData = userDoc.data();
+            
+            // ✅ Vérifier plusieurs champs possibles pour le plan
+            const plan = userData.plan || 
+                        userData.subscriptionPlan || 
+                        userData.currentPlan || 
+                        userData.subscription?.plan ||
+                        'free';
+
+            console.log('✅ User data retrieved:', {
+                uid: userId,
+                displayName: userData.displayName,
+                email: userData.email,
+                plan: plan
+            });
+
+            return {
+                uid: userId,
+                displayName: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
+                photoURL: userData.photoURL || null,
+                email: userData.email || null,
+                plan: plan,
+                lastLoginAt: userData.lastLoginAt || null
+            };
+
+        } catch (error) {
+            console.error('❌ Error getting user data:', error);
+            
+            return {
+                uid: userId,
+                displayName: 'Unknown User',
+                photoURL: null,
+                email: null,
+                plan: 'free'
+            };
+        }
     }
 
     setupEventListeners() {
@@ -52,34 +116,27 @@ class PrivateChat {
         }
     }
 
-    // ✅ Ouvrir un chat (dans la zone de droite)
+    // ✅ Ouvrir un chat
     async openChat(userId, userData) {
         console.log('💬 Opening chat with:', userData);
 
-        this.currentChatUser = { uid: userId, ...userData };
+        // ✅ CORRECTION : Récupérer les données utilisateur avec la méthode robuste
+        this.currentChatUser = await this.getUserData(userId);
 
-        // Masquer l'empty state, afficher le chat
         const emptyState = document.getElementById('chatEmptyState');
         const chatActive = document.getElementById('chatActive');
 
         if (emptyState) emptyState.style.display = 'none';
         if (chatActive) chatActive.style.display = 'flex';
 
-        // Récupérer ou créer la conversation
         const conversationId = await this.getOrCreateConversation(userId);
         this.currentConversationId = conversationId;
 
-        // Charger les messages
         await this.loadMessages();
-
-        // Marquer comme lu
         await this.markAsRead();
-
-        // Afficher le header
         this.renderChatHeader();
     }
 
-    // ✅ Fermer le chat
     closeChat() {
         if (this.messagesListener) {
             this.messagesListener();
@@ -107,28 +164,29 @@ class PrivateChat {
         const participants = [this.currentUser.uid, otherUserId].sort();
         const conversationId = participants.join('_');
 
-        const conversationRef = firebase.firestore().collection('conversations').doc(conversationId);
+        const conversationRef = this.db.collection('conversations').doc(conversationId);
         const doc = await conversationRef.get();
 
         if (!doc.exists) {
-            // Créer la conversation
-            const currentUserData = {
-                displayName: this.currentUser.displayName || this.currentUser.email.split('@')[0],
-                photoURL: this.currentUser.photoURL || null,
-                email: this.currentUser.email
-            };
-
-            const otherUserDoc = await firebase.firestore().collection('users').doc(otherUserId).get();
-            const otherUserData = otherUserDoc.exists ? otherUserDoc.data() : {
-                displayName: 'Unknown User',
-                email: ''
-            };
+            // ✅ CORRECTION : Récupérer les données des deux utilisateurs avec la méthode robuste
+            const currentUserData = await this.getUserData(this.currentUser.uid);
+            const otherUserData = await this.getUserData(otherUserId);
 
             await conversationRef.set({
                 participants: participants,
                 participantsData: {
-                    [this.currentUser.uid]: currentUserData,
-                    [otherUserId]: otherUserData
+                    [this.currentUser.uid]: {
+                        displayName: currentUserData.displayName,
+                        photoURL: currentUserData.photoURL,
+                        email: currentUserData.email,
+                        plan: currentUserData.plan
+                    },
+                    [otherUserId]: {
+                        displayName: otherUserData.displayName,
+                        photoURL: otherUserData.photoURL,
+                        email: otherUserData.email,
+                        plan: otherUserData.plan
+                    }
                 },
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -166,7 +224,7 @@ class PrivateChat {
             this.messagesListener();
         }
 
-        this.messagesListener = firebase.firestore()
+        this.messagesListener = this.db
             .collection('conversations')
             .doc(this.currentConversationId)
             .collection('messages')
@@ -190,8 +248,6 @@ class PrivateChat {
                 }).join('');
 
                 messagesContainer.innerHTML = messagesHTML;
-
-                // Scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, (error) => {
                 console.error('❌ Error loading messages:', error);
@@ -203,7 +259,6 @@ class PrivateChat {
             });
     }
 
-    // ✅ Créer une bulle de message
     createMessageBubble(message) {
         const isOwn = message.senderId === this.currentUser.uid;
         const senderData = isOwn 
@@ -275,13 +330,11 @@ class PrivateChat {
         if (sendBtn) sendBtn.disabled = true;
 
         try {
-            // Uploader les fichiers
             let attachments = [];
             if (this.attachedFiles.length > 0) {
                 attachments = await this.uploadFiles();
             }
 
-            // Créer le message
             const messageData = {
                 text: text,
                 senderId: this.currentUser.uid,
@@ -289,14 +342,13 @@ class PrivateChat {
                 attachments: attachments
             };
 
-            await firebase.firestore()
+            await this.db
                 .collection('conversations')
                 .doc(this.currentConversationId)
                 .collection('messages')
                 .add(messageData);
 
-            // Mettre à jour la conversation
-            await firebase.firestore()
+            await this.db
                 .collection('conversations')
                 .doc(this.currentConversationId)
                 .update({
@@ -308,7 +360,6 @@ class PrivateChat {
                     [`unreadCount.${this.currentChatUser.uid}`]: firebase.firestore.FieldValue.increment(1)
                 });
 
-            // Clear input
             messageInput.value = '';
             this.attachedFiles = [];
             this.renderAttachmentPreview();
@@ -323,7 +374,6 @@ class PrivateChat {
         }
     }
 
-    // ✅ Gérer la sélection de fichiers
     handleFileSelect(event) {
         const files = Array.from(event.target.files);
 
@@ -342,10 +392,9 @@ class PrivateChat {
         }
 
         this.renderAttachmentPreview();
-        event.target.value = ''; // Reset input
+        event.target.value = '';
     }
 
-    // ✅ Afficher la preview des fichiers
     renderAttachmentPreview() {
         const preview = document.getElementById('attachmentPreview');
         if (!preview) return;
@@ -384,17 +433,15 @@ class PrivateChat {
         preview.innerHTML = previewHTML;
     }
 
-    // ✅ Supprimer un fichier
     removeFile(index) {
         this.attachedFiles.splice(index, 1);
         this.renderAttachmentPreview();
     }
 
-    // ✅ Uploader les fichiers vers Firebase Storage
     async uploadFiles() {
         const uploadPromises = this.attachedFiles.map(async (file) => {
             const fileName = `chats/${this.currentConversationId}/${Date.now()}_${file.name}`;
-            const storageRef = firebase.storage().ref(fileName);
+            const storageRef = this.storage.ref(fileName);
 
             await storageRef.put(file);
             const url = await storageRef.getDownloadURL();
@@ -410,12 +457,11 @@ class PrivateChat {
         return await Promise.all(uploadPromises);
     }
 
-    // ✅ Marquer comme lu
     async markAsRead() {
         if (!this.currentConversationId) return;
 
         try {
-            await firebase.firestore()
+            await this.db
                 .collection('conversations')
                 .doc(this.currentConversationId)
                 .update({
@@ -426,19 +472,14 @@ class PrivateChat {
         }
     }
 
-    // ✅ Afficher le header du chat
     async renderChatHeader() {
         const chatHeader = document.getElementById('chatHeader');
         if (!chatHeader) return;
 
-        const displayName = this.currentChatUser.displayName || 
-                           this.currentChatUser.email?.split('@')[0] || 
-                           'Unknown User';
-
+        const displayName = this.currentChatUser.displayName || 'Unknown User';
         const avatar = this.currentChatUser.photoURL || 
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
 
-        // Vérifier le statut en ligne
         const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
         const statusHTML = isOnline 
             ? '<i class="fas fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> Online'
@@ -460,10 +501,9 @@ class PrivateChat {
         `;
     }
 
-    // ✅ Vérifier si un utilisateur est en ligne
     async checkUserOnline(userId) {
         try {
-            const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+            const userDoc = await this.db.collection('users').doc(userId).get();
             if (!userDoc.exists) return false;
 
             const userData = userDoc.data();
@@ -513,4 +553,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v2.0)');
+console.log('✅ private-chat.js loaded (v2.1 - Robust plan retrieval)');
