@@ -1,8 +1,9 @@
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v3.0
+   PRIVATE-CHAT.JS - Private Chat System v3.1
    💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
    ✅ Upload images + documents vers R2
+   🎯 Photos cliquables vers profil public
    ============================================ */
 
 class PrivateChat {
@@ -22,7 +23,7 @@ class PrivateChat {
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat v3.0...');
+        console.log('💬 Initializing Private Chat v3.1...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -304,7 +305,8 @@ class PrivateChat {
         const senderData = isOwn 
             ? { 
                 displayName: 'You', 
-                photoURL: this.currentUser.photoURL || window.currentUserData?.photoURL 
+                photoURL: this.currentUser.photoURL || window.currentUserData?.photoURL,
+                uid: this.currentUser.uid
               }
             : this.currentChatUser;
 
@@ -345,7 +347,11 @@ class PrivateChat {
 
         return `
             <div class="chat-message ${isOwn ? 'own' : ''}">
-                <img src="${avatar}" alt="${displayName}" class="chat-message-avatar" loading="lazy">
+                <img src="${avatar}" 
+                     alt="${displayName}" 
+                     class="chat-message-avatar" 
+                     onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
+                     loading="lazy">
                 <div class="chat-message-content">
                     <div class="chat-message-bubble">
                         ${this.escapeHtml(message.text)}
@@ -603,6 +609,7 @@ class PrivateChat {
                 <img src="${avatar}" 
                      alt="${this.escapeHtml(displayName)}" 
                      class="chat-header-avatar"
+                     onclick="window.privateChat.navigateToProfile('${this.currentChatUser.uid}')"
                      onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
                 
                 <div class="chat-header-info">
@@ -625,6 +632,20 @@ class PrivateChat {
         `;
         
         console.log('✅ Chat header rendered with:', displayName, statusHTML);
+    }
+
+    /* ==========================================
+       🔗 NAVIGATION VERS PROFIL PUBLIC
+       ========================================== */
+    
+    navigateToProfile(userId) {
+        if (!userId) {
+            console.warn('⚠ No user ID provided');
+            return;
+        }
+        
+        console.log('🔗 Navigating to public profile:', userId);
+        window.location.href = `public-profile.html?userId=${userId}`;
     }
 
     async checkUserOnline(userId) {
@@ -679,4 +700,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v3.0 - R2 Upload Support)');
+console.log('✅ private-chat.js loaded (v3.1 - Photos cliquables vers profil public)');
