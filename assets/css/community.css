@@ -6563,95 +6563,87 @@ body.dark-mode .user-select-item:hover {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   📨 SHARED POST BUBBLE (Messages) - VERSION CORRIGÉE
+   📨 SHARED POST BUBBLE - VERSION MINIMALISTE
    ════════════════════════════════════════════════════════════════ */
 
 /* Container du message partagé */
 .shared-post-message .chat-message-bubble {
-    max-width: 420px !important;
+    max-width: 360px !important;
+    padding: 0 !important;
 }
 
-/* Bulle principale du post partagé */
+/* Bulle principale - Style carte compacte */
 .shared-post-bubble {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(10px) saturate(180%) !important;
-    border: 2px solid rgba(102, 126, 234, 0.25) !important;
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 4px solid #667eea !important;
     padding: 0 !important;
-    border-radius: 16px !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
-    cursor: default !important;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15) !important;
-    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.2s ease !important;
 }
 
 body.dark-mode .shared-post-bubble {
-    background: rgba(30, 41, 59, 0.95) !important;
-    border-color: rgba(102, 126, 234, 0.35) !important;
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    border-left-color: #667eea !important;
 }
 
 .shared-post-bubble:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2) !important;
 }
 
-/* Header du post partagé */
+/* Header - Badge "Shared Post" */
 .shared-post-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 18px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    border-bottom: 2px solid rgba(102, 126, 234, 0.15);
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.08);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.15);
 }
 
 body.dark-mode .shared-post-header {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    background: rgba(102, 126, 234, 0.15);
     border-bottom-color: rgba(102, 126, 234, 0.25);
 }
 
 .shared-post-header i {
-    font-size: 1.1rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: #667eea;
 }
 
 .shared-post-header span {
-    font-size: 0.8rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #667eea;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
-/* Contenu du post (cliquable) */
+/* Contenu cliquable */
 .shared-post-content {
+    padding: 14px;
     cursor: pointer;
-    padding: 16px 18px;
-    background: transparent;
-    transition: all 0.3s ease;
+    transition: background 0.2s ease;
 }
 
 .shared-post-content:hover {
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(102, 126, 234, 0.03);
 }
 
 body.dark-mode .shared-post-content:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(102, 126, 234, 0.08);
 }
 
-/* Titre du post */
+/* Titre du post - 2 lignes max */
 .shared-post-title {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.35;
     margin-bottom: 10px;
-    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -6659,200 +6651,105 @@ body.dark-mode .shared-post-content:hover {
     word-break: break-word;
 }
 
-/* Excerpt du post */
-.shared-post-excerpt {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 12px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
+body.dark-mode .shared-post-title {
+    color: #f1f5f9;
 }
 
-/* Métadonnées (auteur, date, etc.) */
+/* Excerpt - MASQUÉ (on ne l'affiche plus) */
+.shared-post-excerpt {
+    display: none !important;
+}
+
+/* Métadonnées - Auteur + Date en ligne */
 .shared-post-meta {
     display: flex;
     align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    font-size: 0.8rem;
-    color: var(--text-tertiary);
-    font-weight: 600;
-}
-
-.shared-post-author {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.shared-post-author i {
+    gap: 10px;
     font-size: 0.75rem;
-    color: #667eea;
-    background: none !important;
-    -webkit-text-fill-color: #667eea !important;
-}
-
-/* Bouton "View Full Post" */
-.shared-post-view-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 18px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white !important;
-    border: none;
-    border-radius: 0 0 14px 14px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1) inset;
-}
-
-.shared-post-view-btn i {
-    font-size: 0.85rem;
-    color: white !important;
-    background: none !important;
-    -webkit-text-fill-color: white !important;
-}
-
-.shared-post-view-btn:hover {
-    background: linear-gradient(135deg, #764ba2, #667eea);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.shared-post-view-btn:active {
-    transform: translateY(0);
-}
-
-/* ════════════════════════════════════════════════════════════════
-   📱 RESPONSIVE DESIGN - Shared Post
-   ════════════════════════════════════════════════════════════════ */
-
-@media (max-width: 768px) {
-    .shared-post-message .chat-message-bubble {
-        max-width: 340px !important;
-    }
-    
-    .shared-post-header {
-        padding: 12px 16px;
-    }
-    
-    .shared-post-header i {
-        font-size: 1rem;
-    }
-    
-    .shared-post-header span {
-        font-size: 0.75rem;
-    }
-    
-    .shared-post-content {
-        padding: 14px 16px;
-    }
-    
-    .shared-post-title {
-        font-size: 0.95rem;
-    }
-    
-    .shared-post-excerpt {
-        font-size: 0.85rem;
-        -webkit-line-clamp: 2;
-    }
-    
-    .shared-post-meta {
-        font-size: 0.75rem;
-    }
-    
-    .shared-post-view-btn {
-        padding: 10px 16px;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .shared-post-message .chat-message-bubble {
-        max-width: 280px !important;
-    }
-    
-    .shared-post-header {
-        padding: 10px 14px;
-        gap: 8px;
-    }
-    
-    .shared-post-header span {
-        font-size: 0.7rem;
-    }
-    
-    .shared-post-content {
-        padding: 12px 14px;
-    }
-    
-    .shared-post-title {
-        font-size: 0.9rem;
-        margin-bottom: 8px;
-    }
-    
-    .shared-post-excerpt {
-        font-size: 0.8rem;
-        margin-bottom: 10px;
-    }
-    
-    .shared-post-view-btn {
-        padding: 10px 14px;
-        font-size: 0.8rem;
-        gap: 6px;
-    }
-}
-
-/* ════════════════════════════════════════════════════════════════
-   ✨ ANIMATIONS
-   ════════════════════════════════════════════════════════════════ */
-
-@keyframes sharedPostSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.shared-post-bubble {
-    animation: sharedPostSlideIn 0.4s ease-out;
-}
-
-/* ════════════════════════════════════════════════════════════════
-   🎨 DARK MODE ENHANCEMENTS
-   ════════════════════════════════════════════════════════════════ */
-
-body.dark-mode .shared-post-title {
-    color: #f8fafc;
-}
-
-body.dark-mode .shared-post-excerpt {
-    color: #cbd5e1;
+    color: #64748b;
+    font-weight: 500;
 }
 
 body.dark-mode .shared-post-meta {
     color: #94a3b8;
 }
 
-body.dark-mode .shared-post-author i {
-    color: #818cf8 !important;
-    -webkit-text-fill-color: #818cf8 !important;
+.shared-post-author {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.shared-post-author i {
+    font-size: 0.7rem;
+    color: #667eea;
+}
+
+/* Bouton "View Post" - Simple lien */
+.shared-post-view-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: #f8fafc;
+    color: #667eea !important;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-top: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .shared-post-view-btn {
+    background: #0f172a;
+    border-top-color: #334155;
+}
+
+.shared-post-view-btn:hover {
+    background: #667eea;
+    color: white !important;
+}
+
+.shared-post-view-btn i {
+    margin-left: 4px;
+    font-size: 0.75rem;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   ✅ FIN DES STYLES SHARED POST BUBBLE
+   📱 RESPONSIVE
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .shared-post-message .chat-message-bubble {
+        max-width: 300px !important;
+    }
+    
+    .shared-post-title {
+        font-size: 0.9rem;
+    }
+    
+    .shared-post-meta {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .shared-post-message .chat-message-bubble {
+        max-width: 260px !important;
+    }
+    
+    .shared-post-content {
+        padding: 12px;
+    }
+    
+    .shared-post-title {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ✅ FIN SHARED POST BUBBLE
    ════════════════════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════════════════════

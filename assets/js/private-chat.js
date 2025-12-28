@@ -1356,9 +1356,8 @@ class PrivateChat {
     /* ==========================================
        📨 RENDU SPÉCIAL POUR LES POSTS PARTAGÉS
        ========================================== */
-    
     /**
-     * Rendu spécial pour les messages de post partagé
+     * Rendu spécial pour les messages de post partagé - VERSION SIMPLIFIÉE
      */
     renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time) {
         const post = message.sharedPost;
@@ -1373,41 +1372,53 @@ class PrivateChat {
 
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
 
+        // ✅ Extraire uniquement le texte du titre (sans HTML)
+        const cleanTitle = this.stripHtml(post.title);
+        
+        // ✅ Formater la date si disponible (sinon masquer)
+        let dateHTML = '';
+        if (post.publishedDate) {
+            dateHTML = `<span>• ${post.publishedDate}</span>`;
+        }
+
         return `
             <div class="chat-message ${isOwn ? 'own' : ''} shared-post-message" data-message-id="${messageId}">
                 <img src="${avatar}" 
-                     alt="${displayName}" 
-                     class="chat-message-avatar" 
-                     onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
-                     onerror="this.src='${fallbackAvatar}'"
-                     loading="lazy">
+                    alt="${displayName}" 
+                    class="chat-message-avatar" 
+                    onclick="window.privateChat.navigateToProfile('${senderData.uid}')"
+                    onerror="this.src='${fallbackAvatar}'"
+                    loading="lazy">
                 <div class="chat-message-content">
                     <div class="chat-message-bubble shared-post-bubble">
+                        
+                        <!-- Header Badge -->
                         <div class="shared-post-header">
                             <i class="fas fa-share-square"></i>
                             <span>Shared Post</span>
                         </div>
                         
+                        <!-- Contenu cliquable -->
                         <div class="shared-post-content" onclick="window.open('${post.url}', '_blank')">
+                            
+                            <!-- Titre -->
                             <div class="shared-post-title">
-                                ${this.escapeHtml(post.title)}
+                                ${this.escapeHtml(cleanTitle)}
                             </div>
                             
-                            <div class="shared-post-excerpt">
-                                ${this.escapeHtml(post.excerpt)}${post.excerpt.length >= 200 ? '...' : ''}
-                            </div>
-                            
+                            <!-- Auteur + Date -->
                             <div class="shared-post-meta">
                                 <span class="shared-post-author">
                                     <i class="fas fa-user"></i>
                                     ${this.escapeHtml(post.authorName)}
                                 </span>
+                                ${dateHTML}
                             </div>
                         </div>
                         
+                        <!-- Bouton View Post -->
                         <a href="${post.url}" target="_blank" class="shared-post-view-btn">
-                            <i class="fas fa-external-link-alt"></i>
-                            View Full Post
+                            View Post <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                     <div class="chat-message-time">${time}</div>
@@ -1415,6 +1426,16 @@ class PrivateChat {
                 ${deleteBtn}
             </div>
         `;
+    }
+
+    /**
+     * Nettoyer le HTML d'une chaîne (nouvelle méthode utilitaire)
+     */
+    stripHtml(html) {
+        if (!html) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        return tempDiv.textContent || tempDiv.innerText || '';
     }
 
     /* ==========================================
