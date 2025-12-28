@@ -1443,3 +1443,72 @@ body.dark-mode .shared-post-title {
 /* ════════════════════════════════════════════════════════════════
    ✅ FIN DU CSS CORRIGÉ
    ════════════════════════════════════════════════════════════════ */
+
+ /* ════════════════════════════════════════════════════════════════
+   🎨 TITRE DE PAGE EN DÉGRADÉ BLEU/VIOLET
+   ════════════════════════════════════════════════════════════════ */
+
+.top-header .page-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    display: inline-block;
+    position: relative;
+}
+
+/* Icône en dégradé aussi */
+.top-header .page-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Dark Mode - Dégradé plus lumineux */
+body.dark-mode .top-header .page-title,
+body.dark-mode .top-header .page-title i {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Effet lumineux subtil autour du titre (optionnel) */
+.top-header .page-title::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    filter: blur(16px);
+    opacity: 0.25;
+    z-index: -1;
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.4; }
+}
+
+body.dark-mode .top-header .page-title::after {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    opacity: 0.2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .top-header .page-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-header .page-title {
+        font-size: 1.5rem;
+    }
+}  
