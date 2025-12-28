@@ -379,18 +379,19 @@ class CommunityFirebaseService {
         try {
             console.log('📧 Sending blog post notifications...');
 
-            // ✅ Récupérer tous les utilisateurs (sauf l'auteur)
+            // ✅ CORRECTION : Récupérer TOUS les utilisateurs (on filtrera côté client)
             const usersSnapshot = await this.db
                 .collection('users')
-                .where('uid', '!=', postData.authorId) // Exclure l'auteur
                 .get();
 
             if (usersSnapshot.empty) {
-                console.warn('⚠ No users to notify');
+                console.warn('⚠ No users found in database');
                 return;
             }
 
+            // ✅ Filtrer les utilisateurs (exclure l'auteur et ceux sans email)
             const recipients = usersSnapshot.docs
+                .filter(doc => doc.id !== postData.authorId) // Exclure l'auteur
                 .map(doc => {
                     const userData = doc.data();
                     return {
@@ -398,7 +399,12 @@ class CommunityFirebaseService {
                         name: userData.displayName || 'Member'
                     };
                 })
-                .filter(user => user.email); // Filtrer ceux sans email
+                .filter(user => user.email && user.email.trim() !== ''); // Filtrer ceux sans email
+
+            if (recipients.length === 0) {
+                console.warn('⚠ No users to notify (all users filtered out)');
+                return;
+            }
 
             console.log(`📤 Notifying ${recipients.length} users...`);
 
@@ -434,6 +440,8 @@ class CommunityFirebaseService {
 
             // ✅ Appeler le worker
             const WORKER_URL = 'https://message-notification-sender.raphnardone.workers.dev/send-blog-post';
+            
+            console.log('📡 Calling notification worker:', WORKER_URL);
             
             const response = await fetch(WORKER_URL, {
                 method: 'POST',
