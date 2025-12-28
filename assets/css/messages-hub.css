@@ -1,6 +1,6 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 2.4 - Optimisations & Corrections
+   Version 2.5 - CORRECTIONS : Panel gauche réduit + Bulles adaptatives
    ============================================ */
 
 /* ===== VARIABLES COULEURS ===== */
@@ -14,7 +14,7 @@
 /* ===== LAYOUT PRINCIPAL ===== */
 .messages-container {
     display: grid;
-    grid-template-columns: 320px 1fr; /* 🎯 Panel gauche réduit (320px) pour agrandir la zone de conversation */
+    grid-template-columns: 280px 1fr; /* 🎯 Panel gauche réduit à 280px (au lieu de 320px) */
     gap: 24px;
     height: calc(100vh - 140px);
     max-width: 1600px;
@@ -42,7 +42,7 @@ body.dark-mode .conversations-panel {
 .search-users-section {
     padding: 20px;
     border-bottom: 2px solid var(--border-color, #e2e8f0);
-    position: relative; /* ✅ Pour le positionnement absolu des résultats */
+    position: relative;
 }
 
 body.dark-mode .search-users-section {
@@ -86,7 +86,7 @@ body.dark-mode .search-input {
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-/* User Search Results - ✅ Position absolue pour ne pas décaler le layout */
+/* User Search Results */
 .user-search-results {
     position: absolute;
     top: 100%;
@@ -468,7 +468,7 @@ body.dark-mode .chat-empty-state h3 {
 
 /* 📱 Bouton Retour Mobile (caché sur desktop) */
 .chat-back-btn {
-    display: none; /* Caché par défaut sur desktop */
+    display: none;
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
@@ -564,6 +564,8 @@ body.dark-mode .chat-messages {
     gap: 12px;
     max-width: 70%;
     animation: fadeInMessage 0.3s ease;
+    /* 🎯 CORRECTION : Ajout de align-items pour éviter l'étirement vertical */
+    align-items: flex-start;
 }
 
 @keyframes fadeInMessage {
@@ -590,6 +592,7 @@ body.dark-mode .chat-messages {
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    /* 🎯 CORRECTION CRITIQUE : Retirer flex: 1 pour permettre l'adaptation au contenu */
 }
 
 .chat-message-bubble {
@@ -602,6 +605,9 @@ body.dark-mode .chat-messages {
     word-wrap: break-word;
     white-space: pre-wrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    /* 🎯 CORRECTION MAJEURE : Adaptation automatique au contenu */
+    width: fit-content;
+    max-width: 100%; /* Limite la largeur max tout en permettant l'adaptation */
 }
 
 body.dark-mode .chat-message-bubble {
@@ -851,14 +857,14 @@ body.dark-mode .chat-input {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
     .messages-container {
-        grid-template-columns: 300px 1fr; /* Réduction progressive du panel gauche */
+        grid-template-columns: 260px 1fr; /* Réduction progressive du panel gauche */
     }
 }
 
 /* 📱 ===== MODE MOBILE (STYLE INSTAGRAM) ===== */
 @media (max-width: 968px) {
     .messages-container {
-        grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+        grid-template-columns: 1fr;
         gap: 0;
         padding: 0;
         height: calc(100vh - 80px);
@@ -873,7 +879,7 @@ body.dark-mode .chat-input {
     }
     
     .chat-panel {
-        display: none; /* Caché par défaut sur mobile */
+        display: none;
         height: 100%;
         border-radius: 0;
         border: none;
@@ -881,11 +887,11 @@ body.dark-mode .chat-input {
     
     /* 🎯 Quand une conversation est active : basculer l'affichage */
     .messages-container.mobile-chat-active .conversations-panel {
-        display: none; /* Cacher la liste */
+        display: none;
     }
     
     .messages-container.mobile-chat-active .chat-panel {
-        display: flex; /* Afficher le chat en plein écran */
+        display: flex;
     }
     
     /* 📱 Afficher le bouton retour sur mobile uniquement */
@@ -911,9 +917,14 @@ body.dark-mode .chat-input {
         font-size: 0.8rem;
     }
     
-    /* Messages pleine largeur sur petit écran */
+    /* 🎯 Messages adaptés mobile */
     .chat-message {
         max-width: 85%;
+    }
+    
+    .chat-message-bubble {
+        font-size: 0.9rem;
+        padding: 10px 14px;
     }
     
     /* Input chat ajusté */
@@ -961,8 +972,8 @@ body.dark-mode .chat-input {
     }
     
     .chat-message-bubble {
-        font-size: 0.9rem;
-        padding: 10px 14px;
+        font-size: 0.875rem;
+        padding: 9px 13px;
     }
     
     .conversations-filters {
@@ -1009,4 +1020,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v2.4 - Optimized PC/Mobile)');
+console.log('✅ messages-hub.css loaded (v2.5 - Panel réduit 280px + Bulles adaptatives)');
