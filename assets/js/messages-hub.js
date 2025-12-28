@@ -1,8 +1,6 @@
 /* ============================================
-   MESSAGES-HUB.JS - Messages Hub System v2.3
-   💬 Utilise window.currentUserData (chargé par auth-guard.js)
-   🔥 Firebase Firestore en temps réel
-   ✅ Suppression de conversation corrigée
+   MESSAGES-HUB.JS - Messages Hub System v2.4
+   ✅ AJOUT : Détection conversation automatique
    ============================================ */
 
 class MessagesHub {
@@ -31,8 +29,53 @@ class MessagesHub {
                 
                 this.setupUserSearch();
                 this.updateUnreadBadges();
+                
+                // ✅ NOUVEAU : Vérifier s'il faut ouvrir une conversation automatiquement
+                this.checkAutoOpenChat();
             }
         });
+    }
+
+    /* ==========================================
+       ✅ NOUVELLE MÉTHODE : Ouvrir automatiquement une conversation
+       ========================================== */
+    
+    checkAutoOpenChat() {
+        // Récupérer les données depuis sessionStorage
+        const chatDataStr = sessionStorage.getItem('openChat');
+        
+        if (!chatDataStr) {
+            console.log('ℹ No auto-open chat request');
+            return;
+        }
+
+        try {
+            const chatData = JSON.parse(chatDataStr);
+            
+            console.log('🔔 Auto-opening chat with:', chatData.userId);
+
+            // ✅ Supprimer immédiatement pour éviter de le réutiliser
+            sessionStorage.removeItem('openChat');
+
+            // ✅ Vérifier que les données ne sont pas trop anciennes (5 minutes max)
+            const ageMinutes = (Date.now() - chatData.timestamp) / 1000 / 60;
+            if (ageMinutes > 5) {
+                console.warn('⚠ Chat data is too old, ignoring');
+                return;
+            }
+
+            // ✅ Attendre un peu que tout soit chargé, puis ouvrir la conversation
+            setTimeout(() => {
+                this.openConversation(
+                    chatData.userId,
+                    chatData.userData || { uid: chatData.userId }
+                );
+            }, 1000); // 1 seconde de délai pour que l'UI soit prête
+
+        } catch (error) {
+            console.error('❌ Error processing auto-open chat:', error);
+            sessionStorage.removeItem('openChat');
+        }
     }
 
     /* ==========================================
