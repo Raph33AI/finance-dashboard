@@ -1,6 +1,10 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 2.7 - CORRECTIONS : Bulles adaptatives + Photos cliquables vers profil
+   Version 2.8 - CORRECTIONS FINALES :
+   ✅ Bulles adaptatives (width: fit-content)
+   ✅ Images avec taille raisonnable (max 280px)
+   ✅ Bouton suppression au survol
+   ✅ Photos cliquables vers profil
    ============================================ */
 
 /* ===== VARIABLES COULEURS ===== */
@@ -571,7 +575,7 @@ body.dark-mode .chat-messages {
     background: rgba(0, 0, 0, 0.2);
 }
 
-/* 🎯 CORRECTION 1 : Bulles adaptatives au contenu */
+/* ✅ CORRECTION 1 : Bulles adaptatives au contenu */
 .chat-message {
     display: flex;
     gap: 12px;
@@ -579,6 +583,7 @@ body.dark-mode .chat-messages {
     max-width: 70%; /* ✅ Maximum 70% de largeur */
     animation: fadeInMessage 0.3s ease;
     align-items: flex-start;
+    position: relative;
 }
 
 @keyframes fadeInMessage {
@@ -614,8 +619,10 @@ body.dark-mode .chat-messages {
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    flex: 1;
 }
 
+/* ✅ CORRECTION 2 : Bulle avec width: fit-content */
 .chat-message-bubble {
     background: white;
     color: var(--text-primary, #1e293b);
@@ -650,7 +657,7 @@ body.dark-mode .chat-message-bubble {
     text-align: right;
 }
 
-/* Message with attachment */
+/* ✅ CORRECTION 3 : Images avec taille raisonnable */
 .message-attachment {
     margin-top: 8px;
     border-radius: 12px;
@@ -658,12 +665,15 @@ body.dark-mode .chat-message-bubble {
 }
 
 .message-attachment img {
-    max-width: 300px;
-    max-height: 300px;
+    max-width: 280px;
+    max-height: 280px;
+    width: auto;
+    height: auto;
     display: block;
     border-radius: 12px;
     cursor: pointer;
     transition: transform 0.3s ease;
+    object-fit: contain;
 }
 
 .message-attachment img:hover {
@@ -677,6 +687,7 @@ body.dark-mode .chat-message-bubble {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 200px;
 }
 
 body.dark-mode .message-attachment-file {
@@ -704,6 +715,33 @@ body.dark-mode .message-attachment-file {
 .message-attachment-size {
     font-size: 0.8rem;
     color: var(--text-secondary, #64748b);
+}
+
+/* ✅ CORRECTION 4 : Bouton suppression au survol */
+.message-delete-btn {
+    position: absolute;
+    top: 8px;
+    right: -40px;
+    background: var(--msg-danger);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.chat-message:hover .message-delete-btn {
+    opacity: 1;
+    right: -44px;
+}
+
+.message-delete-btn:hover {
+    background: #dc2626;
+    transform: scale(1.08);
 }
 
 /* Attachment Preview (before sending) */
@@ -813,6 +851,7 @@ body.dark-mode .attach-btn {
     background: var(--background-primary, #ffffff);
     color: var(--text-primary, #1e293b);
     resize: none;
+    max-height: 120px;
 }
 
 body.dark-mode .chat-input {
@@ -944,6 +983,11 @@ body.dark-mode .chat-input {
         padding: 10px 14px;
     }
     
+    .message-attachment img {
+        max-width: 220px;
+        max-height: 220px;
+    }
+    
     .chat-input-wrapper {
         padding: 12px 16px;
     }
@@ -951,6 +995,15 @@ body.dark-mode .chat-input {
     .user-search-results {
         left: 12px;
         right: 12px;
+    }
+    
+    /* Bouton suppression sur mobile */
+    .message-delete-btn {
+        right: 4px;
+        top: 4px;
+        opacity: 1;
+        padding: 5px 8px;
+        font-size: 0.7rem;
     }
 }
 
@@ -993,6 +1046,11 @@ body.dark-mode .chat-input {
         padding: 12px 16px;
         gap: 6px;
     }
+    
+    .message-attachment img {
+        max-width: 180px;
+        max-height: 180px;
+    }
 }
 
 /* Scrollbar Styling */
@@ -1033,4 +1091,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v2.7 - Bulles adaptatives + Photos cliquables)');
+console.log('✅ messages-hub.css loaded (v2.8 - Bulles adaptatives + Images 280px + Suppression au survol + Photos cliquables)');
