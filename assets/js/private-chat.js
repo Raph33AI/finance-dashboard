@@ -213,7 +213,8 @@ class PrivateChat {
                 unreadCount: {
                     [this.currentUser.uid]: 0,
                     [otherUserId]: 0
-                }
+                },
+                deletedBy: []
             });
 
             console.log('✅ Conversation created:', conversationId);

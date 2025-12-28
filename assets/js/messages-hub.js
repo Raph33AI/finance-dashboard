@@ -224,6 +224,57 @@ class MessagesHub {
                 console.error('❌ Error loading conversations:', error);
                 this.renderError('Failed to load conversations');
             });
+
+        this.conversationsListener = this.db
+            .collection('conversations')
+            .where('participants', 'array-contains', this.currentUser.uid)
+            .orderBy('lastMessageAt', 'desc')
+            .onSnapshot(async (snapshot) => {
+                console.log(`📊 Received ${snapshot.size} conversations`);
+
+                if (snapshot.empty) {
+                    this.conversations = [];
+                    this.renderEmptyState();
+                    this.updateCounters();
+                    return;
+                }
+
+                this.conversations = [];
+
+                for (const doc of snapshot.docs) {
+                    const convData = doc.data();
+                    
+                    // ✅ FILTRER : Ignorer les conversations supprimées par l'utilisateur
+                    const deletedBy = convData.deletedBy || [];
+                    if (deletedBy.includes(this.currentUser.uid)) {
+                        console.log('⏭ Skipping deleted conversation:', doc.id);
+                        continue;
+                    }
+                    
+                    const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
+                    const otherUserData = await this.getUserData(otherUserId);
+                    const isOnline = await this.checkUserOnline(otherUserId);
+
+                    this.conversations.push({
+                        id: doc.id,
+                        otherUserId: otherUserId,
+                        otherUserData: otherUserData,
+                        lastMessage: convData.lastMessage,
+                        lastMessageAt: convData.lastMessageAt?.toDate(),
+                        unreadCount: convData.unreadCount?.[this.currentUser.uid] || 0,
+                        createdAt: convData.createdAt?.toDate(),
+                        isOnline: isOnline
+                    });
+                }
+
+                console.log('✅ Conversations loaded:', this.conversations.length);
+                this.filterConversations(this.currentFilter);
+                this.updateCounters();
+                this.updateUnreadBadges();
+            }, (error) => {
+                console.error('❌ Error loading conversations:', error);
+                this.renderError('Failed to load conversations');
+            });
     }
 
     // ✅ Vérifier si un utilisateur est en ligne (< 5 min)
@@ -352,18 +403,23 @@ class MessagesHub {
         `;
     }
 
-    // ✅ Supprimer une conversation
+    // ✅ Supprimer (soft delete) une conversation
     async deleteConversation(conversationId) {
         if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
             return;
         }
 
         try {
-            console.log('🗑 Deleting conversation:', conversationId);
+            console.log('🗑 Soft deleting conversation:', conversationId);
             
-            await this.db.collection('conversations').doc(conversationId).delete();
+            const conversationRef = this.db.collection('conversations').doc(conversationId);
             
-            console.log('✅ Conversation deleted');
+            // ✅ Ajouter l'UID actuel au tableau deletedBy
+            await conversationRef.update({
+                deletedBy: firebase.firestore.FieldValue.arrayUnion(this.currentUser.uid)
+            });
+            
+            console.log('✅ Conversation hidden from your view');
             
             const conv = this.conversations.find(c => c.id === conversationId);
             if (conv && this.activeConversationId === conv.otherUserId) {
