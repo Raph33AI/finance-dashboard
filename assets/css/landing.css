@@ -4145,7 +4145,7 @@ body {
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
    /* ═══════════════════════════════════════════════════════════════
-   🌐 COMMUNITY HUB SECTION - VERSION OPTIMISÉE
+   🌐 COMMUNITY HUB SECTION - VERSION FINALE OPTIMISÉE
    ═══════════════════════════════════════════════════════════════ */
 
 .community-hub-section {
@@ -4159,7 +4159,10 @@ body.dark-mode .community-hub-section {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
-/* ✅ COMMUNITY FEATURES GRID - OPTIMISÉ */
+/* ═══════════════════════════════════════════════════════════════
+   📦 COMMUNITY FEATURES GRID
+   ═══════════════════════════════════════════════════════════════ */
+
 .community-features-grid {
     max-width: 1400px;
     margin: 60px auto;
@@ -4268,7 +4271,10 @@ body.dark-mode .community-feature-card h3 {
     letter-spacing: 0.5px;
 }
 
-/* ✅ COMMUNITY PREVIEW SECTION - AVEC MARGES */
+/* ═══════════════════════════════════════════════════════════════
+   👁 COMMUNITY PREVIEW SECTION
+   ═══════════════════════════════════════════════════════════════ */
+
 .community-preview-section {
     max-width: 1400px;
     margin: 80px auto;
@@ -4382,7 +4388,10 @@ body.dark-mode .preview-card-header {
     font-size: 1.2rem;
 }
 
-/* ✅ COMMUNITY POST PREVIEW - OPTIMISÉ */
+/* ═══════════════════════════════════════════════════════════════
+   📝 COMMUNITY POST PREVIEW
+   ═══════════════════════════════════════════════════════════════ */
+
 .community-post-preview {
     padding: 20px;
     border-radius: 16px;
@@ -4409,7 +4418,10 @@ body.dark-mode .community-post-preview {
     margin-bottom: 16px;
 }
 
-/* ✅ BORDURE DÉGRADÉ BLEU/VIOLET AUTOUR DES PHOTOS */
+/* ═══════════════════════════════════════════════════════════════
+   🖼 BORDURES DÉGRADÉ BLEU/VIOLET SUR PHOTOS
+   ═══════════════════════════════════════════════════════════════ */
+
 .post-author img,
 .contributor-item img,
 .chat-message img {
@@ -4504,7 +4516,10 @@ body.dark-mode .post-title {
     color: #3B82F6;
 }
 
-/* Top Contributors */
+/* ═══════════════════════════════════════════════════════════════
+   🏆 TOP CONTRIBUTORS
+   ═══════════════════════════════════════════════════════════════ */
+
 .contributor-list {
     display: flex;
     flex-direction: column;
@@ -4578,7 +4593,10 @@ body.dark-mode .contributor-info h4 {
     font-weight: 600;
 }
 
-/* Live Chat Preview */
+/* ═══════════════════════════════════════════════════════════════
+   💬 LIVE CHAT PREVIEW
+   ═══════════════════════════════════════════════════════════════ */
+
 .live-chat-preview {
     display: flex;
     flex-direction: column;
@@ -4607,8 +4625,14 @@ body.dark-mode .contributor-info h4 {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    50% { 
+        opacity: 0.5; 
+        transform: scale(1.2); 
+    }
 }
 
 .chat-messages-preview {
@@ -4690,7 +4714,10 @@ body.dark-mode .chat-input-preview input {
     opacity: 0.6;
 }
 
-/* ✅ COMMUNITY BENEFITS - AVEC MARGES */
+/* ═══════════════════════════════════════════════════════════════
+   🎁 COMMUNITY BENEFITS
+   ═══════════════════════════════════════════════════════════════ */
+
 .community-benefits {
     max-width: 1400px;
     margin: 60px auto;
@@ -4750,7 +4777,10 @@ body.dark-mode .benefit-item h4 {
     line-height: 1.6;
 }
 
-/* ✅ COMMUNITY CTA - TOUS LES TEXTES EN BLANC + MARGES */
+/* ═══════════════════════════════════════════════════════════════
+   🚀 COMMUNITY CTA - TOUS LES TEXTES EN BLANC
+   ═══════════════════════════════════════════════════════════════ */
+
 .community-cta {
     max-width: 1200px;
     margin: 0 auto;
@@ -4804,10 +4834,24 @@ body.dark-mode .benefit-item h4 {
     opacity: 0.9;
 }
 
-/* ✅ RESPONSIVE MOBILE - CARTES SWIPABLES + MARGES */
+/* ═══════════════════════════════════════════════════════════════
+   📱 RESPONSIVE MOBILE
+   ═══════════════════════════════════════════════════════════════ */
+
 @media (max-width: 768px) {
     .community-hub-section {
         padding: 80px 0;
+    }
+    
+    /* ✅ CENTRAGE DU TITRE SUR MOBILE */
+    .community-hub-section .section-header {
+        text-align: center !important;
+    }
+    
+    .community-hub-section .section-tag,
+    .community-hub-section .section-title,
+    .community-hub-section .section-description {
+        text-align: center !important;
     }
     
     /* ✅ GRID SWIPABLE HORIZONTAL AVEC MARGES */
