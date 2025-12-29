@@ -2155,23 +2155,14 @@ body.dark-mode .property-actions {
         font-size: 0.9rem;
     }
     
-    
-Je vois le problème ! Il y a probablement un conflit avec d'autres règles CSS. Voici une solution plus complète et forcée :
-
-🔧 Solution Complète - CSS Modal Mobile
-Remplacez TOUTE la section @media (max-width: 768px) concernant les modals par ce code :
-
-css
-@media (max-width: 768px) {
-    /* ... vos autres styles mobile ... */
-    
     /* ========================================
-       ✅ MODAL - CORRECTION COMPLÈTE MOBILE
+       ✅ MODAL - CORRECTION COMPLÈTE (CLASSES .modal-overlay)
        ======================================== */
     
     /* ✅ Fond modal - scroll activé */
-    .modal {
-        padding: 0 !important;
+    .modal,
+    .modal-overlay {
+        padding: 16px !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch !important;
@@ -2180,17 +2171,10 @@ css
         justify-content: center !important;
     }
     
-    .modal.active {
-        padding: 16px !important;
-        display: flex !important;
-        align-items: flex-start !important;
-        justify-content: center !important;
-    }
-    
     /* ✅ Contenu modal - NE PAS prendre 100% hauteur */
     .modal-content {
         width: calc(100% - 32px) !important;
-        max-width: 100% !important;
+        max-width: 600px !important;
         min-height: auto !important; /* ❌ PAS 100vh */
         max-height: none !important; /* ❌ PAS de limite */
         height: auto !important; /* ✅ Hauteur automatique */
@@ -2199,11 +2183,7 @@ css
         overflow: visible !important;
         position: relative !important;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
-    }
-    
-    .modal-content.modal-large {
-        width: calc(100% - 32px) !important;
-        max-width: 100% !important;
+        background: var(--glass-bg) !important;
     }
     
     /* ✅ Header sticky */
@@ -2225,11 +2205,8 @@ css
         margin: 0 !important;
     }
     
-    .modal-header h2 i {
-        font-size: 1rem !important;
-    }
-    
-    .modal-close {
+    .modal-close,
+    .btn-close {
         width: 32px !important;
         height: 32px !important;
         font-size: 1.3rem !important;
@@ -2245,12 +2222,6 @@ css
         max-width: 100% !important;
     }
     
-    .modal-body > * {
-        max-width: 100% !important;
-        overflow-x: hidden !important;
-        box-sizing: border-box !important;
-    }
-    
     /* ✅ Forms dans modals */
     .modal-body .form-row {
         grid-template-columns: 1fr !important;
@@ -2259,6 +2230,7 @@ css
     
     .modal-body .form-group {
         width: 100% !important;
+        margin-bottom: 16px !important;
     }
     
     .modal-body .form-group label {
@@ -2275,121 +2247,25 @@ css
         box-sizing: border-box !important;
     }
     
-    .modal-body .hint {
-        font-size: 0.75rem !important;
-    }
-    
-    /* ✅ Form sections */
-    .modal-body .form-section {
-        padding: 16px !important;
-        margin-top: 16px !important;
-        margin-bottom: 16px !important;
-    }
-    
-    .modal-body .subsection-title {
-        font-size: 1rem !important;
-        margin-bottom: 14px !important;
-    }
-    
     /* ✅ Modal Actions - Boutons */
-    .modal-actions {
+    .modal-actions,
+    .form-actions {
         flex-direction: column !important;
         gap: 10px !important;
         width: 100% !important;
-        padding: 0 16px 16px 16px !important;
+        padding: 0 !important;
         margin-top: 16px !important;
     }
     
     .modal-actions .btn,
-    .modal-actions button {
+    .modal-actions button,
+    .form-actions .btn,
+    .form-actions button {
         width: 100% !important;
         justify-content: center !important;
         margin: 0 !important;
         padding: 12px 20px !important;
         font-size: 0.95rem !important;
-    }
-    
-    /* ✅ Tables dans modals */
-    .modal-body .comparison-table-wrapper {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 -16px !important;
-        padding: 0 16px !important;
-    }
-    
-    .modal-body .comparison-table {
-        min-width: 600px !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .modal-body .comparison-table th,
-    .modal-body .comparison-table td {
-        padding: 8px 6px !important;
-        font-size: 0.75rem !important;
-        white-space: nowrap !important;
-    }
-    
-    /* ✅ Results cards dans modals */
-    .modal-body .results-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
-    }
-    
-    .modal-body .result-card {
-        padding: 14px !important;
-    }
-    
-    .modal-body .result-card h4 {
-        font-size: 0.95rem !important;
-        margin-bottom: 12px !important;
-    }
-    
-    .modal-body .breakdown-item {
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: 8px !important;
-        padding: 8px 0 !important;
-    }
-    
-    .modal-body .breakdown-item span {
-        font-size: 0.85rem !important;
-    }
-    
-    .modal-body .breakdown-item strong {
-        font-size: 0.9rem !important;
-        text-align: right !important;
-    }
-    
-    /* ✅ Charts dans modals */
-    .modal-body .chart-container {
-        margin-bottom: 16px !important;
-        overflow-x: hidden !important;
-    }
-    
-    .modal-body .chart {
-        min-height: 250px !important;
-        max-width: 100% !important;
-    }
-    
-    .modal-body .chart-title {
-        font-size: 0.95rem !important;
-        margin-bottom: 12px !important;
-    }
-    
-    /* ✅ Tax grid dans modals */
-    .modal-body .tax-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-    }
-    
-    /* ✅ Warning boxes */
-    .modal-body .warning-box {
-        padding: 12px !important;
-        font-size: 0.85rem !important;
-        margin: 12px 0 !important;
     }
     
     /* Tables générales */
