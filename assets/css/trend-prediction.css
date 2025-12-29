@@ -3,8 +3,7 @@
  * ALPHAVAULT AI - TREND PREDICTION PRO - STYLES COMPLETS
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
- * + Wall Street ML Score Indicators Styles
- * + MODERN DOUGHNUT GAUGES (Option 1)
+ * + MODERN DOUGHNUT GAUGES (Option 1) - 100% RESPONSIVE
  */
 
 /* ========================================
@@ -241,7 +240,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   SEARCH SUGGESTIONS DROPDOWN - SANS GROS RECTANGLE
+   SEARCH SUGGESTIONS DROPDOWN
    ======================================== */
 .search-suggestions {
     position: absolute;
@@ -284,7 +283,6 @@ body.dark-mode {
     display: block;
 }
 
-/* Individual Suggestion Item - SANS GROS RECTANGLE */
 .suggestion-item {
     padding: 14px 18px;
     cursor: pointer;
@@ -331,8 +329,6 @@ body.dark-mode .suggestion-item {
     border-left: 4px solid var(--ml-primary);
 }
 
-/* ✅ SUPPRIMÉ : Gros rectangle symbol */
-/* Le .suggestion-symbol est maintenant beaucoup plus petit */
 .suggestion-symbol {
     display: inline-flex;
     align-items: center;
@@ -354,7 +350,6 @@ body.dark-mode .suggestion-item {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
 }
 
-/* Company Info */
 .suggestion-info {
     flex: 1;
     min-width: 0;
@@ -380,7 +375,6 @@ body.dark-mode .suggestion-item {
     letter-spacing: 0.5px;
 }
 
-/* Exchange Badge */
 .suggestion-exchange {
     display: inline-block;
     padding: 4px 10px;
@@ -398,7 +392,6 @@ body.dark-mode .suggestion-exchange {
     background: rgba(102, 126, 234, 0.2);
 }
 
-/* Empty State */
 .suggestion-empty {
     padding: 32px 20px;
     text-align: center;
@@ -419,7 +412,6 @@ body.dark-mode .suggestion-exchange {
     margin: 0;
 }
 
-/* Loading State */
 .suggestion-loading {
     padding: 24px 20px;
     text-align: center;
@@ -435,7 +427,6 @@ body.dark-mode .suggestion-exchange {
     animation: spin 1s linear infinite;
 }
 
-/* Scrollbar personnalisé */
 .search-suggestions::-webkit-scrollbar {
     width: 8px;
 }
@@ -498,7 +489,7 @@ body.dark-mode .suggestion-exchange {
 }
 
 /* ========================================
-   POPULAR STOCKS - AVEC BORDURES GRADIENT
+   POPULAR STOCKS
    ======================================== */
 .popular-stocks {
     display: flex;
@@ -533,7 +524,6 @@ body.dark-mode .suggestion-exchange {
     background-clip: padding-box;
 }
 
-/* Bordure gradient pour les chips */
 .symbol-chip {
     background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
                       linear-gradient(135deg, #667eea, #764ba2);
@@ -553,7 +543,7 @@ body.dark-mode .suggestion-exchange {
 }
 
 /* ========================================
-   PREDICTION SETTINGS - AVEC BORDURES GRADIENT
+   PREDICTION SETTINGS
    ======================================== */
 .prediction-settings {
     display: grid;
@@ -585,7 +575,6 @@ body.dark-mode .suggestion-exchange {
     background-clip: padding-box;
 }
 
-/* Bordure gradient pour les boutons horizon */
 .horizon-btn {
     background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
                       linear-gradient(135deg, #667eea, #764ba2);
@@ -620,7 +609,6 @@ body.dark-mode .suggestion-exchange {
     background-clip: padding-box;
 }
 
-/* Bordure gradient pour le select */
 .form-select {
     background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
                       linear-gradient(135deg, #667eea, #764ba2);
@@ -790,14 +778,14 @@ body.dark-mode .suggestion-exchange {
 }
 
 /* ========================================
-   ENSEMBLE PREDICTION - CORRECTION FINALE
+   ENSEMBLE PREDICTION
    ======================================== */
 .prediction-overview {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     background-size: 200% 200%;
     animation: gradientShift 8s ease infinite;
     border-radius: 28px;
-    padding: 50px;
+    padding: clamp(24px, 4vw, 50px);
     margin-top: 40px;
     margin-bottom: 40px;
     position: relative;
@@ -837,7 +825,7 @@ body.dark-mode .suggestion-exchange {
     margin-bottom: 35px;
     position: relative;
     z-index: 1;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 800;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     -webkit-text-fill-color: white;
@@ -867,8 +855,8 @@ body.dark-mode .suggestion-exchange {
 
 .ensemble-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 20px;
     position: relative;
     z-index: 1;
 }
@@ -877,10 +865,10 @@ body.dark-mode .suggestion-exchange {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: 20px;
-    padding: 28px;
+    padding: 24px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     transition: var(--transition-smooth);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
     transform-style: preserve-3d;
@@ -890,27 +878,31 @@ body.dark-mode .ensemble-card {
     background: rgba(15, 23, 42, 0.9);
 }
 
-.ensemble-card:hover {
-    transform: translateY(-8px) rotateY(5deg);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2), 0 0 60px rgba(255, 255, 255, 0.3);
+@media (hover: hover) {
+    .ensemble-card:hover {
+        transform: translateY(-8px) rotateY(5deg);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2), 0 0 60px rgba(255, 255, 255, 0.3);
+    }
 }
 
 .card-icon {
-    width: 70px;
-    height: 70px;
+    width: clamp(56px, 8vw, 70px);
+    height: clamp(56px, 8vw, 70px);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
     flex-shrink: 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     transition: var(--transition-smooth);
 }
 
-.ensemble-card:hover .card-icon {
-    transform: scale(1.15) rotate(-10deg);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+@media (hover: hover) {
+    .ensemble-card:hover .card-icon {
+        transform: scale(1.15) rotate(-10deg);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+    }
 }
 
 .card-icon.bullish {
@@ -935,10 +927,11 @@ body.dark-mode .ensemble-card {
 
 .card-content {
     flex: 1;
+    min-width: 0;
 }
 
 .card-label {
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem);
     color: #6c757d;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -947,7 +940,7 @@ body.dark-mode .ensemble-card {
 }
 
 .card-value {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 800;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -958,30 +951,36 @@ body.dark-mode .ensemble-card {
 }
 
 .card-sublabel {
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
     font-weight: 700;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (OPTION 1)
+   ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (100% RESPONSIVE)
    ═══════════════════════════════════════════════════════════════ */
 
+/* ✅ CORRECTION PC : Conteneur de gauge avec dimensions fixes */
 .model-chart,
 .gauge-container {
     position: relative;
-    min-height: 280px;
+    width: 100%;
+    max-width: 300px;
+    height: 300px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px 0;
+    padding: 0;
 }
 
-/* Gauge Wrapper avec effet glow */
+/* Wrapper de la gauge */
 .gauge-wrapper {
     position: relative;
     width: 100%;
-    max-width: 280px;
-    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .gauge-wrapper::before {
@@ -990,9 +989,9 @@ body.dark-mode .ensemble-card {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+    width: 110%;
+    height: 110%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
     border-radius: 50%;
     animation: pulseGlow 3s ease-in-out infinite;
     z-index: 0;
@@ -1018,10 +1017,11 @@ body.dark-mode .ensemble-card {
     text-align: center;
     z-index: 10;
     pointer-events: none;
+    width: 100%;
 }
 
 .gauge-score-value {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: 900;
     line-height: 1;
     background: linear-gradient(135deg, #667eea, #764ba2);
@@ -1038,7 +1038,7 @@ body.dark-mode .ensemble-card {
 }
 
 .gauge-score-label {
-    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -1046,12 +1046,12 @@ body.dark-mode .ensemble-card {
 }
 
 .gauge-score-sublabel {
-    font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
     color: var(--text-tertiary);
     margin-top: 4px;
 }
 
-/* Indicateurs de zones (0-25-50-75-100) */
+/* Indicateurs de zones */
 .gauge-zone-indicators {
     position: absolute;
     top: 0;
@@ -1089,8 +1089,10 @@ body.dark-mode .gauge-zone-marker {
 }
 
 /* Effet hover sur les gauges */
-.model-chart:hover .gauge-wrapper::before {
-    animation: pulseGlowHover 2s ease-in-out infinite;
+@media (hover: hover) {
+    .model-chart:hover .gauge-wrapper::before {
+        animation: pulseGlowHover 2s ease-in-out infinite;
+    }
 }
 
 @keyframes pulseGlowHover {
@@ -1105,16 +1107,36 @@ body.dark-mode .gauge-zone-marker {
 }
 
 /* Consensus Gauge Specific Styles */
+.consensus-gauge {
+    background: var(--ml-gradient-soft);
+    border-radius: var(--border-radius);
+    padding: clamp(20px, 3vw, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.consensus-gauge h4 {
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    font-weight: 800;
+    background: var(--ml-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 20px 0;
+}
+
 .consensus-gauge .gauge-wrapper::before {
     background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
 }
 
-.consensus-gauge .gauge-score-value {
-    font-size: clamp(3rem, 6vw, 4rem);
-}
-
-.consensus-gauge .gauge-score-label {
-    font-size: clamp(0.85rem, 1.8vw, 1rem);
+.consensus-gauge .model-chart,
+.consensus-gauge .gauge-container {
+    max-width: 100%;
+    height: auto;
+    min-height: 280px;
 }
 
 /* ========================================
@@ -1126,7 +1148,7 @@ body.dark-mode .gauge-zone-marker {
 
 .models-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 24px;
 }
 
@@ -1140,10 +1162,12 @@ body.dark-mode .gauge-zone-marker {
     transition: var(--transition-smooth);
 }
 
-.model-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
-    border-color: var(--ml-primary);
+@media (hover: hover) {
+    .model-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+        border-color: var(--ml-primary);
+    }
 }
 
 .model-header {
@@ -1153,10 +1177,11 @@ body.dark-mode .gauge-zone-marker {
     padding: 20px 24px;
     background: var(--ml-gradient-soft);
     border-bottom: 1px solid var(--glass-border);
+    gap: 12px;
 }
 
 .model-header h4 {
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 2vw, 1.1rem);
     font-weight: 800;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -1166,15 +1191,19 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex: 1;
+    min-width: 0;
 }
 
 .model-badge {
     padding: 6px 12px;
     border-radius: 8px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .model-badge.pending {
@@ -1205,7 +1234,8 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
+    gap: 12px;
 }
 
 .metric span {
@@ -1216,6 +1246,7 @@ body.dark-mode .gauge-zone-marker {
 .metric strong {
     color: var(--text-primary);
     font-weight: 800;
+    white-space: nowrap;
 }
 
 /* ========================================
@@ -1227,7 +1258,7 @@ body.dark-mode .gauge-zone-marker {
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    padding: 32px;
+    padding: clamp(20px, 3vw, 32px);
     margin-bottom: 32px;
 }
 
@@ -1237,7 +1268,7 @@ body.dark-mode .gauge-zone-marker {
     color: white;
     border: none;
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
     font-weight: 800;
     cursor: pointer;
     transition: var(--transition-smooth);
@@ -1245,11 +1276,14 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
-.btn-export:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+@media (hover: hover) {
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+    }
 }
 
 .chart {
@@ -1273,7 +1307,7 @@ body.dark-mode .gauge-zone-marker {
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    padding: 32px;
+    padding: clamp(20px, 3vw, 32px);
     margin-bottom: 32px;
 }
 
@@ -1283,6 +1317,8 @@ body.dark-mode .gauge-zone-marker {
     margin-bottom: 24px;
     border-bottom: 2px solid var(--glass-border);
     padding-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
@@ -1290,7 +1326,7 @@ body.dark-mode .gauge-zone-marker {
     background: transparent;
     border: none;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
     font-weight: 700;
     color: var(--text-secondary);
     cursor: pointer;
@@ -1298,6 +1334,7 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .tab-btn:hover {
@@ -1321,8 +1358,8 @@ body.dark-mode .gauge-zone-marker {
 
 .backtesting-metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    gap: 16px;
     margin-top: 24px;
 }
 
@@ -1331,40 +1368,43 @@ body.dark-mode .gauge-zone-marker {
     backdrop-filter: blur(20px) saturate(180%);
     border: 2px solid var(--glass-border);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 16px;
     transition: var(--transition-smooth);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
-.metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-    border-color: var(--ml-primary);
+@media (hover: hover) {
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        border-color: var(--ml-primary);
+    }
 }
 
 .metric-icon {
-    width: 48px;
-    height: 48px;
+    width: clamp(40px, 6vw, 48px);
+    height: clamp(40px, 6vw, 48px);
     border-radius: 12px;
     background: var(--ml-gradient);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .metric-content {
     flex: 1;
+    min-width: 0;
 }
 
 .metric-label {
     display: block;
-    font-size: 0.8rem;
+    font-size: clamp(0.75rem, 1.3vw, 0.8rem);
     font-weight: 700;
     color: var(--text-tertiary);
     text-transform: uppercase;
@@ -1374,7 +1414,7 @@ body.dark-mode .gauge-zone-marker {
 
 .metric-value {
     display: block;
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     font-weight: 900;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -1391,13 +1431,13 @@ body.dark-mode .gauge-zone-marker {
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    padding: 32px;
+    padding: clamp(20px, 3vw, 32px);
     margin-bottom: 32px;
 }
 
 .performance-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 24px;
     margin-bottom: 24px;
 }
@@ -1408,10 +1448,12 @@ body.dark-mode .gauge-zone-marker {
 
 .performance-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .performance-table table {
     width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
@@ -1421,24 +1463,26 @@ body.dark-mode .gauge-zone-marker {
 
 .performance-table th {
     background: var(--ml-gradient-soft);
-    padding: 16px;
+    padding: clamp(12px, 2vw, 16px);
     text-align: left;
     font-weight: 800;
     color: var(--text-primary);
     border-bottom: 2px solid var(--glass-border);
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .performance-table td {
-    padding: 14px 16px;
+    padding: clamp(10px, 1.5vw, 14px) clamp(12px, 2vw, 16px);
     border-bottom: 1px solid var(--glass-border);
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
 }
 
-.performance-table tr:hover {
-    background: var(--ml-gradient-soft);
+@media (hover: hover) {
+    .performance-table tr:hover {
+        background: var(--ml-gradient-soft);
+    }
 }
 
 .performance-table tr.best {
@@ -1457,49 +1501,42 @@ body.dark-mode .gauge-zone-marker {
     background-clip: text;
 }
 
-/* ========================================
-   CORRELATION SECTION
-   ======================================== */
+/* ═══════════════════════════════════════════════════════════════
+   ✅ CORRELATION SECTION - 100% RESPONSIVE (FIX DÉBORDEMENT)
+   ═══════════════════════════════════════════════════════════════ */
 .correlation-section {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: var(--border-radius-lg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    padding: 32px;
+    padding: clamp(20px, 3vw, 32px);
     margin-bottom: 32px;
+    overflow: hidden; /* ✅ FIX DÉBORDEMENT */
 }
 
 .correlation-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr;
     gap: 24px;
 }
 
-.consensus-gauge {
-    background: var(--ml-gradient-soft);
-    border-radius: var(--border-radius);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+@media (min-width: 900px) {
+    .correlation-grid {
+        grid-template-columns: 1.5fr 1fr;
+    }
 }
 
-.consensus-gauge h4 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    background: var(--ml-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0 0 20px 0;
+/* ✅ FIX HEATMAP RESPONSIVE */
+#correlationHeatmap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
 }
 
 .gauge-description {
     margin-top: 20px;
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
     color: var(--text-secondary);
     line-height: 1.6;
 }
@@ -1520,35 +1557,39 @@ body.dark-mode .gauge-zone-marker {
     transition: var(--transition-smooth);
 }
 
-.recommendation-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+@media (hover: hover) {
+    .recommendation-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+    }
 }
 
 .recommendation-header {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 28px;
+    padding: clamp(20px, 3vw, 28px);
     border-bottom: 1px solid var(--glass-border);
     background: var(--ml-gradient-soft);
 }
 
 .recommendation-icon {
-    width: 72px;
-    height: 72px;
+    width: clamp(56px, 8vw, 72px);
+    height: clamp(56px, 8vw, 72px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     flex-shrink: 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     transition: var(--transition-smooth);
 }
 
-.recommendation-card:hover .recommendation-icon {
-    transform: scale(1.1) rotate(10deg);
+@media (hover: hover) {
+    .recommendation-card:hover .recommendation-icon {
+        transform: scale(1.1) rotate(10deg);
+    }
 }
 
 .recommendation-icon.strong-buy {
@@ -1577,7 +1618,7 @@ body.dark-mode .gauge-zone-marker {
 }
 
 .recommendation-header h4 {
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     font-weight: 900;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -1587,13 +1628,13 @@ body.dark-mode .gauge-zone-marker {
 }
 
 .recommendation-header p {
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
     color: var(--text-secondary);
     margin: 0;
 }
 
 .recommendation-body {
-    padding: 28px;
+    padding: clamp(20px, 3vw, 28px);
 }
 
 .recommendation-body ul {
@@ -1608,7 +1649,7 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
     line-height: 1.6;
 }
 
@@ -1617,12 +1658,13 @@ body.dark-mode .gauge-zone-marker {
 }
 
 .recommendation-body i {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
     color: var(--ml-primary);
+    flex-shrink: 0;
 }
 
 .recommendation-footer {
-    padding: 20px 28px;
+    padding: clamp(16px, 2.5vw, 20px) clamp(20px, 3vw, 28px);
     background: rgba(245, 158, 11, 0.05);
     border-top: 1px solid var(--glass-border);
 }
@@ -1630,19 +1672,19 @@ body.dark-mode .gauge-zone-marker {
 .disclaimer {
     display: flex;
     gap: 12px;
-    font-size: 0.85rem;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem);
     color: var(--text-secondary);
     line-height: 1.6;
 }
 
 .disclaimer i {
     color: var(--ml-warning);
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
     flex-shrink: 0;
 }
 
 /* ========================================
-   STOCK HEADER (NO PRICES)
+   STOCK HEADER
    ======================================== */
 .stock-header {
     background: var(--glass-bg);
@@ -1658,10 +1700,11 @@ body.dark-mode .gauge-zone-marker {
     justify-content: space-between;
     align-items: center;
     gap: 24px;
+    padding: clamp(20px, 3vw, 32px);
 }
 
 .stock-info h2 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 900;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -1671,20 +1714,20 @@ body.dark-mode .gauge-zone-marker {
 }
 
 .stock-name {
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
     font-weight: 600;
     color: var(--text-secondary);
 }
 
 .stock-price .price {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .stock-price .change {
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
     font-weight: 600;
 }
 
@@ -1756,13 +1799,13 @@ body.dark-mode .gauge-zone-marker {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 32px;
+    padding: clamp(20px, 3vw, 24px) clamp(24px, 4vw, 32px);
     border-bottom: 1px solid var(--glass-border);
     background: var(--ml-gradient-soft);
 }
 
 .modal-header h2 {
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     background: var(--ml-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1774,16 +1817,17 @@ body.dark-mode .gauge-zone-marker {
 .close-modal {
     background: transparent;
     border: none;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     color: var(--text-secondary);
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: clamp(36px, 5vw, 40px);
+    height: clamp(36px, 5vw, 40px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: var(--transition-smooth);
+    flex-shrink: 0;
 }
 
 .close-modal:hover {
@@ -1793,11 +1837,11 @@ body.dark-mode .gauge-zone-marker {
 }
 
 .modal-body {
-    padding: 32px;
+    padding: clamp(24px, 4vw, 32px);
 }
 
 .modal-body h3 {
-    font-size: 1.2rem;
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
     font-weight: 800;
     background: var(--ml-gradient);
     -webkit-background-clip: text;
@@ -1810,6 +1854,7 @@ body.dark-mode .gauge-zone-marker {
     line-height: 1.8;
     margin-bottom: 16px;
     color: var(--text-secondary);
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
 }
 
 .modal-body ul {
@@ -1821,6 +1866,7 @@ body.dark-mode .gauge-zone-marker {
     margin-bottom: 8px;
     line-height: 1.8;
     color: var(--text-secondary);
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
 }
 
 .key-term {
@@ -1852,9 +1898,10 @@ body.dark-mode .gauge-zone-marker {
     border-color: var(--ml-warning);
 }
 
-/* ========================================
-   RESPONSIVE - GAUGES MODERNES
-   ======================================== */
+/* ═══════════════════════════════════════════════════════════════
+   ✅ RESPONSIVE MOBILE - CORRECTIONS FINALES
+   ═══════════════════════════════════════════════════════════════ */
+
 @media (max-width: 1024px) {
     .correlation-grid {
         grid-template-columns: 1fr;
@@ -1932,18 +1979,40 @@ body.dark-mode .gauge-zone-marker {
         right: 0;
     }
     
-    /* Responsive Gauges */
-    .gauge-wrapper {
-        max-width: 220px;
+    /* ✅ Gauges Mobile Responsive */
+    .model-chart,
+    .gauge-container {
+        max-width: 100%;
+        height: auto;
+        min-height: 240px;
     }
     
     .gauge-score-value {
         font-size: 2.5rem;
     }
     
-    .model-chart,
-    .gauge-container {
-        min-height: 240px;
+    /* ✅ Charts Mobile */
+    .chart {
+        min-height: 300px;
+    }
+    
+    .chart-large {
+        min-height: 350px;
+    }
+    
+    .chart-medium {
+        min-height: 280px;
+    }
+    
+    /* ✅ Correlation Section Mobile */
+    .correlation-section {
+        overflow-x: hidden;
+    }
+    
+    #correlationHeatmap,
+    #consensusGauge {
+        max-width: 100%;
+        overflow: hidden;
     }
 }
 
@@ -1964,6 +2033,7 @@ body.dark-mode .gauge-zone-marker {
     
     .backtesting-tabs {
         flex-direction: column;
+        overflow-x: visible;
     }
     
     .tab-btn {
@@ -1971,12 +2041,24 @@ body.dark-mode .gauge-zone-marker {
         justify-content: center;
     }
     
-    .gauge-wrapper {
-        max-width: 200px;
+    /* ✅ Gauges très petits écrans */
+    .model-chart,
+    .gauge-container {
+        max-width: 100%;
+        min-height: 220px;
     }
     
     .gauge-score-value {
         font-size: 2rem;
+    }
+    
+    .prediction-overview {
+        padding: 20px;
+    }
+    
+    .ensemble-card {
+        flex-direction: column;
+        text-align: center;
     }
 }
 
@@ -1984,24 +2066,33 @@ body.dark-mode .gauge-zone-marker {
    SCROLLBAR STYLING
    ======================================== */
 .modal-content::-webkit-scrollbar,
-.card-body::-webkit-scrollbar {
+.card-body::-webkit-scrollbar,
+.performance-table::-webkit-scrollbar,
+.backtesting-tabs::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 .modal-content::-webkit-scrollbar-track,
-.card-body::-webkit-scrollbar-track {
+.card-body::-webkit-scrollbar-track,
+.performance-table::-webkit-scrollbar-track,
+.backtesting-tabs::-webkit-scrollbar-track {
     background: rgba(100, 116, 139, 0.1);
     border-radius: 4px;
 }
 
 .modal-content::-webkit-scrollbar-thumb,
-.card-body::-webkit-scrollbar-thumb {
+.card-body::-webkit-scrollbar-thumb,
+.performance-table::-webkit-scrollbar-thumb,
+.backtesting-tabs::-webkit-scrollbar-thumb {
     background: var(--ml-gradient);
     border-radius: 4px;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover,
-.card-body::-webkit-scrollbar-thumb:hover {
+.card-body::-webkit-scrollbar-thumb:hover,
+.performance-table::-webkit-scrollbar-thumb:hover,
+.backtesting-tabs::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #5a67d8, #6b46c1);
 }
 
