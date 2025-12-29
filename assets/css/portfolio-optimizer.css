@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 PORTFOLIO-OPTIMIZER.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE COMPLÈTE AVEC TITRE DE PAGE
+   VERSION FINALE COMPLÈTE - 100% RESPONSIVE MOBILE
    ============================================== */
 
 /* ============================================
@@ -245,7 +245,7 @@ body.dark-mode {
 }
 
 /* ============================================
-   🗑️ BUTTON REMOVE - POSITIONNÉ À DROITE
+   🗑 BUTTON REMOVE - POSITIONNÉ À DROITE
    ============================================ */
 .btn-remove {
     background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
@@ -366,7 +366,7 @@ body.dark-mode .asset-input-group input {
 }
 
 /* ============================================
-   ☑️ CHECKBOX LABEL - PREMIUM STYLE
+   ☑ CHECKBOX LABEL - PREMIUM STYLE
    ============================================ */
 .checkbox-label {
     font-weight: 700;
@@ -405,7 +405,7 @@ body.dark-mode .asset-input-group input {
 }
 
 /* ============================================
-   ✏️ ASSET NAME INPUT - INLINE EDIT
+   ✏ ASSET NAME INPUT - INLINE EDIT
    ============================================ */
 .asset-name-input {
     background: transparent;
@@ -848,17 +848,43 @@ body.dark-mode .stat-item {
 
 /* ============================================
    📋 ALLOCATION TABLE - PREMIUM DESIGN
+   🔥 WRAPPER POUR SCROLL HORIZONTAL MOBILE
    ============================================ */
-.allocation-table {
+.table-responsive-wrapper {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    overflow-x: auto;
+    overflow-y: visible;
     margin-top: 30px;
     border-radius: 20px;
-    overflow: hidden;
     box-shadow: 
         0 12px 40px rgba(0, 0, 0, 0.12),
         0 0 60px rgba(102, 126, 234, 0.1);
+    /* Scrollbar custom */
+    scrollbar-width: thin;
+    scrollbar-color: var(--ml-primary) rgba(255, 255, 255, 0.1);
+}
+
+.table-responsive-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-radius: 10px;
+}
+
+.allocation-table {
+    width: 100%;
+    min-width: 700px; /* Largeur minimale pour forcer le scroll sur mobile */
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
 .allocation-table th {
@@ -871,6 +897,7 @@ body.dark-mode .stat-item {
     font-size: 0.95rem;
     letter-spacing: 1px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
 }
 
 .allocation-table td {
@@ -880,6 +907,7 @@ body.dark-mode .stat-item {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     transition: var(--transition-smooth);
+    white-space: nowrap;
 }
 
 .allocation-table tr {
@@ -904,7 +932,7 @@ body.dark-mode .allocation-table td {
 }
 
 /* ============================================
-   🏷️ ALLOCATION BADGE - PREMIUM STYLE
+   🏷 ALLOCATION BADGE - PREMIUM STYLE
    ============================================ */
 .allocation-badge {
     background: linear-gradient(135deg, var(--ml-primary) 0%, var(--ml-blue) 100%);
@@ -963,14 +991,24 @@ body.dark-mode .allocation-table td {
 
 /* ============================================
    📱 RESPONSIVE DESIGN - MOBILE OPTIMIZED
+   🔥 CORRECTIONS ULTRA-COMPLÈTES POUR TABLE
    ============================================ */
 @media (max-width: 768px) {
+    /* Titres */
     .top-header h1,
     .page-header h1,
     .main-content > h1:first-child {
         font-size: 1.6rem !important;
+        gap: 10px !important;
     }
     
+    .top-header h1 i,
+    .page-header h1 i,
+    .main-content > h1:first-child i {
+        font-size: 1.8rem !important;
+    }
+    
+    /* Grilles */
     .asset-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -985,6 +1023,7 @@ body.dark-mode .allocation-table td {
         min-height: 350px;
     }
     
+    /* Boutons */
     .btn-container {
         flex-direction: column;
         gap: 15px;
@@ -994,13 +1033,17 @@ body.dark-mode .allocation-table td {
     .btn-secondary {
         width: 100%;
         min-width: auto;
+        padding: 16px 28px;
+        font-size: 1rem;
     }
     
+    /* Stats */
     .stats-row {
         grid-template-columns: 1fr;
         gap: 15px;
     }
     
+    /* Cards */
     .asset-card {
         padding: 20px;
     }
@@ -1014,12 +1057,40 @@ body.dark-mode .allocation-table td {
         margin-top: 30px;
     }
     
-    .allocation-table th,
-    .allocation-table td {
-        padding: 12px;
-        font-size: 0.9rem;
+    /* 🔥 TABLE RESPONSIVE - CORRECTIONS MAJEURES */
+    .table-responsive-wrapper {
+        margin-top: 20px;
+        border-radius: 16px;
+        /* Indicateur visuel de scroll */
+        box-shadow: 
+            inset -20px 0 20px -20px rgba(102, 126, 234, 0.3),
+            0 8px 24px rgba(0, 0, 0, 0.12);
     }
     
+    .allocation-table {
+        min-width: 650px; /* Réduit mais garde le scroll */
+    }
+    
+    .allocation-table th,
+    .allocation-table td {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .allocation-table th {
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Badges plus compacts */
+    .allocation-badge,
+    .allocation-badge-secondary {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        border-radius: 40px;
+    }
+    
+    /* Autres titres */
     .main-content > h2,
     .main-content .section > h2 {
         font-size: 1.3rem !important;
@@ -1040,20 +1111,65 @@ body.dark-mode .allocation-table td {
 }
 
 @media (max-width: 480px) {
+    /* Titres très petits écrans */
+    .top-header h1,
+    .page-header h1,
+    .main-content > h1:first-child {
+        font-size: 1.4rem !important;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    /* Stats compactes */
     .stat-item .value {
         font-size: 1.5rem;
     }
     
+    .stat-item .label {
+        font-size: 0.8rem;
+    }
+    
+    /* Boutons ultra-compacts */
     .btn-primary,
     .btn-secondary,
     .btn-add {
-        font-size: 0.95rem;
-        padding: 14px 24px;
+        font-size: 0.9rem;
+        padding: 14px 20px;
     }
     
     .asset-name-input {
-        width: 150px;
+        width: 140px;
         font-size: 1rem;
+    }
+    
+    /* 🔥 TABLE ULTRA-COMPACTE */
+    .allocation-table {
+        min-width: 580px;
+    }
+    
+    .allocation-table th,
+    .allocation-table td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .allocation-table th {
+        font-size: 0.75rem;
+    }
+    
+    .allocation-badge,
+    .allocation-badge-secondary {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+    
+    /* Stats box plus compact */
+    .stats-box {
+        padding: 20px 15px;
+    }
+    
+    .stat-item {
+        padding: 18px;
     }
 }
 
@@ -1087,27 +1203,23 @@ body.dark-mode .allocation-table td {
 /* ============================================
    🎨 SCROLLBAR CUSTOM - PREMIUM STYLE
    ============================================ */
-.stats-box::-webkit-scrollbar,
-.allocation-table::-webkit-scrollbar {
+.stats-box::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.stats-box::-webkit-scrollbar-track,
-.allocation-table::-webkit-scrollbar-track {
+.stats-box::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
 }
 
-.stats-box::-webkit-scrollbar-thumb,
-.allocation-table::-webkit-scrollbar-thumb {
+.stats-box::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     border-radius: 10px;
     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-.stats-box::-webkit-scrollbar-thumb:hover,
-.allocation-table::-webkit-scrollbar-thumb:hover {
+.stats-box::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
 }
 
@@ -1132,5 +1244,5 @@ body.dark-mode .allocation-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - PORTFOLIO OPTIMIZER PREMIUM 3D
-   VERSION FINALE COMPLÈTE AVEC TITRE DE PAGE
+   VERSION FINALE - 100% RESPONSIVE MOBILE ✅
    ============================================ */
