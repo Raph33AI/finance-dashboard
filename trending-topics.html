@@ -390,17 +390,14 @@
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 
                 <div class='fear-greed-wrapper'>
-                    <div class='fear-greed-header'>
-                        <div class='fear-greed-badge'>
-                            <i class='fas fa-heartbeat'></i>
-                            <span>AI-Powered Market Psychology</span>
+                    <div class='fear-greed-gauge'>
+                        <canvas id='fearGreedGauge'></canvas>
+                        <!-- ✅ NOUVEAU: Graduations visuelles -->
+                        <div class='gauge-markers'></div>
+                        <div class='gauge-center-fear'>
+                            <div class='fear-value' id='fearValue'>0</div>
+                            <div class='fear-label' id='fearLabel'>Neutral</div>
                         </div>
-                        <h2 class='global-title gradient-title'>
-                            <i class='fas fa-brain'></i> Market Fear & Greed Index
-                        </h2>
-                        <p class='global-subtitle'>
-                            Real-time sentiment analysis based on <span id='fearTotalArticles'>0</span> financial news headlines
-                        </p>
                     </div>
                     
                     <div class='fear-greed-main'>
