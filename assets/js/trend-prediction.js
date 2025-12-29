@@ -1333,64 +1333,138 @@ Object.assign(TrendPrediction, {
     createModelScoreGauge(modelName, modelResult) {
         const score = Math.max(0, Math.min(100, 50 + modelResult.percentChange * 2));
         
-        Highcharts.chart(`chart-${modelName}`, {
+        // Couleurs dynamiques selon le score
+        let gradientColors = ['#ef4444', '#dc2626']; // Rouge par défaut
+        if (score >= 75) gradientColors = ['#22c55e', '#16a34a']; // Vert foncé
+        else if (score >= 60) gradientColors = ['#84cc16', '#65a30d']; // Vert clair
+        else if (score >= 40) gradientColors = ['#fbbf24', '#f59e0b']; // Jaune
+        else if (score >= 25) gradientColors = ['#fb923c', '#f97316']; // Orange
+        
+        const chart = Highcharts.chart(`chart-${modelName}`, {
             chart: {
                 type: 'solidgauge',
-                height: 250,
-                backgroundColor: 'transparent'
+                height: 280,
+                backgroundColor: 'transparent',
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
             },
+            
             title: { text: null },
+            
             pane: {
-                center: ['50%', '75%'],
-                size: '110%',
-                startAngle: -90,
-                endAngle: 90,
+                center: ['50%', '50%'],
+                size: '90%',
+                startAngle: 0,
+                endAngle: 360,
                 background: [{
-                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
-                    innerRadius: '60%',
+                    backgroundColor: 'rgba(241, 245, 249, 0.2)',
+                    innerRadius: '85%',
                     outerRadius: '100%',
-                    shape: 'arc',
-                    borderWidth: 0
+                    borderWidth: 0,
+                    shape: 'arc'
                 }]
             },
-            tooltip: { enabled: false },
+            
+            tooltip: {
+                enabled: true,
+                borderRadius: 12,
+                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                style: { color: '#ffffff', fontSize: '14px', fontWeight: '600' },
+                formatter: function() {
+                    return `<b>${this.y.toFixed(0)}/100</b><br/>Score: ${modelResult.percentChange >= 0 ? '+' : ''}${modelResult.percentChange.toFixed(2)}%`;
+                }
+            },
+            
             yAxis: {
                 min: 0,
                 max: 100,
-                stops: [
-                    [0.1, '#ef4444'],
-                    [0.3, '#f59e0b'],
-                    [0.5, '#fbbf24'],
-                    [0.7, '#84cc16'],
-                    [0.9, '#22c55e']
-                ],
                 lineWidth: 0,
                 tickWidth: 0,
                 minorTickInterval: null,
-                tickAmount: 2,
-                labels: { y: 16 }
+                tickAmount: 0,
+                labels: { enabled: false },
+                stops: [
+                    [0, gradientColors[0]],
+                    [1, gradientColors[1]]
+                ]
             },
+            
             plotOptions: {
                 solidgauge: {
+                    borderRadius: '50%',
+                    innerRadius: '85%',
+                    radius: '100%',
                     dataLabels: {
-                        y: -30,
+                        enabled: true,
                         borderWidth: 0,
                         useHTML: true,
-                        format: `<div style="text-align:center">
-                            <span style="font-size:2rem;font-weight:800;color:${this.colors.primary};">{y:.0f}</span><br/>
-                            <span style="font-size:0.8rem;color:#64748b;">Score</span>
-                        </div>`
+                        y: 0,
+                        format: `
+                            <div style="text-align:center;">
+                                <div style="font-size:3rem;font-weight:900;background:linear-gradient(135deg,${gradientColors[0]},${gradientColors[1]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:8px;">
+                                    {y:.0f}
+                                </div>
+                                <div style="font-size:0.85rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
+                                    Score
+                                </div>
+                                <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px;">
+                                    ${modelResult.percentChange >= 0 ? '↑' : '↓'} ${Math.abs(modelResult.percentChange).toFixed(1)}%
+                                </div>
+                            </div>
+                        `
                     }
                 }
             },
+            
             series: [{
                 name: 'Score',
-                data: [score],
-                innerRadius: '60%',
-                radius: '100%'
+                data: [{
+                    y: score,
+                    radius: '100%',
+                    innerRadius: '85%'
+                }],
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
             }],
+            
             credits: { enabled: false }
         });
+        
+        // Ajouter des marqueurs de zones (optionnel)
+        this.addGaugeMarkers(`chart-${modelName}`, score);
+    },
+
+    // Fonction helper pour ajouter des marqueurs visuels
+    addGaugeMarkers(containerId, currentScore) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        const markers = container.querySelector('.gauge-zone-indicators');
+        if (markers) markers.remove();
+        
+        const div = document.createElement('div');
+        div.className = 'gauge-zone-indicators';
+        
+        // Marqueurs à 25, 50, 75
+        [25, 50, 75].forEach(value => {
+            const marker = document.createElement('div');
+            marker.className = 'gauge-zone-marker';
+            const angle = (value / 100) * 360 - 90;
+            marker.style.cssText = `
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(${angle}deg) translateY(-100px);
+                opacity: ${currentScore > value ? 0.3 : 0.6};
+            `;
+            div.appendChild(marker);
+        });
+        
+        container.style.position = 'relative';
+        container.appendChild(div);
     },
     
     displayResults() {

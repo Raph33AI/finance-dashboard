@@ -4,6 +4,7 @@
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
  * + Wall Street ML Score Indicators Styles
+ * + MODERN DOUGHNUT GAUGES (Option 1)
  */
 
 /* ========================================
@@ -961,6 +962,161 @@ body.dark-mode .ensemble-card {
     font-weight: 700;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (OPTION 1)
+   ═══════════════════════════════════════════════════════════════ */
+
+.model-chart,
+.gauge-container {
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+/* Gauge Wrapper avec effet glow */
+.gauge-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.gauge-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulseGlow 3s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { 
+        opacity: 0.6; 
+        transform: translate(-50%, -50%) scale(1); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.05); 
+    }
+}
+
+/* Score central avec gradient texte */
+.gauge-score-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.gauge-score-value {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+.gauge-score-label {
+    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.gauge-score-sublabel {
+    font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+    color: var(--text-tertiary);
+    margin-top: 4px;
+}
+
+/* Indicateurs de zones (0-25-50-75-100) */
+.gauge-zone-indicators {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.gauge-zone-marker {
+    position: absolute;
+    width: 3px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    transform-origin: center;
+    transition: opacity 0.3s ease;
+}
+
+body.dark-mode .gauge-zone-marker {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animation de remplissage au chargement */
+@keyframes fillGauge {
+    from { 
+        stroke-dashoffset: 1000; 
+        opacity: 0;
+    }
+    to { 
+        stroke-dashoffset: 0; 
+        opacity: 1;
+    }
+}
+
+/* Effet hover sur les gauges */
+.model-chart:hover .gauge-wrapper::before {
+    animation: pulseGlowHover 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlowHover {
+    0%, 100% { 
+        opacity: 0.8; 
+        transform: translate(-50%, -50%) scale(1.05); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.1); 
+    }
+}
+
+/* Consensus Gauge Specific Styles */
+.consensus-gauge .gauge-wrapper::before {
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+}
+
+.consensus-gauge .gauge-score-value {
+    font-size: clamp(3rem, 6vw, 4rem);
+}
+
+.consensus-gauge .gauge-score-label {
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
+}
+
 /* ========================================
    ML MODELS SECTION
    ======================================== */
@@ -1035,11 +1191,6 @@ body.dark-mode .ensemble-card {
 .model-badge.completed {
     background: rgba(16, 185, 129, 0.2);
     color: var(--ml-success);
-}
-
-.model-chart {
-    min-height: 200px;
-    padding: 20px;
 }
 
 .model-metrics {
@@ -1344,11 +1495,6 @@ body.dark-mode .ensemble-card {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin: 0 0 20px 0;
-}
-
-.gauge-container {
-    width: 100%;
-    min-height: 200px;
 }
 
 .gauge-description {
@@ -1707,7 +1853,7 @@ body.dark-mode .ensemble-card {
 }
 
 /* ========================================
-   RESPONSIVE
+   RESPONSIVE - GAUGES MODERNES
    ======================================== */
 @media (max-width: 1024px) {
     .correlation-grid {
@@ -1785,6 +1931,20 @@ body.dark-mode .ensemble-card {
     .search-suggestions {
         right: 0;
     }
+    
+    /* Responsive Gauges */
+    .gauge-wrapper {
+        max-width: 220px;
+    }
+    
+    .gauge-score-value {
+        font-size: 2.5rem;
+    }
+    
+    .model-chart,
+    .gauge-container {
+        min-height: 240px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1809,6 +1969,14 @@ body.dark-mode .ensemble-card {
     .tab-btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    .gauge-wrapper {
+        max-width: 200px;
+    }
+    
+    .gauge-score-value {
+        font-size: 2rem;
     }
 }
 
