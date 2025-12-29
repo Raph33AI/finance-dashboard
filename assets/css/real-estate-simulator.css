@@ -2155,23 +2155,31 @@ body.dark-mode .property-actions {
         font-size: 0.9rem;
     }
     
-    /* ✅ MODAL - MOBILE RESPONSIVE (AFFICHAGE VERTICAL COMPLET) */
+     /* ========================================
+       ✅ MODAL - MOBILE RESPONSIVE (CORRECTION)
+       ======================================== */
+    
+    /* Conteneur modal principal */
     .modal.active {
-        padding: 0;
-        align-items: flex-start;
+        padding: 20px; /* ✅ Padding autour du modal */
+        align-items: flex-start; /* ✅ Alignement en haut */
+        overflow-y: auto; /* ✅ Scroll sur le fond gris */
+        -webkit-overflow-scrolling: touch; /* ✅ Scroll fluide iOS */
     }
     
+    /* Contenu du modal */
     .modal-content {
         width: 100%;
         max-width: 100%;
-        min-height: 100vh;
-        max-height: none;
-        margin: 0;
-        border-radius: 0;
+        min-height: auto; /* ✅ PAS de min-height 100vh */
+        max-height: none; /* ✅ Pas de limite de hauteur */
+        margin: 20px auto; /* ✅ Centrage + espace vertical */
+        border-radius: var(--border-radius); /* ✅ Garder les coins arrondis */
         overflow-x: hidden;
-        overflow-y: auto;
+        overflow-y: visible; /* ✅ Le scroll se fait sur .modal, pas sur .modal-content */
     }
     
+    /* Header modal - sticky en haut */
     .modal-header {
         padding: 16px 20px;
         position: sticky;
@@ -2179,6 +2187,7 @@ body.dark-mode .property-actions {
         z-index: 100;
         background: var(--glass-bg);
         backdrop-filter: blur(40px) saturate(180%);
+        border-bottom: 1px solid var(--glass-border);
     }
     
     .modal-header h2 {
@@ -2193,6 +2202,7 @@ body.dark-mode .property-actions {
         font-size: 1.5rem;
     }
     
+    /* Body modal - scroll naturel */
     .modal-body {
         padding: 16px;
         overflow-x: hidden;
@@ -2280,6 +2290,7 @@ body.dark-mode .property-actions {
         flex-direction: column;
         gap: 10px;
         width: 100%;
+        padding: 0 16px 16px 16px; /* ✅ Padding pour aligner avec modal-body */
     }
     
     .modal-actions .btn,
