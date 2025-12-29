@@ -2342,6 +2342,248 @@ body.dark-mode .property-actions {
     .form-actions button {
         width: 100%;
     }
+
+    /* ========================================
+       MY REAL ESTATE SIMULATIONS - MOBILE FIX
+       ======================================== */
+    
+    /* ✅ HEADER ACTIONS - BOUTONS RESPONSIFS */
+    .section .section-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 16px;
+    }
+    
+    .section .header-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .section .header-actions .btn {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        justify-content: center;
+    }
+    
+    .section .header-actions .btn i {
+        font-size: 0.9rem;
+    }
+    
+    /* Masquer texte des boutons secondaires sur très petit écran */
+    .section .header-actions .btn .btn-text {
+        display: inline;
+    }
+    
+    /* ✅ SIMULATION CARD - ADAPTÉ MOBILE */
+    .simulation-card {
+        margin-bottom: 16px;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    /* ✅ SIM HEADER - TITRE + BADGE PAYS */
+    .sim-header {
+        padding: 14px 16px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+    
+    .sim-header h4 {
+        font-size: 0.95rem;
+        max-width: 65%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0;
+    }
+    
+    .sim-country {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* ✅ SIM BODY - INFO */
+    .sim-body {
+        padding: 16px;
+    }
+    
+    .sim-info {
+        gap: 10px;
+    }
+    
+    .sim-info span {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        word-break: break-word;
+    }
+    
+    .sim-info i {
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    
+    /* ✅ SIM METRICS - AFFICHAGE VERTICAL */
+    .sim-metrics {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .sim-metric {
+        padding: 12px;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 8px;
+        border: 1px solid var(--glass-border);
+    }
+    
+    .sim-metric small {
+        font-size: 0.7rem;
+        margin-bottom: 4px;
+    }
+    
+    .sim-metric strong {
+        font-size: 1.1rem;
+        word-break: break-word;
+    }
+    
+    /* ✅ SIM FOOTER - ACTIONS BOUTONS */
+    .sim-footer {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .sim-footer small {
+        font-size: 0.75rem;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* ✅ SIM ACTIONS - BOUTONS HORIZONTAUX */
+    .sim-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        width: 100%;
+    }
+    
+    .sim-actions .btn-icon {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .sim-actions .btn-icon i {
+        font-size: 1rem;
+        margin: 0;
+    }
+    
+    .sim-actions .btn-icon span {
+        display: none; /* Masquer texte pour gagner de la place */
+    }
+    
+    /* ✅ SIMULATIONS EMPTY STATE */
+    .simulations-empty {
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .simulations-empty i {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+    
+    .simulations-empty p {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .simulations-empty small {
+        font-size: 0.85rem;
+        display: block;
+        margin-bottom: 16px;
+    }
+    
+    .simulations-empty .btn-sm {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   EXTRA SMALL SCREENS (< 480px)
+   ======================================== */
+@media (max-width: 480px) {
+    /* ✅ HEADER ACTIONS - 1 COLONNE SUR TRÈS PETIT ÉCRAN */
+    .section .header-actions {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .section .header-actions .btn {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .section .header-actions .btn .btn-text {
+        display: inline; /* Afficher le texte en mode vertical */
+    }
+    
+    /* ✅ SIM HEADER - VERTICAL SUR TRÈS PETIT ÉCRAN */
+    .sim-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .sim-header h4 {
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+    
+    .sim-country {
+        align-self: flex-end;
+    }
+    
+    /* ✅ SIM ACTIONS - 2 COLONNES AU LIEU DE 3 */
+    .sim-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    /* Dernier bouton (Delete) prend toute la largeur */
+    .sim-actions .btn-icon:last-child {
+        grid-column: 1 / -1;
+    }
+    
+    /* Afficher les icônes + texte sur très petit écran */
+    .sim-actions .btn-icon {
+        flex-direction: row;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    
+    .sim-actions .btn-icon span {
+        display: inline;
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 480px) {
