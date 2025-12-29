@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 SCENARIO-ANALYSIS.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE COMPLÈTE ET CORRIGÉE
+   VERSION FINALE - 100% RESPONSIVE MOBILE ✅
    ============================================== */
 
 /* ============================================
@@ -462,7 +462,7 @@ body.dark-mode .scenario-card {
 }
 
 /* ============================================
-   🏷️ IMPACT BADGES - PREMIUM
+   🏷 IMPACT BADGES - PREMIUM
    ============================================ */
 .scenario-impacts {
     display: flex;
@@ -644,8 +644,38 @@ body.dark-mode .result-card {
 }
 
 /* ============================================
-   ✅ DETAILED TABLE - ULTRA LISIBLE
+   📋 DETAILED TABLE - WRAPPER RESPONSIVE
+   🔥 CORRECTION MAJEURE POUR MOBILE
    ============================================ */
+.table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    margin-top: 20px;
+    border-radius: 24px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.12),
+        0 0 60px rgba(102, 126, 234, 0.1);
+    /* Scrollbar custom */
+    scrollbar-width: thin;
+    scrollbar-color: var(--ml-primary) rgba(255, 255, 255, 0.1);
+}
+
+.table-responsive-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-radius: 10px;
+}
+
+/* ✅ DETAILED TABLE - ULTRA LISIBLE */
 .detailed-table-container {
     background: linear-gradient(
         135deg,
@@ -657,7 +687,6 @@ body.dark-mode .result-card {
     border-radius: 24px;
     padding: 30px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    overflow-x: auto;
     margin-bottom: 30px;
 }
 
@@ -671,6 +700,7 @@ body.dark-mode .detailed-table-container {
 
 .detailed-table {
     width: 100%;
+    min-width: 700px; /* Force le scroll horizontal sur mobile */
     border-collapse: separate;
     border-spacing: 0;
     background: rgba(255, 255, 255, 0.02);
@@ -740,6 +770,7 @@ body.dark-mode .detailed-table tbody tr:nth-child(even) {
     color: var(--text-primary);
     font-weight: 600;
     border-right: 1px solid rgba(102, 126, 234, 0.15);
+    white-space: nowrap;
 }
 
 .detailed-table td:last-child {
@@ -831,9 +862,16 @@ body.dark-mode .chart-container {
 }
 
 /* ============================================
-   ℹ️ INFO BOX - PREMIUM
+   ℹ INFO BOX - PREMIUM
+   🔥 CORRECTION RESPONSIVE POUR TEXTES LONGS
    ============================================ */
-.info-box {
+.responsive-text-wrapper {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.info-box,
+.responsive-text-box {
     background: linear-gradient(
         135deg,
         rgba(102, 126, 234, 0.1) 0%,
@@ -844,27 +882,55 @@ body.dark-mode .chart-container {
     border-radius: 12px;
     backdrop-filter: blur(10px);
     margin: 20px 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    /* 🔥 AJOUT RESPONSIVE */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.info-box-content {
+    width: 100%;
 }
 
 .info-box i {
     font-size: 1.5rem;
     color: var(--ml-primary);
     margin-top: 2px;
+    flex-shrink: 0;
 }
 
-.info-box p {
-    margin: 0;
+.info-box p,
+.info-box-content p {
+    margin: 0 0 12px 0;
     color: var(--text-primary);
     font-size: 0.95rem;
     line-height: 1.6;
+    /* 🔥 AJOUT RESPONSIVE */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.info-box p:last-child,
+.info-box-content p:last-child {
+    margin-bottom: 0;
+}
+
+.info-box h4,
+.info-box-content h4 {
+    margin: 0 0 12px 0;
+    color: var(--ml-primary);
+    font-size: 1.1rem;
+    font-weight: 800;
+    /* 🔥 AJOUT RESPONSIVE */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 /* ============================================
-   ⚠️ WARNING BOX
+   ⚠ WARNING BOX
    ============================================ */
 .warning-box {
     background: linear-gradient(
@@ -881,12 +947,16 @@ body.dark-mode .chart-container {
     align-items: flex-start;
     gap: 15px;
     box-shadow: 0 4px 12px rgba(246, 211, 101, 0.15);
+    /* 🔥 AJOUT RESPONSIVE */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .warning-box i {
     font-size: 1.5rem;
     color: var(--ml-warning);
     margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .warning-box p {
@@ -894,6 +964,8 @@ body.dark-mode .chart-container {
     color: var(--text-primary);
     font-size: 0.95rem;
     line-height: 1.6;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 /* ============================================
@@ -914,12 +986,16 @@ body.dark-mode .chart-container {
     align-items: flex-start;
     gap: 15px;
     box-shadow: 0 4px 12px rgba(67, 233, 123, 0.15);
+    /* 🔥 AJOUT RESPONSIVE */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .success-box i {
     font-size: 1.5rem;
     color: var(--ml-success);
     margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .success-box p {
@@ -927,33 +1003,57 @@ body.dark-mode .chart-container {
     color: var(--text-primary);
     font-size: 0.95rem;
     line-height: 1.6;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 /* ============================================
-   📱 RESPONSIVE
+   📱 RESPONSIVE DESIGN - MOBILE OPTIMIZED
+   🔥 CORRECTIONS ULTRA-COMPLÈTES
    ============================================ */
 @media (max-width: 768px) {
+    /* Grilles */
     .portfolio-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
     }
     
     .results-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
     
+    /* Portfolio Input */
     .portfolio-input {
         padding: 20px;
     }
     
+    .input-title {
+        font-size: 1.3rem;
+    }
+    
+    /* Boutons */
     .btn-analyze {
         padding: 15px 32px;
         font-size: 1.1rem;
     }
     
+    /* Scenario Cards */
     .scenario-card {
         padding: 20px;
     }
     
+    .scenario-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    /* Impact Badges - Plus compacts */
+    .impact-badge {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+    }
+    
+    /* Result Cards */
     .result-card {
         padding: 25px;
     }
@@ -962,57 +1062,158 @@ body.dark-mode .chart-container {
         font-size: 2rem;
     }
     
-    .detailed-table-container {
-        padding: 20px;
+    /* 🔥 TABLE RESPONSIVE - CORRECTIONS MAJEURES */
+    .table-responsive-wrapper {
+        margin-top: 15px;
+        border-radius: 16px;
+        /* Indicateur visuel de scroll */
+        box-shadow: 
+            inset -20px 0 20px -20px rgba(102, 126, 234, 0.3),
+            0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .detailed-table {
+        min-width: 650px; /* Réduit mais garde le scroll */
     }
     
     .detailed-table th,
     .detailed-table td {
-        padding: 12px;
+        padding: 12px 10px;
         font-size: 0.85rem;
     }
     
+    .detailed-table th {
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .detailed-table-container {
+        padding: 20px;
+    }
+    
+    /* Titres */
     .subsection-title,
     .section-title {
         font-size: 1.2rem;
     }
+    
+    /* Info Box - Text Wrapping */
+    .info-box,
+    .responsive-text-box,
+    .warning-box,
+    .success-box {
+        padding: 15px 18px;
+        max-width: 100%;
+    }
+    
+    .info-box p,
+    .info-box-content p,
+    .warning-box p,
+    .success-box p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
 }
 
 @media (max-width: 480px) {
+    /* Portfolio Input Ultra-Compact */
     .portfolio-input {
         padding: 15px;
     }
     
     .input-title {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
+        flex-direction: column;
+        text-align: center;
     }
     
     .portfolio-grid {
-        gap: 15px;
+        gap: 12px;
     }
     
     .portfolio-item {
         padding: 15px;
     }
     
+    /* Boutons Ultra-Compacts */
     .btn-analyze {
         padding: 12px 24px;
         font-size: 1rem;
     }
     
+    /* Scenario Cards Compacts */
+    .scenario-card {
+        padding: 15px;
+    }
+    
+    .scenario-card h3 {
+        font-size: 1.1rem;
+    }
+    
     .scenario-impacts {
-        gap: 8px;
+        gap: 6px;
     }
     
     .impact-badge {
-        padding: 6px 14px;
-        font-size: 0.8rem;
+        padding: 5px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* 🔥 TABLE ULTRA-COMPACTE */
+    .detailed-table {
+        min-width: 580px;
     }
     
     .detailed-table th,
     .detailed-table td {
-        padding: 10px;
+        padding: 10px 8px;
         font-size: 0.8rem;
+    }
+    
+    .detailed-table th {
+        font-size: 0.75rem;
+    }
+    
+    .detailed-table-container {
+        padding: 15px;
+    }
+    
+    /* Result Cards Compacts */
+    .result-card {
+        padding: 20px;
+    }
+    
+    .result-card .value {
+        font-size: 1.8rem;
+    }
+    
+    /* Titres Ultra-Compacts */
+    .section-title {
+        font-size: 1.1rem;
+    }
+    
+    .subsection-title {
+        font-size: 1rem;
+    }
+    
+    /* Info Boxes Ultra-Compacts */
+    .info-box,
+    .responsive-text-box,
+    .warning-box,
+    .success-box {
+        padding: 12px 15px;
+    }
+    
+    .info-box h4,
+    .info-box-content h4 {
+        font-size: 1rem;
+    }
+    
+    .info-box p,
+    .info-box-content p,
+    .warning-box p,
+    .success-box p {
+        font-size: 0.85rem;
     }
 }
 
@@ -1115,4 +1316,5 @@ body.dark-mode .chart-container {
 
 /* ============================================
    🎯 FIN DU FICHIER - ULTRA MODERN CSS
+   VERSION FINALE - 100% RESPONSIVE MOBILE ✅
    ============================================ */

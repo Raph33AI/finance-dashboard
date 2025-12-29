@@ -448,11 +448,13 @@
                             What is Scenario Analysis? 
                             <span class='help-icon' onclick='openModal("modalSAIntro")'>?</span>
                         </h2>
-                        <div class='info-box'>
-                            <h4>Stress Testing Your Portfolio</h4>
-                            <p>Scenario Analysis tests how your portfolio would perform during specific historical or hypothetical market events.</p>
-                            <p><strong>Why it matters:</strong> Monte Carlo simulations are random, but real crises follow patterns. This tool shows you exactly what would happen to your portfolio during known events.</p>
-                            <p><strong>Use it to:</strong> Identify vulnerabilities, adjust allocations, and build confidence in your strategy.</p>
+                        <div class='info-box responsive-text-box'>
+                            <div class="info-box-content">
+                                <h4>Stress Testing Your Portfolio</h4>
+                                <p>Scenario Analysis tests how your portfolio would perform during specific historical or hypothetical market events.</p>
+                                <p><strong>Why it matters:</strong> Monte Carlo simulations are random, but real crises follow patterns. This tool shows you exactly what would happen to your portfolio during known events.</p>
+                                <p><strong>Use it to:</strong> Identify vulnerabilities, adjust allocations, and build confidence in your strategy.</p>
+                            </div>
                         </div>
                     </div>
                     
@@ -594,13 +596,17 @@
                         <div id='chartRiskReturn' class='chart'></div>
                         
                         <h3 class='subsection-title'>Detailed Results</h3>
-                        <div id='detailedTable'></div>
+                        <div class="table-responsive-wrapper">
+                            <div id='detailedTable'></div>
+                        </div>
                         
                         <h3 class='subsection-title'>
                             Recommendations 
                             <span class='help-icon' onclick='openModal("modalSARecommendations")'>?</span>
                         </h3>
-                        <div id='recommendations' class='info-box'></div>
+                        <div class="responsive-text-wrapper">
+                            <div id='recommendations' class='info-box responsive-text-box'></div>
+                        </div>
                     </div>
                 </div>
                 
