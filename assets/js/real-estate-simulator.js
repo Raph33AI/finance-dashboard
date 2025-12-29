@@ -3443,6 +3443,7 @@
             color: #10b981;
         }
         
+        /* ✅ SIMULATION ACTIONS - DESKTOP */
         .simulation-actions {
             display: flex;
             gap: 8px;
@@ -3560,6 +3561,126 @@
         
         body.dark-mode .comparison-metrics .metric {
             background: #0f172a;
+        }
+        
+        /* ========================================
+           🔥 RESPONSIVE MOBILE - MEDIA QUERIES
+           ======================================== */
+        
+        @media (max-width: 768px) {
+            /* ✅ MODAL RESPONSIVE */
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                min-height: 100vh;
+                max-height: none;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+            
+            .modal-body {
+                padding: 16px;
+            }
+            
+            /* ✅ FORM RESPONSIVE */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-actions button {
+                width: 100%;
+            }
+            
+            /* ✅ SIMULATION ITEM RESPONSIVE */
+            .simulation-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            
+            .simulation-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .simulation-details {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .simulation-metrics {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            /* 🔥 SIMULATION ACTIONS - VERTICAL SUR MOBILE */
+            .simulation-actions {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+            
+            .simulation-actions button,
+            .simulation-actions .btn-icon {
+                width: 100% !important;
+                padding: 12px 16px !important;
+                font-size: 0.9rem !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+            }
+            
+            /* ✅ RENT VS BUY RESPONSIVE */
+            .rent-vs-buy-results {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            /* ✅ COMPARISON GRID RESPONSIVE */
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-header {
+                padding: 12px 16px;
+            }
+            
+            .modal-header h2 {
+                font-size: 1rem;
+            }
+            
+            .modal-body {
+                padding: 12px;
+            }
+            
+            .simulation-item {
+                padding: 16px;
+            }
+            
+            .simulation-actions button {
+                padding: 14px 20px !important;
+                font-size: 0.95rem !important;
+            }
         }
     `;
     
