@@ -4,6 +4,7 @@
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Ultra Premium
  * + MODERN DOUGHNUT GAUGES (Option 1) - 100% RESPONSIVE
+ * ✅ FIX PC : Titre rogné + Score centré dans doughnut
  */
 
 /* ========================================
@@ -957,9 +958,10 @@ body.dark-mode .ensemble-card {
 
 /* ═══════════════════════════════════════════════════════════════
    ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (100% RESPONSIVE)
+   ✅ FIX PC : Titre non rogné + Score parfaitement centré
    ═══════════════════════════════════════════════════════════════ */
 
-/* ✅ CORRECTION PC : Conteneur de gauge avec dimensions fixes */
+/* ✅ CORRECTION CONTENEUR : Dimensions fixes avec centrage parfait */
 .model-chart,
 .gauge-container {
     position: relative;
@@ -971,6 +973,16 @@ body.dark-mode .ensemble-card {
     align-items: center;
     justify-content: center;
     padding: 0;
+    box-sizing: border-box;
+}
+
+/* Canvas Chart.js doit prendre 100% sans décalage */
+.model-chart canvas,
+.gauge-container canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 auto;
+    display: block;
 }
 
 /* Wrapper de la gauge */
@@ -1008,7 +1020,7 @@ body.dark-mode .ensemble-card {
     }
 }
 
-/* Score central avec gradient texte */
+/* ✅ SCORE CENTRAL : Positionnement absolu centré */
 .gauge-score-display {
     position: absolute;
     top: 50%;
@@ -1017,7 +1029,8 @@ body.dark-mode .ensemble-card {
     text-align: center;
     z-index: 10;
     pointer-events: none;
-    width: 100%;
+    width: auto;
+    max-width: 80%;
 }
 
 .gauge-score-value {
@@ -1170,6 +1183,7 @@ body.dark-mode .gauge-zone-marker {
     }
 }
 
+/* ✅ FIX TITRE ROGNÉ : Retrait min-width + overflow visible */
 .model-header {
     display: flex;
     justify-content: space-between;
@@ -1178,6 +1192,7 @@ body.dark-mode .gauge-zone-marker {
     background: var(--ml-gradient-soft);
     border-bottom: 1px solid var(--glass-border);
     gap: 12px;
+    overflow: visible;
 }
 
 .model-header h4 {
@@ -1192,7 +1207,14 @@ body.dark-mode .gauge-zone-marker {
     align-items: center;
     gap: 8px;
     flex: 1;
-    min-width: 0;
+    /* ✅ RETRAIT min-width: 0 pour éviter la troncature */
+    overflow: visible;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.model-header h4 i {
+    flex-shrink: 0;
 }
 
 .model-badge {
@@ -1220,6 +1242,10 @@ body.dark-mode .gauge-zone-marker {
 .model-badge.completed {
     background: rgba(16, 185, 129, 0.2);
     color: var(--ml-success);
+}
+
+.model-body {
+    padding: 24px;
 }
 
 .model-metrics {
