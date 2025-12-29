@@ -39,15 +39,6 @@
     <script src="assets/js/analytics-tracker.js"></script>
 
     <style>
-        /* ✅ NAVIGATION - TEXTES EN BLANC */
-        .landing-nav .nav-link {
-            color: white !important;
-        }
-
-        .landing-nav .brand-text {
-            color: white !important;
-        }
-
         /* ✅ HERO GRADIENT ANIMATION */
         .hero-trend {
             background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
@@ -82,12 +73,14 @@
             color: white;
         }
 
+        /* ✅ TEXTES DU HERO EN BLANC */
         .hero-trend h1 {
             font-size: 3.5rem;
             font-weight: 900;
             margin-bottom: 1.5rem;
             text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             line-height: 1.2;
+            color: white !important;
         }
 
         .hero-trend .highlight-gradient {
@@ -104,6 +97,7 @@
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            color: white !important;
         }
 
         .score-badge {
@@ -117,6 +111,7 @@
             font-weight: 700;
             margin-bottom: 2rem;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white !important;
         }
 
         .score-badge i {
@@ -269,7 +264,7 @@
             opacity: 0.4;
         }
 
-        /* ✅ CORRECTIFS MOBILE - FIX SCROLL VERTICAL */
+        /* ✅ CORRECTIFS MOBILE - SCROLL HORIZONTAL POUR SWIPER LES CARTES */
         @media (max-width: 768px) {
             html, body {
                 max-width: 100vw;
@@ -284,54 +279,159 @@
                 font-size: 1rem;
             }
 
-            /* FIX: Grilles deviennent des colonnes empilées */
+            /* ✅ SCROLL HORIZONTAL POUR SWIPER LES CARTES */
             .ml-models-grid,
             .score-components-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 1.5rem !important;
-                padding: 0 !important;
-                margin: 2rem 0 !important;
-                overflow: visible !important;
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1rem !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 0.5rem 1rem 1.5rem 1rem !important;
+                margin: 2rem -1rem 0 -1rem !important;
+                max-width: 100vw !important;
+            }
+
+            .ml-models-grid::-webkit-scrollbar,
+            .score-components-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .ml-models-grid,
+            .score-components-grid {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
             }
 
             .ml-model-card,
             .score-component {
-                width: 100% !important;
-                max-width: 100% !important;
-                min-width: 0 !important;
-                flex: none !important;
+                flex: 0 0 85vw !important;
+                min-width: 85vw !important;
+                max-width: 85vw !important;
+                scroll-snap-align: center !important;
                 margin: 0 !important;
+                padding: 2rem 1.5rem !important;
+                min-height: 420px !important;
+                height: auto !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .ml-model-card:first-child,
+            .score-component:first-child {
+                margin-left: 0.5rem !important;
+            }
+
+            .ml-model-card:last-child,
+            .score-component:last-child {
+                margin-right: 0.5rem !important;
+            }
+
+            /* ✅ SOLUTIONS GRID (HOW IT WORKS) - SCROLL HORIZONTAL */
+            .solutions-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1rem !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 0.5rem 1rem 1.5rem 1rem !important;
+                margin: 0 -1rem !important;
+                max-width: 100vw !important;
+            }
+
+            .solutions-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .solutions-grid {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .solution-card {
+                flex: 0 0 85vw !important;
+                min-width: 85vw !important;
+                max-width: 85vw !important;
+                scroll-snap-align: center !important;
+                margin: 0 !important;
+                padding: 2rem 1.5rem !important;
+                min-height: 450px !important;
+                height: auto !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .solution-card:first-child {
+                margin-left: 0.5rem !important;
+            }
+
+            .solution-card:last-child {
+                margin-right: 0.5rem !important;
             }
 
             .features-section,
             .alphy-ai-section,
             .demo-interactive {
-                padding: 3rem 1rem !important;
-                overflow: visible !important;
+                padding: 4rem 1rem !important;
+                max-width: 100vw;
+                overflow-x: hidden;
             }
 
-            .container-fluid {
-                overflow: visible !important;
+            /* Indicateur de scroll */
+            .features-section::after,
+            .alphy-ai-section::after {
+                content: '';
+                display: block;
+                width: 60px;
+                height: 4px;
+                background: linear-gradient(90deg, 
+                    rgba(37, 99, 235, 0.3) 0%, 
+                    rgba(37, 99, 235, 0.8) 50%, 
+                    rgba(37, 99, 235, 0.3) 100%);
+                margin: 1.5rem auto 0 auto;
+                border-radius: 2px;
             }
 
-            .solutions-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 1.5rem !important;
-                overflow: visible !important;
+            /* Section header text */
+            .section-header::after {
+                content: 'Swipe for more';
+                display: block;
+                font-size: 0.8125rem;
+                color: #64748b;
+                margin-top: 0.75rem;
+                font-weight: 500;
+                letter-spacing: 0.02em;
             }
 
-            .solution-card {
-                width: 100% !important;
-                max-width: 100% !important;
-                min-width: 0 !important;
+            .demo-interactive .section-header::after {
+                color: rgba(255, 255, 255, 0.7) !important;
             }
         }
 
         @media (max-width: 480px) {
             .hero-trend {
                 padding: 100px 0 60px;
+            }
+
+            .ml-model-card,
+            .score-component {
+                flex: 0 0 90vw !important;
+                min-width: 90vw !important;
+                max-width: 90vw !important;
+                padding: 1.5rem 1.125rem !important;
+            }
+
+            .solution-card {
+                flex: 0 0 90vw !important;
+                min-width: 90vw !important;
+                max-width: 90vw !important;
+                padding: 1.5rem 1.125rem !important;
             }
         }
     </style>
@@ -406,7 +506,7 @@
     </nav>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         HERO SECTION
+         HERO SECTION - TEXTES EN BLANC
          ═══════════════════════════════════════════════════════════════ -->
     <section class="hero-trend">
         <div class="container-fluid">
@@ -436,7 +536,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         5 ML MODELS SECTION
+         5 ML MODELS SECTION - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="features-section" id="ml-models" style="padding-top: 100px;">
         <div class="container-fluid">
@@ -569,7 +669,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         ALPHAVAULT SCORE - 5 COMPONENTS
+         ALPHAVAULT SCORE - 5 COMPONENTS - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="alphy-ai-section" id="score-engine">
         <div class="container-fluid">
@@ -806,7 +906,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         HOW IT WORKS SECTION
+         HOW IT WORKS SECTION - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="features-section" id="how-it-works">
         <div class="container-fluid">
