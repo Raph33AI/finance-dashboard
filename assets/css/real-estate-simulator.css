@@ -2098,10 +2098,51 @@ body.dark-mode .property-actions {
         align-items: flex-start;
     }
     
+     /* ✅ SIM ACTIONS - BOUTONS EN VERTICAL SUR MOBILE */
     .sim-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         width: 100%;
+    }
+    
+    .sim-actions .btn-icon {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        display: flex;
         flex-direction: row;
-        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .sim-actions .btn-icon i {
+        font-size: 1rem;
+    }
+    
+    .sim-actions .btn-icon span {
+        display: inline; /* Afficher le texte */
+    }
+    
+    /* Couleurs spécifiques pour chaque bouton */
+    .sim-actions .btn-icon:nth-child(1) {
+        /* Bouton Upload/Download */
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .sim-actions .btn-icon:nth-child(2) {
+        /* Bouton Duplicate */
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .sim-actions .btn-icon:nth-child(3),
+    .sim-actions .btn-icon.btn-danger {
+        /* Bouton Delete */
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
     
     .btn-icon {
@@ -2562,27 +2603,20 @@ body.dark-mode .property-actions {
         align-self: flex-end;
     }
     
-    /* ✅ SIM ACTIONS - 2 COLONNES AU LIEU DE 3 */
+    /* ✅ SIM ACTIONS - RESTE EN VERTICAL */
     .sim-actions {
-        grid-template-columns: repeat(2, 1fr);
+        flex-direction: column;
         gap: 8px;
     }
     
-    /* Dernier bouton (Delete) prend toute la largeur */
-    .sim-actions .btn-icon:last-child {
-        grid-column: 1 / -1;
-    }
-    
-    /* Afficher les icônes + texte sur très petit écran */
     .sim-actions .btn-icon {
-        flex-direction: row;
-        gap: 6px;
-        padding: 10px 12px;
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 0.9rem;
     }
     
     .sim-actions .btn-icon span {
         display: inline;
-        font-size: 0.8rem;
     }
 }
 
