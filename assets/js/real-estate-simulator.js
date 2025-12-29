@@ -3628,23 +3628,34 @@
                 gap: 12px;
             }
             
-            /* 🔥 SIMULATION ACTIONS - VERTICAL SUR MOBILE */
+            /* 🔥 SIMULATION ACTIONS - VERTICAL & COMPACT SUR MOBILE */
             .simulation-actions {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 10px !important;
+                gap: 6px !important;
                 width: 100% !important;
             }
             
             .simulation-actions button,
             .simulation-actions .btn-icon {
                 width: 100% !important;
-                padding: 12px 16px !important;
-                font-size: 0.9rem !important;
+                padding: 10px 14px !important;
+                font-size: 0.85rem !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 8px !important;
+                gap: 6px !important;
+                border-radius: 10px !important;
+            }
+            
+            .simulation-actions button i,
+            .simulation-actions .btn-icon i {
+                font-size: 0.9rem !important;
+            }
+            
+            .simulation-actions button span,
+            .simulation-actions .btn-icon span {
+                font-size: 0.85rem !important;
             }
             
             /* ✅ RENT VS BUY RESPONSIVE */
@@ -3677,9 +3688,21 @@
                 padding: 16px;
             }
             
-            .simulation-actions button {
-                padding: 14px 20px !important;
-                font-size: 0.95rem !important;
+            /* 🔥 SIMULATION ACTIONS - ENCORE PLUS COMPACT */
+            .simulation-actions button,
+            .simulation-actions .btn-icon {
+                padding: 9px 12px !important;
+                font-size: 0.8rem !important;
+            }
+            
+            .simulation-actions button i,
+            .simulation-actions .btn-icon i {
+                font-size: 0.85rem !important;
+            }
+            
+            .simulation-actions button span,
+            .simulation-actions .btn-icon span {
+                font-size: 0.8rem !important;
             }
         }
     `;
