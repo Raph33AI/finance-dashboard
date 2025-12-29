@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- <script>
-    if (!sessionStorage.getItem('access')) {
-        window.location.href = 'password-check.html';
-    }
-    </script> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AlphaVault AI - AI-powered financial analysis platform - IPO, M&A, Quantitative Finance">
@@ -19,37 +14,19 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Font Awesome -->
@@ -58,8 +35,6 @@
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Favicon -->
-    <!-- <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg"> -->
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
 </head>
@@ -73,7 +48,6 @@
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="brand-logo">
-                    <!-- Logo AlphaVault AI -->
                     <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
                         <defs>
                             <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -81,22 +55,16 @@
                                 <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
                             </linearGradient>
                         </defs>
-                        
-                        <!-- Graphique montant -->
                         <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                               stroke="url(#logoGradient)" 
                               stroke-width="4" 
                               fill="none" 
                               stroke-linecap="round" 
                               stroke-linejoin="round"/>
-                        
-                        <!-- Points -->
                         <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                         <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                         <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                         <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                        
-                        <!-- Flèche -->
                         <path d="M 85 35 L 90 30 L 85 25" 
                               stroke="url(#logoGradient)" 
                               stroke-width="3" 
@@ -108,16 +76,15 @@
             </div>
             
             <div class="nav-menu" id="navMenu">
-            <a href="#features" class="nav-link">Features</a>
-            <a href="#alphy-ai" class="nav-link">Alphy AI</a>
-            <a href="#community" class="nav-link">Community</a>
-            <a href="#technology" class="nav-link">Technology</a>
-            <a href="#solutions" class="nav-link">Solutions</a>
-            <a href="#tools" class="nav-link">Tools</a>
-            <a href="#pricing" class="nav-link">Pricing</a>
-        </div>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#alphy-ai" class="nav-link">Alphy AI</a>
+                <a href="#community" class="nav-link">Community</a>
+                <a href="#technology" class="nav-link">Technology</a>
+                <a href="#solutions" class="nav-link">Solutions</a>
+                <a href="#tools" class="nav-link">Tools</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+            </div>
             
-            <!-- ✅ CTA Navigation - NON CONNECTÉ -->
             <div class="nav-cta" id="navCtaLoggedOut" style="display: flex;">
                 <button class="btn-text" id="loginBtn">Log in</button>
                 <button class="btn-primary-nav" id="signupBtn">
@@ -126,7 +93,6 @@
                 </button>
             </div>
 
-            <!-- ✅ CTA Navigation - CONNECTÉ -->
             <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
                 <div class="user-profile-menu">
                     <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
@@ -145,7 +111,6 @@
                         <i class="fas fa-chevron-down user-dropdown-icon"></i>
                     </button>
 
-                    <!-- Dropdown Menu -->
                     <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
                         <div class="dropdown-header">
                             <div class="dropdown-user-card">
@@ -257,7 +222,6 @@
                 </div>
             </div>
             
-            <!-- Hero Visual -->
             <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
                 <div class="dashboard-mockup">
                     <div class="browser-chrome">
@@ -305,7 +269,6 @@
                             </div>
                         </div>
                         
-                        <!-- Chart Area -->
                         <div class="mockup-chart-area">
                             <div class="chart-header-stock">
                                 <div class="stock-info">
@@ -331,7 +294,6 @@
                             </div>
                         </div>
                         
-                        <!-- AI Insights -->
                         <div class="mockup-insights">
                             <div class="insight-header">
                                 <i class="fas fa-lightbulb"></i>
@@ -357,7 +319,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         FEATURES SECTION
+         FEATURES SECTION - ✅ VERSION CORRIGÉE (8 FEATURES)
          ═══════════════════════════════════════════════════════════════ -->
     <section class="features-section" id="features">
         <div class="container-fluid">
@@ -370,7 +332,7 @@
             </div>
 
             <div class="features-grid">
-                <!-- Feature 1 -->
+                <!-- ✅ Feature 1: Advanced Analysis -->
                 <div class="feature-card feature-highlight" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -397,77 +359,77 @@
                             <span>Real-time sentiment analysis</span>
                         </li>
                     </ul>
-                    <a href="advanced-analysis.html" class="feature-link">
+                    <a href="feature-advanced-analysis.html" class="feature-link">
                         <span>Explore Analysis</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 2 -->
+                <!-- ✅ Feature 2: AI Trend Prediction -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-database"></i>
+                            <i class="fas fa-chart-line"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Market Data Hub</h3>
+                    <h3 class="feature-title">AI Trend Prediction</h3>
                     <p class="feature-description">
-                        Real-time access to all US companies with comprehensive 
-                        financial data and news feeds.
+                        Machine learning models to forecast market trends and identify 
+                        emerging opportunities before the market.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Live market data feeds</span>
+                            <span>Neural network forecasting</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>20+ years historical data</span>
+                            <span>Confidence intervals</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>50+ financial metrics</span>
+                            <span>Multi-timeframe analysis</span>
                         </li>
                     </ul>
-                    <a href="market-data.html" class="feature-link">
-                        <span>Explore Data</span>
+                    <a href="feature-trend-prediction.html" class="feature-link">
+                        <span>Explore Predictions</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 3 -->
+                <!-- ✅ Feature 3: Interactive Dashboard -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-chart-pie"></i>
+                            <i class="fas fa-tachometer-alt"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Portfolio Optimization</h3>
+                    <h3 class="feature-title">Interactive Dashboard</h3>
                     <p class="feature-description">
-                        Markowitz, Black-Litterman models for optimal asset 
-                        allocation and diversification.
+                        Comprehensive financial dashboard with real-time updates, 
+                        customizable widgets, and advanced visualizations.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Mean-variance optimization</span>
+                            <span>Real-time data streaming</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Black-Litterman allocation</span>
+                            <span>Customizable layouts</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Constraint-based optimization</span>
+                            <span>Advanced charting tools</span>
                         </li>
                     </ul>
-                    <a href="portfolio-optimizer.html" class="feature-link">
-                        <span>Explore Optimizer</span>
+                    <a href="feature-dashboard.html" class="feature-link">
+                        <span>Explore Dashboard</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 4 -->
+                <!-- ✅ Feature 4: Risk Parity Strategies -->
                 <div class="feature-card" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -493,136 +455,136 @@
                             <span>Dynamic rebalancing</span>
                         </li>
                     </ul>
-                    <a href="risk-parity.html" class="feature-link">
+                    <a href="feature-risk-parity.html" class="feature-link">
                         <span>Explore Risk Parity</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 5 -->
+                <!-- ✅ Feature 5: M&A Screening -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-dice"></i>
+                            <i class="fas fa-handshake"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Monte Carlo Simulation</h3>
+                    <h3 class="feature-title">M&A Screening</h3>
                     <p class="feature-description">
-                        Run thousands of simulations to model potential outcomes and 
-                        assess portfolio risk under various scenarios.
+                        AI-powered merger and acquisition screening with SEC filing 
+                        analysis and predictive deal scoring.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>10,000+ simulation paths</span>
+                            <span>SEC document parsing</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>VaR & CVaR calculations</span>
+                            <span>6-factor AI scoring</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Probability distributions</span>
+                            <span>Deal probability prediction</span>
                         </li>
                     </ul>
-                    <a href="monte-carlo.html" class="feature-link">
-                        <span>Explore Monte Carlo</span>
+                    <a href="feature-ma-screening.html" class="feature-link">
+                        <span>Explore M&A</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 6 -->
+                <!-- ✅ Feature 6: IPO Intelligence -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-project-diagram"></i>
+                            <i class="fas fa-rocket"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Scenario Analysis</h3>
+                    <h3 class="feature-title">IPO Intelligence</h3>
                     <p class="feature-description">
-                        Test your portfolio against historical crises and custom scenarios 
-                        to understand potential impacts.
+                        Detect and analyze high-potential IPOs with multi-criteria 
+                        AI scoring and comprehensive S-1 analysis.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Historical stress tests</span>
+                            <span>Real-time IPO detection</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Custom scenario builder</span>
+                            <span>Multi-criteria scoring</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Impact analysis reports</span>
+                            <span>S-1 document analysis</span>
                         </li>
                     </ul>
-                    <a href="scenario-analysis.html" class="feature-link">
-                        <span>Explore Scenarios</span>
+                    <a href="feature-ipo-intelligence.html" class="feature-link">
+                        <span>Explore IPO</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 7 -->
+                <!-- ✅ Feature 7: News Feed -->
                 <div class="feature-card" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
+                            <i class="fas fa-newspaper"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">AI Trend Prediction</h3>
+                    <h3 class="feature-title">News Feed</h3>
                     <p class="feature-description">
-                        Machine learning models to forecast market trends and identify 
-                        emerging opportunities before the market.
+                        AI-powered financial news aggregation with sentiment analysis 
+                        and market impact prediction.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Neural network forecasting</span>
+                            <span>Real-time news aggregation</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Confidence intervals</span>
+                            <span>Sentiment analysis</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Multi-timeframe analysis</span>
+                            <span>Impact prediction</span>
                         </li>
                     </ul>
-                    <a href="trend-prediction.html" class="feature-link">
-                        <span>Explore Predictions</span>
+                    <a href="feature-news-feed.html" class="feature-link">
+                        <span>Explore News</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 8 -->
+                <!-- ✅ Feature 8: Real Estate & Tax Simulators -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-tachometer-alt"></i>
+                            <i class="fas fa-home"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Interactive Dashboard</h3>
+                    <h3 class="feature-title">Real Estate & Tax Simulators</h3>
                     <p class="feature-description">
-                        Comprehensive financial dashboard with real-time updates, 
-                        customizable widgets, and advanced visualizations.
+                        Advanced simulators for real estate investments and tax 
+                        optimization with comprehensive scenario analysis.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Real-time data streaming</span>
+                            <span>Real estate valuation</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Customizable layouts</span>
+                            <span>Tax optimization</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Advanced charting tools</span>
+                            <span>Investment scenarios</span>
                         </li>
                     </ul>
-                    <a href="dashboard-financier.html" class="feature-link">
-                        <span>Explore Dashboard</span>
+                    <a href="feature-real-estate-tax.html" class="feature-link">
+                        <span>Explore Simulators</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -631,7 +593,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         INTERACTIVE DEMO SECTION - AVEC EFFETS 3D
+         INTERACTIVE DEMO SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="demo-interactive" id="demo">
         <div class="container-fluid">
@@ -687,7 +649,6 @@
                 
                 <div class="demo-right" data-aos="fade-left">
                     <div class="search-interface">
-                        <!-- Search Bar -->
                         <div class="search-box-wrapper">
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
@@ -705,14 +666,12 @@
                             </div>
                         </div>
                         
-                        <!-- Results -->
                         <div class="search-results">
                             <div class="results-header">
                                 <span>3 comparable companies found</span>
                                 <span class="results-time">0.3s</span>
                             </div>
                             
-                            <!-- Result Card 1 -->
                             <div class="company-result-card highlight">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -749,7 +708,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Result Card 2 -->
                             <div class="company-result-card">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -786,7 +744,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Result Card 3 -->
                             <div class="company-result-card">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -835,7 +792,6 @@
     <section class="alphy-ai-section" id="alphy-ai">
         <div class="container-fluid">
             <div class="alphy-wrapper">
-                <!-- Left: Alphy Presentation -->
                 <div class="alphy-content" data-aos="fade-right">
                     <div class="alphy-badge">
                         <i class="fas fa-sparkles"></i>
@@ -853,7 +809,6 @@
                         investment strategies, Alphy assists you 24/7 to make the best decisions.
                     </p>
 
-                    <!-- Alphy Capabilities -->
                     <div class="alphy-capabilities">
                         <div class="capability-item">
                             <div class="capability-icon">
@@ -902,7 +857,6 @@
                     </button>
                 </div>
 
-                <!-- Right: Alphy Chat Interface Preview -->
                 <div class="alphy-visual" data-aos="fade-left">
                     <div class="alphy-chat-container">
                         <div class="chat-header">
@@ -985,24 +939,21 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        COMMUNITY HUB SECTION
-        ═══════════════════════════════════════════════════════════════ -->
+         ✅ COMMUNITY HUB SECTION - NOUVELLE SECTION
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="community-hub-section" id="community">
         <div class="container-fluid">
-            <!-- Header -->
             <div class="section-header">
                 <span class="section-tag" data-aos="fade-up">Community Hub</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
                     Join the <span class="gradient-text">AlphaVault Community</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Connect with thousands of investors, share insights, and learn from expert analyses
+                    Connect with investors, share insights, and learn from expert analyses
                 </p>
             </div>
 
-            <!-- Community Features Grid -->
             <div class="community-features-grid">
-                <!-- Feature 1: Posts & Discussions -->
                 <div class="community-feature-card" data-aos="fade-up">
                     <div class="feature-icon-large">
                         <i class="fas fa-newspaper"></i>
@@ -1011,17 +962,16 @@
                     <p>Share market insights, investment ideas, and engage in meaningful discussions with fellow investors.</p>
                     <div class="feature-stats">
                         <div class="stat-item">
-                            <strong>2,500+</strong>
+                            <strong>Active</strong>
                             <span>Posts</span>
                         </div>
                         <div class="stat-item">
-                            <strong>15k+</strong>
-                            <span>Comments</span>
+                            <strong>Daily</strong>
+                            <span>Updates</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Feature 2: Expert Analyses -->
                 <div class="community-feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-icon-large">
                         <i class="fas fa-chart-line"></i>
@@ -1030,17 +980,16 @@
                     <p>Access in-depth market analyses, stock reports, and weekly intelligence reports from top contributors.</p>
                     <div class="feature-stats">
                         <div class="stat-item">
-                            <strong>500+</strong>
+                            <strong>Pro</strong>
                             <span>Reports</span>
                         </div>
                         <div class="stat-item">
-                            <strong>50+</strong>
+                            <strong>Top</strong>
                             <span>Experts</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Feature 3: Live Chat -->
                 <div class="community-feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon-large">
                         <i class="fas fa-comments"></i>
@@ -1049,8 +998,8 @@
                     <p>Real-time discussions with active traders and investors. Get instant feedback and market updates.</p>
                     <div class="feature-stats">
                         <div class="stat-item">
-                            <strong>1,000+</strong>
-                            <span>Active Users</span>
+                            <strong>Active</strong>
+                            <span>Users</span>
                         </div>
                         <div class="stat-item">
                             <strong>24/7</strong>
@@ -1059,7 +1008,6 @@
                     </div>
                 </div>
 
-                <!-- Feature 4: Subscriptions -->
                 <div class="community-feature-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon-large">
                         <i class="fas fa-bell"></i>
@@ -1068,18 +1016,17 @@
                     <p>Follow top analysts and get notified when they publish new insights, analyses, or trading ideas.</p>
                     <div class="feature-stats">
                         <div class="stat-item">
-                            <strong>100+</strong>
+                            <strong>Top</strong>
                             <span>Contributors</span>
                         </div>
                         <div class="stat-item">
                             <strong>Daily</strong>
-                            <span>Updates</span>
+                            <span>Alerts</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Community Hub Preview -->
             <div class="community-preview-section" data-aos="fade-up" data-aos-delay="400">
                 <div class="preview-header">
                     <h3>
@@ -1093,7 +1040,6 @@
                 </div>
 
                 <div class="preview-grid">
-                    <!-- Left: Featured Posts -->
                     <div class="preview-column">
                         <div class="preview-card">
                             <div class="preview-card-header">
@@ -1101,7 +1047,6 @@
                                 <span>Featured Posts</span>
                             </div>
                             
-                            <!-- Post 1 -->
                             <div class="community-post-preview">
                                 <div class="post-author">
                                     <img src="https://ui-avatars.com/api/?name=Raphael+Nardone&background=3B82F6&color=fff&bold=true&size=96" alt="Raphaël NARDONE">
@@ -1123,7 +1068,6 @@
                                 </div>
                             </div>
 
-                            <!-- Post 2 -->
                             <div class="community-post-preview">
                                 <div class="post-author">
                                     <img src="https://ui-avatars.com/api/?name=Raphael+Nardone&background=3B82F6&color=fff&bold=true&size=96" alt="Raphaël NARDONE">
@@ -1132,7 +1076,7 @@
                                         <span class="author-badge platinum">PLATINUM</span>
                                     </div>
                                 </div>
-                                <h5 class="post-title">Deep Analysis: NVDA - Dec 28, 2025 - AlphaVault Intelligence Report</h5>
+                                <h5 class="post-title">Deep Analysis: NVDA - AlphaVault Intelligence Report</h5>
                                 <div class="post-tags">
                                     <span class="tag">#stock-analysis</span>
                                     <span class="tag">#technical-indicators</span>
@@ -1145,7 +1089,6 @@
                                 </div>
                             </div>
 
-                            <!-- Post 3 -->
                             <div class="community-post-preview">
                                 <div class="post-author">
                                     <img src="https://ui-avatars.com/api/?name=Raphael+Nardone&background=3B82F6&color=fff&bold=true&size=96" alt="Raphaël NARDONE">
@@ -1154,11 +1097,10 @@
                                         <span class="author-badge platinum">PLATINUM</span>
                                     </div>
                                 </div>
-                                <h5 class="post-title">Deep Analysis: JPM - Dec 28, 2025 - AlphaVault Intelligence Report</h5>
+                                <h5 class="post-title">Deep Analysis: JPM - AlphaVault Intelligence Report</h5>
                                 <div class="post-tags">
                                     <span class="tag">#stock-analysis</span>
                                     <span class="tag">#financial-sector</span>
-                                    <span class="tag">#technical-indicators</span>
                                 </div>
                                 <div class="post-stats">
                                     <span><i class="fas fa-eye"></i> 1</span>
@@ -1169,9 +1111,7 @@
                         </div>
                     </div>
 
-                    <!-- Right: Top Contributors & Live Chat Preview -->
                     <div class="preview-column">
-                        <!-- Top Contributors -->
                         <div class="preview-card">
                             <div class="preview-card-header">
                                 <i class="fas fa-trophy"></i>
@@ -1179,48 +1119,44 @@
                             </div>
                             
                             <div class="contributor-list">
-                                <!-- Contributor 1 -->
                                 <div class="contributor-item">
                                     <div class="contributor-rank">1</div>
                                     <img src="https://ui-avatars.com/api/?name=Raphael+Nardone&background=3B82F6&color=fff&bold=true&size=96" alt="Raphaël NARDONE">
                                     <div class="contributor-info">
                                         <h4>Raphaël NARDONE</h4>
                                         <div class="contributor-stats">
-                                            <span><i class="fas fa-medal"></i> 39 points</span>
+                                            <span><i class="fas fa-medal"></i> Top Analyst</span>
                                             <span class="contributor-badge">3 posts</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Contributor 2 -->
                                 <div class="contributor-item">
                                     <div class="contributor-rank">2</div>
                                     <img src="https://ui-avatars.com/api/?name=bdoupeux&background=8B5CF6&color=fff&bold=true&size=96" alt="bdoupeux">
                                     <div class="contributor-info">
                                         <h4>bdoupeux</h4>
                                         <div class="contributor-stats">
-                                            <span><i class="fas fa-medal"></i> 0 points</span>
-                                            <span class="contributor-badge">0 posts</span>
+                                            <span><i class="fas fa-medal"></i> Member</span>
+                                            <span class="contributor-badge">Active</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Contributor 3 -->
                                 <div class="contributor-item">
                                     <div class="contributor-rank">3</div>
                                     <img src="https://ui-avatars.com/api/?name=Victor+Mystreets&background=10b981&color=fff&bold=true&size=96" alt="Victor Mystreets">
                                     <div class="contributor-info">
                                         <h4>Victor Mystreets</h4>
                                         <div class="contributor-stats">
-                                            <span><i class="fas fa-medal"></i> 0 points</span>
-                                            <span class="contributor-badge">0 posts</span>
+                                            <span><i class="fas fa-medal"></i> Member</span>
+                                            <span class="contributor-badge">Active</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Live Chat Preview -->
                         <div class="preview-card live-chat-preview">
                             <div class="preview-card-header">
                                 <i class="fas fa-comments"></i>
@@ -1266,7 +1202,6 @@
                 </div>
             </div>
 
-            <!-- Community Benefits -->
             <div class="community-benefits" data-aos="fade-up" data-aos-delay="500">
                 <h3>Why Join the Community?</h3>
                 <div class="benefits-grid">
@@ -1293,13 +1228,12 @@
                 </div>
             </div>
 
-            <!-- CTA -->
             <div class="community-cta" data-aos="zoom-in" data-aos-delay="600">
-                <h3>Ready to join 1,000+ active investors?</h3>
+                <h3>Ready to join the AlphaVault Community?</h3>
                 <p>Start sharing insights, learning from experts, and growing your investment knowledge</p>
                 <button class="btn-community-join" onclick="window.location.href='community-hub.html'">
                     <i class="fas fa-users"></i>
-                    <span>Join the Community</span>
+                    <span>Join AlphaVault Community</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
                 <p class="community-note">Free for all AlphaVault AI members</p>
@@ -1308,57 +1242,44 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        TECHNOLOGY & DATA INFRASTRUCTURE - ✅ VERSION CORRIGÉE
-        ═══════════════════════════════════════════════════════════════ -->
-
+         TECHNOLOGY & DATA INFRASTRUCTURE
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="tech-infra-lux" id="technology">
         <div class="tech-container centered">
-
-            <!-- BADGE BLEU -->
             <div class="tech-section-label" data-aos="fade-up">
                 TECHNOLOGY & DATA INFRASTRUCTURE
             </div>
 
-            <!-- TITRE -->
             <h2 id="tech-infra-title" class="tech-title" data-aos="fade-up" data-aos-delay="100">
                 A Transparent & Secure <span class="gradient-text">Data Ecosystem</span>
             </h2>
 
-            <!-- SOUS-TITRE -->
             <p class="tech-subtitle" data-aos="fade-up" data-aos-delay="200">
                 AlphaVault AI combines advanced AI reasoning, multi-source market data aggregation, and a secure cloud foundation — engineered to deliver precise, transparent, and auditable investment intelligence.
             </p>
 
-            <!-- GRID 5 BLOCS -->
             <div class="tech-grid">
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="300">
+                    <img src="assets/images/FRED.png" alt="FRED Economic Data" class="tech-logo centered">
+                    
+                    <h3 class="tech-card-title">Market Data Aggregation Layer</h3>
+                    
+                    <p class="tech-card-text">
+                        AlphaVault AI aggregates, normalizes, and enriches financial market data from multiple licensed and publicly available third-party sources to support advanced analytics, forecasting models, and signal generation.
+                    </p>
+                    
+                    <ul class="tech-points">
+                        <li>Equities, crypto, FX & macroeconomic indicators</li>
+                        <li>Real-time and historical pricing & fundamentals</li>
+                        <li>Corporate financials, earnings & disclosures</li>
+                        <li>Public macroeconomic and regulatory datasets</li>
+                    </ul>
 
-                <!-- BLOC 1: MARKET DATA LAYER -->
-                    <div class="tech-card" data-aos="fade-up" data-aos-delay="300">
-                        <!-- Logo FRED -->
-                        <img src="assets/images/FRED.png" alt="FRED Economic Data" class="tech-logo centered">
-                        
-                        <h3 class="tech-card-title">Market Data Aggregation Layer</h3>
-                        
-                        <p class="tech-card-text">
-                            AlphaVault AI aggregates, normalizes, and enriches financial market data from multiple licensed and publicly available third-party sources to support advanced analytics, forecasting models, and signal generation.
-                        </p>
-                        
-                        <ul class="tech-points">
-                            <li>Equities, crypto, FX & macroeconomic indicators</li>
-                            <li>Real-time and historical pricing & fundamentals</li>
-                            <li>Corporate financials, earnings & disclosures</li>
-                            <li>Public macroeconomic and regulatory datasets</li>
-                        </ul>
+                    <p class="tech-legal-note">
+                        Data sources include third-party providers such as <strong>Finnhub</strong>, <strong>Twelve Data</strong>, <strong>FRED®</strong> (Federal Reserve Bank of St. Louis), and <strong>SEC EDGAR</strong>. AlphaVault AI is not affiliated with, endorsed by, or sponsored by these organizations.
+                    </p>
+                </div>
 
-                        <!-- Mention légale discrète -->
-                        <p class="tech-legal-note">
-                            Data sources include third-party providers such as <strong>Finnhub</strong>, <strong>Twelve Data</strong>, <strong>FRED®</strong> (Federal Reserve Bank of St. Louis), and <strong>SEC EDGAR</strong>. AlphaVault AI is not affiliated with, endorsed by, or sponsored by these organizations.
-                        </p>
-                    </div>
-
-                <!-- ═══════════════════════════════════════════════════════
-                    🔷 BLOC 2: GX-AVX INTELLIGENCE ENGINE (GEMINI)
-                    ═══════════════════════════════════════════════════════ -->
                 <div class="tech-card" data-aos="fade-up" data-aos-delay="400">
                     <img src="assets/images/gemini-ai.png" alt="Google Gemini AI" class="tech-logo centered">
                     
@@ -1376,42 +1297,35 @@
                         <li>Bias mitigation and signal validation layers</li>
                     </ul>
 
-                    <!-- Mention légale Gemini -->
                     <p class="tech-legal-note">
                         <strong>Gemini</strong> is a trademark of Google LLC. Use of Gemini models does not imply endorsement or responsibility for outputs.
                     </p>
                 </div>
 
-                <!-- BLOC 3: NEWS INTELLIGENCE -->
-                    <div class="tech-card" data-aos="fade-up" data-aos-delay="500">
-                        <!-- Icône News améliorée -->
-                        <div class="tech-icon-wrapper">
-                            <i class="fas fa-newspaper tech-icon-generic news"></i>
-                        </div>
-                        
-                        <h3 class="tech-card-title">News Intelligence & Market Sentiment Analysis</h3>
-                        
-                        <p class="tech-card-text">
-                            AlphaVault AI ingests and analyzes large volumes of financial news and media content from publicly accessible and licensed third-party sources to extract market narratives, sentiment signals, and thematic intelligence.<br><br>
-                            News content is never redistributed. All outputs are the result of proprietary transformation, abstraction, and sentiment modeling.
-                        </p>
-                        
-                        <ul class="tech-points">
-                            <li>Real-time market sentiment & narrative detection</li>
-                            <li>Macro, sector & asset-specific news clustering</li>
-                            <li>Event-driven volatility & risk signal extraction</li>
-                            <li>AI-based sentiment scoring & trend momentum analysis</li>
-                        </ul>
-
-                        <!-- Mention obligatoire -->
-                        <p class="tech-legal-note">
-                            News analysis may incorporate content from third-party publishers such as <strong>CNBC</strong>, <strong>Bloomberg</strong>, <strong>Financial Times</strong>, <strong>Seeking Alpha</strong> & <strong>MarketWatch</strong>. AlphaVault AI is not affiliated with, endorsed by, or sponsored by these publishers. No original news content is redistributed.
-                        </p>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="tech-icon-wrapper">
+                        <i class="fas fa-newspaper tech-icon-generic news"></i>
                     </div>
+                    
+                    <h3 class="tech-card-title">News Intelligence & Market Sentiment Analysis</h3>
+                    
+                    <p class="tech-card-text">
+                        AlphaVault AI ingests and analyzes large volumes of financial news and media content from publicly accessible and licensed third-party sources to extract market narratives, sentiment signals, and thematic intelligence.<br><br>
+                        News content is never redistributed. All outputs are the result of proprietary transformation, abstraction, and sentiment modeling.
+                    </p>
+                    
+                    <ul class="tech-points">
+                        <li>Real-time market sentiment & narrative detection</li>
+                        <li>Macro, sector & asset-specific news clustering</li>
+                        <li>Event-driven volatility & risk signal extraction</li>
+                        <li>AI-based sentiment scoring & trend momentum analysis</li>
+                    </ul>
 
-                <!-- ═══════════════════════════════════════════════════════
-                    🔷 BLOC 4: SECURE CLOUD INFRASTRUCTURE (FIREBASE)
-                    ═══════════════════════════════════════════════════════ -->
+                    <p class="tech-legal-note">
+                        News analysis may incorporate content from third-party publishers such as <strong>CNBC</strong>, <strong>Bloomberg</strong>, <strong>Financial Times</strong>, <strong>Seeking Alpha</strong> & <strong>MarketWatch</strong>. AlphaVault AI is not affiliated with, endorsed by, or sponsored by these publishers. No original news content is redistributed.
+                    </p>
+                </div>
+
                 <div class="tech-card" data-aos="fade-up" data-aos-delay="600">
                     <img src="assets/images/firebase.png" alt="Firebase Secure Cloud" class="tech-logo centered">
                     
@@ -1428,25 +1342,19 @@
                         <li>Secure authentication and session management</li>
                     </ul>
                 </div>
-
             </div>
 
-            <!-- ═══════════════════════════════════════════════════════
-                🔷 BLOC 5: GLOBAL DISCLAIMER (EN BAS, PLEINE LARGEUR)
-                ═══════════════════════════════════════════════════════ -->
             <div class="tech-disclaimer" data-aos="fade-up" data-aos-delay="700">
                 <p>
                     <strong>Third-Party Technologies & Data Disclaimer:</strong><br>
                     AlphaVault AI utilizes third-party technologies and data sources under their respective licenses. AlphaVault AI is an independent platform and is not affiliated with, endorsed by, or sponsored by any referenced data provider, technology vendor, or media publisher.
                 </p>
             </div>
-
         </div>
     </section>
 
-
     <!-- ═══════════════════════════════════════════════════════════════
-         SOLUTIONS SECTION - ✅ CENTRÉ
+         SOLUTIONS SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="solutions-section" id="solutions">
         <div class="container-fluid">
@@ -1459,7 +1367,6 @@
             </div>
 
             <div class="solutions-grid">
-                <!-- Solution 1: Individual Investors -->
                 <div class="solution-card" data-aos="zoom-in">
                     <div class="solution-icon-wrapper">
                         <div class="solution-icon">
@@ -1483,7 +1390,6 @@
                     </a>
                 </div>
 
-                <!-- Solution 2: Finance Professionals -->
                 <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
                     <div class="solution-icon-wrapper">
                         <div class="solution-icon">
@@ -1511,7 +1417,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TOOLS SECTION - AVEC EFFETS 3D
+         TOOLS SECTION - ✅ VERSION CORRIGÉE (+2 OUTILS)
          ═══════════════════════════════════════════════════════════════ -->
     <section class="tools-section" id="tools">
         <div class="container-fluid">
@@ -1592,13 +1498,39 @@
                         <span>Performance</span>
                     </div>
                 </div>
+
+                <!-- ✅ NOUVEAU OUTIL 1: Markowitz Portfolio Optimization -->
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="300">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h4>Markowitz Portfolio Optimization</h4>
+                    <p>Mean-variance optimization for efficient frontier and optimal portfolio allocation</p>
+                    <div class="tool-tags">
+                        <span>Allocation</span>
+                        <span>Optimization</span>
+                    </div>
+                </div>
+
+                <!-- ✅ NOUVEAU OUTIL 2: Monte Carlo Simulation -->
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="350">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-dice"></i>
+                    </div>
+                    <h4>Monte Carlo Simulation</h4>
+                    <p>Run 10,000+ simulation paths to model potential outcomes and assess portfolio risk</p>
+                    <div class="tool-tags">
+                        <span>Simulation</span>
+                        <span>Risk</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-     PRICING SECTION - ✅ VERSION FINALE CORRIGÉE
-     ═══════════════════════════════════════════════════════════════ -->
+         PRICING SECTION (INCHANGÉE)
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
             <div class="section-header" style="text-align: center;">
@@ -1608,7 +1540,6 @@
             </div>
 
             <div class="pricing-grid-three">
-                <!-- ✅ BASIC TIER -->
                 <div class="pricing-card" data-aos="fade-up">
                     <div class="pricing-header">
                         <h3>AlphaVault Basic</h3>
@@ -1620,7 +1551,6 @@
                         <span class="period">/month</span>
                     </div>
                     
-                    <!-- ✅ Section: Pages Access -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-folder-open"></i>
                         <span>Pages Access</span>
@@ -1632,7 +1562,6 @@
                         <li><i class="fas fa-check"></i> Settings & User Profile</li>
                     </ul>
                     
-                    <!-- ✅ Section: Features -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-star"></i>
                         <span>Features</span>
@@ -1645,7 +1574,6 @@
                         <li><i class="fas fa-check"></i> Alphy AI (10 messages/day)</li>
                     </ul>
                     
-                    <!-- ✅ Section: Not Included -->
                     <div class="pricing-section-divider disabled">
                         <i class="fas fa-lock"></i>
                         <span>Not Included</span>
@@ -1660,7 +1588,6 @@
                         <li class="disabled"><i class="fas fa-times"></i> Analyst Coverage</li>
                     </ul>
                     
-                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
                     <div class="pricing-cta-wrapper">
                         <button class="btn-pricing" onclick="window.location.href='auth.html'">
                             Get Started Free
@@ -1668,7 +1595,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ PRO TIER -->
                 <div class="pricing-card featured" data-aos="fade-up" data-aos-delay="100">
                     <div class="popular-badge centered">🔥 Most Popular</div>
                     <div class="pricing-header centered">
@@ -1681,7 +1607,6 @@
                         <span class="period">/month</span>
                     </div>
                     
-                    <!-- ✅ Section: Pages Access -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-folder-open"></i>
                         <span>Pages Access (9 Total)</span>
@@ -1696,7 +1621,6 @@
                         <li><i class="fas fa-check"></i> <strong>Market Intelligence</strong></li>
                     </ul>
                     
-                    <!-- ✅ Section: Features -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-star"></i>
                         <span>Features</span>
@@ -1713,7 +1637,6 @@
                         <li><i class="fas fa-check"></i> <strong>Unlimited</strong> Alphy AI access</li>
                     </ul>
                     
-                    <!-- ✅ Section: Not Included -->
                     <div class="pricing-section-divider disabled">
                         <i class="fas fa-lock"></i>
                         <span>Platinum Features</span>
@@ -1728,7 +1651,6 @@
                         <li class="disabled"><i class="fas fa-times"></i> White-Label Reports</li>
                     </ul>
                     
-                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
                     <div class="pricing-cta-wrapper">
                         <button class="btn-pricing featured" onclick="window.location.href='auth.html'">
                             Start 14-Day Free Trial
@@ -1737,7 +1659,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ PLATINUM TIER - FEATURES CORRIGÉES -->
                 <div class="pricing-card platinum" data-aos="fade-up" data-aos-delay="200">
                     <div class="platinum-badge">💎 Platinum</div>
                     <div class="pricing-header">
@@ -1750,7 +1671,6 @@
                         <span class="period">/month</span>
                     </div>
                     
-                    <!-- ✅ Section: Pages Access -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-infinity"></i>
                         <span>Full Platform Access</span>
@@ -1765,7 +1685,6 @@
                         <li><i class="fas fa-check"></i> <strong>All Current & Future Pages</strong></li>
                     </ul>
                     
-                    <!-- ✅ Section: Premium Features (CORRIGÉE - sans API, sans Dedicated Account Manager, sans Custom integrations, sans Custom scenario builder) -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-crown"></i>
                         <span>Premium Features</span>
@@ -1780,221 +1699,12 @@
                         <li><i class="fas fa-check"></i> Institutional-grade analytics</li>
                     </ul>
                     
-                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
                     <div class="pricing-cta-wrapper">
                         <button class="btn-pricing platinum" onclick="window.location.href='auth.html'">
                             Start 14-Day Free Trial
                         </button>
                         <p class="pricing-note">Professional-grade tools 🚀</p>
                     </div>
-                </div>
-            </div>
-            
-            <!-- ✅ TABLEAU COMPARATIF DÉTAILLÉ - LIGNE API ACCESS SUPPRIMÉE -->
-            <div style="margin-top: 80px; padding: 48px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-radius: 24px; border: 2px solid rgba(59, 130, 246, 0.2);" data-aos="fade-up">
-                <h3 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 32px; text-align: center;">
-                    <i class="fas fa-table" style="color: #3B82F6; margin-right: 12px;"></i>
-                    Complete Feature Comparison
-                </h3>
-                
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
-                        <thead>
-                            <tr style="background: linear-gradient(135deg, #3B82F6, #8B5CF6);">
-                                <th style="padding: 20px; text-align: left; color: white; font-weight: 800; font-size: 1rem; min-width: 250px;">Feature / Page</th>
-                                <th style="padding: 20px; text-align: center; color: white; font-weight: 800; font-size: 1rem; min-width: 120px;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <span>Basic</span>
-                                        <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.9;">Free</span>
-                                    </div>
-                                </th>
-                                <th style="padding: 20px; text-align: center; color: white; font-weight: 800; font-size: 1rem; min-width: 120px;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <span>Pro</span>
-                                        <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.9;">$10/mo</span>
-                                    </div>
-                                </th>
-                                <th style="padding: 20px; text-align: center; color: white; font-weight: 800; font-size: 1rem; min-width: 120px;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <span>Platinum</span>
-                                        <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.9;">$20/mo</span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- ✅ PAGES ACCESS SECTION -->
-                            <tr style="background: rgba(59, 130, 246, 0.05);">
-                                <td colspan="4" style="padding: 16px 20px; font-weight: 800; font-size: 0.95rem; color: #3B82F6; text-transform: uppercase; letter-spacing: 1px;">
-                                    <i class="fas fa-folder-open" style="margin-right: 8px;"></i>
-                                    Pages Access
-                                </td>
-                            </tr>
-                            
-                            <!-- Basic Pages -->
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Financial Dashboard</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Monte Carlo Simulations</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Portfolio Optimizer</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            
-                            <!-- Pro Pages -->
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Investment Analytics</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Risk Parity Optimization</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Scenario Analysis</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Real-Time Market Data</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Trend Prediction AI</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.03);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Market Intelligence</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            
-                            <!-- Platinum Exclusive Pages -->
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">
-                                    <strong>Advanced Analysis Tools</strong>
-                                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Machine Learning & Advanced Metrics</div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">
-                                    <strong>Analyst Coverage & Ratings</strong>
-                                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Professional Analyst Reports</div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">
-                                    <strong>Full-Page AI Chatbot</strong>
-                                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Dedicated Alphy AI Interface</div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">
-                                    <strong>Company Deep Insights</strong>
-                                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Comprehensive Company Analysis</div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">
-                                    <strong>Earnings & Estimates</strong>
-                                    <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Earnings Reports & Forecasts</div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            
-                            <!-- ✅ FEATURES SECTION -->
-                            <tr style="background: rgba(59, 130, 246, 0.05);">
-                                <td colspan="4" style="padding: 16px 20px; font-weight: 800; font-size: 0.95rem; color: #3B82F6; text-transform: uppercase; letter-spacing: 1px;">
-                                    <i class="fas fa-star" style="margin-right: 8px;"></i>
-                                    Premium Features
-                                </td>
-                            </tr>
-                            
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Advanced M&A Screening</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">White-Label Reports</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Priority Support (24/7)</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">Alphy AI Access</td>
-                                <td style="padding: 16px 20px; text-align: center;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i>
-                                        <span style="font-size: 0.75rem; color: #64748b;">10 msg/day</span>
-                                    </div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i>
-                                        <span style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Unlimited</span>
-                                    </div>
-                                </td>
-                                <td style="padding: 16px 20px; text-align: center;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i>
-                                        <span style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Unlimited</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- ✅ Note explicative -->
-                <div style="margin-top: 24px; padding: 20px; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border-left: 4px solid #3B82F6;">
-                    <p style="font-size: 0.95rem; color: #475569; margin: 0; font-weight: 600; line-height: 1.7;">
-                        <i class="fas fa-info-circle" style="color: #3B82F6; margin-right: 8px;"></i>
-                        <strong>Note:</strong> All plans include access to <strong>Settings</strong>, <strong>User Profile</strong>, and <strong>Interactive Demo</strong>. 
-                        The <strong>Pro plan</strong> unlocks 6 additional advanced pages (9 total). 
-                        The <strong>Platinum plan</strong> provides full access to all 14+ pages including 5 exclusive professional tools plus premium support and white-label reports.
-                    </p>
                 </div>
             </div>
         </div>
@@ -2102,59 +1812,26 @@
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE CRITIQUE
+         SCRIPTS
          ═══════════════════════════════════════════════════════════════ -->
     
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <!-- Three.js (Optional) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
-    
-    <!-- Config -->
     <script src="assets/js/config.js"></script>
-    
-    <!-- API CLIENT -->
     <script src="assets/js/api-client.js"></script>
-    
-    <!-- ✅ CHATBOT SCRIPTS COMMENTÉS (désactivé sur landing page) -->
-    <!--
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
-    -->
-    
-    <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
-    
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- ✅ INITIALISATION GLOBALE - SANS CHATBOT -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             
-            // AOS ANIMATIONS
-            console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
             AOS.init({
                 duration: 800,
                 easing: 'ease-out-cubic',
@@ -2164,82 +1841,13 @@
             });
             console.log('✅ AOS Animations initialized\n');
 
-            // ANNÉE DYNAMIQUE
             const yearElement = document.getElementById('currentYear');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
                 console.log('✅ Dynamic year updated\n');
             }
 
-            // VÉRIFIER CONFIG
-            console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
-            if (window.APP_CONFIG) {
-                console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
-                console.log('   📡 API Base URL:', window.APP_CONFIG.API_BASE_URL);
-                console.log('   ⏱️  Quote Cache:', window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60, 'minutes');
-            } else {
-                console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
-            }
-
-            // VÉRIFIER API CLIENT
-            console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
-            if (typeof window.FinanceAPIClient !== 'undefined') {
-                console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
-                console.log('   📊 Market Ticker will use REAL-TIME API data\n');
-            } else {
-                console.error('%c❌ FinanceAPIClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
-                console.error('   📋 Make sure api-client.js is loaded correctly');
-                console.error('   📋 Check the file path: assets/js/api-client.js\n');
-            }
-
-            // ✅ CHATBOT DÉSACTIVÉ SUR LANDING PAGE
-            console.log('%c🤖 Chatbot Configuration', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
-            console.log('%c   🚫 Chatbot disabled on landing page', 'color: #f59e0b; font-weight: bold;');
-            console.log('%c   ℹ️  Users will be redirected to chatbot-fullpage.html\n', 'color: #6b7280;');
-
-            // ✅ BOUTON "CHAT WITH ALPHY" - Redirige vers page dédiée
-            console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
-            
-            const openAlphyBtn = document.getElementById('openAlphyChat');
-            if (openAlphyBtn) {
-                console.log('   ✅ Button #openAlphyChat found');
-                
-                openAlphyBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('%c🚀 Redirecting to full chatbot page...', 'color: #8B5CF6; font-weight: bold;');
-                    window.location.href = 'chatbot-fullpage.html';
-                });
-                
-                console.log('   ✅ Click listener added (redirects to chatbot-fullpage.html)\n');
-            } else {
-                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM\n');
-            }
-
-            // RÉSUMÉ FINAL
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
-            console.log('');
-            console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
-            console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
-            console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
-            console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
-            console.log(`   🚫 Alphy AI Chatbot (disabled on landing page)`);
-            console.log('');
-            console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
-            if (window.APP_CONFIG) {
-                console.log(`   ⏱️  Quote Cache: ${window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60} minutes`);
-            }
-            if (window.marketTicker) {
-                console.log(`   🔄 Ticker Refresh: ${window.marketTicker.updateInterval / 1000 / 60} minutes`);
-            }
-            console.log('');
-            console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
-            console.log('   💬 Click "Chat with Alphy" to access the full chatbot page');
-            console.log('   📊 Market ticker updates automatically every hour');
-            console.log('   🎨 All animations are enabled');
-            console.log('');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
         });
     </script>
 </body>
