@@ -1197,8 +1197,11 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   ✅ CORRECTION 3 : MODALS - STYLE ORIGINAL (PAS DE CHANGEMENT)
+   🎨 MODALS - ULTRA PREMIUM GLASSMORPHISM
+   Design inspiré Forex Converter Pro
+   100% Responsive Mobile
    ============================================ */
+
 .modal {
     display: none;
     position: fixed;
@@ -1207,15 +1210,10 @@ body.dark-mode .search-suggestions {
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
     animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    overflow-y: auto;
 }
 
 .modal.active {
@@ -1225,172 +1223,656 @@ body.dark-mode .search-suggestions {
     padding: 20px;
 }
 
-.modal-content {
-    background: white; /* ✅ Blanc simple */
-    border-radius: 20px;
-    max-width: 800px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-body.dark-mode .modal-content {
-    background: #1e293b; /* ✅ Dark mode simple */
+.modal-content {
+    background: var(--glass-bg);
+    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content.modal-large {
+    max-width: 900px;
 }
 
 @keyframes slideUp {
-    from {
-        transform: translateY(50px);
+    from { 
         opacity: 0;
+        transform: translateY(50px) scale(0.95);
     }
-    to {
-        transform: translateY(0);
+    to { 
         opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
+/* ============================================
+   MODAL HEADER - GRADIENT PREMIUM
+   ============================================ */
 .modal-header {
-    background: linear-gradient(135deg, #2649B2, #4A74F3); /* ✅ Style original */
-    color: white;
-    padding: 25px 30px;
-    border-radius: 20px 20px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 24px 32px;
+    border-bottom: 2px solid var(--glass-border);
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.1) 0%,
+        rgba(118, 75, 162, 0.1) 100%
+    );
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(102, 126, 234, 0.08) 0%,
+        transparent 70%
+    );
+    animation: rotateBg 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateBg {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .modal-header h2 {
-    margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     display: flex;
     align-items: center;
     gap: 12px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    margin: 0;
+    position: relative;
+    z-index: 1;
 }
 
+.modal-header h2 i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.8rem;
+}
+
+.modal-close,
 .close-modal {
-    color: white;
-    font-size: 2rem;
-    font-weight: bold;
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    font-size: 1.5rem;
+    color: var(--ml-danger);
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.2);
     width: 40px;
     height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
 }
 
+.modal-close:hover,
 .close-modal:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
+    background: var(--ml-danger);
+    color: white;
+    border-color: transparent;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
 }
 
+/* ============================================
+   MODAL BODY - GLASSMORPHISM
+   ============================================ */
 .modal-body {
-    padding: 30px;
-    color: #333;
+    padding: 32px;
+    color: var(--text-primary);
 }
 
-body.dark-mode .modal-body {
-    color: #e2e8f0;
+.modal-body p {
+    line-height: 1.8;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.modal-body ul,
+.modal-body ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+}
+
+.modal-body li {
+    margin-bottom: 10px;
+    line-height: 1.8;
+    color: var(--text-secondary);
 }
 
 .modal-body h3 {
-    color: #2649B2;
-    margin-top: 25px;
-    margin-bottom: 15px;
     font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 24px 0 16px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-body.dark-mode .modal-body h3 {
-    color: #60a5fa;
-}
-
-.modal-body h3::before {
-    content: '📊';
+.modal-body h3 i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     font-size: 1.5rem;
 }
 
-.modal-body p {
-    line-height: 1.8;
-    margin-bottom: 15px;
-    color: #555;
-}
-
-body.dark-mode .modal-body p {
-    color: #cbd5e1;
-}
-
-.modal-body ul,
-.modal-body ol {
-    margin-left: 20px;
-    margin-bottom: 20px;
-}
-
-.modal-body li {
-    margin-bottom: 10px;
-    line-height: 1.6;
+.modal-body h4 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 20px 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .modal-body strong {
-    color: #2649B2;
-    font-weight: 600;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-body.dark-mode .modal-body strong {
-    color: #60a5fa;
-}
-
-.key-term {
-    background: linear-gradient(135deg, #2649B2, #4A74F3);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 5px;
-    font-weight: 600;
-}
-
-.warning-box {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin-top: 20px;
+/* ============================================
+   🔧 MANAGE PORTFOLIOS - MODAL SPÉCIFIQUE
+   FIX MOBILE COMPLET
+   ============================================ */
+.portfolios-manage-list {
     display: flex;
-    align-items: start;
-    gap: 12px;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.portfolio-manage-item {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.portfolio-manage-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.portfolio-manage-item:hover {
+    transform: translateX(8px);
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+}
+
+.portfolio-manage-item:hover::before {
+    opacity: 1;
+}
+
+body.dark-mode .portfolio-manage-item {
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.6) 0%,
+        rgba(30, 41, 59, 0.4) 100%
+    );
+}
+
+.portfolio-manage-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex: 1;
+    min-width: 0; /* ✅ Important pour mobile */
+    word-break: break-word; /* ✅ Empêche débordement */
+}
+
+.portfolio-manage-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0; /* ✅ Empêche compression */
+}
+
+.btn-rename,
+.btn-delete-portfolio {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap; /* ✅ Empêche retour à la ligne */
+}
+
+.btn-rename {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--ml-primary);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.btn-rename:hover {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-delete-portfolio {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ml-danger);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete-portfolio:hover {
+    background: var(--ml-danger);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================
+   WARNING & TIP BOXES
+   ============================================ */
+.warning-box {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+    border-left: 4px solid var(--ml-warning);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+}
+
+.warning-box i {
+    color: var(--ml-warning);
+    font-size: 1.4rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.warning-box strong {
+    color: var(--ml-warning);
+    font-weight: 800;
 }
 
 .tip-box {
-    background: #d4edda;
-    border-left: 4px solid #28a745;
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin-top: 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+    border-left: 4px solid var(--ml-success);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 20px 0;
     display: flex;
-    align-items: start;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+}
+
+.tip-box i {
+    color: var(--ml-success);
+    font-size: 1.4rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.tip-box strong {
+    color: var(--ml-success);
+    font-weight: 800;
 }
 
 .formula-box {
-    background: #f8f9fa;
-    border: 2px solid #2649B2;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+    border: 2px solid var(--ml-primary);
+    border-radius: 12px;
     padding: 20px;
-    border-radius: 10px;
     margin: 20px 0;
-    font-family: monospace;
+    font-family: 'Courier New', monospace;
     text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 body.dark-mode .formula-box {
-    background: #334155;
-    border-color: #60a5fa;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.05rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1.05rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(102, 126, 234, 0.4);
+    border-radius: 12px;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .form-input {
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--ml-primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 2px solid var(--glass-border);
+}
+
+.btn-cancel,
+.btn-confirm {
+    padding: 12px 28px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-cancel {
+    background: rgba(108, 117, 125, 0.1);
+    color: var(--text-primary);
+    border: 2px solid rgba(108, 117, 125, 0.3);
+}
+
+.btn-cancel:hover {
+    background: rgba(108, 117, 125, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+/* ============================================
+   📱 RESPONSIVE MOBILE - MANAGE PORTFOLIOS
+   ============================================ */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: 100%;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-body {
+        padding: 24px 20px;
+    }
+    
+    /* ✅ FIX MOBILE PORTFOLIOS */
+    .portfolio-manage-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .portfolio-manage-name {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    
+    .portfolio-manage-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .btn-rename,
+    .btn-delete-portfolio {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .btn-cancel,
+    .btn-confirm {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header {
+        padding: 16px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.15rem;
+        gap: 8px;
+    }
+    
+    .modal-header h2 i {
+        font-size: 1.4rem;
+    }
+    
+    .modal-close,
+    .close-modal {
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+    }
+    
+    .modal-body {
+        padding: 20px 16px;
+    }
+    
+    .portfolio-manage-name {
+        font-size: 1rem;
+    }
+    
+    .btn-rename,
+    .btn-delete-portfolio {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+    
+    /* ✅ Icônes seulement sur très petit écran */
+    .btn-rename span:not(.fa):not(.fas),
+    .btn-delete-portfolio span:not(.fa):not(.fas) {
+        display: none;
+    }
+    
+    .btn-rename i,
+    .btn-delete-portfolio i {
+        margin: 0;
+    }
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(100, 116, 139, 0.1);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
+}
+
+/* ============================================
+   🌙 DARK MODE
+   ============================================ */
+body.dark-mode .modal {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+body.dark-mode .modal-content {
+    background: var(--glass-bg);
+    border-color: rgba(100, 116, 139, 0.3);
+}
+
+body.dark-mode .modal-header {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.08) 0%,
+        rgba(118, 75, 162, 0.05) 100%
+    );
+}
+
+body.dark-mode .warning-box {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.08) 100%);
+}
+
+body.dark-mode .tip-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.08) 100%);
+}
+
+/* ============================================
+   ✨ ANIMATIONS SUPPLÉMENTAIRES
+   ============================================ */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.portfolio-manage-item {
+    animation: slideInLeft 0.4s ease-out backwards;
+}
+
+.portfolio-manage-item:nth-child(1) { animation-delay: 0.05s; }
+.portfolio-manage-item:nth-child(2) { animation-delay: 0.1s; }
+.portfolio-manage-item:nth-child(3) { animation-delay: 0.15s; }
+.portfolio-manage-item:nth-child(4) { animation-delay: 0.2s; }
+.portfolio-manage-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* ============================================
+   ✅ FIN DU CSS MODALS ULTRA-PREMIUM
+   ============================================ */
 
 /* ============================================
    ✅ CORRECTION 2 : HELP ICON - POINT D'INTERROGATION VISIBLE
