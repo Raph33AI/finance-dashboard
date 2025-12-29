@@ -2155,12 +2155,165 @@ body.dark-mode .property-actions {
         font-size: 0.9rem;
     }
     
+    /* ✅ MODAL - MOBILE RESPONSIVE (AFFICHAGE VERTICAL COMPLET) */
+    .modal.active {
+        padding: 0;
+        align-items: flex-start;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--glass-bg);
+        backdrop-filter: blur(40px) saturate(180%);
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1rem;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.5rem;
+    }
+    
+    .modal-body {
+        padding: 16px;
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    .modal-body > * {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* ✅ FORM DANS LES MODALS - AFFICHAGE VERTICAL */
+    .modal-body .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-body .form-group {
+        width: 100%;
+    }
+    
+    .modal-body .form-control {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.95rem;
+    }
+    
+    /* ✅ MODAL TABLES - AFFICHAGE VERTICAL & SCROLLABLE */
+    .modal-body .comparison-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+    
+    .modal-body .comparison-table {
+        min-width: 100%;
+        font-size: 0.75rem;
+        display: table;
+    }
+    
+    .modal-body .comparison-table th,
+    .modal-body .comparison-table td {
+        padding: 8px 6px;
+        font-size: 0.75rem;
+        white-space: normal;
+        word-wrap: break-word;
+        min-width: 80px;
+    }
+    
+    .modal-body .comparison-table th {
+        font-size: 0.7rem;
+    }
+    
+    /* ✅ RESULTS CARDS DANS MODALS - AFFICHAGE VERTICAL */
+    .modal-body .results-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-body .result-card {
+        padding: 16px;
+    }
+    
+    .modal-body .result-card h4 {
+        font-size: 1rem;
+    }
+    
+    .modal-body .breakdown-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px 0;
+    }
+    
+    .modal-body .breakdown-item span,
+    .modal-body .breakdown-item strong {
+        font-size: 0.9rem;
+    }
+    
+    /* ✅ MODAL ACTIONS - AFFICHAGE VERTICAL (TOUS LES BOUTONS) */
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .modal-actions .btn,
+    .modal-actions .btn-primary,
+    .modal-actions .btn-secondary,
+    .modal-actions .btn-success,
+    .modal-actions .btn-danger,
+    .modal-actions .btn-cancel,
+    .modal-actions .btn-compare,
+    .modal-actions .btn-add,
+    .modal-actions button {
+        width: 100%;
+        justify-content: center;
+        margin: 0;
+        padding: 14px 24px;
+        font-size: 0.95rem;
+    }
+    
+    /* ✅ CHARTS DANS MODALS */
+    .modal-body .chart-container {
+        margin-bottom: 20px;
+        overflow-x: hidden;
+    }
+    
+    .modal-body .chart {
+        min-height: 250px;
+        max-width: 100%;
+    }
+
     /* ========================================
-       ✅ MODAL - CORRECTION COMPLÈTE (CLASSES .modal-overlay)
+       ✅ MODAL-OVERLAY - STYLE POUR LES MODALS JAVASCRIPT
        ======================================== */
     
-    /* ✅ Fond modal - scroll activé */
-    .modal,
+    /* ✅ Fond modal overlay - scroll activé */
     .modal-overlay {
         padding: 16px !important;
         overflow-y: auto !important;
@@ -2171,8 +2324,8 @@ body.dark-mode .property-actions {
         justify-content: center !important;
     }
     
-    /* ✅ Contenu modal - NE PAS prendre 100% hauteur */
-    .modal-content {
+    /* ✅ Contenu modal overlay - NE PAS prendre 100% hauteur */
+    .modal-overlay .modal-content {
         width: calc(100% - 32px) !important;
         max-width: 600px !important;
         min-height: auto !important; /* ❌ PAS 100vh */
@@ -2183,11 +2336,10 @@ body.dark-mode .property-actions {
         overflow: visible !important;
         position: relative !important;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
-        background: var(--glass-bg) !important;
     }
     
-    /* ✅ Header sticky */
-    .modal-header {
+    /* ✅ Header sticky dans modal-overlay */
+    .modal-overlay .modal-header {
         padding: 14px 16px !important;
         position: sticky !important;
         top: 0 !important;
@@ -2198,58 +2350,48 @@ body.dark-mode .property-actions {
         border-radius: 16px 16px 0 0 !important;
     }
     
-    .modal-header h2 {
+    .modal-overlay .modal-header h2 {
         font-size: 1rem !important;
         gap: 8px !important;
-        flex-wrap: wrap !important;
-        margin: 0 !important;
     }
     
-    .modal-close,
-    .btn-close {
+    .modal-overlay .btn-close {
         width: 32px !important;
         height: 32px !important;
         font-size: 1.3rem !important;
-        flex-shrink: 0 !important;
     }
     
-    /* ✅ Body modal */
-    .modal-body {
+    /* ✅ Body modal overlay */
+    .modal-overlay .modal-body {
         padding: 16px !important;
         overflow-x: hidden !important;
         overflow-y: visible !important;
-        width: 100% !important;
-        max-width: 100% !important;
     }
     
-    /* ✅ Forms dans modals */
-    .modal-body .form-row {
+    /* ✅ Forms dans modal-overlay */
+    .modal-overlay .form-row {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
     }
     
-    .modal-body .form-group {
+    .modal-overlay .form-group {
         width: 100% !important;
         margin-bottom: 16px !important;
     }
     
-    .modal-body .form-group label {
-        font-size: 0.9rem !important;
-    }
-    
-    .modal-body .form-control,
-    .modal-body input,
-    .modal-body select,
-    .modal-body textarea {
+    .modal-overlay .form-control,
+    .modal-overlay input,
+    .modal-overlay select,
+    .modal-overlay textarea {
         width: 100% !important;
         max-width: 100% !important;
         font-size: 0.95rem !important;
         box-sizing: border-box !important;
     }
     
-    /* ✅ Modal Actions - Boutons */
-    .modal-actions,
-    .form-actions {
+    /* ✅ Actions dans modal-overlay */
+    .modal-overlay .modal-actions,
+    .modal-overlay .form-actions {
         flex-direction: column !important;
         gap: 10px !important;
         width: 100% !important;
@@ -2257,15 +2399,27 @@ body.dark-mode .property-actions {
         margin-top: 16px !important;
     }
     
-    .modal-actions .btn,
-    .modal-actions button,
-    .form-actions .btn,
-    .form-actions button {
+    .modal-overlay .modal-actions .btn,
+    .modal-overlay .modal-actions button,
+    .modal-overlay .form-actions .btn,
+    .modal-overlay .form-actions button {
         width: 100% !important;
         justify-content: center !important;
         margin: 0 !important;
         padding: 12px 20px !important;
         font-size: 0.95rem !important;
+    }
+    
+    /* ✅ Rent vs Buy results dans modal-overlay */
+    .modal-overlay .rent-vs-buy-results {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    /* ✅ Comparison grid dans modal-overlay */
+    .modal-overlay .comparison-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
     }
     
     /* Tables générales */
