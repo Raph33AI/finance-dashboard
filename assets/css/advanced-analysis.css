@@ -1199,7 +1199,7 @@ body.dark-mode .search-suggestions {
 /* ============================================
    🎨 MODALS - ULTRA PREMIUM GLASSMORPHISM
    Design inspiré Forex Converter Pro
-   100% Responsive Mobile
+   100% Responsive Mobile - SANS EMOJIS
    ============================================ */
 
 .modal {
@@ -1385,6 +1385,17 @@ body.dark-mode .search-suggestions {
     gap: 10px;
 }
 
+/* Remplace les emojis par Font Awesome */
+.modal-body h3::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    content: '\f0a4'; /* fa-chart-line */
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+}
+
 .modal-body h3 i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     -webkit-background-clip: text;
@@ -1414,7 +1425,7 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   🔧 MANAGE PORTFOLIOS - MODAL SPÉCIFIQUE
+   MANAGE PORTFOLIOS - MODAL SPÉCIFIQUE
    FIX MOBILE COMPLET
    ============================================ */
 .portfolios-manage-list {
@@ -1480,14 +1491,14 @@ body.dark-mode .portfolio-manage-item {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     flex: 1;
-    min-width: 0; /* ✅ Important pour mobile */
-    word-break: break-word; /* ✅ Empêche débordement */
+    min-width: 0;
+    word-break: break-word;
 }
 
 .portfolio-manage-actions {
     display: flex;
     gap: 10px;
-    flex-shrink: 0; /* ✅ Empêche compression */
+    flex-shrink: 0;
 }
 
 .btn-rename,
@@ -1502,7 +1513,7 @@ body.dark-mode .portfolio-manage-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    white-space: nowrap; /* ✅ Empêche retour à la ligne */
+    white-space: nowrap;
 }
 
 .btn-rename {
@@ -1534,7 +1545,7 @@ body.dark-mode .portfolio-manage-item {
 }
 
 /* ============================================
-   WARNING & TIP BOXES
+   WARNING & TIP BOXES - SANS EMOJIS
    ============================================ */
 .warning-box {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
@@ -1548,6 +1559,16 @@ body.dark-mode .portfolio-manage-item {
     font-size: 0.95rem;
     line-height: 1.6;
     backdrop-filter: blur(10px);
+}
+
+.warning-box::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    content: '\f071'; /* fa-exclamation-triangle */
+    color: var(--ml-warning);
+    font-size: 1.4rem;
+    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .warning-box i {
@@ -1576,6 +1597,16 @@ body.dark-mode .portfolio-manage-item {
     backdrop-filter: blur(10px);
 }
 
+.tip-box::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    content: '\f0eb'; /* fa-lightbulb */
+    color: var(--ml-success);
+    font-size: 1.4rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
 .tip-box i {
     color: var(--ml-success);
     font-size: 1.4rem;
@@ -1597,6 +1628,19 @@ body.dark-mode .portfolio-manage-item {
     font-family: 'Courier New', monospace;
     text-align: center;
     backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.formula-box::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    content: '\f1ec'; /* fa-calculator */
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    opacity: 0.2;
+    color: var(--ml-primary);
 }
 
 body.dark-mode .formula-box {
@@ -1691,7 +1735,7 @@ body.dark-mode .form-input {
 }
 
 /* ============================================
-   📱 RESPONSIVE MOBILE - MANAGE PORTFOLIOS
+   RESPONSIVE MOBILE - MANAGE PORTFOLIOS
    ============================================ */
 @media (max-width: 768px) {
     .modal-content {
@@ -1713,7 +1757,6 @@ body.dark-mode .form-input {
         padding: 24px 20px;
     }
     
-    /* ✅ FIX MOBILE PORTFOLIOS */
     .portfolio-manage-item {
         flex-direction: column;
         align-items: stretch;
@@ -1784,17 +1827,6 @@ body.dark-mode .form-input {
         padding: 10px 12px;
         font-size: 0.8rem;
     }
-    
-    /* ✅ Icônes seulement sur très petit écran */
-    .btn-rename span:not(.fa):not(.fas),
-    .btn-delete-portfolio span:not(.fa):not(.fas) {
-        display: none;
-    }
-    
-    .btn-rename i,
-    .btn-delete-portfolio i {
-        margin: 0;
-    }
 }
 
 /* ============================================
@@ -1819,7 +1851,7 @@ body.dark-mode .form-input {
 }
 
 /* ============================================
-   🌙 DARK MODE
+   DARK MODE
    ============================================ */
 body.dark-mode .modal {
     background: rgba(0, 0, 0, 0.85);
@@ -1847,7 +1879,7 @@ body.dark-mode .tip-box {
 }
 
 /* ============================================
-   ✨ ANIMATIONS SUPPLÉMENTAIRES
+   ANIMATIONS SUPPLÉMENTAIRES
    ============================================ */
 @keyframes slideInLeft {
     from {
@@ -1871,7 +1903,7 @@ body.dark-mode .tip-box {
 .portfolio-manage-item:nth-child(5) { animation-delay: 0.25s; }
 
 /* ============================================
-   ✅ FIN DU CSS MODALS ULTRA-PREMIUM
+   FIN DU CSS MODALS ULTRA-PREMIUM
    ============================================ */
 
 /* ============================================
