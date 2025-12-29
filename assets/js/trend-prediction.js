@@ -1333,17 +1333,20 @@ Object.assign(TrendPrediction, {
     createModelScoreGauge(modelName, modelResult) {
         const score = Math.max(0, Math.min(100, 50 + modelResult.percentChange * 2));
         
-        // Couleurs dynamiques selon le score
+        // ✅ Couleurs dynamiques selon le score
         let gradientColors = ['#ef4444', '#dc2626']; // Rouge par défaut
         if (score >= 75) gradientColors = ['#22c55e', '#16a34a']; // Vert foncé
         else if (score >= 60) gradientColors = ['#84cc16', '#65a30d']; // Vert clair
         else if (score >= 40) gradientColors = ['#fbbf24', '#f59e0b']; // Jaune
         else if (score >= 25) gradientColors = ['#fb923c', '#f97316']; // Orange
         
-        const chart = Highcharts.chart(`chart-${modelName}`, {
+        // ✅ CONFIGURATION RESPONSIVE CORRIGÉE
+        const isMobile = window.innerWidth < 768;
+        
+        Highcharts.chart(`chart-${modelName}`, {
             chart: {
                 type: 'solidgauge',
-                height: 280,
+                height: 300, // ✅ Hauteur fixe pour correspondre au CSS
                 backgroundColor: 'transparent',
                 animation: {
                     duration: 2000,
@@ -1355,7 +1358,7 @@ Object.assign(TrendPrediction, {
             
             pane: {
                 center: ['50%', '50%'],
-                size: '90%',
+                size: '85%', // ✅ Réduit pour laisser de l'espace
                 startAngle: 0,
                 endAngle: 360,
                 background: [{
@@ -1401,15 +1404,20 @@ Object.assign(TrendPrediction, {
                         borderWidth: 0,
                         useHTML: true,
                         y: 0,
+                        style: {
+                            fontSize: isMobile ? '2rem' : '3rem',
+                            fontWeight: '900',
+                            textAlign: 'center'
+                        },
                         format: `
-                            <div style="text-align:center;">
-                                <div style="font-size:3rem;font-weight:900;background:linear-gradient(135deg,${gradientColors[0]},${gradientColors[1]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:8px;">
+                            <div style="text-align:center;width:100%;">
+                                <div style="font-size:${isMobile ? '2rem' : '3rem'};font-weight:900;background:linear-gradient(135deg,${gradientColors[0]},${gradientColors[1]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:8px;">
                                     {y:.0f}
                                 </div>
-                                <div style="font-size:0.85rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
+                                <div style="font-size:${isMobile ? '0.7rem' : '0.85rem'};color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
                                     Score
                                 </div>
-                                <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px;">
+                                <div style="font-size:${isMobile ? '0.65rem' : '0.75rem'};color:#94a3b8;margin-top:4px;">
                                     ${modelResult.percentChange >= 0 ? '↑' : '↓'} ${Math.abs(modelResult.percentChange).toFixed(1)}%
                                 </div>
                             </div>
@@ -1431,40 +1439,25 @@ Object.assign(TrendPrediction, {
                 }
             }],
             
-            credits: { enabled: false }
+            credits: { enabled: false },
+            
+            // ✅ RESPONSIVE OPTIONS
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 768
+                    },
+                    chartOptions: {
+                        chart: {
+                            height: 240
+                        },
+                        pane: {
+                            size: '90%'
+                        }
+                    }
+                }]
+            }
         });
-        
-        // Ajouter des marqueurs de zones (optionnel)
-        this.addGaugeMarkers(`chart-${modelName}`, score);
-    },
-
-    // Fonction helper pour ajouter des marqueurs visuels
-    addGaugeMarkers(containerId, currentScore) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        const markers = container.querySelector('.gauge-zone-indicators');
-        if (markers) markers.remove();
-        
-        const div = document.createElement('div');
-        div.className = 'gauge-zone-indicators';
-        
-        // Marqueurs à 25, 50, 75
-        [25, 50, 75].forEach(value => {
-            const marker = document.createElement('div');
-            marker.className = 'gauge-zone-marker';
-            const angle = (value / 100) * 360 - 90;
-            marker.style.cssText = `
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(${angle}deg) translateY(-100px);
-                opacity: ${currentScore > value ? 0.3 : 0.6};
-            `;
-            div.appendChild(marker);
-        });
-        
-        container.style.position = 'relative';
-        container.appendChild(div);
     },
     
     displayResults() {
@@ -1902,41 +1895,138 @@ Object.assign(TrendPrediction, {
         
         const consensusScore = avgCorrelation * 100;
         
+        // ✅ CONSENSUS GAUGE RESPONSIVE MODERNE
+        const isMobile = window.innerWidth < 768;
+
         Highcharts.chart('consensusGauge', {
-            chart: { type: 'solidgauge', height: 280, backgroundColor: 'transparent' },
-            title: null,
+            chart: {
+                type: 'solidgauge',
+                height: isMobile ? 240 : 300, // ✅ Responsive height
+                backgroundColor: 'transparent'
+            },
+            
+            title: { text: null },
+            
             pane: {
-                center: ['50%', '75%'],
-                size: '110%',
-                startAngle: -90,
-                endAngle: 90,
+                center: ['50%', '60%'],
+                size: '100%',
+                startAngle: -120,
+                endAngle: 120,
                 background: [{
-                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
+                    backgroundColor: {
+                        radialGradient: { cx: 0.5, cy: 0.5, r: 0.5 },
+                        stops: [[0, 'rgba(241, 245, 249, 0.1)'], [1, 'rgba(241, 245, 249, 0.3)']]
+                    },
                     innerRadius: '60%',
                     outerRadius: '100%',
-                    shape: 'arc'
+                    shape: 'arc',
+                    borderWidth: 0
                 }]
             },
-            tooltip: { enabled: false },
+            
+            tooltip: {
+                enabled: true,
+                borderRadius: 20,
+                backgroundColor: 'rgba(102, 126, 234, 0.95)',
+                style: { color: '#fff', fontSize: '16px', fontWeight: '700' },
+                shadow: { 
+                    color: 'rgba(102, 126, 234, 0.6)', 
+                    offsetX: 0, 
+                    offsetY: 8, 
+                    width: 20, 
+                    opacity: 0.7 
+                },
+                formatter: function() {
+                    return `<div style="text-align:center;padding:12px;">
+                        <div style="font-size:2rem;font-weight:900;margin-bottom:8px;">🎯</div>
+                        <div style="font-size:1.5rem;font-weight:900;">${this.y.toFixed(1)}%</div>
+                        <div style="font-size:0.9rem;opacity:0.9;margin-top:4px;">Model Consensus</div>
+                    </div>`;
+                }
+            },
+            
             yAxis: {
                 min: 0,
                 max: 100,
-                stops: [[0.1, '#ef4444'], [0.5, '#fbbf24'], [0.9, '#22c55e']],
+                stops: [
+                    [0, '#ef4444'],
+                    [0.3, '#fb923c'],
+                    [0.5, '#fbbf24'],
+                    [0.7, '#84cc16'],
+                    [0.9, '#22c55e']
+                ],
                 lineWidth: 0,
-                tickWidth: 0
-            },
-            plotOptions: {
-                solidgauge: {
-                    dataLabels: {
-                        y: -30,
-                        borderWidth: 0,
-                        useHTML: true,
-                        format: '<div style="text-align:center"><span style="font-size:2.5rem;font-weight:800;color:' + this.colors.primary + ';">{y:.0f}%</span><br/><span style="font-size:0.9rem;color:#64748b;">Model Consensus</span></div>'
+                tickWidth: 0,
+                minorTickInterval: null,
+                tickAmount: 2,
+                labels: {
+                    y: 24,
+                    distance: -35,
+                    style: { 
+                        fontSize: isMobile ? '11px' : '13px', 
+                        fontWeight: '800', 
+                        color: '#475569' 
                     }
                 }
             },
-            series: [{ data: [consensusScore], innerRadius: '60%', radius: '100%' }],
-            credits: { enabled: false }
+            
+            plotOptions: {
+                solidgauge: {
+                    borderRadius: 10,
+                    innerRadius: '60%',
+                    radius: '100%',
+                    dataLabels: {
+                        y: isMobile ? -40 : -50,
+                        borderWidth: 0,
+                        useHTML: true,
+                        format: `
+                            <div style="text-align:center;">
+                                <div style="font-size:${isMobile ? '2.5rem' : '4rem'};font-weight:900;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;filter:drop-shadow(0 4px 12px rgba(102,126,234,0.4));">
+                                    {y:.0f}<span style="font-size:${isMobile ? '1.5rem' : '2.5rem'};">%</span>
+                                </div>
+                                <div style="font-size:${isMobile ? '0.85rem' : '1rem'};color:#475569;font-weight:800;margin-top:${isMobile ? '12px' : '16px'};text-transform:uppercase;letter-spacing:2px;">
+                                    Consensus
+                                </div>
+                            </div>
+                        `
+                    }
+                }
+            },
+            
+            series: [{
+                name: 'Consensus',
+                data: [consensusScore],
+                animation: {
+                    duration: 3000,
+                    easing: 'easeOutBounce'
+                }
+            }],
+            
+            credits: { enabled: false },
+            
+            // ✅ RESPONSIVE OPTIONS
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 768
+                    },
+                    chartOptions: {
+                        chart: {
+                            height: 240
+                        },
+                        pane: {
+                            size: '110%'
+                        },
+                        yAxis: {
+                            labels: {
+                                style: {
+                                    fontSize: '11px'
+                                }
+                            }
+                        }
+                    }
+                }]
+            }
         });
         
         const descEl = document.getElementById('consensusDescription');
