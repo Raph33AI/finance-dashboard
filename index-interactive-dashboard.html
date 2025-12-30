@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AlphaVault Interactive Dashboard - 8 Advanced Charts + Multi-Allocation Investment Analytics for Smart Budget Management">
-    <meta name="keywords" content="budget dashboard, investment analytics, highcharts, personal finance, AlphaVault, portfolio tracking">
-    <title>AlphaVault Interactive Dashboard - 8 Charts + Budget Optimization | AlphaVault AI</title>
+    <meta name="description" content="AlphaVault Interactive Dashboard - Budget & Investment Analytics with AI-Powered Optimization">
+    <meta name="keywords" content="budget dashboard, investment analytics, financial planning, portfolio optimization, AlphaVault">
+    <title>Interactive Dashboard - Budget & Investment Analytics | AlphaVault AI</title>
     
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,23 +40,24 @@
 
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           GLOBAL FIXES - OVERFLOW & SCROLLL
+           INTERACTIVE DASHBOARD - BLEU CYAN/VIOLET MINIMALISTE PROFESSIONNEL
+           (Style identique à IPO Intelligence)
            ═══════════════════════════════════════════════════════════════ */
+        
+        /* Global overflow fix */
         html, body {
             max-width: 100vw;
             overflow-x: hidden;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET AVEC PARTICULES
-           ═══════════════════════════════════════════════════════════════ */
+        /* ✅ HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE */
         .hero-dashboard {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            padding: 140px 1rem 100px 1rem;
+            padding: 120px 1rem 80px 1rem;
             background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
             background-size: 200% 200%;
             animation: gradientShift 15s ease infinite;
@@ -69,7 +70,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ✅ EFFETS PARTICULES AVEC GLOW */
         .hero-dashboard::before {
             content: '';
             position: absolute;
@@ -91,68 +91,71 @@
             50% { opacity: 1; }
         }
 
-        .hero-dashboard-content {
+        .hero-dashboard .container-fluid {
             position: relative;
             z-index: 1;
+        }
+
+        .hero-dashboard-content {
             text-align: center;
             max-width: 900px;
             margin: 0 auto;
         }
 
-        /* ✅ BADGE GLASSMORPHISM */
-        .dashboard-badge {
+        .hero-dashboard .dashboard-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(20px);
-            padding: 0.75rem 1.5rem;
             border-radius: 50px;
-            font-weight: 700;
-            margin-bottom: 2rem;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white !important;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 2rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
         }
 
-        .dashboard-badge:hover {
+        .hero-dashboard .dashboard-badge:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
         }
 
-        .dashboard-badge i {
-            font-size: 1.5rem;
+        .hero-dashboard .dashboard-badge i {
+            font-size: 1.25rem;
         }
 
-        /* ✅ TEXTES DU HERO EN BLANC */
         .hero-dashboard h1 {
             font-size: clamp(2.5rem, 6vw, 4.5rem);
             font-weight: 900;
+            line-height: 1.1;
             margin-bottom: 1.5rem;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            line-height: 1.2;
-            color: white !important;
+            color: white;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
         }
 
         .hero-dashboard .highlight-gradient {
-            background: linear-gradient(135deg, #ffffff, #e0f2fe);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.5));
         }
 
         .hero-dashboard p {
             font-size: clamp(1.125rem, 2vw, 1.375rem);
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.95);
             margin-bottom: 2.5rem;
-            opacity: 0.95;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            color: white !important;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-            line-height: 1.7;
         }
 
         .hero-dashboard .btn-hero-primary {
@@ -169,6 +172,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            margin: 0 0.5rem;
         }
 
         .hero-dashboard .btn-hero-primary:hover {
@@ -177,148 +181,193 @@
             background: #f8fafc;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ 8 HIGHCHARTS CARDS - ESPACEMENT AUGMENTÉ
-           ═══════════════════════════════════════════════════════════════ */
-        .charts-grid {
+        .hero-dashboard .btn-hero-primary i {
+            font-size: 1.25rem;
+        }
+
+        .hero-dashboard .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 0 0.5rem;
+        }
+
+        .hero-dashboard .btn-hero-secondary:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Cards - DÉGRADÉ BLEU/VIOLET MINIMALISTE */
+        .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2.5rem; /* ✅ ESPACE AUGMENTÉ */
+            gap: 2rem;
             margin-top: 3rem;
         }
 
-        .chart-card {
+        .feature-card {
             background: white;
             border-radius: 20px;
-            padding: 2.5rem; /* ✅ PADDING AUGMENTÉ */
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             border: 2px solid transparent;
             position: relative;
             overflow: hidden;
-            min-height: 420px; /* ✅ HAUTEUR MINIMALE POUR ÉVITER LE SCROLL */
         }
 
-        .chart-card::before {
+        .feature-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 4px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
         }
 
-        .chart-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
-            border-color: #667eea;
+        .feature-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
         }
 
-        .chart-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: white;
             margin-bottom: 1.5rem;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+            transition: all 0.3s ease;
         }
 
-        .chart-card h3 {
-            font-size: 1.5rem;
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.375rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
         }
 
-        .chart-card p {
+        .feature-card p {
             color: #64748b;
             line-height: 1.7;
-            margin-bottom: 1.5rem;
+            font-size: 0.9375rem;
         }
 
-        .chart-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .chart-tag {
-            padding: 0.375rem 0.875rem;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 20px;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: #667eea;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ BUDGET COMPONENTS - ESPACEMENT AUGMENTÉ
-           ═══════════════════════════════════════════════════════════════ */
-        .budget-components-grid {
+        /* Analytics Features - CARTES 3D MINIMALISTES */
+        .analytics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 2rem; /* ✅ ESPACE AUGMENTÉ */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
             margin-top: 3rem;
         }
 
-        .budget-component {
+        .analytics-feature {
             background: white;
-            border-radius: 16px;
-            padding: 2.5rem 1.5rem; /* ✅ PADDING AUGMENTÉ */
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            min-height: 380px; /* ✅ HAUTEUR MINIMALE */
-        }
-
-        .budget-component:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-        }
-
-        .budget-component-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .budget-component h4 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-
-        .budget-component .weight {
-            font-size: 2rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .budget-component p {
-            font-size: 0.875rem;
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ DEMO SECTION - FOND DÉGRADÉ
-           ═══════════════════════════════════════════════════════════════ */
-        .demo-dashboard {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(59, 130, 246, 0.1);
             position: relative;
             overflow: hidden;
-            padding: 100px 1rem;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .analytics-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .analytics-feature:hover::before {
+            transform: scaleX(1);
+        }
+
+        .analytics-feature:hover {
+            transform: translateY(-12px) rotateX(5deg);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .analytics-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background-clip: padding-box;
+            transition: all 0.4s ease;
+        }
+
+        .analytics-icon i {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .analytics-feature:hover .analytics-icon {
+            transform: scale(1.1) rotateY(10deg);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
+        }
+
+        .analytics-feature h4 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .analytics-feature p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* Demo Section Enhancement */
+        .demo-dashboard {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+            position: relative;
+            overflow: hidden;
         }
 
         .demo-dashboard::before {
@@ -332,87 +381,122 @@
             opacity: 0.4;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ SOLUTIONS GRID (HOW IT WORKS) - ESPACEMENT AUGMENTÉ
-           ═══════════════════════════════════════════════════════════════ */
-        .solutions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 2rem; /* ✅ ESPACE AUGMENTÉ */
-            margin-top: 3rem;
+        /* Browser Chrome (Demo) */
+        .browser-chrome {
+            background: linear-gradient(180deg, #e5e7eb 0%, #d1d5db 100%);
+            padding: 12px 16px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .solution-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2.5rem; /* ✅ PADDING AUGMENTÉ */
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            min-height: 450px; /* ✅ HAUTEUR MINIMALE */
+        .chrome-dots {
+            display: flex;
+            gap: 6px;
         }
 
-        .solution-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        .chrome-dots .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           ✅ RESPONSIVE MOBILE - 100% OPTIMISÉ
-           ═══════════════════════════════════════════════════════════════ */
+        .chrome-dots .dot.red { background: #ef4444; }
+        .chrome-dots .dot.yellow { background: #f59e0b; }
+        .chrome-dots .dot.green { background: #10b981; }
+
+        .chrome-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* ✅ SECTIONS - SUPPRESSION DU PADDING EXCESSIF */
+        .features-section,
+        .analytics-section,
+        .demo-dashboard,
+        .how-it-works-section,
+        .cta-final {
+            padding: 3rem 1rem !important;
+            margin: 0 !important;
+            min-height: auto !important;
+        }
+
+        /* ✅ CORRECTIFS MOBILE - SCROLL HORIZONTAL POUR SWIPER LES CARTES */
         @media (max-width: 768px) {
-            /* ✅ HERO RESPONSIVE */
             .hero-dashboard {
                 min-height: 90vh;
                 padding: 100px 1rem 60px 1rem;
             }
 
-            .hero-dashboard h1 {
-                font-size: 2.25rem;
-            }
-
-            .hero-dashboard p {
-                font-size: 1rem;
+            .hero-dashboard .dashboard-badge {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
             }
 
             .hero-dashboard p br {
                 display: none;
             }
 
-            .dashboard-badge {
-                padding: 0.625rem 1.25rem;
-                font-size: 0.875rem;
-            }
-
-            .hero-dashboard .btn-hero-primary {
-                padding: 1rem 2rem;
+            .hero-dashboard .btn-hero-primary,
+            .hero-dashboard .btn-hero-secondary {
+                padding: 1rem 1.5rem;
                 font-size: 1rem;
+                margin: 0.5rem 0;
+                width: 100%;
+                max-width: 320px;
             }
 
-            /* ✅ SECTIONS - PADDING OPTIMISÉ */
             .features-section,
-            .budget-section,
-            .demo-dashboard {
-                padding: 4rem 1rem !important;
-                max-width: 100vw;
-                overflow: hidden;
+            .analytics-section,
+            .demo-dashboard,
+            .how-it-works-section,
+            .cta-final {
+                padding: 2.5rem 1rem !important;
             }
 
-            /* ✅ TITRES CENTRÉS SUR MOBILE */
+            /* ✅ TITRES CENTRÉS SUR MOBILE - RENFORCÉ */
             .section-header {
                 text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                display: block !important;
             }
 
-            .section-tag,
-            .section-title,
+            .section-tag {
+                text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                display: block !important;
+            }
+
+            .section-title {
+                text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                display: block !important;
+            }
+
             .section-description {
                 text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                display: block !important;
             }
 
-            /* ✅ SCROLL HORIZONTAL POUR CHARTS GRID */
-            .charts-grid {
+            /* ✅ SCROLL HORIZONTAL POUR SWIPER LES CARTES */
+            .features-grid,
+            .analytics-grid {
                 display: flex !important;
                 flex-direction: row !important;
-                gap: 1.5rem !important;
+                gap: 1rem !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 scroll-snap-type: x mandatory !important;
@@ -423,61 +507,19 @@
                 max-width: 100vw !important;
             }
 
-            .charts-grid::-webkit-scrollbar {
+            .features-grid::-webkit-scrollbar,
+            .analytics-grid::-webkit-scrollbar {
                 display: none;
             }
 
-            .charts-grid {
+            .features-grid,
+            .analytics-grid {
                 -ms-overflow-style: none;
                 scrollbar-width: none;
             }
 
-            .chart-card {
-                flex: 0 0 85vw !important;
-                min-width: 85vw !important;
-                max-width: 85vw !important;
-                scroll-snap-align: center !important;
-                margin: 0 !important;
-                padding: 2rem 1.5rem !important;
-                min-height: 420px !important;
-                height: auto !important;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .chart-card:first-child {
-                margin-left: 0.5rem !important;
-            }
-
-            .chart-card:last-child {
-                margin-right: 0.5rem !important;
-            }
-
-            /* ✅ SCROLL HORIZONTAL POUR BUDGET COMPONENTS */
-            .budget-components-grid {
-                display: flex !important;
-                flex-direction: row !important;
-                gap: 1.5rem !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                scroll-snap-type: x mandatory !important;
-                scroll-behavior: smooth !important;
-                -webkit-overflow-scrolling: touch !important;
-                padding: 1rem !important;
-                margin: 2rem -1rem 0 -1rem !important;
-                max-width: 100vw !important;
-            }
-
-            .budget-components-grid::-webkit-scrollbar {
-                display: none;
-            }
-
-            .budget-components-grid {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-
-            .budget-component {
+            .feature-card,
+            .analytics-feature {
                 flex: 0 0 85vw !important;
                 min-width: 85vw !important;
                 max-width: 85vw !important;
@@ -490,86 +532,23 @@
                 flex-direction: column;
             }
 
-            .budget-component:first-child {
+            .feature-card:first-child,
+            .analytics-feature:first-child {
                 margin-left: 0.5rem !important;
             }
 
-            .budget-component:last-child {
+            .feature-card:last-child,
+            .analytics-feature:last-child {
                 margin-right: 0.5rem !important;
             }
 
-            /* ✅ SCROLL HORIZONTAL POUR SOLUTIONS GRID */
-            .solutions-grid {
-                display: flex !important;
-                flex-direction: row !important;
-                gap: 1.5rem !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                scroll-snap-type: x mandatory !important;
-                scroll-behavior: smooth !important;
-                -webkit-overflow-scrolling: touch !important;
-                padding: 1rem !important;
-                margin: 2rem -1rem 0 -1rem !important;
-                max-width: 100vw !important;
-            }
-
-            .solutions-grid::-webkit-scrollbar {
-                display: none;
-            }
-
-            .solutions-grid {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-
-            .solution-card {
-                flex: 0 0 85vw !important;
-                min-width: 85vw !important;
-                max-width: 85vw !important;
-                scroll-snap-align: center !important;
-                margin: 0 !important;
-                padding: 2rem 1.5rem !important;
-                min-height: 450px !important;
-                height: auto !important;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .solution-card:first-child {
-                margin-left: 0.5rem !important;
-            }
-
-            .solution-card:last-child {
-                margin-right: 0.5rem !important;
-            }
-
-            /* ✅ INDICATEUR "← Swipe for More →" */
-            .features-section::after,
-            .budget-section::after {
-                content: '← Swipe for More →';
-                display: block;
-                font-size: 0.875rem;
-                color: #64748b;
-                margin: 1.5rem auto 0 auto;
-                text-align: center;
-                font-weight: 600;
-                letter-spacing: 0.02em;
-                padding: 0.5rem;
-            }
-
-            /* ✅ PAS DE SWIPE POUR LA SECTION DEMO */
-            .demo-dashboard::after {
-                display: none !important;
-            }
-
-            /* ✅ DEMO - RESPONSIVE */
+            /* Demo section responsive */
             .demo-dashboard .browser-chrome {
                 display: none;
             }
 
             .demo-dashboard [style*="grid-template-columns"] {
                 grid-template-columns: 1fr !important;
-                gap: 1rem !important;
             }
 
             .demo-dashboard [style*="padding: 2rem"] {
@@ -578,23 +557,13 @@
         }
 
         @media (max-width: 480px) {
-            .hero-dashboard {
-                padding: 80px 1rem 50px 1rem;
-            }
-
-            .chart-card,
-            .budget-component {
+            .feature-card,
+            .analytics-feature {
                 flex: 0 0 90vw !important;
                 min-width: 90vw !important;
                 max-width: 90vw !important;
                 padding: 1.5rem 1.125rem !important;
-            }
-
-            .solution-card {
-                flex: 0 0 90vw !important;
-                min-width: 90vw !important;
-                max-width: 90vw !important;
-                padding: 1.5rem 1.125rem !important;
+                min-height: 360px !important;
             }
         }
     </style>
@@ -638,8 +607,8 @@
             
             <div class="nav-menu" id="navMenu">
                 <a href="index.html" class="nav-link">Home</a>
-                <a href="#highcharts" class="nav-link">8 Charts</a>
-                <a href="#budget-components" class="nav-link">Budget Management</a>
+                <a href="#budget-features" class="nav-link">Budget Features</a>
+                <a href="#investment-analytics" class="nav-link">Investment Analytics</a>
                 <a href="#demo" class="nav-link">Live Demo</a>
                 <a href="#how-it-works" class="nav-link">How It Works</a>
                 <a href="index.html#pricing" class="nav-link">Pricing</a>
@@ -655,8 +624,8 @@
 
             <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
                 <button class="btn-primary-nav" onclick="window.location.href='dashboard-financier.html'">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Open Dashboard</span>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Open Budget Dashboard</span>
                 </button>
             </div>
 
@@ -669,29 +638,33 @@
     </nav>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         ✅ HERO SECTION - DÉGRADÉ CYAN/VIOLET AVEC PARTICULES
+         HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="hero-dashboard">
         <div class="container-fluid">
             <div class="hero-dashboard-content">
                 <div class="dashboard-badge" data-aos="fade-down">
                     <i class="fas fa-chart-line"></i>
-                    <span>AI-Powered Budget Management</span>
+                    <span>Interactive Financial Dashboard</span>
                 </div>
                 
                 <h1 data-aos="fade-up">
-                    AlphaVault <span class="highlight-gradient">Interactive Dashboard</span>
+                    Budget & <span class="highlight-gradient">Investment Analytics</span>
                 </h1>
                 
                 <p data-aos="fade-up" data-aos-delay="100">
-                    Track your personal budget, visualize 8 advanced Highcharts, and optimize your financial future<br>
-                    with multi-allocation investment analytics powered by AI
+                    Complete financial management platform: Budget tracking with AI-powered ROI calculations,<br>
+                    multi-allocation portfolio optimization, and advanced risk analytics
                 </p>
                 
                 <div data-aos="fade-up" data-aos-delay="200">
                     <button class="btn-hero-primary" onclick="window.location.href='dashboard-financier.html'">
-                        <i class="fas fa-play-circle"></i>
-                        <span>Open Dashboard</span>
+                        <i class="fas fa-wallet"></i>
+                        <span>Budget Dashboard</span>
+                    </button>
+                    <button class="btn-hero-secondary" onclick="window.location.href='investment-analytics.html'">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Investment Analytics</span>
                     </button>
                 </div>
             </div>
@@ -699,287 +672,213 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         8 HIGHCHARTS SECTION - SWIPER HORIZONTAL SUR MOBILE
+         BUDGET DASHBOARD FEATURES - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="features-section" id="highcharts" style="padding-top: 100px;">
+    <section class="features-section" id="budget-features">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">Advanced Visualization</span>
+                <span class="section-tag" data-aos="fade-up">Budget Dashboard</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    8 Professional <span class="gradient-text">Highcharts</span>
+                    Complete <span class="gradient-text">Financial Tracking</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Each chart provides deep insights into your budget, investments, and portfolio performance
+                    8 Highcharts visualizations with Cloud Sync, auto-save, and inflation-adjusted analysis
                 </p>
             </div>
 
-            <div class="charts-grid">
-                <!-- 1. Portfolio Evolution -->
-                <div class="chart-card" data-aos="zoom-in">
-                    <div class="chart-icon">
-                        <i class="fas fa-chart-area"></i>
+            <div class="features-grid">
+                <!-- 1. Dynamic Timeline -->
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <h3>Portfolio Evolution</h3>
+                    <h3>Dynamic Timeline</h3>
                     <p>
-                        Multi-series area chart tracking your total portfolio value, cumulated investment, 
-                        and gains over time. Visualize your wealth growth trajectory.
+                        Add/remove months dynamically. Auto-adjusts calculations for unlimited time horizons. 
+                        Tracks income, expenses, savings, and investments with monthly granularity.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Area Chart</span>
-                        <span class="chart-tag">Multi-Series</span>
-                        <span class="chart-tag">Time-based</span>
-                    </div>
                 </div>
 
-                <!-- 2. Monthly Returns -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="50">
-                    <div class="chart-icon">
+                <!-- 2. AI ROI Engine -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI ROI Calculator</h3>
+                    <p>
+                        Customizable annual yield (default 8%). Computes monthly gains with compound interest, 
+                        cumulated portfolio value, and ROI % automatically.
+                    </p>
+                </div>
+
+                <!-- 3. 8 Advanced Charts -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon">
                         <i class="fas fa-chart-bar"></i>
                     </div>
-                    <h3>Monthly Returns</h3>
+                    <h3>8 Highcharts Visualizations</h3>
                     <p>
-                        Hybrid column + line chart showing monthly investment gains (EUR) and return percentage. 
-                        Track compound interest growth and identify best/worst months.
+                        Income vs Expenses, Monthly Breakdowns (pie), Cumulated Savings (area), Portfolio Evolution, 
+                        ROI Evolution, Budget 50/30/20 rule, Multi-currency converter.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Hybrid Chart</span>
-                        <span class="chart-tag">Color-Coded</span>
-                        <span class="chart-tag">ROI Tracking</span>
-                    </div>
                 </div>
 
-                <!-- 3. Asset Allocation -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="chart-icon">
-                        <i class="fas fa-chart-pie"></i>
+                <!-- 4. Inflation Adjusted -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon">
+                        <i class="fas fa-percentage"></i>
                     </div>
-                    <h3>Asset Allocation</h3>
+                    <h3>Inflation-Adjusted Mode</h3>
                     <p>
-                        Donut pie chart with your current portfolio allocation by asset class (Equity, Bonds, Crypto, etc.). 
-                        Visualize diversification at a glance.
+                        Toggle to visualize real value curves adjusted for inflation (customizable rate, default 2.5%). 
+                        See nominal vs real savings and portfolio growth side-by-side.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Pie Chart</span>
-                        <span class="chart-tag">Interactive</span>
-                        <span class="chart-tag">Color by Type</span>
-                    </div>
                 </div>
 
-                <!-- 4. Contribution -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="150">
-                    <div class="chart-icon">
-                        <i class="fas fa-layer-group"></i>
+                <!-- 5. Cloud Sync -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
                     </div>
-                    <h3>Contribution by Asset</h3>
+                    <h3>Cloud Sync (Firestore)</h3>
                     <p>
-                        Stacked area chart breaking down monthly contributions by asset class. 
-                        See how each investment type contributes to your total monthly savings.
+                        Real-time synchronization via Cloudflare Workers + Firestore. Auto-save every 2 seconds (debounced). 
+                        LocalStorage fallback ensures data safety.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Stacked Area</span>
-                        <span class="chart-tag">Breakdown</span>
-                        <span class="chart-tag">Asset-based</span>
-                    </div>
                 </div>
 
-                <!-- 5. Drawdown -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="chart-icon">
-                        <i class="fas fa-arrow-down"></i>
+                <!-- 6. Bulk Editing -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon">
+                        <i class="fas fa-edit"></i>
                     </div>
-                    <h3>Maximum Drawdown</h3>
+                    <h3>Bulk Editing</h3>
                     <p>
-                        Risk analysis chart showing portfolio decline from peak values. 
-                        Identify worst drawdown periods and assess portfolio resilience.
+                        Apply values to multiple months at once. Select category (salary, rent, investment), 
+                        date range, and amount. Instant batch updates with auto-recalculation.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Risk Metric</span>
-                        <span class="chart-tag">Peak Analysis</span>
-                        <span class="chart-tag">Thresholds</span>
-                    </div>
                 </div>
 
-                <!-- 6. Rolling Volatility -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="250">
-                    <div class="chart-icon">
-                        <i class="fas fa-wave-square"></i>
+                <!-- 7. Export/Import -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-export"></i>
                     </div>
-                    <h3>Rolling Volatility</h3>
+                    <h3>Export/Import JSON</h3>
                     <p>
-                        Annualized volatility calculated over a rolling 12-month window. 
-                        Monitor portfolio risk evolution and detect periods of high uncertainty.
+                        Backup entire timeline to JSON file. Import data from previous exports. 
+                        Portable format for migrations and auditing.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">12M Rolling</span>
-                        <span class="chart-tag">Volatility</span>
-                        <span class="chart-tag">Risk Indicator</span>
-                    </div>
                 </div>
 
-                <!-- 7. Returns Distribution -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="chart-icon">
-                        <i class="fas fa-chart-column"></i>
+                <!-- 8. Dropdown Data Section -->
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="350">
+                    <div class="feature-icon">
+                        <i class="fas fa-table"></i>
                     </div>
-                    <h3>Returns Distribution</h3>
+                    <h3>Collapsible Data Table</h3>
                     <p>
-                        Histogram showing frequency distribution of monthly returns. 
-                        Understand return patterns, skewness, and identify outliers.
+                        Toggle visibility of the detailed data table. State saved in localStorage. 
+                        Clean interface focusing on charts or detailed row-by-row editing.
                     </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Histogram</span>
-                        <span class="chart-tag">Statistical</span>
-                        <span class="chart-tag">Color-Coded</span>
-                    </div>
-                </div>
-
-                <!-- 8. Correlation Matrix -->
-                <div class="chart-card" data-aos="zoom-in" data-aos-delay="350">
-                    <div class="chart-icon">
-                        <i class="fas fa-grip"></i>
-                    </div>
-                    <h3>Correlation Matrix</h3>
-                    <p>
-                        Heatmap displaying correlation coefficients between all asset classes. 
-                        Optimize diversification by identifying low-correlation assets.
-                    </p>
-                    <div class="chart-features">
-                        <span class="chart-tag">Heatmap</span>
-                        <span class="chart-tag">Correlation</span>
-                        <span class="chart-tag">Advanced</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chart Summary -->
-            <div style="max-width: 1000px; margin: 4rem auto 0; padding: 2.5rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 24px; border: 2px solid rgba(102, 126, 234, 0.2);" data-aos="fade-up" data-aos-delay="400">
-                <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary, #1e293b); margin-bottom: 1.5rem; text-align: center;">
-                    <i class="fas fa-chart-line" style="color: #667eea;"></i> Powered by Highcharts Professional
-                </h3>
-                <p style="font-size: 1rem; color: #475569; line-height: 1.8; text-align: center; margin-bottom: 2rem;">
-                    All charts are <strong>interactive</strong>, <strong>zoomable</strong>, and <strong>exportable</strong> (PNG/SVG). 
-                    They automatically update when you modify your budget data, giving you real-time insights into your financial health.
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                        <div style="font-size: 1.75rem; font-weight: 800; color: #3B82F6;"><i class="fas fa-search-plus"></i></div>
-                        <div style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Zoom & Pan</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                        <div style="font-size: 1.75rem; font-weight: 800; color: #8B5CF6;"><i class="fas fa-download"></i></div>
-                        <div style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Export PNG/SVG</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                        <div style="font-size: 1.75rem; font-weight: 800; color: #10B981;"><i class="fas fa-sync-alt"></i></div>
-                        <div style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Auto-Update</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                        <div style="font-size: 1.75rem; font-weight: 800; color: #F59E0B;"><i class="fas fa-mobile-alt"></i></div>
-                        <div style="font-size: 0.8125rem; color: #64748b; margin-top: 0.25rem;">Fully Responsive</div>
-                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         5 BUDGET COMPONENTS SECTION - SWIPER HORIZONTAL SUR MOBILE
+         INVESTMENT ANALYTICS FEATURES - CARTES 3D MINIMALISTES
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="budget-section" id="budget-components" style="padding-top: 100px;">
+    <section class="analytics-section" id="investment-analytics">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">Budget Management System</span>
+                <span class="section-tag" data-aos="fade-up">Investment Analytics</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    5 Core <span class="gradient-text">Budget Components</span>
+                    Professional <span class="gradient-text">Portfolio Optimization</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Track all aspects of your personal finances with our comprehensive budget management system
+                    Multi-allocation system with AI-powered Efficient Frontier and 14 advanced risk metrics
                 </p>
             </div>
 
-            <div class="budget-components-grid">
-                <!-- 1. Income -->
-                <div class="budget-component" data-aos="flip-left">
-                    <div class="budget-component-icon"><i class="fas fa-wallet" style="color: #10b981;"></i></div>
-                    <h4>Income</h4>
-                    <div class="weight">Salary + Misc.</div>
+            <div class="analytics-grid">
+                <!-- 1. Multi-Allocations -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-layer-group"></i></div>
+                    <h4>Multi-Allocations</h4>
                     <p>
-                        Track all income sources: monthly salary, bonuses, freelance work, and miscellaneous earnings. 
-                        Foundation of your budget.
+                        Create unlimited allocation simulations. Link to Budget Dashboard simulations. 
+                        Toggle between % and EUR modes. Compare up to 4 allocations side-by-side.
                     </p>
                 </div>
 
-                <!-- 2. Expenses -->
-                <div class="budget-component" data-aos="flip-left" data-aos-delay="50">
-                    <div class="budget-component-icon"><i class="fas fa-shopping-cart" style="color: #8b5cf6;"></i></div>
-                    <h4>Expenses</h4>
-                    <div class="weight">5 Categories</div>
+                <!-- 2. Efficient Frontier -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="100" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-chart-area"></i></div>
+                    <h4>Efficient Frontier</h4>
                     <p>
-                        Organize expenses into: Rent, Food, Fixed Costs, Others (Shopping/Restaurants), and Loans. 
-                        Comprehensive expense tracking.
+                        Visualize 100 optimal risk/return portfolios. Plot current allocation vs efficient frontier. 
+                        Identify under-optimized positions with Sharpe Ratio analysis.
                     </p>
                 </div>
 
-                <!-- 3. Savings -->
-                <div class="budget-component" data-aos="flip-left" data-aos-delay="100">
-                    <div class="budget-component-icon"><i class="fas fa-piggy-bank" style="color: #2563eb;"></i></div>
-                    <h4>Savings</h4>
-                    <div class="weight">Auto-Calculated</div>
+                <!-- 3. AI Strategies -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="150" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-brain"></i></div>
+                    <h4>AI Optimized Strategies</h4>
                     <p>
-                        Automatically calculated as: Income - Expenses - Investment. 
-                        Monitor your monthly and cumulated savings with ease.
+                        4 differentiated strategies: Conservative (min volatility), Balanced (max Sharpe), 
+                        Aggressive (max return), Custom (risk-profile tailored). One-click application.
                     </p>
                 </div>
 
-                <!-- 4. Investment -->
-                <div class="budget-component" data-aos="flip-left" data-aos-delay="150">
-                    <div class="budget-component-icon"><i class="fas fa-chart-line" style="color: #f59e0b;"></i></div>
-                    <h4>Investment</h4>
-                    <div class="weight">Multi-Allocation</div>
+                <!-- 4. Backtest Engine -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="200" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-history"></i></div>
+                    <h4>Historical Backtest</h4>
                     <p>
-                        Define monthly investment amount and allocate across multiple asset classes (Equity, Bonds, Crypto, etc.). 
-                        % or currency mode.
+                        Simulate portfolio performance on historical data. Compare strategies' final values, 
+                        annualized returns, max drawdowns, and Sharpe ratios side-by-side.
                     </p>
                 </div>
 
-                <!-- 5. ROI -->
-                <div class="budget-component" data-aos="flip-left" data-aos-delay="200">
-                    <div class="budget-component-icon"><i class="fas fa-percentage" style="color: #10b981;"></i></div>
-                    <h4>ROI (Return on Investment)</h4>
-                    <div class="weight">Compound Interest</div>
+                <!-- 5. Risk Metrics (14) -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="250" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h4>14 Risk Metrics</h4>
                     <p>
-                        Track investment returns with compound interest calculations. 
-                        Customize annual yield rate (default 8%) to match your portfolio.
+                        Sharpe, Sortino, Calmar, VaR, CVaR, Max Drawdown, Volatility, Win Rate, 
+                        Profit Factor, Rolling metrics, Alpha/Beta, Correlation Matrix, and more.
                     </p>
                 </div>
-            </div>
 
-            <!-- Budget 50/30/20 Rule -->
-            <div style="max-width: 1100px; margin: 4rem auto 0;" data-aos="fade-up" data-aos-delay="250">
-                <div style="padding: 3rem; background: white; border-radius: 24px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);">
-                    <h3 style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem; text-align: center;">
-                        <i class="fas fa-balance-scale" style="color: #667eea;"></i> Budget 50/30/20 Rule
-                    </h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, #6c3483, #8e44ad); border-radius: 16px; color: white; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem;">50%</div>
-                            <div style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">NEEDS</div>
-                            <div style="font-size: 0.875rem; opacity: 0.95;">Rent, Food, Fixed Costs, Loans</div>
-                        </div>
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, #9d5ce6, #c39bd3); border-radius: 16px; color: white; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem;">30%</div>
-                            <div style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">WANTS</div>
-                            <div style="font-size: 0.875rem; opacity: 0.95;">Shopping, Restaurants, Leisure</div>
-                        </div>
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, #2649b2, #4a74f3); border-radius: 16px; color: white; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem;">20%</div>
-                            <div style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">SAVINGS</div>
-                            <div style="font-size: 0.875rem; opacity: 0.95;">Savings + Investments</div>
-                        </div>
-                    </div>
-                    <p style="text-align: center; color: #64748b; font-size: 0.9375rem; margin-top: 2rem; line-height: 1.7;">
-                        The dashboard automatically calculates your budget breakdown and shows if you follow the recommended 50/30/20 rule. 
-                        A dedicated pie chart helps you visualize your spending distribution.
+                <!-- 6. Diversification Score -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="300" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h4>Diversification Score</h4>
+                    <p>
+                        0-100 score analyzing: number of assets, asset class diversity, allocation balance, 
+                        concentration risk, and estimated correlation. Actionable insights included.
+                    </p>
+                </div>
+
+                <!-- 7. 14 Advanced Charts -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="350" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>14 Highcharts Visualizations</h4>
+                    <p>
+                        Portfolio Evolution, Monthly Returns, Drawdown, Rolling Volatility, Returns Distribution, 
+                        VaR, Correlation Heatmap, Rolling Sharpe/Sortino, Alpha/Beta, Calmar, Efficient Frontier, Backtest.
+                    </p>
+                </div>
+
+                <!-- 8. AI Recommendations -->
+                <div class="analytics-feature" data-aos="zoom-in" data-aos-delay="400" data-aos-duration="600">
+                    <div class="analytics-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h4>AI Recommendations</h4>
+                    <p>
+                        Contextual insights based on risk profile, diversification score, Sharpe Ratio, 
+                        and concentration. Prioritized actions (high/medium/low) with actionable buttons.
                     </p>
                 </div>
             </div>
@@ -987,18 +886,17 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         ✅ LIVE DEMO SECTION - PAS DE SWIPE
+         LIVE DEMO SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="demo-dashboard" id="demo">
         <div class="container-fluid">
-            <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <div class="section-header">
                 <span class="section-tag" data-aos="fade-up" style="color: white; background: rgba(255, 255, 255, 0.2);">Live Demo</span>
-                <h2 class="demo-title" data-aos="fade-up" data-aos-delay="100" style="color: white; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
-                    See Your Dashboard
-                    <span class="highlight-gradient">in Action</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100" style="color: white;">
+                    See Your <span class="highlight-gradient">Financial Future</span>
                 </h2>
-                <p class="demo-description" data-aos="fade-up" data-aos-delay="200" style="color: rgba(255, 255, 255, 0.9); font-size: clamp(1rem, 2vw, 1.25rem); max-width: 700px; margin: 0 auto;">
-                    Real-time budget tracking with 8 Highcharts, multi-allocation analytics, and AI-powered insights
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200" style="color: rgba(255, 255, 255, 0.9);">
+                    Real-time budget tracking + AI-optimized portfolio allocations with institutional-grade analytics
                 </p>
             </div>
 
@@ -1014,91 +912,59 @@
                     </div>
 
                     <div style="padding: 2rem; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
-                        <!-- Current Month Stats -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                            <div style="padding: 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white; text-align: center;">
-                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Current Month</div>
-                                <div style="font-size: 1.75rem; font-weight: 900;">12/2024</div>
+                        <!-- Budget Dashboard Preview -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 16px; margin-bottom: 2rem; color: white; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Budget Dashboard</div>
+                                <div style="font-size: 1.5rem; font-weight: 800;">12 Months Tracked</div>
                             </div>
-                            <div style="padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center;">
-                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Income</div>
-                                <div style="font-size: 1.75rem; font-weight: 900; color: #10b981;">€5,200</div>
+                            <div>
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Total Portfolio</div>
+                                <div style="font-size: 1.25rem; font-weight: 700;">€52,380</div>
                             </div>
-                            <div style="padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center;">
-                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Total Expenses</div>
-                                <div style="font-size: 1.75rem; font-weight: 900; color: #8b5cf6;">€3,450</div>
-                            </div>
-                            <div style="padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center;">
-                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Monthly Savings</div>
-                                <div style="font-size: 1.75rem; font-weight: 900; color: #2563eb;">€1,050</div>
-                            </div>
-                            <div style="padding: 1.5rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center;">
-                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">Investment</div>
-                                <div style="font-size: 1.75rem; font-weight: 900; color: #f59e0b;">€700</div>
+                            <div>
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Cumulated Gains</div>
+                                <div style="font-size: 1.25rem; font-weight: 700; color: #10b981;">+€2,380</div>
                             </div>
                         </div>
 
-                        <!-- 8 Charts Preview -->
-                        <div style="padding: 2rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 16px; margin-bottom: 2rem;">
-                            <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; text-align: center;">
-                                <i class="fas fa-chart-line"></i> 8 Interactive Highcharts
+                        <!-- KPIs Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="padding: 1.25rem; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border-left: 4px solid #3b82f6;">
+                                <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Annualized ROI</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">+8.2%</div>
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem;">
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-chart-area" style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Portfolio Evolution</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-chart-bar" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Monthly Returns</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-chart-pie" style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Asset Allocation</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-layer-group" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Contribution</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-arrow-down" style="font-size: 2rem; color: #ef4444; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Drawdown</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-wave-square" style="font-size: 2rem; color: #06b6d4; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Rolling Volatility</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-chart-column" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Returns Distribution</div>
-                                </div>
-                                <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
-                                    <i class="fas fa-grip" style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;"></i>
-                                    <div style="font-size: 0.8125rem; color: #64748b; font-weight: 600;">Correlation Matrix</div>
-                                </div>
+                            <div style="padding: 1.25rem; background: rgba(139, 92, 246, 0.05); border-radius: 12px; border-left: 4px solid #8b5cf6;">
+                                <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Sharpe Ratio</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #2563eb;">1.85</div>
+                            </div>
+                            <div style="padding: 1.25rem; background: rgba(6, 182, 212, 0.05); border-radius: 12px; border-left: 4px solid #06b6d4;">
+                                <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Max Drawdown</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #64748b;">-5.2%</div>
+                            </div>
+                            <div style="padding: 1.25rem; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border-left: 4px solid #10b981;">
+                                <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Win Rate</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">75.0%</div>
                             </div>
                         </div>
 
-                        <!-- Budget 50/30/20 Breakdown -->
-                        <div style="padding: 2rem; background: linear-gradient(135deg, rgba(38, 73, 178, 0.1), rgba(157, 92, 230, 0.1)); border-radius: 16px;">
-                            <div style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; text-align: center;">
-                                <i class="fas fa-balance-scale"></i> Budget 50/30/20 Breakdown
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2.5rem; font-weight: 900; color: #6c3483; margin-bottom: 0.5rem;">48%</div>
-                                    <div style="font-size: 1rem; font-weight: 700; color: #64748b;">Needs</div>
-                                    <div style="font-size: 0.875rem; color: #94a3b8;">€2,496</div>
+                        <!-- Investment Analytics Preview -->
+                        <div style="padding: 2rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 16px; border: 2px solid rgba(59, 130, 246, 0.2); margin-top: 2rem;">
+                            <h3 style="font-size: 1.125rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem;">
+                                <i class="fas fa-brain"></i> AI-Optimized Allocation
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem;">
+                                <div style="padding: 0.75rem; background: white; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Equity</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: #2563eb;">60%</div>
                                 </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2.5rem; font-weight: 900; color: #9d5ce6; margin-bottom: 0.5rem;">18%</div>
-                                    <div style="font-size: 1rem; font-weight: 700; color: #64748b;">Wants</div>
-                                    <div style="font-size: 0.875rem; color: #94a3b8;">€936</div>
+                                <div style="padding: 0.75rem; background: white; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Bonds</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">30%</div>
                                 </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2.5rem; font-weight: 900; color: #2649b2; margin-bottom: 0.5rem;">34%</div>
-                                    <div style="font-size: 1rem; font-weight: 700; color: #64748b;">Savings</div>
-                                    <div style="font-size: 0.875rem; color: #94a3b8;">€1,768</div>
+                                <div style="padding: 0.75rem; background: white; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Cash</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: #64748b;">10%</div>
                                 </div>
                             </div>
                         </div>
@@ -1106,8 +972,8 @@
                         <!-- CTA Button -->
                         <div style="text-align: center; margin-top: 2.5rem;">
                             <button class="btn-hero-primary" onclick="window.location.href='dashboard-financier.html'" style="font-size: 1.125rem; padding: 1.25rem 2.5rem;">
-                                <i class="fas fa-play-circle"></i>
-                                <span>Try Interactive Dashboard Now</span>
+                                <i class="fas fa-chart-line"></i>
+                                <span>Try Dashboard Now</span>
                             </button>
                         </div>
                     </div>
@@ -1117,70 +983,51 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         HOW IT WORKS SECTION - SWIPER HORIZONTAL SUR MOBILE
+         HOW IT WORKS SECTION
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="features-section" id="how-it-works" style="padding-top: 100px;">
+    <section class="features-section how-it-works-section" id="how-it-works">
         <div class="container-fluid">
             <div class="section-header">
                 <span class="section-tag" data-aos="fade-up">How It Works</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    Get Started in <span class="gradient-text">4 Simple Steps</span>
+                    Complete Financial Control in <span class="gradient-text">3 Steps</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    From budget entry to AI-powered insights in under 5 minutes
+                    From budget tracking to AI-optimized allocations in under 5 minutes
                 </p>
             </div>
 
-            <div class="solutions-grid">
-                <div class="solution-card" data-aos="zoom-in" style="text-align: center;">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #2563eb 100%); font-size: 2.5rem; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1.5rem; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);">
-                            1
-                        </div>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in" style="text-align: center;">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); font-size: 2.5rem; margin: 0 auto 1.5rem;">
+                        1
                     </div>
-                    <h3>Fill Your Budget</h3>
+                    <h3>Track Your Budget</h3>
                     <p>
-                        Enter your monthly income (Salary + Misc.), expenses (Rent, Food, Fixed Costs, Others, Loans), 
-                        and investment amounts. Build a dynamic timeline with unlimited months.
+                        Fill monthly income, expenses, and investments. System auto-calculates ROI, cumulated gains, 
+                        and portfolio value. 8 charts visualize your financial evolution instantly.
                     </p>
                 </div>
 
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="100" style="text-align: center;">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon" style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); font-size: 2.5rem; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1.5rem; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
-                            2
-                        </div>
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100" style="text-align: center;">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-size: 2.5rem; margin: 0 auto 1.5rem;">
+                        2
                     </div>
-                    <h3>8 Charts Auto-Generate</h3>
+                    <h3>Define Asset Allocation</h3>
                     <p>
-                        All 8 Highcharts (Portfolio Evolution, Monthly Returns, Asset Allocation, Contribution, Drawdown, 
-                        Volatility, Distribution, Correlation) update instantly as you modify your data.
+                        Create multiple allocation simulations. Add assets (equity, bonds, crypto, etc.) with % or EUR values. 
+                        Link to Budget Dashboard for synchronized monthly investment distribution.
                     </p>
                 </div>
 
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="200" style="text-align: center;">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon" style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); font-size: 2.5rem; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1.5rem; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);">
-                            3
-                        </div>
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200" style="text-align: center;">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); font-size: 2.5rem; margin: 0 auto 1.5rem;">
+                        3
                     </div>
-                    <h3>Optimize Allocation</h3>
+                    <h3>Optimize with AI</h3>
                     <p>
-                        Create multiple asset allocations with % or currency mode. Toggle between allocations, 
-                        compare strategies, and leverage AI to find the optimal mix (Conservative/Balanced/Aggressive).
-                    </p>
-                </div>
-
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="300" style="text-align: center;">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 2.5rem; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 1.5rem; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);">
-                            4
-                        </div>
-                    </div>
-                    <h3>Get AI Insights</h3>
-                    <p>
-                        Run Advanced AI Optimization to calculate Efficient Frontier, Risk Profile, Diversification Score, 
-                        Backtests, and receive personalized recommendations to maximize your portfolio performance.
+                        Run AI analysis: Efficient Frontier with 100 optimal portfolios, 4 differentiated strategies 
+                        (Conservative/Balanced/Aggressive/Custom), backtest simulations, and 14 professional risk metrics.
                     </p>
                 </div>
             </div>
@@ -1188,21 +1035,23 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         ✅ CTA FINAL - SANS "Free for basic users"
+         CTA FINAL
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="cta-final" style="padding: 100px 1rem; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); position: relative; overflow: hidden;">
+    <section class="cta-final">
         <div class="container-fluid">
             <div class="cta-content-wrapper">
-                <div class="cta-content" data-aos="zoom-in" style="text-align: center; max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
-                    <h2 class="cta-title" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: white; margin-bottom: 1.5rem; line-height: 1.2;">
-                        Ready to master your budget?
-                    </h2>
-                    <p class="cta-subtitle" style="font-size: clamp(1.125rem, 2vw, 1.375rem); color: rgba(255, 255, 255, 0.9); margin-bottom: 2.5rem; line-height: 1.7;">
-                        Join thousands of users tracking their finances with 8 professional Highcharts and AI-powered investment analytics
+                <div class="cta-content" data-aos="zoom-in">
+                    <h2 class="cta-title">Ready to master your finances?</h2>
+                    <p class="cta-subtitle">
+                        Join smart investors using AI-powered dashboards to track budgets, optimize portfolios, and maximize returns
                     </p>
                     <div class="cta-buttons">
-                        <button class="btn-hero-primary" onclick="window.location.href='dashboard-financier.html'" style="background: white; color: #1e293b; padding: 1.25rem 2.5rem; font-size: 1.125rem;">
-                            <span>Try Interactive Dashboard Now</span>
+                        <button class="btn-cta-primary" onclick="window.location.href='dashboard-financier.html'">
+                            <span>Try Budget Dashboard</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-cta-secondary" onclick="window.location.href='investment-analytics.html'">
+                            <span>Try Investment Analytics</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -1251,7 +1100,8 @@
                     <ul>
                         <li><a href="index.html#features">Features</a></li>
                         <li><a href="index.html#alphy-ai">Alphy AI</a></li>
-                        <li><a href="dashboard-financier.html">Dashboard</a></li>
+                        <li><a href="dashboard-financier.html">Budget Dashboard</a></li>
+                        <li><a href="investment-analytics.html">Investment Analytics</a></li>
                         <li><a href="index.html#pricing">Pricing</a></li>
                     </ul>
                 </div>
@@ -1261,9 +1111,9 @@
                     <ul>
                         <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
                         <li><a href="trend-prediction.html">AlphaVault Score</a></li>
+                        <li><a href="ma-predictor.html">M&A Intelligence</a></li>
+                        <li><a href="ipo-intelligence.html">IPO Intelligence</a></li>
                         <li><a href="monte-carlo.html">Monte Carlo</a></li>
-                        <li><a href="risk-parity.html">Risk Parity</a></li>
-                        <li><a href="scenario-analysis.html">Scenario Analysis</a></li>
                     </ul>
                 </div>
 
@@ -1305,7 +1155,7 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('%cAlphaVault Interactive Dashboard Landing Page - Initialization', 'color: #667eea; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault Interactive Dashboard Landing Page - Initialization', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
             
             // Initialize AOS Animations
             AOS.init({
@@ -1323,7 +1173,7 @@
                 yearElement.textContent = new Date().getFullYear();
             }
 
-            console.log('%cAlphaVault Dashboard Landing - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault Interactive Dashboard - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
