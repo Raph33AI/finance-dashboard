@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AlphaVault Market News - AI-Powered Financial News Analysis with Sentiment Tracking">
-    <meta name="keywords" content="market news, financial news, sentiment analysis, fear greed index, trending topics, AlphaVault">
-    <title>Market News Intelligence - AI Sentiment & Trending Analysis | AlphaVault AI</title>
+    <meta name="description" content="AlphaVault News Analytics - AI-Powered Market Sentiment, Trending Topics & Real-Time News Terminal">
+    <meta name="keywords" content="news analytics, market sentiment, trending topics, financial news, RSS aggregator, AlphaVault">
+    <title>News Analytics Suite - Market Sentiment & Trending Topics | AlphaVault AI</title>
     
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@
 
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           MARKET NEWS - STYLES ADAPTÉS
+           NEWS ANALYTICS SUITE - BLEU CYAN/VIOLET MINIMALISTE
            ═══════════════════════════════════════════════════════════════ */
         
         /* Global overflow fix */
@@ -49,7 +49,7 @@
             overflow-x: hidden;
         }
 
-        /* ✅ HERO SECTION - DÉGRADÉ ORANGE/ROUGE POUR NEWS */
+        /* ✅ HERO SECTION - DÉGRADÉ DYNAMIQUE */
         .hero-news {
             min-height: 100vh;
             display: flex;
@@ -57,7 +57,7 @@
             justify-content: center;
             position: relative;
             padding: 120px 1rem 80px 1rem;
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #dc2626 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
             background-size: 200% 200%;
             animation: gradientShift 15s ease infinite;
             overflow: hidden;
@@ -77,9 +77,9 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 30%, rgba(239, 68, 68, 0.4), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(245, 158, 11, 0.4), transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(220, 38, 38, 0.3), transparent 60%);
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.4), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.4), transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%);
             pointer-events: none;
             z-index: 0;
             animation: pulseGlow 8s ease-in-out infinite;
@@ -139,7 +139,7 @@
         }
 
         .hero-news .highlight-gradient {
-            background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -183,335 +183,252 @@
             font-size: 1.25rem;
         }
 
-        /* Sections communes */
-        .section {
-            padding: 4rem 1rem;
-            background: var(--bg-primary);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-tag {
-            display: inline-block;
-            padding: 0.5rem 1.25rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--ml-primary);
-            margin-bottom: 1rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .section-description {
-            font-size: 1.125rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
+        /* Module Cards - GRADIENT BLEU/VIOLET */
+        .modules-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
         }
 
-        .stat-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--ml-primary);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.9375rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        /* Filters Panel */
-        .filters-panel {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2rem;
+        .module-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .filters-header {
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+        }
+
+        .module-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .module-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
             margin-bottom: 1.5rem;
-            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
         }
 
-        .filters-header h3 {
+        .module-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .module-card .module-description {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .module-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .module-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #475569;
+            font-size: 0.9375rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .module-features li:last-child {
+            border-bottom: none;
+        }
+
+        .module-features li i {
+            color: #10b981;
+            font-size: 1rem;
+        }
+
+        /* Features Grid - CARTES DÉTAILLÉES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon i {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-card h4 {
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* How It Works - WORKFLOW */
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .workflow-step {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .workflow-step:hover::before {
+            transform: scaleX(1);
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
+        }
+
+        .workflow-number {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
+        }
+
+        .workflow-step h4 {
             font-size: 1.25rem;
             font-weight: 800;
-            color: var(--text-primary);
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .workflow-step p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            line-height: 1.7;
             margin: 0;
         }
 
-        .filters-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            max-height: 500px;
-            overflow: visible;
-            transition: all 0.3s ease;
+        /* ✅ SECTIONS - PADDING OPTIMISÉ */
+        .features-section,
+        .analytics-section,
+        .demo-news,
+        .cta-final {
+            padding: 3rem 1rem !important;
+            margin: 0 !important;
+            min-height: auto !important;
         }
 
-        .filters-content.collapsed {
-            max-height: 0;
-            overflow: hidden;
-            margin: 0;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            padding: 0.75rem 1rem;
-            border: 2px solid rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            font-size: 0.9375rem;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--ml-primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Articles Grid */
-        .articles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .article-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .article-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-            border-color: var(--ml-primary);
-        }
-
-        .article-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .article-content {
-            padding: 1.5rem;
-        }
-
-        .article-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .article-source {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8125rem;
-            color: var(--text-tertiary);
-            font-weight: 600;
-        }
-
-        .article-title {
-            font-size: 1.125rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            line-height: 1.4;
-        }
-
-        .article-description {
-            font-size: 0.9375rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 1rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .article-tickers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .ticker-badge {
-            padding: 0.375rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .company-badge {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-            color: var(--ml-primary);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .country-badge {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .ticker-badge:hover {
-            transform: scale(1.05);
-        }
-
-        .article-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .article-date {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8125rem;
-            color: var(--text-tertiary);
-        }
-
-        .article-link {
-            color: var(--ml-primary);
-            font-weight: 700;
-            font-size: 0.875rem;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .article-link:hover {
-            color: var(--ml-secondary);
-        }
-
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: 4rem 2rem;
-        }
-
-        .loading-state i {
-            font-size: 3rem;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-        }
-
-        /* Dashboard Button */
-        .dashboard-btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-        }
-
-        .dashboard-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Load More Container */
-        .load-more-container {
-            text-align: center;
-            margin: 3rem 0;
-        }
-
-        /* Mobile Responsive */
+        /* ✅ CORRECTIFS MOBILE - SCROLL HORIZONTAL */
         @media (max-width: 768px) {
             .hero-news {
                 min-height: 90vh;
@@ -532,114 +449,125 @@
                 font-size: 1rem;
             }
 
-            .section {
-                padding: 2.5rem 1rem;
+            .features-section,
+            .analytics-section,
+            .demo-news,
+            .cta-final {
+                padding: 2.5rem 1rem !important;
             }
 
-            .filters-content {
-                grid-template-columns: 1fr;
+            /* ✅ TITRES CENTRÉS SUR MOBILE */
+            .section-header,
+            .section-tag,
+            .section-title,
+            .section-description {
+                text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 100% !important;
+                display: block !important;
             }
 
-            .articles-grid {
-                grid-template-columns: 1fr;
+            /* ✅ SCROLL HORIZONTAL POUR CARTES */
+            .modules-grid,
+            .features-grid,
+            .workflow-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1rem !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 1rem !important;
+                margin: 2rem -1rem 0 -1rem !important;
+                max-width: 100vw !important;
+            }
+
+            .modules-grid::-webkit-scrollbar,
+            .features-grid::-webkit-scrollbar,
+            .workflow-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .modules-grid,
+            .features-grid,
+            .workflow-grid {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .module-card,
+            .feature-card,
+            .workflow-step {
+                flex: 0 0 85vw !important;
+                min-width: 85vw !important;
+                max-width: 85vw !important;
+                scroll-snap-align: center !important;
+                margin: 0 !important;
+                padding: 2rem 1.5rem !important;
+                min-height: 380px !important;
+                height: auto !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .module-card:first-child,
+            .feature-card:first-child,
+            .workflow-step:first-child {
+                margin-left: 0.5rem !important;
+            }
+
+            .module-card:last-child,
+            .feature-card:last-child,
+            .workflow-step:last-child {
+                margin-right: 0.5rem !important;
             }
         }
 
-        /* Sentiment & Trending Specific Styles */
-        .global-sentiment-wrapper {
-            max-width: 800px;
-            margin: 0 auto 3rem;
+        @media (max-width: 480px) {
+            .module-card,
+            .feature-card,
+            .workflow-step {
+                flex: 0 0 90vw !important;
+                min-width: 90vw !important;
+                max-width: 90vw !important;
+                padding: 1.5rem 1.125rem !important;
+                min-height: 360px !important;
+            }
         }
 
-        .sentiment-gauge-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        }
-
-        .fear-greed-gauge {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 2rem;
-        }
-
-        .trending-topic-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .trending-topic-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-        }
-
-        .topic-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .topic-icon {
-            width: 50px;
-            height: 50px;
+        /* Code Block Styling */
+        .code-block {
+            background: #1e293b;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .risk-opportunity-item {
-            background: var(--card-bg);
-            border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid var(--ml-primary);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .risk-opportunity-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        .code-block .comment {
+            color: #94a3b8;
+            font-style: italic;
         }
 
-        /* Sentiment Tabs */
-        .sentiment-tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+        .code-block .keyword {
+            color: #c084fc;
+            font-weight: 600;
         }
 
-        .sentiment-tab {
-            padding: 0.75rem 1.5rem;
-            background: var(--card-bg);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .code-block .string {
+            color: #6ee7b7;
         }
 
-        .sentiment-tab.active {
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            color: white;
-        }
-
-        .sentiment-tab:hover:not(.active) {
-            border-color: var(--ml-primary);
+        .code-block .number {
+            color: #fbbf24;
         }
     </style>
 </head>
@@ -682,9 +610,10 @@
             
             <div class="nav-menu" id="navMenu">
                 <a href="index.html" class="nav-link">Home</a>
+                <a href="#modules" class="nav-link">Modules</a>
+                <a href="#trending-topics" class="nav-link">Trending Topics</a>
                 <a href="#news-terminal" class="nav-link">News Terminal</a>
-                <a href="#sentiment" class="nav-link">Sentiment</a>
-                <a href="#trending" class="nav-link">Trending</a>
+                <a href="#sentiment" class="nav-link">Sentiment Analysis</a>
                 <a href="index.html#pricing" class="nav-link">Pricing</a>
             </div>
             
@@ -697,9 +626,9 @@
             </div>
 
             <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
-                <button class="btn-primary-nav" onclick="window.location.href='dashboard-financier.html'">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
+                <button class="btn-primary-nav" onclick="window.location.href='news-analytics.html'">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Open News Analytics</span>
                 </button>
             </div>
 
@@ -718,23 +647,23 @@
         <div class="container-fluid">
             <div class="hero-news-content">
                 <div class="news-badge" data-aos="fade-down">
-                    <i class="fas fa-newspaper"></i>
-                    <span>AI-Powered Market Intelligence</span>
+                    <i class="fas fa-chart-bar"></i>
+                    <span>AI-Powered News Analytics Suite</span>
                 </div>
                 
                 <h1 data-aos="fade-up">
-                    Market News <span class="highlight-gradient">Intelligence</span>
+                    Financial News <span class="highlight-gradient">Intelligence Platform</span>
                 </h1>
                 
                 <p data-aos="fade-up" data-aos-delay="100">
-                    Real-time financial news analysis with AI sentiment tracking,<br>
-                    company extraction, and trending topics detection
+                    3 professional JavaScript modules for market sentiment analysis,<br>
+                    trending topics detection, and real-time news aggregation with entity extraction
                 </p>
                 
                 <div data-aos="fade-up" data-aos-delay="200">
-                    <button class="btn-hero-primary" onclick="document.getElementById('news-terminal').scrollIntoView({behavior: 'smooth'})">
-                        <i class="fas fa-rss"></i>
-                        <span>Explore News Terminal</span>
+                    <button class="btn-hero-primary" onclick="document.getElementById('modules').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fas fa-code"></i>
+                        <span>Explore Modules</span>
                     </button>
                 </div>
             </div>
@@ -742,303 +671,531 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         NEWS TERMINAL SECTION
+         3 MODULES OVERVIEW
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="section" id="news-terminal">
-        <div class="container-fluid" style="max-width: 1400px;">
+    <section class="features-section" id="modules">
+        <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">News Terminal</span>
+                <span class="section-tag" data-aos="fade-up">3 Professional Modules</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    Financial News <span class="gradient-text">Aggregator</span>
+                    Complete <span class="gradient-text">News Analytics Suite</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Track breaking news from multiple sources with company & country extraction
+                    Trending Topics Dashboard, News Terminal & Market Sentiment Analyzer
                 </p>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="stats-grid" data-aos="fade-up" data-aos-delay="300">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-newspaper"></i></div>
-                    <div class="stat-value" id="totalArticles">0</div>
-                    <div class="stat-label">Total Articles</div>
+            <div class="modules-grid">
+                <!-- Module 1: Trending Topics -->
+                <div class="module-card" data-aos="zoom-in">
+                    <div class="module-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3>Trending Topics Dashboard</h3>
+                    <p class="module-description">
+                        <strong>File:</strong> <code>trending-topics-dashboard.js</code><br>
+                        Real-time detection of trending financial topics with company/country tracking, Fear & Greed Index, and AI-driven risk/opportunity analysis.
+                    </p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> 10 trending topics detection</li>
+                        <li><i class="fas fa-check-circle"></i> Company & country entity extraction</li>
+                        <li><i class="fas fa-check-circle"></i> Fear & Greed Index calculation</li>
+                        <li><i class="fas fa-check-circle"></i> Risks & opportunities identification</li>
+                        <li><i class="fas fa-check-circle"></i> Trend momentum tracking</li>
+                        <li><i class="fas fa-check-circle"></i> Interactive Chart.js visualizations</li>
+                    </ul>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
-                    <div class="stat-value" id="hotTopicsCount">0</div>
-                    <div class="stat-label">Companies Tracked</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-rss"></i></div>
-                    <div class="stat-value" id="sourcesCount">0</div>
-                    <div class="stat-label">News Sources</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-building"></i></div>
-                    <div class="stat-value" id="tickersCount">0</div>
-                    <div class="stat-label">Tickers Detected</div>
-                </div>
-            </div>
 
-            <!-- Filters Panel -->
-            <div class="filters-panel" data-aos="fade-up" data-aos-delay="400">
-                <div class="filters-header" onclick="newsTerminal.toggleFilters()">
-                    <h3>
-                        <i class="fas fa-filter"></i> Advanced Filters 
-                        <span id="activeFiltersCount" style="color: var(--text-tertiary); font-weight: 600;">(0 active)</span>
-                    </h3>
-                    <button class="dashboard-btn" onclick="newsTerminal.refreshAll()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
+                <!-- Module 2: News Terminal -->
+                <div class="module-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="module-icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h3>News Terminal</h3>
+                    <p class="module-description">
+                        <strong>File:</strong> <code>news-terminal.js</code><br>
+                        Professional RSS aggregator supporting 1000+ articles with advanced filtering by source, sector, region, and entity-based search.
+                    </p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Multi-source RSS aggregation</li>
+                        <li><i class="fas fa-check-circle"></i> Advanced filtering (source, sector, region)</li>
+                        <li><i class="fas fa-check-circle"></i> Company names & ticker extraction</li>
+                        <li><i class="fas fa-check-circle"></i> Infinite scroll & auto-load</li>
+                        <li><i class="fas fa-check-circle"></i> Grid/List view modes</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time article counter</li>
+                    </ul>
                 </div>
-                <div class="filters-content" id="filtersContent">
-                    <div class="filter-group">
-                        <label for="searchInput"><i class="fas fa-search"></i> Search</label>
-                        <input type="text" id="searchInput" placeholder="Company, keyword, ticker...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="sourceFilter"><i class="fas fa-rss"></i> Source</label>
-                        <select id="sourceFilter">
-                            <option value="all">All Sources</option>
-                            <option value="cnbc-earnings">CNBC Earnings</option>
-                            <option value="marketwatch-realtime">MarketWatch</option>
-                            <option value="cnbc-tech">CNBC Tech</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="sectorFilter"><i class="fas fa-industry"></i> Sector</label>
-                        <select id="sectorFilter">
-                            <option value="all">All Sectors</option>
-                            <option value="tech">Technology</option>
-                            <option value="finance">Finance</option>
-                            <option value="energy">Energy</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="consumer">Consumer</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="regionFilter"><i class="fas fa-globe"></i> Region</label>
-                        <select id="regionFilter">
-                            <option value="all">All Regions</option>
-                            <option value="us">United States</option>
-                            <option value="eu">Europe</option>
-                            <option value="asia">Asia</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="sortFilter"><i class="fas fa-sort"></i> Sort By</label>
-                        <select id="sortFilter">
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="importance">Most Important</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="articleLimitSelect"><i class="fas fa-list"></i> Show Per Page</label>
-                        <select id="articleLimitSelect">
-                            <option value="50">50 articles</option>
-                            <option value="100">100 articles</option>
-                            <option value="200">200 articles</option>
-                            <option value="500">500 articles</option>
-                            <option value="999999">All articles</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Article Counter & Controls -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;" data-aos="fade-up" data-aos-delay="500">
-                <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 600;">
-                    <span id="articleCounter">Loading...</span>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">
-                        <input type="checkbox" id="autoLoadToggle">
-                        Auto-load on scroll
-                    </label>
-                    <button class="dashboard-btn" id="loadMaxBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                        <i class="fas fa-fire"></i> Load MAX Articles
-                    </button>
-                </div>
-            </div>
-
-            <!-- Articles Container -->
-            <div class="articles-grid" id="articlesContainer">
-                <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading articles...</p>
-                </div>
-            </div>
-
-            <!-- Load More Button -->
-            <div class="load-more-container" style="display: none;">
-                <button class="dashboard-btn" onclick="newsTerminal.loadMore()">
-                    <i class="fas fa-chevron-down"></i> Load More Articles
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         MARKET SENTIMENT SECTION
-         ═══════════════════════════════════════════════════════════════ -->
-    <section class="section" id="sentiment" style="background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);">
-        <div class="container-fluid" style="max-width: 1400px;">
-            <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">Market Sentiment</span>
-                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    AI Sentiment <span class="gradient-text">Analysis</span>
-                </h2>
-                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Real-time market sentiment tracking with AI-powered analysis
-                </p>
-            </div>
-
-            <!-- Global Sentiment Gauge -->
-            <div class="global-sentiment-wrapper" data-aos="fade-up" data-aos-delay="300">
-                <div class="sentiment-gauge-card">
-                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem;">
-                        <i class="fas fa-brain"></i> Global Market Sentiment
-                    </h3>
-                    <div class="fear-greed-gauge">
-                        <canvas id="sentimentGauge"></canvas>
+                <!-- Module 3: Market Sentiment -->
+                <div class="module-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="module-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div style="margin-bottom: 2rem;">
-                        <div id="globalSentimentValue" style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
-                        <div id="globalSentimentLabel" style="font-size: 1.25rem; font-weight: 700; color: var(--text-secondary);">Neutral</div>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
-                        <div>
-                            <div style="font-size: 0.875rem; color: var(--text-tertiary); margin-bottom: 0.5rem;">Positive</div>
-                            <div id="positiveCount" style="font-size: 2rem; font-weight: 800; color: #10b981;">0</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.875rem; color: var(--text-tertiary); margin-bottom: 0.5rem;">Neutral</div>
-                            <div id="neutralCount" style="font-size: 2rem; font-weight: 800; color: #6b7280;">0</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.875rem; color: var(--text-tertiary); margin-bottom: 0.5rem;">Negative</div>
-                            <div id="negativeCount" style="font-size: 2rem; font-weight: 800; color: #ef4444;">0</div>
-                        </div>
-                    </div>
-                    <div style="background: rgba(0, 0, 0, 0.03); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
-                        <div style="display: flex; gap: 0.5rem; height: 40px;">
-                            <div id="positiveBar" style="background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; transition: width 0.8s ease; width: 0%;"></div>
-                            <div id="neutralBar" style="background: linear-gradient(135deg, #6b7280, #4b5563); border-radius: 8px; transition: width 0.8s ease; width: 0%;"></div>
-                            <div id="negativeBar" style="background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 8px; transition: width 0.8s ease; width: 0%;"></div>
-                        </div>
-                    </div>
-                    <div style="text-align: left; padding: 1.5rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); border-radius: 12px; border-left: 4px solid var(--ml-primary);">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                            <i class="fas fa-lightbulb" style="font-size: 1.5rem; color: var(--ml-primary);"></i>
-                            <strong style="font-size: 1.125rem;">AI Insight</strong>
-                        </div>
-                        <div id="insightText" style="color: var(--text-secondary); line-height: 1.7;">Analyzing market sentiment...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sector Sentiment -->
-            <div data-aos="fade-up" data-aos-delay="400">
-                <h3 style="font-size: 1.75rem; font-weight: 800; text-align: center; margin-bottom: 2rem;">
-                    <i class="fas fa-chart-pie"></i> Sector Sentiment Breakdown
-                </h3>
-                <div id="sectorSentimentGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Sentiment Articles Tabs -->
-            <div data-aos="fade-up" data-aos-delay="500">
-                <h3 style="font-size: 1.75rem; font-weight: 800; text-align: center; margin-bottom: 2rem;">
-                    <i class="fas fa-newspaper"></i> Analyzed Articles
-                </h3>
-                <div class="sentiment-tabs">
-                    <div class="sentiment-tab active" data-sentiment="all" onclick="sentimentDashboard.filterArticles('all')">
-                        All <span id="tabAllCount" style="opacity: 0.7;">(0)</span>
-                    </div>
-                    <div class="sentiment-tab" data-sentiment="positive" onclick="sentimentDashboard.filterArticles('positive')">
-                        📈 Positive <span id="tabPositiveCount" style="opacity: 0.7;">(0)</span>
-                    </div>
-                    <div class="sentiment-tab" data-sentiment="neutral" onclick="sentimentDashboard.filterArticles('neutral')">
-                        ➡ Neutral <span id="tabNeutralCount" style="opacity: 0.7;">(0)</span>
-                    </div>
-                    <div class="sentiment-tab" data-sentiment="negative" onclick="sentimentDashboard.filterArticles('negative')">
-                        📉 Negative <span id="tabNegativeCount" style="opacity: 0.7;">(0)</span>
-                    </div>
-                </div>
-                <div id="sentimentArticles" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-                    <!-- Populated by JS -->
+                    <h3>Market Sentiment Analyzer</h3>
+                    <p class="module-description">
+                        <strong>File:</strong> <code>market-sentiment-dashboard.js</code><br>
+                        AI-powered sentiment analysis across sectors with positive/neutral/negative classification and global market sentiment scoring.
+                    </p>
+                    <ul class="module-features">
+                        <li><i class="fas fa-check-circle"></i> Global sentiment score (-100 to +100)</li>
+                        <li><i class="fas fa-check-circle"></i> Sector-level sentiment breakdown</li>
+                        <li><i class="fas fa-check-circle"></i> Bullish/Bearish/Neutral classification</li>
+                        <li><i class="fas fa-check-circle"></i> AI-driven insights generation</li>
+                        <li><i class="fas fa-check-circle"></i> Interactive gauge & timeline charts</li>
+                        <li><i class="fas fa-check-circle"></i> Article filtering by sentiment</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TRENDING TOPICS SECTION
+         TRENDING TOPICS - DETAILED FEATURES
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="section" id="trending">
-        <div class="container-fluid" style="max-width: 1400px;">
+    <section class="analytics-section" id="trending-topics">
+        <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">Trending Topics</span>
+                <span class="section-tag" data-aos="fade-up">Module 1: Trending Topics</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
-                    What's <span class="gradient-text">Trending Now</span>
+                    <i class="fas fa-fire"></i> <span class="gradient-text">Trending Topics Dashboard</span>
                 </h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    AI-detected trending topics with momentum analysis
+                    Detect hot market topics, track company mentions, and identify risks/opportunities
                 </p>
             </div>
 
-            <!-- Trending Topics Grid -->
-            <div id="trendingTopicsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;" data-aos="fade-up" data-aos-delay="300">
-                <!-- Populated by JS -->
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-search-dollar"></i></div>
+                    <h4>Topic Detection Engine</h4>
+                    <p>
+                        Scans articles for 10 major topics (AI, Rate Cuts, Earnings, China, Oil, Crypto, Tech, Banking, Inflation, Recession) using keyword variations and pattern matching.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-building"></i></div>
+                    <h4>Entity Extraction</h4>
+                    <p>
+                        Automatically extracts company names, tickers, and countries from article titles using EntityDatabase with 300+ companies and 50+ countries.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-chart-area"></i></div>
+                    <h4>Trend Momentum</h4>
+                    <p>
+                        Compares last 7 days vs previous 7 days to calculate trend direction (Up/Down/Neutral) with percentage change indicators.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h4>Fear & Greed Index</h4>
+                    <p>
+                        Calculates market sentiment score (-100 to +100) based on positive/negative article classification with visual gauge chart.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-balance-scale"></i></div>
+                    <h4>Risks & Opportunities</h4>
+                    <p>
+                        Identifies top 5 companies with highest positive sentiment (opportunities) and top 5 with highest negative sentiment (risks).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>Sparkline Charts</h4>
+                    <p>
+                        Displays 14-day timeline for each trending topic using Chart.js mini-charts with smooth animations and hover tooltips.
+                    </p>
+                </div>
             </div>
 
-            <!-- Fear & Greed Index -->
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 3rem 2rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); margin-bottom: 4rem;" data-aos="fade-up" data-aos-delay="400">
-                <h3 style="font-size: 1.75rem; font-weight: 800; text-align: center; margin-bottom: 3rem;">
-                    <i class="fas fa-chart-line"></i> Fear & Greed Index
+            <!-- Code Example -->
+            <div style="max-width: 1000px; margin: 3rem auto;" data-aos="fade-up">
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; text-align: center;">
+                    <i class="fas fa-code"></i> Key Functions
                 </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-                    <div class="fear-greed-gauge">
-                        <canvas id="fearGreedGauge"></canvas>
-                        <div style="text-align: center; margin-top: 2rem;">
-                            <div id="fearValue" style="font-size: 4rem; font-weight: 900;">0</div>
-                            <div id="fearLabel" style="font-size: 1.5rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 1rem;">Neutral</div>
-                            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem;">
-                                <div>
-                                    <div style="font-size: 0.875rem; color: var(--text-tertiary);">Fear</div>
-                                    <div id="fearCountValue" style="font-size: 1.5rem; font-weight: 800; color: #ef4444;">0</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.875rem; color: var(--text-tertiary);">Greed</div>
-                                    <div id="greedCountValue" style="font-size: 1.5rem; font-weight: 800; color: #10b981;">0</div>
-                                </div>
-                            </div>
+                <div class="code-block">
+<span class="comment">// Topic Detection with Keyword Variations</span>
+<span class="keyword">const</span> keywords = {
+    <span class="string">'AI'</span>: { icon: <span class="string">'fa-robot'</span>, variations: [<span class="string">'ai'</span>, <span class="string">'artificial intelligence'</span>, <span class="string">'chatgpt'</span>] },
+    <span class="string">'Rate Cuts'</span>: { icon: <span class="string">'fa-percent'</span>, variations: [<span class="string">'rate cut'</span>, <span class="string">'fed'</span>, <span class="string">'monetary policy'</span>] }
+};
+
+<span class="comment">// Entity Extraction with EntityDatabase</span>
+<span class="keyword">const</span> entities = <span class="keyword">this</span>.entityDB.extractEntities(article);
+<span class="comment">// Returns: { companies: [{name, ticker}], countries: ['USA', 'China'], tickers: ['AAPL', 'MSFT'] }</span>
+
+<span class="comment">// Trend Momentum Calculation</span>
+<span class="keyword">const</span> recent7Days = dates.slice(<span class="number">0</span>, <span class="number">7</span>).reduce((sum, date) => sum + count[date], <span class="number">0</span>);
+<span class="keyword">const</span> change = Math.round(((recent7Days - previous7Days) / previous7Days) * <span class="number">100</span>);
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         NEWS TERMINAL - DETAILED FEATURES
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="features-section" id="news-terminal">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Module 2: News Terminal</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-newspaper"></i> <span class="gradient-text">Professional News Aggregator</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Load, filter, and analyze 1000+ articles with entity extraction and smart filtering
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-rss"></i></div>
+                    <h4>Multi-Source RSS</h4>
+                    <p>
+                        Aggregates articles from CNBC (earnings, tech, realtime), MarketWatch, Financial Times, Bloomberg, and Reuters. Supports 100-200 articles per source.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                    <h4>Advanced Filtering</h4>
+                    <p>
+                        Filter by source, sector (Tech, Finance, Energy, Healthcare, Consumer), region (US, EU, Asia), and search by company names/tickers/countries.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-infinity"></i></div>
+                    <h4>Infinite Scroll</h4>
+                    <p>
+                        Auto-load more articles when scrolling to 80% of page height. Supports pagination with 50/100/250/500/ALL articles per page.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h4>MAX Load Mode</h4>
+                    <p>
+                        "Load MAX" button fetches up to 200 articles per source (~1000 total) with progress indicator and entity extraction on all articles.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-tags"></i></div>
+                    <h4>Entity Badges</h4>
+                    <p>
+                        Displays company names and countries as clickable badges on each article card. Click to filter by that entity instantly.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-th-large"></i></div>
+                    <h4>Grid/List Views</h4>
+                    <p>
+                        Toggle between grid (card-based) and list (compact) views. Responsive design adapts to mobile/tablet/desktop screens.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Code Example -->
+            <div style="max-width: 1000px; margin: 3rem auto;" data-aos="fade-up">
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; text-align: center;">
+                    <i class="fas fa-code"></i> Key Functions
+                </h3>
+                <div class="code-block">
+<span class="comment">// Load Articles with Entity Extraction</span>
+<span class="keyword">async</span> loadArticles() {
+    <span class="keyword">const</span> data = <span class="keyword">await this</span>.rssClient.getAllArticles({ maxPerSource: <span class="number">100</span> });
+    
+    <span class="keyword">this</span>.allArticles = data.articles.map(article => {
+        <span class="keyword">const</span> entities = <span class="keyword">this</span>.extractEntities(article);
+        <span class="keyword">return</span> { ...article, companies: entities.companies, countries: entities.countries };
+    });
+}
+
+<span class="comment">// Advanced Filtering Logic</span>
+<span class="keyword">const</span> matchesSearch = searchQuery === <span class="string">''</span> || 
+    article.title.toLowerCase().includes(searchQuery) ||
+    article.companies.some(c => c.name.toLowerCase().includes(searchQuery)) ||
+    article.countries.some(country => country.toLowerCase().includes(searchQuery));
+
+<span class="comment">// Infinite Scroll Detection</span>
+<span class="keyword">const</span> scrollPosition = window.innerHeight + window.scrollY;
+<span class="keyword">if</span> (scrollPosition >= pageHeight * <span class="number">0.8</span>) { <span class="keyword">this</span>.loadMore(); }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MARKET SENTIMENT - DETAILED FEATURES
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section" id="sentiment">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Module 3: Market Sentiment</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-chart-line"></i> <span class="gradient-text">AI Sentiment Analysis</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Bullish/Bearish classification with sector breakdown and sentiment scoring
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <h4>AI Sentiment Engine</h4>
+                    <p>
+                        Analyzes article titles using SentimentAnalyzer with 100+ positive/negative keywords. Scores range from -100 (Extreme Bearish) to +100 (Extreme Bullish).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h4>Global Sentiment Gauge</h4>
+                    <p>
+                        Displays market-wide sentiment score with animated Chart.js doughnut gauge. Color-coded: Green (Bullish), Red (Bearish), Gray (Neutral).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-industry"></i></div>
+                    <h4>Sector Breakdown</h4>
+                    <p>
+                        Calculates sentiment for 6 sectors (Tech, Finance, Energy, Healthcare, Consumer, Other) with visual progress bars and article counts.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h4>AI Insights</h4>
+                    <p>
+                        Generates contextual market insights based on positive/negative percentages. Provides investment recommendations (Risk-off/Caution/Monitor).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-chart-area"></i></div>
+                    <h4>Sentiment Timeline</h4>
+                    <p>
+                        Tracks sentiment evolution over 14 days with Chart.js line chart. Shows Fear/Neutral/Greed zones with horizontal gridlines.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-list-alt"></i></div>
+                    <h4>Article Filtering</h4>
+                    <p>
+                        Filter articles by sentiment (All/Positive/Neutral/Negative) with tab-based navigation. Displays top 30 articles per category.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Code Example -->
+            <div style="max-width: 1000px; margin: 3rem auto;" data-aos="fade-up">
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 1.5rem; text-align: center;">
+                    <i class="fas fa-code"></i> Key Functions
+                </h3>
+                <div class="code-block">
+<span class="comment">// Sentiment Analysis with SentimentAnalyzer</span>
+<span class="keyword">const</span> sentiment = <span class="keyword">this</span>.sentimentAnalyzer.analyze(article.title);
+<span class="comment">// Returns: { sentiment: 'positive', score: 45, confidence: 0.85 }</span>
+
+<span class="comment">// Global Sentiment Score Calculation</span>
+<span class="keyword">const</span> globalScore = Math.round(
+    (positiveCount * <span class="number">50</span> - negativeCount * <span class="number">50</span> + neutralCount * <span class="number">0</span>) / totalAnalyzed
+);
+
+<span class="comment">// Sector Sentiment Detection</span>
+<span class="keyword">const</span> text = (article.title + <span class="string">' '</span> + article.description).toLowerCase();
+<span class="keyword">if</span> (text.match(<span class="string">/\b(tech|ai|nvidia|apple)\b/i</span>)) <span class="keyword">return</span> <span class="string">'tech'</span>;
+<span class="keyword">if</span> (text.match(<span class="string">/\b(bank|fed|wall street)\b/i</span>)) <span class="keyword">return</span> <span class="string">'finance'</span>;
+
+<span class="comment">// AI Insights Generation</span>
+<span class="keyword">if</span> (score > <span class="number">40</span>) {
+    insight = <span class="string">`📈 Strongly Bullish Market: ${positivePercent}% positive coverage...`</span>;
+}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HOW IT WORKS - WORKFLOW
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="features-section" id="how-it-works">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">How It Works</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <span class="gradient-text">Data Flow Architecture</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    From RSS feeds to AI-powered insights in 4 steps
+                </p>
+            </div>
+
+            <div class="workflow-grid">
+                <div class="workflow-step" data-aos="zoom-in">
+                    <div class="workflow-number">1</div>
+                    <h4>RSS Data Collection</h4>
+                    <p>
+                        <strong>RSSClient</strong> fetches articles from multiple financial news sources (CNBC, MarketWatch, Bloomberg, Reuters, FT). 
+                        Supports 100-200 articles per source with caching for performance.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="workflow-number">2</div>
+                    <h4>Entity Extraction</h4>
+                    <p>
+                        <strong>EntityDatabase</strong> extracts company names, tickers, and countries from article titles. 
+                        Database contains 300+ companies (AAPL, MSFT, NVDA...) and 50+ countries.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="workflow-number">3</div>
+                    <h4>Sentiment Analysis</h4>
+                    <p>
+                        <strong>SentimentAnalyzer</strong> classifies articles as Positive/Neutral/Negative using keyword matching. 
+                        Scores range from -100 to +100 with confidence levels.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="workflow-number">4</div>
+                    <h4>Dashboard Rendering</h4>
+                    <p>
+                        <strong>Chart.js</strong> visualizes data with gauges, timelines, sparklines, and bars. 
+                        Real-time updates with smooth animations and interactive tooltips.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         DEPENDENCIES & INTEGRATION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Technical Stack</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    Dependencies & <span class="gradient-text">Integration</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Required libraries and modules for the News Analytics Suite
+                </p>
+            </div>
+
+            <div style="max-width: 1000px; margin: 3rem auto;" data-aos="fade-up">
+                <div class="code-block">
+<span class="comment">// ═══════════════════════════════════════════════════════
+// REQUIRED DEPENDENCIES
+// ═══════════════════════════════════════════════════════</span>
+
+<span class="comment">// 1. Chart.js (for visualizations)</span>
+&lt;script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"&gt;&lt;/script&gt;
+
+<span class="comment">// 2. RSSClient (multi-source aggregator)</span>
+&lt;script src="assets/js/rss-client.js"&gt;&lt;/script&gt;
+
+<span class="comment">// 3. SentimentAnalyzer (AI classification)</span>
+&lt;script src="assets/js/sentiment-analyzer.js"&gt;&lt;/script&gt;
+
+<span class="comment">// 4. FearGreedCalculator (market index)</span>
+&lt;script src="assets/js/fear-greed-calculator.js"&gt;&lt;/script&gt;
+
+<span class="comment">// 5. EntityDatabase (company/country extraction)</span>
+&lt;script src="assets/js/entity-database.js"&gt;&lt;/script&gt;
+
+<span class="comment">// 6. Main Modules (load in order)</span>
+&lt;script src="assets/js/trending-topics-dashboard.js"&gt;&lt;/script&gt;
+&lt;script src="assets/js/news-terminal.js"&gt;&lt;/script&gt;
+&lt;script src="assets/js/market-sentiment-dashboard.js"&gt;&lt;/script&gt;
+
+<span class="comment">// ═══════════════════════════════════════════════════════
+// INITIALIZATION EXAMPLE
+// ═══════════════════════════════════════════════════════</span>
+
+document.addEventListener(<span class="string">'DOMContentLoaded'</span>, () => {
+    <span class="comment">// Initialize EntityDatabase globally</span>
+    window.entityDB = <span class="keyword">new</span> EntityDatabase();
+    
+    <span class="comment">// Initialize modules (only on respective pages)</span>
+    <span class="keyword">if</span> (document.getElementById(<span class="string">'trendingTopicsGrid'</span>)) {
+        window.trendingDashboard = <span class="keyword">new</span> TrendingTopicsDashboard();
+    }
+    
+    <span class="keyword">if</span> (document.getElementById(<span class="string">'articlesContainer'</span>)) {
+        window.newsTerminal = <span class="keyword">new</span> NewsTerminal();
+    }
+    
+    <span class="keyword">if</span> (document.getElementById(<span class="string">'sentimentGauge'</span>)) {
+        window.sentimentDashboard = <span class="keyword">new</span> MarketSentimentDashboard();
+    }
+});
+                </div>
+            </div>
+
+            <!-- Key Features Summary -->
+            <div style="max-width: 1100px; margin: 3rem auto;" data-aos="fade-up">
+                <div style="background: white; border-radius: 24px; padding: 3rem; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);">
+                    <h3 style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem; text-align: center;">
+                        <i class="fas fa-star"></i> Key Capabilities
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 16px; border-left: 4px solid #3b82f6;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔥</div>
+                            <strong style="color: #1e293b; font-size: 1.125rem;">10 Trending Topics</strong>
+                            <p style="color: #64748b; margin-top: 0.5rem; font-size: 0.9375rem;">AI, Rate Cuts, Earnings, China, Oil, Crypto, Tech, Banking, Inflation, Recession</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 16px; border-left: 4px solid #8b5cf6;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏢</div>
+                            <strong style="color: #1e293b; font-size: 1.125rem;">300+ Companies</strong>
+                            <p style="color: #64748b; margin-top: 0.5rem; font-size: 0.9375rem;">Automatic extraction of company names and ticker symbols from article text</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 16px; border-left: 4px solid #06b6d4;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+                            <strong style="color: #1e293b; font-size: 1.125rem;">50+ Countries</strong>
+                            <p style="color: #64748b; margin-top: 0.5rem; font-size: 0.9375rem;">Geographic entity extraction for global market coverage and region filtering</p>
+                        </div>
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 16px; border-left: 4px solid #10b981;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                            <strong style="color: #1e293b; font-size: 1.125rem;">1000+ Articles</strong>
+                            <p style="color: #64748b; margin-top: 0.5rem; font-size: 0.9375rem;">Support for massive datasets with infinite scroll and auto-load functionality</p>
                         </div>
                     </div>
-                    <div>
-                        <canvas id="fearGreedTimeline" style="max-height: 300px;"></canvas>
-                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Risks & Opportunities -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;" data-aos="fade-up" data-aos-delay="500">
-                <div>
-                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; color: #10b981;">
-                        <i class="fas fa-arrow-up"></i> Top Opportunities
-                    </h3>
-                    <div id="opportunitiesList">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                <div>
-                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; color: #ef4444;">
-                        <i class="fas fa-exclamation-triangle"></i> Top Risks
-                    </h3>
-                    <div id="risksList">
-                        <!-- Populated by JS -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         CTA FINAL
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="cta-final">
+        <div class="container-fluid">
+            <div class="cta-content-wrapper">
+                <div class="cta-content" data-aos="zoom-in">
+                    <h2 class="cta-title">Ready to analyze market news with AI?</h2>
+                    <p class="cta-subtitle">
+                        3 professional JavaScript modules for trending topics, news aggregation, and sentiment analysis
+                    </p>
+                    <div class="cta-buttons">
+                        <button class="btn-cta-primary" onclick="window.location.href='news-analytics.html'">
+                            <span>Try News Analytics Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1097,7 +1254,7 @@
                         <li><a href="trend-prediction.html">AlphaVault Score</a></li>
                         <li><a href="ma-predictor.html">M&A Intelligence</a></li>
                         <li><a href="ipo-intelligence.html">IPO Intelligence</a></li>
-                        <li><a href="market-news.html">Market News</a></li>
+                        <li><a href="news-analytics.html">News Analytics</a></li>
                     </ul>
                 </div>
 
@@ -1127,37 +1284,19 @@
          SCRIPTS
          ═══════════════════════════════════════════════════════════════ -->
     
-    <!-- External Libraries -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Core Scripts -->
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- News & Sentiment Analysis Dependencies -->
-    <script src="assets/js/rss-client.js"></script>
-    <script src="assets/js/entity-database.js"></script>
-    <script src="assets/js/sentiment-analyzer.js"></script>
-    <script src="assets/js/fear-greed-calculator.js"></script>
-    
-    <!-- ✅ NEWS TERMINAL, SENTIMENT & TRENDING DASHBOARDS -->
-    <script src="assets/js/news-terminal.js"></script>
-    <script src="assets/js/market-sentiment-dashboard.js"></script>
-    <script src="assets/js/trending-topics-dashboard.js"></script>
-    
-    <!-- Initialization Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('%cAlphaVault Market News Intelligence - Initialization', 'color: #ef4444; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault News Analytics Suite - Initialization', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
             
             // Initialize AOS Animations
             AOS.init({
@@ -1175,7 +1314,7 @@
                 yearElement.textContent = new Date().getFullYear();
             }
 
-            console.log('%cAlphaVault Market News - All Systems Ready!', 'color: #f59e0b; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault News Analytics - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
