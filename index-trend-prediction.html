@@ -367,15 +367,24 @@
                 padding: 2.5rem 1rem !important;
             }
 
-            /* ✅ TITRES CENTRÉS SUR MOBILE */
+            /* ✅ TITRES CENTRÉS SUR MOBILE - RENFORCÉ */
             .section-header {
                 text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
             }
 
             .section-tag,
             .section-title,
             .section-description {
                 text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+
+            .section-title {
+                display: block !important;
+                width: 100% !important;
             }
 
             /* ✅ SCROLL HORIZONTAL POUR SWIPER LES CARTES */
@@ -472,19 +481,6 @@
 
             .solution-card:last-child {
                 margin-right: 0.5rem !important;
-            }
-
-            /* Indicateur de scroll */
-            .features-section::after,
-            .alphy-ai-section::after {
-                content: '← Swipe for more →';
-                display: block;
-                font-size: 0.8125rem;
-                color: #64748b;
-                margin: 1.5rem auto 0 auto;
-                text-align: center;
-                font-weight: 500;
-                letter-spacing: 0.02em;
             }
         }
 
