@@ -517,6 +517,33 @@
                 padding: 1.5rem 1rem !important;
             }
         }
+
+        /* ✅ VAGUES DOUCES ANIMÉES */
+        .hero-trend::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at center, transparent 40%, rgba(255, 255, 255, 0.05) 50%, transparent 60%),
+                radial-gradient(ellipse at center, transparent 30%, rgba(255, 255, 255, 0.08) 40%, transparent 50%);
+            background-size: 100% 50%, 100% 70%;
+            background-position: 0 0, 50% 30%;
+            animation: waveMotion 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes waveMotion {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            50% {
+                transform: translateX(-25%) translateY(-10px);
+            }
+        }
     </style>
 </head>
 
