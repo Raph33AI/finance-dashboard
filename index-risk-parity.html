@@ -222,9 +222,17 @@
                 padding: 2.5rem 1rem !important;
             }
 
-            /* ✅ TITRES CENTRÉS SUR MOBILE */
+            /* ✅ TITRES CENTRÉS SUR MOBILE - CORRECTION RENFORCÉE */
             .section-header {
                 text-align: center !important;
+            }
+
+            .section-header .section-tag,
+            .section-header .section-title,
+            .section-header .section-description {
+                text-align: center !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
             }
 
             .section-tag,
@@ -323,9 +331,8 @@
                 margin-right: 0.5rem !important;
             }
 
-            /* Indicateur de scroll */
-            .features-section::after,
-            .benefits-section::after {
+            /* ✅ INDICATEUR DE SCROLL - UNIQUEMENT POUR CORE CONCEPT */
+            .features-section#concept::after {
                 content: '← Swipe for more →';
                 display: block;
                 font-size: 0.8125rem;
