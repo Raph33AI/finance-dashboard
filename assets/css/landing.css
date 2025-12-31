@@ -4942,7 +4942,7 @@ body.dark-mode .benefit-item h4 {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✨ HERO SECTION - ULTRA STYLÉ BLEU/VIOLET
+   ✨ HERO SECTION - ULTRA STYLÉ BLEU/VIOLET (VERSION CORRIGÉE)
    ═══════════════════════════════════════════════════════════════ */
 
 /* Hero Container - Dégradé animé premium */
@@ -4952,7 +4952,7 @@ body.dark-mode .benefit-item h4 {
     display: flex;
     align-items: center;
     padding: 120px 0 80px 0;
-    overflow: hidden;
+    overflow: visible; /* ✅ CORRIGÉ - Au lieu de overflow: hidden */
     background: linear-gradient(135deg, 
         #0f172a 0%, 
         #1e293b 25%, 
@@ -5067,6 +5067,8 @@ body.dark-mode .benefit-item h4 {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
+    overflow: visible; /* ✅ AJOUTÉ */
+    height: auto; /* ✅ AJOUTÉ */
 }
 
 /* Hero Content - Côté gauche */
@@ -5074,9 +5076,11 @@ body.dark-mode .benefit-item h4 {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    overflow: visible; /* ✅ AJOUTÉ */
+    height: auto; /* ✅ AJOUTÉ */
 }
 
-/* Announcement Badge - Badge premium */
+/* Announcement Badge - Badge premium glassmorphism */
 .announcement-badge {
     display: inline-flex;
     align-items: center;
@@ -5084,6 +5088,7 @@ body.dark-mode .benefit-item h4 {
     padding: 0.75rem 1.5rem;
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 50px;
     color: white;
@@ -5420,24 +5425,31 @@ body.dark-mode .benefit-item h4 {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📱 RESPONSIVE MOBILE
+   📱 RESPONSIVE MOBILE - HERO SECTION
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
+    .hero {
+        padding: 120px 0 60px 0;
+        overflow: visible; /* ✅ MAINTENU */
+    }
+    
     .hero-container {
         grid-template-columns: 1fr;
         gap: 3rem;
         padding: 0 1.5rem;
-    }
-
-    .hero-visual {
-        order: 2;
+        overflow: visible; /* ✅ MAINTENU */
     }
 
     .hero-content {
         order: 1;
         text-align: center;
         align-items: center;
+        overflow: visible; /* ✅ MAINTENU */
+    }
+
+    .hero-visual {
+        order: 2;
     }
 
     .hero-headline {
@@ -5481,11 +5493,19 @@ body.dark-mode .benefit-item h4 {
 @media (max-width: 640px) {
     .hero {
         padding: 100px 0 60px 0;
+        overflow: visible; /* ✅ MAINTENU */
+        min-height: auto; /* ✅ AJOUTÉ */
     }
 
     .hero-container {
         padding: 0 1rem;
         gap: 2rem;
+        overflow: visible; /* ✅ MAINTENU */
+    }
+
+    .hero-content {
+        overflow: visible; /* ✅ MAINTENU */
+        gap: 1.5rem;
     }
 
     .hero-headline {
@@ -5525,6 +5545,55 @@ body.dark-mode .benefit-item h4 {
         filter: blur(80px);
     }
 }
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 90px 0 50px 0;
+    }
+
+    .hero-container {
+        padding: 0 0.75rem;
+        gap: 1.5rem;
+    }
+
+    .hero-headline {
+        font-size: clamp(1.75rem, 11vw, 2.25rem);
+    }
+
+    .announcement-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .btn-hero-primary {
+        padding: 0.875rem 1.75rem;
+        font-size: 0.9375rem;
+    }
+
+    .social-proof {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .proof-number {
+        font-size: 1.375rem;
+    }
+
+    .mockup-content {
+        padding: 1.25rem;
+    }
+
+    .gradient-orb.orb-1,
+    .gradient-orb.orb-2 {
+        width: 250px;
+        height: 250px;
+        filter: blur(70px);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FIN DE LA HERO SECTION
+   ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
    PRIVATE & GROUP CHATS PREVIEW
