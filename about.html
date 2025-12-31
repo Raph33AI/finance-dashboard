@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - AlphaVault AI | Democratizing AI-Powered Financial Intelligence</title>
-    
     <meta name="description" content="AlphaVault AI democratizes institutional-grade financial analysis through AI. Discover our mission, vision, and revolutionary approach to investment intelligence.">
     <meta name="keywords" content="AI finance, financial intelligence, investment platform, AlphaVault AI, about us, mission, vision">
+    <title>About Us - AlphaVault AI | Democratizing Financial Intelligence</title>
     
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
     
@@ -28,22 +29,27 @@
     <meta name="msapplication-TileColor" content="#667eea">
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
-    
+
     <style>
+        /* ═══════════════════════════════════════════════════════════════
+           ABOUT US - ALPHAVAULT AI - 100% RESPONSIVE
+           ═══════════════════════════════════════════════════════════════ */
+        
         /* Global overflow fix */
         html, body {
             max-width: 100vw;
             overflow-x: hidden;
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-           HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE (IDENTIQUE IPO)
-           ═══════════════════════════════════════════════════════════════ */
+        /* ✅ HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE */
         .hero-about {
             min-height: 100vh;
             display: flex;
@@ -151,7 +157,7 @@
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
         }
 
-        /* Stats Cards in Hero */
+        /* Hero Stats Cards */
         .hero-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -191,7 +197,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           MISSION & VISION SECTION - ENRICHIE
+           MISSION & VISION SECTION
            ═══════════════════════════════════════════════════════════════ */
         .mission-vision-section {
             padding: 100px 1rem;
@@ -302,12 +308,31 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           WHY CHOOSE US SECTION - AVANTAGES COMPÉTITIFS
+           WHY CHOOSE US SECTION - SWIPER HORIZONTAL SUR MOBILE
            ═══════════════════════════════════════════════════════════════ */
         .why-choose-section {
             padding: 100px 1rem;
             background: var(--bg-primary);
             position: relative;
+        }
+
+        .section-header-custom {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header-custom h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-header-custom p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .why-choose-grid {
@@ -392,6 +417,21 @@
             color: var(--text-secondary);
         }
 
+        /* Swipe Indicator (Hidden on Desktop) */
+        .swipe-indicator {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 600;
+        }
+
+        .swipe-indicator i {
+            font-size: 1.125rem;
+            color: var(--ml-primary);
+        }
+
         /* ═══════════════════════════════════════════════════════════════
            TECHNOLOGY SECTION
            ═══════════════════════════════════════════════════════════════ */
@@ -456,6 +496,11 @@
             margin-bottom: 0.75rem;
         }
 
+        .tech-item h4 i {
+            margin-right: 0.5rem;
+            color: #3b82f6;
+        }
+
         .tech-item p {
             font-size: 1rem;
             line-height: 1.7;
@@ -463,89 +508,11 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           IMPACT SECTION
-           ═══════════════════════════════════════════════════════════════ */
-        .impact-section {
-            padding: 100px 1rem;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        }
-
-        body.dark-mode .impact-section {
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-        }
-
-        .impact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 2.5rem;
-            max-width: 1200px;
-            margin: 3rem auto 0;
-        }
-
-        .impact-card {
-            text-align: center;
-            padding: 3rem 2rem;
-            background: var(--card-bg);
-            border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(59, 130, 246, 0.1);
-        }
-
-        .impact-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .impact-number {
-            font-size: 3.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-        }
-
-        .impact-label {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .impact-desc {
-            font-size: 0.9375rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           VALUES SECTION - OPTIMISÉE
+           VALUES SECTION - SWIPER HORIZONTAL SUR MOBILE
            ═══════════════════════════════════════════════════════════════ */
         .values-section {
             padding: 100px 1rem;
             background: var(--bg-primary);
-        }
-
-        .section-header-custom {
-            text-align: center;
-            margin-bottom: 5rem;
-        }
-
-        .section-header-custom h2 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .section-header-custom p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto;
         }
 
         .values-grid {
@@ -634,7 +601,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           FOUNDER SECTION - PREMIUM
+           FOUNDER SECTION
            ═══════════════════════════════════════════════════════════════ */
         .founder-section {
             padding: 100px 1rem;
@@ -762,6 +729,11 @@
             animation: pulse 8s ease-in-out infinite;
         }
 
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .cta-about-content {
             max-width: 800px;
             margin: 0 auto;
@@ -808,7 +780,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           RESPONSIVE
+           RESPONSIVE MOBILE - SCROLL HORIZONTAL
            ═══════════════════════════════════════════════════════════════ */
         @media (max-width: 768px) {
             .hero-about {
@@ -821,39 +793,195 @@
                 font-size: 0.875rem;
             }
 
-            .hero-stats {
-                grid-template-columns: 1fr;
+            .hero-about p br {
+                display: none;
             }
 
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .hero-stat-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-stat-value {
+                font-size: 2rem;
+            }
+
+            /* Mission & Vision - Stack Mobile */
             .mission-vision-grid {
                 grid-template-columns: 1fr;
+                gap: 2rem;
             }
 
             .mission-card, .vision-card {
                 padding: 2.5rem 2rem;
             }
 
+            .mission-card h2, .vision-card h2 {
+                font-size: 2rem;
+            }
+
+            .mission-card p, .vision-card p {
+                font-size: 1rem;
+            }
+
+            /* ✅ WHY CHOOSE - SCROLL HORIZONTAL */
+            .why-choose-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1rem !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 1rem !important;
+                margin: 0 -1rem !important;
+                max-width: 100vw !important;
+            }
+
+            .why-choose-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .why-choose-grid {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .why-card {
+                flex: 0 0 85vw !important;
+                min-width: 85vw !important;
+                max-width: 85vw !important;
+                scroll-snap-align: center !important;
+                margin: 0 !important;
+                padding: 2rem 1.5rem !important;
+                min-height: 320px !important;
+                height: auto !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .why-card:first-child {
+                margin-left: 0.5rem !important;
+            }
+
+            .why-card:last-child {
+                margin-right: 0.5rem !important;
+            }
+
+            /* Swipe Indicator - Visible on Mobile */
+            .swipe-indicator {
+                display: block !important;
+            }
+
+            /* Technology Section Mobile */
             .tech-content {
                 padding: 2.5rem 2rem;
             }
 
-            .why-choose-grid,
-            .values-grid,
-            .impact-grid,
             .tech-grid {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
 
+            /* ✅ VALUES - SCROLL HORIZONTAL */
+            .values-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 1rem !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                scroll-behavior: smooth !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 1rem !important;
+                margin: 0 -1rem !important;
+                max-width: 100vw !important;
+            }
+
+            .values-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .values-grid {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .value-card {
+                flex: 0 0 85vw !important;
+                min-width: 85vw !important;
+                max-width: 85vw !important;
+                scroll-snap-align: center !important;
+                margin: 0 !important;
+                padding: 2rem 1.5rem !important;
+                min-height: 320px !important;
+                height: auto !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .value-card:first-child {
+                margin-left: 0.5rem !important;
+            }
+
+            .value-card:last-child {
+                margin-right: 0.5rem !important;
+            }
+
+            /* Founder Section Mobile */
             .founder-card {
                 padding: 3rem 2rem;
             }
 
+            .founder-name {
+                font-size: 2rem;
+            }
+
+            .founder-title {
+                font-size: 1.25rem;
+            }
+
+            /* CTA Mobile */
+            .cta-about h2 {
+                font-size: 2rem;
+            }
+
+            .cta-about p {
+                font-size: 1.125rem;
+            }
+
+            .btn-cta-about {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+
+            /* Section Headers Mobile */
             .section-header-custom h2 {
                 font-size: 2rem;
             }
 
-            .cta-about h2 {
-                font-size: 2rem;
+            .section-header-custom p {
+                font-size: 1.0625rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .why-card,
+            .value-card {
+                flex: 0 0 90vw !important;
+                min-width: 90vw !important;
+                max-width: 90vw !important;
+                padding: 1.5rem 1.125rem !important;
+                min-height: 300px !important;
             }
         }
     </style>
@@ -876,8 +1004,20 @@
                             </linearGradient>
                         </defs>
                         <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                              stroke="url(#logoGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                              stroke="url(#logoGradient)" 
+                              stroke-width="4" 
+                              fill="none" 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round"/>
+                        <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                         <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                        <path d="M 85 35 L 90 30 L 85 25" 
+                              stroke="url(#logoGradient)" 
+                              stroke-width="3" 
+                              fill="none" 
+                              stroke-linecap="round"/>
                     </svg>
                 </div>
                 <span class="brand-text">AlphaVault <strong>AI</strong></span>
@@ -1007,7 +1147,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         WHY CHOOSE ALPHAVAULT AI
+         WHY CHOOSE ALPHAVAULT AI - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="why-choose-section">
         <div class="container-fluid">
@@ -1042,7 +1182,7 @@
                 </div>
 
                 <!-- 3. Real-Time Data -->
-                <div class="why-card" data-aos="zoom-in" data-aos-delay="200">
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="150">
                     <div class="why-icon-wrapper">
                         <i class="fas fa-bolt"></i>
                     </div>
@@ -1054,7 +1194,7 @@
                 </div>
 
                 <!-- 4. Transparency & Trust -->
-                <div class="why-card" data-aos="zoom-in" data-aos-delay="300">
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="200">
                     <div class="why-icon-wrapper">
                         <i class="fas fa-shield-alt"></i>
                     </div>
@@ -1066,7 +1206,7 @@
                 </div>
 
                 <!-- 5. Affordable Pricing -->
-                <div class="why-card" data-aos="zoom-in" data-aos-delay="400">
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="250">
                     <div class="why-icon-wrapper">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
@@ -1078,7 +1218,7 @@
                 </div>
 
                 <!-- 6. Global Coverage -->
-                <div class="why-card" data-aos="zoom-in" data-aos-delay="500">
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="300">
                     <div class="why-icon-wrapper">
                         <i class="fas fa-globe"></i>
                     </div>
@@ -1088,6 +1228,13 @@
                         cross-border M&A tracking, and international IPO screening.
                     </p>
                 </div>
+            </div>
+
+            <!-- Swipe Indicator (Mobile Only) -->
+            <div class="swipe-indicator">
+                <i class="fas fa-chevron-left"></i>
+                Swipe for more
+                <i class="fas fa-chevron-right"></i>
             </div>
         </div>
     </section>
@@ -1163,51 +1310,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         IMPACT & RESULTS
-         ═══════════════════════════════════════════════════════════════ -->
-    <section class="impact-section">
-        <div class="container-fluid">
-            <div class="section-header-custom" data-aos="fade-up">
-                <h2>Our Impact in Numbers</h2>
-                <p>Real results from real users making smarter investment decisions</p>
-            </div>
-
-            <div class="impact-grid">
-                <div class="impact-card" data-aos="zoom-in">
-                    <div class="impact-number">10,000+</div>
-                    <div class="impact-label">Active Users</div>
-                    <div class="impact-desc">Investors worldwide trust AlphaVault AI</div>
-                </div>
-
-                <div class="impact-card" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="impact-number">$2.5B+</div>
-                    <div class="impact-label">Assets Analyzed</div>
-                    <div class="impact-desc">Portfolio value processed through our platform</div>
-                </div>
-
-                <div class="impact-card" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="impact-number">94%</div>
-                    <div class="impact-label">AI Prediction Accuracy</div>
-                    <div class="impact-desc">Average accuracy on IPO success scoring</div>
-                </div>
-
-                <div class="impact-card" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="impact-number">500K+</div>
-                    <div class="impact-label">Companies Analyzed</div>
-                    <div class="impact-desc">IPOs, M&A deals, and public companies screened</div>
-                </div>
-
-                <div class="impact-card" data-aos="zoom-in" data-aos-delay="400">
-                    <div class="impact-number">18.7%</div>
-                    <div class="impact-label">Avg. Outperformance</div>
-                    <div class="impact-desc">Users vs. S&P 500 over 12-month period</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         CORE VALUES
+         CORE VALUES - SWIPER HORIZONTAL SUR MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     <section class="values-section">
         <div class="container-fluid">
@@ -1283,6 +1386,13 @@
                     </p>
                 </div>
             </div>
+
+            <!-- Swipe Indicator (Mobile Only) -->
+            <div class="swipe-indicator">
+                <i class="fas fa-chevron-left"></i>
+                Swipe for more
+                <i class="fas fa-chevron-right"></i>
+            </div>
         </div>
     </section>
 
@@ -1346,15 +1456,20 @@
                                     </linearGradient>
                                 </defs>
                                 <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                      stroke="url(#logoGradientFooter)" stroke-width="4" fill="none"/>
+                                      stroke="url(#logoGradientFooter)" 
+                                      stroke-width="4" 
+                                      fill="none"/>
                             </svg>
                         </div>
                         <span class="brand-text">AlphaVault <strong>AI</strong></span>
                     </div>
-                    <p class="footer-description">AI-powered financial intelligence platform for smart investors.</p>
+                    <p class="footer-description">
+                        AI-powered financial intelligence platform for smart investors.
+                    </p>
                     <div class="footer-social">
                         <a href="https://www.linkedin.com/company/alphavault-ai" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                         <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
                     </div>
                 </div>
@@ -1364,8 +1479,8 @@
                     <ul>
                         <li><a href="index.html#features">Features</a></li>
                         <li><a href="index.html#alphy-ai">Alphy AI</a></li>
-                        <li><a href="index.html#pricing">Pricing</a></li>
                         <li><a href="dashboard-financier.html">Dashboard</a></li>
+                        <li><a href="index.html#pricing">Pricing</a></li>
                     </ul>
                 </div>
 
@@ -1376,6 +1491,7 @@
                         <li><a href="trend-prediction.html">AlphaVault Score</a></li>
                         <li><a href="ma-predictor.html">M&A Intelligence</a></li>
                         <li><a href="ipo-intelligence.html">IPO Intelligence</a></li>
+                        <li><a href="monte-carlo.html">Monte Carlo</a></li>
                     </ul>
                 </div>
 
@@ -1404,16 +1520,20 @@
     <!-- ═══════════════════════════════════════════════════════════════
          SCRIPTS
          ═══════════════════════════════════════════════════════════════ -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="assets/js/firebase-config.js"></script>
     
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/config.js"></script>
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/landing.js"></script>
+    <script src="assets/js/auth-system.js"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('%cAlphaVault AI - About Us Page', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault AI - About Us Page - Initialization', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
             
             // Initialize AOS Animations
             AOS.init({
@@ -1425,37 +1545,13 @@
             });
             console.log('✅ AOS Animations initialized');
 
-            // Current Year
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-            // Mobile Menu
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const navMenu = document.getElementById('navMenu');
-            
-            if (mobileMenuBtn && navMenu) {
-                mobileMenuBtn.addEventListener('click', () => {
-                    mobileMenuBtn.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
+            // Update current year in footer
+            const yearElement = document.getElementById('currentYear');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
             }
 
-            // Auth State Management
-            const navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
-            const navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
-
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                firebase.auth().onAuthStateChanged((user) => {
-                    if (user) {
-                        navCtaLoggedOut.style.display = 'none';
-                        navCtaLoggedIn.style.display = 'flex';
-                    } else {
-                        navCtaLoggedOut.style.display = 'flex';
-                        navCtaLoggedIn.style.display = 'none';
-                    }
-                });
-            }
-
-            console.log('%cAlphaVault AI - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
+            console.log('%cAlphaVault AI - About Us - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
