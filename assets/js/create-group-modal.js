@@ -341,21 +341,18 @@ class CreateGroupModal {
                 return;
             }
 
-            // Appeler le Worker de notification
-            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev', {
+            // ✅ CORRECTION : Appeler le bon endpoint avec la bonne structure
+            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev/send-group-created', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    type: 'group_created',
-                    data: {
-                        groupName: groupData.name,
-                        groupPhoto: groupData.photoURL,
-                        creatorName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
-                        creatorEmail: this.currentUser.email,
-                        members: members
-                    }
+                    groupName: groupData.name,
+                    groupPhoto: groupData.photoURL,
+                    creatorName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
+                    creatorEmail: this.currentUser.email,
+                    members: members
                 })
             });
 

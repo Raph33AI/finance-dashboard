@@ -405,21 +405,18 @@ class GroupChat {
                 ? messageText.substring(0, 100) + '...' 
                 : messageText;
 
-            // Appeler le Worker de notification
-            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev', {
+            // ✅ CORRECTION : Appeler le bon endpoint avec la bonne structure
+            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev/send-group-message', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    type: 'group_message',
-                    data: {
-                        groupName: this.currentGroup.name,
-                        groupPhoto: this.currentGroup.photoURL,
-                        senderName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
-                        messagePreview: messagePreview || '📎 Attachment',
-                        recipients: recipients
-                    }
+                    groupName: this.currentGroup.name,
+                    groupPhoto: this.currentGroup.photoURL,
+                    senderName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
+                    messagePreview: messagePreview || '📎 Attachment',
+                    recipients: recipients
                 })
             });
 
