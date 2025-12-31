@@ -939,7 +939,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        ✅ COMMUNITY HUB SECTION - VERSION CORRIGÉE
+        ✅ COMMUNITY HUB SECTION - VERSION CORRIGÉE (PRIVATE & GROUP CHATS)
         ═══════════════════════════════════════════════════════════════ -->
     <section class="community-hub-section" id="community">
         <div class="container-fluid">
@@ -991,23 +991,24 @@
                     </div>
                 </div>
 
-                <!-- <div class="community-feature-card" data-aos="fade-up" data-aos-delay="200">
+                <!-- ✅ NOUVELLE CARTE: PRIVATE & GROUP CHATS -->
+                <div class="community-feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon-large">
-                        <i class="fas fa-comments"></i>
+                        <i class="fas fa-user-friends"></i>
                     </div>
-                    <h3>Live Community Chat</h3>
-                    <p>Real-time discussions with active traders and investors. Get instant feedback and market updates.</p>
+                    <h3>Private & Group Chats</h3>
+                    <p>Create private 1-on-1 conversations or join thematic groups to discuss strategies with like-minded investors.</p>
                     <div class="feature-stats">
                         <div class="stat-item">
-                            <strong>Active</strong>
-                            <span>Users</span>
+                            <strong>Secure</strong>
+                            <span>Private</span>
                         </div>
                         <div class="stat-item">
-                            <strong>24/7</strong>
-                            <span>Online</span>
+                            <strong>Themed</strong>
+                            <span>Groups</span>
                         </div>
                     </div>
-                </div> -->
+                </div>
 
                 <div class="community-feature-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon-large">
@@ -1113,7 +1114,7 @@
                     </div>
 
                     <div class="preview-column">
-                        <!-- ✅ TOP CONTRIBUTORS - NOMS FAKE + ESPACE EN BAS -->
+                        <!-- ✅ TOP CONTRIBUTORS -->
                         <div class="preview-card preview-card-top-contributors">
                             <div class="preview-card-header">
                                 <i class="fas fa-trophy"></i>
@@ -1183,47 +1184,92 @@
                             </div>
                         </div>
 
-                        <!-- ✅ LIVE CHAT - AVEC ESPACE EN HAUT -->
-                        <div class="preview-card live-chat-preview">
+                        <!-- ✅ NOUVELLE SECTION: PRIVATE & GROUP CHATS -->
+                        <div class="preview-card private-chats-preview">
                             <div class="preview-card-header">
-                                <i class="fas fa-comments"></i>
-                                <span>Live Chat</span>
-                                <span class="live-indicator">
+                                <i class="fas fa-user-friends"></i>
+                                <span>Private & Group Chats</span>
+                                <span class="active-indicator">
                                     <span class="pulse-dot"></span>
-                                    Live
+                                    Active
                                 </span>
                             </div>
                             
-                            <div class="chat-messages-preview">
-                                <div class="chat-message">
-                                    <img src="https://ui-avatars.com/api/?name=Sarah+J&background=ef4444&color=fff&bold=true&size=48" alt="Sarah J">
-                                    <div class="chat-content">
-                                        <strong>Sarah J.</strong>
-                                        <p>Anyone following the NVDA earnings call today? 🚀</p>
+                            <!-- Liste des groupes disponibles -->
+                            <div class="chat-groups-list">
+                                <div class="chat-group-item">
+                                    <div class="group-icon tech">
+                                        <i class="fas fa-microchip"></i>
                                     </div>
+                                    <div class="group-info">
+                                        <h4>Tech Stocks Hub</h4>
+                                        <p><i class="fas fa-users"></i> 248 members • <span class="group-status online">12 online</span></p>
+                                    </div>
+                                    <button class="btn-join-group">Join</button>
                                 </div>
 
-                                <div class="chat-message">
-                                    <img src="https://ui-avatars.com/api/?name=Mike+T&background=f59e0b&color=fff&bold=true&size=48" alt="Mike T">
-                                    <div class="chat-content">
-                                        <strong>Mike T.</strong>
-                                        <p>Yes! Expecting strong guidance for Q1 2026</p>
+                                <div class="chat-group-item">
+                                    <div class="group-icon crypto">
+                                        <i class="fab fa-bitcoin"></i>
                                     </div>
+                                    <div class="group-info">
+                                        <h4>Crypto Traders</h4>
+                                        <p><i class="fas fa-users"></i> 189 members • <span class="group-status online">8 online</span></p>
+                                    </div>
+                                    <button class="btn-join-group">Join</button>
                                 </div>
 
-                                <div class="chat-message">
-                                    <img src="https://ui-avatars.com/api/?name=Alex+R&background=3B82F6&color=fff&bold=true&size=48" alt="Alex R">
-                                    <div class="chat-content">
-                                        <strong>Alex R.</strong>
-                                        <p>Just published my NVDA deep analysis. Check the community feed! 📊</p>
+                                <div class="chat-group-item">
+                                    <div class="group-icon ipo">
+                                        <i class="fas fa-rocket"></i>
+                                    </div>
+                                    <div class="group-info">
+                                        <h4>IPO Watch</h4>
+                                        <p><i class="fas fa-users"></i> 156 members • <span class="group-status online">5 online</span></p>
+                                    </div>
+                                    <button class="btn-join-group">Join</button>
+                                </div>
+
+                                <div class="chat-group-item">
+                                    <div class="group-icon dividend">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                    </div>
+                                    <div class="group-info">
+                                        <h4>Dividend Investors</h4>
+                                        <p><i class="fas fa-users"></i> 134 members • <span class="group-status online">3 online</span></p>
+                                    </div>
+                                    <button class="btn-join-group">Join</button>
+                                </div>
+                            </div>
+
+                            <!-- Section Private Chats -->
+                            <div class="private-chats-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-lock"></i>
+                                    Your Private Conversations
+                                </h4>
+                                <div class="private-chat-item">
+                                    <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=8B5CF6&color=fff&bold=true&size=48" alt="Sarah Johnson">
+                                    <div class="private-chat-info">
+                                        <h5>Sarah Johnson <span class="online-dot"></span></h5>
+                                        <p class="last-message">Great analysis on NVDA! 👍</p>
+                                    </div>
+                                    <span class="unread-badge">2</span>
+                                </div>
+
+                                <div class="private-chat-item">
+                                    <img src="https://ui-avatars.com/api/?name=Michael+Anderson&background=3B82F6&color=fff&bold=true&size=48" alt="Michael Anderson">
+                                    <div class="private-chat-info">
+                                        <h5>Michael Anderson</h5>
+                                        <p class="last-message">Thanks for sharing the report</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="chat-input-preview">
-                                <input type="text" placeholder="Join the conversation..." disabled>
-                                <button disabled><i class="fas fa-paper-plane"></i></button>
-                            </div>
+                            <button class="btn-create-chat">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Create New Chat</span>
+                            </button>
                         </div>
                     </div>
                 </div>
