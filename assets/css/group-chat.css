@@ -1,7 +1,7 @@
 /* ============================================
-   GROUP-CHAT.CSS v1.1 - CORRECTIONS MODAL
+   GROUP-CHAT.CSS v1.2 - CORRECTION BOUTON CLOSE
    🎨 Styles pour création et gestion de groupes
-   ✅ Bouton close reste dans le modal
+   ✅ Bouton close reste DANS le modal
    ============================================ */
 
 /* ===== MODAL OVERLAY ===== */
@@ -38,7 +38,8 @@
     flex-direction: column;
     animation: slideUp 0.4s ease;
     border: 2px solid var(--border-color, #e2e8f0);
-    overflow: hidden; /* ✅ AJOUT : Empêche les débordements */
+    overflow: hidden;
+    position: relative; /* ✅ AJOUT : Contexte de positionnement */
 }
 
 body.dark-mode .modal-container {
@@ -66,9 +67,11 @@ body.dark-mode .modal-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px; /* ✅ AJOUT : Espace entre titre et bouton */
-    flex-wrap: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
-    min-height: 80px; /* ✅ AJOUT : Hauteur minimale */
+    gap: 16px;
+    flex-wrap: nowrap;
+    min-height: 80px;
+    position: relative; /* ✅ AJOUT : Contexte pour le bouton close */
+    flex-shrink: 0; /* ✅ AJOUT : Empêche la compression */
 }
 
 .modal-header h2 {
@@ -78,11 +81,12 @@ body.dark-mode .modal-container {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1; /* ✅ MODIF : Prend l'espace disponible */
-    min-width: 0; /* ✅ AJOUT : Permet la réduction si nécessaire */
-    overflow: hidden; /* ✅ AJOUT : Cache le débordement */
-    text-overflow: ellipsis; /* ✅ AJOUT : Ajoute ... si trop long */
-    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 60px); /* ✅ AJOUT : Laisse de la place au bouton */
 }
 
 .modal-close {
@@ -94,12 +98,14 @@ body.dark-mode .modal-container {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1.2rem;
-    flex-shrink: 0; /* ✅ Conservé : Empêche la compression */
-    width: 44px; /* ✅ AJOUT : Largeur fixe */
-    height: 44px; /* ✅ AJOUT : Hauteur fixe */
-    display: flex; /* ✅ AJOUT : Centrage parfait */
-    align-items: center; /* ✅ AJOUT */
-    justify-content: center; /* ✅ AJOUT */
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* ✅ AJOUT : Reste dans le flux */
+    z-index: 1; /* ✅ AJOUT : Au-dessus du contenu */
 }
 
 .modal-close:hover {
@@ -836,4 +842,4 @@ body.dark-mode .danger-zone {
     }
 }
 
-console.log('✅ group-chat.css loaded (v1.1 - Modal close button fixed)');
+console.log('✅ group-chat.css loaded (v1.2 - Modal close button FIXED)');
