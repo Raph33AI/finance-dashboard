@@ -341,7 +341,9 @@ class CreateGroupModal {
                 return;
             }
 
-            // ✅ CORRECTION : Appeler le bon endpoint avec la bonne structure
+            console.log(`📤 Sending notifications to ${members.length} members:`, members.map(m => m.email));
+
+            // ✅ CORRECTION : Bon endpoint + bonne structure (sans "type" ni "data")
             const response = await fetch('https://message-notification-sender.raphnardone.workers.dev/send-group-created', {
                 method: 'POST',
                 headers: {
@@ -356,16 +358,22 @@ class CreateGroupModal {
                 })
             });
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Worker response error:', response.status, errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
             const result = await response.json();
 
             if (result.success) {
-                console.log(`✅ Notifications sent to ${result.sent} members`);
+                console.log(`✅ Group created notifications sent to ${result.sent} members`);
             } else {
                 console.error('❌ Failed to send notifications:', result.error);
             }
 
         } catch (error) {
-            console.error('❌ Error sending notifications:', error);
+            console.error('❌ Error sending group created notifications:', error);
             // Ne pas bloquer la création du groupe si les emails échouent
         }
     }
