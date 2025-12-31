@@ -50,114 +50,282 @@
             overflow-x: hidden;
         }
 
-        /* ✅ HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE */
+        /* ═══════════════════════════════════════════════════════════════
+        ✨ HERO SECTION - ULTRA STYLÉ PREMIUM (STYLE IDENTIQUE À ADVANCED ANALYSIS)
+        ═══════════════════════════════════════════════════════════════ */
+
+        /* Hero Container - Dégradé animé premium */
         .hero-score {
+            position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            padding: 120px 1rem 80px 1rem;
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
-            background-size: 200% 200%;
-            animation: gradientShift 15s ease infinite;
-            overflow: hidden;
+            padding: 120px 2rem 80px 2rem;
+            overflow: visible;
+            background: linear-gradient(135deg, 
+                #0f172a 0%, 
+                #1e293b 25%, 
+                #334155 50%, 
+                #1e293b 75%, 
+                #0f172a 100%);
+            background-size: 400% 400%;
+            animation: heroGradientFlow 20s ease infinite;
         }
 
-        @keyframes gradientShift {
+        @keyframes heroGradientFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        /* Hero Background - Multi-couches */
         .hero-score::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.4), transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.4), transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%);
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
             z-index: 0;
-            animation: pulseGlow 8s ease-in-out infinite;
+            pointer-events: none;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridPulse 10s ease-in-out infinite;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
+        /* Gradient Orbs - Orbes lumineux animés */
+        .hero-score::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            top: -10%;
+            left: -5%;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(59, 130, 246, 0.6) 0%, 
+                rgba(99, 102, 241, 0.4) 35%, 
+                transparent 70%);
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: floatOrb1 25s ease-in-out infinite;
+            mix-blend-mode: screen;
+            z-index: 0;
+        }
+
+        @keyframes floatOrb1 {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translate(30px, -50px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-20px, -80px) scale(0.95);
+                opacity: 0.7;
+            }
+            75% { 
+                transform: translate(40px, -30px) scale(1.05);
+                opacity: 0.65;
+            }
+        }
+
+        /* Second Orb (via pseudo-element sur container-fluid) */
+        .hero-score .container-fluid::before {
+            content: '';
+            position: absolute;
+            width: 550px;
+            height: 550px;
+            bottom: -15%;
+            right: -10%;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(139, 92, 246, 0.6) 0%, 
+                rgba(168, 85, 247, 0.4) 35%, 
+                transparent 70%);
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: floatOrb2 30s ease-in-out infinite -5s;
+            mix-blend-mode: screen;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatOrb2 {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translate(-30px, 50px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(20px, 80px) scale(0.95);
+                opacity: 0.7;
+            }
+            75% { 
+                transform: translate(-40px, 30px) scale(1.05);
+                opacity: 0.65;
+            }
+        }
+
+        /* Container */
         .hero-score .container-fluid {
             position: relative;
             z-index: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: auto;
+            overflow: visible;
         }
 
         .hero-score-content {
             text-align: center;
             max-width: 900px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            overflow: visible;
+            height: auto;
         }
 
+        /* Score Badge - Style premium glassmorphism */
         .hero-score .score-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
-            font-weight: 700;
             font-size: 0.9375rem;
-            letter-spacing: 0.5px;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            box-shadow: 
+                0 8px 32px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-score .score-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.6s;
+        }
+
+        .hero-score .score-badge:hover::before {
+            left: 100%;
         }
 
         .hero-score .score-badge:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+            box-shadow: 
+                0 12px 48px rgba(59, 130, 246, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .hero-score .score-badge i {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
+            animation: sparkle 2s ease-in-out infinite;
         }
 
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.1) rotate(10deg); }
+        }
+
+        /* Headline - Titre principal */
         .hero-score h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2.75rem, 6vw, 5rem);
             font-weight: 900;
             line-height: 1.1;
-            margin-bottom: 1.5rem;
             color: white;
-            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            margin: 0;
+            letter-spacing: -0.03em;
+            text-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(59, 130, 246, 0.3);
+            animation: titleReveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
         }
 
+        @keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Gradient Text - Texte avec gradient animé */
         .hero-score .highlight-gradient {
-            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
+            background: linear-gradient(135deg, 
+                #60a5fa 0%, 
+                #818cf8 25%, 
+                #a78bfa 50%, 
+                #c084fc 75%, 
+                #e879f9 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.5));
+            animation: gradientShine 8s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.5));
+            display: inline-block;
         }
 
+        @keyframes gradientShine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Subheadline - Sous-titre */
         .hero-score p {
             font-size: clamp(1.125rem, 2vw, 1.375rem);
             line-height: 1.7;
-            color: rgba(255, 255, 255, 0.95);
-            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
             max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            font-weight: 400;
+            text-align: center;
         }
 
+        /* CTA Button - Bouton principal premium */
         .hero-score .btn-hero-primary {
             display: inline-flex;
             align-items: center;
@@ -165,23 +333,188 @@
             padding: 1.25rem 2.5rem;
             font-size: 1.125rem;
             font-weight: 700;
-            color: #1e293b;
-            background: white;
+            color: white;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            background-size: 200% auto;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 12px 40px rgba(59, 130, 246, 0.4),
+                0 0 0 0 rgba(59, 130, 246, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-score .btn-hero-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .hero-score .btn-hero-primary:hover::before {
+            left: 100%;
         }
 
         .hero-score .btn-hero-primary:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-            background: #f8fafc;
+            transform: translateY(-3px) scale(1.02);
+            background-position: right center;
+            box-shadow: 
+                0 16px 56px rgba(59, 130, 246, 0.6),
+                0 0 60px rgba(139, 92, 246, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-score .btn-hero-primary:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .hero-score .btn-hero-primary i {
+            transition: transform 0.3s;
             font-size: 1.25rem;
+        }
+
+        .hero-score .btn-hero-primary:hover i {
+            transform: translateX(4px);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+        📱 RESPONSIVE MOBILE - HERO SECTION
+        ═══════════════════════════════════════════════════════════════ */
+
+        @media (max-width: 1024px) {
+            .hero-score {
+                padding: 120px 1.5rem 80px 1.5rem;
+            }
+
+            .hero-score h1 {
+                font-size: clamp(2.25rem, 8vw, 3.5rem);
+            }
+
+            .hero-score .container-fluid::before,
+            .hero-score::after {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-score {
+                min-height: 100vh;
+                padding: 140px 1.5rem 100px 1.5rem;
+                overflow: visible;
+            }
+
+            .hero-score-content {
+                gap: 1.75rem;
+                overflow: visible;
+            }
+
+            .hero-score .score-badge {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
+                gap: 0.5rem;
+            }
+
+            .hero-score h1 {
+                font-size: clamp(2rem, 9vw, 2.75rem);
+                line-height: 1.15;
+            }
+
+            .hero-score p {
+                font-size: clamp(1rem, 4vw, 1.125rem);
+                line-height: 1.6;
+            }
+
+            .hero-score p br {
+                display: none;
+            }
+
+            .hero-score .btn-hero-primary {
+                padding: 1.125rem 2rem;
+                font-size: 1rem;
+                width: 100%;
+                max-width: 400px;
+                justify-content: center;
+            }
+
+            .hero-score .container-fluid::before,
+            .hero-score::after {
+                width: 300px;
+                height: 300px;
+                filter: blur(80px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-score {
+                min-height: 100vh;
+                padding: 130px 1.25rem 90px 1.25rem;
+            }
+
+            .hero-score-content {
+                gap: 1.5rem;
+            }
+
+            .hero-score .score-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            .hero-score h1 {
+                font-size: clamp(1.875rem, 10vw, 2.5rem);
+            }
+
+            .hero-score p {
+                font-size: clamp(0.9375rem, 4.5vw, 1.0625rem);
+            }
+
+            .hero-score .btn-hero-primary {
+                padding: 1rem 1.75rem;
+                font-size: 0.9375rem;
+                max-width: 360px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-score {
+                min-height: 100vh;
+                padding: 120px 1rem 80px 1rem;
+            }
+
+            .hero-score-content {
+                gap: 1.5rem;
+            }
+
+            .hero-score .score-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            .hero-score h1 {
+                font-size: clamp(1.75rem, 11vw, 2.25rem);
+            }
+
+            .hero-score p {
+                font-size: clamp(0.875rem, 5vw, 1rem);
+            }
+
+            .hero-score .btn-hero-primary {
+                width: 100%;
+                max-width: none;
+                padding: 1rem 1.5rem;
+                font-size: 0.9375rem;
+            }
         }
 
         /* ML Models Cards - DÉGRADÉ BLEU/VIOLET MINIMALISTE */
