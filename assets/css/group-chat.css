@@ -84,11 +84,16 @@ body.dark-mode .modal-container {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1.2rem;
+    flex-shrink: 0; /* ⚠ Important pour éviter que le bouton disparaisse */
 }
 
 .modal-close:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: rotate(90deg);
+}
+
+.modal-close:active {
+    transform: rotate(90deg) scale(0.95);
 }
 
 /* ===== MODAL BODY ===== */

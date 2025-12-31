@@ -355,6 +355,9 @@ class GroupChat {
                 .doc(this.currentGroupId)
                 .update(updateData);
 
+            // ✅ ✨ NOUVEAU : Envoyer les notifications ✨
+            await this.sendGroupMessageNotifications(text);
+
             messageInput.value = '';
             this.attachedFiles = [];
             this.renderAttachmentPreview();
@@ -366,6 +369,71 @@ class GroupChat {
             alert('Failed to send message. Please try again.');
         } finally {
             if (sendBtn) sendBtn.disabled = false;
+        }
+    }
+
+    /* ==========================================
+    📧 ENVOYER NOTIFICATIONS NOUVEAU MESSAGE
+    ========================================== */
+
+    async sendGroupMessageNotifications(messageText) {
+        try {
+            console.log('📧 Sending group message notifications...');
+
+            // Préparer la liste des destinataires (tous les membres SAUF l'expéditeur)
+            const recipients = [];
+            
+            for (const userId of this.currentGroup.participants) {
+                if (userId === this.currentUser.uid) continue; // Skip expéditeur
+                
+                const userData = this.currentGroup.participantsData[userId];
+                if (userData && userData.email) {
+                    recipients.push({
+                        email: userData.email,
+                        displayName: userData.displayName || 'User'
+                    });
+                }
+            }
+
+            if (recipients.length === 0) {
+                console.log('ℹ No recipients to notify');
+                return;
+            }
+
+            // Préparer l'aperçu du message (max 100 caractères)
+            const messagePreview = messageText.length > 100 
+                ? messageText.substring(0, 100) + '...' 
+                : messageText;
+
+            // Appeler le Worker de notification
+            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'group_message',
+                    data: {
+                        groupName: this.currentGroup.name,
+                        groupPhoto: this.currentGroup.photoURL,
+                        senderName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
+                        messagePreview: messagePreview || '📎 Attachment',
+                        recipients: recipients
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(`✅ Notifications sent to ${result.sent} members`);
+            } else {
+                console.error('❌ Failed to send notifications:', result.error);
+            }
+
+        } catch (error) {
+            console.error('❌ Error sending notifications:', error);
+            // Ne pas bloquer l'envoi du message si les emails échouent
         }
     }
 

@@ -314,6 +314,66 @@ class CreateGroupModal {
     }
 
     /* ==========================================
+    📧 ENVOYER NOTIFICATIONS CRÉATION GROUPE
+    ========================================== */
+
+    async sendGroupCreatedNotifications(groupData) {
+        try {
+            console.log('📧 Sending group created notifications...');
+
+            // Préparer la liste des membres (avec emails)
+            const members = [];
+            
+            for (const userId of groupData.participants) {
+                if (userId === this.currentUser.uid) continue; // Skip créateur
+                
+                const userData = groupData.participantsData[userId];
+                if (userData && userData.email) {
+                    members.push({
+                        email: userData.email,
+                        displayName: userData.displayName || 'User'
+                    });
+                }
+            }
+
+            if (members.length === 0) {
+                console.log('ℹ No members to notify (creator only)');
+                return;
+            }
+
+            // Appeler le Worker de notification
+            const response = await fetch('https://message-notification-sender.raphnardone.workers.dev', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'group_created',
+                    data: {
+                        groupName: groupData.name,
+                        groupPhoto: groupData.photoURL,
+                        creatorName: this.currentUser.displayName || window.currentUserData?.displayName || 'Someone',
+                        creatorEmail: this.currentUser.email,
+                        members: members
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(`✅ Notifications sent to ${result.sent} members`);
+            } else {
+                console.error('❌ Failed to send notifications:', result.error);
+            }
+
+        } catch (error) {
+            console.error('❌ Error sending notifications:', error);
+            // Ne pas bloquer la création du groupe si les emails échouent
+        }
+    }
+
+    /* ==========================================
        ✅ CRÉATION DU GROUPE
        ========================================== */
     
@@ -401,6 +461,9 @@ class CreateGroupModal {
             const groupRef = await this.db.collection('conversations').add(groupData);
 
             console.log('✅ Group created:', groupRef.id);
+
+            // ✅ ✨ NOUVEAU : Envoyer les notifications ✨
+            await this.sendGroupCreatedNotifications(groupData);
 
             // Fermer le modal
             this.close();
