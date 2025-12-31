@@ -10,104 +10,314 @@
     
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
     
     <style>
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           HERO SECTION
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-        .page-hero {
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 180px 0 120px;
-            text-align: center;
-            color: white;
-            overflow: hidden;
+        /* Global overflow fix */
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
         }
-        
-        .page-hero::before {
+
+        /* ═══════════════════════════════════════════════════════════════
+           ✨ HERO SECTION - ULTRA STYLÉ PREMIUM (STYLE IDENTIQUE)
+           ═══════════════════════════════════════════════════════════════ */
+
+        /* Hero Container - Dégradé animé premium */
+        .hero-contact {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 2rem 80px 2rem;
+            overflow: visible;
+            background: linear-gradient(135deg, 
+                #0f172a 0%, 
+                #1e293b 25%, 
+                #334155 50%, 
+                #1e293b 75%, 
+                #0f172a 100%);
+            background-size: 400% 400%;
+            animation: heroGradientFlow 20s ease infinite;
+        }
+
+        @keyframes heroGradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Hero Background - Multi-couches */
+        .hero-contact::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
-            animation: pulse 8s ease-in-out infinite;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridPulse 10s ease-in-out infinite;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
-        
-        .page-hero .container-fluid {
+
+        /* Gradient Orbs - Orbes lumineux animés */
+        .hero-contact::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            top: -10%;
+            left: -5%;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(59, 130, 246, 0.6) 0%, 
+                rgba(99, 102, 241, 0.4) 35%, 
+                transparent 70%);
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: floatOrb1 25s ease-in-out infinite;
+            mix-blend-mode: screen;
+            z-index: 0;
+        }
+
+        @keyframes floatOrb1 {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translate(30px, -50px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-20px, -80px) scale(0.95);
+                opacity: 0.7;
+            }
+            75% { 
+                transform: translate(40px, -30px) scale(1.05);
+                opacity: 0.65;
+            }
+        }
+
+        /* Second Orb (via pseudo-element sur container-fluid) */
+        .hero-contact .container-fluid::before {
+            content: '';
+            position: absolute;
+            width: 550px;
+            height: 550px;
+            bottom: -15%;
+            right: -10%;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(139, 92, 246, 0.6) 0%, 
+                rgba(168, 85, 247, 0.4) 35%, 
+                transparent 70%);
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: floatOrb2 30s ease-in-out infinite -5s;
+            mix-blend-mode: screen;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatOrb2 {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translate(-30px, 50px) scale(1.1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(20px, 80px) scale(0.95);
+                opacity: 0.7;
+            }
+            75% { 
+                transform: translate(-40px, 30px) scale(1.05);
+                opacity: 0.65;
+            }
+        }
+
+        /* Container */
+        .hero-contact .container-fluid {
             position: relative;
             z-index: 1;
-        }
-        
-        .page-hero h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-            letter-spacing: -1px;
-            color: white;
-        }
-        
-        .page-hero p {
-            font-size: 1.5rem;
-            color: white;
-            opacity: 1;
-            max-width: 700px;
+            width: 100%;
+            max-width: 1400px;
             margin: 0 auto;
-            font-weight: 300;
+            height: auto;
+            overflow: visible;
         }
-        
+
+        .hero-contact-content {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            overflow: visible;
+            height: auto;
+        }
+
+        /* Contact Badge - Style premium glassmorphism */
+        .hero-contact .contact-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            color: white;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            box-shadow: 
+                0 8px 32px rgba(59, 130, 246, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-contact .contact-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.6s;
+        }
+
+        .hero-contact .contact-badge:hover::before {
+            left: 100%;
+        }
+
+        .hero-contact .contact-badge:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 48px rgba(59, 130, 246, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .hero-contact .contact-badge i {
+            font-size: 1.125rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.1) rotate(10deg); }
+        }
+
+        /* Headline - Titre principal */
+        .hero-contact h1 {
+            font-size: clamp(2.75rem, 6vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            color: white;
+            margin: 0;
+            letter-spacing: -0.03em;
+            text-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(59, 130, 246, 0.3);
+            animation: titleReveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+
+        @keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Gradient Text - Texte avec gradient animé */
+        .hero-contact .highlight-gradient {
+            background: linear-gradient(135deg, 
+                #60a5fa 0%, 
+                #818cf8 25%, 
+                #a78bfa 50%, 
+                #c084fc 75%, 
+                #e879f9 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShine 8s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.5));
+            display: inline-block;
+        }
+
+        @keyframes gradientShine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Subheadline - Sous-titre */
+        .hero-contact p {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
+            max-width: 800px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            font-weight: 400;
+            text-align: center;
+        }
+
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           CONTACT SECTION
+           CONTACT SECTION - SANS EFFETS BLEUS
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
         .contact-section {
-            padding: 100px 0;
+            padding: 100px 1rem;
             background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
         }
         
@@ -131,7 +341,7 @@
         }
         
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           INFO CARDS - GLASSMORPHISM
+           INFO CARDS - GLASSMORPHISM (SANS EFFET BLEU)
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
         .contact-info {
             display: flex;
@@ -165,6 +375,8 @@
                 0 20px 60px rgba(59, 130, 246, 0.15),
                 0 0 0 1px rgba(59, 130, 246, 0.3);
         }
+
+        /* ✅ EFFET BLEU SUPPRIMÉ - Pas de ::before sur .info-card */
         
         .info-icon {
             width: 70px;
@@ -215,7 +427,7 @@
         }
         
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           CONTACT FORM - PREMIUM GLASSMORPHISM
+           CONTACT FORM - PREMIUM GLASSMORPHISM (SANS EFFET BLEU)
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
         .contact-form-wrapper {
             background: rgba(255, 255, 255, 0.7);
@@ -235,28 +447,8 @@
             background: rgba(30, 41, 59, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .contact-form-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(59, 130, 246, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: shimmer 3s ease-in-out infinite;
-        }
-        
-        @keyframes shimmer {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
+
+        /* ✅ EFFET BLEU SUPPRIMÉ - Pas de ::before sur .contact-form-wrapper */
         
         .form-header {
             margin-bottom: 2.5rem;
@@ -410,18 +602,117 @@
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            RESPONSIVE
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        
+        /* Hero Responsive */
+        @media (max-width: 1024px) {
+            .hero-contact {
+                padding: 120px 1.5rem 80px 1.5rem;
+            }
+
+            .hero-contact h1 {
+                font-size: clamp(2.25rem, 8vw, 3.5rem);
+            }
+
+            .hero-contact .container-fluid::before,
+            .hero-contact::after {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .page-hero h1 {
-                font-size: 2.5rem;
+            .hero-contact {
+                min-height: 80vh;
+                padding: 140px 1.5rem 80px 1.5rem;
+                overflow: visible;
             }
-            .page-hero p {
-                font-size: 1.125rem;
+
+            .hero-contact-content {
+                gap: 1.5rem;
+                overflow: visible;
             }
+
+            .hero-contact .contact-badge {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
+                gap: 0.5rem;
+            }
+
+            .hero-contact h1 {
+                font-size: clamp(2rem, 9vw, 2.75rem);
+                line-height: 1.15;
+            }
+
+            .hero-contact p {
+                font-size: clamp(1rem, 4vw, 1.125rem);
+                line-height: 1.6;
+            }
+
+            .hero-contact p br {
+                display: none;
+            }
+
+            .hero-contact .container-fluid::before,
+            .hero-contact::after {
+                width: 300px;
+                height: 300px;
+                filter: blur(80px);
+            }
+
             .contact-form-wrapper {
                 padding: 2.5rem 2rem;
             }
+            
             .form-header h2 {
                 font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-contact {
+                min-height: 80vh;
+                padding: 130px 1.25rem 70px 1.25rem;
+            }
+
+            .hero-contact-content {
+                gap: 1.25rem;
+            }
+
+            .hero-contact .contact-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            .hero-contact h1 {
+                font-size: clamp(1.875rem, 10vw, 2.5rem);
+            }
+
+            .hero-contact p {
+                font-size: clamp(0.9375rem, 4.5vw, 1.0625rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-contact {
+                min-height: 80vh;
+                padding: 120px 1rem 60px 1rem;
+            }
+
+            .hero-contact-content {
+                gap: 1.25rem;
+            }
+
+            .hero-contact .contact-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            .hero-contact h1 {
+                font-size: clamp(1.75rem, 11vw, 2.25rem);
+            }
+
+            .hero-contact p {
+                font-size: clamp(0.875rem, 5vw, 1rem);
             }
         }
     </style>
@@ -442,8 +733,20 @@
                             </linearGradient>
                         </defs>
                         <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                              stroke="url(#logoGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                              stroke="url(#logoGradient)" 
+                              stroke-width="4" 
+                              fill="none" 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round"/>
+                        <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                         <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                        <path d="M 85 35 L 90 30 L 85 25" 
+                              stroke="url(#logoGradient)" 
+                              stroke-width="3" 
+                              fill="none" 
+                              stroke-linecap="round"/>
                     </svg>
                 </div>
                 <span class="brand-text">AlphaVault <strong>AI</strong></span>
@@ -456,85 +759,22 @@
                 <a href="about.html" class="nav-link">About</a>
             </div>
             
-            <!-- CTA Navigation avec gestion authentification -->
-            <div class="nav-cta">
-                <!-- CTA pour utilisateurs non connectés -->
-                <div class="nav-cta-logged-out" id="navCtaLoggedOut">
-                    <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
-                    <button class="btn-primary-nav" onclick="window.location.href='auth.html#signup'">
-                        Start Free
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-
-                <!-- CTA pour utilisateurs connectés -->
-                <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
-                    <div class="user-profile-menu">
-                        <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
-                            <div class="user-avatar-wrapper">
-                                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                     alt="User Profile" 
-                                     class="user-avatar"
-                                     id="userAvatarImg">
-                                <span class="user-status-dot"></span>
-                            </div>
-                            <div class="user-info-text">
-                                <span class="user-display-name" id="userDisplayName">User</span>
-                                <span class="user-plan-badge" id="userPlanBadge">Free</span>
-                            </div>
-                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
-                        </button>
-
-                        <!-- Dropdown Menu (SANS Notifications) -->
-                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
-                            <div class="dropdown-header">
-                                <div class="dropdown-user-card">
-                                    <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                         alt="User Profile"
-                                         id="dropdownAvatarImg">
-                                    <div class="dropdown-user-text">
-                                        <h4 id="dropdownUserName">User</h4>
-                                        <p id="dropdownUserEmail">user@alphavault.ai</p>
-                                    </div>
-                                </div>
-                                <div class="dropdown-plan-info">
-                                    <i class="fas fa-crown"></i>
-                                    <span id="dropdownUserPlan">Free</span>
-                                </div>
-                            </div>
-
-                            <div class="dropdown-divider"></div>
-
-                            <div class="dropdown-section">
-                                <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">My Portfolio</span>
-                                        <span class="dropdown-link-desc">Manage investments</span>
-                                    </div>
-                                </a>
-                            </div>
-
-                            <div class="dropdown-divider"></div>
-
-                            <div class="dropdown-section">
-                                <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Log Out</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="nav-cta" id="navCtaLoggedOut" style="display: flex;">
+                <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
+                <button class="btn-primary-nav" onclick="window.location.href='auth.html'">
+                    Start Free
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
 
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
+                <button class="btn-primary-nav" onclick="window.location.href='dashboard-financier.html'">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </button>
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -542,13 +782,25 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="page-hero">
+    <!-- ═══════════════════════════════════════════════════════════════
+         HERO SECTION - ULTRA STYLÉ PREMIUM
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="hero-contact">
         <div class="container-fluid">
-            <h1 data-aos="fade-up">Get in Touch</h1>
-            <p data-aos="fade-up" data-aos-delay="100">
-                We'd love to hear from you. Our team is here to help.
-            </p>
+            <div class="hero-contact-content">
+                <div class="contact-badge" data-aos="fade-down">
+                    <i class="fas fa-headset"></i>
+                    <span>We're Here to Help</span>
+                </div>
+                
+                <h1 data-aos="fade-up">
+                    Get in <span class="highlight-gradient">Touch</span>
+                </h1>
+                
+                <p data-aos="fade-up" data-aos-delay="100">
+                    We'd love to hear from you. Our team is here to help you unlock the power of AI-powered financial intelligence.
+                </p>
+            </div>
         </div>
     </section>
 
@@ -564,7 +816,7 @@
                         </div>
                         <h3>Email Us</h3>
                         <p>Get in touch via email</p>
-                        <p><a href="mailto:support@alphavault.ai">contact@alphavault-ai.com</a></p>
+                        <p><a href="mailto:contact@alphavault-ai.com">contact@alphavault-ai.com</a></p>
                     </div>
 
                     <div class="info-card" data-aos="fade-right" data-aos-delay="200">
@@ -647,15 +899,20 @@
                                     </linearGradient>
                                 </defs>
                                 <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                      stroke="url(#logoGradientFooter)" stroke-width="4" fill="none"/>
+                                      stroke="url(#logoGradientFooter)" 
+                                      stroke-width="4" 
+                                      fill="none"/>
                             </svg>
                         </div>
                         <span class="brand-text">AlphaVault <strong>AI</strong></span>
                     </div>
-                    <p class="footer-description">AI-powered financial intelligence platform for smart investors.</p>
+                    <p class="footer-description">
+                        AI-powered financial intelligence platform for smart investors.
+                    </p>
                     <div class="footer-social">
                         <a href="https://www.linkedin.com/company/alphavault-ai" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                         <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
                     </div>
                 </div>
@@ -665,7 +922,19 @@
                     <ul>
                         <li><a href="index.html#features">Features</a></li>
                         <li><a href="index.html#alphy-ai">Alphy AI</a></li>
+                        <li><a href="dashboard-financier.html">Dashboard</a></li>
                         <li><a href="index.html#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
+                        <li><a href="trend-prediction.html">AlphaVault Score</a></li>
+                        <li><a href="ma-predictor.html">M&A Intelligence</a></li>
+                        <li><a href="ipo-intelligence.html">IPO Intelligence</a></li>
+                        <li><a href="monte-carlo.html">Monte Carlo</a></li>
                     </ul>
                 </div>
 
@@ -678,18 +947,10 @@
                         <li><a href="terms.html">Terms of Service</a></li>
                     </ul>
                 </div>
-
-                <div class="footer-col">
-                    <h4>Contact</h4>
-                    <ul>
-                        <li><i class="fas fa-envelope"></i> contact@alphavault-ai.com</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Paris, France</li>
-                    </ul>
-                </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"><script>document.write(new Date().getFullYear())</script></span> AlphaVault AI. All rights reserved.</p>
+                <p>&copy; <span id="currentYear">2024</span> AlphaVault AI. All rights reserved.</p>
                 <div class="footer-bottom-links">
                     <a href="privacy.html">Privacy</a>
                     <a href="terms.html">Terms</a>
@@ -707,98 +968,27 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/landing.js"></script>
+    <script src="assets/js/auth-system.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // AOS Init
+            console.log('%cAlphaVault AI - Contact Page - Initialization', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
+            
+            // Initialize AOS Animations
             AOS.init({
                 duration: 800,
                 easing: 'ease-out-cubic',
                 once: true,
-                offset: 50
+                offset: 50,
+                mirror: false
             });
+            console.log('✅ AOS Animations initialized');
 
-            // Current Year
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-            // Mobile Menu
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const navMenu = document.getElementById('navMenu');
-            
-            if (mobileMenuBtn && navMenu) {
-                mobileMenuBtn.addEventListener('click', () => {
-                    mobileMenuBtn.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-            }
-
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // GESTION AUTHENTIFICATION
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            const navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
-            const navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
-            const userProfileButton = document.getElementById('userProfileButton');
-            const userDropdownMenu = document.getElementById('userDropdownMenu');
-            const logoutButton = document.getElementById('logoutButton');
-
-            // Vérifier l'état d'authentification Firebase
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                firebase.auth().onAuthStateChanged((user) => {
-                    if (user) {
-                        // Utilisateur connecté - Afficher le menu profil
-                        navCtaLoggedOut.style.display = 'none';
-                        navCtaLoggedIn.style.display = 'flex';
-
-                        // Mettre à jour les informations utilisateur
-                        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-                        document.getElementById('userDisplayName').textContent = displayName;
-                        document.getElementById('dropdownUserName').textContent = displayName;
-                        document.getElementById('dropdownUserEmail').textContent = user.email || '';
-
-                        // Avatar
-                        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
-                        document.getElementById('userAvatarImg').src = avatarUrl;
-                        document.getElementById('dropdownAvatarImg').src = avatarUrl;
-                    } else {
-                        // Utilisateur non connecté - Afficher les boutons
-                        navCtaLoggedOut.style.display = 'flex';
-                        navCtaLoggedIn.style.display = 'none';
-                    }
-                });
-            }
-
-            // Toggle dropdown menu
-            if (userProfileButton) {
-                userProfileButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const isExpanded = userProfileButton.getAttribute('aria-expanded') === 'true';
-                    userProfileButton.setAttribute('aria-expanded', !isExpanded);
-                    userDropdownMenu.classList.toggle('active');
-                });
-            }
-
-            // Fermer le dropdown en cliquant ailleurs
-            document.addEventListener('click', (e) => {
-                if (!userDropdownMenu.contains(e.target) && !userProfileButton.contains(e.target)) {
-                    userDropdownMenu.classList.remove('active');
-                    userProfileButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            // Logout
-            if (logoutButton) {
-                logoutButton.addEventListener('click', () => {
-                    if (typeof firebase !== 'undefined' && firebase.auth) {
-                        firebase.auth().signOut()
-                            .then(() => {
-                                window.location.href = 'index.html';
-                            })
-                            .catch((error) => {
-                                console.error('Erreur lors de la déconnexion:', error);
-                            });
-                    }
-                });
+            // Update current year in footer
+            const yearElement = document.getElementById('currentYear');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
             }
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -824,6 +1014,8 @@
                     successMessage.classList.remove('show');
                 }, 5000);
             });
+
+            console.log('%cAlphaVault AI - Contact - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
