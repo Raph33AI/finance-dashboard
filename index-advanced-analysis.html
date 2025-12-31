@@ -449,8 +449,12 @@
 
         @media (max-width: 768px) {
             .hero-advanced {
-                min-height: auto;
-                padding: 140px 1.25rem 80px 1.25rem;
+                min-height: 100vh;
+                padding: 140px 1.5rem 100px 1.5rem;
+            }
+
+            .hero-advanced-content {
+                gap: 1.5rem;
             }
 
             .hero-advanced .score-badge {
@@ -461,10 +465,12 @@
 
             .hero-advanced h1 {
                 font-size: clamp(2rem, 9vw, 2.75rem);
+                line-height: 1.15;
             }
 
             .hero-advanced p {
                 font-size: clamp(1rem, 4vw, 1.125rem);
+                line-height: 1.6;
             }
 
             .hero-advanced p br {
@@ -498,9 +504,14 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
             .hero-advanced {
-                padding: 120px 1rem 60px 1rem;
+                min-height: 100vh;
+                padding: 130px 1.25rem 90px 1.25rem;
+            }
+
+            .hero-advanced-content {
+                gap: 1.25rem;
             }
 
             .hero-advanced .score-badge {
@@ -509,13 +520,47 @@
             }
 
             .hero-advanced h1 {
-                font-size: clamp(1.75rem, 10vw, 2.25rem);
+                font-size: clamp(1.875rem, 10vw, 2.25rem);
+            }
+
+            .hero-advanced p {
+                font-size: clamp(0.9375rem, 4.5vw, 1.0625rem);
+            }
+
+            .hero-advanced .btn-hero-primary {
+                padding: 1rem 1.75rem;
+                font-size: 0.9375rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-advanced {
+                min-height: 100vh;
+                padding: 120px 1rem 80px 1rem;
+            }
+
+            .hero-advanced-content {
+                gap: 1.25rem;
+            }
+
+            .hero-advanced .score-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            .hero-advanced h1 {
+                font-size: clamp(1.75rem, 11vw, 2.125rem);
+            }
+
+            .hero-advanced p {
+                font-size: clamp(0.875rem, 5vw, 1rem);
             }
 
             .hero-advanced .btn-hero-primary {
                 width: 100%;
                 max-width: none;
                 padding: 1rem 1.5rem;
+                font-size: 0.9375rem;
             }
         }
 
