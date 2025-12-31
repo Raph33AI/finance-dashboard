@@ -3,66 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - AlphaVault AI</title>
+    <title>About Us - AlphaVault AI | Democratizing AI-Powered Financial Intelligence</title>
+    
+    <meta name="description" content="AlphaVault AI democratizes institutional-grade financial analysis through AI. Discover our mission, vision, and revolutionary approach to investment intelligence.">
+    <meta name="keywords" content="AI finance, financial intelligence, investment platform, AlphaVault AI, about us, mission, vision">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg"> -->
+    
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
     
     <style>
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           HERO SECTION - PREMIUM GRADIENT
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-        .page-hero {
+        /* Global overflow fix */
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE (IDENTIQUE IPO)
+           ═══════════════════════════════════════════════════════════════ */
+        .hero-about {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 180px 0 120px;
-            text-align: center;
-            color: white;
+            padding: 120px 1rem 80px 1rem;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
             overflow: hidden;
         }
-        
-        .page-hero::before {
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-about::before {
             content: '';
             position: absolute;
             top: 0;
@@ -70,86 +71,150 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
-            animation: pulse 8s ease-in-out infinite;
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.4), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.4), transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: pulseGlow 8s ease-in-out infinite;
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
         }
-        
-        .page-hero .container-fluid {
+
+        .hero-about .container-fluid {
             position: relative;
             z-index: 1;
         }
-        
-        .page-hero h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-            letter-spacing: -1px;
-            color: white;
-        }
-        
-        .page-hero p {
-            font-size: 1.5rem;
-            color: white;
-            opacity: 1;
-            max-width: 700px;
+
+        .hero-about-content {
+            text-align: center;
+            max-width: 900px;
             margin: 0 auto;
-            font-weight: 300;
         }
-        
-        .hero-badge {
+
+        .hero-about .about-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hero-about .about-badge:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-about .about-badge i {
+            font-size: 1.25rem;
+        }
+
+        .hero-about h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-about .highlight-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.5));
+        }
+
+        .hero-about p {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 2.5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Stats Cards in Hero */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 3rem auto 0;
+        }
+
+        .hero-stat-card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
-            padding: 12px 24px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 2rem;
-            font-weight: 600;
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            color: white;
         }
-        
-        .hero-badge:hover {
+
+        .hero-stat-card:hover {
             background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
         }
-        
-        .hero-badge i {
-            font-size: 1.25rem;
-            color: #fbbf24;
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
         }
-        
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           MISSION SECTION - GLASSMORPHISM
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-        .mission-section {
-            padding: 100px 0;
+
+        .hero-stat-label {
+            font-size: 0.9375rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           MISSION & VISION SECTION - ENRICHIE
+           ═══════════════════════════════════════════════════════════════ */
+        .mission-vision-section {
+            padding: 100px 1rem;
             background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
         }
-        
-        body.dark-mode .mission-section {
+
+        body.dark-mode .mission-vision-section {
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
         }
-        
-        .mission-container {
-            max-width: 1100px;
+
+        .mission-vision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
-        .mission-card {
+
+        .mission-card, .vision-card {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px) saturate(180%);
             border-radius: 32px;
-            padding: 60px;
+            padding: 3.5rem;
             box-shadow: 
                 0 20px 60px rgba(0, 0, 0, 0.1),
                 0 0 0 1px rgba(255, 255, 255, 0.5),
@@ -159,20 +224,23 @@
             overflow: hidden;
             transition: all 0.4s ease;
         }
-        
-        body.dark-mode .mission-card {
+
+        body.dark-mode .mission-card,
+        body.dark-mode .vision-card {
             background: rgba(30, 41, 59, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .mission-card:hover {
-            transform: translateY(-8px);
+
+        .mission-card:hover,
+        .vision-card:hover {
+            transform: translateY(-12px);
             box-shadow: 
-                0 30px 80px rgba(0, 0, 0, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.6);
+                0 30px 80px rgba(59, 130, 246, 0.2),
+                0 0 0 1px rgba(59, 130, 246, 0.3);
         }
-        
-        .mission-card::before {
+
+        .mission-card::before,
+        .vision-card::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -188,16 +256,33 @@
             transform: rotate(45deg);
             animation: shimmer 3s ease-in-out infinite;
         }
-        
+
         @keyframes shimmer {
             0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
             50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
-        
-        .mission-card h2 {
-            font-size: 2.75rem;
-            font-weight: 800;
+
+        .mission-icon, .vision-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
             margin-bottom: 2rem;
+            box-shadow: 0 12px 36px rgba(59, 130, 246, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission-card h2,
+        .vision-card h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
             background: linear-gradient(135deg, #3B82F6, #8B5CF6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -205,51 +290,272 @@
             position: relative;
             z-index: 1;
         }
-        
-        .mission-card p {
-            font-size: 1.25rem;
+
+        .mission-card p,
+        .vision-card p {
+            font-size: 1.125rem;
             line-height: 1.9;
             color: var(--text-secondary);
             margin-bottom: 1.5rem;
             position: relative;
             z-index: 1;
         }
-        
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           VALUES SECTION - PREMIUM CARDS
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+        /* ═══════════════════════════════════════════════════════════════
+           WHY CHOOSE US SECTION - AVANTAGES COMPÉTITIFS
+           ═══════════════════════════════════════════════════════════════ */
+        .why-choose-section {
+            padding: 100px 1rem;
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        .why-choose-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .why-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .why-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        .why-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .why-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 
+                0 20px 60px rgba(59, 130, 246, 0.2),
+                0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        .why-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 
+                0 10px 30px rgba(6, 182, 212, 0.3),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .why-card:hover .why-icon-wrapper {
+            transform: rotateY(360deg) scale(1.1);
+        }
+
+        .why-icon-wrapper i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .why-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .why-card p {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TECHNOLOGY SECTION
+           ═══════════════════════════════════════════════════════════════ */
+        .technology-section {
+            padding: 100px 1rem;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .technology-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        .tech-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 32px;
+            padding: 4rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        body.dark-mode .tech-content {
+            background: rgba(30, 41, 59, 0.95);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-item {
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 20px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 12px 36px rgba(59, 130, 246, 0.2);
+        }
+
+        .tech-item h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .tech-item p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           IMPACT SECTION
+           ═══════════════════════════════════════════════════════════════ */
+        .impact-section {
+            padding: 100px 1rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        body.dark-mode .impact-section {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 3rem auto 0;
+        }
+
+        .impact-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .impact-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .impact-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .impact-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .impact-desc {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           VALUES SECTION - OPTIMISÉE
+           ═══════════════════════════════════════════════════════════════ */
         .values-section {
-            padding: 100px 0;
+            padding: 100px 1rem;
             background: var(--bg-primary);
         }
-        
+
         .section-header-custom {
             text-align: center;
             margin-bottom: 5rem;
         }
-        
+
         .section-header-custom h2 {
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 1rem;
             color: var(--text-primary);
         }
-        
+
         .section-header-custom p {
             font-size: 1.25rem;
             color: var(--text-secondary);
             max-width: 700px;
             margin: 0 auto;
         }
-        
+
         .values-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2.5rem;
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .value-card {
             background: var(--card-bg);
             border-radius: 24px;
@@ -262,7 +568,7 @@
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .value-card::before {
             content: '';
             position: absolute;
@@ -275,18 +581,18 @@
             transform-origin: left;
             transition: transform 0.5s ease;
         }
-        
+
         .value-card:hover::before {
             transform: scaleX(1);
         }
-        
+
         .value-card:hover {
             transform: translateY(-12px) scale(1.02);
             box-shadow: 
                 0 20px 60px rgba(59, 130, 246, 0.2),
                 0 0 0 1px rgba(59, 130, 246, 0.3);
         }
-        
+
         .value-icon-wrapper {
             width: 80px;
             height: 80px;
@@ -301,46 +607,46 @@
                 inset 0 -2px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.4s ease;
         }
-        
+
         .value-card:hover .value-icon-wrapper {
             transform: rotateY(360deg) scale(1.1);
             box-shadow: 
                 0 15px 40px rgba(59, 130, 246, 0.4),
                 inset 0 -2px 8px rgba(0, 0, 0, 0.3);
         }
-        
+
         .value-icon-wrapper i {
             font-size: 2.5rem;
             color: white;
         }
-        
+
         .value-card h3 {
             font-size: 1.75rem;
             font-weight: 700;
             margin-bottom: 1rem;
             color: var(--text-primary);
         }
-        
+
         .value-card p {
             font-size: 1.0625rem;
             line-height: 1.8;
             color: var(--text-secondary);
         }
-        
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           FOUNDER SECTION - PREMIUM DESIGN
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+        /* ═══════════════════════════════════════════════════════════════
+           FOUNDER SECTION - PREMIUM
+           ═══════════════════════════════════════════════════════════════ */
         .founder-section {
-            padding: 100px 0;
+            padding: 100px 1rem;
             background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
         }
-        
+
         .founder-container {
             max-width: 700px;
             margin: 0 auto;
             text-align: center;
         }
-        
+
         .founder-card {
             background: var(--card-bg);
             border-radius: 32px;
@@ -353,7 +659,7 @@
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .founder-card::after {
             content: '';
             position: absolute;
@@ -364,19 +670,19 @@
             background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
             animation: rotate 20s linear infinite;
         }
-        
+
         @keyframes rotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .founder-card:hover {
             transform: translateY(-16px);
             box-shadow: 
                 0 30px 80px rgba(59, 130, 246, 0.25),
                 0 0 0 1px rgba(59, 130, 246, 0.3);
         }
-        
+
         .founder-avatar-wrapper {
             position: relative;
             width: 200px;
@@ -384,7 +690,7 @@
             margin: 0 auto 2rem;
             z-index: 1;
         }
-        
+
         .founder-avatar-wrapper::before {
             content: '';
             position: absolute;
@@ -394,7 +700,7 @@
             animation: rotate 4s linear infinite;
             z-index: -1;
         }
-        
+
         .founder-avatar {
             width: 200px;
             height: 200px;
@@ -408,11 +714,11 @@
             z-index: 1;
             object-fit: cover;
         }
-        
+
         .founder-card:hover .founder-avatar {
             transform: scale(1.05);
         }
-        
+
         .founder-name {
             font-size: 2.5rem;
             font-weight: 800;
@@ -424,7 +730,7 @@
             position: relative;
             z-index: 1;
         }
-        
+
         .founder-title {
             font-size: 1.5rem;
             color: #3B82F6;
@@ -432,33 +738,121 @@
             position: relative;
             z-index: 1;
         }
-        
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        /* ═══════════════════════════════════════════════════════════════
+           CTA SECTION
+           ═══════════════════════════════════════════════════════════════ */
+        .cta-about {
+            padding: 100px 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .cta-about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-about h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-about p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .btn-cta-about {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-cta-about:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+            background: #f8fafc;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
            RESPONSIVE
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+           ═══════════════════════════════════════════════════════════════ */
         @media (max-width: 768px) {
-            .page-hero h1 {
-                font-size: 2.5rem;
+            .hero-about {
+                min-height: 90vh;
+                padding: 100px 1rem 60px 1rem;
             }
-            .page-hero p {
-                font-size: 1.125rem;
+
+            .hero-about .about-badge {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
             }
-            .mission-card {
-                padding: 40px 30px;
-            }
-            .mission-card h2 {
-                font-size: 2rem;
-            }
-            .mission-card p {
-                font-size: 1.0625rem;
-            }
-            .values-grid {
+
+            .hero-stats {
                 grid-template-columns: 1fr;
             }
+
+            .mission-vision-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mission-card, .vision-card {
+                padding: 2.5rem 2rem;
+            }
+
+            .tech-content {
+                padding: 2.5rem 2rem;
+            }
+
+            .why-choose-grid,
+            .values-grid,
+            .impact-grid,
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
             .founder-card {
                 padding: 3rem 2rem;
             }
-            .founder-name {
+
+            .section-header-custom h2 {
+                font-size: 2rem;
+            }
+
+            .cta-about h2 {
                 font-size: 2rem;
             }
         }
@@ -467,7 +861,9 @@
 
 <body class="landing-page">
     
-    <!-- Navigation -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         NAVIGATION
+         ═══════════════════════════════════════════════════════════════ -->
     <nav class="landing-nav" id="landingNav">
         <div class="nav-container">
             <div class="nav-brand">
@@ -494,85 +890,22 @@
                 <a href="contact.html" class="nav-link">Contact</a>
             </div>
             
-            <!-- CTA Navigation avec gestion authentification -->
-            <div class="nav-cta">
-                <!-- CTA pour utilisateurs non connectés -->
-                <div class="nav-cta-logged-out" id="navCtaLoggedOut">
-                    <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
-                    <button class="btn-primary-nav" onclick="window.location.href='auth.html#signup'">
-                        Start Free
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-
-                <!-- CTA pour utilisateurs connectés -->
-                <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
-                    <div class="user-profile-menu">
-                        <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
-                            <div class="user-avatar-wrapper">
-                                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                     alt="User Profile" 
-                                     class="user-avatar"
-                                     id="userAvatarImg">
-                                <span class="user-status-dot"></span>
-                            </div>
-                            <div class="user-info-text">
-                                <span class="user-display-name" id="userDisplayName">User</span>
-                                <span class="user-plan-badge" id="userPlanBadge">Free</span>
-                            </div>
-                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
-                        </button>
-
-                        <!-- Dropdown Menu (SANS NOTIFICATIONS) -->
-                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
-                            <div class="dropdown-header">
-                                <div class="dropdown-user-card">
-                                    <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                         alt="User Profile"
-                                         id="dropdownAvatarImg">
-                                    <div class="dropdown-user-text">
-                                        <h4 id="dropdownUserName">User</h4>
-                                        <p id="dropdownUserEmail">user@alphavault.ai</p>
-                                    </div>
-                                </div>
-                                <div class="dropdown-plan-info">
-                                    <i class="fas fa-crown"></i>
-                                    <span id="dropdownUserPlan">Free</span>
-                                </div>
-                            </div>
-
-                            <div class="dropdown-divider"></div>
-
-                            <div class="dropdown-section">
-                                <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">My Portfolio</span>
-                                        <span class="dropdown-link-desc">Manage investments</span>
-                                    </div>
-                                </a>
-                            </div>
-
-                            <div class="dropdown-divider"></div>
-
-                            <div class="dropdown-section">
-                                <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Log Out</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="nav-cta" id="navCtaLoggedOut" style="display: flex;">
+                <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
+                <button class="btn-primary-nav" onclick="window.location.href='auth.html'">
+                    Start Free
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
 
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
+                <button class="btn-primary-nav" onclick="window.location.href='dashboard-financier.html'">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </button>
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -580,47 +913,307 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="page-hero">
+    <!-- ═══════════════════════════════════════════════════════════════
+         HERO SECTION - DÉGRADÉ BLEU CYAN/VIOLET DYNAMIQUE
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="hero-about">
         <div class="container-fluid">
-            <div class="hero-badge" data-aos="fade-down">
-                <i class="fas fa-crown"></i>
-                <span>Building the Future of Finance</span>
+            <div class="hero-about-content">
+                <div class="about-badge" data-aos="fade-down">
+                    <i class="fas fa-crown"></i>
+                    <span>Building the Future of Finance</span>
+                </div>
+                
+                <h1 data-aos="fade-up">
+                    Democratizing <span class="highlight-gradient">Financial Intelligence</span>
+                </h1>
+                
+                <p data-aos="fade-up" data-aos-delay="100">
+                    AlphaVault AI empowers investors with institutional-grade tools powered by cutting-edge artificial intelligence. 
+                    From IPO screening to portfolio optimization, we make Wall Street analytics accessible to everyone.
+                </p>
+
+                <!-- Hero Stats -->
+                <div class="hero-stats" data-aos="fade-up" data-aos-delay="200">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">10K+</div>
+                        <div class="hero-stat-label">Active Users</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">$2.5B+</div>
+                        <div class="hero-stat-label">Assets Analyzed</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">94%</div>
+                        <div class="hero-stat-label">AI Accuracy</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-value">24/7</div>
+                        <div class="hero-stat-label">Market Coverage</div>
+                    </div>
+                </div>
             </div>
-            <h1 data-aos="fade-up" data-aos-delay="100">About AlphaVault AI</h1>
-            <p data-aos="fade-up" data-aos-delay="200">
-                Democratizing AI-powered financial intelligence for everyone
-            </p>
         </div>
     </section>
 
-    <!-- Mission Section -->
-    <section class="mission-section">
+    <!-- ═══════════════════════════════════════════════════════════════
+         MISSION & VISION SECTION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="mission-vision-section">
         <div class="container-fluid">
-            <div class="mission-container">
-                <div class="mission-card" data-aos="fade-up">
+            <div class="mission-vision-grid">
+                <!-- Mission Card -->
+                <div class="mission-card" data-aos="fade-right">
+                    <div class="mission-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
                     <h2>Our Mission</h2>
                     <p>
                         At AlphaVault AI, we believe that sophisticated financial analysis tools should be accessible to everyone, 
-                        not just institutional investors. Our mission is to democratize financial intelligence by leveraging 
-                        cutting-edge artificial intelligence and machine learning technologies.
+                        not just institutional investors with multi-million dollar budgets.
                     </p>
                     <p>
-                        We empower individual investors and finance professionals with the same institutional-grade tools used 
-                        by Wall Street, but at a fraction of the cost. From IPO screening to portfolio optimization, Monte Carlo 
-                        simulations to M&A analysis, we provide comprehensive solutions for modern investors.
+                        Our mission is to <strong>democratize financial intelligence</strong> by leveraging cutting-edge AI and machine learning 
+                        to deliver institutional-grade insights at a fraction of traditional costs.
+                    </p>
+                    <p>
+                        We empower individual investors, finance professionals, and businesses with the same powerful analytics 
+                        used by hedge funds and investment banks—from IPO screening and M&A analysis to portfolio optimization 
+                        and Monte Carlo simulations.
+                    </p>
+                </div>
+
+                <!-- Vision Card -->
+                <div class="vision-card" data-aos="fade-left">
+                    <div class="vision-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h2>Our Vision</h2>
+                    <p>
+                        We envision a future where <strong>every investor</strong>—regardless of portfolio size or experience—has access 
+                        to the most advanced financial intelligence tools on the planet.
+                    </p>
+                    <p>
+                        By 2030, we aim to be the <strong>global standard</strong> for AI-powered financial analysis, serving millions 
+                        of users worldwide and processing trillions of dollars in investment decisions.
+                    </p>
+                    <p>
+                        Our vision extends beyond technology: we're building a community of informed investors who make smarter, 
+                        data-driven decisions that generate real wealth and financial freedom.
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Values Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         WHY CHOOSE ALPHAVAULT AI
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="why-choose-section">
+        <div class="container-fluid">
+            <div class="section-header-custom" data-aos="fade-up">
+                <h2>Why Choose AlphaVault AI</h2>
+                <p>The competitive advantages that set us apart</p>
+            </div>
+
+            <div class="why-choose-grid">
+                <!-- 1. Institutional-Grade AI -->
+                <div class="why-card" data-aos="zoom-in">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Institutional-Grade AI</h3>
+                    <p>
+                        Our proprietary AI engine analyzes millions of data points in real-time, using the same machine learning 
+                        algorithms deployed by top hedge funds—but at 1/10th the cost.
+                    </p>
+                </div>
+
+                <!-- 2. Comprehensive Suite -->
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3>All-in-One Platform</h3>
+                    <p>
+                        From IPO screening to M&A prediction, portfolio optimization to Monte Carlo simulations—everything you need 
+                        in one seamless, integrated platform. No switching between tools.
+                    </p>
+                </div>
+
+                <!-- 3. Real-Time Data -->
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-Time Intelligence</h3>
+                    <p>
+                        Access live market data, SEC filings, insider transactions, and economic indicators updated in real-time. 
+                        Never miss a market-moving event again.
+                    </p>
+                </div>
+
+                <!-- 4. Transparency & Trust -->
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Transparent Algorithms</h3>
+                    <p>
+                        Unlike black-box systems, we show you exactly how our AI makes recommendations. Full transparency 
+                        on scoring factors, data sources, and confidence levels.
+                    </p>
+                </div>
+
+                <!-- 5. Affordable Pricing -->
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>Radically Affordable</h3>
+                    <p>
+                        Professional tools shouldn't cost $50,000/year. Our pricing starts free and scales with your needs—
+                        delivering Fortune 500 analytics for individuals and small teams.
+                    </p>
+                </div>
+
+                <!-- 6. Global Coverage -->
+                <div class="why-card" data-aos="zoom-in" data-aos-delay="500">
+                    <div class="why-icon-wrapper">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Global Market Coverage</h3>
+                    <p>
+                        Analyze opportunities across US, European, and Asian markets with multi-currency support, 
+                        cross-border M&A tracking, and international IPO screening.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         OUR TECHNOLOGY
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="technology-section">
+        <div class="container-fluid">
+            <div class="tech-content">
+                <div class="section-header-custom" data-aos="fade-up">
+                    <h2>Powered by Cutting-Edge AI</h2>
+                    <p>The technology stack that drives institutional-grade financial intelligence</p>
+                </div>
+
+                <div class="tech-grid">
+                    <!-- Machine Learning -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="100">
+                        <h4><i class="fas fa-robot"></i> Advanced Machine Learning</h4>
+                        <p>
+                            Neural networks, ensemble models, and deep learning algorithms trained on decades of historical data 
+                            to identify patterns invisible to human analysts.
+                        </p>
+                    </div>
+
+                    <!-- Natural Language Processing -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="150">
+                        <h4><i class="fas fa-language"></i> NLP & Sentiment Analysis</h4>
+                        <p>
+                            Process millions of SEC filings, earnings calls, news articles, and social media posts to extract 
+                            actionable sentiment signals in real-time.
+                        </p>
+                    </div>
+
+                    <!-- Quantitative Models -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="200">
+                        <h4><i class="fas fa-calculator"></i> Quantitative Finance</h4>
+                        <p>
+                            Monte Carlo simulations, Black-Scholes derivatives pricing, VaR calculations, and modern portfolio 
+                            theory—all powered by GPU-accelerated computing.
+                        </p>
+                    </div>
+
+                    <!-- Big Data Infrastructure -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="250">
+                        <h4><i class="fas fa-database"></i> Big Data Processing</h4>
+                        <p>
+                            Cloudflare Workers and distributed computing process billions of data points daily, delivering 
+                            sub-second query responses across terabytes of financial data.
+                        </p>
+                    </div>
+
+                    <!-- API Integrations -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="300">
+                        <h4><i class="fas fa-plug"></i> Multi-Source Integration</h4>
+                        <p>
+                            Seamlessly integrate data from SEC EDGAR, Alpha Vantage, Twelve Data, Finnhub, ECB, and 15+ premium 
+                            financial data providers for comprehensive market coverage.
+                        </p>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="tech-item" data-aos="fade-up" data-aos-delay="350">
+                        <h4><i class="fas fa-lock"></i> Enterprise Security</h4>
+                        <p>
+                            Bank-grade encryption, SOC 2 compliance, multi-factor authentication, and zero-knowledge architecture 
+                            to protect your data and investment strategies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         IMPACT & RESULTS
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="impact-section">
+        <div class="container-fluid">
+            <div class="section-header-custom" data-aos="fade-up">
+                <h2>Our Impact in Numbers</h2>
+                <p>Real results from real users making smarter investment decisions</p>
+            </div>
+
+            <div class="impact-grid">
+                <div class="impact-card" data-aos="zoom-in">
+                    <div class="impact-number">10,000+</div>
+                    <div class="impact-label">Active Users</div>
+                    <div class="impact-desc">Investors worldwide trust AlphaVault AI</div>
+                </div>
+
+                <div class="impact-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="impact-number">$2.5B+</div>
+                    <div class="impact-label">Assets Analyzed</div>
+                    <div class="impact-desc">Portfolio value processed through our platform</div>
+                </div>
+
+                <div class="impact-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="impact-number">94%</div>
+                    <div class="impact-label">AI Prediction Accuracy</div>
+                    <div class="impact-desc">Average accuracy on IPO success scoring</div>
+                </div>
+
+                <div class="impact-card" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="impact-number">500K+</div>
+                    <div class="impact-label">Companies Analyzed</div>
+                    <div class="impact-desc">IPOs, M&A deals, and public companies screened</div>
+                </div>
+
+                <div class="impact-card" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="impact-number">18.7%</div>
+                    <div class="impact-label">Avg. Outperformance</div>
+                    <div class="impact-desc">Users vs. S&P 500 over 12-month period</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CORE VALUES
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="values-section">
         <div class="container-fluid">
             <div class="section-header-custom" data-aos="fade-up">
                 <h2>Our Core Values</h2>
-                <p>The principles that drive everything we do</p>
+                <p>The principles that guide everything we build</p>
             </div>
 
             <div class="values-grid">
@@ -628,10 +1221,10 @@
                     <div class="value-icon-wrapper">
                         <i class="fas fa-lightbulb"></i>
                     </div>
-                    <h3>Innovation</h3>
+                    <h3>Innovation First</h3>
                     <p>
-                        We continuously push the boundaries of what's possible in financial technology, 
-                        integrating the latest AI research into practical tools that deliver real value.
+                        We continuously push the boundaries of financial technology, integrating the latest AI research 
+                        into practical tools that deliver measurable value to our users.
                     </p>
                 </div>
 
@@ -641,8 +1234,8 @@
                     </div>
                     <h3>Trust & Transparency</h3>
                     <p>
-                        We prioritize data security and algorithmic transparency, ensuring you understand 
-                        how our AI makes its recommendations and that your data is always protected.
+                        We prioritize algorithmic transparency and data security. You'll always understand how our AI 
+                        makes recommendations, and your data is always encrypted and protected.
                     </p>
                 </div>
 
@@ -650,17 +1243,52 @@
                     <div class="value-icon-wrapper">
                         <i class="fas fa-users"></i>
                     </div>
-                    <h3>Accessibility</h3>
+                    <h3>Accessibility for All</h3>
                     <p>
-                        Financial intelligence shouldn't be limited to the wealthy. We make professional-grade 
-                        tools accessible to all investors, regardless of portfolio size or experience.
+                        Financial intelligence shouldn't be limited to the wealthy. We make professional-grade tools 
+                        accessible to all investors, regardless of portfolio size or experience level.
+                    </p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="value-icon-wrapper">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Data-Driven Excellence</h3>
+                    <p>
+                        Every feature we build is backed by rigorous backtesting, validation, and real-world performance 
+                        metrics. We let the data speak for itself.
+                    </p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="value-icon-wrapper">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>User-Centric Design</h3>
+                    <p>
+                        We obsess over user experience. Complex analytics should be intuitive, beautiful, and enjoyable 
+                        to use—we design with you in mind.
+                    </p>
+                </div>
+
+                <div class="value-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="value-icon-wrapper">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <h3>Global Perspective</h3>
+                    <p>
+                        Markets are interconnected. We provide global coverage across US, European, and Asian markets 
+                        to help you identify opportunities anywhere.
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Founder Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         FOUNDER SECTION
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="founder-section">
         <div class="container-fluid">
             <div class="section-header-custom" data-aos="fade-up">
@@ -672,17 +1300,38 @@
                 <div class="founder-card" data-aos="zoom-in" data-aos-delay="200">
                     <div class="founder-avatar-wrapper">
                         <img src="assets/images/raphael-nardone.jpg" 
-                             alt="Raphael Nardone" 
+                             alt="Raphael Nardone - Founder of AlphaVault AI" 
                              class="founder-avatar">
                     </div>
                     <h3 class="founder-name">Raphael NARDONE</h3>
-                    <p class="founder-title">Founder</p>
+                    <p class="founder-title">Founder & CEO</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         CTA SECTION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="cta-about">
+        <div class="container-fluid">
+            <div class="cta-about-content" data-aos="zoom-in">
+                <h2>Ready to Transform Your Investment Strategy?</h2>
+                <p>
+                    Join 10,000+ investors using AlphaVault AI to make smarter, data-driven investment decisions. 
+                    Start your free trial today—no credit card required.
+                </p>
+                <button class="btn-cta-about" onclick="window.location.href='auth.html'">
+                    <span>Start Free Trial</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════════════════════════ -->
     <footer class="landing-footer">
         <div class="container-fluid">
             <div class="footer-grid">
@@ -716,6 +1365,17 @@
                         <li><a href="index.html#features">Features</a></li>
                         <li><a href="index.html#alphy-ai">Alphy AI</a></li>
                         <li><a href="index.html#pricing">Pricing</a></li>
+                        <li><a href="dashboard-financier.html">Dashboard</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
+                        <li><a href="trend-prediction.html">AlphaVault Score</a></li>
+                        <li><a href="ma-predictor.html">M&A Intelligence</a></li>
+                        <li><a href="ipo-intelligence.html">IPO Intelligence</a></li>
                     </ul>
                 </div>
 
@@ -728,18 +1388,10 @@
                         <li><a href="terms.html">Terms of Service</a></li>
                     </ul>
                 </div>
-
-                <div class="footer-col">
-                    <h4>Contact</h4>
-                    <ul>
-                        <li><i class="fas fa-envelope"></i> contact@alphavault-ai.com</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Paris, France</li>
-                    </ul>
-                </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"><script>document.write(new Date().getFullYear())</script></span> AlphaVault AI. All rights reserved.</p>
+                <p>&copy; <span id="currentYear">2024</span> AlphaVault AI. All rights reserved.</p>
                 <div class="footer-bottom-links">
                     <a href="privacy.html">Privacy</a>
                     <a href="terms.html">Terms</a>
@@ -749,23 +1401,29 @@
         </div>
     </footer>
 
-    <!-- Scripts Firebase -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="assets/js/firebase-config.js"></script>
-
-    <!-- Scripts -->
+    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="assets/js/common.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // AOS Init
+            console.log('%cAlphaVault AI - About Us Page', 'color: #3b82f6; font-size: 18px; font-weight: bold;');
+            
+            // Initialize AOS Animations
             AOS.init({
                 duration: 800,
                 easing: 'ease-out-cubic',
                 once: true,
-                offset: 50
+                offset: 50,
+                mirror: false
             });
+            console.log('✅ AOS Animations initialized');
 
             // Current Year
             document.getElementById('currentYear').textContent = new Date().getFullYear();
@@ -781,75 +1439,23 @@
                 });
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // GESTION AUTHENTIFICATION
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // Auth State Management
             const navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
             const navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
-            const userProfileButton = document.getElementById('userProfileButton');
-            const userDropdownMenu = document.getElementById('userDropdownMenu');
-            const logoutButton = document.getElementById('logoutButton');
 
-            // Vérifier l'état d'authentification Firebase
             if (typeof firebase !== 'undefined' && firebase.auth) {
                 firebase.auth().onAuthStateChanged((user) => {
                     if (user) {
-                        // Utilisateur connecté - Afficher le menu profil
                         navCtaLoggedOut.style.display = 'none';
                         navCtaLoggedIn.style.display = 'flex';
-
-                        // Mettre à jour les informations utilisateur
-                        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-                        document.getElementById('userDisplayName').textContent = displayName;
-                        document.getElementById('dropdownUserName').textContent = displayName;
-                        document.getElementById('dropdownUserEmail').textContent = user.email || '';
-
-                        // Avatar
-                        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
-                        document.getElementById('userAvatarImg').src = avatarUrl;
-                        document.getElementById('dropdownAvatarImg').src = avatarUrl;
                     } else {
-                        // Utilisateur non connecté - Afficher les boutons
                         navCtaLoggedOut.style.display = 'flex';
                         navCtaLoggedIn.style.display = 'none';
                     }
                 });
             }
 
-            // Toggle dropdown menu
-            if (userProfileButton) {
-                userProfileButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const isExpanded = userProfileButton.getAttribute('aria-expanded') === 'true';
-                    userProfileButton.setAttribute('aria-expanded', !isExpanded);
-                    userDropdownMenu.classList.toggle('active');
-                });
-            }
-
-            // Fermer le dropdown en cliquant ailleurs
-            document.addEventListener('click', (e) => {
-                if (!userDropdownMenu.contains(e.target) && !userProfileButton.contains(e.target)) {
-                    userDropdownMenu.classList.remove('active');
-                    userProfileButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            // Logout
-            if (logoutButton) {
-                logoutButton.addEventListener('click', () => {
-                    if (typeof firebase !== 'undefined' && firebase.auth) {
-                        firebase.auth().signOut()
-                            .then(() => {
-                                window.location.href = 'index.html';
-                            })
-                            .catch((error) => {
-                                console.error('Erreur lors de la déconnexion:', error);
-                            });
-                    }
-                });
-            }
+            console.log('%cAlphaVault AI - All Systems Ready!', 'color: #8b5cf6; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
