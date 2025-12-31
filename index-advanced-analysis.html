@@ -61,7 +61,7 @@
             align-items: center;
             justify-content: center;
             padding: 120px 2rem 80px 2rem;
-            overflow: hidden;
+            overflow: visible;
             background: linear-gradient(135deg, 
                 #0f172a 0%, 
                 #1e293b 25%, 
@@ -188,6 +188,8 @@
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
+            height: auto;
+            overflow: visible;
         }
 
         .hero-advanced-content {
@@ -198,6 +200,8 @@
             flex-direction: column;
             align-items: center;
             gap: 2rem;
+            overflow: visible;
+            height: auto;
         }
 
         /* Score Badge - Style premium glassmorphism */
@@ -449,28 +453,30 @@
 
         @media (max-width: 768px) {
             .hero-advanced {
-                min-height: 100vh;
-                padding: 140px 1.5rem 100px 1.5rem;
+                min-height: auto;
+                padding: 120px 1.25rem 60px 1.25rem;
+                overflow: visible;
             }
 
             .hero-advanced-content {
-                gap: 1.5rem;
+                gap: 1.25rem;
+                overflow: visible;
             }
 
             .hero-advanced .score-badge {
-                padding: 0.625rem 1.25rem;
-                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.8125rem;
                 gap: 0.5rem;
             }
 
             .hero-advanced h1 {
-                font-size: clamp(2rem, 9vw, 2.75rem);
+                font-size: clamp(1.75rem, 8.5vw, 2.5rem);
                 line-height: 1.15;
             }
 
             .hero-advanced p {
-                font-size: clamp(1rem, 4vw, 1.125rem);
-                line-height: 1.6;
+                font-size: clamp(0.9375rem, 4vw, 1.0625rem);
+                line-height: 1.5;
             }
 
             .hero-advanced p br {
@@ -478,10 +484,10 @@
             }
 
             .hero-advanced .btn-hero-primary {
-                padding: 1.125rem 2rem;
-                font-size: 1rem;
+                padding: 1rem 1.75rem;
+                font-size: 0.9375rem;
                 width: 100%;
-                max-width: 400px;
+                max-width: 340px;
                 justify-content: center;
             }
 
@@ -506,61 +512,60 @@
 
         @media (max-width: 640px) {
             .hero-advanced {
-                min-height: 100vh;
-                padding: 130px 1.25rem 90px 1.25rem;
+                padding: 110px 1rem 50px 1rem;
             }
 
             .hero-advanced-content {
-                gap: 1.25rem;
+                gap: 1rem;
             }
 
             .hero-advanced .score-badge {
-                padding: 0.5rem 1rem;
-                font-size: 0.8125rem;
+                padding: 0.5rem 0.875rem;
+                font-size: 0.75rem;
             }
 
             .hero-advanced h1 {
-                font-size: clamp(1.875rem, 10vw, 2.25rem);
+                font-size: clamp(1.625rem, 9vw, 2.25rem);
             }
 
             .hero-advanced p {
-                font-size: clamp(0.9375rem, 4.5vw, 1.0625rem);
+                font-size: clamp(0.875rem, 4.2vw, 1rem);
             }
 
             .hero-advanced .btn-hero-primary {
-                padding: 1rem 1.75rem;
-                font-size: 0.9375rem;
+                padding: 0.9375rem 1.5rem;
+                font-size: 0.875rem;
+                max-width: 320px;
             }
         }
 
         @media (max-width: 480px) {
             .hero-advanced {
-                min-height: 100vh;
-                padding: 120px 1rem 80px 1rem;
+                padding: 100px 0.875rem 40px 0.875rem;
             }
 
             .hero-advanced-content {
-                gap: 1.25rem;
+                gap: 0.875rem;
             }
 
             .hero-advanced .score-badge {
-                padding: 0.5rem 1rem;
-                font-size: 0.8125rem;
+                padding: 0.4375rem 0.75rem;
+                font-size: 0.6875rem;
             }
 
             .hero-advanced h1 {
-                font-size: clamp(1.75rem, 11vw, 2.125rem);
+                font-size: clamp(1.5rem, 9.5vw, 2rem);
             }
 
             .hero-advanced p {
-                font-size: clamp(0.875rem, 5vw, 1rem);
+                font-size: clamp(0.8125rem, 4.5vw, 0.9375rem);
             }
 
             .hero-advanced .btn-hero-primary {
                 width: 100%;
                 max-width: none;
-                padding: 1rem 1.5rem;
-                font-size: 0.9375rem;
+                padding: 0.875rem 1.25rem;
+                font-size: 0.8125rem;
             }
         }
 
@@ -829,26 +834,6 @@
                         <span>Open Advanced Analysis</span>
                     </button>
                 </div>
-
-                <!-- Social Proof (OPTIONNEL - décommentez si vous voulez l'afficher) -->
-                <!--
-                <div class="social-proof" data-aos="fade-up" data-aos-delay="300">
-                    <div class="proof-item">
-                        <div class="proof-number">14</div>
-                        <div class="proof-label">Pro Indicators</div>
-                    </div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item">
-                        <div class="proof-number">3</div>
-                        <div class="proof-label">Time Horizons</div>
-                    </div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item">
-                        <div class="proof-number">100%</div>
-                        <div class="proof-label">AI-Powered</div>
-                    </div>
-                </div>
-                -->
             </div>
         </div>
     </section>
