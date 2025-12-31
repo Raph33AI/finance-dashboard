@@ -393,7 +393,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           MISSION & VISION SECTION
+           MISSION & VISION SECTION - SANS EFFET BLEU DÉFILANT
            ═══════════════════════════════════════════════════════════════ */
         .mission-vision-section {
             padding: 100px 1rem;
@@ -441,28 +441,7 @@
                 0 0 0 1px rgba(59, 130, 246, 0.3);
         }
 
-        .mission-card::before,
-        .vision-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(59, 130, 246, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: shimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
+        /* ✅ EFFET BLEU DÉFILANT SUPPRIMÉ - Pas de ::before */
 
         .mission-icon, .vision-icon {
             width: 80px;
@@ -629,7 +608,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-           TECHNOLOGY SECTION
+           TECHNOLOGY SECTION - SANS SCROLL VERTICAL INTERNE
            ═══════════════════════════════════════════════════════════════ */
         .technology-section {
             padding: 100px 1rem;
@@ -658,6 +637,9 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 1;
+            /* ✅ AUCUN SCROLL VERTICAL INTERNE */
+            overflow: visible;
+            height: auto;
         }
 
         body.dark-mode .tech-content {
@@ -669,6 +651,9 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
+            /* ✅ AUCUN SCROLL VERTICAL INTERNE */
+            overflow: visible;
+            height: auto;
         }
 
         .tech-item {
@@ -677,6 +662,9 @@
             border-radius: 20px;
             border: 2px solid rgba(59, 130, 246, 0.2);
             transition: all 0.3s ease;
+            /* ✅ AUCUN SCROLL VERTICAL INTERNE */
+            overflow: visible;
+            height: auto;
         }
 
         .tech-item:hover {
