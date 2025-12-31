@@ -1,6 +1,7 @@
 /* ============================================
-   GROUP-CHAT.CSS v1.0
+   GROUP-CHAT.CSS v1.1 - CORRECTIONS MODAL
    🎨 Styles pour création et gestion de groupes
+   ✅ Bouton close reste dans le modal
    ============================================ */
 
 /* ===== MODAL OVERLAY ===== */
@@ -37,6 +38,7 @@
     flex-direction: column;
     animation: slideUp 0.4s ease;
     border: 2px solid var(--border-color, #e2e8f0);
+    overflow: hidden; /* ✅ AJOUT : Empêche les débordements */
 }
 
 body.dark-mode .modal-container {
@@ -64,6 +66,9 @@ body.dark-mode .modal-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px; /* ✅ AJOUT : Espace entre titre et bouton */
+    flex-wrap: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
+    min-height: 80px; /* ✅ AJOUT : Hauteur minimale */
 }
 
 .modal-header h2 {
@@ -73,6 +78,11 @@ body.dark-mode .modal-container {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1; /* ✅ MODIF : Prend l'espace disponible */
+    min-width: 0; /* ✅ AJOUT : Permet la réduction si nécessaire */
+    overflow: hidden; /* ✅ AJOUT : Cache le débordement */
+    text-overflow: ellipsis; /* ✅ AJOUT : Ajoute ... si trop long */
+    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
 }
 
 .modal-close {
@@ -84,7 +94,12 @@ body.dark-mode .modal-container {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1.2rem;
-    flex-shrink: 0; /* ⚠ Important pour éviter que le bouton disparaisse */
+    flex-shrink: 0; /* ✅ Conservé : Empêche la compression */
+    width: 44px; /* ✅ AJOUT : Largeur fixe */
+    height: 44px; /* ✅ AJOUT : Hauteur fixe */
+    display: flex; /* ✅ AJOUT : Centrage parfait */
+    align-items: center; /* ✅ AJOUT */
+    justify-content: center; /* ✅ AJOUT */
 }
 
 .modal-close:hover {
@@ -821,4 +836,4 @@ body.dark-mode .danger-zone {
     }
 }
 
-console.log('✅ group-chat.css loaded (v1.0)');
+console.log('✅ group-chat.css loaded (v1.1 - Modal close button fixed)');

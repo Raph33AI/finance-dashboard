@@ -1,6 +1,7 @@
 /* ============================================
    MESSAGES HUB - Layout 2 Colonnes (PC) / Navigation Mobile (Instagram Style)
-   Version 3.0 - CORRECTIONS FINALES MOBILE :
+   Version 3.1 - CORRECTIONS FINALES :
+   ✅ Bouton Create Group correctement aligné sur PC
    ✅ Page conversations pleine hauteur sur mobile
    ✅ Bouton suppression à GAUCHE du message (PC + Mobile)
    ✅ Bulles plus petites et compactes
@@ -24,7 +25,7 @@
     max-width: 100%;
     margin: 0 auto;
     padding: 12px;
-    overflow: hidden; /* ✅ Empêche le débordement */
+    overflow: hidden;
 }
 
 /* ===== PANEL GAUCHE (Conversations) ===== */
@@ -186,12 +187,14 @@ body.dark-mode .user-result-name {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Filters */
+/* ✅ CORRECTION : Filters + Create Group Button Container */
 .conversations-filters {
     display: flex;
+    align-items: center;
     gap: 8px;
     padding: 16px 20px;
     border-bottom: 2px solid var(--border-color, #e2e8f0);
+    flex-wrap: wrap; /* ✅ AJOUT : Permet le retour à la ligne si nécessaire */
 }
 
 body.dark-mode .conversations-filters {
@@ -199,7 +202,6 @@ body.dark-mode .conversations-filters {
 }
 
 .filter-btn {
-    flex: 1;
     padding: 10px 16px;
     border-radius: 10px;
     border: 2px solid var(--border-color, #e2e8f0);
@@ -213,6 +215,7 @@ body.dark-mode .conversations-filters {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    flex-shrink: 0; /* ✅ AJOUT : Empêche la compression */
 }
 
 body.dark-mode .filter-btn {
@@ -234,7 +237,7 @@ body.dark-mode .filter-btn {
 .filter-badge {
     background: var(--msg-danger);
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 10px;
@@ -242,9 +245,14 @@ body.dark-mode .filter-btn {
     text-align: center;
 }
 
-/* ===== CREATE GROUP BUTTON ===== */
+.conversations-count {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* ✅ CORRECTION : Create Group Button - Nouvelle structure */
 .create-group-btn {
-    padding: 10px 20px;
+    padding: 10px 16px;
     border-radius: 10px;
     border: none;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -258,8 +266,9 @@ body.dark-mode .filter-btn {
     justify-content: center;
     gap: 8px;
     flex-shrink: 0;
-    margin-left: auto; /* Pousse le bouton à droite */
+    margin-left: auto; /* ✅ Pousse le bouton à droite */
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
 }
 
 .create-group-btn:hover {
@@ -270,23 +279,6 @@ body.dark-mode .filter-btn {
 
 .create-group-btn i {
     font-size: 1rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .create-group-btn {
-        padding: 8px 14px;
-        font-size: 0.85rem;
-    }
-    
-    .create-group-btn span {
-        display: none; /* Cacher le texte sur mobile, garder l'icône */
-    }
-}
-
-.conversations-count {
-    font-size: 0.85rem;
-    opacity: 0.8;
 }
 
 /* Conversations List */
@@ -513,7 +505,7 @@ body.dark-mode .chat-empty-state h3 {
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-/* 📱 Bouton Retour Mobile (caché sur desktop) */
+/* Bouton Retour Mobile (caché sur desktop) */
 .chat-back-btn {
     display: none;
     background: rgba(255, 255, 255, 0.2);
@@ -539,7 +531,7 @@ body.dark-mode .chat-empty-state h3 {
     flex: 1;
 }
 
-/* 🎯 Photo cliquable dans le header */
+/* Photo cliquable dans le header */
 .chat-header-avatar {
     width: 50px;
     height: 50px;
@@ -562,7 +554,7 @@ body.dark-mode .chat-empty-state h3 {
     min-width: 0;
 }
 
-/* 🎯 Nom/Prénom en BLANC (forcé) */
+/* Nom/Prénom en BLANC (forcé) */
 .chat-header-info h3 {
     font-size: 1.1rem;
     font-weight: 800;
@@ -603,7 +595,7 @@ body.dark-mode .chat-empty-state h3 {
     transform: scale(1.05);
 }
 
-/* ✅ Bouton suppression conversation (rouge dans header) */
+/* Bouton suppression conversation (rouge dans header) */
 .chat-delete-conversation-btn {
     background: rgba(239, 68, 68, 0.3) !important;
 }
@@ -621,9 +613,9 @@ body.dark-mode .chat-empty-state h3 {
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden; /* ✅ Empêche le débordement horizontal */
+    overflow-x: hidden;
     padding: 24px;
-    padding-left: 60px; /* ✅ Espace pour le bouton suppression à gauche */
+    padding-left: 60px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -634,15 +626,18 @@ body.dark-mode .chat-messages {
     background: rgba(0, 0, 0, 0.2);
 }
 
-/* ✅ CORRECTION 1 : Bulles plus petites et adaptatives */
+/* MESSAGES - STRUCTURE COMPACTE */
 .chat-message {
-    display: flex;
-    gap: 12px;
-    width: fit-content;
-    max-width: 55%; /* ✅ Réduit de 70% à 55% */
-    animation: fadeInMessage 0.3s ease;
-    align-items: flex-start;
-    position: relative;
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+}
+
+.chat-message.own {
+    align-self: flex-end;
+    flex-direction: row-reverse !important;
 }
 
 @keyframes fadeInMessage {
@@ -650,20 +645,16 @@ body.dark-mode .chat-messages {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.chat-message.own {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-/* 🎯 Photo cliquable dans les messages */
+/* Photo cliquable dans les messages */
 .chat-message-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 2px solid var(--border-color, #e2e8f0);
-    cursor: pointer;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    flex-shrink: 0 !important;
+    border: 2px solid #667eea !important;
+    cursor: pointer !important;
     transition: all 0.3s ease;
 }
 
@@ -674,49 +665,68 @@ body.dark-mode .chat-messages {
 }
 
 .chat-message-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    max-width: 65% !important;
+    width: auto !important;
 }
 
-/* ✅ CORRECTION 2 : Bulle compacte avec moins de padding */
+.chat-message.own .chat-message-content {
+    align-items: flex-end !important;
+}
+
+/* Bulle de message (FIT-CONTENT) */
 .chat-message-bubble {
-    background: white;
-    color: var(--text-primary, #1e293b);
-    padding: 10px 14px; /* ✅ Réduit de 12px 16px à 10px 14px */
-    border-radius: 16px;
-    font-size: 0.9rem; /* ✅ Réduit de 0.95rem à 0.9rem */
-    line-height: 1.4; /* ✅ Réduit de 1.5 à 1.4 */
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    width: fit-content;
-    max-width: 100%;
+    display: inline-block !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    min-width: 60px !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
+    line-height: 1.5 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.2s ease !important;
 }
 
-body.dark-mode .chat-message-bubble {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary, #f8fafc);
+.chat-message-bubble:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
 }
 
+/* Bulle envoyée (violet) */
 .chat-message.own .chat-message-bubble {
-    background: linear-gradient(135deg, var(--msg-primary) 0%, var(--msg-secondary) 100%);
-    color: white;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+/* Bulle reçue (blanc) */
+.chat-message:not(.own) .chat-message-bubble {
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+/* Dark mode */
+body.dark-mode .chat-message:not(.own) .chat-message-bubble {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
 }
 
 .chat-message-time {
-    font-size: 0.75rem;
-    color: var(--text-secondary, #64748b);
-    padding: 0 8px;
+    font-size: 0.7rem !important;
+    color: #94a3b8 !important;
+    margin-top: 4px !important;
+    padding: 0 4px !important;
 }
 
-.chat-message.own .chat-message-time {
-    text-align: right;
-}
-
-/* ✅ CORRECTION 3 : Images avec taille réduite */
+/* Images */
 .message-attachment {
     margin-top: 8px;
     border-radius: 12px;
@@ -724,8 +734,8 @@ body.dark-mode .chat-message-bubble {
 }
 
 .message-attachment img {
-    max-width: 240px; /* ✅ Réduit de 280px à 240px */
-    max-height: 240px; /* ✅ Réduit de 280px à 240px */
+    max-width: 240px;
+    max-height: 240px;
     width: auto;
     height: auto;
     display: block;
@@ -776,11 +786,11 @@ body.dark-mode .message-attachment-file {
     color: var(--text-secondary, #64748b);
 }
 
-/* ✅ CORRECTION 4 : Bouton suppression À GAUCHE (PC + Mobile) */
+/* Bouton suppression À GAUCHE */
 .message-delete-btn {
     position: absolute;
     top: 8px;
-    left: -44px; /* ✅ CHANGÉ : À GAUCHE au lieu de right: -40px */
+    left: -44px;
     background: var(--msg-danger);
     color: white;
     border: none;
@@ -802,37 +812,88 @@ body.dark-mode .message-attachment-file {
     transform: scale(1.08);
 }
 
-/* ✅ Pour les messages "own" (à droite), bouton aussi à gauche */
 .chat-message.own .message-delete-btn {
-    left: -44px; /* ✅ Toujours à gauche */
+    left: -44px;
     right: auto;
 }
 
-/* ✅ Indicateur visuel message actif (mobile) */
-/* .chat-message.message-active {
-    position: relative;
+/* Shared Posts */
+.shared-post-message .chat-message-content {
+    max-width: 360px !important;
+    min-width: 300px !important;
 }
 
-.chat-message.message-active::before {
-    content: '';
-    position: absolute;
-    left: -4px;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--msg-primary);
-    border-radius: 2px;
-    animation: pulseActive 1.5s ease infinite;
+.shared-post-message .chat-message-bubble {
+    width: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
-@keyframes pulseActive {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+.shared-post-header {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    padding: 12px 16px !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-.chat-message.message-active .chat-message-bubble {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-} */
+.shared-post-content {
+    padding: 16px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+}
+
+.shared-post-content:hover {
+    background: rgba(102, 126, 234, 0.05) !important;
+}
+
+.shared-post-title {
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    color: #1e293b !important;
+    margin-bottom: 8px !important;
+    line-height: 1.4 !important;
+}
+
+body.dark-mode .shared-post-title {
+    color: #f1f5f9 !important;
+}
+
+.shared-post-meta {
+    font-size: 0.8rem !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.shared-post-author {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.shared-post-view-btn {
+    display: block !important;
+    width: 100% !important;
+    padding: 12px !important;
+    text-align: center !important;
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    border-top: 1px solid rgba(102, 126, 234, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.shared-post-view-btn:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+}
 
 /* Attachment Preview (before sending) */
 .attachment-preview {
@@ -1003,6 +1064,56 @@ body.dark-mode .chat-input {
     margin-left: auto;
 }
 
+/* TITRE DE PAGE EN DÉGRADÉ */
+.top-header .page-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    display: inline-block;
+    position: relative;
+}
+
+.top-header .page-title i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-mode .top-header .page-title,
+body.dark-mode .top-header .page-title i {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.top-header .page-title::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    filter: blur(16px);
+    opacity: 0.25;
+    z-index: -1;
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.4; }
+}
+
+body.dark-mode .top-header .page-title::after {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    opacity: 0.2;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
     .messages-container {
@@ -1012,26 +1123,26 @@ body.dark-mode .chat-input {
     }
 }
 
-/* 📱 ===== MODE MOBILE (STYLE INSTAGRAM) ===== */
+/* MODE MOBILE (STYLE INSTAGRAM) */
 @media (max-width: 968px) {
     .messages-container {
         grid-template-columns: 1fr;
         gap: 0;
         padding: 0;
-        height: 100vh; /* ✅ CORRECTION : Pleine hauteur sur mobile */
+        height: 100vh;
         max-height: 100vh;
     }
     
     .conversations-panel {
         display: flex;
-        height: 100%; /* ✅ CORRECTION : Pleine hauteur */
+        height: 100%;
         border-radius: 0;
         border: none;
     }
     
     .chat-panel {
         display: none;
-        height: 100%; /* ✅ CORRECTION : Pleine hauteur */
+        height: 100%;
         border-radius: 0;
         border: none;
     }
@@ -1065,23 +1176,22 @@ body.dark-mode .chat-input {
         font-size: 0.8rem;
     }
     
-    /* ✅ Messages encore plus compacts sur mobile */
     .chat-messages {
         padding: 16px;
-        padding-left: 50px; /* ✅ Espace pour bouton suppression */
+        padding-left: 50px;
     }
     
     .chat-message {
-        max-width: 75%; /* ✅ Un peu plus large sur mobile */
+        max-width: 75%;
     }
     
     .chat-message-bubble {
-        font-size: 0.875rem; /* ✅ Légèrement plus petit */
-        padding: 9px 12px; /* ✅ Encore plus compact */
+        font-size: 0.875rem;
+        padding: 9px 12px;
     }
     
     .message-attachment img {
-        max-width: 200px; /* ✅ Réduit sur mobile */
+        max-width: 200px;
         max-height: 200px;
     }
     
@@ -1094,7 +1204,6 @@ body.dark-mode .chat-input {
         right: 12px;
     }
     
-    /* ✅ Bouton suppression visible au clic sur mobile */
     .message-delete-btn {
         opacity: 0;
         left: -40px;
@@ -1106,6 +1215,16 @@ body.dark-mode .chat-input {
     
     .chat-message.message-active .message-delete-btn {
         opacity: 1;
+    }
+    
+    /* ✅ Bouton Create Group responsive */
+    .create-group-btn {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    
+    .create-group-btn span {
+        display: none;
     }
 }
 
@@ -1128,6 +1247,15 @@ body.dark-mode .chat-input {
     .search-users-section {
         padding: 16px;
     }
+    
+    .top-header .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .shared-post-message .chat-message-content {
+        max-width: 90% !important;
+        min-width: 280px !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1137,7 +1265,7 @@ body.dark-mode .chat-input {
     
     .chat-message-bubble {
         font-size: 0.85rem;
-        padding: 8px 11px; /* ✅ Encore plus compact */
+        padding: 8px 11px;
     }
     
     .conversations-filters {
@@ -1146,7 +1274,7 @@ body.dark-mode .chat-input {
     }
     
     .message-attachment img {
-        max-width: 160px; /* ✅ Très compact sur petit écran */
+        max-width: 160px;
         max-height: 160px;
     }
     
@@ -1154,6 +1282,15 @@ body.dark-mode .chat-input {
         left: -36px;
         padding: 6px 9px;
         font-size: 0.7rem;
+    }
+    
+    .top-header .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .shared-post-message .chat-message-content {
+        max-width: 95% !important;
+        min-width: 260px !important;
     }
 }
 
@@ -1195,362 +1332,4 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
-console.log('✅ messages-hub.css loaded (v3.0 - Bouton suppression À GAUCHE + Bulles compactes + Mobile pleine hauteur)');
-
-/* ════════════════════════════════════════════════════════════════
-   💬 MESSAGES - STRUCTURE COMPACTE ET RESPONSIVE
-   ════════════════════════════════════════════════════════════════ */
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CONTENEUR DE MESSAGE (ligne horizontale)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.chat-message {
-    display: flex !important;
-    align-items: flex-end !important;
-    gap: 8px !important;
-    margin-bottom: 12px !important;
-    width: 100% !important;
-}
-
-.chat-message.own {
-    flex-direction: row-reverse !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   AVATAR (taille fixe)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.chat-message-avatar {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    flex-shrink: 0 !important;
-    border: 2px solid #667eea !important;
-    cursor: pointer !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CONTENEUR DU CONTENU (largeur automatique)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.chat-message-content {
-    display: flex !important;
-    flex-direction: column !important;
-    max-width: 65% !important;
-    width: auto !important;
-}
-
-.chat-message.own .chat-message-content {
-    align-items: flex-end !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BULLE DE MESSAGE (FIT-CONTENT)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.chat-message-bubble {
-    /* 🎯 DIMENSIONS ADAPTATIVES */
-    display: inline-block !important;
-    width: fit-content !important;
-    max-width: 100% !important;
-    min-width: 60px !important;
-    
-    /* 🎨 STYLE */
-    padding: 10px 14px !important;
-    border-radius: 16px !important;
-    
-    /* 📝 TEXTE */
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-    white-space: pre-wrap !important;
-    line-height: 1.5 !important;
-    
-    /* ✨ EFFET */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    transition: transform 0.2s ease !important;
-}
-
-.chat-message-bubble:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-}
-
-/* Bulle envoyée (violet) */
-.chat-message.own .chat-message-bubble {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    color: white !important;
-    border-bottom-right-radius: 4px !important;
-}
-
-/* Bulle reçue (blanc) */
-.chat-message:not(.own) .chat-message-bubble {
-    background: white !important;
-    color: #1e293b !important;
-    border: 1px solid #e2e8f0 !important;
-    border-bottom-left-radius: 4px !important;
-}
-
-/* Dark mode */
-body.dark-mode .chat-message:not(.own) .chat-message-bubble {
-    background: #1e293b !important;
-    color: #f1f5f9 !important;
-    border-color: #334155 !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   HEURE DU MESSAGE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.chat-message-time {
-    font-size: 0.7rem !important;
-    color: #94a3b8 !important;
-    margin-top: 4px !important;
-    padding: 0 4px !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BOUTON SUPPRESSION (mobile)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.message-delete-btn {
-    opacity: 0 !important;
-    transform: scale(0.8) !important;
-    transition: all 0.3s ease !important;
-    background: #ef4444 !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 6px 10px !important;
-    cursor: pointer !important;
-    font-size: 0.875rem !important;
-    margin-left: 8px !important;
-}
-
-/* Desktop: affichage au survol */
-@media (min-width: 769px) {
-    .chat-message:hover .message-delete-btn {
-        opacity: 1 !important;
-        transform: scale(1) !important;
-    }
-}
-
-/* Mobile: affichage sur clic */
-@media (max-width: 768px) {
-    .chat-message.message-active .message-delete-btn {
-        opacity: 1 !important;
-        transform: scale(1) !important;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   POSTS PARTAGÉS (EXCEPTION - Largeur fixe)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.shared-post-message .chat-message-content {
-    max-width: 360px !important;
-    min-width: 300px !important;
-}
-
-.shared-post-message .chat-message-bubble {
-    width: 100% !important;
-    display: block !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-}
-
-/* Header du post partagé */
-.shared-post-header {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    color: white !important;
-    padding: 12px 16px !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-/* Contenu du post */
-.shared-post-content {
-    padding: 16px !important;
-    cursor: pointer !important;
-    transition: background 0.2s ease !important;
-}
-
-.shared-post-content:hover {
-    background: rgba(102, 126, 234, 0.05) !important;
-}
-
-.shared-post-title {
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    color: #1e293b !important;
-    margin-bottom: 8px !important;
-    line-height: 1.4 !important;
-}
-
-body.dark-mode .shared-post-title {
-    color: #f1f5f9 !important;
-}
-
-.shared-post-meta {
-    font-size: 0.8rem !important;
-    color: #64748b !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.shared-post-author {
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-}
-
-/* Bouton View Post */
-.shared-post-view-btn {
-    display: block !important;
-    width: 100% !important;
-    padding: 12px !important;
-    text-align: center !important;
-    background: rgba(102, 126, 234, 0.1) !important;
-    color: #667eea !important;
-    text-decoration: none !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    border-top: 1px solid rgba(102, 126, 234, 0.2) !important;
-    transition: all 0.2s ease !important;
-}
-
-.shared-post-view-btn:hover {
-    background: rgba(102, 126, 234, 0.2) !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ATTACHMENTS (images)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.message-attachment img {
-    max-width: 280px !important;
-    max-height: 280px !important;
-    width: auto !important;
-    height: auto !important;
-    display: block !important;
-    border-radius: 12px !important;
-    cursor: pointer !important;
-    object-fit: contain !important;
-    margin-top: 8px !important;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   RESPONSIVE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 768px) {
-    .chat-message-content {
-        max-width: 75% !important;
-    }
-    
-    .chat-message-bubble {
-        padding: 9px 12px !important;
-        min-width: 50px !important;
-    }
-    
-    .shared-post-message .chat-message-content {
-        max-width: 90% !important;
-        min-width: 280px !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .chat-message-content {
-        max-width: 80% !important;
-    }
-    
-    .chat-message-bubble {
-        padding: 8px 11px !important;
-        min-width: 40px !important;
-    }
-    
-    .shared-post-message .chat-message-content {
-        max-width: 95% !important;
-        min-width: 260px !important;
-    }
-}
-
-/* ════════════════════════════════════════════════════════════════
-   ✅ FIN DU CSS CORRIGÉ
-   ════════════════════════════════════════════════════════════════ */
-
- /* ════════════════════════════════════════════════════════════════
-   🎨 TITRE DE PAGE EN DÉGRADÉ BLEU/VIOLET
-   ════════════════════════════════════════════════════════════════ */
-
-.top-header .page-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 900;
-    display: inline-block;
-    position: relative;
-}
-
-/* Icône en dégradé aussi */
-.top-header .page-title i {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Dark Mode - Dégradé plus lumineux */
-body.dark-mode .top-header .page-title,
-body.dark-mode .top-header .page-title i {
-    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Effet lumineux subtil autour du titre (optionnel) */
-.top-header .page-title::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    filter: blur(16px);
-    opacity: 0.25;
-    z-index: -1;
-    animation: pulseGlow 3s ease-in-out infinite;
-}
-
-@keyframes pulseGlow {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 0.4; }
-}
-
-body.dark-mode .top-header .page-title::after {
-    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-    opacity: 0.2;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .top-header .page-title {
-        font-size: 1.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .top-header .page-title {
-        font-size: 1.5rem;
-    }
-}  
+console.log('✅ messages-hub.css loaded (v3.1 - Create Group Button Fixed)');
