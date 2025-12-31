@@ -13,6 +13,8 @@
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/messages-hub.css'>
+    <!-- ✅ NOUVEAU : Styles pour les groupes -->
+    <link rel='stylesheet' href='assets/css/group-chat.css'>
     
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -376,6 +378,10 @@
                             <i class="fas fa-envelope"></i> Unread
                             <span class="filter-badge" id="unreadFilterBadge" style="display: none;">0</span>
                         </button>
+                        <!-- ✅ NOUVEAU : Bouton Create Group -->
+                        <button class="create-group-btn" onclick="window.createGroupModal.open()">
+                            <i class="fas fa-users-plus"></i> New Group
+                        </button>
                     </div>
                     
                     <!-- Conversations List -->
@@ -457,8 +463,71 @@
     <!-- ✅ MESSAGES SYSTEM -->
     <script src='assets/js/messages-hub.js'></script>
     <script src='assets/js/private-chat.js'></script>
+
+    <!-- ✅ GROUP SYSTEM (NOUVEAU) -->
+    <script src='assets/js/create-group-modal.js'></script>
+    <script src='assets/js/group-chat.js'></script>
+    <script src='assets/js/group-members-manager.js'></script>
     
     <script src="assets/js/admin-visibility.js"></script>
+
+    <!-- ✅ CREATE GROUP MODAL -->
+    <div id="createGroupModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-users-plus"></i> Create New Group</h2>
+                <button class="modal-close" onclick="window.createGroupModal.close()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Group Photo -->
+                <div class="group-photo-upload">
+                    <div class="group-photo-preview" id="groupPhotoPreview">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <input type="file" id="groupPhotoInput" accept="image/*" style="display: none;">
+                    <button class="upload-photo-btn" onclick="document.getElementById('groupPhotoInput').click()">
+                        <i class="fas fa-camera"></i> Add Photo
+                    </button>
+                </div>
+                
+                <!-- Group Name -->
+                <div class="form-group">
+                    <label for="groupName">Group Name *</label>
+                    <input type="text" id="groupName" class="form-input" placeholder="e.g., Tech Investors" maxlength="50">
+                </div>
+                
+                <!-- Group Description -->
+                <div class="form-group">
+                    <label for="groupDescription">Description (optional)</label>
+                    <textarea id="groupDescription" class="form-textarea" placeholder="What is this group about?" maxlength="200"></textarea>
+                </div>
+                
+                <!-- Members Selection -->
+                <div class="form-group" style="position: relative;">
+                    <label>Add Members * (min 2)</label>
+                    <input type="text" id="memberSearchInput" class="form-input" placeholder="Search users...">
+                    
+                    <div id="memberSearchResults" class="member-search-results" style="display: none;"></div>
+                    
+                    <div id="selectedMembers" class="selected-members">
+                        <!-- Selected members chips will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="window.createGroupModal.close()">Cancel</button>
+                <button class="btn-primary" id="createGroupBtn" onclick="window.createGroupModal.create()">
+                    <i class="fas fa-check"></i> Create Group
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ GROUP MEMBERS MODAL (sera généré dynamiquement par group-members-manager.js) -->
 
     <!-- User Menu Init -->
     <script>

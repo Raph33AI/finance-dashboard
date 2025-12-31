@@ -812,6 +812,266 @@ class MessagesHub {
             this.conversationsListener();
         }
     }
+
+    /* ==========================================
+   ✅ AJOUT : GESTION DES GROUPES
+   ========================================== */
+
+    // 🔹 Méthode : Ouvrir un groupe (au lieu d'une conversation privée)
+    async openGroup(groupId, groupData) {
+        console.log('👥 Opening group:', groupData.name);
+
+        // Marquer comme conversation active
+        this.activeConversationId = groupId;
+        this.renderConversations();
+
+        // Gestion mobile (basculer en mode chat)
+        if (window.innerWidth <= 968) {
+            const container = document.querySelector('.messages-container');
+            if (container) {
+                container.classList.add('mobile-chat-active');
+            }
+        }
+
+        // Vérifier que le système de chat groupe est chargé
+        if (!window.groupChat) {
+            console.error('❌ Group chat system not loaded');
+            alert('Group chat system is not available. Please refresh the page.');
+            return;
+        }
+
+        // Ouvrir le groupe
+        await window.groupChat.openGroup(groupId, groupData);
+        
+        console.log('✅ Group opened successfully');
+    }
+
+    // 🔹 Modifier la méthode `createConversationCard` pour détecter les groupes
+    createConversationCard(conv) {
+        // ✅ Détecter si c'est un groupe
+        const isGroup = conv.type === 'group' || (conv.participants && conv.participants.length > 2);
+
+        if (isGroup) {
+            return this.createGroupCard(conv);
+        }
+
+        // Sinon, carte de conversation normale (code existant)
+        const displayName = conv.otherUserData?.displayName || 'Unknown User';
+        const avatar = conv.otherUserData?.photoURL || 
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff`;
+
+        const lastMessageText = conv.lastMessage?.text || 'No messages yet';
+        const lastMessagePreview = lastMessageText.length > 60 
+            ? lastMessageText.substring(0, 60) + '...' 
+            : lastMessageText;
+
+        const timeAgo = conv.lastMessageAt 
+            ? this.formatTimeAgo(conv.lastMessageAt) 
+            : 'Just now';
+
+        const isUnread = conv.unreadCount > 0;
+        const unreadBadgeHTML = isUnread 
+            ? `<div class="unread-badge">${conv.unreadCount}</div>` 
+            : '';
+
+        const onlineIndicator = conv.isOnline 
+            ? '<div class="online-indicator"></div>' 
+            : '';
+
+        const isActive = this.activeConversationId === conv.otherUserId;
+
+        return `
+            <div class="conversation-card ${isUnread ? 'unread' : ''} ${isActive ? 'active' : ''}" 
+                onclick="window.messagesHub.openConversation('${conv.otherUserId}', ${JSON.stringify(conv.otherUserData).replace(/"/g, '&quot;')})">
+                
+                <div class="conversation-avatar-wrapper">
+                    <img src="${avatar}" 
+                        alt="${this.escapeHtml(displayName)}" 
+                        class="conversation-avatar"
+                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff'">
+                    ${onlineIndicator}
+                </div>
+                
+                <div class="conversation-content">
+                    <div class="conversation-header">
+                        <h3 class="conversation-name">${this.escapeHtml(displayName)}</h3>
+                        <span class="conversation-time">${timeAgo}</span>
+                    </div>
+                    <p class="conversation-last-message">${this.escapeHtml(lastMessagePreview)}</p>
+                </div>
+                
+                ${unreadBadgeHTML}
+                
+                <button class="delete-conversation-btn" 
+                        onclick="event.stopPropagation(); window.messagesHub.deleteConversation('${conv.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        `;
+    }
+
+    // 🔹 Nouvelle méthode : Créer une carte de groupe
+    createGroupCard(conv) {
+        const groupName = conv.name || 'Group';
+        const groupAvatar = conv.photoURL || 
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff`;
+
+        const lastMessageText = conv.lastMessage?.text || 'No messages yet';
+        const lastMessagePreview = lastMessageText.length > 60 
+            ? lastMessageText.substring(0, 60) + '...' 
+            : lastMessageText;
+
+        const timeAgo = conv.lastMessageAt 
+            ? this.formatTimeAgo(conv.lastMessageAt) 
+            : 'Just now';
+
+        const isUnread = conv.unreadCount > 0;
+        const unreadBadgeHTML = isUnread 
+            ? `<div class="unread-badge">${conv.unreadCount}</div>` 
+            : '';
+
+        const isActive = this.activeConversationId === conv.id;
+        const membersCount = conv.participants?.length || 0;
+
+        return `
+            <div class="conversation-card ${isUnread ? 'unread' : ''} ${isActive ? 'active' : ''}" 
+                onclick="window.messagesHub.openGroup('${conv.id}', ${JSON.stringify(conv).replace(/"/g, '&quot;')})">
+                
+                <div class="conversation-avatar-wrapper">
+                    <img src="${groupAvatar}" 
+                        alt="${this.escapeHtml(groupName)}" 
+                        class="conversation-avatar"
+                        onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff'">
+                </div>
+                
+                <div class="conversation-content">
+                    <div class="conversation-header">
+                        <h3 class="conversation-name">
+                            <i class="fas fa-users" style="font-size: 0.8rem; color: #667eea; margin-right: 4px;"></i>
+                            ${this.escapeHtml(groupName)}
+                        </h3>
+                        <span class="conversation-time">${timeAgo}</span>
+                    </div>
+                    <p class="conversation-last-message">${this.escapeHtml(lastMessagePreview)}</p>
+                </div>
+                
+                ${unreadBadgeHTML}
+                
+                <span class="conversation-group-badge">
+                    <i class="fas fa-users"></i>
+                    ${membersCount}
+                </span>
+                
+                <button class="delete-conversation-btn" 
+                        onclick="event.stopPropagation(); window.messagesHub.deleteConversation('${conv.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        `;
+    }
+
+    // 🔹 Modifier la méthode `loadConversations` pour gérer les groupes
+    async loadConversations() {
+        if (!this.currentUser) return;
+
+        console.log('📥 Loading conversations...');
+
+        const conversationsList = document.getElementById('conversationsList');
+        if (!conversationsList) return;
+
+        conversationsList.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading conversations...</p>
+            </div>
+        `;
+
+        if (this.conversationsListener) {
+            this.conversationsListener();
+        }
+
+        this.conversationsListener = this.db
+            .collection('conversations')
+            .where('participants', 'array-contains', this.currentUser.uid)
+            .orderBy('lastMessageAt', 'desc')
+            .onSnapshot(async (snapshot) => {
+                console.log(`📊 Received ${snapshot.size} conversations`);
+
+                if (snapshot.empty) {
+                    this.conversations = [];
+                    this.renderEmptyState();
+                    this.updateCounters();
+                    return;
+                }
+
+                const conversationsMap = new Map();
+
+                for (const doc of snapshot.docs) {
+                    const convData = doc.data();
+                    
+                    // Filtrer les conversations supprimées
+                    const deletedBy = convData.deletedBy || [];
+                    if (deletedBy.includes(this.currentUser.uid)) {
+                        console.log('⏭ Skipping deleted conversation:', doc.id);
+                        continue;
+                    }
+                    
+                    // Protection anti-doublons
+                    if (conversationsMap.has(doc.id)) {
+                        console.warn('⚠ Duplicate conversation detected, skipping:', doc.id);
+                        continue;
+                    }
+                    
+                    // ✅ Détecter si c'est un groupe
+                    const isGroup = convData.type === 'group' || (convData.participants && convData.participants.length > 2);
+
+                    if (isGroup) {
+                        // Conversation de groupe
+                        conversationsMap.set(doc.id, {
+                            id: doc.id,
+                            type: 'group',
+                            name: convData.name,
+                            photoURL: convData.photoURL,
+                            description: convData.description,
+                            participants: convData.participants,
+                            participantsData: convData.participantsData,
+                            admins: convData.admins,
+                            lastMessage: convData.lastMessage,
+                            lastMessageAt: convData.lastMessageAt?.toDate(),
+                            unreadCount: convData.unreadCount?.[this.currentUser.uid] || 0,
+                            createdAt: convData.createdAt?.toDate()
+                        });
+                    } else {
+                        // Conversation privée (code existant)
+                        const otherUserId = convData.participants.find(id => id !== this.currentUser.uid);
+                        const otherUserData = await this.getUserData(otherUserId);
+                        const isOnline = await this.checkUserOnline(otherUserId);
+
+                        conversationsMap.set(doc.id, {
+                            id: doc.id,
+                            type: 'private',
+                            otherUserId: otherUserId,
+                            otherUserData: otherUserData,
+                            lastMessage: convData.lastMessage,
+                            lastMessageAt: convData.lastMessageAt?.toDate(),
+                            unreadCount: convData.unreadCount?.[this.currentUser.uid] || 0,
+                            createdAt: convData.createdAt?.toDate(),
+                            isOnline: isOnline
+                        });
+                    }
+                }
+
+                this.conversations = Array.from(conversationsMap.values());
+
+                console.log('✅ Conversations loaded (deduplicated):', this.conversations.length);
+                this.filterConversations(this.currentFilter);
+                this.updateCounters();
+                this.updateUnreadBadges();
+            }, (error) => {
+                console.error('❌ Error loading conversations:', error);
+                this.renderError('Failed to load conversations');
+            });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
