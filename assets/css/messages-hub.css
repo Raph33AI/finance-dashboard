@@ -1325,4 +1325,53 @@ body.dark-mode .user-search-results::-webkit-scrollbar-thumb {
     background: var(--text-secondary, #94a3b8);
 }
 
+/* ===== GROUP BADGE - POSITIONNÉ À CÔTÉ DU NOM ===== */
+
+/* ✅ Retire le positionnement absolu, place le badge dans le flux normal */
+.conversation-group-badge {
+    position: static; /* ✅ MODIF : static au lieu de absolute */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: inline-flex; /* ✅ MODIF : inline-flex pour être sur la même ligne */
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px; /* ✅ AJOUT : Espace entre le nom et le badge */
+    vertical-align: middle; /* ✅ AJOUT : Alignement vertical */
+}
+
+/* ✅ Le nom et le badge doivent être sur la même ligne */
+.conversation-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+    display: flex; /* ✅ MODIF : flex au lieu de block */
+    align-items: center; /* ✅ AJOUT : Centrage vertical */
+    gap: 0; /* ✅ Le gap est géré par le badge lui-même */
+    overflow: visible; /* ✅ MODIF : visible pour ne pas couper le badge */
+}
+
+body.dark-mode .conversation-name {
+    color: var(--text-primary, #f8fafc);
+}
+
+/* ✅ Le header doit autoriser le débordement du badge */
+.conversation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    overflow: visible; /* ✅ AJOUT : Permet au badge d'être visible */
+}
+
+/* ✅ Animation au survol du badge */
+.conversation-group-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 console.log('✅ messages-hub.css loaded (v3.3 - PC: 340px panel + Mobile: uniform button spacing)');
