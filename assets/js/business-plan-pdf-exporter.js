@@ -6,7 +6,7 @@
 
 class BusinessPlanPDFExporter {
     constructor() {
-        this.workerUrl = 'https://business-plan-pdf.VOTRE-COMPTE.workers.dev'; // ⚠ REMPLACER
+        this.workerUrl = 'https://business-plan-pdf.raphnardone.workers.dev'; // ⚠ REMPLACER
         this.iconMap = {
             'fa-briefcase': '💼', 'fa-chart-area': '📊', 'fa-puzzle-piece': '🧩',
             'fa-dollar-sign': '💰', 'fa-sliders-h': '🎚', 'fa-calculator': '🧮',
