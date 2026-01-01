@@ -1079,6 +1079,68 @@ class PrivateChat {
             this.messagesListener();
         }
     }
+
+    /**
+     * ✅ HELPER : Couleur dynamique par channel
+     */
+    getChannelColor(channelName) {
+        const colorMap = {
+            'Market Intelligence': '#3B82F6',
+            'IPO Hub': '#8B5CF6',
+            'M&A Insights': '#EC4899',
+            'Portfolio Strategies': '#10B981',
+            'Economic Analysis': '#F59E0B',
+            'Trading Ideas': '#EF4444',
+            'Tech & Innovation': '#06B6D4',
+            'ESG & Sustainability': '#84CC16'
+        };
+        
+        return colorMap[channelName] || '#667eea';
+    }
+
+    /**
+     * ✅ HELPER : Badge plan minimal
+     */
+    getMinimalPlanBadge(plan) {
+        const badges = {
+            'platinum': '<span class="mini-plan-badge platinum"><i class="fas fa-crown"></i></span>',
+            'pro': '<span class="mini-plan-badge pro"><i class="fas fa-star"></i></span>',
+            'basic': '<span class="mini-plan-badge basic">B</span>'
+        };
+        
+        return badges[plan] || '';
+    }
+
+    /**
+     * ✅ HELPER : Formatage de date pour posts
+     */
+    formatPostDate(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+        });
+    }
+
+    /**
+     * ✅ HELPER : Formatage de nombres
+     */
+    formatNumber(num) {
+        if (!num) return '0';
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

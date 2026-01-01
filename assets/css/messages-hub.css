@@ -1893,6 +1893,112 @@ body.dark-mode .shared-post-stats {
     animation: fadeInSharedPost 0.5s ease-out;
 }
 
-console.log('✅ Shared Post Premium CSS loaded');
+/* ============================================
+   🎨 SHARE MODAL - ONGLETS USERS/GROUPS
+   ============================================ */
+
+/* Onglets */
+.share-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px 0 20px;
+    border-bottom: 2px solid var(--border-color, #e2e8f0);
+    margin-bottom: 16px;
+}
+
+body.dark-mode .share-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.share-tab {
+    flex: 1;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    color: var(--text-secondary, #64748b);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+}
+
+.share-tab:hover {
+    background: rgba(102, 126, 234, 0.05);
+    color: var(--msg-primary);
+}
+
+.share-tab.active {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--msg-primary);
+}
+
+.share-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--msg-primary), var(--msg-secondary));
+    border-radius: 2px 2px 0 0;
+}
+
+.share-tab i {
+    font-size: 1rem;
+}
+
+/* Contenus des onglets */
+.share-content-tab {
+    display: none;
+}
+
+.share-content-tab.active {
+    display: block;
+}
+
+/* Indicateur de groupe sur l'avatar */
+.group-indicator-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: 3px solid var(--background-primary, #ffffff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .group-indicator-badge {
+    border-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Ajustement pour les items de groupe */
+.group-select-item .user-select-name {
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .share-tab span {
+        display: none; /* Cacher le texte sur mobile */
+    }
+    
+    .share-tab i {
+        font-size: 1.2rem;
+    }
+}
 
 console.log('✅ messages-hub.css loaded (v3.3 - PC: 340px panel + Mobile: uniform button spacing)');
