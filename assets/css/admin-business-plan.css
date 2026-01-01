@@ -3534,3 +3534,155 @@ table {
 /* ════════════════════════════════════════════════════════════════
    FIN DES CORRECTIONS RESPONSIVE
    ════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   📈 CORRECTION GRAPHIQUES MOBILE - VERSION ULTRA RENFORCÉE
+   ════════════════════════════════════════════════════════════════ */
+
+/* Container des graphiques - Force le bon ratio */
+.chart-container {
+    position: relative;
+    width: 100% !important;
+    max-width: 100%;
+    padding: 24px 20px !important;
+    overflow: visible !important; /* Permet aux légendes de ne pas être coupées */
+    margin-bottom: 30px;
+}
+
+/* Canvas - Force les dimensions responsives */
+.chart-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    min-height: 350px !important; /* Hauteur minimale pour éviter l'écrasement */
+    display: block !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   📱 RESPONSIVE TABLETTE (1024px)
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .chart-container {
+        padding: 28px 24px !important;
+    }
+
+    .chart-container canvas {
+        min-height: 320px !important;
+        max-height: 420px !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   📱 RESPONSIVE TABLETTE/MOBILE (768px)
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .chart-container {
+        padding: 24px 16px !important;
+        border-radius: 16px;
+        margin-bottom: 24px;
+    }
+
+    .chart-container canvas {
+        min-height: 380px !important; /* ⚡ AUGMENTÉ pour éviter l'écrasement */
+        max-height: 480px !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   📱 RESPONSIVE MOBILE (480px et moins)
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .chart-container {
+        padding: 20px 12px !important;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        /* Retire l'aspect ratio qui écrase le graphique */
+        min-height: 400px !important;
+    }
+
+    /* ⚠ SUPPRESSION du ::before qui écrase le canvas */
+    .chart-container::before {
+        display: none !important;
+    }
+
+    .chart-container canvas {
+        position: relative !important; /* Change de absolute à relative */
+        width: 100% !important;
+        height: 360px !important; /* ⚡ Hauteur FIXE pour mobile */
+        min-height: 360px !important;
+        max-height: 450px !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   📱 TRÈS PETIT MOBILE (375px - iPhone SE, etc.)
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 375px) {
+    .chart-container {
+        padding: 16px 10px !important;
+        min-height: 380px !important;
+    }
+
+    .chart-container canvas {
+        height: 340px !important;
+        min-height: 340px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 AMÉLIORATION DES LÉGENDES SUR MOBILE
+   ════════════════════════════════════════════════════════════════ */
+
+/* Force les légendes à passer en vertical sur mobile */
+@media (max-width: 768px) {
+    /* Si tu utilises Chart.js avec légende personnalisée */
+    .chart-container .chart-legend {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container .chart-legend {
+        font-size: 0.8125rem !important;
+        gap: 6px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ⚡ FIX SPÉCIFIQUE HIGHCHARTS (si utilisé)
+   ════════════════════════════════════════════════════════════════ */
+
+.chart-container .highcharts-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-container .highcharts-root {
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .chart-container .highcharts-container,
+    .chart-container .highcharts-root {
+        min-height: 380px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container .highcharts-container,
+    .chart-container .highcharts-root {
+        height: 360px !important;
+        min-height: 360px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FIN DES CORRECTIONS GRAPHIQUES MOBILE
+   ════════════════════════════════════════════════════════════════ */
