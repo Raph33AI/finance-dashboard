@@ -369,7 +369,7 @@ class GroupMembersManager {
         this.newGroupPhoto = file;
         console.log('✅ [GROUP EDIT] Photo stored in this.newGroupPhoto');
 
-        // ✅ CORRECTION : Preview immédiat et simple
+        // ✅ CORRECTION : Preview avec diagnostic CSS complet
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById('groupPhotoPreview');
@@ -379,14 +379,42 @@ class GroupMembersManager {
             console.log('📦 Container element:', previewContainer ? 'FOUND' : 'NOT FOUND');
             
             if (preview) {
-                // ✅ Changement DIRECT du src (pas d'animation complexe)
+                // ✅ DIAGNOSTIC : Afficher les styles actuels
+                const computedStyle = window.getComputedStyle(preview);
+                console.log('🎨 Current styles BEFORE update:', {
+                    display: computedStyle.display,
+                    visibility: computedStyle.visibility,
+                    opacity: computedStyle.opacity,
+                    width: computedStyle.width,
+                    height: computedStyle.height,
+                    position: computedStyle.position
+                });
+                
+                // ✅ FORCER tous les styles nécessaires
+                preview.style.display = 'block';
+                preview.style.visibility = 'visible';
+                preview.style.opacity = '1';
+                preview.style.width = '100px';
+                preview.style.height = '100px';
+                preview.style.borderRadius = '50%';
+                preview.style.objectFit = 'cover';
+                preview.style.border = '3px solid #667eea';
+                
+                // ✅ Changer le src
                 preview.src = e.target.result;
+                
                 console.log('✅ [GROUP EDIT] Preview SRC updated to:', e.target.result.substring(0, 50) + '...');
                 
-                // ✅ Forcer le rafraîchissement visuel
-                preview.style.display = 'none';
-                preview.offsetHeight; // Force reflow
-                preview.style.display = '';
+                // ✅ Vérifier les styles APRÈS update
+                setTimeout(() => {
+                    const newComputedStyle = window.getComputedStyle(preview);
+                    console.log('🎨 Styles AFTER update:', {
+                        display: newComputedStyle.display,
+                        visibility: newComputedStyle.visibility,
+                        opacity: newComputedStyle.opacity,
+                        src: preview.src.substring(0, 50) + '...'
+                    });
+                }, 100);
                 
                 console.log('✅ [GROUP EDIT] Preview refreshed');
                 
@@ -420,7 +448,6 @@ class GroupMembersManager {
                         console.log('✅ Badge created and added');
                     } else {
                         console.log('ℹ Badge already exists, re-animating...');
-                        // Re-animer le badge existant
                         badge.style.animation = 'none';
                         setTimeout(() => {
                             badge.style.animation = 'bounceIn 0.5s ease, pulse 2s infinite';
