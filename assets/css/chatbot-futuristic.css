@@ -1475,3 +1475,119 @@ body.dark-mode .bot-avatar {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONVERSATIONS SIDEBAR - AMÉLIORATIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.conversation-item:hover {
+    background: #e2e8f0;
+    transform: translateX(4px);
+}
+
+.conversation-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.conversation-item.active .conversation-preview,
+.conversation-item.active .conversation-meta {
+    color: white;
+}
+
+.conversation-item.active .conversation-date i,
+.conversation-item.active .conversation-count i {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.conversation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.conversation-preview {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.conversation-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.conversation-date i,
+.conversation-count i {
+    margin-right: 4px;
+    color: #94a3b8;
+}
+
+/* ✅ BOUTON DE SUPPRESSION */
+.conversation-delete-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.conversation-item:hover .conversation-delete-btn {
+    opacity: 1;
+}
+
+.conversation-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+.conversation-item.active .conversation-delete-btn {
+    color: white;
+    opacity: 1;
+}
+
+.conversation-item.active .conversation-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode */
+body.dark-mode .conversation-item {
+    background: #1e293b;
+}
+
+body.dark-mode .conversation-item:hover {
+    background: #334155;
+}
+
+body.dark-mode .conversation-preview {
+    color: #e2e8f0;
+}
+
+body.dark-mode .conversation-meta {
+    color: #94a3b8;
+}

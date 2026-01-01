@@ -1887,16 +1887,20 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎨 FORMAT CONTENT (HTML + Markdown)
+    // 🎨 FORMAT CONTENT (HTML + Markdown) - CORRECTION FINALE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     formatContent(text) {
         if (!text) return '';
 
         let formatted = text;
 
+        // ✅ ÉTAPE 0: Nettoyer les attributs style inline (CRITIQUE)
+        formatted = formatted.replace(/style="[^"]*"/g, '');
+        formatted = formatted.replace(/style='[^']*'/g, '');
+
         // ✅ ÉTAPE 1: Nettoyer les balises HTML mal formées
         formatted = formatted
-            .replace(/<br>/gi, '<br>')
+            .replace(/<br\s*\/?>/gi, '<br>')
             .replace(/<\/br>/gi, '')
             .replace(/<strong>/gi, '<strong>')
             .replace(/<\/strong>/gi, '</strong>')
@@ -1905,18 +1909,20 @@ class ChatbotUI {
             .replace(/<code>/gi, '<code>')
             .replace(/<\/code>/gi, '</code>');
 
-        // ✅ ÉTAPE 2: Gérer les listes à puces (Markdown → HTML)
-        formatted = formatted.replace(/^\* (.+)$/gm, '<li>$1</li>');
-        formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+        // ✅ ÉTAPE 2: Convertir les listes à puces (• ou *)
+        formatted = formatted
+            .replace(/^[•*]\s+(.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*?<\/li>\n?)+/gs, '<ul style="margin: 12px 0; padding-left: 24px; line-height: 1.8;">$&</ul>')
+            .replace(/<li>/g, '<li style="margin: 6px 0;">');
 
-        // ✅ ÉTAPE 3: Gérer les titres (Markdown → HTML)
+        // ✅ ÉTAPE 3: Gérer les titres (Markdown → HTML avec styles)
         formatted = formatted
             .replace(/^### (.+)$/gm, '<h3 style="font-size: 1.2em; font-weight: 700; color: #667eea; margin: 16px 0 8px 0;">$1</h3>')
             .replace(/^## (.+)$/gm, '<h2 style="font-size: 1.4em; font-weight: 800; color: #667eea; margin: 20px 0 10px 0;">$1</h2>')
             .replace(/^# (.+)$/gm, '<h1 style="font-size: 1.6em; font-weight: 900; color: #667eea; margin: 24px 0 12px 0;">$1</h1>');
 
         // ✅ ÉTAPE 4: Gérer les séparateurs (--- → <hr>)
-        formatted = formatted.replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e2e8f0; margin: 20px 0;">');
+        formatted = formatted.replace(/^---+$/gm, '<hr style="border: none; border-top: 2px solid #e2e8f0; margin: 20px 0;">');
 
         // ✅ ÉTAPE 5: Gérer le gras/italique Markdown (si pas déjà en HTML)
         formatted = formatted
@@ -1925,22 +1931,25 @@ class ChatbotUI {
             .replace(/`(.+?)`/g, '<code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
 
         // ✅ ÉTAPE 6: Améliorer le rendu des emojis financiers
-        formatted = formatted
-            .replace(/📊/g, '<span style="font-size: 1.2em;">📊</span>')
-            .replace(/📈/g, '<span style="font-size: 1.2em;">📈</span>')
-            .replace(/📉/g, '<span style="font-size: 1.2em;">📉</span>')
-            .replace(/💰/g, '<span style="font-size: 1.2em;">💰</span>')
-            .replace(/🚀/g, '<span style="font-size: 1.2em;">🚀</span>')
-            .replace(/⚠/g, '<span style="font-size: 1.2em;">⚠</span>');
+        const emojiMap = {
+            '📊': '<span style="font-size: 1.2em;">📊</span>',
+            '📈': '<span style="font-size: 1.2em; color: #10b981;">📈</span>',
+            '📉': '<span style="font-size: 1.2em; color: #ef4444;">📉</span>',
+            '💰': '<span style="font-size: 1.2em;">💰</span>',
+            '🚀': '<span style="font-size: 1.2em;">🚀</span>',
+            '⚠': '<span style="font-size: 1.2em; color: #f59e0b;">⚠</span>',
+            '✅': '<span style="font-size: 1.2em; color: #10b981;">✅</span>',
+            '❌': '<span style="font-size: 1.2em; color: #ef4444;">❌</span>'
+        };
+
+        Object.keys(emojiMap).forEach(emoji => {
+            formatted = formatted.replace(new RegExp(emoji, 'g'), emojiMap[emoji]);
+        });
 
         // ✅ ÉTAPE 7: Gérer les retours à la ligne (si pas de <br> déjà présent)
         if (!formatted.includes('<br>')) {
             formatted = formatted.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
         }
-
-        // ✅ ÉTAPE 8: Ajouter du style aux listes
-        formatted = formatted.replace(/<ul>/g, '<ul style="margin: 12px 0; padding-left: 24px; line-height: 1.8;">');
-        formatted = formatted.replace(/<li>/g, '<li style="margin: 6px 0;">');
 
         return formatted;
     }
@@ -2072,6 +2081,9 @@ class ChatbotUI {
         }
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📚 RENDER CONVERSATIONS LIST (COMPLET)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     renderConversationsList(conversations) {
         if (!this.elements.conversationsList) return;
 
@@ -2079,9 +2091,10 @@ class ChatbotUI {
 
         if (conversations.length === 0) {
             this.elements.conversationsList.innerHTML = `
-                <div class="no-conversations">
-                    <i class="fas fa-comments"></i>
-                    <p>No saved conversations</p>
+                <div class="no-conversations" style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p style="font-size: 14px;">No saved conversations</p>
+                    <p style="font-size: 12px; margin-top: 8px;">Start chatting to save your first conversation!</p>
                 </div>
             `;
             return;
@@ -2090,27 +2103,116 @@ class ChatbotUI {
         conversations.forEach(conv => {
             const item = document.createElement('div');
             item.className = 'conversation-item';
+            item.dataset.conversationId = conv.id;
+            
+            // ✅ Surbrillance si conversation active
             if (conv.id === this.currentConversationId) {
                 item.classList.add('active');
             }
 
-            const preview = conv.messages[0]?.content?.substring(0, 50) || 'Empty conversation';
-            const date = conv.updatedAt?.toDate?.()?.toLocaleDateString() || 'Unknown date';
+            // Extract preview text
+            const firstMessage = conv.messages?.[0];
+            let preview = 'Empty conversation';
+            
+            if (firstMessage && firstMessage.text) {
+                preview = firstMessage.text.replace(/<[^>]*>/g, '').substring(0, 60);
+            } else if (firstMessage && firstMessage.content) {
+                preview = firstMessage.content.replace(/<[^>]*>/g, '').substring(0, 60);
+            }
+
+            const date = conv.updatedAt?.toDate?.()?.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) || 'Unknown date';
 
             item.innerHTML = `
-                <div class="conversation-preview">${preview}...</div>
-                <div class="conversation-meta">
-                    <span class="conversation-date">${date}</span>
-                    <span class="conversation-count">${conv.messageCount || 0} messages</span>
+                <div class="conversation-content">
+                    <div class="conversation-preview">${preview}${preview.length >= 60 ? '...' : ''}</div>
+                    <div class="conversation-meta">
+                        <span class="conversation-date">
+                            <i class="fas fa-clock"></i> ${date}
+                        </span>
+                        <span class="conversation-count">
+                            <i class="fas fa-comment"></i> ${conv.messageCount || conv.messages?.length || 0}
+                        </span>
+                    </div>
                 </div>
+                <button class="conversation-delete-btn" data-conversation-id="${conv.id}" title="Delete conversation">
+                    <i class="fas fa-trash"></i>
+                </button>
             `;
 
-            item.addEventListener('click', () => this.loadConversation(conv));
+            // ✅ Clic pour charger la conversation
+            const contentDiv = item.querySelector('.conversation-content');
+            contentDiv.addEventListener('click', () => {
+                // Retirer la classe active de toutes les conversations
+                document.querySelectorAll('.conversation-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // Ajouter la classe active à celle-ci
+                item.classList.add('active');
+                
+                this.loadConversation(conv);
+            });
+
+            // ✅ Bouton de suppression
+            const deleteBtn = item.querySelector('.conversation-delete-btn');
+            deleteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Empêcher le clic de charger la conversation
+                
+                if (confirm('Delete this conversation? This action cannot be undone.')) {
+                    await this.deleteConversation(conv.id);
+                }
+            });
 
             this.elements.conversationsList.appendChild(item);
         });
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🗑 DELETE CONVERSATION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async deleteConversation(conversationId) {
+        try {
+            console.log('🗑 Deleting conversation:', conversationId);
+
+            // Supprimer de Firebase si disponible
+            if (this.config.storage.useFirebase && window.chatbotModals) {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    await firebase.firestore()
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('conversations')
+                        .doc(conversationId)
+                        .delete();
+                    
+                    console.log('✅ Conversation deleted from Firebase');
+                }
+            }
+
+            // Si c'est la conversation active, réinitialiser
+            if (conversationId === this.currentConversationId) {
+                this.startNewConversation();
+            }
+
+            // Recharger la liste
+            await this.loadConversationsFromFirebase();
+
+            console.log('✅ Conversation deleted successfully');
+
+        } catch (error) {
+            console.error('❌ Delete conversation error:', error);
+            alert('Failed to delete conversation. Please try again.');
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📖 LOAD CONVERSATION (CORRECTION)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     loadConversation(conversation) {
         this.currentConversationId = conversation.id;
         this.messages = conversation.messages || [];
@@ -2124,8 +2226,8 @@ class ChatbotUI {
         this.messages.forEach(msg => {
             const messageEl = this.createMessageElement(msg);
             const textEl = messageEl.querySelector('.message-text');
-            if (textEl) {
-                textEl.innerHTML = this.formatMarkdown(msg.text);
+            if (textEl && msg.text) {  // ✅ Vérification que msg.text existe
+                textEl.innerHTML = this.formatContent(msg.text);
             }
             this.elements.messagesContent.appendChild(messageEl);
         });
