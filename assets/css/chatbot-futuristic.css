@@ -384,24 +384,35 @@ body {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BOUTON POUR ROUVRIR LA SIDEBAR (VERSION AUTO)
+   BOUTON POUR ROUVRIR LA SIDEBAR (CORRECTION Z-INDEX)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .conversations-reopen-btn {
+    /* ✅ Position APRÈS la sidebar principale */
     position: fixed;
-    left: 20px;
+    left: calc(var(--sidebar-width) + 30px); /* 280px + 30px = 310px */
     top: 120px;
     width: 48px;
     height: 48px;
+    
+    /* Design */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 12px;
     color: white;
     font-size: 20px;
     cursor: pointer;
+    
+    /* Shadow */
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    
+    /* ✅ Z-INDEX ÉLEVÉ (au-dessus de la sidebar principale) */
+    z-index: 9999;
+    
+    /* Transition */
     transition: all 0.3s ease;
-    z-index: 1000;
+    
+    /* Alignement */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -412,15 +423,7 @@ body {
     transform: translateX(-10px);
 }
 
-/* ✅ AFFICHAGE AUTOMATIQUE quand sidebar est collapsed */
-.conversations-sidebar.collapsed ~ .chat-messages-area ~ .conversations-reopen-btn,
-body:has(.conversations-sidebar.collapsed) .conversations-reopen-btn {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateX(0);
-}
-
-/* ✅ OU avec la classe .visible (pour compatibilité JS) */
+/* ✅ Affichage avec classe .visible */
 .conversations-reopen-btn.visible {
     opacity: 1;
     pointer-events: all;
@@ -450,8 +453,7 @@ body:has(.conversations-sidebar.collapsed) .conversations-reopen-btn {
     }
 }
 
-.conversations-reopen-btn.visible,
-body:has(.conversations-sidebar.collapsed) .conversations-reopen-btn {
+.conversations-reopen-btn.visible {
     animation: slideInFromLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -465,14 +467,25 @@ body.dark-mode .conversations-reopen-btn:hover {
     box-shadow: 0 6px 20px rgba(129, 140, 248, 0.6);
 }
 
-/* Responsive - Mobile */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE - MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ✅ Sur mobile, quand la sidebar principale est réduite */
+@media (max-width: 1024px) {
+    .conversations-reopen-btn {
+        left: 90px; /* Position après l'icône de la sidebar principale */
+    }
+}
+
 @media (max-width: 768px) {
     .conversations-reopen-btn {
-        left: 12px;
+        left: 12px; /* Position à gauche sur mobile */
         top: 120px;
         width: 44px;
         height: 44px;
         font-size: 18px;
+        z-index: 9999; /* Toujours au-dessus */
     }
 }
 
