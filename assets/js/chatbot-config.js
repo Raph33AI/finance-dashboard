@@ -410,11 +410,13 @@ const ChatbotConfig = {
         enable3DRobot: true,
         enableTypingIndicator: true,
         enableSoundEffects: false,
-        messageDelay: 50, // ms entre chaque caractère du streaming
-        maxMessages: 100, // Limite de messages en mémoire
+        messageDelay: 5,  // ✅ RÉDUIT DE 50ms à 5ms (10x plus rapide)
+        enableStreaming: true,  // ✅ NOUVEAU : Option pour désactiver le streaming
+        maxMessages: 100,
         autoScroll: true,
         showTimestamps: true,
-        enableMarkdown: true
+        enableMarkdown: true,
+        enableHTML: true  // ✅ NOUVEAU : Active le rendu HTML
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

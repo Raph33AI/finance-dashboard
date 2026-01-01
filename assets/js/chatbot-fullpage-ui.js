@@ -1794,6 +1794,9 @@ class ChatbotUI {
         // Streaming effect for assistant messages
         if (role === 'assistant' && !options.error) {
             await this.streamText(messageEl.querySelector('.message-text'), text);
+        } else if (role === 'user') {
+            // Pour les messages utilisateur, pas de HTML
+            messageEl.querySelector('.message-text').textContent = text;
         }
 
         this.scrollToBottom();
@@ -1850,22 +1853,96 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ⌨ STREAM TEXT EFFECT
+    // ⌨ STREAM TEXT EFFECT (ULTRA-FAST)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async streamText(element, text) {
+        // ✅ Si streaming désactivé, afficher instantanément
+        if (!this.config.ui.enableStreaming) {
+            element.innerHTML = this.formatContent(text);
+            return;
+        }
+
         element.innerHTML = '';
         
-        // Parse markdown-style formatting
-        const formatted = this.formatMarkdown(text);
+        // Format le texte complet une seule fois
+        const formattedText = this.formatContent(text);
         
-        for (let i = 0; i < formatted.length; i++) {
-            element.innerHTML += formatted[i];
-            this.scrollToBottom();
+        // Split par mots au lieu de caractères (beaucoup plus rapide)
+        const words = formattedText.split(' ');
+        
+        for (let i = 0; i < words.length; i++) {
+            element.innerHTML += words[i] + ' ';
             
-            // Variable delay (faster for spaces)
-            const delay = formatted[i] === ' ' ? 10 : this.config.ui.messageDelay;
-            await new Promise(resolve => setTimeout(resolve, delay));
+            // Scroll uniquement tous les 10 mots (optimisation)
+            if (i % 10 === 0) {
+                this.scrollToBottom();
+            }
+            
+            // Délai ultra-court (5ms par mot au lieu de 50ms par caractère)
+            await new Promise(resolve => setTimeout(resolve, this.config.ui.messageDelay));
         }
+        
+        // Scroll final
+        this.scrollToBottom();
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎨 FORMAT CONTENT (HTML + Markdown)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    formatContent(text) {
+        if (!text) return '';
+
+        let formatted = text;
+
+        // ✅ ÉTAPE 1: Nettoyer les balises HTML mal formées
+        formatted = formatted
+            .replace(/<br>/gi, '<br>')
+            .replace(/<\/br>/gi, '')
+            .replace(/<strong>/gi, '<strong>')
+            .replace(/<\/strong>/gi, '</strong>')
+            .replace(/<em>/gi, '<em>')
+            .replace(/<\/em>/gi, '</em>')
+            .replace(/<code>/gi, '<code>')
+            .replace(/<\/code>/gi, '</code>');
+
+        // ✅ ÉTAPE 2: Gérer les listes à puces (Markdown → HTML)
+        formatted = formatted.replace(/^\* (.+)$/gm, '<li>$1</li>');
+        formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+        // ✅ ÉTAPE 3: Gérer les titres (Markdown → HTML)
+        formatted = formatted
+            .replace(/^### (.+)$/gm, '<h3 style="font-size: 1.2em; font-weight: 700; color: #667eea; margin: 16px 0 8px 0;">$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2 style="font-size: 1.4em; font-weight: 800; color: #667eea; margin: 20px 0 10px 0;">$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1 style="font-size: 1.6em; font-weight: 900; color: #667eea; margin: 24px 0 12px 0;">$1</h1>');
+
+        // ✅ ÉTAPE 4: Gérer les séparateurs (--- → <hr>)
+        formatted = formatted.replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e2e8f0; margin: 20px 0;">');
+
+        // ✅ ÉTAPE 5: Gérer le gras/italique Markdown (si pas déjà en HTML)
+        formatted = formatted
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`(.+?)`/g, '<code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
+
+        // ✅ ÉTAPE 6: Améliorer le rendu des emojis financiers
+        formatted = formatted
+            .replace(/📊/g, '<span style="font-size: 1.2em;">📊</span>')
+            .replace(/📈/g, '<span style="font-size: 1.2em;">📈</span>')
+            .replace(/📉/g, '<span style="font-size: 1.2em;">📉</span>')
+            .replace(/💰/g, '<span style="font-size: 1.2em;">💰</span>')
+            .replace(/🚀/g, '<span style="font-size: 1.2em;">🚀</span>')
+            .replace(/⚠/g, '<span style="font-size: 1.2em;">⚠</span>');
+
+        // ✅ ÉTAPE 7: Gérer les retours à la ligne (si pas de <br> déjà présent)
+        if (!formatted.includes('<br>')) {
+            formatted = formatted.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+        }
+
+        // ✅ ÉTAPE 8: Ajouter du style aux listes
+        formatted = formatted.replace(/<ul>/g, '<ul style="margin: 12px 0; padding-left: 24px; line-height: 1.8;">');
+        formatted = formatted.replace(/<li>/g, '<li style="margin: 6px 0;">');
+
+        return formatted;
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
