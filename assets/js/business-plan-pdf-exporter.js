@@ -1,37 +1,11 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * BUSINESS PLAN - PDF EXPORTER v1.0
- * Ultra-Professional PDF Export System
+ * BUSINESS PLAN - PDF EXPORTER v2.0 (CORRECTED)
  * ════════════════════════════════════════════════════════════════
  */
 
 class BusinessPlanPDFExporter {
     constructor() {
-        this.pdfOptions = {
-            margin: [15, 15, 20, 15], // top, left, bottom, right (mm)
-            filename: `AlphaVault_AI_Business_Plan_${new Date().toISOString().split('T')[0]}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                letterRendering: true,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: {
-                unit: 'mm',
-                format: 'a4',
-                orientation: 'portrait',
-                compress: true
-            },
-            pagebreak: {
-                mode: ['avoid-all', 'css', 'legacy'],
-                before: '.pdf-section, .force-page-break',
-                avoid: '.avoid-break, .pdf-card, .pdf-table, .pdf-chart-container'
-            }
-        };
-
         this.init();
     }
 
@@ -43,293 +17,368 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎯 FONCTION PRINCIPALE D'EXPORT
+     * 🎯 EXPORT PDF PRINCIPAL
      */
     async exportToPDF() {
         try {
-            // Afficher loader
             this.showLoader();
 
-            // Préparer le contenu
-            const pdfContent = await this.preparePDFContent();
+            // Créer le contenu PDF complet
+            const pdfContent = this.createFullPDFContent();
+            
+            // Ajouter au DOM
+            document.body.appendChild(pdfContent);
+
+            // Attendre le rendu
+            await this.wait(1000);
+
+            // Options PDF optimisées
+            const opt = {
+                margin: 10,
+                filename: `AlphaVault_AI_Business_Plan_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 1200,
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait'
+                },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css'],
+                    before: '.pdf-page-break',
+                    after: '.pdf-page-break-after'
+                }
+            };
 
             // Générer le PDF
-            await html2pdf()
-                .set(this.pdfOptions)
-                .from(pdfContent)
-                .save()
-                .then(() => {
-                    this.hideLoader();
-                    this.showSuccess();
-                })
-                .catch((error) => {
-                    console.error('PDF Generation Error:', error);
-                    this.hideLoader();
-                    this.showError();
-                });
+            await html2pdf().set(opt).from(pdfContent).save();
+
+            // Nettoyer
+            pdfContent.remove();
+            this.hideLoader();
+            this.showSuccess();
 
         } catch (error) {
-            console.error('PDF Export Error:', error);
+            console.error('PDF Error:', error);
             this.hideLoader();
             this.showError();
         }
     }
 
     /**
-     * 📄 PRÉPARER LE CONTENU PDF
+     * 📄 CRÉER CONTENU PDF COMPLET
      */
-    async preparePDFContent() {
-        // Créer container PDF
-        const pdfContainer = document.createElement('div');
-        pdfContainer.className = 'pdf-container';
-        pdfContainer.style.cssText = 'position: absolute; left: -99999px; top: 0; width: 210mm;';
+    createFullPDFContent() {
+        const container = document.createElement('div');
+        container.id = 'pdf-export-container';
+        container.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 210mm;
+            background: white;
+            color: #1e293b;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        `;
 
-        // 1⃣ PAGE DE GARDE
-        pdfContainer.appendChild(this.createCoverPage());
+        // ✅ PAGE DE GARDE
+        container.appendChild(this.createCoverPage());
 
-        // 2⃣ TABLE DES MATIÈRES
-        pdfContainer.appendChild(this.createTableOfContents());
+        // ✅ TOUTES LES SECTIONS
+        const sections = [
+            'executive',
+            'market',
+            'business-model',
+            'financials',
+            'simulator',
+            'unit-economics',
+            'growth',
+            'competitive',
+            'risks'
+        ];
 
-        // 3⃣ TOUTES LES SECTIONS
-        const sections = document.querySelectorAll('.bp-section');
-        for (const section of sections) {
-            pdfContainer.appendChild(await this.createPDFSection(section));
-        }
+        sections.forEach(sectionId => {
+            const originalSection = document.getElementById(sectionId);
+            if (originalSection) {
+                container.appendChild(this.createPDFSection(originalSection, sectionId));
+            }
+        });
 
-        // Ajouter au DOM temporairement
-        document.body.appendChild(pdfContainer);
-
-        // Attendre le rendu des graphiques
-        await this.waitForCharts();
-
-        return pdfContainer;
+        return container;
     }
 
     /**
-     * 🎨 CRÉER PAGE DE GARDE
+     * 🎨 PAGE DE GARDE
      */
     createCoverPage() {
         const cover = document.createElement('div');
-        cover.className = 'pdf-cover force-page-break';
+        cover.className = 'pdf-page-break-after';
+        cover.style.cssText = `
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+        `;
         cover.innerHTML = `
-            <div class="pdf-cover-logo">
+            <div style="width: 100px; height: 100px; margin-bottom: 30px;">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-                    <defs>
-                        <linearGradient id="pdfLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
                     <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                        stroke="url(#pdfLogoGrad)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
                     <circle cx="30" cy="70" r="4" fill="white"/>
                     <circle cx="50" cy="60" r="4" fill="white"/>
                     <circle cx="70" cy="45" r="4" fill="white"/>
                     <circle cx="90" cy="30" r="5" fill="white"/>
-                    <path d="M 85 35 L 90 30 L 85 25" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
                 </svg>
             </div>
-            <h1 class="pdf-cover-title">AlphaVault AI</h1>
-            <p class="pdf-cover-subtitle">AI-Powered Financial Intelligence Platform</p>
-            <p class="pdf-cover-tagline">Empowering Individual Investors with Institutional-Grade Analytics</p>
-            <div class="pdf-cover-meta">
-                <div class="pdf-cover-meta-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </div>
-                <div class="pdf-cover-meta-item">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Business Plan v3.0</span>
-                </div>
-                <div class="pdf-cover-meta-item">
-                    <i class="fas fa-lock"></i>
-                    <span>Confidential</span>
-                </div>
-                <div class="pdf-cover-meta-item">
-                    <i class="fas fa-globe"></i>
-                    <span>Global Market</span>
-                </div>
+            <h1 style="font-size: 48px; font-weight: 900; margin-bottom: 16px;">AlphaVault AI</h1>
+            <p style="font-size: 24px; font-weight: 600; margin-bottom: 30px;">AI-Powered Financial Intelligence Platform</p>
+            <p style="font-size: 18px; opacity: 0.95; max-width: 600px; margin-bottom: 50px;">
+                Empowering Individual Investors with Institutional-Grade Analytics
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; font-size: 14px; margin-top: 60px;">
+                <div>📅 ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <div>📄 Business Plan v3.0</div>
+                <div>🔒 Confidential</div>
+                <div>🌐 Global Market</div>
             </div>
         `;
         return cover;
     }
 
     /**
-     * 📑 CRÉER TABLE DES MATIÈRES
-     */
-    createTableOfContents() {
-        const toc = document.createElement('div');
-        toc.className = 'pdf-toc force-page-break';
-
-        const sections = [
-            { number: '1', title: 'Executive Summary', page: '3' },
-            { number: '2', title: 'Market Analysis', page: '7' },
-            { number: '3', title: 'Business Model', page: '11' },
-            { number: '4', title: 'Financial Projections', page: '15' },
-            { number: '5', title: 'Scenario Simulator', page: '20' },
-            { number: '6', title: 'Unit Economics', page: '24' },
-            { number: '7', title: 'Growth Strategy', page: '28' },
-            { number: '8', title: 'Competitive Analysis', page: '32' },
-            { number: '9', title: 'Risk Analysis', page: '36' }
-        ];
-
-        let tocHTML = '<h2 class="pdf-toc-title"><i class="fas fa-list"></i> Table of Contents</h2>';
-        
-        sections.forEach(section => {
-            tocHTML += `
-                <div class="pdf-toc-item">
-                    <span class="pdf-toc-item-number">${section.number}.</span>
-                    <span class="pdf-toc-item-title">${section.title}</span>
-                    <span class="pdf-toc-item-page">Page ${section.page}</span>
-                </div>
-            `;
-        });
-
-        toc.innerHTML = tocHTML;
-        return toc;
-    }
-
-    /**
      * 📋 CRÉER SECTION PDF
      */
-    async createPDFSection(originalSection) {
-        const pdfSection = document.createElement('div');
-        pdfSection.className = 'pdf-section';
+    createPDFSection(originalSection, sectionId) {
+        const sectionWrapper = document.createElement('div');
+        sectionWrapper.className = 'pdf-page-break';
+        sectionWrapper.style.cssText = `
+            padding: 30px;
+            background: white;
+            color: #1e293b;
+            page-break-before: always;
+        `;
+
+        // Titre de la section
+        const title = originalSection.querySelector('.section-title');
+        if (title) {
+            const pdfTitle = document.createElement('h2');
+            pdfTitle.style.cssText = `
+                font-size: 32px;
+                font-weight: 800;
+                color: #667eea;
+                margin-bottom: 30px;
+                border-left: 6px solid #667eea;
+                padding-left: 20px;
+            `;
+            pdfTitle.innerHTML = title.innerHTML;
+            sectionWrapper.appendChild(pdfTitle);
+        }
+
+        // Contenu de la section
+        const content = this.extractSectionContent(originalSection);
+        sectionWrapper.appendChild(content);
+
+        return sectionWrapper;
+    }
+
+    /**
+     * 📦 EXTRAIRE CONTENU DE SECTION
+     */
+    extractSectionContent(section) {
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = 'color: #1e293b; background: white;';
 
         // Cloner le contenu
-        const sectionClone = originalSection.cloneNode(true);
+        const clone = section.cloneNode(true);
 
-        // Nettoyer les éléments inutiles
-        this.cleanSectionForPDF(sectionClone);
+        // Supprimer éléments inutiles
+        clone.querySelectorAll('.section-title, button, input, select, .nav-tabs').forEach(el => el.remove());
 
-        // Convertir les éléments en format PDF-friendly
-        this.convertToPDFFormat(sectionClone);
+        // Forcer les styles
+        this.applyPDFStyles(clone);
 
-        pdfSection.appendChild(sectionClone);
-
-        return pdfSection;
+        contentDiv.appendChild(clone);
+        return contentDiv;
     }
 
     /**
-     * 🧹 NETTOYER SECTION POUR PDF
+     * 🎨 APPLIQUER STYLES PDF
      */
-    cleanSectionForPDF(section) {
-        // Supprimer boutons interactifs
-        section.querySelectorAll('button:not(.scenario-card button)').forEach(btn => btn.remove());
+    applyPDFStyles(element) {
+        // Texte principal
+        element.style.color = '#1e293b';
+        element.style.background = 'white';
 
-        // Supprimer inputs
-        section.querySelectorAll('input, select').forEach(input => {
-            const value = input.value || input.getAttribute('value') || 'N/A';
-            const span = document.createElement('span');
-            span.textContent = value;
-            span.style.cssText = 'font-weight: 600; color: #667eea;';
-            input.replaceWith(span);
+        // Tous les enfants
+        element.querySelectorAll('*').forEach(el => {
+            el.style.color = '#1e293b';
+            el.style.background = 'transparent';
+            
+            // Titres
+            if (el.classList.contains('subsection-title')) {
+                el.style.cssText += `
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-top: 30px;
+                    margin-bottom: 15px;
+                    border-bottom: 2px solid #e2e8f0;
+                    padding-bottom: 8px;
+                `;
+            }
+
+            // Cartes
+            if (el.classList.contains('highlight-card') || 
+                el.classList.contains('value-prop-item') ||
+                el.classList.contains('trend-card')) {
+                el.style.cssText += `
+                    border: 2px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 15px 0;
+                    background: #f8fafc !important;
+                    page-break-inside: avoid;
+                `;
+            }
+
+            // Tableaux
+            if (el.tagName === 'TABLE') {
+                el.style.cssText += `
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                    font-size: 13px;
+                    page-break-inside: avoid;
+                `;
+                
+                // En-têtes de tableau
+                el.querySelectorAll('thead th').forEach(th => {
+                    th.style.cssText = `
+                        background: #667eea !important;
+                        color: white !important;
+                        padding: 10px;
+                        border: 1px solid white;
+                        font-weight: 700;
+                    `;
+                });
+
+                // Cellules de tableau
+                el.querySelectorAll('tbody td').forEach(td => {
+                    td.style.cssText = `
+                        padding: 10px;
+                        border: 1px solid #e2e8f0;
+                        color: #1e293b !important;
+                        background: white !important;
+                    `;
+                });
+
+                // Lignes alternées
+                el.querySelectorAll('tbody tr:nth-child(even)').forEach(tr => {
+                    tr.style.background = '#f8fafc !important';
+                });
+            }
+
+            // Canvas (graphiques)
+            if (el.tagName === 'CANVAS') {
+                el.style.cssText += `
+                    max-width: 100%;
+                    height: auto !important;
+                    page-break-inside: avoid;
+                `;
+            }
+
+            // Conteneurs de graphiques
+            if (el.classList.contains('chart-container')) {
+                el.style.cssText += `
+                    margin: 30px 0;
+                    padding: 20px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    background: white !important;
+                    page-break-inside: avoid;
+                `;
+            }
         });
-
-        // Supprimer éléments cachés
-        section.querySelectorAll('.hide-in-pdf, .nav-tabs').forEach(el => el.remove());
     }
 
     /**
-     * 🎨 CONVERTIR AU FORMAT PDF
+     * ⏳ UTILITAIRE WAIT
      */
-    convertToPDFFormat(section) {
-        // Tables
-        section.querySelectorAll('table').forEach(table => {
-            table.classList.add('pdf-table', 'avoid-break');
-        });
-
-        // Cards
-        section.querySelectorAll('.highlight-card, .value-prop-item, .trend-card').forEach(card => {
-            card.classList.add('pdf-card', 'avoid-break');
-        });
-
-        // Charts
-        section.querySelectorAll('.chart-container').forEach(chart => {
-            chart.classList.add('pdf-chart-container', 'avoid-break');
-        });
-
-        // Sections
-        section.querySelectorAll('.section-title').forEach(title => {
-            title.classList.add('pdf-section-title');
-        });
-
-        section.querySelectorAll('.subsection-title').forEach(title => {
-            title.classList.add('pdf-subsection-title');
-        });
+    wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     /**
-     * ⏳ ATTENDRE RENDU DES GRAPHIQUES
-     */
-    waitForCharts() {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(), 2000); // 2 secondes pour le rendu
-        });
-    }
-
-    /**
-     * 🔄 AFFICHER LOADER
+     * 🔄 LOADER
      */
     showLoader() {
         const loader = document.createElement('div');
         loader.id = 'pdf-loader';
         loader.style.cssText = `
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8); z-index: 99999;
+            background: rgba(0, 0, 0, 0.85); z-index: 99999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; font-family: 'Inter', sans-serif;
         `;
         loader.innerHTML = `
             <div style="text-align: center;">
-                <div style="width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.2); border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 24px;"></div>
-                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 12px;">Generating PDF...</h3>
-                <p style="font-size: 16px; color: rgba(255,255,255,0.8);">Please wait while we prepare your Business Plan document</p>
+                <div style="width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.2); 
+                    border-top-color: #667eea; border-radius: 50%; 
+                    animation: spin 1s linear infinite; margin: 0 auto 24px;"></div>
+                <h3 style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 12px;">
+                    📄 Generating PDF...
+                </h3>
+                <p style="font-size: 16px; color: rgba(255,255,255,0.8);">
+                    Exporting all sections with charts and tables
+                </p>
             </div>
             <style>
-                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                @keyframes spin { 
+                    0% { transform: rotate(0deg); } 
+                    100% { transform: rotate(360deg); } 
+                }
             </style>
         `;
         document.body.appendChild(loader);
     }
 
-    /**
-     * ✅ CACHER LOADER
-     */
     hideLoader() {
         const loader = document.getElementById('pdf-loader');
         if (loader) loader.remove();
-
-        // Nettoyer le container PDF temporaire
-        document.querySelectorAll('.pdf-container').forEach(el => el.remove());
+        const pdfContainer = document.getElementById('pdf-export-container');
+        if (pdfContainer) pdfContainer.remove();
     }
 
-    /**
-     * ✅ AFFICHER SUCCÈS
-     */
     showSuccess() {
-        this.showNotification('✅ PDF Generated Successfully!', 'Your Business Plan has been downloaded.', 'success');
+        this.showNotification('✅ PDF Generated!', 'Your Business Plan has been downloaded successfully.', 'success');
     }
 
-    /**
-     * ❌ AFFICHER ERREUR
-     */
     showError() {
-        this.showNotification('❌ PDF Generation Failed', 'Please try again or contact support.', 'error');
+        this.showNotification('❌ Error', 'PDF generation failed. Please try again.', 'error');
     }
 
-    /**
-     * 🔔 NOTIFICATION SYSTÈME
-     */
-    showNotification(title, message, type = 'success') {
+    showNotification(title, message, type) {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed; top: 24px; right: 24px; z-index: 100000;
             background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #ef4444, #dc2626)'};
             color: white; padding: 20px 28px; border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            font-family: 'Inter', sans-serif; min-width: 320px;
-            animation: slideIn 0.4s ease;
+            font-family: Arial, sans-serif; min-width: 320px;
         `;
         notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 16px;">
@@ -339,24 +388,19 @@ class BusinessPlanPDFExporter {
                     <div style="font-size: 14px; opacity: 0.9;">${message}</div>
                 </div>
             </div>
-            <style>
-                @keyframes slideIn {
-                    from { transform: translateX(400px); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-            </style>
         `;
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.style.animation = 'slideIn 0.4s ease reverse';
+            notification.style.transition = 'opacity 0.4s ease';
+            notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 400);
         }, 4000);
     }
 }
 
-// ✅ INITIALISATION AUTOMATIQUE
+// ✅ INITIALISATION
 document.addEventListener('DOMContentLoaded', () => {
     window.pdfExporter = new BusinessPlanPDFExporter();
-    console.log('📄 Business Plan PDF Exporter initialized');
+    console.log('📄 Business Plan PDF Exporter v2.0 initialized');
 });
