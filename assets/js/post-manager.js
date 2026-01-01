@@ -1014,7 +1014,7 @@ class PostManager {
     }
 
     /**
-     * Afficher la liste des utilisateurs
+     * ✅ AMÉLIORÉ : Afficher la liste des utilisateurs (STYLE OPTIMISÉ)
      */
     renderUsersList(users, query = '') {
         const usersList = document.getElementById('shareUsersList');
@@ -1037,29 +1037,40 @@ class PostManager {
         const usersHTML = users.map(user => {
             const displayName = user.displayName || user.email?.split('@')[0] || 'Unknown User';
             const avatar = user.photoURL || 
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&size=128`;
             
             const plan = user.plan || 'free';
             const planBadge = this.getPlanBadge(plan);
 
             return `
-                <div class="user-select-item" onclick="window.postManager.sendPostAsMessage('${user.uid}', ${JSON.stringify({ displayName, photoURL: user.photoURL || '', email: user.email || '' }).replace(/"/g, '&quot;')})">
-                    <div class="user-select-avatar-wrapper">
+                <div class="user-select-item user-type-individual" 
+                    onclick="window.postManager.sendPostAsMessage('${user.uid}', ${JSON.stringify({ displayName, photoURL: user.photoURL || '', email: user.email || '' }).replace(/"/g, '&quot;')})">
+                    
+                    <!-- ✅ AVATAR AVEC BORDURE BLEUE (Individual) -->
+                    <div class="user-select-avatar-wrapper individual-avatar">
                         <img src="${avatar}" 
-                             alt="${this.escapeHtml(displayName)}" 
-                             class="user-select-avatar"
-                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'">
+                            alt="${this.escapeHtml(displayName)}" 
+                            class="user-select-avatar"
+                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&size=128'">
+                        <!-- Badge "User" discret -->
+                        <div class="user-type-indicator">
+                            <i class="fas fa-user"></i>
+                        </div>
                     </div>
                     
                     <div class="user-select-info">
                         <div class="user-select-name">
+                            <i class="fas fa-circle-user" style="font-size: 0.75rem; color: #3B82F6; margin-right: 6px; opacity: 0.7;"></i>
                             ${this.escapeHtml(displayName)}
                             ${planBadge}
                         </div>
-                        <div class="user-select-email">${this.escapeHtml(user.email || '')}</div>
+                        <div class="user-select-email">
+                            <i class="fas fa-envelope" style="font-size: 0.7rem; margin-right: 4px; opacity: 0.5;"></i>
+                            ${this.escapeHtml(user.email || 'No email')}
+                        </div>
                     </div>
                     
-                    <button class="user-select-send-btn">
+                    <button class="user-select-send-btn individual-btn">
                         <i class="fas fa-paper-plane"></i>
                         <span>Send</span>
                     </button>
@@ -1168,7 +1179,7 @@ class PostManager {
     }
 
     /**
-     * ✅ NOUVEAU : Afficher la liste des groupes
+     * ✅ AMÉLIORÉ : Afficher la liste des groupes (STYLE OPTIMISÉ)
      */
     renderGroupsList(groups, query = '') {
         const groupsList = document.getElementById('shareGroupsList');
@@ -1192,34 +1203,43 @@ class PostManager {
         const groupsHTML = groups.map(group => {
             const groupName = group.name || 'Group';
             const avatar = group.photoURL || 
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128`;
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128&bold=true`;
             
             const membersCount = group.participants?.length || 0;
 
             return `
-                <div class="user-select-item group-select-item" 
+                <div class="user-select-item group-select-item user-type-group" 
                     onclick="window.postManager.sendPostAsGroupMessage('${group.id}', ${JSON.stringify(group).replace(/"/g, '&quot;')})">
-                    <div class="user-select-avatar-wrapper">
+                    
+                    <!-- ✅ AVATAR AVEC BORDURE VIOLETTE (Group) -->
+                    <div class="user-select-avatar-wrapper group-avatar">
                         <img src="${avatar}" 
                             alt="${this.escapeHtml(groupName)}" 
                             class="user-select-avatar"
-                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128'">
-                        <div class="group-indicator-badge">
+                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128&bold=true'">
+                        <!-- Badge "Group" VISIBLE -->
+                        <div class="group-type-indicator">
                             <i class="fas fa-users"></i>
                         </div>
                     </div>
                     
                     <div class="user-select-info">
                         <div class="user-select-name">
-                            <i class="fas fa-users" style="font-size: 0.8rem; color: #667eea; margin-right: 4px;"></i>
-                            ${this.escapeHtml(groupName)}
+                            <!-- Icône groupe VOYANTE -->
+                            <div class="group-name-badge">
+                                <i class="fas fa-users"></i>
+                                <span>${this.escapeHtml(groupName)}</span>
+                            </div>
                         </div>
-                        <div class="user-select-email">${membersCount} member${membersCount > 1 ? 's' : ''}</div>
+                        <div class="user-select-email group-members-count">
+                            <i class="fas fa-user-friends" style="font-size: 0.7rem; margin-right: 4px; color: #667eea;"></i>
+                            <strong>${membersCount}</strong> member${membersCount !== 1 ? 's' : ''}
+                        </div>
                     </div>
                     
-                    <button class="user-select-send-btn">
+                    <button class="user-select-send-btn group-btn">
                         <i class="fas fa-paper-plane"></i>
-                        <span>Send</span>
+                        <span>Send to Group</span>
                     </button>
                 </div>
             `;
