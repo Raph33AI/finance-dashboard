@@ -13,7 +13,6 @@
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/messages-hub.css'>
-    <!-- ✅ NOUVEAU : Styles pour les groupes -->
     <link rel='stylesheet' href='assets/css/group-chat.css'>
     
     <!-- Favicons -->
@@ -32,7 +31,6 @@
     <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
     <script src="assets/js/access-control.js"></script>
-    <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
 </head>
 <body>
@@ -44,7 +42,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- SIDEBAR (identique à votre structure) -->
+        <!-- SIDEBAR -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -243,7 +241,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ SECTION COMMUNITY (avec Messages) -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -259,7 +256,6 @@
                             <i class='fas fa-pen-fancy'></i>
                             <span>Create Post</span>
                         </a>
-                        <!-- ✅ NOUVEAU : Messages -->
                         <a href='messages.html' class='nav-link active'>
                             <i class='fas fa-envelope'></i>
                             <span>Messages</span>
@@ -340,16 +336,14 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1 class="page-title">
-                        </i> Messages
-                    </h1>
+                    <h1 class="page-title">Messages</h1>
                 </div>
             </header>
             
-            <!-- ✅ MESSAGES LAYOUT 2 COLONNES -->
+            <!-- MESSAGES LAYOUT 2 COLONNES -->
             <div class='messages-container'>
                 
-                <!-- ✅ COLONNE GAUCHE : CONVERSATIONS -->
+                <!-- COLONNE GAUCHE : CONVERSATIONS -->
                 <div class='conversations-panel'>
                     
                     <!-- Search Users -->
@@ -378,7 +372,6 @@
                             <i class="fas fa-envelope"></i> Unread
                             <span class="filter-badge" id="unreadFilterBadge" style="display: none;">0</span>
                         </button>
-                        <!-- ✅ NOUVEAU : Bouton Create Group -->
                         <button class="create-group-btn" onclick="window.createGroupModal.open()" title="Create a new group">
                             <i class="fas fa-users-plus"></i> New Group
                         </button>
@@ -393,7 +386,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ COLONNE DROITE : CHAT -->
+                <!-- COLONNE DROITE : CHAT -->
                 <div class='chat-panel' id="chatPanel">
                     
                     <!-- Empty State -->
@@ -408,7 +401,6 @@
                         
                         <!-- Chat Header -->
                         <div class="chat-header" id="chatHeader">
-                            <!-- ✅ Bouton retour mobile (généré dynamiquement par private-chat.js) -->
                             <button class="chat-back-btn" style="display: none;">
                                 <i class="fas fa-arrow-left"></i>
                             </button>
@@ -425,7 +417,7 @@
                         <!-- Messages Container -->
                         <div class="chat-messages" id="chatMessagesContainer"></div>
                         
-                        <!-- Attachment Preview -->
+                        <!-- ✅ ATTACHMENT PREVIEW (JUSTE AVANT L'INPUT) -->
                         <div class="attachment-preview" id="attachmentPreview" style="display: none;"></div>
                         
                         <!-- Input Area -->
@@ -465,7 +457,7 @@
     <script src='assets/js/messages-hub.js'></script>
     <script src='assets/js/private-chat.js'></script>
 
-    <!-- ✅ GROUP SYSTEM (NOUVEAU) -->
+    <!-- ✅ GROUP SYSTEM -->
     <script src='assets/js/create-group-modal.js'></script>
     <script src='assets/js/group-chat.js'></script>
     <script src='assets/js/group-members-manager.js'></script>
@@ -527,8 +519,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ✅ GROUP MEMBERS MODAL (sera généré dynamiquement par group-members-manager.js) -->
 
     <!-- User Menu Init -->
     <script>
