@@ -1,36 +1,20 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * BUSINESS PLAN - PDF EXPORTER v3.0 (ULTRA-CORRECTED)
+ * BUSINESS PLAN - PDF EXPORTER v4.0 (CANVAS-SAFE)
  * ════════════════════════════════════════════════════════════════
  */
 
 class BusinessPlanPDFExporter {
     constructor() {
         this.iconMap = {
-            'fa-briefcase': '💼',
-            'fa-chart-area': '📊',
-            'fa-puzzle-piece': '🧩',
-            'fa-dollar-sign': '💰',
-            'fa-sliders-h': '🎚',
-            'fa-calculator': '🧮',
-            'fa-rocket': '🚀',
-            'fa-chess': '♟',
-            'fa-exclamation-triangle': '⚠',
-            'fa-users': '👥',
-            'fa-chart-line': '📈',
-            'fa-brain': '🧠',
-            'fa-bullseye': '🎯',
-            'fa-globe-americas': '🌎',
-            'fa-tags': '🏷',
-            'fa-funnel-dollar': '💸',
-            'fa-table': '📋',
-            'fa-road': '🛣',
-            'fa-medal': '🏅',
-            'fa-shield-alt': '🛡',
-            'fa-check-circle': '✅',
-            'fa-times-circle': '❌',
-            'fa-check': '✓',
-            'fa-trophy': '🏆'
+            'fa-briefcase': '💼', 'fa-chart-area': '📊', 'fa-puzzle-piece': '🧩',
+            'fa-dollar-sign': '💰', 'fa-sliders-h': '🎚', 'fa-calculator': '🧮',
+            'fa-rocket': '🚀', 'fa-chess': '♟', 'fa-exclamation-triangle': '⚠',
+            'fa-users': '👥', 'fa-chart-line': '📈', 'fa-brain': '🧠',
+            'fa-bullseye': '🎯', 'fa-globe-americas': '🌎', 'fa-tags': '🏷',
+            'fa-funnel-dollar': '💸', 'fa-table': '📋', 'fa-road': '🛣',
+            'fa-medal': '🏅', 'fa-shield-alt': '🛡', 'fa-check-circle': '✅',
+            'fa-times-circle': '❌', 'fa-check': '✓', 'fa-trophy': '🏆'
         };
         this.init();
     }
@@ -43,55 +27,46 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎯 EXPORT PDF - TOUTES LES SECTIONS
+     * 🎯 EXPORT PDF PRINCIPAL
      */
     async exportToPDF() {
         try {
+            console.log('📄 Initiating PDF export...');
             this.showLoader();
 
-            // Créer le conteneur PDF complet
-            const pdfContent = this.createCompletePDF();
-            document.body.appendChild(pdfContent);
+            // Créer le contenu PDF
+            const pdfContent = await this.createPDFContent();
 
-            // Attendre le rendu
-            await this.wait(1500);
-
-            // Configuration PDF optimisée
+            // Options PDF optimisées
             const options = {
                 margin: [12, 12, 15, 12],
-                filename: `AlphaVault_AI_BusinessPlan_${this.getFormattedDate()}.pdf`,
+                filename: `AlphaVault_BusinessPlan_${this.getFormattedDate()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',
-                    windowWidth: 1400,
-                    onclone: (clonedDoc) => {
-                        const clonedContent = clonedDoc.getElementById('pdf-full-content');
-                        if (clonedContent) {
-                            clonedContent.style.display = 'block';
-                            clonedContent.style.visibility = 'visible';
-                        }
+                    windowWidth: 1200,
+                    ignoreElements: (element) => {
+                        // Ignorer les canvas pour éviter les erreurs
+                        return element.tagName === 'CANVAS';
                     }
                 },
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
-                    orientation: 'portrait',
-                    compress: true
+                    orientation: 'portrait'
                 },
                 pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    before: '.pdf-section-break',
-                    avoid: '.avoid-page-break'
+                    mode: ['avoid-all', 'css'],
+                    before: '.pdf-section-break'
                 }
             };
 
-            // Générer et télécharger
+            // Générer le PDF
             await html2pdf().set(options).from(pdfContent).save();
 
-            // Nettoyer
             this.cleanup();
             this.showSuccess();
 
@@ -103,44 +78,52 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📄 CRÉER PDF COMPLET (TOUTES LES SECTIONS)
+     * 📄 CRÉER CONTENU PDF
      */
-    createCompletePDF() {
+    async createPDFContent() {
         const container = document.createElement('div');
-        container.id = 'pdf-full-content';
+        container.id = 'pdf-export-container';
+        
+        // Position visible mais hors écran
         container.style.cssText = `
-            position: absolute;
-            left: -99999px;
+            position: fixed;
             top: 0;
+            left: 0;
             width: 210mm;
             background: white;
+            visibility: hidden;
+            z-index: -9999;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
         `;
 
-        // ✅ 1. PAGE DE GARDE
-        container.appendChild(this.createEnhancedCover());
+        // Page de garde
+        container.appendChild(this.createCoverPage());
 
-        // ✅ 2. EXPORTER TOUTES LES SECTIONS VISIBLES
+        // Toutes les sections
         const allSections = document.querySelectorAll('.bp-section');
         console.log(`📊 Found ${allSections.length} sections to export`);
 
         allSections.forEach((section, index) => {
-            const sectionId = section.id;
             const sectionTitle = this.getSectionTitle(section);
-            
             console.log(`📄 Exporting section ${index + 1}: ${sectionTitle}`);
             
-            const pdfSection = this.convertSectionToPDF(section, sectionTitle, index + 1);
+            const pdfSection = this.createPDFSection(section, sectionTitle, index + 1);
             container.appendChild(pdfSection);
         });
+
+        // Ajouter au DOM
+        document.body.appendChild(container);
+
+        // Attendre le rendu (important pour les styles)
+        await this.wait(2000);
 
         return container;
     }
 
     /**
-     * 🎨 PAGE DE GARDE AMÉLIORÉE
+     * 🎨 PAGE DE GARDE
      */
-    createEnhancedCover() {
+    createCoverPage() {
         const cover = document.createElement('div');
         cover.className = 'pdf-section-break';
         cover.style.cssText = `
@@ -156,43 +139,35 @@ class BusinessPlanPDFExporter {
             page-break-after: always;
         `;
 
-        const logoHTML = this.getSVGLogo();
-        const currentDate = new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        const logoSVG = `
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                    stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <circle cx="30" cy="70" r="5" fill="white"/>
+                <circle cx="50" cy="60" r="5" fill="white"/>
+                <circle cx="70" cy="45" r="5" fill="white"/>
+                <circle cx="90" cy="30" r="6" fill="white"/>
+            </svg>
+        `;
 
         cover.innerHTML = `
             <div style="width: 120px; height: 120px; margin-bottom: 40px;">
-                ${logoHTML}
+                ${logoSVG}
             </div>
-            <h1 style="font-size: 56px; font-weight: 900; margin: 0 0 20px 0; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <h1 style="font-size: 56px; font-weight: 900; margin: 0 0 20px 0; color: white;">
                 AlphaVault AI
             </h1>
-            <p style="font-size: 28px; font-weight: 600; margin: 0 0 40px 0; color: rgba(255,255,255,0.95);">
+            <p style="font-size: 28px; font-weight: 600; margin: 0 0 40px 0; opacity: 0.95;">
                 AI-Powered Financial Intelligence Platform
             </p>
-            <p style="font-size: 20px; font-weight: 500; margin: 0 0 60px 0; color: rgba(255,255,255,0.9); max-width: 700px; line-height: 1.6;">
+            <p style="font-size: 20px; margin: 0 0 60px 0; opacity: 0.9; max-width: 700px; line-height: 1.6;">
                 Empowering Individual Investors with Institutional-Grade Analytics
             </p>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 80px; font-size: 16px; color: rgba(255,255,255,0.95);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">📅</span>
-                    <span>${currentDate}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">📄</span>
-                    <span>Business Plan v3.0</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">🔒</span>
-                    <span>Confidential Document</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">🌐</span>
-                    <span>Global Market</span>
-                </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 80px; font-size: 16px;">
+                <div>📅 ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <div>📄 Business Plan v3.0</div>
+                <div>🔒 Confidential</div>
+                <div>🌐 Global Market</div>
             </div>
         `;
 
@@ -200,11 +175,11 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📋 CONVERTIR SECTION EN PDF
+     * 📋 CRÉER SECTION PDF
      */
-    convertSectionToPDF(originalSection, title, sectionNumber) {
+    createPDFSection(originalSection, title, sectionNumber) {
         const pdfSection = document.createElement('div');
-        pdfSection.className = 'pdf-section-break avoid-page-break';
+        pdfSection.className = 'pdf-section-break';
         pdfSection.style.cssText = `
             padding: 40px 30px;
             background: white;
@@ -213,17 +188,11 @@ class BusinessPlanPDFExporter {
             min-height: 200mm;
         `;
 
-        // Titre de section avec icône
-        const titleElement = originalSection.querySelector('.section-title');
-        const titleIcon = this.extractIcon(titleElement);
-        
-        const sectionHeader = document.createElement('div');
-        sectionHeader.style.cssText = `
-            margin-bottom: 40px;
-            border-left: 8px solid #667eea;
-            padding-left: 24px;
-        `;
-        sectionHeader.innerHTML = `
+        // En-tête de section
+        const titleIcon = this.extractIcon(originalSection.querySelector('.section-title'));
+        const header = document.createElement('div');
+        header.style.cssText = 'margin-bottom: 40px; border-left: 8px solid #667eea; padding-left: 24px;';
+        header.innerHTML = `
             <div style="font-size: 14px; font-weight: 600; color: #667eea; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
                 Section ${sectionNumber}
             </div>
@@ -231,9 +200,9 @@ class BusinessPlanPDFExporter {
                 ${titleIcon} ${title}
             </h2>
         `;
-        pdfSection.appendChild(sectionHeader);
+        pdfSection.appendChild(header);
 
-        // Contenu de la section
+        // Contenu
         const content = this.cloneAndStyleContent(originalSection);
         pdfSection.appendChild(content);
 
@@ -241,24 +210,43 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎨 CLONER ET STYLER LE CONTENU
+     * 🎨 CLONER ET STYLER CONTENU
      */
     cloneAndStyleContent(section) {
         const contentDiv = document.createElement('div');
         contentDiv.style.cssText = 'color: #1e293b; line-height: 1.7;';
 
-        // Cloner sans le titre principal
         const clone = section.cloneNode(true);
-        
+
         // Supprimer éléments inutiles
-        clone.querySelectorAll('.section-title, button:not(.scenario-card *), input, select, .nav-tabs, .bp-nav').forEach(el => {
-            if (el && el.parentNode) el.remove();
+        clone.querySelectorAll('.section-title, button, input, select, .nav-tabs, .bp-nav, canvas, .chart-container').forEach(el => {
+            if (el && el.parentNode) {
+                // Remplacer les graphiques par un placeholder
+                if (el.classList.contains('chart-container')) {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = `
+                        padding: 60px 40px;
+                        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+                        border: 2px dashed #667eea;
+                        border-radius: 16px;
+                        text-align: center;
+                        color: #667eea;
+                        font-weight: 600;
+                        font-size: 16px;
+                        margin: 30px 0;
+                    `;
+                    placeholder.innerHTML = '📊 Chart: See interactive version at alphavault-ai.com/admin-business-plan';
+                    el.replaceWith(placeholder);
+                } else {
+                    el.remove();
+                }
+            }
         });
 
-        // Convertir les icônes Font Awesome en emojis
+        // Convertir icônes
         this.convertIcons(clone);
 
-        // Appliquer les styles PDF
+        // Appliquer styles PDF
         this.applyPDFStyling(clone);
 
         contentDiv.appendChild(clone);
@@ -266,10 +254,9 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎨 APPLIQUER STYLES PDF COMPLETS
+     * 🎨 APPLIQUER STYLES PDF
      */
     applyPDFStyling(element) {
-        // Style de base
         element.style.color = '#1e293b';
         element.style.background = 'white';
 
@@ -297,7 +284,7 @@ class BusinessPlanPDFExporter {
             `;
         });
 
-        // Cards colorées
+        // Cards
         element.querySelectorAll('.highlight-card, .projection-card, .metric-card, .advantage-card, .trend-card, .value-prop-item').forEach(card => {
             card.style.cssText = `
                 border: 2px solid #667eea !important;
@@ -306,30 +293,16 @@ class BusinessPlanPDFExporter {
                 margin: 20px 0 !important;
                 background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)) !important;
                 page-break-inside: avoid !important;
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15) !important;
             `;
         });
 
-        // Valeurs/chiffres importants
+        // Valeurs
         element.querySelectorAll('.highlight-value, .metric-value, .proj-value, .result-value').forEach(val => {
             val.style.cssText = `
                 font-size: 32px !important;
                 font-weight: 800 !important;
                 color: #667eea !important;
                 margin: 8px 0 !important;
-                background: transparent !important;
-            `;
-        });
-
-        // Labels
-        element.querySelectorAll('.highlight-label, .metric-label, .proj-label').forEach(label => {
-            label.style.cssText = `
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                color: #64748b !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.5px !important;
-                margin-bottom: 8px !important;
                 background: transparent !important;
             `;
         });
@@ -345,19 +318,16 @@ class BusinessPlanPDFExporter {
                 page-break-inside: avoid !important;
             `;
 
-            // En-têtes
             table.querySelectorAll('thead th').forEach(th => {
                 th.style.cssText = `
                     background: linear-gradient(135deg, #667eea, #764ba2) !important;
                     color: white !important;
                     padding: 14px 12px !important;
                     font-weight: 700 !important;
-                    text-align: left !important;
                     border: 1px solid white !important;
                 `;
             });
 
-            // Cellules
             table.querySelectorAll('tbody td').forEach(td => {
                 td.style.cssText = `
                     padding: 12px !important;
@@ -367,22 +337,16 @@ class BusinessPlanPDFExporter {
                 `;
             });
 
-            // Lignes alternées
-            table.querySelectorAll('tbody tr:nth-child(even)').forEach(tr => {
-                tr.querySelectorAll('td').forEach(td => {
-                    td.style.background = '#f8fafc !important';
-                });
+            table.querySelectorAll('tbody tr:nth-child(even) td').forEach(td => {
+                td.style.background = '#f8fafc !important';
             });
 
-            // Lignes en surbrillance
-            table.querySelectorAll('tr.highlight, tr.total-row').forEach(tr => {
-                tr.querySelectorAll('td').forEach(td => {
-                    td.style.cssText += `
-                        background: rgba(102, 126, 234, 0.1) !important;
-                        font-weight: 700 !important;
-                        color: #667eea !important;
-                    `;
-                });
+            table.querySelectorAll('tr.highlight td, tr.total-row td').forEach(td => {
+                td.style.cssText += `
+                    background: rgba(102, 126, 234, 0.1) !important;
+                    font-weight: 700 !important;
+                    color: #667eea !important;
+                `;
             });
         });
 
@@ -404,30 +368,10 @@ class BusinessPlanPDFExporter {
                 `;
             });
         });
-
-        // Graphiques
-        element.querySelectorAll('.chart-container').forEach(chart => {
-            chart.style.cssText = `
-                margin: 30px 0 !important;
-                padding: 24px !important;
-                border: 2px solid #e2e8f0 !important;
-                border-radius: 12px !important;
-                background: white !important;
-                page-break-inside: avoid !important;
-            `;
-        });
-
-        element.querySelectorAll('canvas').forEach(canvas => {
-            canvas.style.cssText = `
-                max-width: 100% !important;
-                height: auto !important;
-                background: white !important;
-            `;
-        });
     }
 
     /**
-     * 🔄 CONVERTIR ICÔNES FONT AWESOME EN EMOJIS
+     * 🔄 CONVERTIR ICÔNES
      */
     convertIcons(element) {
         element.querySelectorAll('i[class*="fa-"]').forEach(icon => {
@@ -449,7 +393,7 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎯 EXTRAIRE ICÔNE D'UN ÉLÉMENT
+     * 🎯 EXTRAIRE ICÔNE
      */
     extractIcon(element) {
         if (!element) return '';
@@ -458,51 +402,18 @@ class BusinessPlanPDFExporter {
         
         const classes = iconEl.className.split(' ');
         for (const cls of classes) {
-            if (this.iconMap[cls]) {
-                return this.iconMap[cls];
-            }
+            if (this.iconMap[cls]) return this.iconMap[cls];
         }
         return '●';
     }
 
     /**
-     * 📝 OBTENIR TITRE DE SECTION
+     * 📝 OBTENIR TITRE SECTION
      */
     getSectionTitle(section) {
         const titleEl = section.querySelector('.section-title');
         if (!titleEl) return 'Section';
-        
-        // Retirer l'icône du texte
-        let text = titleEl.textContent.trim();
-        // Nettoyer les espaces multiples
-        text = text.replace(/\s+/g, ' ');
-        return text;
-    }
-
-    /**
-     * 🎨 OBTENIR LOGO SVG
-     */
-    getSVGLogo() {
-        return `
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                    stroke="white" 
-                    stroke-width="5" 
-                    fill="none" 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round"
-                    style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"/>
-                <circle cx="30" cy="70" r="5" fill="white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"/>
-                <circle cx="50" cy="60" r="5" fill="white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"/>
-                <circle cx="70" cy="45" r="5" fill="white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"/>
-                <circle cx="90" cy="30" r="6" fill="white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"/>
-                <path d="M 85 35 L 90 30 L 85 25" 
-                    stroke="white" 
-                    stroke-width="4" 
-                    fill="none" 
-                    stroke-linecap="round"/>
-            </svg>
-        `;
+        return titleEl.textContent.trim().replace(/\s+/g, ' ');
     }
 
     /**
@@ -514,7 +425,7 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * ⏳ WAIT UTILITY
+     * ⏳ WAIT
      */
     wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -527,7 +438,7 @@ class BusinessPlanPDFExporter {
         const loader = document.getElementById('pdf-loader');
         if (loader) loader.remove();
         
-        const pdfContent = document.getElementById('pdf-full-content');
+        const pdfContent = document.getElementById('pdf-export-container');
         if (pdfContent) pdfContent.remove();
     }
 
@@ -548,14 +459,14 @@ class BusinessPlanPDFExporter {
                 <div style="width: 70px; height: 70px; border: 5px solid #e2e8f0; border-top-color: #667eea; 
                     border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 30px;"></div>
                 <h3 style="font-size: 26px; font-weight: 800; color: #1e293b; margin: 0 0 12px 0;">
-                    📄 Generating PDF...
+                    📄 Generating Professional PDF...
                 </h3>
                 <p style="font-size: 16px; color: #64748b; margin: 0;">
-                    Exporting all 9 sections with charts and formatting
+                    Exporting all sections with premium formatting
                 </p>
                 <div style="margin-top: 24px; padding: 12px 24px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); 
                     border-radius: 12px; font-size: 14px; color: #667eea; font-weight: 600;">
-                    Please wait 10-15 seconds...
+                    ⏱ Please wait 10-15 seconds...
                 </div>
             </div>
             <style>
@@ -574,7 +485,7 @@ class BusinessPlanPDFExporter {
     showSuccess() {
         this.showNotification(
             '✅ PDF Generated Successfully!',
-            'Your Business Plan has been downloaded with all sections, colors, and formatting preserved.',
+            'Your Business Plan has been downloaded. Charts are replaced with placeholders - view interactive version online.',
             'success'
         );
     }
@@ -585,7 +496,7 @@ class BusinessPlanPDFExporter {
     showError(message) {
         this.showNotification(
             '❌ PDF Generation Failed',
-            message || 'Please try again or check the console for errors.',
+            message || 'Please try again or check the console.',
             'error'
         );
     }
@@ -606,38 +517,36 @@ class BusinessPlanPDFExporter {
             box-shadow: 0 12px 40px rgba(0,0,0,0.4);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             min-width: 380px; max-width: 500px;
-            animation: slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: slideIn 0.5s ease;
         `;
         notification.innerHTML = `
             <div style="display: flex; align-items: flex-start; gap: 20px;">
-                <div style="font-size: 32px; line-height: 1;">${type === 'success' ? '✅' : '❌'}</div>
+                <div style="font-size: 32px;">${type === 'success' ? '✅' : '❌'}</div>
                 <div style="flex: 1;">
                     <div style="font-weight: 800; font-size: 18px; margin-bottom: 8px;">${title}</div>
                     <div style="font-size: 15px; opacity: 0.95; line-height: 1.5;">${message}</div>
                 </div>
             </div>
             <style>
-                @keyframes slideInRight {
+                @keyframes slideIn {
                     from { transform: translateX(500px); opacity: 0; }
                     to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(500px); opacity: 0; }
                 }
             </style>
         `;
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            notification.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(500px)';
             setTimeout(() => notification.remove(), 500);
         }, 5000);
     }
 }
 
-// ✅ INITIALISATION AUTO
+// ✅ INITIALISATION
 document.addEventListener('DOMContentLoaded', () => {
     window.pdfExporter = new BusinessPlanPDFExporter();
-    console.log('📄 ✅ Business Plan PDF Exporter v3.0 ULTRA initialized');
+    console.log('📄 ✅ Business Plan PDF Exporter v4.0 CANVAS-SAFE initialized');
 });
