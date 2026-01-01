@@ -615,7 +615,7 @@ class PostManager {
        ========================================== */
 
     /**
-     * ✅ MODAL DE PARTAGE AVEC ONGLETS : Utilisateurs OU Groupes (EXCLUSIF)
+     * ✅ MODAL DE PARTAGE - ONGLETS EXCLUSIFS (CORRECTION COMPLÈTE)
      */
     openShareAsMessageModal() {
         console.log('💬 Opening share modal - USERS ONLY by default...');
@@ -664,8 +664,8 @@ class PostManager {
                             >
                         </div>
 
-                        <!-- ✅ CONTENU ONGLET USERS (visible par défaut) -->
-                        <div class="share-content-tab active" data-content="users">
+                        <!-- ✅ CONTENU ONGLET USERS -->
+                        <div class="share-content-tab active" data-content="users" id="usersTabContent">
                             <div class="users-list-wrapper" id="shareUsersList">
                                 <div class="loading-spinner">
                                     <i class="fas fa-spinner fa-spin"></i>
@@ -674,10 +674,10 @@ class PostManager {
                             </div>
                         </div>
 
-                        <!-- ✅ CONTENU ONGLET GROUPS (caché par défaut) -->
-                        <div class="share-content-tab" data-content="groups">
+                        <!-- ✅ CONTENU ONGLET GROUPS -->
+                        <div class="share-content-tab" data-content="groups" id="groupsTabContent">
                             <div class="groups-list-wrapper" id="shareGroupsList">
-                                <!-- Sera chargé uniquement si on clique sur l'onglet -->
+                                <!-- Chargé à la demande -->
                             </div>
                         </div>
                     </div>
@@ -694,32 +694,32 @@ class PostManager {
             overlay.addEventListener('click', () => this.closeShareMessageModal());
             closeBtn.addEventListener('click', () => this.closeShareMessageModal());
 
-            // ✅ GESTION DES ONGLETS (EXCLUSIF)
+            // ✅ GESTION DES ONGLETS (EXCLUSIF - CORRECTION)
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabName = tab.dataset.tab;
                     
                     console.log('📑 Switching to tab:', tabName);
                     
-                    // Activer l'onglet cliqué
+                    // 1⃣ ACTIVER L'ONGLET CLIQUÉ
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     
-                    // ✅ AFFICHER UNIQUEMENT LE BON CONTENU (MASQUER L'AUTRE)
-                    modal.querySelectorAll('.share-content-tab').forEach(content => {
-                        if (content.dataset.content === tabName) {
-                            content.classList.add('active');
-                        } else {
-                            content.classList.remove('active');
-                        }
-                    });
+                    // 2⃣ MASQUER TOUS LES CONTENUS
+                    const usersTab = modal.querySelector('#usersTabContent');
+                    const groupsTab = modal.querySelector('#groupsTabContent');
                     
-                    // ✅ CHARGER LES DONNÉES SELON L'ONGLET
+                    usersTab.classList.remove('active');
+                    groupsTab.classList.remove('active');
+                    
+                    // 3⃣ AFFICHER UNIQUEMENT LE BON CONTENU
                     if (tabName === 'users') {
+                        usersTab.classList.add('active');
                         searchInput.placeholder = 'Search users...';
                         searchInput.value = '';
                         this.loadUsersForShare();
                     } else if (tabName === 'groups') {
+                        groupsTab.classList.add('active');
                         searchInput.placeholder = 'Search groups...';
                         searchInput.value = '';
                         this.loadGroupsForShare();
@@ -752,22 +752,17 @@ class PostManager {
             document.addEventListener('keydown', this.escapeMessageHandler);
         }
 
-        // ✅ CHARGER UNIQUEMENT LES UTILISATEURS PAR DÉFAUT
-        this.loadUsersForShare();
+        // ✅ RÉINITIALISER L'AFFICHAGE (USERS PAR DÉFAUT)
+        const usersTab = modal.querySelector('#usersTabContent');
+        const groupsTab = modal.querySelector('#groupsTabContent');
+        
+        if (usersTab) usersTab.classList.add('active');
+        if (groupsTab) groupsTab.classList.remove('active');
 
-        // Réinitialiser l'onglet actif (Users)
+        // Réinitialiser les onglets
         const tabs = modal.querySelectorAll('.share-tab');
         tabs.forEach(t => t.classList.remove('active'));
-        modal.querySelector('[data-tab="users"]').classList.add('active');
-
-        // Réinitialiser le contenu visible
-        modal.querySelectorAll('.share-content-tab').forEach(content => {
-            if (content.dataset.content === 'users') {
-                content.classList.add('active');
-            } else {
-                content.classList.remove('active');
-            }
-        });
+        modal.querySelector('[data-tab="users"]')?.classList.add('active');
 
         // Réinitialiser la recherche
         const searchInput = modal.querySelector('#shareSearchInput');
@@ -775,6 +770,9 @@ class PostManager {
             searchInput.value = '';
             searchInput.placeholder = 'Search users...';
         }
+
+        // ✅ CHARGER UNIQUEMENT LES UTILISATEURS
+        this.loadUsersForShare();
 
         // Afficher la modal
         const scrollY = window.scrollY;
@@ -887,7 +885,7 @@ class PostManager {
      * ✅ NOUVEAU : Afficher la liste des groupes
      */
     renderGroupsList(groups, query = '') {
-        const groupsList = document.getElementById('shareGroupsList');
+        const groupsList = document.getElementById('shareGroupsList'); // ✅ BON ID
         if (!groupsList) return;
 
         if (groups.length === 0) {
@@ -908,40 +906,46 @@ class PostManager {
         const groupsHTML = groups.map(group => {
             const groupName = group.name || 'Group';
             const avatar = group.photoURL || 
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128`;
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128&bold=true`;
             
             const membersCount = group.participants?.length || 0;
 
             return `
-                <div class="user-select-item group-select-item" 
+                <div class="user-select-item group-select-item user-type-group" 
                     onclick="window.postManager.sendPostAsGroupMessage('${group.id}', ${JSON.stringify(group).replace(/"/g, '&quot;')})">
-                    <div class="user-select-avatar-wrapper">
+                    
+                    <div class="user-select-avatar-wrapper group-avatar">
                         <img src="${avatar}" 
                             alt="${this.escapeHtml(groupName)}" 
                             class="user-select-avatar"
-                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128'">
-                        <div class="group-indicator-badge">
+                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128&bold=true'">
+                        <div class="group-type-indicator">
                             <i class="fas fa-users"></i>
                         </div>
                     </div>
                     
                     <div class="user-select-info">
                         <div class="user-select-name">
-                            <i class="fas fa-users" style="font-size: 0.8rem; color: #667eea; margin-right: 4px;"></i>
-                            ${this.escapeHtml(groupName)}
+                            <div class="group-name-badge">
+                                <i class="fas fa-users"></i>
+                                <span>${this.escapeHtml(groupName)}</span>
+                            </div>
                         </div>
-                        <div class="user-select-email">${membersCount} member${membersCount > 1 ? 's' : ''}</div>
+                        <div class="user-select-email group-members-count">
+                            <i class="fas fa-user-friends" style="font-size: 0.7rem; margin-right: 4px; color: #667eea;"></i>
+                            <strong>${membersCount}</strong> member${membersCount !== 1 ? 's' : ''}
+                        </div>
                     </div>
                     
-                    <button class="user-select-send-btn">
+                    <button class="user-select-send-btn group-btn">
                         <i class="fas fa-paper-plane"></i>
-                        <span>Send</span>
+                        <span>Send to Group</span>
                     </button>
                 </div>
             `;
         }).join('');
 
-        groupsList.innerHTML = `<div class="users-select-list">${groupsHTML}</div>`;
+        groupsList.innerHTML = groupsHTML; // ✅ Remplace TOUT le contenu
     }
 
     /**

@@ -2363,27 +2363,31 @@ body.dark-mode .group-name-badge {
 }
 
 /* ====================================================
-   📑 SHARE MODAL - GESTION DES ONGLETS (EXCLUSIF)
+   📑 SHARE MODAL - ONGLETS EXCLUSIFS (FIX COMPLET)
    ==================================================== */
 
-/* ✅ Par défaut, masquer tous les contenus d'onglets */
+/* ✅ MASQUER PAR DÉFAUT TOUS LES CONTENUS */
 .share-content-tab {
-    display: none;
+    display: none !important;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
 }
 
-/* ✅ Afficher uniquement l'onglet actif */
+/* ✅ AFFICHER UNIQUEMENT L'ONGLET ACTIF */
 .share-content-tab.active {
-    display: block;
+    display: block !important;
     opacity: 1;
-    animation: fadeInContent 0.3s ease;
+    visibility: visible;
+    height: auto;
+    animation: fadeInTab 0.3s ease;
 }
 
-@keyframes fadeInContent {
+@keyframes fadeInTab {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -2391,15 +2395,39 @@ body.dark-mode .group-name-badge {
     }
 }
 
-/* ✅ Onglets - Style actif */
+/* ✅ Conteneurs de listes */
+.users-list-wrapper,
+.groups-list-wrapper {
+    max-height: 450px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ✅ Liste vide dans un onglet inactif */
+.share-content-tab:not(.active) .users-list-wrapper,
+.share-content-tab:not(.active) .groups-list-wrapper {
+    display: none !important;
+}
+
+/* ✅ Style des onglets */
+.share-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
 .share-tab {
     flex: 1;
-    padding: 12px 24px;
+    padding: 14px 24px;
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
     cursor: pointer;
     font-weight: 600;
+    font-size: 0.95rem;
     color: var(--text-secondary);
     transition: all 0.3s ease;
     display: flex;
@@ -2415,21 +2443,9 @@ body.dark-mode .group-name-badge {
 
 .share-tab.active {
     color: white;
-    border-bottom-color: transparent;
     position: relative;
 }
 
-.share-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: currentColor;
-}
-
-/* ✅ Couleurs spécifiques par onglet */
 .share-tab[data-tab="users"].active {
     background: linear-gradient(135deg, #3B82F6, #2563EB);
 }
@@ -2438,16 +2454,7 @@ body.dark-mode .group-name-badge {
     background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
-/* ✅ Container des onglets */
-.share-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 20px;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-}
-
+/* ✅ Dark mode */
 body.dark-mode .share-tabs {
     border-bottom-color: rgba(255, 255, 255, 0.1);
 }
