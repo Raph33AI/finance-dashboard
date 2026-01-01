@@ -1134,10 +1134,15 @@ class PrivateChat {
         if (emptyState) emptyState.style.display = 'none';
         if (chatActive) chatActive.style.display = 'flex';
 
-        // ✅ CORRECTION : Activer les événements pour ce type de chat
-        if (window.chatEventManager) {
-            window.chatEventManager.activateFor('private');
-        }
+        // ✅ CORRECTION : Activer après un délai pour s'assurer que chatEventManager est prêt
+        setTimeout(() => {
+            if (window.chatEventManager) {
+                window.chatEventManager.activateFor('private');
+                console.log('✅ ChatEventManager activated for PRIVATE chat');
+            } else {
+                console.error('❌ ChatEventManager not found!');
+            }
+        }, 100);
 
         await this.renderChatHeader();
         await this.loadMessages();
