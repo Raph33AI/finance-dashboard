@@ -1,6 +1,6 @@
 // ============================================
-// CHATBOT AI ENGINE v6.1 ULTRA PRO
-// Moteur principal avec AlphaVault Scoring
+// CHATBOT AI ENGINE v6.2 ULTRA PRO
+// Moteur principal avec support graphiques techniques
 // ✅ CONFORMITÉ LÉGALE : Scores propriétaires
 // ============================================
 
@@ -24,16 +24,23 @@ class ChatbotAIEngine {
             console.log('✅ AlphaVault Scoring Engine initialized');
         }
         
+        // ✅ NOUVEAU : Initialiser ChatbotCharts
+        if (typeof ChatbotCharts !== 'undefined') {
+            this.chartsEngine = new ChatbotCharts(config);
+            console.log('✅ ChatbotCharts Engine initialized');
+        }
+        
         this.conversationHistory = [];
         this.currentContext = {
             symbols: [],
             timeframes: [],
             lastIntent: null,
             recentMetrics: {},
-            lastAlphaVaultData: null
+            lastAlphaVaultData: null,
+            lastSymbols: [] // ✅ NOUVEAU : Garder trace des derniers symboles
         };
         
-        console.log('🧠 ChatbotAIEngine v6.1 ULTRA PRO initialized');
+        console.log('🧠 ChatbotAIEngine v6.2 ULTRA PRO initialized');
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -53,10 +60,16 @@ class ChatbotAIEngine {
             const entities = this.extractEntities(userMessage);
             console.log('🔍 Extracted entities:', entities);
 
-            // 3⃣ Update Context
+            // 3⃣ ✅ NOUVEAU : Utiliser le contexte si pas de symboles
+            if (entities.symbols.length === 0 && this.currentContext.lastSymbols.length > 0) {
+                console.log('📌 Using context symbols:', this.currentContext.lastSymbols);
+                entities.symbols = [...this.currentContext.lastSymbols];
+            }
+
+            // 4⃣ Update Context
             this.updateContext(intent, entities);
 
-            // 4⃣ ✅ NOUVEAU : Fetch AlphaVault Data (si nécessaire)
+            // 5⃣ ✅ NOUVEAU : Fetch AlphaVault Data (si nécessaire)
             let alphaVaultData = null;
             
             if (this.shouldFetchRealTimeData(intent, entities)) {
@@ -67,7 +80,7 @@ class ChatbotAIEngine {
                     
                     if (alphaVaultData && !alphaVaultData.error) {
                         console.log('✅ AlphaVault data retrieved successfully');
-                        console.log('📈 AlphaVault Score:', alphaVaultData.alphaVaultScore || alphaVaultData.overallScore);
+                        console.log('📈 AlphaVault Score:', alphaVaultData.overall || alphaVaultData.overallScore);
                         this.currentContext.lastAlphaVaultData = alphaVaultData;
                     } else {
                         console.warn('⚠ AlphaVault data not available, using Gemini knowledge only');
@@ -80,7 +93,7 @@ class ChatbotAIEngine {
                 console.log('📚 Using Gemini general knowledge (no real-time data needed)');
             }
 
-            // 5⃣ Enrich message with AlphaVault context
+            // 6⃣ Enrich message with AlphaVault context
             const enrichedMessage = this.enrichMessageWithAlphaVault(
                 userMessage, 
                 intent, 
@@ -88,7 +101,7 @@ class ChatbotAIEngine {
                 alphaVaultData
             );
 
-            // 6⃣ Send to Gemini AI
+            // 7⃣ Send to Gemini AI
             const response = await this.geminiClient.sendMessage(
                 enrichedMessage,
                 this.conversationHistory
@@ -102,7 +115,7 @@ class ChatbotAIEngine {
                 };
             }
 
-            // 7⃣ Update conversation history
+            // 8⃣ Update conversation history
             this.conversationHistory.push({
                 role: 'user',
                 text: userMessage
@@ -141,7 +154,7 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔍 SHOULD FETCH REAL-TIME DATA?
+    // 🔍 SHOULD FETCH REAL-TIME DATA? (✅ AMÉLIORÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     shouldFetchRealTimeData(intent, entities) {
         // Fetch data pour ces intents
@@ -158,6 +171,15 @@ class ChatbotAIEngine {
             return false;
         }
 
+        // ✅ NOUVEAU : Pour TECHNICAL_ANALYSIS, utiliser le contexte si pas de symboles
+        if (intent === 'TECHNICAL_ANALYSIS') {
+            if (entities.symbols.length === 0 && this.currentContext.lastSymbols.length === 0) {
+                console.warn('⚠ Technical analysis requested but no symbols available');
+                return false;
+            }
+            return true; // On a des symboles (soit dans entities, soit dans le contexte)
+        }
+
         // Vérifier qu'on a des symboles
         if (entities.symbols.length === 0) {
             return false;
@@ -172,7 +194,7 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 FETCH ALPHAVAULT DATA (AMÉLIORÉ AVEC TECHNICAL CHARTS)
+    // 📊 FETCH ALPHAVAULT DATA (✅ AMÉLIORÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async fetchAlphaVaultData(intent, entities) {
         try {
@@ -183,14 +205,25 @@ class ChatbotAIEngine {
                 return await this.getStockAlphaVaultData(symbol);
             }
 
-            // 📊 TECHNICAL ANALYSIS (NOUVEAU)
+            // 📊 TECHNICAL ANALYSIS (✅ AMÉLIORÉ)
             if (intent === 'TECHNICAL_ANALYSIS') {
-                return await this.getTechnicalChartData(symbol, entities);
+                const symbols = entities.symbols.length > 0 ? entities.symbols : this.currentContext.lastSymbols;
+                
+                if (symbols.length === 0) {
+                    throw new Error('No symbols available for technical analysis');
+                }
+
+                // Si plusieurs symboles, faire une comparaison
+                if (symbols.length > 1) {
+                    return await this.getTechnicalComparisonData(symbols);
+                } else {
+                    return await this.getTechnicalChartData(symbols[0], entities);
+                }
             }
 
-            // ⚖ STOCK COMPARISON
+            // ⚖ STOCK COMPARISON (✅ AMÉLIORÉ AVEC GRAPHIQUES)
             if (intent === 'STOCK_COMPARISON' && entities.symbols.length >= 2) {
-                return await this.getComparisonAlphaVaultData(entities.symbols);
+                return await this.getComparisonWithChartsData(entities.symbols);
             }
 
             // 🚀 IPO ANALYSIS
@@ -212,7 +245,43 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 GET TECHNICAL CHART DATA (NOUVEAU)
+    // 📈 GET STOCK ALPHAVAULT DATA
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async getStockAlphaVaultData(symbol) {
+        try {
+            console.log(`📊 Fetching AlphaVault data for ${symbol}...`);
+
+            // Fetch raw data from APIs (INTERNAL USE ONLY)
+            const [quote, profile] = await Promise.all([
+                this.apiClient.getQuote(symbol).catch(() => null),
+                this.apiClient.getProfile(symbol).catch(() => null)
+            ]);
+
+            if (!quote) {
+                throw new Error(`Quote data not available for ${symbol}`);
+            }
+
+            console.log(`✅ Raw data fetched for ${symbol}`);
+
+            // Transform to AlphaVault proprietary scores
+            const alphaVaultData = this.scoringEngine.calculateComprehensiveScore({
+                symbol: symbol,
+                quote: quote,
+                profile: profile
+            });
+
+            console.log(`🏆 AlphaVault Score calculated: ${alphaVaultData.overall}/100`);
+
+            return alphaVaultData;
+
+        } catch (error) {
+            console.error(`❌ Error fetching AlphaVault data for ${symbol}:`, error);
+            return { error: error.message, symbol: symbol };
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 GET TECHNICAL CHART DATA (✅ NOUVEAU)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async getTechnicalChartData(symbol, entities) {
         try {
@@ -222,7 +291,7 @@ class ChatbotAIEngine {
             const timeSeries = await this.apiClient.getTimeSeries(symbol, '1day', 200);
 
             if (!timeSeries || !timeSeries.data || timeSeries.data.length < 50) {
-                throw new Error(`Insufficient historical data for ${symbol}`);
+                throw new Error(`Insufficient historical data for ${symbol} (need min 50 candles, got ${timeSeries?.data?.length || 0})`);
             }
 
             console.log(`✅ Received ${timeSeries.data.length} candles for ${symbol}`);
@@ -275,11 +344,10 @@ class ChatbotAIEngine {
                 prices: prices,
                 indicators: indicators,
                 alphaVaultScores: alphaVaultScores,
-                chartConfig: {
-                    includeMACD: true,
-                    includeBollinger: true,
-                    includeRSI: true,
-                    includeVolume: true
+                chartData: {
+                    symbol: symbol,
+                    indicators: indicators,
+                    prices: prices
                 }
             };
 
@@ -290,43 +358,46 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📈 GET STOCK ALPHAVAULT DATA
+    // ⚖ GET COMPARISON WITH CHARTS DATA (✅ NOUVEAU)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    async getStockAlphaVaultData(symbol) {
+    async getComparisonWithChartsData(symbols) {
         try {
-            console.log(`📊 Fetching AlphaVault data for ${symbol}...`);
+            console.log(`⚖ Comparing stocks with technical data: ${symbols.join(' vs ')}`);
 
-            // Fetch raw data from APIs (INTERNAL USE ONLY)
-            const [quote, profile] = await Promise.all([
-                this.apiClient.getQuote(symbol).catch(() => null),
-                this.apiClient.getProfile(symbol).catch(() => null)
-            ]);
+            // Récupérer les données techniques pour chaque symbole
+            const results = await Promise.all(
+                symbols.map(symbol => this.getTechnicalChartData(symbol, {}))
+            );
 
-            if (!quote) {
-                throw new Error(`Quote data not available for ${symbol}`);
+            // Filter out errors
+            const validResults = results.filter(r => !r.error);
+
+            if (validResults.length === 0) {
+                throw new Error('No valid data for comparison');
             }
 
-            console.log(`✅ Raw data fetched for ${symbol}`);
-
-            // Transform to AlphaVault proprietary scores
-            const alphaVaultData = this.scoringEngine.calculateComprehensiveScore({
-                symbol: symbol,
-                quote: quote,
-                profile: profile
-            });
-
-            console.log(`🏆 AlphaVault Score calculated: ${alphaVaultData.overall}/100`);
-
-            return alphaVaultData;
+            return {
+                type: 'comparison',
+                symbols: symbols,
+                stocks: validResults,
+                winner: this.identifyWinner(validResults)
+            };
 
         } catch (error) {
-            console.error(`❌ Error fetching AlphaVault data for ${symbol}:`, error);
-            return { error: error.message, symbol: symbol };
+            console.error('❌ Error in comparison:', error);
+            return { error: error.message };
         }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ⚖ GET COMPARISON ALPHAVAULT DATA
+    // 📊 GET TECHNICAL COMPARISON DATA (✅ NOUVEAU)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async getTechnicalComparisonData(symbols) {
+        return await this.getComparisonWithChartsData(symbols);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ⚖ GET COMPARISON ALPHAVAULT DATA (LEGACY - CONSERVÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async getComparisonAlphaVaultData(symbols) {
         try {
@@ -357,11 +428,19 @@ class ChatbotAIEngine {
     }
 
     identifyWinner(results) {
-        const sorted = [...results].sort((a, b) => b.overall - a.overall);
+        const sorted = [...results].sort((a, b) => {
+            const scoreA = a.alphaVaultScores?.overall || a.overall || 0;
+            const scoreB = b.alphaVaultScores?.overall || b.overall || 0;
+            return scoreB - scoreA;
+        });
+
+        const topResult = sorted[0];
+        const score = topResult.alphaVaultScores?.overall || topResult.overall || 0;
+
         return {
-            symbol: sorted[0].symbol,
-            score: sorted[0].overall,
-            reason: `Highest AlphaVault Score (${sorted[0].overall}/100)`
+            symbol: topResult.symbol,
+            score: score,
+            reason: `Highest AlphaVault Score (${score}/100)`
         };
     }
 
@@ -389,7 +468,6 @@ class ChatbotAIEngine {
                 exchange: ipo.exchange,
                 date: ipo.date,
                 status: ipo.status,
-                // Simplified scoring (no real prices)
                 potentialScore: this.calculateIPOPotentialScore(ipo)
             }));
 
@@ -406,20 +484,16 @@ class ChatbotAIEngine {
     }
 
     calculateIPOPotentialScore(ipo) {
-        // Simplified scoring logic
         let score = 50;
 
-        // Exchange premium (NASDAQ/NYSE = higher score)
         if (ipo.exchange === 'NASDAQ' || ipo.exchange === 'NYSE') {
             score += 20;
         }
 
-        // Status boost
         if (ipo.status === 'priced') {
             score += 15;
         }
 
-        // Recent date boost
         const ipoDate = new Date(ipo.date);
         const today = new Date();
         const daysDiff = Math.abs((ipoDate - today) / (1000 * 60 * 60 * 24));
@@ -434,7 +508,6 @@ class ChatbotAIEngine {
     // 💱 GET FOREX ALPHAVAULT DATA
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async getForexAlphaVaultData(currencyPair) {
-        // Placeholder pour forex (nécessite API forex spécifique)
         return {
             type: 'forex',
             pair: currencyPair,
@@ -444,7 +517,7 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📝 ENRICH MESSAGE WITH ALPHAVAULT
+    // 📝 ENRICH MESSAGE WITH ALPHAVAULT (✅ AMÉLIORÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     enrichMessageWithAlphaVault(userMessage, intent, entities, alphaVaultData) {
         let enrichedMessage = userMessage;
@@ -452,8 +525,85 @@ class ChatbotAIEngine {
         // Si on a des données AlphaVault
         if (alphaVaultData && !alphaVaultData.error) {
             
-            // STOCK ANALYSIS
-            if (alphaVaultData.type !== 'comparison' && alphaVaultData.type !== 'ipo') {
+            // ✅ TECHNICAL ANALYSIS
+            if (alphaVaultData.type === 'technical_analysis') {
+                const scores = alphaVaultData.alphaVaultScores;
+                
+                const technicalContext = `
+
+[AlphaVault Technical Intelligence Report]
+Symbol: ${alphaVaultData.symbol}
+
+═══════════════════════════════════════════════════════════════════
+📊 ALPHAVAULT TECHNICAL SCORES
+═══════════════════════════════════════════════════════════════════
+
+Overall Technical Score: ${scores.overall}/100 (${scores.overallSignal})
+
+Momentum Indicators:
+${scores.momentum.rsi ? `- RSI Score: ${scores.momentum.rsi.score}/100 (${scores.momentum.rsi.signal})` : ''}
+${scores.momentum.stochastic ? `- Stochastic Score: ${scores.momentum.stochastic.score}/100 (${scores.momentum.stochastic.signal})` : ''}
+${scores.momentum.mfi ? `- MFI Score: ${scores.momentum.mfi.score}/100 (${scores.momentum.mfi.signal})` : ''}
+
+Trend Indicators:
+${scores.trend.macd ? `- MACD Score: ${scores.trend.macd.score}/100 (${scores.trend.macd.signal})` : ''}
+${scores.trend.adx ? `- ADX Score: ${scores.trend.adx.score}/100 (${scores.trend.adx.signal})` : ''}
+
+Volume Indicators:
+${scores.volume.obv ? `- OBV Score: ${scores.volume.obv.score}/100 (${scores.volume.obv.signal})` : ''}
+
+Volatility:
+${scores.volatility.atr ? `- ATR Score: ${scores.volatility.atr.score}/100 (${scores.volatility.atr.signal})` : ''}
+
+Overbought Signals: ${scores.overbought}
+Oversold Signals: ${scores.oversold}
+
+═══════════════════════════════════════════════════════════════════
+
+⚠ CRITICAL: Use ONLY the above AlphaVault Scores in your analysis.
+Provide detailed technical analysis with trading recommendations.
+MENTION that an interactive technical chart is available (you will generate it).
+`;
+                
+                enrichedMessage += technicalContext;
+            }
+
+            // ✅ COMPARISON (WITH TECHNICAL DATA)
+            else if (alphaVaultData.type === 'comparison' && alphaVaultData.stocks[0]?.alphaVaultScores) {
+                const comparisonContext = `
+
+[AlphaVault Comparative Technical Analysis]
+Stocks Compared: ${alphaVaultData.symbols.join(' vs ')}
+
+═══════════════════════════════════════════════════════════════════
+📊 ALPHAVAULT COMPARATIVE TECHNICAL SCORES
+═══════════════════════════════════════════════════════════════════
+
+${alphaVaultData.stocks.map(stock => {
+    const scores = stock.alphaVaultScores;
+    return `
+**${stock.symbol}**
+- Overall Technical Score: ${scores.overall}/100 (${scores.overallSignal})
+- MACD Score: ${scores.trend.macd?.score || 'N/A'}/100
+- RSI Score: ${scores.momentum.rsi?.score || 'N/A'}/100
+- ADX Score: ${scores.trend.adx?.score || 'N/A'}/100
+`;
+}).join('\n')}
+
+🏆 Top Technical Pick: ${alphaVaultData.winner.symbol} (Score: ${alphaVaultData.winner.score}/100)
+Reason: ${alphaVaultData.winner.reason}
+
+═══════════════════════════════════════════════════════════════════
+
+Provide detailed comparative analysis using ONLY these AlphaVault Technical Scores.
+MENTION that interactive comparison charts are available.
+`;
+                
+                enrichedMessage += comparisonContext;
+            }
+
+            // STOCK ANALYSIS (NON-TECHNICAL)
+            else if (!alphaVaultData.type || alphaVaultData.type !== 'comparison') {
                 const scoreContext = `
 
 [AlphaVault Intelligence Report]
@@ -489,14 +639,12 @@ ${alphaVaultData.insights.map(i => `- ${i}`).join('\n')}
 ═══════════════════════════════════════════════════════════════════
 
 ⚠ CRITICAL: Use ONLY the above AlphaVault Scores in your analysis.
-DO NOT mention specific prices, P/E ratios, or raw financial metrics.
-Focus on score interpretation, trend analysis, and investment recommendations.
 `;
                 
                 enrichedMessage += scoreContext;
             }
 
-            // COMPARISON
+            // COMPARISON (LEGACY - WITHOUT TECHNICAL)
             else if (alphaVaultData.type === 'comparison') {
                 const comparisonContext = `
 
@@ -568,7 +716,7 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
         const intentInstructions = {
             'STOCK_ANALYSIS': '\n\nProvide comprehensive stock analysis with clear buy/sell/hold recommendation.',
             'STOCK_COMPARISON': '\n\nCompare the stocks across all dimensions and identify the best investment.',
-            'TECHNICAL_ANALYSIS': '\n\nFocus on technical indicators, chart patterns, and trading signals.',
+            'TECHNICAL_ANALYSIS': '\n\n✅ CRITICAL: Mention that you will generate an interactive technical chart with all indicators. Provide detailed technical analysis based on AlphaVault Scores.',
             'IPO_ANALYSIS': '\n\nEvaluate IPO potential, market timing, and investment risks.',
             'MARKET_SENTIMENT': '\n\nAnalyze current market mood, VIX levels, and sector rotation.'
         };
@@ -586,6 +734,13 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
     detectIntent(message) {
         const msg = message.toLowerCase();
         
+        // Technical Analysis (✅ PRIORITÉ HAUTE)
+        if (msg.includes('technical') || msg.includes('chart') || msg.includes('indicator') || 
+            msg.includes('macd') || msg.includes('rsi') || msg.includes('bollinger') ||
+            msg.includes('stochastic') || msg.includes('adx') || msg.includes('show me') && msg.includes('with')) {
+            return 'TECHNICAL_ANALYSIS';
+        }
+
         // Comparison
         if (msg.includes('compare') || msg.includes(' vs ') || msg.includes('versus')) {
             return 'STOCK_COMPARISON';
@@ -604,11 +759,6 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
         // Forex
         if (this.matchKeywords(msg, this.config.intents.forexAnalysis)) {
             return 'FOREX_ANALYSIS';
-        }
-
-        // Technical
-        if (this.matchKeywords(msg, this.config.intents.technicalAnalysis)) {
-            return 'TECHNICAL_ANALYSIS';
         }
 
         // Portfolio
@@ -640,7 +790,7 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔍 EXTRACT ENTITIES
+    // 🔍 EXTRACT ENTITIES (✅ AMÉLIORÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     extractEntities(message) {
         const entities = {
@@ -652,14 +802,14 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
         };
 
         // Extract stock symbols
-        const knownStocks = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NFLX', 'AMD', 'INTC', 'ORCL', 'CRM', 'ADBE'];
+        const knownStocks = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NFLX', 'AMD', 'INTC', 'ORCL', 'CRM', 'ADBE', 'PYPL', 'DIS', 'BA', 'GE'];
         
         // Method 1: Uppercase symbols
         const symbolRegex = /\b([A-Z]{2,5})\b/g;
         const upperSymbols = message.match(symbolRegex) || [];
         
         upperSymbols.forEach(symbol => {
-            if (!['IPO', 'USD', 'EUR', 'GBP', 'JPY', 'THE', 'AND', 'FOR', 'USA', 'CEO', 'CFO', 'API'].includes(symbol)) {
+            if (!['IPO', 'USD', 'EUR', 'GBP', 'JPY', 'THE', 'AND', 'FOR', 'USA', 'CEO', 'CFO', 'API', 'RSI', 'MACD', 'ADX', 'ATR', 'MFI', 'CCI', 'OBV', 'CMF'].includes(symbol)) {
                 if (!entities.symbols.includes(symbol)) {
                     entities.symbols.push(symbol);
                 }
@@ -685,7 +835,9 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
             'nvidia': 'NVDA',
             'meta': 'META',
             'facebook': 'META',
-            'netflix': 'NFLX'
+            'netflix': 'NFLX',
+            'disney': 'DIS',
+            'boeing': 'BA'
         };
 
         const msgLower = message.toLowerCase();
@@ -723,13 +875,14 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔄 UPDATE CONTEXT
+    // 🔄 UPDATE CONTEXT (✅ AMÉLIORÉ)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     updateContext(intent, entities) {
         this.currentContext.lastIntent = intent;
 
         if (entities.symbols.length > 0) {
             this.currentContext.symbols = entities.symbols;
+            this.currentContext.lastSymbols = entities.symbols; // ✅ NOUVEAU : Sauvegarder pour le contexte
         }
 
         if (entities.timeframes.length > 0) {
@@ -754,7 +907,8 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
             timeframes: [],
             lastIntent: null,
             recentMetrics: {},
-            lastAlphaVaultData: null
+            lastAlphaVaultData: null,
+            lastSymbols: []
         };
         this.geminiClient.resetConversation();
         console.log('🔄 Conversation & context reset');
@@ -769,6 +923,7 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
             symbolsDiscussed: [...new Set(this.currentContext.symbols)],
             lastIntent: this.currentContext.lastIntent,
             hasAlphaVaultData: !!this.currentContext.lastAlphaVaultData,
+            lastSymbols: this.currentContext.lastSymbols,
             conversationLength: this.conversationHistory.reduce((sum, msg) => sum + msg.text.length, 0)
         };
     }
@@ -777,6 +932,8 @@ Suggest to the user that you can fetch real-time AlphaVault analysis if they wan
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ✅ EXPORT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-console.log('✅ ChatbotAIEngine v6.1 ULTRA PRO loaded successfully');
+console.log('✅ ChatbotAIEngine v6.2 ULTRA PRO loaded successfully');
 console.log('🏆 AlphaVault Integration: ACTIVE');
 console.log('📊 Real-time data fetching: ENABLED');
+console.log('📈 Technical Analysis: ENABLED');
+console.log('⚖ Comparison with Charts: ENABLED');
