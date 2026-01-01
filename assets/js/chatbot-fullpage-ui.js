@@ -1463,7 +1463,7 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🚀 INITIALIZATION
+    // 🚀 INITIALIZATION (CORRECTION)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async init() {
         console.log('🚀 Initializing ChatbotUI v6.0...');
@@ -1503,13 +1503,102 @@ class ChatbotUI {
         // Attach event listeners
         this.attachEventListeners();
 
-        // Load conversations from Firebase
-        await this.loadConversationsFromFirebase();
+        // ✅ CORRECTION: Attendre que Firebase et ChatbotModals soient prêts
+        this.waitForFirebaseAndLoadConversations();
 
         // Auto-scroll to bottom
         this.scrollToBottom();
 
         console.log('✅ ChatbotUI initialized successfully!');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ⏳ WAIT FOR FIREBASE & LOAD CONVERSATIONS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async waitForFirebaseAndLoadConversations() {
+        console.log('⏳ Waiting for Firebase authentication...');
+
+        // Attendre que Firebase soit initialisé
+        if (typeof firebase === 'undefined') {
+            console.warn('⚠ Firebase not available, skipping conversation loading');
+            return;
+        }
+
+        // Attendre l'authentification Firebase
+        const maxWaitTime = 5000; // 5 secondes max
+        const startTime = Date.now();
+
+        const waitForAuth = () => {
+            return new Promise((resolve) => {
+                const checkAuth = () => {
+                    const user = firebase.auth().currentUser;
+                    
+                    if (user) {
+                        console.log('✅ User authenticated, loading conversations...');
+                        resolve(true);
+                    } else if (Date.now() - startTime > maxWaitTime) {
+                        console.warn('⚠ Auth timeout, skipping conversation loading');
+                        resolve(false);
+                    } else {
+                        setTimeout(checkAuth, 200); // Vérifier toutes les 200ms
+                    }
+                };
+                
+                checkAuth();
+            });
+        };
+
+        const isAuthenticated = await waitForAuth();
+
+        if (!isAuthenticated) {
+            return;
+        }
+
+        // Attendre que ChatbotModals soit prêt
+        let attempts = 0;
+        const maxAttempts = 25; // 5 secondes (25 × 200ms)
+
+        const waitForModals = () => {
+            return new Promise((resolve) => {
+                const checkModals = () => {
+                    attempts++;
+                    
+                    if (window.chatbotModals && typeof window.chatbotModals.loadConversations === 'function') {
+                        console.log('✅ ChatbotModals ready');
+                        resolve(true);
+                    } else if (attempts >= maxAttempts) {
+                        console.warn('⚠ ChatbotModals timeout');
+                        resolve(false);
+                    } else {
+                        setTimeout(checkModals, 200);
+                    }
+                };
+                
+                checkModals();
+            });
+        };
+
+        const modalsReady = await waitForModals();
+
+        if (!modalsReady) {
+            console.warn('⚠ Could not load conversations (modals not ready)');
+            return;
+        }
+
+        // ✅ Charger les conversations
+        try {
+            console.log('📚 Loading conversations from Firebase...');
+            await this.loadConversationsFromFirebase();
+            
+            // ✅ Afficher la sidebar par défaut
+            if (this.elements.conversationsSidebar) {
+                this.elements.conversationsSidebar.classList.remove('collapsed');
+            }
+            
+            console.log('✅ Conversations loaded and sidebar displayed');
+        } catch (error) {
+            console.error('❌ Error loading conversations:', error);
+        }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2066,18 +2155,51 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📚 LOAD CONVERSATIONS
+    // 📚 LOAD CONVERSATIONS (AVEC LOGS)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async loadConversationsFromFirebase() {
-        if (!this.config.storage.useFirebase || !window.chatbotModals) {
+        if (!this.config.storage.useFirebase) {
+            console.log('ℹ Firebase storage disabled in config');
+            return;
+        }
+
+        if (!window.chatbotModals) {
+            console.warn('⚠ ChatbotModals not available');
             return;
         }
 
         try {
+            console.log('📡 Fetching conversations from Firebase...');
             const conversations = await window.chatbotModals.loadConversations();
+            
+            console.log(`✅ Retrieved ${conversations.length} conversations from Firebase`);
+            
+            if (conversations.length > 0) {
+                console.log('📋 Conversations:', conversations.map(c => ({
+                    id: c.id,
+                    messageCount: c.messageCount || c.messages?.length || 0,
+                    date: c.updatedAt?.toDate?.()?.toLocaleDateString() || 'Unknown'
+                })));
+            }
+            
             this.renderConversationsList(conversations);
+            
         } catch (error) {
             console.error('❌ Firebase load error:', error);
+            
+            // Afficher un message d'erreur dans la sidebar
+            if (this.elements.conversationsList) {
+                this.elements.conversationsList.innerHTML = `
+                    <div class="no-conversations" style="text-align: center; padding: 40px 20px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <p style="font-size: 14px; font-weight: 600;">Error loading conversations</p>
+                        <p style="font-size: 12px; margin-top: 8px;">${error.message}</p>
+                        <button onclick="window.location.reload()" style="margin-top: 16px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
         }
     }
 
