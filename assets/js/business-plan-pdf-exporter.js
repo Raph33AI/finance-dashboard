@@ -178,7 +178,7 @@ class BusinessPlanPDFExporter {
     <head>
         <meta charset="UTF-8">
         <title>AlphaVault AI - Business Plan</title>
-        <style>${getBusinessPlanCSS()}</style>
+        <style>${this.getBusinessPlanCSS()}</style>
     </head>
     <body>
 
@@ -662,7 +662,7 @@ class BusinessPlanPDFExporter {
             </table>
         </div>
 
-        ${includeSimulator ? createSimulatorSection() : ''}
+        ${includeSimulator ? this.createSimulatorSection() : ''}
 
         <!-- ════════════════════════════════════════════════════════════════
             SECTION: UNIT ECONOMICS
