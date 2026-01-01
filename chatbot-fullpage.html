@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-    <!-- <script>
-    if (!sessionStorage.getItem('access')) {
-        window.location.href = 'password-check.html';
-    }
-    </script> -->
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Alphy AI Assistant</title>
+    <title>Alphy AI Assistant - Financial Chatbot</title>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -71,13 +66,25 @@
 
     <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
     <script src="assets/js/access-control.js"></script>
+    
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
 </head>
 <body>
 
-    <!-- Theme Script -->
+    <!-- Theme Script (Load first for no flash) -->
     <script src="assets/js/theme.js"></script>
+
+    <!-- ✅ LOADING INDICATOR -->
+    <div id="chatbot-loading-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease;">
+        <div style="width: 80px; height: 80px; border: 6px solid rgba(255, 255, 255, 0.2); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="color: white; margin-top: 24px; font-size: 18px; font-weight: 600;">Loading Alphy AI...</p>
+        <style>
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    </div>
 
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
@@ -314,7 +321,7 @@
                         </a>
                     </div>
                     <div class='nav-submenu' style='display: block;'>
-                        <a href='admin-documentation.html' class='nav-link active'>
+                        <a href='admin-documentation.html' class='nav-link'>
                             <i class='fas fa-book-open'></i>
                             <span>Documentation</span>
                         </a>
@@ -543,13 +550,13 @@
     <script src='assets/js/sidebar.js'></script>
     
     <!-- ═══════════════════════════════════════════════════════════════
-     CHATBOT :: SECTION 1: CONFIGURATION
-     ═══════════════════════════════════════════════════════════════ -->
+         CHATBOT :: SECTION 1: CONFIGURATION
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="assets/js/chatbot-config.js"></script>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        SECTION 2: API CLIENT CLASSES (AVANT INITIALISATION)
-        ═══════════════════════════════════════════════════════════════ -->
+         SECTION 2: API CLIENT CLASSES (AVANT INITIALISATION)
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="assets/js/api-client.js"></script>
     <script src="assets/js/economic-data-client.js"></script>
     <script src="assets/js/sec-api-client.js"></script>
@@ -559,33 +566,35 @@
     <script src="assets/js/api-clients-init.js"></script>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        SECTION 3: AI & CHARTS
-        ═══════════════════════════════════════════════════════════════ -->
+         SECTION 3: AI & CHARTS
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-charts.js"></script>
 
     <!-- ═══════════════════════════════════════════════════════════════
-        SECTION 4: SPECIALIZED ANALYZERS (APRÈS LES CLIENTS API)
-        ═══════════════════════════════════════════════════════════════ -->
+         SECTION 4: SPECIALIZED ANALYZERS (OPTIONNELS - Commentés pour l'instant)
+         ═══════════════════════════════════════════════════════════════ -->
+    <!-- 
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-ma-analyzer.js"></script>
     <script src="assets/js/chatbot-forex-analyzer.js"></script>
     <script src="assets/js/chatbot-insider-analyzer.js"></script>
     <script src="assets/js/chatbot-budget-manager.js"></script>
     <script src="assets/js/chatbot-investment-manager.js"></script>
+    -->
 
     <!-- ═══════════════════════════════════════════════════════════════
-        SECTION 5: CORE CHATBOT
-        ═══════════════════════════════════════════════════════════════ -->
+         SECTION 5: CORE CHATBOT ENGINE
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="assets/js/chatbot-analytics.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
     
-    <!-- 7⃣ Particles Background -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         SECTION 6: UI ENHANCEMENTS
+         ═══════════════════════════════════════════════════════════════ -->
     <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- 8⃣ Chatbot Modals (Share & Settings) -->
     <script src="assets/js/chatbot-modals.js"></script>
 
     <!-- ============================================
@@ -663,6 +672,88 @@
             } else {
                 setTimeout(initMenu, 100);
             }
+        })();
+    </script>
+
+    <!-- ============================================
+         ✅ VERIFICATION & DIAGNOSTIC SCRIPT
+         ============================================ -->
+    <script>
+        /**
+         * Vérification finale de tous les composants
+         */
+        (function chatbotDiagnostic() {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔍 CHATBOT DIAGNOSTIC - Starting...');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+            const checks = {
+                'Three.js': typeof THREE !== 'undefined',
+                'Highcharts': typeof Highcharts !== 'undefined',
+                'Chart.js': typeof Chart !== 'undefined',
+                'html2canvas': typeof html2canvas !== 'undefined',
+                'jsPDF': typeof window.jspdf !== 'undefined',
+                'Firebase': typeof firebase !== 'undefined',
+                'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
+                'GeminiAIClient': typeof GeminiAIClient !== 'undefined',
+                'ChatbotAIEngine': typeof ChatbotAIEngine !== 'undefined',
+                'ChatbotUI': typeof ChatbotUI !== 'undefined',
+                'ChatbotCharts': typeof ChatbotCharts !== 'undefined',
+                'ChatbotSuggestions': typeof ChatbotSuggestions !== 'undefined',
+                'ChatbotAnalytics': typeof ChatbotAnalytics !== 'undefined',
+                'ChatbotModals': typeof ChatbotModals !== 'undefined'
+            };
+
+            console.log('📊 Libraries & Classes Status:');
+            console.table(checks);
+
+            const allLoaded = Object.values(checks).every(v => v === true);
+
+            if (allLoaded) {
+                console.log('✅ ALL COMPONENTS LOADED SUCCESSFULLY!');
+                console.log('🎉 Chatbot is ready to use!');
+                
+                // Hide loading screen
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('chatbot-loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 1000);
+            } else {
+                console.error('❌ SOME COMPONENTS ARE MISSING!');
+                const missing = Object.entries(checks).filter(([k, v]) => !v).map(([k]) => k);
+                console.error('Missing components:', missing);
+                
+                // Show error message
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('chatbot-loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.innerHTML = `
+                            <div style="text-align: center; color: white;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 60px; margin-bottom: 20px;"></i>
+                                <h2>Loading Error</h2>
+                                <p>Some components failed to load:</p>
+                                <ul style="list-style: none; padding: 0;">
+                                    ${missing.map(m => `<li>❌ ${m}</li>`).join('')}
+                                </ul>
+                                <p style="margin-top: 20px;">Please refresh the page or check the console (F12)</p>
+                            </div>
+                        `;
+                    }
+                }, 1000);
+            }
+
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+            // Export diagnostic function globally
+            window.runChatbotDiagnostic = () => {
+                console.table(checks);
+                return checks;
+            };
         })();
     </script>
 
