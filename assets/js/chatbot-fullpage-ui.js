@@ -1815,29 +1815,64 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔄 TOGGLE CONVERSATIONS SIDEBAR
+    // 🔄 TOGGLE CONVERSATIONS SIDEBAR (CORRECTION FINALE)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     toggleConversationsSidebar(collapse) {
         const sidebar = this.elements.conversationsSidebar;
         const reopenBtn = this.elements.conversationsReopenBtn;
         const toggleBtn = this.elements.conversationsToggle;
         
-        if (!sidebar) return;
+        if (!sidebar) {
+            console.error('❌ Sidebar element not found');
+            return;
+        }
+        
+        console.log('🔄 Toggling sidebar:', collapse ? 'CLOSE' : 'OPEN');
         
         if (collapse) {
-            // Fermer la sidebar
+            // ✅ Fermer la sidebar
             sidebar.classList.add('collapsed');
-            if (reopenBtn) reopenBtn.classList.add('visible');
+            
+            // ✅ Afficher le bouton de réouverture
+            if (reopenBtn) {
+                reopenBtn.classList.add('visible');
+                reopenBtn.style.opacity = '1';
+                reopenBtn.style.pointerEvents = 'all';
+                console.log('✅ Reopen button shown');
+            } else {
+                console.warn('⚠ Reopen button element not found');
+                
+                // ✅ Créer le bouton s'il n'existe pas
+                const newBtn = document.createElement('button');
+                newBtn.id = 'conversations-reopen-btn';
+                newBtn.className = 'conversations-reopen-btn visible';
+                newBtn.title = 'Show conversations';
+                newBtn.innerHTML = '<i class="fas fa-history"></i>';
+                newBtn.addEventListener('click', () => this.toggleConversationsSidebar(false));
+                document.body.appendChild(newBtn);
+                
+                // Mettre à jour la référence
+                this.elements.conversationsReopenBtn = newBtn;
+                console.log('✅ Reopen button created dynamically');
+            }
             
             // Changer l'icône du toggle
             const icon = toggleBtn?.querySelector('i');
             if (icon) icon.className = 'fas fa-chevron-right';
             
             console.log('📕 Conversations sidebar collapsed');
+            
         } else {
-            // Ouvrir la sidebar
+            // ✅ Ouvrir la sidebar
             sidebar.classList.remove('collapsed');
-            if (reopenBtn) reopenBtn.classList.remove('visible');
+            
+            // ✅ Cacher le bouton de réouverture
+            if (reopenBtn) {
+                reopenBtn.classList.remove('visible');
+                reopenBtn.style.opacity = '0';
+                reopenBtn.style.pointerEvents = 'none';
+                console.log('✅ Reopen button hidden');
+            }
             
             // Changer l'icône du toggle
             const icon = toggleBtn?.querySelector('i');
