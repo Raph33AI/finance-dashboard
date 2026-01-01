@@ -1,6 +1,6 @@
 /* ============================================
    CHATBOT FULL PAGE - VERSION MOBILE OPTIMISÉE ✅
-   100% Responsive & Touch-Friendlyy
+   100% Responsive & Touch-Friendly
    ============================================ */
 
 :root {
@@ -50,13 +50,13 @@ body {
     background: transparent !important;
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* ✅ Prevent horizontal scroll */
+    overflow-x: hidden;
 }
 
 .layout-wrapper {
     background: transparent !important;
     width: 100%;
-    max-width: 100vw; /* ✅ Prevent overflow */
+    max-width: 100vw;
     overflow-x: hidden;
 }
 
@@ -79,7 +79,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 15;
-    padding: 12px 16px; /* ✅ Optimized for mobile */
+    padding: 12px 16px;
 }
 
 .header-status {
@@ -110,7 +110,7 @@ body {
 }
 
 .header-action-btn {
-    min-width: 44px; /* ✅ Touch-friendly */
+    min-width: 44px;
     min-height: 44px;
     width: 44px;
     height: 44px;
@@ -193,7 +193,7 @@ body {
 }
 
 .conversations-toggle {
-    min-width: 44px; /* ✅ Touch-friendly */
+    min-width: 44px;
     min-height: 44px;
     width: 44px;
     height: 44px;
@@ -212,46 +212,6 @@ body {
     background: #e2e8f0;
     transform: scale(1.05);
     box-shadow: var(--shadow-sm);
-}
-
-.sidebar-reopen-btn {
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    min-width: 44px; /* ✅ Touch-friendly */
-    min-height: 60px;
-    width: 40px;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--chatbot-border);
-    border-left: none;
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    color: var(--neon-purple);
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
-    transition: all var(--transition-smooth);
-    opacity: 0;
-    pointer-events: none;
-}
-
-.conversations-sidebar.collapsed ~ .chat-messages-area .sidebar-reopen-btn,
-body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.sidebar-reopen-btn:hover {
-    background: rgba(237, 233, 254, 0.95);
-    border-color: var(--neon-purple);
-    width: 50px;
-    box-shadow: 4px 0 16px rgba(118, 75, 162, 0.2);
 }
 
 .conversations-list {
@@ -290,15 +250,17 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 .conversation-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: all var(--transition-fast);
-    margin-bottom: 4px;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    min-height: 44px; /* ✅ Touch-friendly */
+    min-height: 44px;
 }
 
 .conversation-item::before {
@@ -314,7 +276,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .conversation-item:hover {
-    background: rgba(241, 245, 249, 0.8);
+    background: #e2e8f0;
     transform: translateX(4px);
 }
 
@@ -323,11 +285,52 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .conversation-item.active {
-    background: #ede9fe;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .conversation-item.active::before {
     transform: scaleY(1);
+}
+
+.conversation-item.active .conversation-preview,
+.conversation-item.active .conversation-meta {
+    color: white;
+}
+
+.conversation-item.active .conversation-date i,
+.conversation-item.active .conversation-count i {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.conversation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.conversation-preview {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.conversation-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.conversation-date i,
+.conversation-count i {
+    margin-right: 4px;
+    color: #94a3b8;
 }
 
 .conversation-title {
@@ -340,28 +343,101 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     font-weight: 500;
 }
 
-.conversation-delete {
-    min-width: 44px; /* ✅ Touch-friendly */
+.conversation-delete,
+.conversation-delete-btn {
+    min-width: 44px;
     min-height: 44px;
     width: 44px;
     height: 44px;
     border: none;
     background: transparent;
-    color: var(--chatbot-text-secondary);
+    color: #ef4444;
     font-size: 14px;
     cursor: pointer;
     opacity: 0;
     transition: all var(--transition-fast);
-    border-radius: 4px;
+    border-radius: 6px;
+    padding: 8px;
+    flex-shrink: 0;
 }
 
-.conversation-item:hover .conversation-delete {
+.conversation-item:hover .conversation-delete,
+.conversation-item:hover .conversation-delete-btn {
     opacity: 1;
 }
 
-.conversation-delete:hover {
-    color: #ef4444;
+.conversation-delete:hover,
+.conversation-delete-btn:hover {
     background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+.conversation-item.active .conversation-delete,
+.conversation-item.active .conversation-delete-btn {
+    color: white;
+    opacity: 1;
+}
+
+.conversation-item.active .conversation-delete:hover,
+.conversation-item.active .conversation-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BOUTON POUR ROUVRIR LA SIDEBAR
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.conversations-reopen-btn {
+    position: fixed;
+    left: 20px;
+    top: 120px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
+}
+
+.conversations-reopen-btn.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+}
+
+.conversations-reopen-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.conversations-reopen-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.conversations-reopen-btn.visible {
+    animation: slideInFromLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ============================================
@@ -377,20 +453,20 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     position: relative;
     transition: all var(--transition-smooth);
     width: 100%;
-    max-width: 100vw; /* ✅ Prevent overflow */
+    max-width: 100vw;
 }
 
 .chatbot-messages-wrapper {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden; /* ✅ Prevent horizontal scroll */
+    overflow-x: hidden;
     background: transparent;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* ✅ Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
 }
 
 .chatbot-messages-wrapper::-webkit-scrollbar {
-    width: 6px; /* ✅ Thinner scrollbar on mobile */
+    width: 6px;
 }
 
 .chatbot-messages-wrapper::-webkit-scrollbar-track {
@@ -421,7 +497,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    ============================================ */
 .welcome-screen {
     text-align: center;
-    padding: 20px 16px; /* ✅ Reduced padding */
+    padding: 20px 16px;
     animation: fade-in-up 0.8s ease-out;
     width: 100%;
     max-width: 100%;
@@ -443,7 +519,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .welcome-title {
-    font-size: clamp(24px, 6vw, 42px); /* ✅ Fluid typography */
+    font-size: clamp(24px, 6vw, 42px);
     font-weight: 800;
     margin-bottom: 12px;
     margin-top: 0 !important;
@@ -457,9 +533,9 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .welcome-subtitle {
-    font-size: clamp(14px, 3.5vw, 18px); /* ✅ Fluid typography */
+    font-size: clamp(14px, 3.5vw, 18px);
     color: var(--chatbot-text-secondary);
-    margin-bottom: 30px; /* ✅ Reduced spacing */
+    margin-bottom: 30px;
     margin-top: 0 !important;
     padding: 0 10px;
     word-wrap: break-word;
@@ -471,15 +547,15 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    ============================================ */
 .welcome-features {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* ✅ Smaller min-width */
-    gap: 12px; /* ✅ Reduced gap */
-    margin-bottom: 30px; /* ✅ Reduced margin */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 30px;
     padding: 0 10px;
     max-width: 100%;
 }
 
 .feature-card {
-    padding: 16px; /* ✅ Reduced padding */
+    padding: 16px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     border: 1px solid var(--chatbot-border);
@@ -496,19 +572,19 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .feature-icon {
-    font-size: clamp(28px, 7vw, 36px); /* ✅ Fluid size */
+    font-size: clamp(28px, 7vw, 36px);
     margin-bottom: 8px;
 }
 
 .feature-title {
-    font-size: clamp(14px, 3.5vw, 16px); /* ✅ Fluid size */
+    font-size: clamp(14px, 3.5vw, 16px);
     font-weight: 700;
     color: var(--chatbot-text);
     margin-bottom: 6px;
 }
 
 .feature-desc {
-    font-size: clamp(12px, 3vw, 13px); /* ✅ Fluid size */
+    font-size: clamp(12px, 3vw, 13px);
     color: var(--chatbot-text-secondary);
     line-height: 1.5;
 }
@@ -517,33 +593,33 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    WELCOME SUGGESTIONS
    ============================================ */
 .welcome-suggestions {
-    margin-top: 20px; /* ✅ Reduced margin */
+    margin-top: 20px;
     padding: 0 10px;
     max-width: 100%;
 }
 
 .suggestions-title {
-    font-size: clamp(18px, 4.5vw, 22px); /* ✅ Fluid size */
+    font-size: clamp(18px, 4.5vw, 22px);
     font-weight: 700;
-    margin-bottom: 16px; /* ✅ Reduced margin */
+    margin-bottom: 16px;
     color: var(--chatbot-text);
 }
 
 .welcome-suggestion-grid {
     display: grid;
-    grid-template-columns: 1fr; /* ✅ Stack on mobile by default */
-    gap: 12px; /* ✅ Reduced gap */
+    grid-template-columns: 1fr;
+    gap: 12px;
     max-width: 100%;
 }
 
 .welcome-suggestion-btn {
-    padding: 14px 16px; /* ✅ Reduced padding */
+    padding: 14px 16px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     border: 1px solid var(--chatbot-border);
     border-radius: var(--radius-md);
     color: var(--chatbot-text);
-    font-size: clamp(13px, 3.2vw, 14px); /* ✅ Fluid size */
+    font-size: clamp(13px, 3.2vw, 14px);
     text-align: left;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -552,7 +628,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     gap: 12px;
     box-shadow: var(--shadow-sm);
     width: 100%;
-    min-height: 44px; /* ✅ Touch-friendly */
+    min-height: 44px;
 }
 
 .welcome-suggestion-btn:hover {
@@ -562,7 +638,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .suggestion-icon {
-    font-size: clamp(18px, 4.5vw, 22px); /* ✅ Fluid size */
+    font-size: clamp(18px, 4.5vw, 22px);
     flex-shrink: 0;
 }
 
@@ -576,10 +652,10 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    ============================================ */
 .message {
     display: flex;
-    gap: 12px; /* ✅ Reduced gap */
-    margin-bottom: 24px; /* ✅ Reduced margin */
+    gap: 12px;
+    margin-bottom: 24px;
     animation: message-slide-in 0.5s ease-out;
-    max-width: 100%; /* ✅ Prevent overflow */
+    max-width: 100%;
 }
 
 @keyframes message-slide-in {
@@ -600,7 +676,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 .message-avatar {
     width: 40px;
     height: 40px;
-    border-radius: 50%; /* ✅ Already round */
+    border-radius: 50%;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -608,7 +684,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     font-size: 20px;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: hidden; /* ✅ Ensure content respects border-radius */
+    overflow: hidden;
 }
 
 .message-avatar.bot-avatar {
@@ -621,23 +697,22 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     border: 3px solid rgba(255, 255, 255, 0.95);
 }
 
-/* ✅ CORRECTION: Photo de profil utilisateur ronde */
 .user-avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    border-radius: 50%; /* ✅ Force l'image à être ronde */
+    border-radius: 50%;
 }
 
 .message-content {
     flex: 1;
-    max-width: calc(100% - 52px); /* ✅ Account for avatar + gap */
-    min-width: 0; /* ✅ Allow flex items to shrink */
+    max-width: calc(100% - 52px);
+    min-width: 0;
 }
 
 .message-bubble {
-    padding: 14px 16px; /* ✅ Reduced padding */
+    padding: 14px 16px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--chatbot-border);
     box-shadow: var(--shadow-sm);
@@ -660,7 +735,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .message-text {
-    font-size: clamp(14px, 3.5vw, 15px); /* ✅ Fluid size */
+    font-size: clamp(14px, 3.5vw, 15px);
     line-height: 1.6;
     color: var(--chatbot-text);
     word-wrap: break-word;
@@ -672,12 +747,39 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     padding: 2px 6px;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
-    font-size: clamp(12px, 3vw, 14px); /* ✅ Fluid size */
-    word-break: break-all; /* ✅ Prevent code overflow */
+    font-size: clamp(12px, 3vw, 14px);
+    word-break: break-all;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3 {
+    margin: 16px 0 8px 0;
+}
+
+.message-text ul {
+    margin: 12px 0;
+    padding-left: 24px;
+    line-height: 1.8;
+}
+
+.message-text li {
+    margin: 6px 0;
+}
+
+.message-text hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 20px 0;
+}
+
+.message-text strong {
+    font-weight: 700;
+    color: var(--chatbot-text);
 }
 
 .message-time {
-    font-size: clamp(11px, 2.8vw, 12px); /* ✅ Fluid size */
+    font-size: clamp(11px, 2.8vw, 12px);
     color: var(--chatbot-text-secondary);
     margin-top: 6px;
     display: block;
@@ -688,6 +790,11 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     display: flex;
     gap: 6px;
     padding: 12px 0;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 6px;
 }
 
 .typing-dot {
@@ -717,41 +824,41 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    INPUT AREA
    ============================================ */
 .chatbot-input-area {
-    padding: 16px 16px 20px; /* ✅ Optimized padding */
+    padding: 16px 16px 20px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(180%);
     border-top: 1px solid var(--chatbot-border);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-    max-width: 100vw; /* ✅ Prevent overflow */
+    max-width: 100vw;
 }
 
 .input-suggestions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 12px; /* ✅ Reduced margin */
+    margin-bottom: 12px;
     min-height: 32px;
-    overflow-x: auto; /* ✅ Allow horizontal scroll if needed */
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Hide scrollbar */
+    scrollbar-width: none;
 }
 
 .input-suggestions::-webkit-scrollbar {
-    display: none; /* Hide scrollbar */
+    display: none;
 }
 
 .input-suggestion-chip {
-    padding: 8px 14px; /* ✅ Reduced padding */
+    padding: 8px 14px;
     background: rgba(241, 245, 249, 0.9);
     border: 1px solid var(--chatbot-border);
     border-radius: 20px;
     color: var(--neon-blue);
-    font-size: clamp(12px, 3vw, 13px); /* ✅ Fluid size */
+    font-size: clamp(12px, 3vw, 13px);
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
     font-weight: 500;
-    flex-shrink: 0; /* ✅ Prevent shrinking */
+    flex-shrink: 0;
 }
 
 .input-suggestion-chip:hover {
@@ -763,7 +870,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 
 .input-container {
     display: flex;
-    gap: 10px; /* ✅ Reduced gap */
+    gap: 10px;
     align-items: flex-end;
     max-width: 900px;
     margin: 0 auto;
@@ -779,19 +886,19 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     position: relative;
     display: flex;
     align-items: center;
-    min-width: 0; /* ✅ Allow flex items to shrink */
+    min-width: 0;
 }
 
 .chatbot-input {
     width: 100%;
-    min-height: 48px; /* ✅ Touch-friendly height */
-    max-height: 150px; /* ✅ Reduced max-height for mobile */
-    padding: 12px 40px 12px 16px; /* ✅ Optimized padding */
+    min-height: 48px;
+    max-height: 150px;
+    padding: 12px 40px 12px 16px;
     background: rgba(255, 255, 255, 0.98);
     border: 2px solid var(--chatbot-border);
-    border-radius: 24px; /* ✅ Slightly reduced radius */
+    border-radius: 24px;
     color: var(--chatbot-text);
-    font-size: clamp(14px, 3.5vw, 15px); /* ✅ Fluid size */
+    font-size: clamp(14px, 3.5vw, 15px);
     font-family: 'Inter', sans-serif;
     resize: none;
     outline: none;
@@ -814,7 +921,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    min-width: 32px; /* ✅ Touch-friendly */
+    min-width: 32px;
     min-height: 32px;
     width: 32px;
     height: 32px;
@@ -841,7 +948,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .chatbot-send-btn {
-    min-width: 48px; /* ✅ Touch-friendly */
+    min-width: 48px;
     min-height: 48px;
     width: 48px;
     height: 48px;
@@ -878,13 +985,13 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px; /* ✅ Reduced margin */
+    margin-top: 10px;
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     padding: 0 4px;
     transition: max-width var(--transition-smooth);
-    flex-wrap: wrap; /* ✅ Allow wrapping */
+    flex-wrap: wrap;
     gap: 8px;
 }
 
@@ -893,7 +1000,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .input-hint {
-    font-size: clamp(11px, 2.8vw, 12px); /* ✅ Fluid size */
+    font-size: clamp(11px, 2.8vw, 12px);
     color: var(--chatbot-text-secondary);
     display: flex;
     align-items: center;
@@ -901,7 +1008,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .input-counter {
-    font-size: clamp(11px, 2.8vw, 12px); /* ✅ Fluid size */
+    font-size: clamp(11px, 2.8vw, 12px);
     color: var(--chatbot-text-secondary);
     font-variant-numeric: tabular-nums;
 }
@@ -910,30 +1017,30 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    CHART CONTAINERS
    ============================================ */
 .chart-container {
-    margin: 16px 0; /* ✅ Reduced margin */
-    padding: 16px; /* ✅ Reduced padding */
+    margin: 16px 0;
+    padding: 16px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border: 1px solid var(--chatbot-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    overflow-x: auto; /* ✅ Allow horizontal scroll */
+    overflow-x: auto;
     max-width: 100%;
 }
 
 .chart-header {
     display: flex;
-    flex-wrap: wrap; /* ✅ Allow wrapping */
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px; /* ✅ Reduced margin */
+    margin-bottom: 14px;
     padding-bottom: 12px;
     border-bottom: 2px solid rgba(102, 126, 234, 0.2);
 }
 
 .chart-title {
-    font-size: clamp(14px, 3.5vw, 16px); /* ✅ Fluid size */
+    font-size: clamp(14px, 3.5vw, 16px);
     font-weight: 700;
     color: var(--chatbot-text);
 }
@@ -941,17 +1048,17 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 .chart-actions {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap; /* ✅ Allow wrapping */
+    flex-wrap: wrap;
 }
 
 .chart-btn {
-    padding: 8px 14px; /* ✅ Touch-friendly */
+    padding: 8px 14px;
     min-height: 36px;
     background: rgba(241, 245, 249, 0.9);
     border: 1px solid var(--chatbot-border);
     border-radius: var(--radius-sm);
     color: var(--chatbot-text);
-    font-size: clamp(12px, 3vw, 13px); /* ✅ Fluid size */
+    font-size: clamp(12px, 3vw, 13px);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -963,7 +1070,7 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 
 .chart-canvas-wrapper {
     position: relative;
-    height: 300px; /* ✅ Reduced height for mobile */
+    height: 300px;
     width: 100%;
     max-width: 100%;
 }
@@ -972,15 +1079,15 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    VISUAL CARDS & METRICS
    ============================================ */
 .visual-cards-container {
-    margin: 20px 0; /* ✅ Reduced margin */
+    margin: 20px 0;
     animation: fade-in-up 0.5s ease-out;
     max-width: 100%;
 }
 
 .metrics-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* ✅ Smaller min-width */
-    gap: 12px; /* ✅ Reduced gap */
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
     margin-bottom: 20px;
 }
 
@@ -989,10 +1096,10 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     backdrop-filter: blur(10px);
     border: 1px solid var(--chatbot-border);
     border-radius: var(--radius-lg);
-    padding: 16px; /* ✅ Reduced padding */
+    padding: 16px;
     display: flex;
     align-items: center;
-    gap: 12px; /* ✅ Reduced gap */
+    gap: 12px;
     transition: all var(--transition-base);
     box-shadow: var(--shadow-sm);
 }
@@ -1004,12 +1111,12 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .metric-card-icon {
-    font-size: clamp(24px, 6vw, 32px); /* ✅ Fluid size */
+    font-size: clamp(24px, 6vw, 32px);
     flex-shrink: 0;
 }
 
 .metric-card-title {
-    font-size: clamp(10px, 2.5vw, 12px); /* ✅ Fluid size */
+    font-size: clamp(10px, 2.5vw, 12px);
     font-weight: 600;
     color: var(--chatbot-text-secondary);
     text-transform: uppercase;
@@ -1018,14 +1125,14 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 }
 
 .metric-card-value {
-    font-size: clamp(18px, 4.5vw, 24px); /* ✅ Fluid size */
+    font-size: clamp(18px, 4.5vw, 24px);
     font-weight: 800;
     color: var(--chatbot-text);
     line-height: 1.2;
 }
 
 .metric-card-change {
-    font-size: clamp(12px, 3vw, 14px); /* ✅ Fluid size */
+    font-size: clamp(12px, 3vw, 14px);
     font-weight: 700;
     margin-top: 4px;
 }
@@ -1040,8 +1147,8 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 
 .comparison-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* ✅ Smaller min-width */
-    gap: 12px; /* ✅ Reduced gap */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
 }
 
 .comparison-card {
@@ -1049,19 +1156,19 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     backdrop-filter: blur(10px);
     border: 2px solid var(--chatbot-border);
     border-radius: var(--radius-lg);
-    padding: 18px; /* ✅ Reduced padding */
+    padding: 18px;
     transition: all var(--transition-base);
     box-shadow: var(--shadow-sm);
 }
 
 .comparison-card-symbol {
-    font-size: clamp(16px, 4vw, 20px); /* ✅ Fluid size */
+    font-size: clamp(16px, 4vw, 20px);
     font-weight: 800;
     color: var(--chatbot-text);
 }
 
 .comparison-card-price {
-    font-size: clamp(20px, 5vw, 28px); /* ✅ Fluid size */
+    font-size: clamp(20px, 5vw, 28px);
     font-weight: 800;
     color: var(--chatbot-text);
     margin-bottom: 14px;
@@ -1076,10 +1183,10 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     backdrop-filter: blur(10px);
     border: 1px solid var(--chatbot-border);
     border-radius: var(--radius-lg);
-    padding: 16px; /* ✅ Reduced padding */
+    padding: 16px;
     box-shadow: var(--shadow-sm);
     animation: fade-in-up 0.5s ease-out;
-    overflow-x: auto; /* ✅ Allow horizontal scroll */
+    overflow-x: auto;
     max-width: 100%;
 }
 
@@ -1091,13 +1198,13 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 .metrics-comparison-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: clamp(12px, 3vw, 14px); /* ✅ Fluid size */
-    min-width: 500px; /* ✅ Minimum width to prevent cramping */
+    font-size: clamp(12px, 3vw, 14px);
+    min-width: 500px;
 }
 
 .metrics-comparison-table th,
 .metrics-comparison-table td {
-    padding: 10px 12px; /* ✅ Reduced padding */
+    padding: 10px 12px;
 }
 
 /* ============================================
@@ -1118,7 +1225,6 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
    RESPONSIVE DESIGN - MOBILE (TABLET PORTRAIT)
    ============================================ */
 @media (max-width: 768px) {
-    /* ✅ CORRECTION: Sidebar accessible en overlay sur mobile */
     .conversations-sidebar {
         position: fixed;
         left: 0;
@@ -1127,27 +1233,23 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         z-index: 100;
         transform: translateX(-100%);
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
-        opacity: 1; /* ✅ Toujours visible quand ouverte */
-        pointer-events: all; /* ✅ Toujours interactive */
+        opacity: 1;
+        pointer-events: all;
     }
     
-    /* ✅ CORRECTION: Classe pour ouvrir la sidebar sur mobile */
     .conversations-sidebar.mobile-open,
     .conversations-sidebar:not(.collapsed) {
         transform: translateX(0);
     }
     
-    /* ✅ Bouton pour rouvrir la sidebar */
-    .sidebar-reopen-btn {
-        top: 120px; /* ✅ Better position */
+    .conversations-reopen-btn {
+        top: 120px;
         height: 56px;
         width: 36px;
         font-size: 16px;
-        opacity: 1 !important; /* ✅ Toujours visible sur mobile */
-        pointer-events: all !important;
+        left: 12px;
     }
     
-    /* ✅ CORRECTION: Masquer "Real-Time Data" sur mobile */
     .header-status {
         display: none !important;
     }
@@ -1175,11 +1277,11 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     }
     
     .metrics-cards-grid {
-        grid-template-columns: 1fr; /* ✅ Stack on mobile */
+        grid-template-columns: 1fr;
     }
     
     .comparison-cards-grid {
-        grid-template-columns: 1fr; /* ✅ Stack on mobile */
+        grid-template-columns: 1fr;
     }
     
     .chart-canvas-wrapper {
@@ -1226,8 +1328,6 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         padding: 8px 10px;
     }
     
-    /* ✅ CORRECTION: "Real-Time Data" déjà masqué au niveau @768px */
-    
     .header-action-btn {
         width: 40px;
         height: 40px;
@@ -1270,11 +1370,12 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         gap: 10px;
     }
     
-    .sidebar-reopen-btn {
+    .conversations-reopen-btn {
         width: 32px;
         height: 48px;
         font-size: 14px;
         top: 100px;
+        left: 10px;
     }
     
     .message {
@@ -1385,7 +1486,8 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
         font-size: 13px;
     }
     
-    .conversation-delete {
+    .conversation-delete,
+    .conversation-delete-btn {
         width: 40px;
         height: 40px;
         min-width: 40px;
@@ -1397,12 +1499,20 @@ body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
 /* ============================================
    DARK MODE
    ============================================ */
+body.dark-mode .particles-background {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
 body.dark-mode .chatbot-top-header,
 body.dark-mode .conversations-sidebar,
 body.dark-mode .chat-messages-area,
 body.dark-mode .chatbot-input-area {
     background: rgba(15, 23, 42, 0.95);
     border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .conversations-header {
+    background: rgba(15, 23, 42, 0.8);
 }
 
 body.dark-mode .message-bubble {
@@ -1424,158 +1534,35 @@ body.dark-mode .metrics-table-container {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-body.dark-mode .chatbot-text,
-body.dark-mode .welcome-title,
-body.dark-mode .chart-title,
-body.dark-mode .metric-card-value {
-    color: #f1f5f9;
+body.dark-mode .welcome-title {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-body.dark-mode .user-avatar,
-body.dark-mode .bot-avatar {
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* ============================================
-   PERFORMANCE OPTIMIZATIONS
-   ============================================ */
-* {
-    -webkit-tap-highlight-color: transparent; /* ✅ Remove tap highlight on mobile */
-}
-
-.chatbot-messages-wrapper,
-.conversations-list,
-.input-suggestions,
-.metrics-table-wrapper {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* ✅ Smooth scrolling on iOS */
-}
-
-/* ✅ GPU acceleration for animations */
-.message,
-.feature-card,
-.metric-card,
-.comparison-card,
-.welcome-suggestion-btn,
-.conversation-item,
-.header-action-btn,
-.chatbot-send-btn {
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-}
-
-/* ✅ Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CONVERSATIONS SIDEBAR - AMÉLIORATIONS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.conversation-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.conversation-item:hover {
-    background: #e2e8f0;
-    transform: translateX(4px);
-}
-
-.conversation-item.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.conversation-item.active .conversation-preview,
-.conversation-item.active .conversation-meta {
-    color: white;
-}
-
-.conversation-item.active .conversation-date i,
-.conversation-item.active .conversation-count i {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.conversation-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.conversation-preview {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.conversation-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 11px;
-    color: #64748b;
-}
-
-.conversation-date i,
-.conversation-count i {
-    margin-right: 4px;
+body.dark-mode .welcome-subtitle,
+body.dark-mode .feature-desc,
+body.dark-mode .suggestion-text {
     color: #94a3b8;
 }
 
-/* ✅ BOUTON DE SUPPRESSION */
-.conversation-delete-btn {
-    background: transparent;
-    border: none;
-    color: #ef4444;
-    font-size: 14px;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
+body.dark-mode .feature-title,
+body.dark-mode .chart-title,
+body.dark-mode .metric-card-value,
+body.dark-mode .message-text {
+    color: #f1f5f9;
 }
 
-.conversation-item:hover .conversation-delete-btn {
-    opacity: 1;
+body.dark-mode .conversations-reopen-btn {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4);
 }
 
-.conversation-delete-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    transform: scale(1.1);
+body.dark-mode .conversations-reopen-btn:hover {
+    box-shadow: 0 6px 20px rgba(129, 140, 248, 0.6);
 }
 
-.conversation-item.active .conversation-delete-btn {
-    color: white;
-    opacity: 1;
-}
-
-.conversation-item.active .conversation-delete-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* Dark mode */
 body.dark-mode .conversation-item {
     background: #1e293b;
 }
@@ -1592,76 +1579,40 @@ body.dark-mode .conversation-meta {
     color: #94a3b8;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BOUTON POUR ROUVRIR LA SIDEBAR
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.conversations-reopen-btn {
-    position: fixed;
-    left: 20px;
-    top: 100px;
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
-    z-index: 1000;
-    display: none; /* Caché par défaut */
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+* {
+    -webkit-tap-highlight-color: transparent;
 }
 
-.conversations-reopen-btn.visible {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.chatbot-messages-wrapper,
+.conversations-list,
+.input-suggestions,
+.metrics-table-wrapper {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
-.conversations-reopen-btn:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+.message,
+.feature-card,
+.metric-card,
+.comparison-card,
+.welcome-suggestion-btn,
+.conversation-item,
+.header-action-btn,
+.chatbot-send-btn {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
-.conversations-reopen-btn:active {
-    transform: translateY(0) scale(0.95);
-}
-
-/* Animation d'apparition */
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.conversations-reopen-btn.visible {
-    animation: slideInLeft 0.3s ease;
-}
-
-/* Dark mode */
-body.dark-mode .conversations-reopen-btn {
-    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4);
-}
-
-body.dark-mode .conversations-reopen-btn:hover {
-    box-shadow: 0 6px 20px rgba(129, 140, 248, 0.6);
-}
-
-/* Responsive - Cache le bouton sur mobile */
-@media (max-width: 768px) {
-    .conversations-reopen-btn {
-        left: 12px;
-        top: 80px;
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }
