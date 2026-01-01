@@ -1,7 +1,8 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * BUSINESS PLAN PDF EXPORTER v9.0 (html2pdf.js)
- * Génère le PDF côté client avec html2pdf.js
+ * BUSINESS PLAN PDF EXPORTER v10.0 (html2pdf.js)
+ * Génère le PDF côté client avec pagination optimisée
+ * Version sans emojis - Formatage professionnel
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -37,15 +38,15 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📧 GÉNÉRER PDF AVEC html2pdf.js ET ENVOYER
+     * GÉNÉRER PDF AVEC html2pdf.js ET ENVOYER
      */
     async sendPDF() {
         try {
-            console.log('🚀 Initiating PDF export...');
+            console.log('Initiating PDF export...');
             
             const emails = this.getEmails();
             if (emails.length === 0) {
-                this.showNotification('⚠ No recipients', 'Please enter at least one email address.', 'warning');
+                this.showNotification('No recipients', 'Please enter at least one email address.', 'warning');
                 return;
             }
 
@@ -55,21 +56,20 @@ class BusinessPlanPDFExporter {
 
             this.showProgress(0, 'Preparing document...');
 
-            // ✅ CRÉER LE HTML
+            // CRÉER LE HTML
             const htmlContent = this.createBusinessPlanHTML(includeSimulator);
-            console.log('📝 HTML length:', htmlContent.length, 'characters');
+            console.log('HTML length:', htmlContent.length, 'characters');
 
             this.showProgress(20, 'Generating PDF with html2pdf.js...');
 
-            // ✅ GÉNÉRER PDF
+            // GÉNÉRER PDF
             const pdfBlob = await this.generatePDFWithHtml2Pdf(htmlContent);
-            console.log('📦 PDF Blob size:', pdfBlob.size, 'bytes');
+            console.log('PDF Blob size:', pdfBlob.size, 'bytes');
             
-            // ⚠ VÉRIFIER SI LE PDF EST TROP PETIT (probablement vide)
+            // VÉRIFIER SI LE PDF EST TROP PETIT
             if (pdfBlob.size < 5000) {
-                console.warn('⚠ PDF size is suspiciously small! Might be blank.');
+                console.warn('PDF size is suspiciously small! Might be blank.');
                 
-                // Option : télécharger le PDF localement pour vérifier
                 const url = URL.createObjectURL(pdfBlob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -82,13 +82,13 @@ class BusinessPlanPDFExporter {
 
             this.showProgress(60, 'Converting to Base64...');
 
-            // ✅ CONVERTIR EN BASE64
+            // CONVERTIR EN BASE64
             const pdfBase64 = await this.blobToBase64(pdfBlob);
-            console.log('📊 Base64 length:', pdfBase64.length, 'characters');
+            console.log('Base64 length:', pdfBase64.length, 'characters');
 
             this.showProgress(70, 'Sending to server...');
 
-            // ✅ ENVOYER AU WORKER
+            // ENVOYER AU WORKER
             const response = await fetch(this.workerUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -112,22 +112,22 @@ class BusinessPlanPDFExporter {
 
             this.closeModal();
             this.hideProgress();
-            this.showNotification('✅ PDF Sent!', `Sent to ${emails.length} recipient(s).`, 'success');
+            this.showNotification('PDF Sent!', `Sent to ${emails.length} recipient(s).`, 'success');
 
         } catch (error) {
-            console.error('❌ PDF Error:', error);
+            console.error('PDF Error:', error);
             this.hideProgress();
-            this.showNotification('❌ Error', error.message, 'error');
+            this.showNotification('Error', error.message, 'error');
         }
     }
 
     /**
-     * 🎨 GÉNÉRER PDF AVEC html2pdf.js (VERSION AMÉLIORÉE)
+     * GÉNÉRER PDF AVEC html2pdf.js (VERSION OPTIMISÉE PAGINATION)
      */
     async generatePDFWithHtml2Pdf(htmlContent) {
-        console.log('📄 Creating temporary container...');
+        console.log('Creating temporary container...');
         
-        // ✅ Créer un conteneur VISIBLE mais caché par overflow
+        // Créer un conteneur VISIBLE mais caché
         const container = document.createElement('div');
         container.id = 'pdf-temp-container';
         container.style.cssText = `
@@ -135,7 +135,6 @@ class BusinessPlanPDFExporter {
             top: 0;
             left: 0;
             width: 210mm;
-            height: 297mm;
             overflow: hidden;
             z-index: -9999;
             opacity: 0;
@@ -154,84 +153,89 @@ class BusinessPlanPDFExporter {
         document.body.appendChild(container);
 
         try {
-            console.log('⏳ Waiting for DOM to render...');
+            console.log('Waiting for DOM to render...');
             
-            // ✅ ATTENDRE que le navigateur rende le DOM
+            // ATTENDRE que le navigateur rende le DOM
             await this.wait(500);
 
-            console.log('🖨 Generating PDF with html2pdf.js...');
+            console.log('Generating PDF with html2pdf.js...');
 
-            // ✅ Options optimisées
+            // OPTIONS OPTIMISÉES POUR PAGINATION PARFAITE
             const options = {
-                margin: [10, 10, 10, 10],
+                margin: [15, 15, 15, 15], // Marges augmentées pour éviter les coupures
                 filename: `AlphaVault_BusinessPlan_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { 
                     type: 'jpeg', 
-                    quality: 0.95 
+                    quality: 0.98 
                 },
                 html2canvas: { 
                     scale: 2,
                     useCORS: true,
-                    logging: true, // ✅ Activer les logs pour debug
+                    logging: false,
                     letterRendering: true,
                     allowTaint: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    windowWidth: 794, // A4 width en pixels à 96 DPI
+                    windowHeight: 1123 // A4 height en pixels à 96 DPI
                 },
                 jsPDF: { 
                     unit: 'mm', 
                     format: 'a4', 
                     orientation: 'portrait',
-                    compress: true
+                    compress: true,
+                    precision: 16
                 },
                 pagebreak: { 
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    before: '.section'
+                    mode: ['css', 'legacy'], // Mode CSS en priorité
+                    before: ['.page-break-before', '.section'],
+                    after: ['.page-break-after', '.cover-page'],
+                    avoid: ['.avoid-break', 'table', '.highlight-card', '.pricing-card', '.value-prop-item', '.roadmap-item', '.risk-card']
                 }
             };
 
-            // ✅ Générer le PDF
+            // Générer le PDF
             const pdfBlob = await html2pdf()
                 .set(options)
                 .from(tempDiv)
-                .outputPdf('blob');
+                .toPdf()
+                .output('blob');
 
-            console.log('✅ PDF generated successfully:', pdfBlob.size, 'bytes');
+            console.log('PDF generated successfully:', pdfBlob.size, 'bytes');
 
             return pdfBlob;
 
         } catch (error) {
-            console.error('❌ PDF Generation Error:', error);
+            console.error('PDF Generation Error:', error);
             throw new Error(`PDF generation failed: ${error.message}`);
         } finally {
-            // ✅ Nettoyer après un délai
+            // Nettoyer après un délai
             setTimeout(() => {
                 if (document.body.contains(container)) {
                     document.body.removeChild(container);
-                    console.log('🧹 Temporary container removed');
+                    console.log('Temporary container removed');
                 }
             }, 1000);
         }
     }
 
-        /**
-         * 🔄 CONVERTIR BLOB EN BASE64
-         */
-        blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    // Retirer le préfixe "data:application/pdf;base64,"
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        }
+    /**
+     * CONVERTIR BLOB EN BASE64
+     */
+    blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
 
-        /**
+    /**
      * ════════════════════════════════════════════════════════════════
-     * CRÉATION DU HTML COMPLET DU BUSINESS PLAN
+     * CRÉATION DU HTML COMPLET DU BUSINESS PLAN (SANS EMOJIS)
      * ════════════════════════════════════════════════════════════════
      */
     createBusinessPlanHTML(includeSimulator) {
@@ -247,10 +251,8 @@ class BusinessPlanPDFExporter {
     </head>
     <body>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            PAGE DE GARDE
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="cover-page">
+        <!-- PAGE DE GARDE -->
+        <div class="cover-page page-break-after">
             <div class="cover-logo">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 140px; height: 140px;">
                     <defs>
@@ -279,32 +281,30 @@ class BusinessPlanPDFExporter {
                 <div class="meta-grid">
                     <div class="meta-item">
                         <div class="meta-label">Document</div>
-                        <div class="meta-value">📄 Business Plan v3.0</div>
+                        <div class="meta-value">[DOC] Business Plan v3.0</div>
                     </div>
                     <div class="meta-item">
                         <div class="meta-label">Date</div>
-                        <div class="meta-value">📅 ${today}</div>
+                        <div class="meta-value">[DATE] ${today}</div>
                     </div>
                     <div class="meta-item">
                         <div class="meta-label">Market</div>
-                        <div class="meta-value">🌐 Global - Cloud-Based</div>
+                        <div class="meta-value">[GLOBE] Global - Cloud-Based</div>
                     </div>
                     <div class="meta-item">
                         <div class="meta-label">Confidentiality</div>
-                        <div class="meta-value">🔒 Confidential</div>
+                        <div class="meta-value">[LOCK] Confidential</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION 1: EXECUTIVE SUMMARY
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">💼 Executive Summary</h2>
+        <!-- SECTION 1: EXECUTIVE SUMMARY -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[BRIEFCASE] Executive Summary</h2>
             
-            <div class="mission-statement">
-                <h3>🎯 Mission Statement</h3>
+            <div class="mission-statement avoid-break">
+                <h3>[TARGET] Mission Statement</h3>
                 <p class="mission-text">
                     To democratize institutional-grade financial intelligence by providing individual investors 
                     with AI-powered analytics, predictive models, and real-time market insights through an 
@@ -312,42 +312,42 @@ class BusinessPlanPDFExporter {
                 </p>
             </div>
 
-            <h3 class="subsection-title">🎯 Key Highlights</h3>
+            <h3 class="subsection-title">[DART] Key Highlights</h3>
             
             <div class="highlights-grid">
-                <div class="highlight-card">
-                    <div class="highlight-icon">👥</div>
+                <div class="highlight-card avoid-break">
+                    <div class="highlight-icon">[USERS]</div>
                     <div class="highlight-label">Target Market</div>
                     <div class="highlight-value">$12.5B+</div>
                     <div class="highlight-desc">Global retail investment analytics market (2024)</div>
                 </div>
                 
-                <div class="highlight-card">
-                    <div class="highlight-icon">📈</div>
+                <div class="highlight-card avoid-break">
+                    <div class="highlight-icon">[CHART]</div>
                     <div class="highlight-label">Revenue Model</div>
                     <div class="highlight-value">Freemium SaaS</div>
                     <div class="highlight-desc">3 tiers: Basic (Free), Pro ($10/mo), Platinum ($20/mo)</div>
                 </div>
                 
-                <div class="highlight-card">
-                    <div class="highlight-icon">🧠</div>
+                <div class="highlight-card avoid-break">
+                    <div class="highlight-icon">[BRAIN]</div>
                     <div class="highlight-label">Core Technology</div>
                     <div class="highlight-value">AI + ML</div>
                     <div class="highlight-desc">Gemini AI, predictive algorithms, real-time analytics</div>
                 </div>
                 
-                <div class="highlight-card">
-                    <div class="highlight-icon">🚀</div>
+                <div class="highlight-card avoid-break">
+                    <div class="highlight-icon">[ROCKET]</div>
                     <div class="highlight-label">5-Year Goal</div>
                     <div class="highlight-value">100K Users</div>
                     <div class="highlight-desc">$12M ARR with 15% paid conversion rate</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">📋 Value Proposition</h3>
+            <h3 class="subsection-title">[LIST] Value Proposition</h3>
             
             <div class="value-props">
-                <div class="value-prop-item">
+                <div class="value-prop-item avoid-break">
                     <div class="vp-number">1</div>
                     <div class="vp-content">
                         <h4>Institutional-Grade Tools for Individual Investors</h4>
@@ -355,7 +355,7 @@ class BusinessPlanPDFExporter {
                     </div>
                 </div>
                 
-                <div class="value-prop-item">
+                <div class="value-prop-item avoid-break">
                     <div class="vp-number">2</div>
                     <div class="vp-content">
                         <h4>AI-Powered Financial Chatbot</h4>
@@ -363,7 +363,7 @@ class BusinessPlanPDFExporter {
                     </div>
                 </div>
                 
-                <div class="value-prop-item">
+                <div class="value-prop-item avoid-break">
                     <div class="vp-number">3</div>
                     <div class="vp-content">
                         <h4>Affordable Freemium Pricing</h4>
@@ -371,7 +371,7 @@ class BusinessPlanPDFExporter {
                     </div>
                 </div>
                 
-                <div class="value-prop-item">
+                <div class="value-prop-item avoid-break">
                     <div class="vp-number">4</div>
                     <div class="vp-content">
                         <h4>Real-Time Data & Automation</h4>
@@ -381,43 +381,41 @@ class BusinessPlanPDFExporter {
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION 2: MARKET ANALYSIS
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">📊 Market Analysis</h2>
+        <!-- SECTION 2: MARKET ANALYSIS -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[CHART-BAR] Market Analysis</h2>
             
-            <h3 class="subsection-title">🌎 Total Addressable Market (TAM)</h3>
+            <h3 class="subsection-title">[GLOBE] Total Addressable Market (TAM)</h3>
             
             <div class="market-metrics">
-                <div class="market-metric-card">
-                    <div class="metric-header">🌐 TAM</div>
+                <div class="market-metric-card avoid-break">
+                    <div class="metric-header">[WORLD] TAM</div>
                     <div class="metric-value">$12.5B</div>
                     <div class="metric-label">Global Retail Investment Analytics Market</div>
                     <div class="metric-growth">+18.5% CAGR (2024-2029)</div>
                 </div>
                 
-                <div class="market-metric-card">
-                    <div class="metric-header">🎯 SAM</div>
+                <div class="market-metric-card avoid-break">
+                    <div class="metric-header">[TARGET] SAM</div>
                     <div class="metric-value">$3.2B</div>
                     <div class="metric-label">Serviceable Available Market (English-speaking retail investors)</div>
                     <div class="metric-growth">~25% of TAM</div>
                 </div>
                 
-                <div class="market-metric-card">
-                    <div class="metric-header">🎯 SOM</div>
+                <div class="market-metric-card avoid-break">
+                    <div class="metric-header">[FOCUS] SOM</div>
                     <div class="metric-value">$160M</div>
                     <div class="metric-label">Serviceable Obtainable Market (5-year target: 5% of SAM)</div>
                     <div class="metric-growth">Conservative estimate</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">👥 Target Customer Segments</h3>
+            <h3 class="subsection-title page-break-before">[USERS] Target Customer Segments</h3>
             
             <div class="segments-grid">
-                <div class="segment-card">
+                <div class="segment-card avoid-break">
                     <div class="segment-header">
-                        <h4>🎓 Millennial/Gen Z Investors</h4>
+                        <h4>[GRAD] Millennial/Gen Z Investors</h4>
                     </div>
                     <div class="segment-stats">
                         <div class="stat-row"><span>Age Range:</span> <strong>25-40 years</strong></div>
@@ -428,9 +426,9 @@ class BusinessPlanPDFExporter {
                     <p>Digital natives seeking advanced tools to outperform traditional advisors. Comfortable with SaaS subscriptions, value AI/ML capabilities.</p>
                 </div>
                 
-                <div class="segment-card">
+                <div class="segment-card avoid-break">
                     <div class="segment-header">
-                        <h4>📈 Active Day Traders</h4>
+                        <h4>[TREND] Active Day Traders</h4>
                     </div>
                     <div class="segment-stats">
                         <div class="stat-row"><span>Age Range:</span> <strong>30-55 years</strong></div>
@@ -441,9 +439,9 @@ class BusinessPlanPDFExporter {
                     <p>Require technical indicators, insider flow data, M&A predictions. Willing to pay premium for edge in market movements.</p>
                 </div>
                 
-                <div class="segment-card">
+                <div class="segment-card avoid-break">
                     <div class="segment-header">
-                        <h4>🐷 Long-Term Investors</h4>
+                        <h4>[SAVINGS] Long-Term Investors</h4>
                     </div>
                     <div class="segment-stats">
                         <div class="stat-row"><span>Age Range:</span> <strong>35-65 years</strong></div>
@@ -456,70 +454,68 @@ class BusinessPlanPDFExporter {
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION 3: BUSINESS MODEL
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">🧩 Business Model</h2>
+        <!-- SECTION 3: BUSINESS MODEL -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[PUZZLE] Business Model</h2>
             
-            <h3 class="subsection-title">🏷 Pricing Strategy</h3>
+            <h3 class="subsection-title">[TAG] Pricing Strategy</h3>
             
             <div class="pricing-tiers">
-                <div class="pricing-card">
+                <div class="pricing-card avoid-break">
                     <div class="pricing-header">
-                        <div class="pricing-icon">🚀</div>
+                        <div class="pricing-icon">[ROCKET]</div>
                         <h3>Basic</h3>
                         <div class="pricing-price">$0<span>/month</span></div>
                     </div>
                     <div class="pricing-features">
-                        <div class="feature">✓ Basic stock analysis</div>
-                        <div class="feature">✓ Real-time quotes (delayed 15 min)</div>
-                        <div class="feature">✓ Budget dashboard</div>
-                        <div class="feature">✓ News terminal (basic)</div>
-                        <div class="feature disabled">✗ Advanced analytics</div>
-                        <div class="feature disabled">✗ AI chatbot</div>
+                        <div class="feature">[CHECK] Basic stock analysis</div>
+                        <div class="feature">[CHECK] Real-time quotes (delayed 15 min)</div>
+                        <div class="feature">[CHECK] Budget dashboard</div>
+                        <div class="feature">[CHECK] News terminal (basic)</div>
+                        <div class="feature disabled">[X] Advanced analytics</div>
+                        <div class="feature disabled">[X] AI chatbot</div>
                     </div>
                     <div class="pricing-target">
                         <strong>Target:</strong> 70% of users remain free
                     </div>
                 </div>
                 
-                <div class="pricing-card featured">
+                <div class="pricing-card featured avoid-break">
                     <div class="pricing-badge">Most Popular</div>
                     <div class="pricing-header">
-                        <div class="pricing-icon">⭐</div>
+                        <div class="pricing-icon">[STAR]</div>
                         <h3>Pro</h3>
                         <div class="pricing-price">$10<span>/month</span></div>
                     </div>
                     <div class="pricing-features">
-                        <div class="feature">✓ Everything in Basic</div>
-                        <div class="feature">✓ Advanced technical analysis (14 indicators)</div>
-                        <div class="feature">✓ M&A predictor</div>
-                        <div class="feature">✓ Insider flow tracker</div>
-                        <div class="feature">✓ Monte Carlo simulation</div>
-                        <div class="feature">✓ Risk parity optimizer</div>
-                        <div class="feature">✓ Real-time alerts</div>
+                        <div class="feature">[CHECK] Everything in Basic</div>
+                        <div class="feature">[CHECK] Advanced technical analysis (14 indicators)</div>
+                        <div class="feature">[CHECK] M&A predictor</div>
+                        <div class="feature">[CHECK] Insider flow tracker</div>
+                        <div class="feature">[CHECK] Monte Carlo simulation</div>
+                        <div class="feature">[CHECK] Risk parity optimizer</div>
+                        <div class="feature">[CHECK] Real-time alerts</div>
                     </div>
                     <div class="pricing-target">
                         <strong>Target:</strong> 20% of users upgrade to Pro
                     </div>
                 </div>
                 
-                <div class="pricing-card premium">
+                <div class="pricing-card premium avoid-break">
                     <div class="pricing-badge">Premium</div>
                     <div class="pricing-header">
-                        <div class="pricing-icon">👑</div>
+                        <div class="pricing-icon">[CROWN]</div>
                         <h3>Platinum</h3>
                         <div class="pricing-price">$20<span>/month</span></div>
                     </div>
                     <div class="pricing-features">
-                        <div class="feature">✓ Everything in Pro</div>
-                        <div class="feature">✓ AI Chatbot (FinanceGPT) - Unlimited</div>
-                        <div class="feature">✓ Trend prediction (ML models)</div>
-                        <div class="feature">✓ Analyst coverage reports</div>
-                        <div class="feature">✓ Custom portfolio scenarios</div>
-                        <div class="feature">✓ Priority support</div>
-                        <div class="feature">✓ API access (coming soon)</div>
+                        <div class="feature">[CHECK] Everything in Pro</div>
+                        <div class="feature">[CHECK] AI Chatbot (FinanceGPT) - Unlimited</div>
+                        <div class="feature">[CHECK] Trend prediction (ML models)</div>
+                        <div class="feature">[CHECK] Analyst coverage reports</div>
+                        <div class="feature">[CHECK] Custom portfolio scenarios</div>
+                        <div class="feature">[CHECK] Priority support</div>
+                        <div class="feature">[CHECK] API access (coming soon)</div>
                     </div>
                     <div class="pricing-target">
                         <strong>Target:</strong> 10% of users upgrade to Platinum
@@ -528,45 +524,43 @@ class BusinessPlanPDFExporter {
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION 4: FINANCIAL PROJECTIONS
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">💰 Financial Projections (5-Year)</h2>
+        <!-- SECTION 4: FINANCIAL PROJECTIONS -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[MONEY] Financial Projections (5-Year)</h2>
             
             <div class="projection-summary">
-                <div class="projection-card">
-                    <div class="proj-icon">📈</div>
+                <div class="projection-card avoid-break">
+                    <div class="proj-icon">[UP]</div>
                     <div class="proj-label">Year 5 ARR</div>
                     <div class="proj-value">$12.0M</div>
                     <div class="proj-growth">+285% CAGR</div>
                 </div>
                 
-                <div class="projection-card">
-                    <div class="proj-icon">👥</div>
+                <div class="projection-card avoid-break">
+                    <div class="proj-icon">[GROUP]</div>
                     <div class="proj-label">Total Users (Year 5)</div>
                     <div class="proj-value">100,000</div>
                     <div class="proj-growth">15,000 paid subscribers</div>
                 </div>
                 
-                <div class="projection-card">
-                    <div class="proj-icon">📊</div>
+                <div class="projection-card avoid-break">
+                    <div class="proj-icon">[BAR]</div>
                     <div class="proj-label">Gross Margin (Year 5)</div>
                     <div class="proj-value">82%</div>
                     <div class="proj-growth">SaaS economics</div>
                 </div>
                 
-                <div class="projection-card">
-                    <div class="proj-icon">🐷</div>
+                <div class="projection-card avoid-break">
+                    <div class="proj-icon">[BANK]</div>
                     <div class="proj-label">EBITDA (Year 5)</div>
                     <div class="proj-value">$2.8M</div>
                     <div class="proj-growth">23% margin</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">📊 5-Year Revenue Projection</h3>
+            <h3 class="subsection-title page-break-before">[TABLE] 5-Year Revenue Projection</h3>
             
-            <table class="financial-table">
+            <table class="financial-table avoid-break">
                 <thead>
                     <tr>
                         <th>Metric</th>
@@ -637,9 +631,9 @@ class BusinessPlanPDFExporter {
                 </tbody>
             </table>
 
-            <h3 class="subsection-title">📋 Expense Breakdown & P&L</h3>
+            <h3 class="subsection-title page-break-before">[LIST] Expense Breakdown & P&L</h3>
             
-            <table class="financial-table">
+            <table class="financial-table avoid-break">
                 <thead>
                     <tr>
                         <th>Expense Category</th>
@@ -729,37 +723,35 @@ class BusinessPlanPDFExporter {
 
         ${includeSimulator ? this.createSimulatorSection() : ''}
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION: UNIT ECONOMICS
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">🧮 Unit Economics & Key Metrics</h2>
+        <!-- SECTION: UNIT ECONOMICS -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[CALC] Unit Economics & Key Metrics</h2>
             
-            <h3 class="subsection-title">📊 Customer Lifetime Value (LTV)</h3>
+            <h3 class="subsection-title">[BAR] Customer Lifetime Value (LTV)</h3>
             
             <div class="ltv-calculation">
-                <div class="calc-card">
-                    <h4>💰 Average Revenue Per User (ARPU)</h4>
+                <div class="calc-card avoid-break">
+                    <h4>[DOLLAR] Average Revenue Per User (ARPU)</h4>
                     <div class="calc-formula">ARPU = (60% × $10) + (40% × $20)</div>
                     <div class="calc-result"><strong>$14/month</strong></div>
                 </div>
                 
-                <div class="calc-card">
-                    <h4>📅 Average Customer Lifespan</h4>
+                <div class="calc-card avoid-break">
+                    <h4>[CALENDAR] Average Customer Lifespan</h4>
                     <div class="calc-formula">Lifespan = 1 / 5% Monthly Churn</div>
                     <div class="calc-result"><strong>20 months</strong></div>
                 </div>
                 
-                <div class="calc-card highlight">
-                    <h4>📈 Lifetime Value (LTV)</h4>
+                <div class="calc-card highlight avoid-break">
+                    <h4>[UP-TREND] Lifetime Value (LTV)</h4>
                     <div class="calc-formula">LTV = $14 × 20 months</div>
                     <div class="calc-result"><strong>$280</strong></div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">🎯 Customer Acquisition Cost (CAC)</h3>
+            <h3 class="subsection-title page-break-before">[TARGET] Customer Acquisition Cost (CAC)</h3>
             
-            <table class="financial-table">
+            <table class="financial-table avoid-break">
                 <thead>
                     <tr>
                         <th>Channel</th>
@@ -807,109 +799,105 @@ class BusinessPlanPDFExporter {
                 </tbody>
             </table>
 
-            <h3 class="subsection-title">⚖ LTV:CAC Ratio Analysis</h3>
+            <h3 class="subsection-title page-break-before">[SCALE] LTV:CAC Ratio Analysis</h3>
             
             <div class="ratio-analysis">
-                <div class="ratio-card">
-                    <div class="ratio-header">🏆 AlphaVault AI LTV:CAC</div>
+                <div class="ratio-card avoid-break">
+                    <div class="ratio-header">[TROPHY] AlphaVault AI LTV:CAC</div>
                     <div class="ratio-value">14.7:1</div>
                     <div class="ratio-calc">$280 LTV / $19 CAC</div>
-                    <div class="ratio-verdict">✅ <strong>Excellent</strong> - Well above 3:1 benchmark</div>
+                    <div class="ratio-verdict">[CHECK] <strong>Excellent</strong> - Well above 3:1 benchmark</div>
                 </div>
                 
-                <div class="benchmarks">
-                    <h4>📊 Industry Benchmarks</h4>
-                    <div class="benchmark-item">❌ Poor (&lt; 1:1) - Unsustainable</div>
-                    <div class="benchmark-item">⚠ Fair (1:1 to 3:1) - Break-even to marginal</div>
-                    <div class="benchmark-item">✅ Good (3:1 to 5:1) - Healthy SaaS metrics</div>
-                    <div class="benchmark-item highlight">⭐ Excellent (&gt; 5:1) - Highly scalable (AlphaVault: 14.7:1)</div>
+                <div class="benchmarks avoid-break">
+                    <h4>[CHART] Industry Benchmarks</h4>
+                    <div class="benchmark-item">[X] Poor (&lt; 1:1) - Unsustainable</div>
+                    <div class="benchmark-item">[WARNING] Fair (1:1 to 3:1) - Break-even to marginal</div>
+                    <div class="benchmark-item">[CHECK] Good (3:1 to 5:1) - Healthy SaaS metrics</div>
+                    <div class="benchmark-item highlight">[STAR] Excellent (&gt; 5:1) - Highly scalable (AlphaVault: 14.7:1)</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">⏱ Payback Period</h3>
+            <h3 class="subsection-title">[CLOCK] Payback Period</h3>
             
             <div class="payback-analysis">
-                <div class="calc-card">
-                    <h4>🧮 Calculation</h4>
+                <div class="calc-card avoid-break">
+                    <h4>[CALC] Calculation</h4>
                     <div class="calc-formula">Payback = $19 / ($14 × 0.85)</div>
                     <div class="calc-result"><strong>1.6 months</strong></div>
                 </div>
-                <div class="calc-card">
-                    <h4>✅ Industry Standard</h4>
+                <div class="calc-card avoid-break">
+                    <h4>[CHECK] Industry Standard</h4>
                     <p>Best-in-class SaaS: &lt; 12 months</p>
-                    <p><strong>🏆 AlphaVault AI: 1.6 months</strong> — Exceptional capital efficiency!</p>
+                    <p><strong>[TROPHY] AlphaVault AI: 1.6 months</strong> — Exceptional capital efficiency!</p>
                 </div>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION: GROWTH STRATEGY
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">🚀 Growth Strategy & Roadmap</h2>
+        <!-- SECTION: GROWTH STRATEGY -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[ROCKET] Growth Strategy & Roadmap</h2>
             
-            <h3 class="subsection-title">🗺 18-Month Product Roadmap</h3>
+            <h3 class="subsection-title">[MAP] 18-Month Product Roadmap</h3>
             
             <div class="roadmap">
-                <div class="roadmap-item">
+                <div class="roadmap-item avoid-break">
                     <div class="roadmap-quarter">Q1</div>
                     <h4>Foundation & Launch</h4>
                     <ul>
-                        <li>✅ Core platform launch</li>
-                        <li>✅ Freemium model activation</li>
-                        <li>⏳ SEO optimization (50+ blog posts)</li>
-                        <li>⏳ Social media presence</li>
-                        <li>⏳ First 500 users milestone</li>
+                        <li>[CHECK] Core platform launch</li>
+                        <li>[CHECK] Freemium model activation</li>
+                        <li>[PROGRESS] SEO optimization (50+ blog posts)</li>
+                        <li>[PROGRESS] Social media presence</li>
+                        <li>[PROGRESS] First 500 users milestone</li>
                     </ul>
                 </div>
                 
-                <div class="roadmap-item">
+                <div class="roadmap-item avoid-break">
                     <div class="roadmap-quarter">Q2</div>
                     <h4>User Growth & Engagement</h4>
                     <ul>
-                        <li>⏳ Paid ads campaign ($5K/month)</li>
-                        <li>⏳ Referral program</li>
-                        <li>⏳ Mobile app development start</li>
-                        <li>⏳ Community hub enhancements</li>
-                        <li>⏳ Target: 2,000 users, 10% conversion</li>
+                        <li>[PROGRESS] Paid ads campaign ($5K/month)</li>
+                        <li>[PROGRESS] Referral program</li>
+                        <li>[PROGRESS] Mobile app development start</li>
+                        <li>[PROGRESS] Community hub enhancements</li>
+                        <li>[PROGRESS] Target: 2,000 users, 10% conversion</li>
                     </ul>
                 </div>
                 
-                <div class="roadmap-item">
+                <div class="roadmap-item avoid-break">
                     <div class="roadmap-quarter">Q3</div>
                     <h4>Feature Expansion</h4>
                     <ul>
-                        <li>⏳ Mobile app beta launch</li>
-                        <li>⏳ Broker integrations</li>
-                        <li>⏳ Advanced backtesting</li>
-                        <li>⏳ Influencer partnerships</li>
-                        <li>⏳ Target: 5,000 users, 15% conversion</li>
+                        <li>[PROGRESS] Mobile app beta launch</li>
+                        <li>[PROGRESS] Broker integrations</li>
+                        <li>[PROGRESS] Advanced backtesting</li>
+                        <li>[PROGRESS] Influencer partnerships</li>
+                        <li>[PROGRESS] Target: 5,000 users, 15% conversion</li>
                     </ul>
                 </div>
                 
-                <div class="roadmap-item">
+                <div class="roadmap-item avoid-break">
                     <div class="roadmap-quarter">Q4</div>
                     <h4>Scale & Optimize</h4>
                     <ul>
-                        <li>⏳ API access tier launch</li>
-                        <li>⏳ Enterprise features</li>
-                        <li>⏳ International expansion</li>
-                        <li>⏳ ML model improvements</li>
-                        <li>⏳ Target: 10,000 users, 20% conversion</li>
+                        <li>[PROGRESS] API access tier launch</li>
+                        <li>[PROGRESS] Enterprise features</li>
+                        <li>[PROGRESS] International expansion</li>
+                        <li>[PROGRESS] ML model improvements</li>
+                        <li>[PROGRESS] Target: 10,000 users, 20% conversion</li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION: COMPETITIVE ANALYSIS
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">♟ Competitive Analysis</h2>
+        <!-- SECTION: COMPETITIVE ANALYSIS -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[CHESS] Competitive Analysis</h2>
             
-            <h3 class="subsection-title">📊 Competitor Comparison</h3>
+            <h3 class="subsection-title">[TABLE] Competitor Comparison</h3>
             
-            <table class="competitive-table">
+            <table class="competitive-table avoid-break">
                 <thead>
                     <tr>
                         <th>Feature</th>
@@ -929,92 +917,90 @@ class BusinessPlanPDFExporter {
                     </tr>
                     <tr>
                         <td>AI Chatbot</td>
-                        <td class="us">✅</td>
-                        <td>❌</td>
-                        <td>❌</td>
-                        <td>❌</td>
+                        <td class="us">[CHECK]</td>
+                        <td>[X]</td>
+                        <td>[X]</td>
+                        <td>[X]</td>
                     </tr>
                     <tr>
                         <td>M&A Prediction</td>
-                        <td class="us">✅</td>
-                        <td>⚠</td>
-                        <td>❌</td>
-                        <td>❌</td>
+                        <td class="us">[CHECK]</td>
+                        <td>[PARTIAL]</td>
+                        <td>[X]</td>
+                        <td>[X]</td>
                     </tr>
                     <tr>
                         <td>Insider Flow</td>
-                        <td class="us">✅</td>
-                        <td>✅</td>
-                        <td>⚠</td>
-                        <td>❌</td>
+                        <td class="us">[CHECK]</td>
+                        <td>[CHECK]</td>
+                        <td>[PARTIAL]</td>
+                        <td>[X]</td>
                     </tr>
                     <tr>
                         <td>Monte Carlo</td>
-                        <td class="us">✅</td>
-                        <td>✅</td>
-                        <td>❌</td>
-                        <td>❌</td>
+                        <td class="us">[CHECK]</td>
+                        <td>[CHECK]</td>
+                        <td>[X]</td>
+                        <td>[X]</td>
                     </tr>
                     <tr>
                         <td>ML Prediction</td>
-                        <td class="us">✅</td>
-                        <td>⚠</td>
-                        <td>❌</td>
-                        <td>⚠</td>
+                        <td class="us">[CHECK]</td>
+                        <td>[PARTIAL]</td>
+                        <td>[X]</td>
+                        <td>[PARTIAL]</td>
                     </tr>
                 </tbody>
             </table>
 
-            <h3 class="subsection-title">🏆 Competitive Advantages</h3>
+            <h3 class="subsection-title page-break-before">[TROPHY] Competitive Advantages</h3>
             
             <div class="advantages">
-                <div class="advantage-item">
+                <div class="advantage-item avoid-break">
                     <div class="advantage-number">1</div>
                     <div class="advantage-content">
-                        <h4>💰 Price Disruption</h4>
+                        <h4>[DOLLAR] Price Disruption</h4>
                         <p>Bloomberg: $24,000/year | AlphaVault Platinum: $240/year (100x cheaper)</p>
                     </div>
                 </div>
                 
-                <div class="advantage-item">
+                <div class="advantage-item avoid-break">
                     <div class="advantage-number">2</div>
                     <div class="advantage-content">
-                        <h4>🤖 AI-First Approach</h4>
+                        <h4>[ROBOT] AI-First Approach</h4>
                         <p>Only platform with conversational AI for financial analysis + proprietary ML models</p>
                     </div>
                 </div>
                 
-                <div class="advantage-item">
+                <div class="advantage-item avoid-break">
                     <div class="advantage-number">3</div>
                     <div class="advantage-content">
-                        <h4>🧩 All-in-One Platform</h4>
+                        <h4>[PUZZLE] All-in-One Platform</h4>
                         <p>Budgeting + Analysis + Predictions + Simulations + Chatbot + Community</p>
                     </div>
                 </div>
                 
-                <div class="advantage-item">
+                <div class="advantage-item avoid-break">
                     <div class="advantage-number">4</div>
                     <div class="advantage-content">
-                        <h4>👥 Community-Driven</h4>
+                        <h4>[NETWORK] Community-Driven</h4>
                         <p>Network effects: platform becomes more valuable as user base grows</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-            SECTION: RISK ANALYSIS
-            ════════════════════════════════════════════════════════════════ -->
-        <div class="section">
-            <h2 class="section-title">⚠ Risk Analysis & Mitigation</h2>
+        <!-- SECTION: RISK ANALYSIS -->
+        <div class="section page-break-before">
+            <h2 class="section-title">[WARNING] Risk Analysis & Mitigation</h2>
             
             <div class="risks">
-                <div class="risk-card">
+                <div class="risk-card avoid-break">
                     <div class="risk-severity high">High Impact</div>
-                    <h4>📉 Market Risk: Prolonged Bear Market</h4>
+                    <h4>[DOWN] Market Risk: Prolonged Bear Market</h4>
                     <p><strong>Scenario:</strong> Extended downturn reduces retail investor activity</p>
                     <div class="risk-mitigation">
-                        <h5>🛡 Mitigation:</h5>
+                        <h5>[SHIELD] Mitigation:</h5>
                         <ul>
                             <li>Emphasize risk management tools (MORE valuable during volatility)</li>
                             <li>Add hedging strategies & recession-proof portfolios</li>
@@ -1024,12 +1010,12 @@ class BusinessPlanPDFExporter {
                     <div class="risk-prob">Probability: Medium (30%)</div>
                 </div>
                 
-                <div class="risk-card">
+                <div class="risk-card avoid-break">
                     <div class="risk-severity medium">Medium Impact</div>
-                    <h4>🤖 Technology Risk: AI Model Accuracy</h4>
+                    <h4>[ROBOT] Technology Risk: AI Model Accuracy</h4>
                     <p><strong>Scenario:</strong> ML predictions underperform, causing user churn</p>
                     <div class="risk-mitigation">
-                        <h5>🛡 Mitigation:</h5>
+                        <h5>[SHIELD] Mitigation:</h5>
                         <ul>
                             <li>Transparent communication: predictions are probabilistic</li>
                             <li>Monthly model retraining with latest data</li>
@@ -1039,12 +1025,12 @@ class BusinessPlanPDFExporter {
                     <div class="risk-prob">Probability: Medium (40%)</div>
                 </div>
                 
-                <div class="risk-card">
+                <div class="risk-card avoid-break">
                     <div class="risk-severity high">High Impact</div>
-                    <h4>♟ Competitive Risk: Big Tech Entry</h4>
+                    <h4>[CHESS] Competitive Risk: Big Tech Entry</h4>
                     <p><strong>Scenario:</strong> Google/Apple launch competing platforms</p>
                     <div class="risk-mitigation">
-                        <h5>🛡 Mitigation:</h5>
+                        <h5>[SHIELD] Mitigation:</h5>
                         <ul>
                             <li>Focus on advanced users (niche specialization)</li>
                             <li>Build community moat with network effects</li>
@@ -1055,12 +1041,12 @@ class BusinessPlanPDFExporter {
                     <div class="risk-prob">Probability: Low-Medium (20%)</div>
                 </div>
                 
-                <div class="risk-card">
+                <div class="risk-card avoid-break">
                     <div class="risk-severity medium">Medium Impact</div>
-                    <h4>⚖ Regulatory Risk: Financial Advice Compliance</h4>
+                    <h4>[BALANCE] Regulatory Risk: Financial Advice Compliance</h4>
                     <p><strong>Scenario:</strong> SEC classifies AI recommendations as investment advice</p>
                     <div class="risk-mitigation">
-                        <h5>🛡 Mitigation:</h5>
+                        <h5>[SHIELD] Mitigation:</h5>
                         <ul>
                             <li>Clear disclaimers: "Not financial advice. Educational purposes only."</li>
                             <li>Position as analytical tool, not advisory service</li>
@@ -1075,7 +1061,7 @@ class BusinessPlanPDFExporter {
 
         <!-- Footer -->
         <div class="footer">
-            <div class="footer-title">📊 AlphaVault AI Business Plan</div>
+            <div class="footer-title">[CHART] AlphaVault AI Business Plan</div>
             <div class="footer-subtitle">Confidential - For Internal Use Only</div>
             <div class="footer-date">Generated: ${today}</div>
         </div>
@@ -1092,100 +1078,100 @@ class BusinessPlanPDFExporter {
      */
     createSimulatorSection() {
         return `
-        <div class="section">
-            <h2 class="section-title">🎚 Interactive Scenario Simulator</h2>
+        <div class="section page-break-before">
+            <h2 class="section-title">[SLIDERS] Interactive Scenario Simulator</h2>
             
-            <div class="info-box">
-                <h3>ℹ How to Use</h3>
+            <div class="info-box avoid-break">
+                <h3>[INFO] How to Use</h3>
                 <p>This section showcases our interactive scenario modeling capabilities. The live simulator is available on the AlphaVault AI platform with real-time calculations.</p>
             </div>
 
-            <h3 class="subsection-title">⚙ Key Parameters</h3>
+            <h3 class="subsection-title">[SETTINGS] Key Parameters</h3>
             
             <div class="simulator-params">
-                <div class="param-card">
-                    <div class="param-label">👥 Total Users (Year 1)</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[USERS] Total Users (Year 1)</div>
                     <div class="param-value">5,000</div>
                     <div class="param-desc">Starting user base</div>
                 </div>
                 
-                <div class="param-card">
-                    <div class="param-label">📊 Conversion Rate</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[BAR] Conversion Rate</div>
                     <div class="param-value">30%</div>
                     <div class="param-desc">Free → Paid conversion</div>
                 </div>
                 
-                <div class="param-card">
-                    <div class="param-label">⭐ Pro Plan %</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[STAR] Pro Plan %</div>
                     <div class="param-value">60%</div>
                     <div class="param-desc">Of paid users</div>
                 </div>
                 
-                <div class="param-card">
-                    <div class="param-label">📈 YoY Growth</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[UP] YoY Growth</div>
                     <div class="param-value">200%</div>
                     <div class="param-desc">Year-over-year</div>
                 </div>
                 
-                <div class="param-card">
-                    <div class="param-label">💰 CAC</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[DOLLAR] CAC</div>
                     <div class="param-value">$25</div>
                     <div class="param-desc">Customer acquisition cost</div>
                 </div>
                 
-                <div class="param-card">
-                    <div class="param-label">📉 Churn Rate</div>
+                <div class="param-card avoid-break">
+                    <div class="param-label">[DOWN] Churn Rate</div>
                     <div class="param-value">5%</div>
                     <div class="param-desc">Monthly churn</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">📊 Simulation Results (Base Case)</h3>
+            <h3 class="subsection-title page-break-before">[BAR] Simulation Results (Base Case)</h3>
             
             <div class="sim-results">
-                <div class="sim-result-card">
-                    <div class="sim-icon">💰</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[MONEY]</div>
                     <div class="sim-label">Year 1 MRR</div>
                     <div class="sim-value">$21,000</div>
                 </div>
                 
-                <div class="sim-result-card">
-                    <div class="sim-icon">📅</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[CALENDAR]</div>
                     <div class="sim-label">Year 1 ARR</div>
                     <div class="sim-value">$252,000</div>
                 </div>
                 
-                <div class="sim-result-card">
-                    <div class="sim-icon">🎯</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[TARGET]</div>
                     <div class="sim-label">Year 5 ARR</div>
                     <div class="sim-value">$5.67M</div>
                 </div>
                 
-                <div class="sim-result-card">
-                    <div class="sim-icon">📊</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[CHART]</div>
                     <div class="sim-label">LTV:CAC Ratio</div>
                     <div class="sim-value">14.7:1</div>
                 </div>
                 
-                <div class="sim-result-card">
-                    <div class="sim-icon">⏱</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[CLOCK]</div>
                     <div class="sim-label">Payback Period</div>
                     <div class="sim-value">1.6 months</div>
                 </div>
                 
-                <div class="sim-result-card">
-                    <div class="sim-icon">🐷</div>
+                <div class="sim-result-card avoid-break">
+                    <div class="sim-icon">[BANK]</div>
                     <div class="sim-label">Year 5 EBITDA</div>
                     <div class="sim-value">$3.30M</div>
                 </div>
             </div>
 
-            <h3 class="subsection-title">🧪 Pre-Configured Scenarios</h3>
+            <h3 class="subsection-title page-break-before">[LAB] Pre-Configured Scenarios</h3>
             
             <div class="scenarios">
-                <div class="scenario-card conservative">
+                <div class="scenario-card conservative avoid-break">
                     <div class="scenario-header">
-                        <div class="scenario-icon">🐢</div>
+                        <div class="scenario-icon">[TURTLE]</div>
                         <h4>Conservative Growth</h4>
                     </div>
                     <div class="scenario-params">
@@ -1199,9 +1185,9 @@ class BusinessPlanPDFExporter {
                     </div>
                 </div>
                 
-                <div class="scenario-card base">
+                <div class="scenario-card base avoid-break">
                     <div class="scenario-header">
-                        <div class="scenario-icon">⚖</div>
+                        <div class="scenario-icon">[BALANCE]</div>
                         <h4>Base Case (Default)</h4>
                     </div>
                     <div class="scenario-params">
@@ -1215,9 +1201,9 @@ class BusinessPlanPDFExporter {
                     </div>
                 </div>
                 
-                <div class="scenario-card aggressive">
+                <div class="scenario-card aggressive avoid-break">
                     <div class="scenario-header">
-                        <div class="scenario-icon">🚀</div>
+                        <div class="scenario-icon">[ROCKET]</div>
                         <h4>Aggressive Growth</h4>
                     </div>
                     <div class="scenario-params">
@@ -1237,7 +1223,7 @@ class BusinessPlanPDFExporter {
 
     /**
      * ════════════════════════════════════════════════════════════════
-     * CSS COMPLET DU BUSINESS PLAN
+     * CSS COMPLET DU BUSINESS PLAN (OPTIMISÉ PAGINATION)
      * ════════════════════════════════════════════════════════════════
      */
     getBusinessPlanCSS() {
@@ -1250,17 +1236,35 @@ class BusinessPlanPDFExporter {
 
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-                font-size: 15px;
-                line-height: 1.7;
+                font-size: 14px;
+                line-height: 1.6;
                 color: #1e293b;
                 background: white;
+            }
+
+            /* ════════════════════════════════════════════════════════════════
+            CONTRÔLE DES SAUTS DE PAGE
+            ════════════════════════════════════════════════════════════════ */
+            .page-break-before {
+                page-break-before: always;
+                break-before: page;
+            }
+
+            .page-break-after {
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .avoid-break {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
 
             /* ════════════════════════════════════════════════════════════════
             PAGE DE GARDE
             ════════════════════════════════════════════════════════════════ */
             .cover-page {
-                min-height: 280mm;
+                min-height: 260mm;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -1268,48 +1272,47 @@ class BusinessPlanPDFExporter {
                 text-align: center;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                padding: 60px 40px;
-                page-break-after: always;
+                padding: 50px 40px;
             }
 
             .cover-logo {
-                margin-bottom: 50px;
+                margin-bottom: 40px;
                 filter: drop-shadow(0 8px 24px rgba(0,0,0,0.3));
             }
 
             .cover-title {
-                font-size: 64px;
+                font-size: 56px;
                 font-weight: 900;
-                margin: 0 0 24px 0;
+                margin: 0 0 20px 0;
                 letter-spacing: -1px;
                 line-height: 1.1;
                 text-shadow: 0 4px 16px rgba(0,0,0,0.3);
             }
 
             .cover-subtitle {
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 700;
-                margin: 0 0 50px 0;
+                margin: 0 0 40px 0;
                 opacity: 0.95;
                 line-height: 1.3;
             }
 
             .cover-tagline {
                 max-width: 600px;
-                margin: 0 auto 60px;
-                padding: 24px 32px;
+                margin: 0 auto 50px;
+                padding: 20px 28px;
                 background: rgba(255,255,255,0.15);
                 border-radius: 16px;
                 backdrop-filter: blur(10px);
                 border: 1px solid rgba(255,255,255,0.2);
-                font-size: 20px;
+                font-size: 18px;
                 line-height: 1.6;
                 font-weight: 500;
             }
 
             .cover-meta {
-                margin-top: 80px;
-                padding-top: 40px;
+                margin-top: 60px;
+                padding-top: 30px;
                 border-top: 2px solid rgba(255,255,255,0.3);
                 width: 100%;
                 max-width: 700px;
@@ -1318,8 +1321,8 @@ class BusinessPlanPDFExporter {
             .meta-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 24px;
-                font-size: 17px;
+                gap: 20px;
+                font-size: 15px;
                 font-weight: 600;
             }
 
@@ -1333,8 +1336,8 @@ class BusinessPlanPDFExporter {
 
             .meta-label {
                 opacity: 0.8;
-                font-size: 14px;
-                margin-bottom: 6px;
+                font-size: 13px;
+                margin-bottom: 5px;
             }
 
             .meta-value {
@@ -1345,53 +1348,52 @@ class BusinessPlanPDFExporter {
             SECTIONS
             ════════════════════════════════════════════════════════════════ */
             .section {
-                padding: 30px 40px;
+                padding: 25px 35px 30px 35px;
                 background: white;
-                page-break-before: always;
-                min-height: 250mm;
+                min-height: auto;
             }
 
             .section-title {
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 800;
                 color: #1e293b;
-                margin-bottom: 35px;
-                padding-bottom: 16px;
+                margin-bottom: 25px;
+                padding-bottom: 12px;
                 border-bottom: 4px solid #667eea;
             }
 
             .subsection-title {
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: 700;
                 color: #1e293b;
-                margin: 35px 0 20px 0;
-                padding-bottom: 10px;
-                border-bottom: 3px solid #667eea;
+                margin: 25px 0 15px 0;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #667eea;
             }
 
             h3, h4 {
-                margin: 24px 0 12px 0;
+                margin: 18px 0 10px 0;
                 font-weight: 700;
                 color: #1e293b;
             }
 
-            h3 { font-size: 20px; }
-            h4 { font-size: 18px; }
+            h3 { font-size: 18px; }
+            h4 { font-size: 16px; }
 
             p {
-                margin-bottom: 16px;
+                margin-bottom: 12px;
                 color: #1e293b;
-                line-height: 1.8;
+                line-height: 1.7;
             }
 
             ul, ol {
-                margin: 16px 0;
-                padding-left: 28px;
+                margin: 12px 0;
+                padding-left: 24px;
             }
 
             li {
-                margin-bottom: 10px;
-                line-height: 1.7;
+                margin-bottom: 8px;
+                line-height: 1.6;
             }
 
             /* ════════════════════════════════════════════════════════════════
@@ -1400,15 +1402,15 @@ class BusinessPlanPDFExporter {
             .mission-statement,
             .info-box {
                 background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.05));
-                padding: 28px;
-                border-radius: 16px;
-                border-left: 6px solid #667eea;
-                margin: 30px 0;
+                padding: 22px;
+                border-radius: 14px;
+                border-left: 5px solid #667eea;
+                margin: 20px 0;
             }
 
             .mission-text {
-                font-size: 17px;
-                line-height: 1.9;
+                font-size: 15px;
+                line-height: 1.8;
                 color: #1e293b;
                 margin: 0;
             }
@@ -1420,9 +1422,9 @@ class BusinessPlanPDFExporter {
             .ltv-calculation,
             .sim-results {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin: 30px 0;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 16px;
+                margin: 20px 0;
             }
 
             .highlight-card,
@@ -1432,48 +1434,48 @@ class BusinessPlanPDFExporter {
             .calc-card,
             .sim-result-card {
                 border: 2px solid #667eea;
-                border-radius: 16px;
-                padding: 24px;
+                border-radius: 14px;
+                padding: 18px;
                 background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.05));
-                page-break-inside: avoid;
             }
 
             .highlight-icon,
             .proj-icon,
             .sim-icon {
-                font-size: 32px;
-                margin-bottom: 12px;
+                font-size: 28px;
+                margin-bottom: 10px;
+                font-weight: 700;
             }
 
             .highlight-label,
             .proj-label,
             .metric-label,
             .sim-label {
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 700;
                 color: #64748b;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .highlight-value,
             .proj-value,
             .metric-value,
             .sim-value {
-                font-size: 28px;
+                font-size: 24px;
                 font-weight: 800;
                 color: #667eea;
-                margin: 8px 0;
+                margin: 6px 0;
                 line-height: 1.2;
             }
 
             .highlight-desc,
             .proj-growth,
             .metric-growth {
-                font-size: 14px;
+                font-size: 13px;
                 color: #64748b;
-                margin-top: 8px;
+                margin-top: 6px;
             }
 
             /* ════════════════════════════════════════════════════════════════
@@ -1482,25 +1484,26 @@ class BusinessPlanPDFExporter {
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin: 25px 0;
-                font-size: 14px;
-                page-break-inside: avoid;
+                margin: 20px 0;
+                font-size: 13px;
                 background: white;
             }
 
             thead th {
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
-                padding: 14px 12px;
+                padding: 12px 10px;
                 font-weight: 700;
                 text-align: left;
                 border: 1px solid rgba(255,255,255,0.2);
+                font-size: 13px;
             }
 
             tbody td {
-                padding: 12px;
+                padding: 10px;
                 border: 1px solid #e2e8f0;
                 color: #1e293b;
+                font-size: 13px;
             }
 
             tbody tr:nth-child(even) td {
@@ -1526,66 +1529,66 @@ class BusinessPlanPDFExporter {
             ════════════════════════════════════════════════════════════════ */
             .pricing-card {
                 border: 2px solid #e2e8f0;
-                border-radius: 20px;
-                padding: 28px;
+                border-radius: 18px;
+                padding: 22px;
                 position: relative;
                 background: white;
-                page-break-inside: avoid;
             }
 
             .pricing-card.featured {
                 border-color: #667eea;
-                box-shadow: 0 8px 24px rgba(102,126,234,0.2);
+                box-shadow: 0 6px 20px rgba(102,126,234,0.2);
             }
 
             .pricing-card.premium {
                 border-color: #764ba2;
-                box-shadow: 0 8px 24px rgba(118,75,162,0.2);
+                box-shadow: 0 6px 20px rgba(118,75,162,0.2);
             }
 
             .pricing-badge {
                 position: absolute;
-                top: -12px;
+                top: -10px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
-                padding: 6px 20px;
-                border-radius: 20px;
-                font-size: 13px;
+                padding: 5px 18px;
+                border-radius: 18px;
+                font-size: 12px;
                 font-weight: 700;
             }
 
             .pricing-header {
                 text-align: center;
-                margin-bottom: 24px;
+                margin-bottom: 18px;
             }
 
             .pricing-icon {
-                font-size: 40px;
-                margin-bottom: 12px;
+                font-size: 32px;
+                margin-bottom: 10px;
+                font-weight: 700;
             }
 
             .pricing-price {
-                font-size: 48px;
+                font-size: 40px;
                 font-weight: 800;
                 color: #667eea;
-                margin: 16px 0;
+                margin: 12px 0;
             }
 
             .pricing-price span {
-                font-size: 18px;
+                font-size: 16px;
                 color: #64748b;
             }
 
             .pricing-features {
-                margin: 24px 0;
+                margin: 18px 0;
             }
 
             .pricing-features .feature {
-                padding: 10px 0;
+                padding: 8px 0;
                 border-bottom: 1px solid #e2e8f0;
-                font-size: 14px;
+                font-size: 13px;
             }
 
             .pricing-features .feature.disabled {
@@ -1593,10 +1596,10 @@ class BusinessPlanPDFExporter {
             }
 
             .pricing-target {
-                margin-top: 20px;
-                padding-top: 20px;
+                margin-top: 16px;
+                padding-top: 16px;
                 border-top: 2px solid #e2e8f0;
-                font-size: 13px;
+                font-size: 12px;
                 color: #64748b;
             }
 
@@ -1605,32 +1608,31 @@ class BusinessPlanPDFExporter {
             ════════════════════════════════════════════════════════════════ */
             .value-props,
             .advantages {
-                margin: 30px 0;
+                margin: 20px 0;
             }
 
             .value-prop-item,
             .advantage-item {
                 display: flex;
-                gap: 20px;
-                margin-bottom: 24px;
-                padding: 20px;
+                gap: 16px;
+                margin-bottom: 18px;
+                padding: 16px;
                 background: rgba(102,126,234,0.05);
-                border-radius: 16px;
+                border-radius: 14px;
                 border-left: 4px solid #667eea;
-                page-break-inside: avoid;
             }
 
             .vp-number,
             .advantage-number {
-                width: 50px;
-                height: 50px;
+                width: 42px;
+                height: 42px;
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: 800;
                 flex-shrink: 0;
             }
@@ -1638,7 +1640,7 @@ class BusinessPlanPDFExporter {
             .vp-content h4,
             .advantage-content h4 {
                 margin-top: 0;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
                 color: #1e293b;
             }
 
@@ -1646,61 +1648,60 @@ class BusinessPlanPDFExporter {
             ROADMAP
             ════════════════════════════════════════════════════════════════ */
             .roadmap {
-                margin: 30px 0;
+                margin: 20px 0;
             }
 
             .roadmap-item {
-                margin-bottom: 24px;
-                padding: 20px;
+                margin-bottom: 18px;
+                padding: 16px;
                 background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.05));
-                border-radius: 16px;
-                border-left: 6px solid #667eea;
-                page-break-inside: avoid;
+                border-radius: 14px;
+                border-left: 5px solid #667eea;
             }
 
             .roadmap-quarter {
                 display: inline-block;
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
-                padding: 8px 20px;
-                border-radius: 20px;
+                padding: 6px 16px;
+                border-radius: 16px;
                 font-weight: 800;
-                font-size: 14px;
-                margin-bottom: 12px;
+                font-size: 13px;
+                margin-bottom: 10px;
             }
 
             .roadmap-item h4 {
-                margin: 12px 0;
-                font-size: 18px;
+                margin: 10px 0;
+                font-size: 16px;
             }
 
             .roadmap-item ul {
-                margin: 12px 0;
-                padding-left: 24px;
+                margin: 10px 0;
+                padding-left: 20px;
             }
 
             .roadmap-item li {
-                margin-bottom: 8px;
-                font-size: 14px;
+                margin-bottom: 6px;
+                font-size: 13px;
             }
 
             /* ════════════════════════════════════════════════════════════════
             SEGMENTS & STATS
             ════════════════════════════════════════════════════════════════ */
             .segment-header {
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
 
             .segment-stats {
-                margin: 16px 0;
+                margin: 12px 0;
             }
 
             .stat-row {
                 display: flex;
                 justify-content: space-between;
-                padding: 8px 0;
+                padding: 6px 0;
                 border-bottom: 1px solid rgba(102,126,234,0.2);
-                font-size: 14px;
+                font-size: 13px;
             }
 
             /* ════════════════════════════════════════════════════════════════
@@ -1709,63 +1710,73 @@ class BusinessPlanPDFExporter {
             .ratio-analysis {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 24px;
-                margin: 30px 0;
+                gap: 20px;
+                margin: 20px 0;
             }
 
             .ratio-card {
                 border: 3px solid #10b981;
-                border-radius: 20px;
-                padding: 28px;
+                border-radius: 18px;
+                padding: 22px;
                 text-align: center;
                 background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05));
             }
 
             .ratio-header {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #10b981;
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
 
             .ratio-value {
-                font-size: 56px;
+                font-size: 48px;
                 font-weight: 900;
                 color: #10b981;
-                margin: 16px 0;
+                margin: 12px 0;
             }
 
             .ratio-calc {
-                font-size: 14px;
+                font-size: 13px;
                 color: #64748b;
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
 
             .ratio-verdict {
-                font-size: 16px;
-                padding: 12px;
+                font-size: 14px;
+                padding: 10px;
                 background: rgba(16,185,129,0.15);
-                border-radius: 12px;
+                border-radius: 10px;
             }
 
             .benchmarks {
-                padding: 24px;
+                padding: 20px;
                 background: #f8fafc;
-                border-radius: 16px;
+                border-radius: 14px;
             }
 
             .benchmark-item {
-                padding: 10px 0;
+                padding: 8px 0;
                 border-bottom: 1px solid #e2e8f0;
-                font-size: 14px;
+                font-size: 13px;
             }
 
             .benchmark-item.highlight {
                 background: rgba(255,215,0,0.15);
-                padding: 12px;
+                padding: 10px;
                 border-radius: 8px;
                 border: none;
                 font-weight: 700;
+            }
+
+            /* ════════════════════════════════════════════════════════════════
+            PAYBACK ANALYSIS
+            ════════════════════════════════════════════════════════════════ */
+            .payback-analysis {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin: 20px 0;
             }
 
             /* ════════════════════════════════════════════════════════════════
@@ -1774,50 +1785,49 @@ class BusinessPlanPDFExporter {
             .simulator-params {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin: 30px 0;
+                gap: 16px;
+                margin: 20px 0;
             }
 
             .param-card {
                 border: 2px solid #667eea;
                 border-radius: 12px;
-                padding: 20px;
+                padding: 16px;
                 text-align: center;
                 background: white;
             }
 
             .param-label {
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 700;
                 color: #64748b;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .param-value {
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 800;
                 color: #667eea;
-                margin: 8px 0;
+                margin: 6px 0;
             }
 
             .param-desc {
-                font-size: 12px;
+                font-size: 11px;
                 color: #64748b;
             }
 
             .scenarios {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin: 30px 0;
+                gap: 16px;
+                margin: 20px 0;
             }
 
             .scenario-card {
                 border: 2px solid #e2e8f0;
-                border-radius: 16px;
-                padding: 24px;
+                border-radius: 14px;
+                padding: 18px;
                 background: white;
-                page-break-inside: avoid;
             }
 
             .scenario-card.conservative {
@@ -1838,57 +1848,57 @@ class BusinessPlanPDFExporter {
             .scenario-header {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                margin-bottom: 16px;
+                gap: 10px;
+                margin-bottom: 12px;
             }
 
             .scenario-icon {
-                font-size: 32px;
+                font-size: 28px;
+                font-weight: 700;
             }
 
             .scenario-params {
-                margin: 16px 0;
-                font-size: 14px;
+                margin: 12px 0;
+                font-size: 13px;
                 color: #64748b;
             }
 
             .scenario-params div {
-                padding: 6px 0;
+                padding: 5px 0;
                 border-bottom: 1px solid #e2e8f0;
             }
 
             .scenario-result {
-                margin-top: 16px;
-                padding: 12px;
+                margin-top: 12px;
+                padding: 10px;
                 background: rgba(102,126,234,0.1);
                 border-radius: 8px;
                 text-align: center;
-                font-size: 15px;
+                font-size: 14px;
             }
 
             /* ════════════════════════════════════════════════════════════════
             RISKS
             ════════════════════════════════════════════════════════════════ */
             .risks {
-                margin: 30px 0;
+                margin: 20px 0;
             }
 
             .risk-card {
-                margin-bottom: 24px;
-                padding: 24px;
-                border-radius: 16px;
-                border-left: 6px solid #f59e0b;
+                margin-bottom: 18px;
+                padding: 18px;
+                border-radius: 14px;
+                border-left: 5px solid #f59e0b;
                 background: rgba(245,158,11,0.05);
-                page-break-inside: avoid;
             }
 
             .risk-severity {
                 display: inline-block;
-                padding: 6px 16px;
-                border-radius: 20px;
-                font-size: 12px;
+                padding: 5px 14px;
+                border-radius: 16px;
+                font-size: 11px;
                 font-weight: 700;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
             }
 
             .risk-severity.high {
@@ -1907,26 +1917,26 @@ class BusinessPlanPDFExporter {
             }
 
             .risk-mitigation {
-                margin: 16px 0;
-                padding: 16px;
+                margin: 12px 0;
+                padding: 12px;
                 background: rgba(255,255,255,0.7);
-                border-radius: 12px;
+                border-radius: 10px;
             }
 
             .risk-mitigation h5 {
-                margin-bottom: 8px;
-                font-size: 15px;
+                margin-bottom: 6px;
+                font-size: 14px;
                 color: #667eea;
             }
 
             .risk-mitigation ul {
-                margin: 8px 0;
-                padding-left: 20px;
+                margin: 6px 0;
+                padding-left: 18px;
             }
 
             .risk-prob {
-                margin-top: 12px;
-                font-size: 13px;
+                margin-top: 10px;
+                font-size: 12px;
                 font-weight: 600;
                 color: #64748b;
             }
@@ -1935,29 +1945,29 @@ class BusinessPlanPDFExporter {
             FOOTER
             ════════════════════════════════════════════════════════════════ */
             .footer {
-                margin-top: 60px;
-                padding: 32px;
+                margin-top: 40px;
+                padding: 24px;
                 text-align: center;
                 background: #f8fafc;
-                border-radius: 16px;
+                border-radius: 14px;
                 border-top: 4px solid #667eea;
             }
 
             .footer-title {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #1e293b;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .footer-subtitle {
-                font-size: 14px;
+                font-size: 13px;
                 color: #64748b;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .footer-date {
-                font-size: 13px;
+                font-size: 12px;
                 color: #94a3b8;
             }
 
@@ -1965,6 +1975,11 @@ class BusinessPlanPDFExporter {
             PRINT OPTIMIZATIONS
             ════════════════════════════════════════════════════════════════ */
             @media print {
+                body {
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+
                 .section {
                     page-break-inside: avoid;
                 }
@@ -1975,10 +1990,7 @@ class BusinessPlanPDFExporter {
                 .value-prop-item,
                 .advantage-item,
                 .roadmap-item,
-                .risk-card {
-                    page-break-inside: avoid;
-                }
-
+                .risk-card,
                 table {
                     page-break-inside: avoid;
                 }
@@ -1987,7 +1999,9 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🔧 UTILS
+     * ════════════════════════════════════════════════════════════════
+     * MÉTHODES UTILITAIRES
+     * ════════════════════════════════════════════════════════════════
      */
     getEmails() {
         const raw = document.getElementById('recipientEmails').value;
@@ -2035,9 +2049,12 @@ class BusinessPlanPDFExporter {
             border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
             min-width: 380px; animation: slideIn 0.5s ease;
         `;
+        
+        const icon = type === 'success' ? '[CHECK]' : type === 'warning' ? '[WARNING]' : '[X]';
+        
         notification.innerHTML = `
             <div style="display: flex; gap: 20px;">
-                <div style="font-size: 32px;">${type === 'success' ? '✅' : type === 'warning' ? '⚠' : '❌'}</div>
+                <div style="font-size: 32px;">${icon}</div>
                 <div>
                     <div style="font-weight: 800; font-size: 18px; margin-bottom: 8px;">${title}</div>
                     <div style="font-size: 15px; opacity: 0.95;">${message}</div>
@@ -2056,8 +2073,8 @@ class BusinessPlanPDFExporter {
     }
 }
 
-// ✅ INITT
+// INITIALISATION
 document.addEventListener('DOMContentLoaded', () => {
     window.pdfExporter = new BusinessPlanPDFExporter();
-    console.log('📄 ✅ Business Plan PDF Exporter v9.0 (html2pdf.js) initialized');
+    console.log('Business Plan PDF Exporter v10.0 (No Emojis + Perfect Pagination) initialized');
 });
