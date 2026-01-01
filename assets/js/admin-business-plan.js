@@ -1,12 +1,22 @@
 /* ════════════════════════════════════════════════════════════════
    ADMIN BUSINESS PLAN - VERSION PREMIUM COMPLÈTE
    AlphaVault AI - Interactive Business Plan Dashboard
-   Version 3.0 - Full Featured
+   Version 3.0 - Full Featured + MOBILE RESPONSIVE
    ════════════════════════════════════════════════════════════════ */
 
 // ════════════════════════════════════════════════════════════════
 // GLOBAL VARIABLES & CONFIGURATION
 // ════════════════════════════════════════════════════════════════
+
+// ⚡ DÉTECTION MOBILE
+const isMobile = window.innerWidth <= 768;
+const isSmallMobile = window.innerWidth <= 480;
+
+console.log('📱 Device Detection:', {
+    width: window.innerWidth,
+    isMobile: isMobile,
+    isSmallMobile: isSmallMobile
+});
 
 let currentScenario = 'base';
 let simulationParams = {
@@ -178,10 +188,12 @@ function initializeTabs() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// CHARTS INITIALIZATION - ALL CHARTS
+// CHARTS INITIALIZATION - ALL CHARTS WITH MOBILE RESPONSIVE
 // ════════════════════════════════════════════════════════════════
 
 function initializeCharts() {
+    console.log('📊 Initializing charts with mobile detection...');
+    
     createMarketGrowthChart();
     createRevenueChart();
     createProfitabilityChart();
@@ -194,7 +206,79 @@ function initializeCharts() {
     console.log('✅ All charts initialized');
 }
 
-// Chart 1: Market Growth
+// ⚡ NOUVELLE FONCTION : Configuration responsive adaptative
+function getResponsiveChartConfig(title, yAxisLabel, prefix, suffix) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false, // ⚡ CRITICAL: Permet hauteur fixe
+        aspectRatio: isSmallMobile ? 1 : (isMobile ? 1.5 : 2),
+        plugins: {
+            legend: {
+                position: isMobile ? 'bottom' : 'top',
+                labels: {
+                    font: { 
+                        size: isSmallMobile ? 10 : (isMobile ? 11 : 13),
+                        weight: 'bold' 
+                    },
+                    padding: isSmallMobile ? 8 : (isMobile ? 10 : 18),
+                    usePointStyle: true,
+                    boxWidth: isSmallMobile ? 30 : 40
+                }
+            },
+            title: {
+                display: true,
+                text: title,
+                font: { 
+                    size: isSmallMobile ? 13 : (isMobile ? 15 : 17),
+                    weight: 'bold' 
+                },
+                padding: isSmallMobile ? 12 : (isMobile ? 15 : 20)
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                padding: isMobile ? 10 : 14,
+                bodyFont: {
+                    size: isSmallMobile ? 11 : (isMobile ? 12 : 13)
+                },
+                callbacks: {
+                    label: context => context.dataset.label + ': ' + prefix + context.parsed.y.toLocaleString() + suffix
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: yAxisLabel,
+                    font: { 
+                        size: isSmallMobile ? 11 : (isMobile ? 12 : 14),
+                        weight: 'bold' 
+                    }
+                },
+                ticks: {
+                    font: {
+                        size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                    },
+                    callback: value => prefix + value.toLocaleString() + suffix
+                },
+                grid: { color: 'rgba(59, 130, 246, 0.1)' }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                    },
+                    maxRotation: isMobile ? 45 : 0,
+                    minRotation: isMobile ? 45 : 0
+                },
+                grid: { display: false }
+            }
+        }
+    };
+}
+
+// Chart 1: Market Growth (CORRIGÉ)
 function createMarketGrowthChart() {
     const ctx = document.getElementById('marketGrowthChart');
     if (!ctx) return;
@@ -205,45 +289,45 @@ function createMarketGrowthChart() {
             labels: ['2024', '2025', '2026', '2027', '2028', '2029'],
             datasets: [
                 {
-                    label: 'TAM (Total Addressable Market)',
+                    label: 'TAM',
                     data: [12.5, 14.8, 17.5, 20.7, 24.5, 29.0],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 3 : 5,
+                    pointHoverRadius: isMobile ? 5 : 7
                 },
                 {
-                    label: 'SAM (Serviceable Available Market)',
+                    label: 'SAM',
                     data: [3.2, 3.8, 4.5, 5.3, 6.3, 7.5],
                     borderColor: '#8b5cf6',
                     backgroundColor: 'rgba(139, 92, 246, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 3 : 5,
+                    pointHoverRadius: isMobile ? 5 : 7
                 },
                 {
-                    label: 'SOM (Serviceable Obtainable Market)',
+                    label: 'SOM',
                     data: [0.08, 0.12, 0.22, 0.35, 0.50, 0.75],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 3 : 5,
+                    pointHoverRadius: isMobile ? 5 : 7
                 }
             ]
         },
-        options: getChartOptions('Market Size Projection ($B)', 'Market Size (Billions USD)', '$', 'B')
+        options: getResponsiveChartConfig('Market Size Projection ($B)', 'Market Size (Billions USD)', '$', 'B')
     });
 }
 
-// Chart 2: Revenue Projection
+// Chart 2: Revenue Projection (CORRIGÉ)
 function createRevenueChart() {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
@@ -270,23 +354,23 @@ function createRevenueChart() {
             ]
         },
         options: {
-            ...getChartOptions('5-Year Revenue Projection ($K)', 'Revenue (Thousands USD)', '$', 'K'),
+            ...getResponsiveChartConfig('5-Year Revenue Projection ($K)', 'Revenue (Thousands USD)', '$', 'K'),
             scales: {
-                ...getChartOptions('', '', '$', 'K').scales,
+                ...getResponsiveChartConfig('', '', '$', 'K').scales,
                 y: {
-                    ...getChartOptions('', '', '$', 'K').scales.y,
+                    ...getResponsiveChartConfig('', '', '$', 'K').scales.y,
                     stacked: true
                 },
                 x: {
-                    stacked: true,
-                    grid: { display: false }
+                    ...getResponsiveChartConfig('', '', '$', 'K').scales.x,
+                    stacked: true
                 }
             }
         }
     });
 }
 
-// Chart 3: Profitability Analysis
+// Chart 3: Profitability Analysis (CORRIGÉ)
 function createProfitabilityChart() {
     const ctx = document.getElementById('profitabilityChart');
     if (!ctx) return;
@@ -303,9 +387,9 @@ function createProfitabilityChart() {
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
+                    borderWidth: isMobile ? 2 : 3,
                     yAxisID: 'y',
-                    pointRadius: 5
+                    pointRadius: isMobile ? 3 : 5
                 },
                 {
                     label: 'Total Expenses',
@@ -314,9 +398,9 @@ function createProfitabilityChart() {
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
+                    borderWidth: isMobile ? 2 : 3,
                     yAxisID: 'y',
-                    pointRadius: 5
+                    pointRadius: isMobile ? 3 : 5
                 },
                 {
                     label: 'EBITDA',
@@ -325,9 +409,9 @@ function createProfitabilityChart() {
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: true,
-                    borderWidth: 3,
+                    borderWidth: isMobile ? 2 : 3,
                     yAxisID: 'y',
-                    pointRadius: 5
+                    pointRadius: isMobile ? 3 : 5
                 },
                 {
                     label: 'EBITDA Margin (%)',
@@ -335,31 +419,45 @@ function createProfitabilityChart() {
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
                     tension: 0.4,
-                    borderWidth: 3,
+                    borderWidth: isMobile ? 2 : 3,
                     borderDash: [5, 5],
                     yAxisID: 'y1',
-                    pointRadius: 5
+                    pointRadius: isMobile ? 3 : 5
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false, // ⚡ CRITICAL
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: {
-                    position: 'top',
-                    labels: { font: { size: 13, weight: 'bold' }, padding: 18, usePointStyle: true }
+                    position: isMobile ? 'bottom' : 'top',
+                    labels: {
+                        font: {
+                            size: isSmallMobile ? 10 : (isMobile ? 11 : 13),
+                            weight: 'bold'
+                        },
+                        padding: isSmallMobile ? 8 : (isMobile ? 10 : 18),
+                        usePointStyle: true,
+                        boxWidth: isSmallMobile ? 30 : 40
+                    }
                 },
                 title: {
                     display: true,
                     text: 'Revenue vs Expenses vs Profitability',
-                    font: { size: 17, weight: 'bold' },
-                    padding: 20
+                    font: {
+                        size: isSmallMobile ? 13 : (isMobile ? 15 : 17),
+                        weight: 'bold'
+                    },
+                    padding: isSmallMobile ? 12 : (isMobile ? 15 : 20)
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    padding: 14,
+                    padding: isMobile ? 10 : 14,
+                    bodyFont: {
+                        size: isSmallMobile ? 11 : (isMobile ? 12 : 13)
+                    },
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -377,24 +475,57 @@ function createProfitabilityChart() {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: { display: true, text: 'Amount ($K)', font: { size: 14, weight: 'bold' } },
-                    ticks: { callback: value => '$' + value.toLocaleString() + 'K' },
+                    title: {
+                        display: true,
+                        text: 'Amount ($K)',
+                        font: {
+                            size: isSmallMobile ? 11 : (isMobile ? 12 : 14),
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                        },
+                        callback: value => '$' + value.toLocaleString() + 'K'
+                    },
                     grid: { color: 'rgba(59, 130, 246, 0.1)' }
                 },
                 y1: {
                     type: 'linear',
-                    display: true,
+                    display: !isSmallMobile, // Cache sur très petits écrans
                     position: 'right',
-                    title: { display: true, text: 'Margin (%)', font: { size: 14, weight: 'bold' } },
-                    ticks: { callback: value => value + '%' },
+                    title: {
+                        display: true,
+                        text: 'Margin (%)',
+                        font: {
+                            size: isSmallMobile ? 11 : (isMobile ? 12 : 14),
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                        },
+                        callback: value => value + '%'
+                    },
                     grid: { drawOnChartArea: false }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                        },
+                        maxRotation: isMobile ? 45 : 0,
+                        minRotation: isMobile ? 45 : 0
+                    }
                 }
             }
         }
     });
 }
 
-// Chart 4: Scenario Comparison
+// Chart 4: Scenario Comparison (CORRIGÉ)
 function createScenarioChart() {
     const ctx = document.getElementById('scenarioChart');
     if (!ctx) return;
@@ -410,15 +541,15 @@ function createScenarioChart() {
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.4,
                 fill: true,
-                borderWidth: 3,
-                pointRadius: 5
+                borderWidth: isMobile ? 2 : 3,
+                pointRadius: isMobile ? 3 : 5
             }]
         },
-        options: getChartOptions('Scenario ARR Projection ($K)', 'ARR (Thousands USD)', '$', 'K')
+        options: getResponsiveChartConfig('Scenario ARR Projection ($K)', 'ARR (Thousands USD)', '$', 'K')
     });
 }
 
-// Chart 5: Risk Matrix
+// Chart 5: Risk Matrix (CORRIGÉ)
 function createRiskMatrixChart() {
     const ctx = document.getElementById('riskMatrixChart');
     if (!ctx) return;
@@ -427,37 +558,93 @@ function createRiskMatrixChart() {
         type: 'bubble',
         data: {
             datasets: [
-                { label: 'Market Risk', data: [{ x: 30, y: 80, r: 22 }], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 2 },
-                { label: 'AI Model Accuracy', data: [{ x: 40, y: 60, r: 17 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
-                { label: 'Big Tech Competition', data: [{ x: 20, y: 70, r: 20 }], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 2 },
-                { label: 'Regulatory Risk', data: [{ x: 10, y: 50, r: 14 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
-                { label: 'Data Provider Dependency', data: [{ x: 30, y: 45, r: 16 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
-                { label: 'Key Person Dependency', data: [{ x: 15, y: 30, r: 12 }], backgroundColor: 'rgba(16, 185, 129, 0.6)', borderColor: '#10b981', borderWidth: 2 }
+                { label: 'Market Risk', data: [{ x: 30, y: 80, r: isMobile ? 15 : 22 }], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 2 },
+                { label: 'AI Model Accuracy', data: [{ x: 40, y: 60, r: isMobile ? 12 : 17 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
+                { label: 'Big Tech Competition', data: [{ x: 20, y: 70, r: isMobile ? 14 : 20 }], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: '#ef4444', borderWidth: 2 },
+                { label: 'Regulatory Risk', data: [{ x: 10, y: 50, r: isMobile ? 10 : 14 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
+                { label: 'Data Provider Dependency', data: [{ x: 30, y: 45, r: isMobile ? 11 : 16 }], backgroundColor: 'rgba(245, 158, 11, 0.6)', borderColor: '#f59e0b', borderWidth: 2 },
+                { label: 'Key Person Dependency', data: [{ x: 15, y: 30, r: isMobile ? 9 : 12 }], backgroundColor: 'rgba(16, 185, 129, 0.6)', borderColor: '#10b981', borderWidth: 2 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false, // ⚡ CRITICAL
             plugins: {
-                legend: { position: 'right', labels: { font: { size: 12, weight: 'bold' }, padding: 14, usePointStyle: true } },
-                title: { display: true, text: 'Risk Matrix: Probability vs Impact', font: { size: 17, weight: 'bold' }, padding: 20 },
+                legend: {
+                    position: isMobile ? 'bottom' : 'right',
+                    labels: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12),
+                            weight: 'bold'
+                        },
+                        padding: isSmallMobile ? 8 : (isMobile ? 10 : 14),
+                        usePointStyle: true,
+                        boxWidth: isSmallMobile ? 25 : 35
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Risk Matrix: Probability vs Impact',
+                    font: {
+                        size: isSmallMobile ? 13 : (isMobile ? 15 : 17),
+                        weight: 'bold'
+                    },
+                    padding: isSmallMobile ? 12 : (isMobile ? 15 : 20)
+                },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    padding: 14,
+                    padding: isMobile ? 10 : 14,
+                    bodyFont: {
+                        size: isSmallMobile ? 10 : (isMobile ? 11 : 12)
+                    },
                     callbacks: {
                         label: context => [context.dataset.label, 'Probability: ' + context.parsed.x + '%', 'Impact: ' + context.parsed.y + '/100']
                     }
                 }
             },
             scales: {
-                x: { title: { display: true, text: 'Probability (%)', font: { size: 14, weight: 'bold' } }, min: 0, max: 50, grid: { color: 'rgba(59, 130, 246, 0.1)' } },
-                y: { title: { display: true, text: 'Impact Score (0-100)', font: { size: 14, weight: 'bold' } }, min: 0, max: 100, grid: { color: 'rgba(59, 130, 246, 0.1)' } }
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Probability (%)',
+                        font: {
+                            size: isSmallMobile ? 11 : (isMobile ? 12 : 14),
+                            weight: 'bold'
+                        }
+                    },
+                    min: 0,
+                    max: 50,
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                        }
+                    },
+                    grid: { color: 'rgba(59, 130, 246, 0.1)' }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Impact Score (0-100)',
+                        font: {
+                            size: isSmallMobile ? 11 : (isMobile ? 12 : 14),
+                            weight: 'bold'
+                        }
+                    },
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 12)
+                        }
+                    },
+                    grid: { color: 'rgba(59, 130, 246, 0.1)' }
+                }
             }
         }
     });
 }
 
-// Chart 6: Cash Flow
+// Chart 6: Cash Flow (CORRIGÉ)
 function createCashFlowChart() {
     const ctx = document.getElementById('cashFlowChart');
     if (!ctx) return;
@@ -471,11 +658,11 @@ function createCashFlowChart() {
                 { label: 'Free Cash Flow', data: [50, 300, 880, 1850, 2850], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: '#3b82f6', borderWidth: 2 }
             ]
         },
-        options: getChartOptions('Cash Flow Projection ($K)', 'Cash Flow ($K)', '$', 'K')
+        options: getResponsiveChartConfig('Cash Flow Projection ($K)', 'Cash Flow ($K)', '$', 'K')
     });
 }
 
-// Chart 7: User Growth
+// Chart 7: User Growth (CORRIGÉ)
 function createUserGrowthChart() {
     const ctx = document.getElementById('userGrowthChart');
     if (!ctx) return;
@@ -485,17 +672,38 @@ function createUserGrowthChart() {
         data: {
             labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
             datasets: [
-                { label: 'Total Users', data: [5000, 15000, 35000, 65000, 100000], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, fill: true, borderWidth: 3, pointRadius: 5 },
-                { label: 'Paid Users', data: [1500, 4500, 10500, 19500, 30000], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, borderWidth: 3, pointRadius: 5 }
+                {
+                    label: 'Total Users',
+                    data: [5000, 15000, 35000, 65000, 100000],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 3 : 5
+                },
+                {
+                    label: 'Paid Users',
+                    data: [1500, 4500, 10500, 19500, 30000],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: isMobile ? 2 : 3,
+                    pointRadius: isMobile ? 3 : 5
+                }
             ]
         },
         options: {
-            ...getChartOptions('User Growth Projection', 'Number of Users', '', ''),
+            ...getResponsiveChartConfig('User Growth Projection', 'Number of Users', '', ''),
             plugins: {
-                ...getChartOptions('', '', '', '').plugins,
+                ...getResponsiveChartConfig('', '', '', '').plugins,
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    padding: 14,
+                    padding: isMobile ? 10 : 14,
+                    bodyFont: {
+                        size: isSmallMobile ? 11 : (isMobile ? 12 : 13)
+                    },
                     callbacks: { label: context => context.dataset.label + ': ' + context.parsed.y.toLocaleString() }
                 }
             }
@@ -503,7 +711,7 @@ function createUserGrowthChart() {
     });
 }
 
-// Chart 8: Market Share
+// Chart 8: Market Share (CORRIGÉ)
 function createMarketShareChart() {
     const ctx = document.getElementById('marketShareChart');
     if (!ctx) return;
@@ -521,46 +729,40 @@ function createMarketShareChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false, // ⚡ CRITICAL
             plugins: {
-                legend: { position: 'right', labels: { font: { size: 13, weight: 'bold' }, padding: 14, usePointStyle: true } },
-                title: { display: true, text: 'Target Market Share (Year 5)', font: { size: 17, weight: 'bold' }, padding: 20 },
+                legend: {
+                    position: isMobile ? 'bottom' : 'right',
+                    labels: {
+                        font: {
+                            size: isSmallMobile ? 10 : (isMobile ? 11 : 13),
+                            weight: 'bold'
+                        },
+                        padding: isSmallMobile ? 8 : (isMobile ? 10 : 14),
+                        usePointStyle: true,
+                        boxWidth: isSmallMobile ? 30 : 40
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Target Market Share (Year 5)',
+                    font: {
+                        size: isSmallMobile ? 13 : (isMobile ? 15 : 17),
+                        weight: 'bold'
+                    },
+                    padding: isSmallMobile ? 12 : (isMobile ? 15 : 20)
+                },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                    padding: 14,
+                    padding: isMobile ? 10 : 14,
+                    bodyFont: {
+                        size: isSmallMobile ? 11 : (isMobile ? 12 : 13)
+                    },
                     callbacks: { label: context => context.label + ': ' + context.parsed + '%' }
                 }
             }
         }
     });
-}
-
-// Chart Options Helper
-function getChartOptions(title, yAxisLabel, prefix, suffix) {
-    return {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { position: 'top', labels: { font: { size: 13, weight: 'bold' }, padding: 18, usePointStyle: true } },
-            title: { display: true, text: title, font: { size: 17, weight: 'bold' }, padding: 20 },
-            tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                padding: 14,
-                callbacks: {
-                    label: context => context.dataset.label + ': ' + prefix + context.parsed.y.toLocaleString() + suffix
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: { display: true, text: yAxisLabel, font: { size: 14, weight: 'bold' } },
-                ticks: { callback: value => prefix + value.toLocaleString() + suffix },
-                grid: { color: 'rgba(59, 130, 246, 0.1)' }
-            },
-            x: { grid: { display: false } }
-        }
-    };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -731,7 +933,7 @@ function applyScenario(scenario) {
 // ════════════════════════════════════════════════════════════════
 
 function initializeScenarioComparison() {
-    const comparisonContainer = document.getElementById('scenarioComparisonGrid');
+    const comparisonContainer = document.querySelector('.scenario-comparison-grid');
     if (!comparisonContainer) return;
     
     const scenarios = {
@@ -896,7 +1098,6 @@ function initializeExportPDF() {
     const exportBtn = document.getElementById('exportPdfBtn');
     if (exportBtn) {
         exportBtn.addEventListener('click', function() {
-            // Simple print for now (can be upgraded to jsPDF)
             window.print();
             console.log('📄 Initiating PDF export...');
         });
@@ -949,4 +1150,30 @@ if (footerDateEl) {
     });
 }
 
-console.log('✅ Business Plan JavaScript Loaded Successfully');
+console.log('✅ Business Plan JavaScript Loaded Successfully (MOBILE RESPONSIVE VERSION)');
+
+// ════════════════════════════════════════════════════════════════
+// ⚡ FORÇAGE FINAL MOBILE (AU CAS OÙ)
+// ════════════════════════════════════════════════════════════════
+
+window.addEventListener('load', function() {
+    if (isMobile) {
+        console.log('📱 Applying final mobile chart corrections...');
+        
+        const allCanvas = document.querySelectorAll('.chart-container canvas');
+        
+        allCanvas.forEach(function(canvas) {
+            const container = canvas.closest('.chart-container');
+            
+            if (container) {
+                container.style.minHeight = isSmallMobile ? '400px' : '420px';
+                container.style.padding = isSmallMobile ? '20px 12px' : '24px 16px';
+                
+                canvas.style.height = isSmallMobile ? '360px' : '380px';
+                canvas.style.minHeight = isSmallMobile ? '360px' : '380px';
+            }
+        });
+        
+        console.log(`✅ Final corrections applied to ${allCanvas.length} charts`);
+    }
+});
