@@ -22,7 +22,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
+    <!-- <link rel="stylesheet" href="assets/css/chatbot-styles.css"> -->
     <link rel='stylesheet' href='assets/css/monte-carlo.css'>
     
     <!-- ✅ FAVICON DYNAMIQUE - ICI -->
@@ -2095,14 +2095,14 @@
 
     <!-- Chatbot -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="assets/js/chatbot-config.js"></script>
+    <!-- <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
     <script src="assets/js/chatbot-charts.js"></script>
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script> -->
     <script src="assets/js/chatbot-particles.js"></script>
 
     <!-- ============================================
@@ -2175,22 +2175,6 @@
                 setTimeout(initMenu, 100);
             }
         })();
-    </script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const initChatbotWhenReady = () => {
-            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
-            if (accessDenied) return;
-            if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') return;
-            try {
-                window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            } catch (error) {
-                console.error('Chatbot init error:', error);
-            }
-        };
-        setTimeout(initChatbotWhenReady, 500);
-    });
     </script>
 
     <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
