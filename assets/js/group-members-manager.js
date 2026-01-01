@@ -1,11 +1,12 @@
 /* ============================================
-   GROUP-MEMBERS-MANAGER.JS v2.1 - FIXED
+   GROUP-MEMBERS-MANAGER.JS v2.2 - PREVIEW ENHANCED
    👥 Gestion complète des membres du groupe
    ✅ Ajouter/retirer des membres
    ✅ Promouvoir/rétrograder admin
    ✅ Modifier nom, photo, description du groupe
    ✅ Upload photo groupe vers R2
    🔧 FIX: Conflit ID avec create-group-modal
+   ✨ NEW: Preview animé + badge "NEW PHOTO"
    ============================================ */
 
 class GroupMembersManager {
@@ -21,7 +22,7 @@ class GroupMembersManager {
     }
 
     initialize() {
-        console.log('👥 Initializing Group Members Manager v2.1 (Fixed)...');
+        console.log('👥 Initializing Group Members Manager v2.2 (Preview Enhanced)...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -147,20 +148,20 @@ class GroupMembersManager {
                                 <!-- MODE ÉDITION -->
                                 <div class="group-info-edit" style="padding: 20px; background: rgba(102, 126, 234, 0.05); border-radius: 12px;">
                                     
-                                    <!-- Photo Upload -->
+                                    <!-- Photo Upload avec Preview Animé -->
                                     <div style="text-align: center; margin-bottom: 24px;">
-                                        <div style="position: relative; display: inline-block;">
+                                        <div id="groupPhotoPreviewContainer" style="position: relative; display: inline-block;">
                                             <img src="${groupPhoto}" 
                                                  id="groupPhotoPreview"
                                                  alt="Group" 
-                                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea; transition: all 0.3s ease;">
                                             <input type="file" 
                                                    id="editGroupPhotoInput"
                                                    accept="image/*" 
                                                    style="display: none;"
                                                    onchange="window.groupMembersManager.handlePhotoSelect(event)">
                                             <button onclick="document.getElementById('editGroupPhotoInput').click()"
-                                                    style="position: absolute; bottom: 0; right: 0; width: 36px; height: 36px; border-radius: 50%; background: #667eea; color: white; border: 2px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                                                    style="position: absolute; bottom: 0; right: 0; width: 36px; height: 36px; border-radius: 50%; background: #667eea; color: white; border: 2px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);">
                                                 <i class="fas fa-camera"></i>
                                             </button>
                                         </div>
@@ -192,6 +193,31 @@ class GroupMembersManager {
                                                   placeholder="Enter group description">${this.escapeHtml(groupDesc)}</textarea>
                                     </div>
                                 </div>
+                                
+                                <!-- ✨ Animations CSS -->
+                                <style>
+                                    @keyframes bounceIn {
+                                        0% { transform: scale(0); opacity: 0; }
+                                        50% { transform: scale(1.1); }
+                                        100% { transform: scale(1); opacity: 1; }
+                                    }
+                                    
+                                    @keyframes fadeOut {
+                                        0% { opacity: 1; transform: scale(1); }
+                                        100% { opacity: 0; transform: scale(0.8); }
+                                    }
+                                    
+                                    @keyframes pulse {
+                                        0%, 100% { transform: scale(1); }
+                                        50% { transform: scale(1.05); }
+                                    }
+                                    
+                                    #groupPhotoPreviewContainer button:hover {
+                                        transform: scale(1.1);
+                                        background: #5568d3 !important;
+                                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6) !important;
+                                    }
+                                </style>
                             `}
                         </div>
                         
@@ -346,9 +372,55 @@ class GroupMembersManager {
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById('groupPhotoPreview');
+            const previewContainer = document.getElementById('groupPhotoPreviewContainer');
+            
             if (preview) {
-                preview.src = e.target.result;
-                console.log('✅ [GROUP EDIT] Preview updated');
+                // ✨ Animation de transition
+                preview.style.opacity = '0';
+                preview.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    preview.src = e.target.result;
+                    preview.style.opacity = '1';
+                    preview.style.transform = 'scale(1)';
+                    preview.style.transition = 'all 0.3s ease';
+                    console.log('✅ [GROUP EDIT] Preview updated');
+                }, 150);
+                
+                // ✅ Ajouter badge "NEW PHOTO"
+                if (previewContainer) {
+                    let badge = document.getElementById('newPhotoBadge');
+                    
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.id = 'newPhotoBadge';
+                        badge.innerHTML = '<i class="fas fa-check-circle"></i> NEW PHOTO';
+                        badge.style.cssText = `
+                            position: absolute;
+                            top: -10px;
+                            right: -10px;
+                            background: linear-gradient(135deg, #10b981, #059669);
+                            color: white;
+                            padding: 6px 12px;
+                            border-radius: 20px;
+                            font-size: 0.75rem;
+                            font-weight: 800;
+                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+                            animation: bounceIn 0.5s ease;
+                            z-index: 10;
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                        `;
+                        previewContainer.appendChild(badge);
+                    }
+                    
+                    // Animation du badge
+                    badge.style.animation = 'none';
+                    setTimeout(() => {
+                        badge.style.animation = 'bounceIn 0.5s ease, pulse 2s infinite';
+                    }, 10);
+                }
             } else {
                 console.error('❌ Preview element not found!');
             }
@@ -401,6 +473,13 @@ class GroupMembersManager {
                 
                 if (newPhotoURL) {
                     console.log('✅ New photo URL received:', newPhotoURL);
+                    
+                    // ✅ Retirer le badge "NEW PHOTO" avec animation
+                    const badge = document.getElementById('newPhotoBadge');
+                    if (badge) {
+                        badge.style.animation = 'fadeOut 0.3s ease';
+                        setTimeout(() => badge.remove(), 300);
+                    }
                 } else {
                     console.warn('⚠ Upload returned null URL, keeping old photo');
                 }
@@ -807,4 +886,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.groupMembersManager.initialize();
 });
 
-console.log('✅ group-members-manager.js loaded (v2.1 - ID Conflict Fixed)');
+console.log('✅ group-members-manager.js loaded (v2.2 - Preview Enhanced with Animated Badge)');
