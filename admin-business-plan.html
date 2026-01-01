@@ -2558,25 +2558,6 @@
                 window.location.href = 'login.html';
             });
         }
-
-        // Set dates
-        const currentDate = new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        
-        const footerDate = new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-        
-        const currentDateEl = document.getElementById('currentDate');
-        if (currentDateEl) currentDateEl.textContent = currentDate;
-        
-        const footerDateEl = document.getElementById('footerDate');
-        if (footerDateEl) footerDateEl.textContent = footerDate;
     </script>
 </body>
 </html>
