@@ -1,125 +1,161 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🏆 ALPHAVAULT SCORING SYSTEM - PROPRIETARY DATA TRANSFORMATION
+ * 🏆 ALPHAVAULT SCORING SYSTEM v2.0 ULTRA PRO
  * ═══════════════════════════════════════════════════════════════════
- * Transforme les données brutes API (Finnhub/Twelve Data) en scores
- * propriétaires AlphaVault pour éviter la redistribution de données.
+ * Algorithme propriétaire de scoring financier
+ * Transforme données API brutes en scores normalisés (0-100)
  * 
- * ✅ CONFORMITÉ LÉGALE :
- * - Aucune donnée brute API n'est exposée à l'utilisateur
- * - Tous les prix/volumes/métriques sont transformés en scores (0-100)
- * - Les graphiques utilisent des indices normalisés (base 100)
- * - Les comparaisons affichent des scores relatifs uniquement
+ * ✅ CONFORMITÉ LÉGALE : Aucune redistribution de données brutes
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class AlphaVaultScoring {
     constructor() {
-        this.scoringVersion = '1.0.0';
-        console.log('🏆 AlphaVault Scoring System initialized');
+        this.version = '2.0.0';
+        console.log('🏆 AlphaVault Scoring System v2.0 ULTRA PRO initialized');
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 📊 TRANSFORMATION STOCK DATA (Quote + Profile + Metrics)
+     * 🎯 CALCULATE COMPREHENSIVE SCORE (Main Entry Point)
      * ═══════════════════════════════════════════════════════════════
      */
-    transformStockData(rawData) {
-        if (!rawData || rawData.error) {
+    calculateComprehensiveScore(data) {
+        const { symbol, quote, profile } = data;
+
+        if (!quote || quote.error) {
             return {
-                error: 'Stock data unavailable',
-                alphaVaultScore: 0
+                error: 'Insufficient data for scoring',
+                symbol: symbol
             };
         }
 
-        const transformed = {
-            symbol: rawData.symbol,
-            companyName: rawData.profile?.name || rawData.symbol, // ✅ OK (info publique)
-            sector: rawData.profile?.sector || 'Unknown', // ✅ OK (classification publique)
+        console.log(`🏆 Calculating AlphaVault Score for ${symbol}...`);
+
+        // Calculate individual scores
+        const technicalScore = this.calculateTechnicalScore(quote);
+        const momentumScore = this.calculateMomentumScore(quote);
+        const qualityGrade = this.calculateQualityGrade(quote, profile);
+        const riskRating = this.calculateRiskRating(quote, profile);
+        const valueScore = this.calculateValueScore(quote, profile);
+        const sentimentScore = 50; // Placeholder (needs news data)
+
+        // Overall score (weighted average)
+        const overallScore = Math.round(
+            technicalScore * 0.25 +
+            momentumScore * 0.20 +
+            valueScore * 0.25 +
+            sentimentScore * 0.15 +
+            this.qualityGradeToScore(qualityGrade) * 0.15
+        );
+
+        // Rating
+        const rating = this.getScoreRating(overallScore);
+
+        // Trend analysis
+        const trend = this.analyzeTrend(quote);
+
+        // Volatility
+        const volatility = this.categorizeVolatility(quote);
+
+        // Market cap category
+        const marketCapCategory = this.categorizeMarketCap(profile?.marketCapitalization);
+
+        // Generate insights
+        const insights = this.generateInsights(
+            overallScore, 
+            technicalScore, 
+            momentumScore, 
+            qualityGrade, 
+            riskRating,
+            trend
+        );
+
+        const result = {
+            symbol: symbol,
+            companyName: profile?.name || symbol,
+            sector: profile?.finnhubIndustry || profile?.sector || 'Unknown',
             
-            // ✅ SCORES PROPRIÉTAIRES (0-100)
-            alphaVaultScore: this.calculateAlphaVaultScore(rawData),
-            momentumIndex: this.calculateMomentumIndex(rawData),
-            qualityGrade: this.calculateQualityGrade(rawData),
-            riskRating: this.calculateRiskRating(rawData),
-            technicalStrength: this.calculateTechnicalStrength(rawData),
-            valueScore: this.calculateValueScore(rawData),
-            sentimentIndex: this.calculateSentimentIndex(rawData),
+            // Scores
+            overall: overallScore,
+            technical: technicalScore,
+            momentum: momentumScore,
+            quality: qualityGrade,
+            value: valueScore,
+            sentiment: sentimentScore,
             
-            // ✅ DONNÉES RELATIVES (pas de prix absolus)
-            priceChangePercent: rawData.quote?.changePercent || 0,
-            volatilityLevel: this.categorizeVolatility(rawData),
-            marketCapCategory: this.categorizeMarketCap(rawData.profile?.marketCap),
+            // Ratings
+            rating: rating,
+            risk: riskRating,
             
-            // ✅ METADATA (âge des données, pas de valeurs brutes)
-            dataQuality: this.assessDataQuality(rawData),
-            lastUpdate: new Date().toISOString(),
-            source: 'AlphaVault Proprietary Analysis'
+            // Metrics
+            changePercent: (quote.percentChange || quote.change || 0).toFixed(2),
+            trend: trend,
+            volatility: volatility,
+            marketCapCategory: marketCapCategory,
+            
+            // Insights
+            insights: insights,
+            
+            // Metadata
+            timestamp: new Date().toISOString(),
+            dataQuality: this.assessDataQuality(quote, profile),
+            source: 'AlphaVault Proprietary Analysis v2.0'
         };
 
-        return transformed;
+        console.log(`✅ AlphaVault Score: ${result.overall}/100 (${result.rating})`);
+
+        return result;
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 🎯 ALPHAVAULT SCORE (Score composite 0-100)
+     * 📈 TECHNICAL SCORE (0-100)
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateAlphaVaultScore(rawData) {
-        let score = 50; // Base score
+    calculateTechnicalScore(quote) {
+        let score = 50;
 
-        // 1⃣ MOMENTUM (0-20 points)
-        const changePercent = rawData.quote?.changePercent || 0;
-        if (changePercent > 10) score += 20;
-        else if (changePercent > 5) score += 15;
-        else if (changePercent > 2) score += 10;
-        else if (changePercent > 0) score += 5;
-        else if (changePercent < -10) score -= 15;
-        else if (changePercent < -5) score -= 10;
+        // Price position in 52-week range
+        const current = quote.price || quote.close || 0;
+        const high = quote.high || current;
+        const low = quote.low || current;
 
-        // 2⃣ VALUATION (0-20 points)
-        const pe = rawData.metrics?.peRatio || 0;
-        if (pe > 0 && pe < 15) score += 20; // Undervalued
-        else if (pe >= 15 && pe < 25) score += 10; // Fair
-        else if (pe >= 25 && pe < 40) score += 0; // Neutral
-        else if (pe >= 40) score -= 10; // Overvalued
+        if (high > low) {
+            const position = (current - low) / (high - low);
+            if (position > 0.8) score += 20;
+            else if (position > 0.6) score += 15;
+            else if (position > 0.4) score += 10;
+            else if (position < 0.2) score -= 15;
+        }
 
-        // 3⃣ PROFITABILITY (0-20 points)
-        const profitMargin = rawData.metrics?.profitMargin || 0;
-        if (profitMargin > 30) score += 20;
-        else if (profitMargin > 20) score += 15;
-        else if (profitMargin > 10) score += 10;
-        else if (profitMargin > 5) score += 5;
-        else if (profitMargin < 0) score -= 10;
+        // Volume analysis
+        const volume = quote.volume || 0;
+        if (volume > 10000000) score += 15;
+        else if (volume > 5000000) score += 10;
+        else if (volume > 1000000) score += 5;
 
-        // 4⃣ GROWTH (0-20 points)
-        const revenueGrowth = rawData.metrics?.revenueGrowth || 0;
-        if (revenueGrowth > 30) score += 20;
-        else if (revenueGrowth > 20) score += 15;
-        else if (revenueGrowth > 10) score += 10;
-        else if (revenueGrowth > 5) score += 5;
-        else if (revenueGrowth < -10) score -= 15;
-
-        // 5⃣ FINANCIAL HEALTH (0-20 points)
-        const debtToEquity = rawData.metrics?.debtToEquity || 0;
-        if (debtToEquity < 0.5) score += 20; // Very healthy
-        else if (debtToEquity < 1) score += 15; // Healthy
-        else if (debtToEquity < 2) score += 5; // Moderate
-        else if (debtToEquity >= 3) score -= 10; // Risky
+        // Change momentum
+        const change = quote.percentChange || quote.change || 0;
+        if (change > 5) score += 15;
+        else if (change > 2) score += 10;
+        else if (change > 0) score += 5;
+        else if (change < -5) score -= 15;
+        else if (change < -2) score -= 10;
 
         return Math.max(0, Math.min(100, Math.round(score)));
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 📈 MOMENTUM INDEX (0-100)
+     * 🚀 MOMENTUM SCORE (0-100)
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateMomentumIndex(rawData) {
-        const changePercent = rawData.quote?.changePercent || 0;
+    calculateMomentumScore(quote) {
+        const changePercent = quote.percentChange || quote.change || 0;
         
         // Normalize -20% to +20% → 0 to 100
-        const normalized = ((changePercent + 20) / 40) * 100;
+        const normalized = ((parseFloat(changePercent) + 20) / 40) * 100;
         return Math.max(0, Math.min(100, Math.round(normalized)));
     }
 
@@ -128,30 +164,28 @@ class AlphaVaultScoring {
      * 💎 QUALITY GRADE (A+ to D-)
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateQualityGrade(rawData) {
-        const roe = rawData.metrics?.roe || 0;
-        const profitMargin = rawData.metrics?.profitMargin || 0;
-        const debtToEquity = rawData.metrics?.debtToEquity || 999;
-
+    calculateQualityGrade(quote, profile) {
         let gradeScore = 0;
 
-        // ROE scoring
-        if (roe > 20) gradeScore += 4;
-        else if (roe > 15) gradeScore += 3;
-        else if (roe > 10) gradeScore += 2;
-        else if (roe > 5) gradeScore += 1;
+        // Market cap (larger = higher quality typically)
+        const marketCap = profile?.marketCapitalization || 0;
+        if (marketCap > 1000000) gradeScore += 4; // > $1T
+        else if (marketCap > 100000) gradeScore += 3; // > $100B
+        else if (marketCap > 10000) gradeScore += 2; // > $10B
+        else if (marketCap > 1000) gradeScore += 1; // > $1B
 
-        // Profit Margin scoring
-        if (profitMargin > 30) gradeScore += 4;
-        else if (profitMargin > 20) gradeScore += 3;
-        else if (profitMargin > 10) gradeScore += 2;
-        else if (profitMargin > 5) gradeScore += 1;
+        // Volume (liquidity indicator)
+        const volume = quote.volume || 0;
+        if (volume > 50000000) gradeScore += 4;
+        else if (volume > 20000000) gradeScore += 3;
+        else if (volume > 5000000) gradeScore += 2;
+        else if (volume > 1000000) gradeScore += 1;
 
-        // Debt scoring (inverse)
-        if (debtToEquity < 0.5) gradeScore += 4;
-        else if (debtToEquity < 1) gradeScore += 3;
-        else if (debtToEquity < 2) gradeScore += 2;
-        else if (debtToEquity < 3) gradeScore += 1;
+        // Consistency (low volatility = quality)
+        const change = Math.abs(quote.percentChange || quote.change || 0);
+        if (change < 1) gradeScore += 4;
+        else if (change < 2) gradeScore += 3;
+        else if (change < 5) gradeScore += 2;
 
         // Convert to grade (0-12 scale)
         if (gradeScore >= 11) return 'A+';
@@ -168,32 +202,41 @@ class AlphaVaultScoring {
         return 'D-';
     }
 
+    qualityGradeToScore(grade) {
+        const gradeMap = {
+            'A+': 100, 'A': 95, 'A-': 90,
+            'B+': 85, 'B': 80, 'B-': 75,
+            'C+': 70, 'C': 65, 'C-': 60,
+            'D+': 55, 'D': 50, 'D-': 45
+        };
+        return gradeMap[grade] || 50;
+    }
+
     /**
      * ═══════════════════════════════════════════════════════════════
      * ⚠ RISK RATING (Low/Medium/High/Very High)
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateRiskRating(rawData) {
-        const beta = rawData.metrics?.beta || 1;
-        const debtToEquity = rawData.metrics?.debtToEquity || 0;
-        const profitMargin = rawData.metrics?.profitMargin || 0;
-
+    calculateRiskRating(quote, profile) {
         let riskScore = 0;
 
-        // Beta risk
-        if (beta > 2) riskScore += 3;
-        else if (beta > 1.5) riskScore += 2;
-        else if (beta > 1) riskScore += 1;
+        // Volatility risk
+        const changeAbs = Math.abs(quote.percentChange || quote.change || 0);
+        if (changeAbs > 10) riskScore += 3;
+        else if (changeAbs > 5) riskScore += 2;
+        else if (changeAbs > 2) riskScore += 1;
 
-        // Debt risk
-        if (debtToEquity > 3) riskScore += 3;
-        else if (debtToEquity > 2) riskScore += 2;
-        else if (debtToEquity > 1) riskScore += 1;
+        // Market cap risk (smaller = riskier)
+        const marketCap = profile?.marketCapitalization || 0;
+        if (marketCap < 1000) riskScore += 3; // < $1B
+        else if (marketCap < 10000) riskScore += 2; // < $10B
+        else if (marketCap < 100000) riskScore += 1; // < $100B
 
-        // Profitability risk (inverse)
-        if (profitMargin < 0) riskScore += 3;
-        else if (profitMargin < 5) riskScore += 2;
-        else if (profitMargin < 10) riskScore += 1;
+        // Volume risk (low volume = risky)
+        const volume = quote.volume || 0;
+        if (volume < 500000) riskScore += 3;
+        else if (volume < 2000000) riskScore += 2;
+        else if (volume < 5000000) riskScore += 1;
 
         // Rating (0-9 scale)
         if (riskScore <= 2) return 'Low';
@@ -204,147 +247,167 @@ class AlphaVaultScoring {
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 📉 TECHNICAL STRENGTH (0-100)
-     * ═══════════════════════════════════════════════════════════════
-     */
-    calculateTechnicalStrength(rawData) {
-        // Basé sur les indicateurs techniques calculés
-        const tech = rawData.technicalIndicators || {};
-        
-        let strength = 50;
-
-        // RSI
-        if (tech.momentum?.rsi) {
-            const rsi = parseFloat(tech.momentum.rsi);
-            if (rsi >= 50 && rsi <= 70) strength += 20; // Bullish zone
-            else if (rsi > 70) strength -= 10; // Overbought
-            else if (rsi < 30) strength -= 20; // Oversold
-        }
-
-        // Trend
-        if (tech.trend?.direction) {
-            if (tech.trend.direction.includes('Uptrend')) strength += 20;
-            else if (tech.trend.direction.includes('Downtrend')) strength -= 20;
-        }
-
-        // Moving averages position
-        if (tech.movingAverages?.priceVsSMA20) {
-            const vs20 = parseFloat(tech.movingAverages.priceVsSMA20);
-            if (vs20 > 5) strength += 10;
-            else if (vs20 < -5) strength -= 10;
-        }
-
-        return Math.max(0, Math.min(100, Math.round(strength)));
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════════
      * 💰 VALUE SCORE (0-100)
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateValueScore(rawData) {
-        const pe = rawData.metrics?.peRatio || 0;
-        const pb = rawData.metrics?.priceToBook || 0;
-        const ps = rawData.metrics?.priceToSales || 0;
-
+    calculateValueScore(quote, profile) {
         let valueScore = 50;
 
-        // P/E valuation
-        if (pe > 0 && pe < 10) valueScore += 20; // Deep value
-        else if (pe >= 10 && pe < 15) valueScore += 15;
-        else if (pe >= 15 && pe < 20) valueScore += 10;
-        else if (pe >= 20 && pe < 30) valueScore += 0;
-        else if (pe >= 30) valueScore -= 15;
+        // Market cap valuation (relative)
+        const marketCap = profile?.marketCapitalization || 0;
+        const volume = quote.volume || 0;
 
-        // P/B valuation
-        if (pb > 0 && pb < 1) valueScore += 15;
-        else if (pb >= 1 && pb < 2) valueScore += 10;
-        else if (pb >= 2 && pb < 3) valueScore += 5;
-        else if (pb >= 5) valueScore -= 10;
+        // Volume-to-MarketCap ratio (liquidity indicator)
+        if (marketCap > 0) {
+            const liquidityRatio = (volume * quote.price) / (marketCap * 1000000);
+            if (liquidityRatio > 0.01) valueScore += 20;
+            else if (liquidityRatio > 0.005) valueScore += 15;
+            else if (liquidityRatio > 0.001) valueScore += 10;
+        }
 
-        // P/S valuation
-        if (ps > 0 && ps < 1) valueScore += 15;
-        else if (ps >= 1 && ps < 3) valueScore += 10;
-        else if (ps >= 3 && ps < 5) valueScore += 5;
-        else if (ps >= 10) valueScore -= 10;
+        // Price momentum (contrarian indicator)
+        const change = quote.percentChange || quote.change || 0;
+        if (change < -10) valueScore += 20; // Deep value
+        else if (change < -5) valueScore += 15;
+        else if (change < -2) valueScore += 10;
+        else if (change > 20) valueScore -= 15; // Potentially overvalued
 
         return Math.max(0, Math.min(100, Math.round(valueScore)));
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 😊 SENTIMENT INDEX (0-100)
+     * 📊 TREND ANALYSIS
      * ═══════════════════════════════════════════════════════════════
      */
-    calculateSentimentIndex(rawData) {
-        let sentiment = 50;
+    analyzeTrend(quote) {
+        const change = quote.percentChange || quote.change || 0;
 
-        // Analyst recommendations
-        if (rawData.analystRecommendations) {
-            const rec = rawData.analystRecommendations;
-            const bullishPercent = parseFloat(rec.bullishPercent) || 50;
-            sentiment = bullishPercent;
-        }
-
-        // News sentiment (si disponible)
-        if (rawData.sentiment) {
-            const newsScore = rawData.sentiment.overallSentiment.sentiment || 0;
-            // Normaliser -1 to +1 → 0 to 100
-            sentiment = ((newsScore + 1) / 2) * 100;
-        }
-
-        return Math.max(0, Math.min(100, Math.round(sentiment)));
+        if (change > 5) return 'Strong Uptrend 🚀';
+        if (change > 2) return 'Uptrend 📈';
+        if (change > 0) return 'Slight Uptrend ↗';
+        if (change > -2) return 'Slight Downtrend ↘';
+        if (change > -5) return 'Downtrend 📉';
+        return 'Strong Downtrend 🔻';
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 📏 CATÉGORISATION VOLATILITÉ
+     * 🌊 VOLATILITY CATEGORIZATION
      * ═══════════════════════════════════════════════════════════════
      */
-    categorizeVolatility(rawData) {
-        const volatility = rawData.historicalStats?.volatility || rawData.technicalIndicators?.volatility?.annualized || 0;
-        
-        const vol = parseFloat(volatility);
-        
-        if (vol < 15) return 'Very Low';
-        if (vol < 25) return 'Low';
-        if (vol < 40) return 'Moderate';
-        if (vol < 60) return 'High';
+    categorizeVolatility(quote) {
+        const changeAbs = Math.abs(quote.percentChange || quote.change || 0);
+
+        if (changeAbs < 1) return 'Very Low';
+        if (changeAbs < 2) return 'Low';
+        if (changeAbs < 5) return 'Moderate';
+        if (changeAbs < 10) return 'High';
         return 'Very High';
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * 📏 CATÉGORISATION MARKET CAP
+     * 📏 MARKET CAP CATEGORIZATION
      * ═══════════════════════════════════════════════════════════════
      */
-    categorizeMarketCap(marketCapBillions) {
-        if (!marketCapBillions || marketCapBillions <= 0) return 'Unknown';
-        
-        if (marketCapBillions < 0.3) return 'Nano Cap';
-        if (marketCapBillions < 2) return 'Micro Cap';
-        if (marketCapBillions < 10) return 'Small Cap';
-        if (marketCapBillions < 50) return 'Mid Cap';
-        if (marketCapBillions < 200) return 'Large Cap';
+    categorizeMarketCap(marketCapMillions) {
+        if (!marketCapMillions || marketCapMillions <= 0) return 'Unknown';
+
+        const billions = marketCapMillions / 1000;
+
+        if (billions < 0.3) return 'Nano Cap';
+        if (billions < 2) return 'Micro Cap';
+        if (billions < 10) return 'Small Cap';
+        if (billions < 50) return 'Mid Cap';
+        if (billions < 200) return 'Large Cap';
         return 'Mega Cap';
     }
 
     /**
      * ═══════════════════════════════════════════════════════════════
-     * ✅ ÉVALUATION QUALITÉ DES DONNÉES
+     * ⭐ SCORE RATING
      * ═══════════════════════════════════════════════════════════════
      */
-    assessDataQuality(rawData) {
-        let qualityScore = 0;
-        let maxScore = 7;
+    getScoreRating(score) {
+        if (score >= 85) return 'Strong Buy';
+        if (score >= 70) return 'Buy';
+        if (score >= 50) return 'Hold';
+        if (score >= 35) return 'Sell';
+        return 'Strong Sell';
+    }
 
-        if (rawData.quote?.current) qualityScore++;
-        if (rawData.profile?.name) qualityScore++;
-        if (rawData.metrics?.peRatio) qualityScore++;
-        if (rawData.analystRecommendations) qualityScore++;
-        if (rawData.earningsHistory) qualityScore++;
-        if (rawData.timeSeriesData) qualityScore++;
-        if (rawData.technicalIndicators) qualityScore++;
+    /**
+     * ═══════════════════════════════════════════════════════════════
+     * 💡 GENERATE INSIGHTS
+     * ═══════════════════════════════════════════════════════════════
+     */
+    generateInsights(overall, technical, momentum, quality, risk, trend) {
+        const insights = [];
+
+        // Overall assessment
+        if (overall >= 85) {
+            insights.push('Exceptional investment opportunity with strong fundamentals');
+        } else if (overall >= 70) {
+            insights.push('Solid investment candidate with positive outlook');
+        } else if (overall >= 50) {
+            insights.push('Neutral outlook - monitor for entry opportunities');
+        } else {
+            insights.push('Caution advised - significant risks present');
+        }
+
+        // Technical
+        if (technical >= 75) {
+            insights.push('Strong technical momentum with bullish indicators');
+        } else if (technical < 40) {
+            insights.push('Weak technical position - bearish pressure detected');
+        }
+
+        // Momentum
+        if (momentum >= 70) {
+            insights.push('Positive price momentum indicates buying pressure');
+        } else if (momentum < 40) {
+            insights.push('Negative momentum suggests selling pressure');
+        }
+
+        // Quality
+        if (quality.startsWith('A')) {
+            insights.push('Premium quality stock with excellent fundamentals');
+        } else if (quality.startsWith('D')) {
+            insights.push('Quality concerns - enhanced due diligence recommended');
+        }
+
+        // Risk
+        if (risk === 'Low') {
+            insights.push('Low risk profile suitable for conservative investors');
+        } else if (risk === 'Very High') {
+            insights.push('Very high risk - suitable for aggressive investors only');
+        }
+
+        // Trend
+        if (trend.includes('Strong Uptrend')) {
+            insights.push('Sustained upward trajectory with strong momentum');
+        } else if (trend.includes('Strong Downtrend')) {
+            insights.push('Significant downward pressure - caution advised');
+        }
+
+        return insights;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════
+     * ✅ DATA QUALITY ASSESSMENT
+     * ═══════════════════════════════════════════════════════════════
+     */
+    assessDataQuality(quote, profile) {
+        let qualityScore = 0;
+        let maxScore = 5;
+
+        if (quote && quote.price) qualityScore++;
+        if (quote && quote.volume) qualityScore++;
+        if (quote && (quote.high || quote.low)) qualityScore++;
+        if (profile && profile.name) qualityScore++;
+        if (profile && profile.marketCapitalization) qualityScore++;
 
         const percentage = (qualityScore / maxScore) * 100;
 
@@ -352,114 +415,6 @@ class AlphaVaultScoring {
         if (percentage >= 70) return 'Good';
         if (percentage >= 50) return 'Fair';
         return 'Limited';
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════════
-     * 📊 TRANSFORMATION TIME SERIES (Indices Normalisés Base 100)
-     * ═══════════════════════════════════════════════════════════════
-     */
-    transformTimeSeries(rawTimeSeries) {
-        if (!rawTimeSeries || !rawTimeSeries.data || rawTimeSeries.data.length === 0) {
-            return {
-                error: 'No time series data available',
-                normalizedData: []
-            };
-        }
-
-        const firstPrice = rawTimeSeries.data[0].close;
-        
-        const normalizedData = rawTimeSeries.data.map((point, index) => ({
-            date: point.datetime,
-            timestamp: point.timestamp,
-            performanceIndex: ((point.close / firstPrice) * 100).toFixed(2), // ✅ Base 100
-            volumeIndex: index > 0 
-                ? ((point.volume / rawTimeSeries.data[0].volume) * 100).toFixed(2)
-                : 100,
-            // ✅ On garde les % de variation (pas de prix bruts)
-            dailyChange: index > 0 
-                ? (((point.close - rawTimeSeries.data[index - 1].close) / rawTimeSeries.data[index - 1].close) * 100).toFixed(2)
-                : 0
-        }));
-
-        return {
-            symbol: rawTimeSeries.symbol,
-            interval: rawTimeSeries.interval,
-            normalizedData: normalizedData,
-            dataPoints: normalizedData.length,
-            performanceSummary: {
-                totalReturn: (normalizedData[normalizedData.length - 1].performanceIndex - 100).toFixed(2) + '%',
-                dataQuality: this.assessTimeSeriesQuality(normalizedData)
-            },
-            source: 'AlphaVault Normalized Performance Index'
-        };
-    }
-
-    assessTimeSeriesQuality(data) {
-        if (data.length >= 250) return 'Excellent';
-        if (data.length >= 100) return 'Good';
-        if (data.length >= 30) return 'Fair';
-        return 'Limited';
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════════
-     * ⚖ TRANSFORMATION COMPARISON DATA
-     * ═══════════════════════════════════════════════════════════════
-     */
-    transformComparisonData(rawComparisonData) {
-        if (!rawComparisonData || rawComparisonData.stocksData.length < 2) {
-            return {
-                error: 'Insufficient data for comparison',
-                comparison: []
-            };
-        }
-
-        const { symbols, stocksData, timeSeries } = rawComparisonData;
-
-        const comparison = stocksData.map((stock, index) => {
-            const transformedStock = this.transformStockData(stock);
-            
-            // Ajouter performance relative si time series disponible
-            let relativePerformance = null;
-            if (timeSeries && timeSeries[index]) {
-                const series = timeSeries[index].data;
-                if (series.length > 0) {
-                    const firstPrice = series[0].close;
-                    const lastPrice = series[series.length - 1].close;
-                    relativePerformance = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2);
-                }
-            }
-
-            return {
-                symbol: stock.symbol,
-                companyName: transformedStock.companyName,
-                alphaVaultScore: transformedStock.alphaVaultScore,
-                momentumIndex: transformedStock.momentumIndex,
-                qualityGrade: transformedStock.qualityGrade,
-                riskRating: transformedStock.riskRating,
-                valueScore: transformedStock.valueScore,
-                relativePerformance: relativePerformance ? relativePerformance + '%' : 'N/A',
-                marketCapCategory: transformedStock.marketCapCategory,
-                volatilityLevel: transformedStock.volatilityLevel
-            };
-        });
-
-        return {
-            symbols: symbols,
-            comparison: comparison,
-            winner: this.identifyWinner(comparison),
-            source: 'AlphaVault Comparative Analysis'
-        };
-    }
-
-    identifyWinner(comparison) {
-        const sorted = [...comparison].sort((a, b) => b.alphaVaultScore - a.alphaVaultScore);
-        return {
-            topPick: sorted[0].symbol,
-            score: sorted[0].alphaVaultScore,
-            reason: `Highest AlphaVault Score (${sorted[0].alphaVaultScore}/100)`
-        };
     }
 }
 
@@ -473,6 +428,6 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.AlphaVaultScoring = AlphaVaultScoring;
 
-console.log('✅ AlphaVault Scoring System loaded successfully!');
-console.log('🏆 Proprietary scoring engine active');
-console.log('🔒 Legal compliance: No raw API data redistribution');
+console.log('✅ AlphaVault Scoring System v2.0 ULTRA PRO loaded!');
+console.log('🏆 Advanced proprietary scoring algorithms active');
+console.log('🔒 Legal compliance: Full data transformation enabled');

@@ -1,381 +1,7 @@
-// // ============================================
-// // FINANCIAL CHATBOT - CONFIGURATION
-// // Version Conversationnelle Ultra-Performante v3.1
-// // ✅ CORRECTION: Détection thème dark/light pour couleurs de graphiques
-// // ============================================
-
-// const ChatbotConfig = {
-//     api: {
-//         // ✅ WORKER CLOUDFLARE EXISTANT (Finnhub + Twelve Data)
-//         worker: {
-//             baseUrl: 'https://finance-hub-api.raphnardone.workers.dev',
-//             endpoints: {
-//                 finnhub: '/api/finnhub',
-//                 twelvedata: '/api/twelvedata',
-//                 // ✅ Endpoints directs pour compatibilité
-//                 quote: '/api/quote',
-//                 timeSeries: '/api/time-series',
-//                 profile: '/api/profile',
-//                 companyProfile: '/api/finnhub/company-profile',
-//                 basicFinancials: '/api/finnhub/basic-financials'
-//             }
-//         },
-        
-//         // ✅ WORKER GEMINI
-//         gemini: {
-//             apiKey: '',
-//             workerUrl: 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini',
-//             model: 'gemini-2.5-flash',
-//             maxOutputTokens: 8192,
-//             temperature: 0.9,
-//             topK: 40,
-//             topP: 0.95,
-            
-//             safetySettings: [
-//                 { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-//                 { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-//                 { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-//                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
-//             ]
-//         },
-        
-//         finnhub: {
-//             apiKey: '',
-//             endpoint: 'https://finnhub.io/api/v1',
-//             websocket: 'wss://ws.finnhub.io'
-//         },
-        
-//         twelveData: {
-//             apiKey: '',
-//             endpoint: 'https://api.twelvedata.com'
-//         }
-//     },
-
-//     // ============================================
-//     // CHATBOT BEHAVIOR
-//     // ============================================
-//     behavior: {
-//         typingDelay: 1200,
-//         responseDelay: 200,
-//         maxMessageLength: 2000,
-        
-//         maxHistorySize: 100,
-//         conversationMemorySize: 20,
-        
-//         showSuggestions: true,
-//         suggestionsDelay: 400,
-//         maxSuggestions: 4,
-        
-//         autoGenerateCharts: true,
-//         chartAnimationDuration: 600,
-        
-//         inputDebounce: 200,
-//         virtualScrollThreshold: 100,
-//         enableLazyLoading: true,
-//         enableWebWorkers: false,
-//         enableServiceWorker: false
-//     },
-
-//     // ============================================
-//     // UI CUSTOMIZATION
-//     // ============================================
-//     ui: {
-//         theme: 'futuristic',
-//         primaryColor: '#667eea',
-//         accentColor: '#764ba2',
-//         botAvatar: '🤖',
-//         userAvatar: '👤',
-//         enableAnimations: true,
-//         enableParticles: false,
-//         position: 'bottom-right',
-//         width: 420,
-//         height: 650,
-//         mobileBreakpoint: 768,
-        
-//         welcomeMessage: "👋 **Hi! I'm Alphy**, your AI Financial Expert.\n\nI can help you with:\n• 📊 Stock analysis & recommendations\n• 💰 IPO evaluation & research\n• 📈 Technical & fundamental analysis\n• 🌐 Market insights & trends\n• 💡 Financial education\n\n**Ask me anything about finance!**",
-        
-//         placeholderText: "Ask me anything about stocks, markets, IPOs...",
-//         showTimestamps: true,
-//         timestampFormat: 'HH:mm'
-//     },
-
-//     // ============================================
-//     // FEATURES FLAGS
-//     // ============================================
-//     features: {
-//         ipoAnalysis: true,
-//         marketData: true,
-//         chartGeneration: true,
-//         technicalIndicators: true,
-//         sentimentAnalysis: false,
-//         portfolioTracking: false,
-//         realTimeAlerts: false,
-//         exportConversation: true,
-//         voiceInput: false,
-//         multiLanguage: false,
-        
-//         contextualMemory: true,
-//         smartSuggestions: true,
-//         adaptiveResponses: true
-//     },
-
-//     // ============================================
-//     // IPO ANALYZER SETTINGS
-//     // ============================================
-//     ipo: {
-//         weights: {
-//             financial: 0.30,
-//             market: 0.25,
-//             valuation: 0.20,
-//             growth: 0.15,
-//             momentum: 0.10
-//         },
-//         highPotentialThreshold: 75,
-//         mediumPotentialThreshold: 60,
-//         cacheTimeout: 3600000,
-//         lookbackPeriod: 90,
-//         minDataPoints: 10
-//     },
-
-//     // ============================================
-//     // CHART SETTINGS (✅ CORRECTION MAJEURE)
-//     // ============================================
-//     charts: {
-//         defaultType: 'line',
-        
-//         // ✅ CORRECTION: Couleurs adaptatives selon le thème
-//         colors: {
-//             // Fonction pour obtenir les couleurs selon le thème
-//             getColors: function() {
-//                 const isDarkMode = document.body.classList.contains('dark-mode');
-                
-//                 if (isDarkMode) {
-//                     return {
-//                         primary: '#667eea',
-//                         secondary: '#764ba2',
-//                         success: '#38ef7d',
-//                         danger: '#f45c43',
-//                         warning: '#ffbe0b',
-//                         info: '#00d9ff',
-//                         grid: 'rgba(255, 255, 255, 0.1)',
-//                         text: 'rgba(255, 255, 255, 0.9)', // Blanc en dark mode
-//                         background: 'rgba(15, 23, 42, 0.95)'
-//                     };
-//                 } else {
-//                     return {
-//                         primary: '#667eea',
-//                         secondary: '#764ba2',
-//                         success: '#10b981',
-//                         danger: '#ef4444',
-//                         warning: '#f59e0b',
-//                         info: '#06b6d4',
-//                         grid: 'rgba(0, 0, 0, 0.08)',
-//                         text: 'rgba(30, 41, 59, 0.9)', // ✅ NOIR en light mode
-//                         background: 'rgba(255, 255, 255, 0.98)'
-//                     };
-//                 }
-//             },
-            
-//             // ✅ Valeurs par défaut (light mode) pour compatibilité
-//             primary: '#667eea',
-//             secondary: '#764ba2',
-//             success: '#10b981',
-//             danger: '#ef4444',
-//             warning: '#f59e0b',
-//             info: '#06b6d4',
-//             grid: 'rgba(0, 0, 0, 0.08)',
-//             text: 'rgba(30, 41, 59, 0.9)', // ✅ PAR DÉFAUT: NOIR (light mode)
-//             background: 'rgba(255, 255, 255, 0.98)'
-//         },
-        
-//         animation: {
-//             duration: 600,
-//             easing: 'easeInOutQuart'
-//         },
-//         enableZoom: true,
-//         enablePan: true,
-//         enableTooltip: true,
-//         enableLegend: true,
-//         indicators: {
-//             sma: { periods: [20, 50, 200] },
-//             ema: { periods: [12, 26] },
-//             rsi: { period: 14, overbought: 70, oversold: 30 },
-//             macd: { fast: 12, slow: 26, signal: 9 },
-//             bollingerBands: { period: 20, stdDev: 2 }
-//         },
-//         exportFormats: ['png', 'svg', 'csv']
-//     },
-
-//     // ============================================
-//     // ANALYTICS
-//     // ============================================
-//     analytics: {
-//         enabled: false,
-//         trackingId: '',
-//         events: {
-//             messagesSent: true,
-//             chartsGenerated: true,
-//             suggestionsClicked: true,
-//             errorsOccurred: true
-//         }
-//     },
-
-//     // ============================================
-//     // LOCALIZATION
-//     // ============================================
-//     localization: {
-//         defaultLanguage: 'en',
-//         supportedLanguages: ['en'],
-//         translations: {
-//             en: {
-//                 welcome: "👋 Hi! I'm Alphy, your AI Financial Expert. Ask me anything!",
-//                 placeholder: "Ask me anything about stocks, markets, IPOs...",
-//                 send: "Send",
-//                 typing: "Alphy is typing...",
-//                 error: "Oops! Something went wrong.",
-//                 retry: "Retry",
-//                 clear: "Clear",
-//                 export: "Export",
-//                 close: "Close"
-//             }
-//         }
-//     },
-
-//     // ============================================
-//     // SUGGESTIONS TEMPLATES
-//     // ============================================
-//     suggestions: {
-//         initial: [
-//             "📈 Analyze NVDA stock performance",
-//             "💰 What's happening in the market today?",
-//             "📊 Show me top performing IPOs",
-//             "🎯 Explain the P/E ratio",
-//             "💡 Best tech stocks to watch",
-//             "🔍 Compare AAPL vs MSFT"
-//         ],
-//         followUp: {
-//             ipo: [
-//                 "Show detailed IPO analysis",
-//                 "Compare with industry peers",
-//                 "Risk assessment for this IPO",
-//                 "Historical IPO performance"
-//             ],
-//             stock: [
-//                 "Technical indicators analysis",
-//                 "Fundamental metrics breakdown",
-//                 "Compare with competitors",
-//                 "Price targets and recommendations"
-//             ],
-//             market: [
-//                 "Sector performance breakdown",
-//                 "Top gainers and losers",
-//                 "Economic indicators impact",
-//                 "Market sentiment analysis"
-//             ]
-//         }
-//     },
-
-//     // ============================================
-//     // PERFORMANCE
-//     // ============================================
-//     performance: {
-//         lazyLoadImages: true,
-//         lazyLoadCharts: true,
-//         enableCache: true,
-//         cacheExpiration: 300000, // 5 minutes
-//         compressMessages: false,
-//         useWebWorkers: false,
-//         maxWorkers: 2,
-//         batchRequests: false,
-//         batchDelay: 100,
-//         maxRequestsPerMinute: 30,
-//         virtualScrollItemHeight: 80,
-//         virtualScrollBuffer: 5
-//     },
-
-//     // ============================================
-//     // ERROR HANDLING
-//     // ============================================
-//     errors: {
-//         maxRetries: 3,
-//         retryDelay: 1000,
-//         showUserFriendlyMessages: true,
-//         logErrors: true,
-//         messages: {
-//             network: "⚠ Network error. Please check your connection.",
-//             apiKey: "⚠ API key is missing or invalid. Please configure your API keys.",
-//             rateLimit: "⚠ Rate limit exceeded. Please wait a moment.",
-//             timeout: "⚠ Request timeout. Please try again.",
-//             unknown: "⚠ An unexpected error occurred. Please try rephrasing your question."
-//         }
-//     },
-
-//     // ============================================
-//     // DEVELOPMENT
-//     // ============================================
-//     development: {
-//         debugMode: true,
-//         mockApiResponses: false,
-//         showPerformanceMetrics: true,
-//         enableHotReload: false
-//     }
-// };
-
-// // ============================================
-// // ✅ HELPER: Détection thème et mise à jour couleurs
-// // ============================================
-// ChatbotConfig.updateChartColors = function() {
-//     const colors = this.charts.colors.getColors();
-    
-//     // Mettre à jour les couleurs dans l'objet
-//     Object.assign(this.charts.colors, colors);
-    
-//     console.log('🎨 Chart colors updated for theme:', document.body.classList.contains('dark-mode') ? 'DARK' : 'LIGHT');
-//     console.log('   Text color:', this.charts.colors.text);
-//     console.log('   Grid color:', this.charts.colors.grid);
-    
-//     return colors;
-// };
-
-// // ✅ Observer les changements de thème
-// if (typeof window !== 'undefined') {
-//     const observer = new MutationObserver(() => {
-//         ChatbotConfig.updateChartColors();
-        
-//         // ✅ Rafraîchir Chart.js defaults si disponible
-//         if (typeof Chart !== 'undefined') {
-//             Chart.defaults.color = ChatbotConfig.charts.colors.text;
-//             Chart.defaults.borderColor = ChatbotConfig.charts.colors.grid;
-//             console.log('✅ Chart.js defaults updated');
-//         }
-//     });
-    
-//     observer.observe(document.body, {
-//         attributes: true,
-//         attributeFilter: ['class']
-//     });
-    
-//     // ✅ Initialisation au chargement
-//     document.addEventListener('DOMContentLoaded', () => {
-//         ChatbotConfig.updateChartColors();
-//     });
-// }
-
-// // ============================================
-// // EXPORT & GLOBAL AVAILABILITY
-// // ============================================
-// if (typeof module !== 'undefined' && module.exports) {
-//     module.exports = ChatbotConfig;
-// }
-
-// window.ChatbotConfig = ChatbotConfig;
-
-// console.log('✅ ChatbotConfig v3.1 loaded - Adaptive Chart Colors enabled');
-
-
 // ============================================
-// CHATBOT CONFIGURATION v6.0 ULTRA
+// CHATBOT CONFIGURATION v6.1 ULTRA PRO
 // Configuration centrale du chatbot financier
+// ✅ CONFORMITÉ LÉGALE : AlphaVault Scores
 // ============================================
 
 const ChatbotConfig = {
@@ -398,6 +24,15 @@ const ChatbotConfig = {
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🌐 CONFIGURATION API CLIENT
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    api: {
+        baseURL: 'https://finance-hub-api.raphnardone.workers.dev',
+        cacheDuration: 300000, // 5 minutes
+        enableRealTimeData: true
+    },
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 🎨 CONFIGURATION UI
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ui: {
@@ -405,18 +40,18 @@ const ChatbotConfig = {
         tagline: 'Your Elite Financial Analyst',
         avatar: '🤖',
         language: 'en',
-        theme: 'auto', // 'light', 'dark', 'auto'
+        theme: 'auto',
         enableParticles: true,
         enable3DRobot: true,
         enableTypingIndicator: true,
         enableSoundEffects: false,
-        messageDelay: 5,  // ✅ RÉDUIT DE 50ms à 5ms (10x plus rapide)
-        enableStreaming: true,  // ✅ NOUVEAU : Option pour désactiver le streaming
+        messageDelay: 5,
+        enableStreaming: true,
+        enableHTML: true,
         maxMessages: 100,
         autoScroll: true,
         showTimestamps: true,
-        enableMarkdown: true,
-        enableHTML: true  // ✅ NOUVEAU : Active le rendu HTML
+        enableMarkdown: true
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -427,15 +62,14 @@ const ChatbotConfig = {
         firestoreCollection: 'chatbot_conversations',
         localStorageKey: 'alphy_ai_conversations',
         autoSave: true,
-        autoSaveDelay: 2000, // ms
+        autoSaveDelay: 2000,
         maxConversations: 50
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 PROMPTS SYSTÈME (FINANCE EXPERT)
+    // 📊 SYSTEM PROMPT (GEMINI ULTRA PRO)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     get systemPrompt() {
-        // ✅ Date dynamique mise à jour à chaque requête
         const now = new Date();
         const currentDate = now.toLocaleDateString('en-US', { 
             weekday: 'long', 
@@ -449,79 +83,212 @@ const ChatbotConfig = {
             timeZoneName: 'short'
         });
 
-        return `You are **Alphy AI**, an elite financial analyst and investment advisor with expertise in:
+        return `You are **Alphy AI**, an elite financial analyst for AlphaVault AI platform.
 
-    📅 **IMPORTANT: Today is ${currentDate} at ${currentTime}**
-    ⚠ Always provide information based on this current date. When discussing market data, news, or events, refer to the most recent available data relative to this date.
+📅 **CURRENT DATE & TIME:** ${currentDate} at ${currentTime}
 
-    📊 **Core Competencies:**
-    - Stock Analysis (Technical & Fundamental)
-    - IPO Evaluation & Scoring
-    - M&A Predictions & Deal Analysis
-    - Forex Trading & Currency Analysis
-    - Portfolio Optimization (Markowitz, Risk Parity, Monte Carlo)
-    - Economic Data Interpretation (GDP, Inflation, Interest Rates)
-    - Insider Trading Pattern Detection
-    - Budget Planning & Investment Strategies
+═══════════════════════════════════════════════════════════════════
+🚨 CRITICAL LEGAL COMPLIANCE RULES 🚨
+═══════════════════════════════════════════════════════════════════
 
-    🎯 **Response Guidelines:**
-    1. **Always provide actionable insights** with specific numbers, percentages, and timeframes
-    2. **Use real-time data** when discussing current market conditions (relative to ${currentDate})
-    3. **Include risk assessments** (Low/Medium/High) for investment recommendations
-    4. **Be explicit about data freshness** (e.g., "As of December 2024..." or "Latest data from Q4 2024...")
-    5. **Explain complex concepts** in clear, professional language
-    6. **Suggest relevant charts** when data visualization would enhance understanding
-    7. **Provide multiple scenarios** (Bull/Base/Bear cases) for predictions
-    8. **Use financial terminology** accurately (P/E, EPS, EBITDA, Sharpe Ratio, etc.)
+**DATA REDISTRIBUTION POLICY:**
+You will receive proprietary **AlphaVault Scores** (0-100) instead of raw market data.
 
-    💼 **Tone:** Professional, confident, data-driven, yet approachable
+✅ **ALWAYS USE:**
+- AlphaVault Score (0-100)
+- Momentum Index (0-100)
+- Quality Grade (A+ to D-)
+- Risk Rating (Low/Medium/High/Very High)
+- Technical Strength Score (0-100)
+- Value Score (0-100)
+- Sentiment Index (0-100)
+- Performance Index (base 100)
+- Market Cap Category (Nano/Micro/Small/Mid/Large/Mega Cap)
+- Volatility Level (Very Low/Low/Moderate/High/Very High)
 
-    📝 **Formatting Rules (CRITICAL):**
-    - Use **bold** for important terms and numbers
-    - Use bullet points (•) for lists, NOT HTML <ul> tags
-    - Use ### for section headers
-    - Use --- for separators
-    - Keep paragraphs concise (max 3-4 sentences)
-    - Add emojis strategically: 📊 📈 📉 💰 🚀 ⚠ ✅ ❌
-    - NEVER use inline style="" attributes
-    - Use clear markdown formatting that will be converted to HTML
+❌ **NEVER MENTION:**
+- Specific stock prices (e.g., "$270.00")
+- Exact P/E ratios (e.g., "P/E of 32.5")
+- Exact market cap in dollars (e.g., "$3.2 trillion")
+- Specific EPS values
+- Exact revenue/profit numbers
+- Raw financial metrics from APIs
 
-    🚫 **Never:**
-    - Give financial advice as personal recommendation (always use "consider", "may", "could")
-    - Guarantee returns or predict exact prices
-    - Recommend illegal activities (insider trading, market manipulation)
-    - Use overly complex jargon without explanation
-    - Provide outdated data without mentioning the date
+═══════════════════════════════════════════════════════════════════
 
-    ✅ **Always:**
-    - Mention the current date when relevant (${currentDate})
-    - Mention risks and uncertainties
-    - Provide context (market conditions, sector trends)
-    - Suggest further research or professional consultation for major decisions
-    - Acknowledge data limitations (e.g., "Latest available data as of...")
+📊 **WHEN YOU RECEIVE ALPHAVAULT DATA:**
 
-    When asked about specific stocks, IPOs, forex pairs, or economic data:
-    1. Provide current metrics (price, volume, volatility) - specify the date
-    2. Analyze technical indicators (RSI, MACD, Bollinger Bands)
-    3. Evaluate fundamentals (P/E, Revenue Growth, Debt/Equity)
-    4. Assess market sentiment and news impact
-    5. Give short-term (1-3 months) and long-term (1-3 years) outlooks
-    6. Suggest risk management strategies (stop-loss, position sizing)
+You will get context like this:
+\`\`\`
+[AlphaVault Intelligence Report]
+Symbol: AAPL
+Company: Apple Inc.
+Sector: Technology
 
-    Remember: You have access to real-time financial data through APIs. Always specify the timeframe of your data relative to ${currentDate}.`;
+Overall Score: 87/100 (Strong Buy)
+Technical Strength: 82/100
+Quality Grade: A
+Risk Level: Medium
+Momentum Index: 78/100
+Value Score: 65/100
+Sentiment Index: 85/100
+
+Performance (vs. 1Y ago): +45.2%
+Volatility Level: Moderate
+Market Cap Category: Mega Cap
+
+Key Insights:
+- Strong technical momentum with sustained upward trajectory
+- Excellent fundamental quality (A grade)
+- Positive market sentiment driven by product innovation
+- Moderate risk profile suitable for growth investors
+\`\`\`
+
+**YOUR RESPONSE SHOULD BE:**
+
+"📊 **Apple Inc. (AAPL) - AlphaVault Analysis**
+
+**Overall Assessment:** Strong Buy ⭐⭐⭐⭐⭐
+**AlphaVault Score:** 87/100
+
+---
+
+### Technical Analysis
+**Technical Strength:** 82/100 (Bullish Momentum)
+The stock exhibits strong technical indicators with sustained upward momentum. The Momentum Index of 78/100 suggests continued buying pressure.
+
+### Fundamental Quality
+**Quality Grade:** A (Excellent)
+Superior fundamental strength with industry-leading profitability and solid balance sheet.
+
+### Risk Assessment
+**Risk Level:** Medium ⚠
+Moderate volatility suitable for growth-oriented portfolios. The stock's beta suggests balanced risk-reward.
+
+### Valuation
+**Value Score:** 65/100
+Fair valuation with room for appreciation based on growth prospects.
+
+### Market Sentiment
+**Sentiment Index:** 85/100 (Very Positive)
+Strong positive sentiment driven by innovation announcements and solid execution.
+
+### Performance
+**1-Year Performance:** +45.2% (outperforming sector)
+
+---
+
+**💡 Investment Recommendation:**
+This is a **high-conviction Strong Buy** for:
+- Growth investors seeking quality mega-cap exposure
+- Long-term portfolios (12+ months horizon)
+- Investors comfortable with moderate volatility
+
+**⚠ Risk Considerations:**
+- Moderate volatility expected
+- Sector rotation risks
+- Regulatory headwinds in certain markets
+
+**🎯 Strategy:**
+Consider this as a core holding (5-10% portfolio allocation) with a 12-18 month investment horizon."
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 **WHEN NO ALPHAVAULT DATA IS PROVIDED:**
+
+If you don't receive AlphaVault data, provide **general market context** based on your knowledge:
+
+**EXAMPLE:**
+
+User: "What do you think about Apple?"
+
+You: "📊 **Apple Inc. (AAPL) - General Market Context**
+
+Apple is a leading technology company known for:
+- **Products:** iPhone, Mac, iPad, Apple Watch, Services (App Store, iCloud, Apple Music)
+- **Sector:** Consumer Electronics & Software Services
+- **Market Position:** Global market leader in premium smartphones
+- **Competitive Advantages:** Brand loyalty, ecosystem integration, premium pricing power
+
+**Industry Trends (General):**
+- Growing services revenue diversification
+- Expansion into wearables and health tech
+- Strategic focus on AI and machine learning
+- Regulatory scrutiny in app store policies
+
+**Typical Investment Profile:**
+- **Category:** Mega-cap technology stock
+- **Investor Type:** Suitable for growth and dividend investors
+- **Volatility:** Moderate (typical for large-cap tech)
+- **Sector:** Cyclical technology with recurring services revenue
+
+⚠ **Important:** For real-time analysis with specific recommendations, I would need to access current AlphaVault proprietary data. The above is general market context only.
+
+**Would you like me to:**
+1. Fetch current AlphaVault analysis for AAPL?
+2. Compare AAPL with competitors (e.g., MSFT, GOOGL)?
+3. Analyze sector trends in technology?"
+
+═══════════════════════════════════════════════════════════════════
+
+📝 **FORMATTING RULES:**
+
+- Use **bold** for emphasis
+- Use ### for section headers
+- Use --- for separators
+- Use emojis: 📊 📈 📉 💰 🚀 ⚠ ✅ ❌ 💡 ⭐
+- Use bullet points (•) NOT HTML <ul>
+- Keep paragraphs concise (2-4 sentences)
+- Use tables for comparisons (markdown format)
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 **YOUR EXPERTISE AREAS:**
+
+1. **Stock Analysis** (with AlphaVault Scores)
+2. **IPO Evaluation** (scoring 0-100)
+3. **Portfolio Optimization** (Markowitz, Risk Parity)
+4. **Technical Analysis** (RSI, MACD, Bollinger Bands)
+5. **Forex Analysis** (currency pairs, economic factors)
+6. **Economic Data** (GDP, inflation, rates)
+7. **Market Sentiment** (Fear & Greed, VIX)
+8. **Budget Planning** (savings, investments)
+
+═══════════════════════════════════════════════════════════════════
+
+💼 **TONE:** Professional, confident, data-driven, actionable
+
+🚫 **NEVER:**
+- Guarantee specific returns
+- Provide personal financial advice (use "consider", "may", "could")
+- Recommend illegal activities
+- Mention specific current prices without AlphaVault context
+
+✅ **ALWAYS:**
+- Acknowledge when data is from your training vs. real-time AlphaVault data
+- Mention risks and uncertainties
+- Provide context (sector trends, market conditions)
+- Suggest diversification and risk management
+- Recommend professional consultation for major decisions
+
+═══════════════════════════════════════════════════════════════════
+
+**Remember:** Your primary value is **interpreting AlphaVault proprietary scores** to provide actionable investment insights while maintaining full legal compliance.`;
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 💬 MESSAGES PAR DÉFAUT
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     messages: {
-        welcome: "👋 Hello! I'm Alphy AI, your personal financial analyst. Ask me anything about stocks, IPOs, forex, portfolio optimization, or market trends!",
+        welcome: "👋 Hello! I'm Alphy AI, your personal financial analyst powered by AlphaVault proprietary intelligence. Ask me anything about stocks, IPOs, forex, portfolio optimization, or market trends!",
         error: "❌ I encountered an error. Please try rephrasing your question or check your connection.",
         networkError: "🌐 Network error. Please check your internet connection and try again.",
-        apiError: "🔧 API service temporarily unavailable. Please try again in a moment.",
-        thinking: "🤔 Analyzing financial data...",
+        apiError: "🔧 API service temporarily unavailable. I can provide general market context based on my knowledge. Would you like me to continue?",
+        thinking: "🤔 Analyzing with AlphaVault intelligence...",
+        fetchingData: "📊 Fetching real-time AlphaVault data...",
         noResults: "📭 No results found. Try adjusting your query.",
-        rateLimited: "⏳ Rate limit reached. Please wait a moment before sending another message."
+        rateLimited: "⏳ Rate limit reached. Please wait a moment before sending another message.",
+        dataTransforming: "🔄 Transforming data into AlphaVault scores..."
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -530,23 +297,23 @@ const ChatbotConfig = {
     initialSuggestions: [
         {
             icon: '📈',
-            text: 'Analyze NVDA stock performance over the last 5 years',
-            query: 'Analyze NVDA stock performance over the last 5 years'
+            text: 'Analyze Apple stock with AlphaVault',
+            query: 'Give me a complete AlphaVault analysis of Apple (AAPL)'
         },
         {
             icon: '🚀',
-            text: 'Show me the top 5 highest potential IPOs',
-            query: 'Show me the top 5 highest potential IPOs'
+            text: 'Top IPOs this month',
+            query: 'Show me the top 5 highest potential IPOs this month with scores'
         },
         {
             icon: '💰',
-            text: "What's the market sentiment today?",
-            query: "What's the market sentiment today?"
+            text: 'Market sentiment today',
+            query: "What's the current market sentiment and Fear & Greed index?"
         },
         {
-            icon: '📊',
-            text: 'Compare AAPL vs MSFT technical indicators',
-            query: 'Compare AAPL vs MSFT technical indicators'
+            icon: '⚖',
+            text: 'Compare tech giants',
+            query: 'Compare AAPL vs MSFT vs GOOGL using AlphaVault scores'
         }
     ],
 
@@ -568,8 +335,8 @@ const ChatbotConfig = {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     security: {
         maxMessageLength: 2000,
-        rateLimitRequests: 10, // requêtes max
-        rateLimitWindow: 60000, // par minute (ms)
+        rateLimitRequests: 10,
+        rateLimitWindow: 60000,
         enableXSSProtection: true,
         sanitizeInput: true
     },
@@ -587,18 +354,19 @@ const ChatbotConfig = {
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔍 DÉTECTION D'INTENT (Keywords)
+    // 🔍 DÉTECTION D'INTENT
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     intents: {
-        stockAnalysis: ['stock', 'share', 'ticker', 'quote', 'price', 'analyze', 'performance'],
+        stockAnalysis: ['stock', 'share', 'ticker', 'quote', 'analyze', 'performance', 'company'],
         ipoAnalysis: ['ipo', 'initial public offering', 'newly listed', 'ipo score'],
-        forexAnalysis: ['forex', 'currency', 'exchange rate', 'eur/usd', 'fx'],
+        forexAnalysis: ['forex', 'currency', 'exchange rate', 'eur/usd', 'fx', 'usd', 'eur'],
         technicalAnalysis: ['rsi', 'macd', 'bollinger', 'moving average', 'technical', 'indicators'],
         portfolioOptimization: ['portfolio', 'optimization', 'markowitz', 'risk parity', 'allocation'],
         marketSentiment: ['sentiment', 'market mood', 'fear', 'greed', 'vix'],
         economicData: ['gdp', 'inflation', 'interest rate', 'unemployment', 'fed', 'ecb'],
         newsAnalysis: ['news', 'headlines', 'latest', 'breaking'],
-        budgetPlanning: ['budget', 'savings', 'expenses', 'financial plan']
+        budgetPlanning: ['budget', 'savings', 'expenses', 'financial plan'],
+        comparison: ['compare', 'vs', 'versus', 'comparison', 'better']
     },
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -606,23 +374,27 @@ const ChatbotConfig = {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     features: {
         enableRealTimeData: true,
+        enableAlphaVaultScoring: true,
         enableCharts: true,
         enableIPOScoring: true,
         enableForexAnalysis: true,
         enableTechnicalIndicators: true,
         enablePortfolioOptimization: true,
         enableNewsIntegration: true,
-        enableVoiceInput: false, // Future feature
-        enableMultiLanguage: false // Future feature
+        enableVoiceInput: false,
+        enableMultiLanguage: false
     }
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ✅ EXPORT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-console.log('✅ ChatbotConfig loaded successfully');
+console.log('✅ ChatbotConfig v6.1 ULTRA PRO loaded successfully');
+console.log('🏆 AlphaVault Scoring: ENABLED');
+console.log('🔒 Legal Compliance: ACTIVE (No raw API data redistribution)');
 console.log('🤖 Alphy AI Configuration:', {
     model: ChatbotConfig.gemini.model,
     maxTokens: ChatbotConfig.gemini.maxOutputTokens,
-    workerUrl: ChatbotConfig.gemini.workerUrl
+    workerUrl: ChatbotConfig.gemini.workerUrl,
+    alphaVaultScoring: ChatbotConfig.features.enableAlphaVaultScoring
 });
