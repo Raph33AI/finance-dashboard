@@ -2576,6 +2576,374 @@
     <!-- ✅ PDF Export Styles & Script -->
     <link rel='stylesheet' href='assets/css/business-plan-pdf.css'>
     <script src='assets/js/business-plan-pdf-exporter.js'></script>
+
+    <!-- ════════════════════════════════════════════════════════════════
+        MODAL ENVOI PDF PAR EMAIL
+        ════════════════════════════════════════════════════════════════ -->
+    <div id="pdfEmailModal" class="pdf-modal">
+        <div class="pdf-modal-overlay"></div>
+        <div class="pdf-modal-content">
+            <div class="pdf-modal-header">
+                <div class="modal-header-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h2 class="modal-title">📧 Send Business Plan PDF</h2>
+                <p class="modal-subtitle">Enter recipient email addresses (one per line)</p>
+                <button class="modal-close-btn" id="closePdfModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="pdf-modal-body">
+                <div class="form-group">
+                    <label for="recipientEmails">
+                        <i class="fas fa-users"></i> Recipients
+                    </label>
+                    <textarea 
+                        id="recipientEmails" 
+                        rows="5" 
+                        placeholder="&#10;investor@example.com&#10;partner@company.com&#10;team@alphavault-ai.com"
+                        class="email-textarea"
+                    ></textarea>
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i> 
+                        Separate multiple emails with line breaks or commas
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailSubject">
+                        <i class="fas fa-tag"></i> Email Subject
+                    </label>
+                    <input 
+                        type="text" 
+                        id="emailSubject" 
+                        class="email-input"
+                        value="AlphaVault AI - Business Plan (Confidential)"
+                        placeholder="Email subject..."
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="emailMessage">
+                        <i class="fas fa-comment-alt"></i> Message (Optional)
+                    </label>
+                    <textarea 
+                        id="emailMessage" 
+                        rows="4" 
+                        class="email-textarea"
+                        placeholder="Add a personal message to accompany the Business Plan PDF..."
+                    ></textarea>
+                </div>
+
+                <div class="pdf-options">
+                    <h4><i class="fas fa-cog"></i> PDF Options</h4>
+                    <div class="option-item">
+                        <input type="checkbox" id="includeCharts" checked>
+                        <label for="includeCharts">Include charts as images (recommended)</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="includeSimulator">
+                        <label for="includeSimulator">Include Scenario Simulator section</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pdf-modal-footer">
+                <button class="btn-secondary" id="cancelPdfBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-primary" id="sendPdfBtn">
+                    <i class="fas fa-paper-plane"></i> Generate & Send PDF
+                </button>
+            </div>
+
+            <div class="pdf-progress" id="pdfProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Preparing PDF...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+        STYLES MODAL
+        ════════════════════════════════════════════════════════════════ -->
+    <style>
+    .pdf-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .pdf-modal.active {
+        display: block;
+    }
+
+    .pdf-modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+    }
+
+    .pdf-modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        animation: slideUp 0.4s ease;
+    }
+
+    body.dark-mode .pdf-modal-content {
+        background: #1e293b;
+        color: white;
+    }
+
+    .pdf-modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 40px 30px;
+        position: relative;
+        text-align: center;
+    }
+
+    .modal-header-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 36px;
+    }
+
+    .modal-title {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+    }
+
+    .modal-subtitle {
+        font-size: 16px;
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .modal-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .pdf-modal-body {
+        padding: 40px;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+
+    body.dark-mode .form-group label {
+        color: white;
+    }
+
+    .form-group label i {
+        margin-right: 8px;
+        color: #667eea;
+    }
+
+    .email-textarea,
+    .email-input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        transition: all 0.3s ease;
+        background: white;
+        color: #1e293b;
+    }
+
+    body.dark-mode .email-textarea,
+    body.dark-mode .email-input {
+        background: #0f172a;
+        color: white;
+        border-color: #334155;
+    }
+
+    .email-textarea:focus,
+    .email-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-hint {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 8px;
+    }
+
+    .pdf-options {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+        padding: 24px;
+        border-radius: 16px;
+        margin-top: 30px;
+    }
+
+    .pdf-options h4 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+        color: #667eea;
+    }
+
+    .option-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+
+    .option-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        cursor: pointer;
+    }
+
+    .pdf-modal-footer {
+        display: flex;
+        gap: 16px;
+        padding: 24px 40px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    body.dark-mode .pdf-modal-footer {
+        background: #0f172a;
+        border-top-color: #334155;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+        flex: 1;
+        padding: 16px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    }
+
+    .pdf-progress {
+        padding: 24px 40px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-text {
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translate(-50%, -45%); opacity: 0; }
+        to { transform: translate(-50%, -50%); opacity: 1; }
+    }
+    </style>
     
     <!-- User Menu Script -->
     <script>
