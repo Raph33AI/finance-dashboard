@@ -852,6 +852,7 @@ class PostManager {
 
     /**
      * Envoyer le post à un utilisateur via message privé
+     * ✅ VERSION AMÉLIORÉE : Envoie TOUTES les données du post
      */
     async sendPostAsMessage(userId, userData) {
         try {
@@ -860,25 +861,32 @@ class PostManager {
             // Fermer la modal de sélection
             this.closeShareMessageModal();
 
-            // ✅ CORRECTION : Ne plus utiliser window.privateChat
-            // On envoie directement via Firestore
-
             if (!this.currentUser) {
                 alert('You must be logged in to send messages.');
                 return;
             }
 
-            // Préparer les données du post
+            // ✅ AMÉLIORATION : Préparer TOUTES les données du post
             const postData = {
                 postId: this.postId,
                 title: this.post.title,
                 excerpt: this.stripMarkdown(this.post.content).substring(0, 200),
                 authorName: this.post.authorName,
+                authorPhoto: this.post.authorPhoto || null,
+                authorPlan: this.post.authorPlan || 'free',
                 channelId: this.post.channelId,
+                channelName: this.getChannelName(this.post.channelId), // ✅ NOUVEAU
+                channelIcon: this.getChannelIcon(this.post.channelId), // ✅ NOUVEAU
+                tags: this.post.tags || [],
+                views: this.post.views || 0,
+                likes: this.post.likes?.length || 0,
+                commentsCount: this.post.commentsCount || 0,
+                coverImage: this.post.images?.[0] || null, // ✅ NOUVEAU : Première image
+                createdAt: this.post.createdAt,
                 url: window.location.href
             };
 
-            // ✅ Créer ou récupérer l'ID de conversation
+            // Créer ou récupérer l'ID de conversation
             const participants = [this.currentUser.uid, userId].sort();
             const conversationId = participants.join('_');
 
@@ -898,6 +906,7 @@ class PostManager {
                 };
 
                 await conversationRef.set({
+                    type: 'private', // ✅ Type explicite
                     participants: participants,
                     participantsData: {
                         [this.currentUser.uid]: currentUserData,
@@ -911,7 +920,7 @@ class PostManager {
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastMessage: {
-                        text: `📌 Shared a post: "${postData.title}"`,
+                        text: `📌 Shared: "${postData.title}"`,
                         senderId: this.currentUser.uid
                     },
                     unreadCount: {
@@ -924,20 +933,13 @@ class PostManager {
                 console.log('✅ Conversation created:', conversationId);
             }
 
-            // ✅ Créer le message avec les données du post
+            // ✅ Créer le message avec TOUTES les données du post
             const messageData = {
                 type: 'shared_post',
                 text: `📌 Shared a post: "${postData.title}"`,
                 senderId: this.currentUser.uid,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                sharedPost: {
-                    postId: postData.postId,
-                    title: postData.title,
-                    excerpt: postData.excerpt,
-                    authorName: postData.authorName,
-                    channelId: postData.channelId,
-                    url: postData.url
-                },
+                sharedPost: postData, // ✅ Structure complète
                 attachments: []
             };
 
@@ -949,7 +951,7 @@ class PostManager {
             // Mettre à jour la conversation
             await conversationRef.update({
                 lastMessage: {
-                    text: `📌 Shared a post: "${postData.title}"`,
+                    text: `📌 Shared: "${postData.title}"`,
                     senderId: this.currentUser.uid
                 },
                 lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -979,7 +981,6 @@ class PostManager {
         } catch (error) {
             console.error('❌ Error sending post as message:', error);
             
-            // Message d'erreur plus explicite
             let errorMessage = 'Failed to send post. ';
             
             if (error.code === 'permission-denied') {
@@ -992,6 +993,22 @@ class PostManager {
             
             alert(errorMessage);
         }
+    }
+
+    /**
+     * ✅ NOUVEAU : Récupérer le nom du channel
+     */
+    getChannelName(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        return channel ? channel.name : 'General';
+    }
+
+    /**
+     * ✅ NOUVEAU : Récupérer l'icône du channel
+     */
+    getChannelIcon(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        return channel ? channel.icon : '📝';
     }
 
     /**
