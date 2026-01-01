@@ -640,14 +640,14 @@
                         </h2>
 
                         <h3 class="subsection-title">
-                            <i class="fas fa-globe-americas"></i> Total Addressable Market (TAM)
+                            <i class="fas fa-globe-americas"></i> Total Addressable Market (<span class="tooltip-term" data-term="TAM">TAM</span>)
                         </h3>
 
                         <div class="market-metrics">
                             <div class="market-metric-card tam">
                                 <div class="metric-header">
                                     <i class="fas fa-globe"></i>
-                                    <span>TAM</span>
+                                    <span class="tooltip-term" data-term="TAM" style="cursor: pointer;">TAM</span>
                                 </div>
                                 <div class="metric-value">$12.5B</div>
                                 <div class="metric-label">Global Retail Investment Analytics Market</div>
@@ -657,7 +657,7 @@
                             <div class="market-metric-card sam">
                                 <div class="metric-header">
                                     <i class="fas fa-crosshairs"></i>
-                                    <span>SAM</span>
+                                    <span class="tooltip-term" data-term="SAM" style="cursor: pointer;">SAM</span>
                                 </div>
                                 <div class="metric-value">$3.2B</div>
                                 <div class="metric-label">Serviceable Available Market (English-speaking retail investors)</div>
@@ -667,7 +667,7 @@
                             <div class="market-metric-card som">
                                 <div class="metric-header">
                                     <i class="fas fa-bullseye"></i>
-                                    <span>SOM</span>
+                                    <span class="tooltip-term" data-term="SOM" style="cursor: pointer;">SOM</span>
                                 </div>
                                 <div class="metric-value">$160M</div>
                                 <div class="metric-label">Serviceable Obtainable Market (5-year target: 5% of SAM)</div>
@@ -1236,7 +1236,7 @@
                                         <td>12,000 (40%)</td>
                                     </tr>
                                     <tr class="separator highlight">
-                                        <td class="row-header"><strong>MRR (Monthly Recurring Revenue)</strong></td>
+                                        <td class="row-header"><strong><span class="tooltip-term" data-term="MRR">MRR</span> (Monthly Recurring Revenue)</strong></td>
                                         <td><strong>$21,000</strong></td>
                                         <td><strong>$63,000</strong></td>
                                         <td><strong>$147,000</strong></td>
@@ -1244,7 +1244,7 @@
                                         <td><strong>$420,000</strong></td>
                                     </tr>
                                     <tr class="highlight">
-                                        <td class="row-header"><strong>ARR (Annual Recurring Revenue)</strong></td>
+                                        <td class="row-header"><strong><span class="tooltip-term" data-term="ARR">ARR</span> (Annual Recurring Revenue)</strong></td>
                                         <td><strong>$252K</strong></td>
                                         <td><strong>$756K</strong></td>
                                         <td><strong>$1.76M</strong></td>
@@ -1354,7 +1354,7 @@
                                     </tr>
                                     <tr class="separator"></tr>
                                     <tr class="highlight">
-                                        <td class="row-header"><strong>EBITDA</strong></td>
+                                        <td class="row-header"><strong><span class="tooltip-term" data-term="EBITDA">EBITDA</span></strong></td>
                                         <td><strong>$92K</strong></td>
                                         <td><strong>$401K</strong></td>
                                         <td><strong>$1.10M</strong></td>
@@ -1466,7 +1466,7 @@
 
                             <div class="input-group">
                                 <label for="simCAC">
-                                    <i class="fas fa-dollar-sign"></i> Customer Acquisition Cost (CAC)
+                                    <i class="fas fa-dollar-sign"></i> Customer Acquisition Cost (<span class="tooltip-term" data-term="CAC">CAC</span>)
                                 </label>
                                 <input type="number" id="simCAC" value="25" min="5" max="100" step="5">
                                 <div class="input-hint">Current: $<span id="cacValue">25</span></div>
@@ -1474,7 +1474,7 @@
 
                             <div class="input-group">
                                 <label for="simChurnRate">
-                                    <i class="fas fa-user-times"></i> Monthly Churn Rate (%)
+                                    <i class="fas fa-user-times"></i> Monthly <span class="tooltip-term" data-term="CHURN">Churn Rate</span> (%)
                                 </label>
                                 <input type="number" id="simChurnRate" value="5" min="1" max="15" step="0.5">
                                 <div class="input-hint">Current: <span id="churnRateValue">5</span>%</div>
@@ -1530,7 +1530,7 @@
                                     <i class="fas fa-chart-pie"></i>
                                 </div>
                                 <div class="result-content">
-                                    <div class="result-label">LTV:CAC Ratio</div>
+                                    <div class="result-label"><span class="tooltip-term" data-term="LTV">LTV</span>:<span class="tooltip-term" data-term="CAC">CAC</span> Ratio</div>
                                     <div class="result-value" id="simLTVCAC">3.2:1</div>
                                 </div>
                             </div>
@@ -1540,7 +1540,7 @@
                                     <i class="fas fa-hourglass-half"></i>
                                 </div>
                                 <div class="result-content">
-                                    <div class="result-label">Payback Period</div>
+                                    <div class="result-label"><span class="tooltip-term" data-term="PAYBACK">Payback Period</span></div>
                                     <div class="result-value" id="simPayback">8 months</div>
                                 </div>
                             </div>
@@ -1628,13 +1628,63 @@
                             Unit Economics & Key Metrics
                         </h2>
 
+                        <!-- ════════════════════════════════════════════════════════════════
+                            💡 FINANCIAL TERMS GLOSSARY (CLIQUABLE)
+                            ════════════════════════════════════════════════════════════════ -->
+                        <div class="info-card" style="margin-bottom: 40px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));">
+                            <h3 style="margin-bottom: 16px; font-size: 1.3rem;">
+                                <i class="fas fa-lightbulb"></i> Financial Terms Glossary
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8; margin-bottom: 20px;">
+                                Click on any highlighted term below to see its detailed definition, formula, and example:
+                            </p>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                                <span class="tooltip-term" data-term="LTV" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-chart-line"></i> LTV
+                                </span>
+                                <span class="tooltip-term" data-term="CAC" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-funnel-dollar"></i> CAC
+                                </span>
+                                <span class="tooltip-term" data-term="ARR" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-sync-alt"></i> ARR
+                                </span>
+                                <span class="tooltip-term" data-term="MRR" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-calendar-alt"></i> MRR
+                                </span>
+                                <span class="tooltip-term" data-term="EBITDA" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-piggy-bank"></i> EBITDA
+                                </span>
+                                <span class="tooltip-term" data-term="CHURN" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-user-times"></i> Churn
+                                </span>
+                                <span class="tooltip-term" data-term="ARPU" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-user-tag"></i> ARPU
+                                </span>
+                                <span class="tooltip-term" data-term="TAM" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-globe"></i> TAM
+                                </span>
+                                <span class="tooltip-term" data-term="SAM" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-crosshairs"></i> SAM
+                                </span>
+                                <span class="tooltip-term" data-term="SOM" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-bullseye"></i> SOM
+                                </span>
+                                <span class="tooltip-term" data-term="PAYBACK" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-hourglass-half"></i> Payback
+                                </span>
+                                <span class="tooltip-term" data-term="GROSS_MARGIN" style="cursor: pointer; padding: 12px 16px; background: white; border-radius: 12px; font-weight: 700; color: var(--bp-primary); text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; display: block;">
+                                    <i class="fas fa-percentage"></i> Margin
+                                </span>
+                            </div>
+                        </div>
+
                         <h3 class="subsection-title">
                             <i class="fas fa-user-tag"></i> Customer Lifetime Value (<span class="tooltip-term" data-term="LTV">LTV</span>)
                         </h3>
 
                         <div class="ltv-calculation">
                             <div class="calc-card">
-                                <h4><i class="fas fa-dollar-sign"></i> Average Revenue Per User (ARPU)</h4>
+                                <h4><i class="fas fa-dollar-sign"></i> Average Revenue Per User (<span class="tooltip-term" data-term="ARPU">ARPU</span>)</h4>
                                 <div class="calc-formula">
                                     ARPU = (Pro Users × $10) + (Platinum Users × $20) / Total Paid Users
                                 </div>
@@ -1665,7 +1715,7 @@
                         </div>
 
                         <h3 class="subsection-title" style="margin-top: 40px;">
-                            <i class="fas fa-funnel-dollar"></i> Customer Acquisition Cost (CAC)
+                            <i class="fas fa-funnel-dollar"></i> Customer Acquisition Cost (<span class="tooltip-term" data-term="CAC">CAC</span>)
                         </h3>
 
                         <div class="cac-breakdown">
@@ -1719,7 +1769,7 @@
                         </div>
 
                         <h3 class="subsection-title" style="margin-top: 40px;">
-                            <i class="fas fa-balance-scale"></i> LTV:CAC Ratio Analysis
+                            <i class="fas fa-balance-scale"></i> <span class="tooltip-term" data-term="LTV">LTV</span>:<span class="tooltip-term" data-term="CAC">CAC</span> Ratio Analysis
                         </h3>
 
                         <div class="ltv-cac-analysis">
@@ -1770,7 +1820,7 @@
                         </div>
 
                         <h3 class="subsection-title" style="margin-top: 40px;">
-                            <i class="fas fa-clock"></i> Payback Period
+                            <i class="fas fa-clock"></i> <span class="tooltip-term" data-term="PAYBACK">Payback Period</span>
                         </h3>
 
                         <div class="payback-calculation">
@@ -1808,7 +1858,7 @@
                                 <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
                                     <i class="fas fa-percentage"></i>
                                 </div>
-                                <div class="metric-label">Gross Margin</div>
+                                <div class="metric-label"><span class="tooltip-term" data-term="GROSS_MARGIN">Gross Margin</span></div>
                                 <div class="metric-value">85%</div>
                                 <div class="metric-trend positive">
                                     <i class="fas fa-arrow-up"></i> Industry avg: 70-80%
@@ -1819,7 +1869,7 @@
                                 <div class="metric-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
                                     <i class="fas fa-user-times"></i>
                                 </div>
-                                <div class="metric-label">Monthly Churn</div>
+                                <div class="metric-label">Monthly <span class="tooltip-term" data-term="CHURN">Churn</span></div>
                                 <div class="metric-value">5%</div>
                                 <div class="metric-trend positive">
                                     <i class="fas fa-check"></i> Target: < 7%
