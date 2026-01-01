@@ -1486,7 +1486,8 @@ class ChatbotUI {
             inputCounter: document.getElementById('input-counter'),
             conversationsList: document.getElementById('conversations-list'),
             conversationsSidebar: document.getElementById('conversations-sidebar'),
-            conversationsToggle: document.getElementById('conversations-toggle')
+            conversationsToggle: document.getElementById('conversations-toggle'),
+            conversationsReopenBtn: document.getElementById('conversations-reopen-btn')
         };
 
         // Validate critical elements
@@ -1801,21 +1802,49 @@ class ChatbotUI {
             });
         });
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // Conversations sidebar toggle
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         this.elements.conversationsToggle?.addEventListener('click', () => {
-            const sidebar = this.elements.conversationsSidebar;
-            if (sidebar) {
-                const isCollapsed = sidebar.classList.toggle('collapsed');
-                
-                // Changer l'icône du bouton
-                const icon = this.elements.conversationsToggle.querySelector('i');
-                if (icon) {
-                    icon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
-                }
-                
-                console.log(isCollapsed ? '📕 Sidebar collapsed' : '📖 Sidebar expanded');
-            }
+            this.toggleConversationsSidebar(true); // Fermer
         });
+
+        this.elements.conversationsReopenBtn?.addEventListener('click', () => {
+            this.toggleConversationsSidebar(false); // Ouvrir
+        });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔄 TOGGLE CONVERSATIONS SIDEBAR
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    toggleConversationsSidebar(collapse) {
+        const sidebar = this.elements.conversationsSidebar;
+        const reopenBtn = this.elements.conversationsReopenBtn;
+        const toggleBtn = this.elements.conversationsToggle;
+        
+        if (!sidebar) return;
+        
+        if (collapse) {
+            // Fermer la sidebar
+            sidebar.classList.add('collapsed');
+            if (reopenBtn) reopenBtn.classList.add('visible');
+            
+            // Changer l'icône du toggle
+            const icon = toggleBtn?.querySelector('i');
+            if (icon) icon.className = 'fas fa-chevron-right';
+            
+            console.log('📕 Conversations sidebar collapsed');
+        } else {
+            // Ouvrir la sidebar
+            sidebar.classList.remove('collapsed');
+            if (reopenBtn) reopenBtn.classList.remove('visible');
+            
+            // Changer l'icône du toggle
+            const icon = toggleBtn?.querySelector('i');
+            if (icon) icon.className = 'fas fa-chevron-left';
+            
+            console.log('📖 Conversations sidebar expanded');
+        }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2123,22 +2152,135 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔄 START NEW CONVERSATION
+    // 🔄 START NEW CONVERSATION (CORRECTION COMPLÈTE)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     startNewConversation() {
-        if (confirm('Start a new conversation? Current chat will be saved.')) {
-            this.aiEngine.resetConversation();
-            this.messages = [];
-            this.currentConversationId = null;
-            
-            this.elements.messagesContent.innerHTML = '';
-            
-            if (this.elements.welcomeScreen) {
-                this.elements.welcomeScreen.style.display = 'block';
-            }
-
-            console.log('🔄 New conversation started');
+        console.log('🔄 Starting new conversation...');
+        
+        // Sauvegarder la conversation actuelle si elle existe et qu'elle contient des messages
+        if (this.currentConversationId && this.messages.length > 0) {
+            console.log('💾 Saving current conversation before starting new one...');
+            this.saveConversationToFirebase();
         }
+        
+        // Réinitialiser le moteur AI
+        this.aiEngine.resetConversation();
+        
+        // Réinitialiser les messages
+        this.messages = [];
+        this.currentConversationId = null;
+        
+        // Vider le conteneur de messages
+        this.elements.messagesContent.innerHTML = '';
+        
+        // ✅ CORRECTION: Réafficher le Welcome Screen
+        if (this.elements.welcomeScreen) {
+            // Recréer le welcome screen HTML complet
+            const welcomeHTML = `
+                <!-- ✅ ROBOT 3D ULTRA-RÉALISTE (THREE.JS) -->
+                <div id="robot-3d-container" class="robot-3d-container-threejs"></div>
+                
+                <h2 class="welcome-title">Welcome to Alphy AI</h2>
+                <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
+                
+                <div class="welcome-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Real-Time Analysis</div>
+                        <div class="feature-desc">Live market data from Finnhub & Twelve Data</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <div class="feature-title">AI-Powered Insights</div>
+                        <div class="feature-desc">Advanced Gemini AI with 8192 token output</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-title">Technical Analysis</div>
+                        <div class="feature-desc">RSI, MACD, Bollinger Bands & more</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <div class="feature-title">IPO Scoring</div>
+                        <div class="feature-desc">Advanced multi-criteria IPO evaluation</div>
+                    </div>
+                </div>
+
+                <div class="welcome-suggestions">
+                    <h3 class="suggestions-title">Try asking:</h3>
+                    <div class="welcome-suggestion-grid">
+                        <button class="welcome-suggestion-btn" data-query="Analyze NVDA stock performance over the last 5 years">
+                            <span class="suggestion-icon">📈</span>
+                            <span class="suggestion-text">Analyze NVDA stock performance over the last 5 years</span>
+                        </button>
+                        <button class="welcome-suggestion-btn" data-query="Show me the top 5 highest potential IPOs">
+                            <span class="suggestion-icon">🚀</span>
+                            <span class="suggestion-text">Show me the top 5 highest potential IPOs</span>
+                        </button>
+                        <button class="welcome-suggestion-btn" data-query="What's the market sentiment today?">
+                            <span class="suggestion-icon">💰</span>
+                            <span class="suggestion-text">What's the market sentiment today?</span>
+                        </button>
+                        <button class="welcome-suggestion-btn" data-query="Compare AAPL vs MSFT technical indicators">
+                            <span class="suggestion-icon">📊</span>
+                            <span class="suggestion-text">Compare AAPL vs MSFT technical indicators</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            this.elements.welcomeScreen.innerHTML = welcomeHTML;
+            this.elements.welcomeScreen.style.display = 'block';
+            
+            // ✅ Réattacher les event listeners aux suggestions
+            this.attachWelcomeSuggestionListeners();
+            
+            // ✅ Réinitialiser le robot 3D
+            if (this.config.ui.enable3DRobot) {
+                setTimeout(() => {
+                    this.init3DRobot();
+                }, 100);
+            }
+        }
+        
+        // Retirer la surbrillance de toutes les conversations
+        document.querySelectorAll('.conversation-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Vider l'input
+        if (this.elements.input) {
+            this.elements.input.value = '';
+            this.elements.input.style.height = 'auto';
+        }
+        
+        if (this.elements.inputCounter) {
+            this.elements.inputCounter.textContent = '0/' + this.config.security.maxMessageLength;
+        }
+        
+        console.log('✅ New conversation started - Welcome screen displayed');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎯 ATTACH WELCOME SUGGESTION LISTENERS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    attachWelcomeSuggestionListeners() {
+        document.querySelectorAll('.welcome-suggestion-btn').forEach(btn => {
+            // Retirer les anciens listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // Ajouter le nouveau listener
+            newBtn.addEventListener('click', (e) => {
+                const query = e.currentTarget.dataset.query;
+                if (query) {
+                    this.elements.input.value = query;
+                    this.handleSendMessage();
+                }
+            });
+        });
+        
+        console.log('✅ Welcome suggestion listeners attached');
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
