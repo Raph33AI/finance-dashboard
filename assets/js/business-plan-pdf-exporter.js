@@ -1,12 +1,13 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * BUSINESS PLAN - PDF EXPORTER v5.0 (EMAIL INTEGRATION)
+ * BUSINESS PLAN - PDF EXPORTER v6.0 (CLIENT-SIDE PDF GENERATION)
+ * 100% Gratuit - Pas besoin de PDFShift
  * ════════════════════════════════════════════════════════════════
  */
 
 class BusinessPlanPDFExporter {
     constructor() {
-        this.workerUrl = 'https://business-plan-pdf-worker.raphnardone.workers.dev'; // ⚠ REMPLACER
+        this.workerUrl = 'https://business-plan-pdf-worker.raphnardone.workers.dev';
         this.iconMap = {
             'fa-briefcase': '💼', 'fa-chart-area': '📊', 'fa-puzzle-piece': '🧩',
             'fa-dollar-sign': '💰', 'fa-sliders-h': '🎚', 'fa-calculator': '🧮',
@@ -21,24 +22,18 @@ class BusinessPlanPDFExporter {
     }
 
     init() {
-        // Bouton export PDF ouvre le modal
         const exportBtn = document.getElementById('exportPdfBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => this.openModal());
         }
 
-        // Boutons modal
         document.getElementById('closePdfModal')?.addEventListener('click', () => this.closeModal());
         document.getElementById('cancelPdfBtn')?.addEventListener('click', () => this.closeModal());
         document.getElementById('sendPdfBtn')?.addEventListener('click', () => this.sendPDF());
 
-        // Fermer modal en cliquant sur overlay
         document.querySelector('.pdf-modal-overlay')?.addEventListener('click', () => this.closeModal());
     }
 
-    /**
-     * 🔓 OUVRIR MODAL
-     */
     openModal() {
         const modal = document.getElementById('pdfEmailModal');
         if (modal) {
@@ -47,9 +42,6 @@ class BusinessPlanPDFExporter {
         }
     }
 
-    /**
-     * 🔒 FERMER MODAL
-     */
     closeModal() {
         const modal = document.getElementById('pdfEmailModal');
         if (modal) {
@@ -58,7 +50,7 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📧 ENVOYER PDF
+     * 📧 ENVOYER PDF (VERSION CLIENT-SIDE GENERATION)
      */
     async sendPDF() {
         try {
@@ -75,17 +67,17 @@ class BusinessPlanPDFExporter {
             const includeSimulator = document.getElementById('includeSimulator').checked;
 
             // Afficher progression
-            this.showProgress(0, 'Generating PDF content...');
+            this.showProgress(0, 'Preparing PDF content...');
 
-            // Générer HTML du PDF
-            const pdfHTML = await this.generatePDFHTML(includeSimulator, includeCharts);
-            this.showProgress(40, 'Converting charts to images...');
+            // ✅ GÉNÉRER PDF CÔTÉ CLIENT avec html2pdf.js
+            const pdfBlob = await this.generatePDFClientSide(includeSimulator, includeCharts);
+            this.showProgress(60, 'Converting PDF to base64...');
 
-            // Attendre conversion images
-            await this.wait(1500);
-            this.showProgress(60, 'Sending to server...');
+            // Convertir PDF en base64
+            const pdfBase64 = await this.blobToBase64(pdfBlob);
+            this.showProgress(70, 'Sending to server...');
 
-            // Envoyer au Worker
+            // Envoyer au Worker (juste pour email)
             const response = await fetch(this.workerUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -93,7 +85,7 @@ class BusinessPlanPDFExporter {
                     emails,
                     subject,
                     message,
-                    pdfHTML
+                    pdfBase64 // ⚠ Envoyer directement le PDF encodé
                 })
             });
 
@@ -125,30 +117,68 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📧 EXTRAIRE EMAILS
+     * 📄 GÉNÉRER PDF CÔTÉ CLIENT (html2pdf.js)
      */
-    getEmails() {
-        const raw = document.getElementById('recipientEmails').value;
-        const emails = raw
-            .split(/[\n,;]+/)
-            .map(e => e.trim())
-            .filter(e => this.isValidEmail(e));
-        return [...new Set(emails)]; // Dédupliquer
+    async generatePDFClientSide(includeSimulator, includeCharts) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                console.log('📄 Generating PDF client-side...');
+
+                // Créer le contenu HTML
+                const pdfContent = await this.createPDFContent(includeSimulator, includeCharts);
+
+                // Options html2pdf
+                const options = {
+                    margin: [12, 12, 15, 12],
+                    filename: `AlphaVault_BusinessPlan_${this.getFormattedDate()}.pdf`,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: 1200,
+                        ignoreElements: (element) => {
+                            return element.tagName === 'CANVAS' && !includeCharts;
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: {
+                        mode: ['avoid-all', 'css'],
+                        before: '.pdf-section-break'
+                    }
+                };
+
+                // Générer PDF et obtenir Blob
+                const worker = html2pdf().set(options).from(pdfContent);
+                const pdfBlob = await worker.outputPdf('blob');
+
+                this.cleanup();
+                console.log(`✅ PDF generated (${(pdfBlob.size / 1024).toFixed(2)} KB)`);
+                resolve(pdfBlob);
+
+            } catch (error) {
+                this.cleanup();
+                reject(error);
+            }
+        });
     }
 
     /**
-     * ✅ VALIDER EMAIL
+     * 📄 CRÉER CONTENU PDF
      */
-    isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    /**
-     * 📄 GÉNÉRER HTML PDF
-     */
-    async generatePDFHTML(includeSimulator, includeCharts) {
+    async createPDFContent(includeSimulator, includeCharts) {
         const container = document.createElement('div');
-        container.style.cssText = 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;';
+        container.id = 'pdf-export-container';
+        container.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 210mm;
+            background: white; visibility: hidden; z-index: -9999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        `;
 
         // Page de garde
         container.appendChild(this.createCoverPage());
@@ -158,7 +188,6 @@ class BusinessPlanPDFExporter {
         for (const section of allSections) {
             const sectionId = section.id;
 
-            // ⚠ EXCLURE SCENARIO SIMULATOR si option désactivée
             if (!includeSimulator && sectionId === 'simulator') {
                 console.log('⏭ Skipping Scenario Simulator section');
                 continue;
@@ -169,7 +198,10 @@ class BusinessPlanPDFExporter {
             container.appendChild(pdfSection);
         }
 
-        return container.outerHTML;
+        document.body.appendChild(container);
+        await this.wait(1500); // Attendre le rendu
+
+        return container;
     }
 
     /**
@@ -177,17 +209,12 @@ class BusinessPlanPDFExporter {
      */
     createCoverPage() {
         const cover = document.createElement('div');
+        cover.className = 'pdf-section-break';
         cover.style.cssText = `
-            min-height: 297mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            min-height: 297mm; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 80px 40px;
-            page-break-after: always;
+            color: white; padding: 80px 40px; page-break-after: always;
         `;
 
         const logoSVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;"><path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="30" cy="70" r="5" fill="white"/><circle cx="50" cy="60" r="5" fill="white"/><circle cx="70" cy="45" r="5" fill="white"/><circle cx="90" cy="30" r="6" fill="white"/></svg>`;
@@ -211,15 +238,12 @@ class BusinessPlanPDFExporter {
      */
     async createPDFSection(originalSection, title, includeCharts) {
         const pdfSection = document.createElement('div');
+        pdfSection.className = 'pdf-section-break';
         pdfSection.style.cssText = `
-            padding: 40px 30px;
-            background: white;
-            color: #1e293b;
-            page-break-before: always;
-            min-height: 200mm;
+            padding: 40px 30px; background: white; color: #1e293b;
+            page-break-before: always; min-height: 200mm;
         `;
 
-        // En-tête
         const header = document.createElement('div');
         header.style.cssText = 'margin-bottom: 40px; border-left: 8px solid #667eea; padding-left: 24px;';
         header.innerHTML = `
@@ -229,7 +253,6 @@ class BusinessPlanPDFExporter {
         `;
         pdfSection.appendChild(header);
 
-        // Contenu
         const content = await this.cloneAndStyleContent(originalSection, includeCharts);
         pdfSection.appendChild(content);
 
@@ -243,10 +266,9 @@ class BusinessPlanPDFExporter {
         const contentDiv = document.createElement('div');
         const clone = section.cloneNode(true);
 
-        // Supprimer éléments inutiles
         clone.querySelectorAll('.section-title, button, input, select, .nav-tabs, .bp-nav').forEach(el => el?.remove());
 
-        // ⚠ TRAITER LES GRAPHIQUES
+        // Traiter graphiques
         if (includeCharts) {
             const chartContainers = clone.querySelectorAll('.chart-container');
             for (const container of chartContainers) {
@@ -256,18 +278,17 @@ class BusinessPlanPDFExporter {
                         const imgData = canvas.toDataURL('image/png');
                         const img = document.createElement('img');
                         img.src = imgData;
-                        img.style.cssText = 'width: 100%; max-width: 800px; display: block; margin: 30px auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);';
+                        img.style.cssText = 'width: 100%; max-width: 800px; display: block; margin: 30px auto; border-radius: 12px;';
                         container.innerHTML = '';
                         container.appendChild(img);
                     } catch (error) {
-                        console.error('⚠ Chart conversion error:', error);
-                        container.innerHTML = '<div style="padding: 60px; background: #f8fafc; border: 2px dashed #667eea; border-radius: 16px; text-align: center; color: #667eea; font-weight: 600;">📊 Chart: See interactive version online</div>';
+                        container.innerHTML = '<div style="padding: 60px; background: #f8fafc; border: 2px dashed #667eea; border-radius: 16px; text-align: center; color: #667eea; font-weight: 600;">📊 Chart unavailable</div>';
                     }
                 }
             }
         } else {
             clone.querySelectorAll('.chart-container').forEach(el => {
-                el.innerHTML = '<div style="padding: 60px; background: #f8fafc; border: 2px dashed #667eea; border-radius: 16px; text-align: center; color: #667eea; font-weight: 600;">📊 Chart: See interactive version online</div>';
+                el.innerHTML = '<div style="padding: 60px; background: #f8fafc; border: 2px dashed #667eea; border-radius: 16px; text-align: center; color: #667eea; font-weight: 600;">📊 Chart: See online version</div>';
             });
         }
 
@@ -279,7 +300,7 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎨 APPLIQUER STYLES PDF
+     * 🎨 STYLES PDF
      */
     applyPDFStyling(element) {
         element.style.color = '#1e293b';
@@ -307,9 +328,6 @@ class BusinessPlanPDFExporter {
         });
     }
 
-    /**
-     * 🔄 CONVERTIR ICÔNES
-     */
     convertIcons(element) {
         element.querySelectorAll('i[class*="fa-"]').forEach(icon => {
             const classes = icon.className.split(' ');
@@ -328,8 +346,21 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 📝 UTILS
+     * 🔧 UTILS
      */
+    getEmails() {
+        const raw = document.getElementById('recipientEmails').value;
+        const emails = raw
+            .split(/[\n,;]+/)
+            .map(e => e.trim())
+            .filter(e => this.isValidEmail(e));
+        return [...new Set(emails)];
+    }
+
+    isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
     getSectionTitle(section) {
         const titleEl = section.querySelector('.section-title');
         return titleEl ? titleEl.textContent.trim().replace(/\s+/g, ' ') : 'Section';
@@ -345,13 +376,32 @@ class BusinessPlanPDFExporter {
         return '●';
     }
 
+    getFormattedDate() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
     wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    /**
-     * 📊 PROGRESSION
-     */
+    async blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    cleanup() {
+        const pdfContent = document.getElementById('pdf-export-container');
+        if (pdfContent) pdfContent.remove();
+    }
+
     showProgress(percent, text) {
         const progressDiv = document.getElementById('pdfProgress');
         const progressFill = document.getElementById('progressFill');
@@ -372,9 +422,6 @@ class BusinessPlanPDFExporter {
         document.getElementById('cancelPdfBtn').disabled = false;
     }
 
-    /**
-     * 🔔 NOTIFICATIONS
-     */
     showNotification(title, message, type) {
         const bgColor = type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
                         type === 'warning' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 
@@ -413,5 +460,5 @@ class BusinessPlanPDFExporter {
 // ✅ INIT
 document.addEventListener('DOMContentLoaded', () => {
     window.pdfExporter = new BusinessPlanPDFExporter();
-    console.log('📄 ✅ Business Plan PDF Exporter v5.0 initialized');
+    console.log('📄 ✅ Business Plan PDF Exporter v6.0 (Client-Side) initialized');
 });
