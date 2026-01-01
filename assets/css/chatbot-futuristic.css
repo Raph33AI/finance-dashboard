@@ -384,14 +384,14 @@ body {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BOUTON POUR ROUVRIR LA SIDEBAR (CORRECTION Z-INDEX)
+   BOUTON POUR ROUVRIR LA SIDEBAR (POSITION HAUT)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .conversations-reopen-btn {
-    /* ✅ Position APRÈS la sidebar principale */
+    /* ✅ Position en HAUT À GAUCHE de la zone de chat */
     position: fixed;
-    left: calc(var(--sidebar-width) + 30px); /* 280px + 30px = 310px */
-    top: 120px;
+    left: calc(var(--sidebar-width) + 20px); /* 280px + 20px = 300px */
+    top: 85px; /* Juste sous le header (~70px) */
     width: 48px;
     height: 48px;
     
@@ -406,7 +406,7 @@ body {
     /* Shadow */
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     
-    /* ✅ Z-INDEX ÉLEVÉ (au-dessus de la sidebar principale) */
+    /* Z-INDEX ÉLEVÉ */
     z-index: 9999;
     
     /* Transition */
@@ -417,13 +417,13 @@ body {
     align-items: center;
     justify-content: center;
     
-    /* ✅ Caché par défaut */
+    /* Caché par défaut */
     opacity: 0;
     pointer-events: none;
     transform: translateX(-10px);
 }
 
-/* ✅ Affichage avec classe .visible */
+/* Affichage avec classe .visible */
 .conversations-reopen-btn.visible {
     opacity: 1;
     pointer-events: all;
@@ -468,31 +468,33 @@ body.dark-mode .conversations-reopen-btn:hover {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   RESPONSIVE - MOBILE
+   RESPONSIVE - ADAPTATIONS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* ✅ Sur mobile, quand la sidebar principale est réduite */
+/* Tablet - Sidebar principale réduite */
 @media (max-width: 1024px) {
     .conversations-reopen-btn {
-        left: 90px; /* Position après l'icône de la sidebar principale */
+        left: 90px; /* Sidebar principale compactée */
+        top: 85px;
     }
 }
 
+/* Mobile - Position à gauche */
 @media (max-width: 768px) {
     .conversations-reopen-btn {
-        left: 12px; /* Position à gauche sur mobile */
-        top: 120px;
+        left: 12px;
+        top: 80px;
         width: 44px;
         height: 44px;
         font-size: 18px;
-        z-index: 9999; /* Toujours au-dessus */
     }
 }
 
+/* Small Mobile */
 @media (max-width: 480px) {
     .conversations-reopen-btn {
         left: 10px;
-        top: 100px;
+        top: 75px;
         width: 40px;
         height: 40px;
         font-size: 16px;
