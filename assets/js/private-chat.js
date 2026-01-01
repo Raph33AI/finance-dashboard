@@ -1,5 +1,5 @@
 // /* ============================================
-//    PRIVATE-CHAT.JS - Private Chat System v3.6
+//    PRIVATE-CHAT.JS - Private Chat System v3.7
 //    💬 Chat en temps réel avec upload R2
 //    🔥 Récupération robuste du plan utilisateur
 //    ✅ Upload images + documents vers R2
@@ -11,6 +11,7 @@
 //    🔇 Boutons téléphone et vidéo retirés
 //    ✅ PARTAGE DE POST PAR MESSAGE PRIVÉ
 //    📧 NOTIFICATION EMAIL AUTOMATIQUE (Cloudflare Worker)
+//    ⚠ SANS ALERT() - Console uniquement
 //    ============================================ */
 
 // class PrivateChat {
@@ -25,15 +26,12 @@
 //         this.db = firebase.firestore();
 //         this.auth = firebase.auth();
         
-//         // ✅ URL du Worker R2
 //         this.R2_WORKER_URL = 'https://alphavault-image-storage.raphnardone.workers.dev';
-        
-//         // ✅ URL du Worker de notification email
 //         this.EMAIL_NOTIFICATION_WORKER_URL = 'https://message-notification-sender.raphnardone.workers.dev';
 //     }
 
 //     async initialize() {
-//         console.log('💬 Initializing Private Chat v3.6...');
+//         console.log('💬 Initializing Private Chat v3.7...');
         
 //         this.auth.onAuthStateChanged((user) => {
 //             this.currentUser = user;
@@ -44,15 +42,10 @@
 //         });
 //     }
 
-//     /* ==========================================
-//        👤 RÉCUPÉRATION ROBUSTE DES DONNÉES UTILISATEUR
-//        ========================================== */
-    
 //     async getUserData(userId) {
 //         try {
 //             console.log('🔍 Getting user data for:', userId);
             
-//             // ✅ SI C'EST L'UTILISATEUR ACTUEL : Utiliser window.currentUserData
 //             if (userId === this.currentUser?.uid && window.currentUserData) {
 //                 console.log('✅ Using cached data from auth-guard.js');
 //                 console.log('📊 Plan:', window.currentUserData.plan);
@@ -68,7 +61,6 @@
 //                 };
 //             }
             
-//             // ✅ SINON : Requête Firestore pour les autres utilisateurs
 //             console.log('📥 Fetching from Firestore...');
             
 //             const userDoc = await this.db.collection('users').doc(userId).get();
@@ -143,16 +135,11 @@
 //             fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
 //         }
 //     }
-    
-//     /* ==========================================
-//     💬 OUVRIR UN CHAT (VERSION CORRIGÉE - Sans duplication)
-//     ========================================== */
 
 //     async openChat(userId, userData, conversationId) {
 //         console.log('💬 Opening chat with:', userData);
 //         console.log('📝 Conversation ID:', conversationId);
 
-//         // ✅ CORRECTION : Utiliser l'ID fourni par messages-hub
 //         if (!conversationId) {
 //             console.error('❌ No conversation ID provided');
 //             return;
@@ -261,7 +248,6 @@
 
 //                 messagesContainer.innerHTML = messagesHTML;
                 
-//                 // ✅ Ajouter les événements de clic pour toggle le bouton suppression (mobile)
 //                 this.setupMessageClickListeners();
                 
 //                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -275,33 +261,24 @@
 //             });
 //     }
 
-//     /* ==========================================
-//        📱 TOGGLE BOUTON SUPPRESSION SUR CLIC (MOBILE)
-//        ========================================== */
-    
 //     setupMessageClickListeners() {
 //         const messages = document.querySelectorAll('.chat-message.own');
         
 //         messages.forEach(message => {
-//             // Retirer les anciens listeners
 //             const newMessage = message.cloneNode(true);
 //             message.parentNode.replaceChild(newMessage, message);
             
-//             // Ajouter le nouveau listener
 //             newMessage.addEventListener('click', (e) => {
-//                 // Ne pas toggle si on clique sur le bouton suppression ou l'avatar
 //                 if (e.target.closest('.message-delete-btn') || e.target.closest('.chat-message-avatar')) {
 //                     return;
 //                 }
                 
-//                 // Fermer tous les autres messages actifs
 //                 document.querySelectorAll('.chat-message.message-active').forEach(msg => {
 //                     if (msg !== newMessage) {
 //                         msg.classList.remove('message-active');
 //                     }
 //                 });
                 
-//                 // Toggle l'état actif
 //                 newMessage.classList.toggle('message-active');
 //             });
 //         });
@@ -321,7 +298,6 @@
 
 //         const displayName = senderData.displayName || 'Unknown';
         
-//         // ✅ CORRECTION : Fallback robuste pour l'avatar
 //         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
 //         const avatar = senderData.photoURL || fallbackAvatar;
 
@@ -329,12 +305,10 @@
 //             ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 //             : 'Now';
 
-//         // ✅ NOUVEAU : Rendu spécial pour les posts partagés
 //         if (message.type === 'shared_post' && message.sharedPost) {
 //             return this.renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time);
 //         }
 
-//         // Affichage des attachments normaux
 //         let attachmentHTML = '';
 //         if (message.attachments && message.attachments.length > 0) {
 //             attachmentHTML = message.attachments.map(att => {
@@ -394,17 +368,12 @@
 //         `;
 //     }
 
-//     /* ==========================================
-//     📨 RENDU SPÉCIAL POUR LES POSTS PARTAGÉS (VERSION AMÉLIORÉE)
-//     ========================================== */
-
 //     renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time) {
 //         const post = message.sharedPost;
         
-//         // ✅ Sécurité : Vérifier que le post existe
 //         if (!post) {
 //             console.error('❌ Missing sharedPost data in message:', messageId);
-//             return this.createMessageBubble(message, messageId); // Fallback vers message normal
+//             return this.createMessageBubble(message, messageId);
 //         }
         
 //         const deleteBtn = isOwn ? `
@@ -417,22 +386,18 @@
 
 //         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
 
-//         // ✅ Nettoyer et valider le titre
 //         const rawTitle = post.title || 'Untitled Post';
 //         const cleanTitle = this.stripHtml(rawTitle).trim() || 'Untitled Post';
         
-//         // ✅ Nettoyer et valider l'auteur
 //         const rawAuthor = post.authorName || 'Unknown Author';
 //         const cleanAuthor = this.stripHtml(rawAuthor).trim() || 'Unknown Author';
         
-//         // ✅ Formater la date (si disponible)
 //         let dateHTML = '';
 //         if (post.publishedDate) {
 //             const cleanDate = this.escapeHtml(post.publishedDate.toString());
 //             dateHTML = `<span>• ${cleanDate}</span>`;
 //         }
         
-//         // ✅ Valider l'URL
 //         const postUrl = post.url || '#';
 
 //         return `
@@ -446,19 +411,15 @@
 //                 <div class="chat-message-content">
 //                     <div class="chat-message-bubble shared-post-bubble">
                         
-//                         <!-- Header Badge -->
 //                         <div class="shared-post-header">
 //                             <i class="fas fa-share-square"></i>
 //                             <span>Shared Post</span>
 //                         </div>
                         
-//                         <!-- Contenu cliquable -->
 //                         <div class="shared-post-content" onclick="window.open('${postUrl}', '_blank')">
                             
-//                             <!-- Titre -->
 //                             <div class="shared-post-title">${this.escapeHtml(cleanTitle)}</div>
                             
-//                             <!-- Auteur + Date -->
 //                             <div class="shared-post-meta">
 //                                 <span class="shared-post-author">
 //                                     <i class="fas fa-user"></i>
@@ -468,7 +429,6 @@
 //                             </div>
 //                         </div>
                         
-//                         <!-- Bouton View Post -->
 //                         <a href="${postUrl}" target="_blank" class="shared-post-view-btn" onclick="event.stopPropagation()">
 //                             View Post <i class="fas fa-external-link-alt"></i>
 //                         </a>
@@ -480,27 +440,17 @@
 //         `;
 //     }
 
-//     /**
-//      * Nettoyer le HTML d'une chaîne (version améliorée)
-//      */
 //     stripHtml(html) {
 //         if (!html) return '';
         
-//         // Créer un élément temporaire pour parser le HTML
 //         const tempDiv = document.createElement('div');
 //         tempDiv.innerHTML = html;
         
-//         // Extraire le texte brut
 //         const text = tempDiv.textContent || tempDiv.innerText || '';
         
-//         // Nettoyer les espaces multiples et retourner
 //         return text.replace(/\s+/g, ' ').trim();
 //     }
 
-//     /* ==========================================
-//        🗑 SUPPRESSION DÉFINITIVE DE MESSAGE
-//        ========================================== */
-    
 //     async deleteMessage(messageId) {
 //         if (!confirm('Are you sure you want to permanently delete this message?')) {
 //             return;
@@ -514,7 +464,6 @@
 //         try {
 //             console.log('🗑 Deleting message:', messageId);
 
-//             // ✅ SUPPRESSION DÉFINITIVE du document Firestore
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
@@ -524,7 +473,6 @@
 
 //             console.log('✅ Message deleted permanently');
 
-//             // ✅ Mettre à jour le dernier message si nécessaire
 //             const messagesSnapshot = await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
@@ -547,7 +495,6 @@
 //                         lastMessageAt: lastMessage.createdAt
 //                     });
 //             } else {
-//                 // Si c'était le dernier message, réinitialiser
 //                 await this.db
 //                     .collection('conversations')
 //                     .doc(this.currentConversationId)
@@ -562,14 +509,9 @@
 
 //         } catch (error) {
 //             console.error('❌ Error deleting message:', error);
-//             alert('Failed to delete message. Please try again.');
 //         }
 //     }
 
-//     /* ==========================================
-//        🗑 SUPPRESSION DÉFINITIVE DE CONVERSATION
-//        ========================================== */
-    
 //     async deleteConversation(conversationId) {
 //         const confirmText = 
 //             '⚠ WARNING ⚠\n\n' +
@@ -585,7 +527,6 @@
 //         try {
 //             console.log('🗑 Deleting conversation:', conversationId);
 
-//             // ✅ ÉTAPE 1 : Supprimer tous les messages de la conversation
 //             const messagesSnapshot = await this.db
 //                 .collection('conversations')
 //                 .doc(conversationId)
@@ -594,7 +535,6 @@
 
 //             console.log(`📊 Found ${messagesSnapshot.size} messages to delete`);
 
-//             // Supprimer par batch (max 500 par batch)
 //             const batchSize = 500;
 //             let batch = this.db.batch();
 //             let operationCount = 0;
@@ -603,7 +543,6 @@
 //                 batch.delete(doc.ref);
 //                 operationCount++;
 
-//                 // Si on atteint 500 opérations, commit et créer un nouveau batch
 //                 if (operationCount === batchSize) {
 //                     await batch.commit();
 //                     batch = this.db.batch();
@@ -612,13 +551,11 @@
 //                 }
 //             }
 
-//             // Commit le dernier batch si nécessaire
 //             if (operationCount > 0) {
 //                 await batch.commit();
 //                 console.log(`✅ Deleted final batch of ${operationCount} messages`);
 //             }
 
-//             // ✅ ÉTAPE 2 : Supprimer le document conversation
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(conversationId)
@@ -626,19 +563,14 @@
 
 //             console.log('✅ Conversation deleted permanently');
 
-//             // ✅ ÉTAPE 3 : Fermer le chat et recharger les conversations
 //             this.closeChat();
 
-//             // Déclencher un événement pour recharger la liste des conversations
 //             if (window.messagesHub) {
 //                 window.messagesHub.loadConversations();
 //             }
 
-//             alert('✅ Conversation deleted successfully');
-
 //         } catch (error) {
 //             console.error('❌ Error deleting conversation:', error);
-//             alert(`Failed to delete conversation: ${error.message}`);
 //         }
 //     }
 
@@ -659,13 +591,8 @@
 //         return iconMap[ext] || 'fas fa-file';
 //     }
 
-//     /* ==========================================
-//        📧 ENVOYER NOTIFICATION EMAIL AU DESTINATAIRE
-//        ========================================== */
-
 //     async sendEmailNotification(recipientId, messageData) {
 //         try {
-//             // ✅ Récupérer les données du destinataire
 //             const recipientDoc = await this.db.collection('users').doc(recipientId).get();
             
 //             if (!recipientDoc.exists) {
@@ -675,13 +602,11 @@
 
 //             const recipientData = recipientDoc.data();
 
-//             // ✅ Vérifier les préférences (optionnel)
 //             if (recipientData.emailNotifications === false) {
 //                 console.log('🔕 User has disabled email notifications');
 //                 return;
 //             }
 
-//             // ✅ Préparer les données pour le Worker
 //             const notificationPayload = {
 //                 recipientEmail: recipientData.email,
 //                 recipientName: recipientData.displayName || recipientData.email?.split('@')[0] || 'User',
@@ -698,7 +623,6 @@
 
 //             console.log('📧 Sending email notification:', notificationPayload);
 
-//             // ✅ Appeler le Worker Cloudflare
 //             const response = await fetch(this.EMAIL_NOTIFICATION_WORKER_URL, {
 //                 method: 'POST',
 //                 headers: {
@@ -717,14 +641,9 @@
 
 //         } catch (error) {
 //             console.error('❌ Error sending email notification:', error);
-//             // ⚠ Ne pas bloquer l'envoi du message si l'email échoue
 //         }
 //     }
 
-//     /* ==========================================
-//        📤 ENVOYER UN MESSAGE
-//        ========================================== */
-    
 //     async sendMessage() {
 //         const messageInput = document.getElementById('chatMessageInput');
 //         if (!messageInput) return;
@@ -732,8 +651,14 @@
 //         const text = messageInput.value.trim();
 //         if (!text && this.attachedFiles.length === 0) return;
 
+//         // ✅ CORRECTION : Vérification sans alert()
 //         if (!this.currentConversationId) {
-//             alert('No active conversation');
+//             console.error('❌ CRITICAL: No conversation ID found!', {
+//                 currentConversationId: this.currentConversationId,
+//                 currentChatUser: this.currentChatUser,
+//                 currentUser: this.currentUser?.uid
+//             });
+//             console.error('⚠ Please select a conversation first');
 //             return;
 //         }
 
@@ -753,14 +678,12 @@
 //                 attachments: attachments
 //             };
 
-//             // ✅ AJOUTER LE MESSAGE À FIRESTORE
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
 //                 .collection('messages')
 //                 .add(messageData);
 
-//             // ✅ METTRE À JOUR LA CONVERSATION
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
@@ -773,7 +696,6 @@
 //                     [`unreadCount.${this.currentChatUser.uid}`]: firebase.firestore.FieldValue.increment(1)
 //                 });
 
-//             // ✅ ✨ NOUVEAU : ENVOYER NOTIFICATION EMAIL ✨
 //             await this.sendEmailNotification(this.currentChatUser.uid, messageData);
 
 //             messageInput.value = '';
@@ -784,31 +706,21 @@
 
 //         } catch (error) {
 //             console.error('❌ Error sending message:', error);
-//             alert('Failed to send message. Please try again.');
 //         } finally {
 //             if (sendBtn) sendBtn.disabled = false;
 //         }
 //     }
 
-//     /* ==========================================
-//        📨 ENVOI DE POST COMME MESSAGE SPÉCIAL
-//        ========================================== */
-
-//     /**
-//      * Envoyer un post partagé comme message privé (VERSION AMÉLIORÉE)
-//      */
 //     async sendPostAsMessage(userId, postData, userData) {
 //         try {
 //             console.log('📨 Sending post as message to:', userId);
 //             console.log('📄 Post data:', postData);
 
-//             // ✅ VALIDATION : Vérifier que les données essentielles existent
 //             if (!postData || !postData.title || !postData.url) {
 //                 console.error('❌ Invalid post data:', postData);
 //                 throw new Error('Missing required post information');
 //             }
 
-//             // ✅ Créer ou récupérer la conversation
 //             if (!this.currentConversationId || this.currentChatUser?.uid !== userId) {
 //                 console.log('🔄 Opening conversation via messages-hub first...');
                 
@@ -817,11 +729,9 @@
 //                 this.currentChatUser = userData;
 //             }
 
-//             // ✅ Nettoyer le titre pour l'aperçu
 //             const cleanTitle = this.stripHtml(postData.title).trim() || 'Untitled Post';
 //             const previewText = `📌 Shared a post: "${cleanTitle.substring(0, 50)}${cleanTitle.length > 50 ? '...' : ''}"`;
 
-//             // Créer le message avec les données du post
 //             const messageData = {
 //                 type: 'shared_post',
 //                 text: previewText,
@@ -839,14 +749,12 @@
 //                 attachments: []
 //             };
 
-//             // Ajouter le message à Firestore
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
 //                 .collection('messages')
 //                 .add(messageData);
 
-//             // Mettre à jour la conversation
 //             await this.db
 //                 .collection('conversations')
 //                 .doc(this.currentConversationId)
@@ -859,29 +767,20 @@
 //                     [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
 //                 });
 
-//             // ✅ ✨ NOUVEAU : ENVOYER NOTIFICATION EMAIL ✨
 //             await this.sendEmailNotification(userId, messageData);
 
 //             console.log('✅ Post shared successfully as message');
 
 //         } catch (error) {
 //             console.error('❌ Error sending post as message:', error);
-//             alert(`Failed to share post: ${error.message}`);
 //             throw error;
 //         }
 //     }
 
-//     /* ==========================================
-//        📤 UPLOAD VERS R2 WORKER
-//        ========================================== */
-    
 //     async uploadFilesToR2() {
 //         const uploadPromises = this.attachedFiles.map(async (file) => {
 //             try {
-//                 // Obtenir le token Firebase
 //                 const token = await this.currentUser.getIdToken();
-
-//                 // Créer le FormData
 //                 const formData = new FormData();
 //                 formData.append('file', file);
 //                 formData.append('userId', this.currentUser.uid);
@@ -889,7 +788,6 @@
 
 //                 console.log('📤 Uploading to R2:', file.name);
 
-//                 // Envoyer vers le Worker R2
 //                 const response = await fetch(`${this.R2_WORKER_URL}/upload`, {
 //                     method: 'POST',
 //                     headers: {
@@ -928,12 +826,12 @@
 
 //         for (const file of files) {
 //             if (this.attachedFiles.length >= this.MAX_FILES) {
-//                 alert(`Maximum ${this.MAX_FILES} files allowed`);
+//                 console.warn(`⚠ Maximum ${this.MAX_FILES} files allowed`);
 //                 break;
 //             }
 
 //             if (file.size > this.MAX_FILE_SIZE) {
-//                 alert(`${file.name} is too large (max 10MB)`);
+//                 console.warn(`⚠ ${file.name} is too large (max 10MB)`);
 //                 continue;
 //             }
 
@@ -1004,10 +902,6 @@
 //         }
 //     }
 
-//     /* ==========================================
-//        🎨 RENDER CHAT HEADER (CORRIGÉ)
-//        ========================================== */
-    
 //     async renderChatHeader() {
 //         const chatHeader = document.getElementById('chatHeader');
 //         if (!chatHeader) return;
@@ -1020,7 +914,6 @@
 
 //         const displayName = this.currentChatUser.displayName || 'Unknown User';
         
-//         // ✅ CORRECTION : Fallback robuste pour l'avatar
 //         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
 //         const avatar = this.currentChatUser.photoURL || fallbackAvatar;
         
@@ -1051,7 +944,6 @@
 //             </div>
             
 //             <div class="chat-header-actions">
-//                 <!-- ✅ Bouton suppression conversation (rouge) -->
 //                 <button class="chat-header-btn chat-delete-conversation-btn" 
 //                         onclick="window.privateChat.deleteConversation('${this.currentConversationId}')" 
 //                         title="Delete conversation">
@@ -1067,10 +959,6 @@
 //         console.log('✅ Chat header rendered with:', displayName, statusHTML);
 //     }
 
-//     /* ==========================================
-//        🔗 NAVIGATION VERS PROFIL PUBLIC (CORRIGÉ)
-//        ========================================== */
-    
 //     navigateToProfile(userId) {
 //         if (!userId) {
 //             console.warn('⚠ No user ID provided');
@@ -1079,7 +967,6 @@
         
 //         console.log('🔗 Navigating to public profile:', userId);
         
-//         // ✅ CORRECTION : Utiliser ?id= comme dans profile.js
 //         window.location.href = `public-profile.html?id=${userId}`;
 //     }
 
@@ -1135,22 +1022,13 @@
 //     }
 // });
 
-// console.log('✅ private-chat.js loaded (v3.6 - Email Notifications Support)');
+// console.log('✅ private-chat.js loaded (v3.7 - No Alert)');
 
 /* ============================================
-   PRIVATE-CHAT.JS - Private Chat System v3.7
+   PRIVATE-CHAT.JS - Private Chat System v3.8
+   ✅ CORRECTION : Gestion unifiée des attachments
    💬 Chat en temps réel avec upload R2
    🔥 Récupération robuste du plan utilisateur
-   ✅ Upload images + documents vers R2
-   🎯 Photos cliquables vers profil public (CORRIGÉ ?id=)
-   🗑 Suppression définitive des messages ET conversations
-   💬 Bulles adaptatives au contenu
-   📱 Bouton suppression message sur clic (mobile)
-   🖼 Correction affichage photo utilisateur avec fallback
-   🔇 Boutons téléphone et vidéo retirés
-   ✅ PARTAGE DE POST PAR MESSAGE PRIVÉ
-   📧 NOTIFICATION EMAIL AUTOMATIQUE (Cloudflare Worker)
-   ⚠ SANS ALERT() - Console uniquement
    ============================================ */
 
 class PrivateChat {
@@ -1159,9 +1037,6 @@ class PrivateChat {
         this.currentChatUser = null;
         this.currentConversationId = null;
         this.messagesListener = null;
-        this.attachedFiles = [];
-        this.MAX_FILES = 5;
-        this.MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
         this.db = firebase.firestore();
         this.auth = firebase.auth();
         
@@ -1170,13 +1045,13 @@ class PrivateChat {
     }
 
     async initialize() {
-        console.log('💬 Initializing Private Chat v3.7...');
+        console.log('💬 Initializing Private Chat v3.8...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
             if (user) {
                 console.log('✅ Chat user authenticated:', user.email);
-                this.setupEventListeners();
+                // ✅ NE PAS appeler setupEventListeners() ici
             }
         });
     }
@@ -1187,8 +1062,6 @@ class PrivateChat {
             
             if (userId === this.currentUser?.uid && window.currentUserData) {
                 console.log('✅ Using cached data from auth-guard.js');
-                console.log('📊 Plan:', window.currentUserData.plan);
-                console.log('🖼 Photo URL:', window.currentUserData.photoURL);
                 
                 return {
                     uid: userId,
@@ -1217,16 +1090,7 @@ class PrivateChat {
             }
 
             const userData = userDoc.data();
-            
-            console.log('📄 Firestore data:', userData);
-            console.log('🖼 Photo URL from Firestore:', userData.photoURL);
-            
-            const plan = userData.plan || 
-                        userData.subscriptionPlan || 
-                        userData.currentPlan || 
-                        'free';
-            
-            console.log('📊 Plan:', plan);
+            const plan = userData.plan || userData.subscriptionPlan || userData.currentPlan || 'free';
 
             return {
                 uid: userId,
@@ -1250,33 +1114,8 @@ class PrivateChat {
         }
     }
 
-    setupEventListeners() {
-        const messageInput = document.getElementById('chatMessageInput');
-        const sendBtn = document.getElementById('chatSendBtn');
-        const attachBtn = document.getElementById('attachBtn');
-        const fileInput = document.getElementById('fileInput');
-
-        if (messageInput) {
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this.sendMessage();
-                }
-            });
-        }
-
-        if (sendBtn) {
-            sendBtn.addEventListener('click', () => this.sendMessage());
-        }
-
-        if (attachBtn && fileInput) {
-            attachBtn.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-        }
-    }
-
     async openChat(userId, userData, conversationId) {
-        console.log('💬 Opening chat with:', userData);
+        console.log('💬 Opening PRIVATE chat with:', userData);
         console.log('📝 Conversation ID:', conversationId);
 
         if (!conversationId) {
@@ -1294,6 +1133,11 @@ class PrivateChat {
 
         if (emptyState) emptyState.style.display = 'none';
         if (chatActive) chatActive.style.display = 'flex';
+
+        // ✅ CORRECTION : Activer les événements pour ce type de chat
+        if (window.chatEventManager) {
+            window.chatEventManager.activateFor('private');
+        }
 
         await this.renderChatHeader();
         await this.loadMessages();
@@ -1329,7 +1173,6 @@ class PrivateChat {
 
         this.currentChatUser = null;
         this.currentConversationId = null;
-        this.attachedFiles = [];
 
         const emptyState = document.getElementById('chatEmptyState');
         const chatActive = document.getElementById('chatActive');
@@ -1337,10 +1180,9 @@ class PrivateChat {
         if (emptyState) emptyState.style.display = 'flex';
         if (chatActive) chatActive.style.display = 'none';
 
-        const attachmentPreview = document.getElementById('attachmentPreview');
-        if (attachmentPreview) {
-            attachmentPreview.style.display = 'none';
-            attachmentPreview.innerHTML = '';
+        // ✅ Nettoyer les attachments via le manager
+        if (window.chatEventManager) {
+            window.chatEventManager.clearAttachments();
         }
     }
 
@@ -1788,15 +1630,14 @@ class PrivateChat {
         if (!messageInput) return;
 
         const text = messageInput.value.trim();
-        if (!text && this.attachedFiles.length === 0) return;
+        
+        // ✅ CORRECTION : Récupérer les fichiers du manager global
+        const attachedFiles = window.chatEventManager ? window.chatEventManager.getAttachedFiles() : [];
+        
+        if (!text && attachedFiles.length === 0) return;
 
-        // ✅ CORRECTION : Vérification sans alert()
         if (!this.currentConversationId) {
-            console.error('❌ CRITICAL: No conversation ID found!', {
-                currentConversationId: this.currentConversationId,
-                currentChatUser: this.currentChatUser,
-                currentUser: this.currentUser?.uid
-            });
+            console.error('❌ CRITICAL: No conversation ID found!');
             console.error('⚠ Please select a conversation first');
             return;
         }
@@ -1806,8 +1647,8 @@ class PrivateChat {
 
         try {
             let attachments = [];
-            if (this.attachedFiles.length > 0) {
-                attachments = await this.uploadFilesToR2();
+            if (attachedFiles.length > 0) {
+                attachments = await this.uploadFilesToR2(attachedFiles);
             }
 
             const messageData = {
@@ -1838,8 +1679,11 @@ class PrivateChat {
             await this.sendEmailNotification(this.currentChatUser.uid, messageData);
 
             messageInput.value = '';
-            this.attachedFiles = [];
-            this.renderAttachmentPreview();
+            
+            // ✅ Nettoyer les attachments via le manager
+            if (window.chatEventManager) {
+                window.chatEventManager.clearAttachments();
+            }
 
             console.log('✅ Message sent');
 
@@ -1853,7 +1697,6 @@ class PrivateChat {
     async sendPostAsMessage(userId, postData, userData) {
         try {
             console.log('📨 Sending post as message to:', userId);
-            console.log('📄 Post data:', postData);
 
             if (!postData || !postData.title || !postData.url) {
                 console.error('❌ Invalid post data:', postData);
@@ -1916,8 +1759,8 @@ class PrivateChat {
         }
     }
 
-    async uploadFilesToR2() {
-        const uploadPromises = this.attachedFiles.map(async (file) => {
+    async uploadFilesToR2(files) {
+        const uploadPromises = files.map(async (file) => {
             try {
                 const token = await this.currentUser.getIdToken();
                 const formData = new FormData();
@@ -1960,72 +1803,6 @@ class PrivateChat {
         return await Promise.all(uploadPromises);
     }
 
-    handleFileSelect(event) {
-        const files = Array.from(event.target.files);
-
-        for (const file of files) {
-            if (this.attachedFiles.length >= this.MAX_FILES) {
-                console.warn(`⚠ Maximum ${this.MAX_FILES} files allowed`);
-                break;
-            }
-
-            if (file.size > this.MAX_FILE_SIZE) {
-                console.warn(`⚠ ${file.name} is too large (max 10MB)`);
-                continue;
-            }
-
-            this.attachedFiles.push(file);
-        }
-
-        this.renderAttachmentPreview();
-        event.target.value = '';
-    }
-
-    renderAttachmentPreview() {
-        const preview = document.getElementById('attachmentPreview');
-        if (!preview) return;
-
-        if (this.attachedFiles.length === 0) {
-            preview.style.display = 'none';
-            preview.innerHTML = '';
-            return;
-        }
-
-        preview.style.display = 'block';
-
-        const previewHTML = `
-            <div class="attachment-preview-grid">
-                ${this.attachedFiles.map((file, index) => {
-                    const isImage = file.type.startsWith('image/');
-                    const previewUrl = isImage ? URL.createObjectURL(file) : null;
-                    const icon = this.getFileIcon(file.name);
-
-                    return `
-                        <div class="attachment-preview-item">
-                            ${isImage 
-                                ? `<img src="${previewUrl}" class="attachment-preview-img" alt="${file.name}">`
-                                : `<div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(102, 126, 234, 0.1); padding: 8px;">
-                                    <i class="${icon}" style="font-size: 2rem; color: #667eea; margin-bottom: 4px;"></i>
-                                    <span style="font-size: 0.7rem; color: #667eea; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">${file.name}</span>
-                                   </div>`
-                            }
-                            <button class="attachment-remove-btn" onclick="window.privateChat.removeFile(${index})" title="Remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-
-        preview.innerHTML = previewHTML;
-    }
-
-    removeFile(index) {
-        this.attachedFiles.splice(index, 1);
-        this.renderAttachmentPreview();
-    }
-
     async markAsRead() {
         if (!this.currentConversationId) return;
 
@@ -2055,8 +1832,6 @@ class PrivateChat {
         
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
         const avatar = this.currentChatUser.photoURL || fallbackAvatar;
-        
-        console.log('🖼 Header Avatar URL:', avatar);
 
         const isOnline = await this.checkUserOnline(this.currentChatUser.uid);
         const statusHTML = isOnline 
@@ -2095,7 +1870,7 @@ class PrivateChat {
             </div>
         `;
         
-        console.log('✅ Chat header rendered with:', displayName, statusHTML);
+        console.log('✅ Chat header rendered');
     }
 
     navigateToProfile(userId) {
@@ -2161,4 +1936,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ private-chat.js loaded (v3.7 - No Alert)');
+console.log('✅ private-chat.js loaded (v3.8 - Unified Events)');
