@@ -19,7 +19,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
+    <!-- <link rel="stylesheet" href="assets/css/chatbot-styles.css"> -->
     <link rel='stylesheet' href='assets/css/economic-pages.css'>
     <link rel='stylesheet' href='assets/css/insider-flow-tracker.css'>
     
@@ -641,14 +641,14 @@
     <script src="assets/js/insider-flow-tracker.js"></script>
 
     <!-- Chatbot Scripts -->
-    <script src="assets/js/chatbot-config.js"></script>
+    <!-- <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
     <script src="assets/js/chatbot-charts.js"></script>
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script> -->
     <script src="assets/js/chatbot-particles.js"></script>
 
     <!-- User Menu Init -->
@@ -698,45 +698,6 @@
                 setTimeout(initMenu, 100);
             }
         })();
-    </script>
-
-    <!-- Chatbot Init -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
-        
-        const initChatbotWhenReady = () => {
-            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
-            
-            if (accessDenied) {
-                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
-                return;
-            }
-            
-            if (typeof ChatbotConfig === 'undefined') {
-                console.error('❌ ChatbotConfig non défini !');
-                return;
-            }
-            
-            console.log('✅ ChatbotConfig chargé');
-            
-            if (typeof ChatbotUI === 'undefined') {
-                console.error('❌ ChatbotUI non défini !');
-                return;
-            }
-            
-            console.log('✅ ChatbotUI chargé');
-            
-            try {
-                window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-            } catch (error) {
-                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-            }
-        };
-        
-        setTimeout(initChatbotWhenReady, 500);
-    });
     </script>
 
     <!-- Admin Visibility -->
