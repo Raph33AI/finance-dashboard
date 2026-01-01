@@ -369,29 +369,33 @@ class GroupMembersManager {
         this.newGroupPhoto = file;
         console.log('✅ [GROUP EDIT] Photo stored in this.newGroupPhoto');
 
+        // ✅ CORRECTION : Preview immédiat et simple
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById('groupPhotoPreview');
             const previewContainer = document.getElementById('groupPhotoPreviewContainer');
             
+            console.log('📸 Reader loaded, preview element:', preview ? 'FOUND' : 'NOT FOUND');
+            console.log('📦 Container element:', previewContainer ? 'FOUND' : 'NOT FOUND');
+            
             if (preview) {
-                // ✨ Animation de transition
-                preview.style.opacity = '0';
-                preview.style.transform = 'scale(0.8)';
+                // ✅ Changement DIRECT du src (pas d'animation complexe)
+                preview.src = e.target.result;
+                console.log('✅ [GROUP EDIT] Preview SRC updated to:', e.target.result.substring(0, 50) + '...');
                 
-                setTimeout(() => {
-                    preview.src = e.target.result;
-                    preview.style.opacity = '1';
-                    preview.style.transform = 'scale(1)';
-                    preview.style.transition = 'all 0.3s ease';
-                    console.log('✅ [GROUP EDIT] Preview updated');
-                }, 150);
+                // ✅ Forcer le rafraîchissement visuel
+                preview.style.display = 'none';
+                preview.offsetHeight; // Force reflow
+                preview.style.display = '';
+                
+                console.log('✅ [GROUP EDIT] Preview refreshed');
                 
                 // ✅ Ajouter badge "NEW PHOTO"
                 if (previewContainer) {
                     let badge = document.getElementById('newPhotoBadge');
                     
                     if (!badge) {
+                        console.log('🎖 Creating NEW PHOTO badge...');
                         badge = document.createElement('div');
                         badge.id = 'newPhotoBadge';
                         badge.innerHTML = '<i class="fas fa-check-circle"></i> NEW PHOTO';
@@ -406,25 +410,35 @@ class GroupMembersManager {
                             font-size: 0.75rem;
                             font-weight: 800;
                             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-                            animation: bounceIn 0.5s ease;
+                            animation: bounceIn 0.5s ease, pulse 2s infinite;
                             z-index: 10;
                             display: flex;
                             align-items: center;
                             gap: 4px;
                         `;
                         previewContainer.appendChild(badge);
+                        console.log('✅ Badge created and added');
+                    } else {
+                        console.log('ℹ Badge already exists, re-animating...');
+                        // Re-animer le badge existant
+                        badge.style.animation = 'none';
+                        setTimeout(() => {
+                            badge.style.animation = 'bounceIn 0.5s ease, pulse 2s infinite';
+                        }, 10);
                     }
-                    
-                    // Animation du badge
-                    badge.style.animation = 'none';
-                    setTimeout(() => {
-                        badge.style.animation = 'bounceIn 0.5s ease, pulse 2s infinite';
-                    }, 10);
+                } else {
+                    console.error('❌ Preview container not found!');
                 }
             } else {
-                console.error('❌ Preview element not found!');
+                console.error('❌ Preview element (#groupPhotoPreview) not found!');
             }
         };
+        
+        reader.onerror = (error) => {
+            console.error('❌ FileReader error:', error);
+        };
+        
+        console.log('📖 Starting FileReader...');
         reader.readAsDataURL(file);
 
         console.log('📸 Photo selection complete:', file.name);
