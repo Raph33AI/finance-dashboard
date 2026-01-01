@@ -1588,7 +1588,7 @@ class ChatbotUI {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎨 CREATE 3D ROBOT MODEL
+    // 🎨 CREATE 3D ROBOT MODEL (CORRECTION)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     create3DRobot() {
         const robot = new THREE.Group();
@@ -1656,7 +1656,8 @@ class ChatbotUI {
         leftLeg.position.set(-0.5, -0.9, 0);
         robot.add(leftLeg);
 
-        const rightLeg = new THREE.Mesh(rightMaterial);
+        // ✅ CORRECTION ICI
+        const rightLeg = new THREE.Mesh(legGeometry, accentMaterial);  // Utilise legGeometry + accentMaterial
         rightLeg.position.set(0.5, -0.9, 0);
         robot.add(rightLeg);
 
