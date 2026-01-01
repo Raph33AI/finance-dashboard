@@ -172,15 +172,20 @@ class ChatbotAIEngine {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 FETCH ALPHAVAULT DATA
+    // 📊 FETCH ALPHAVAULT DATA (AMÉLIORÉ AVEC TECHNICAL CHARTS)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     async fetchAlphaVaultData(intent, entities) {
         try {
-            const symbol = entities.symbols[0]; // Premier symbole
+            const symbol = entities.symbols[0];
 
             // 📈 STOCK ANALYSIS
-            if (intent === 'STOCK_ANALYSIS' || intent === 'TECHNICAL_ANALYSIS') {
+            if (intent === 'STOCK_ANALYSIS') {
                 return await this.getStockAlphaVaultData(symbol);
+            }
+
+            // 📊 TECHNICAL ANALYSIS (NOUVEAU)
+            if (intent === 'TECHNICAL_ANALYSIS') {
+                return await this.getTechnicalChartData(symbol, entities);
             }
 
             // ⚖ STOCK COMPARISON
@@ -203,6 +208,84 @@ class ChatbotAIEngine {
         } catch (error) {
             console.error('❌ Error in fetchAlphaVaultData:', error);
             return { error: error.message };
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 GET TECHNICAL CHART DATA (NOUVEAU)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    async getTechnicalChartData(symbol, entities) {
+        try {
+            console.log(`📊 Fetching technical chart data for ${symbol}...`);
+
+            // Fetch time series data (200 candles pour calculs techniques)
+            const timeSeries = await this.apiClient.getTimeSeries(symbol, '1day', 200);
+
+            if (!timeSeries || !timeSeries.data || timeSeries.data.length < 50) {
+                throw new Error(`Insufficient historical data for ${symbol}`);
+            }
+
+            console.log(`✅ Received ${timeSeries.data.length} candles for ${symbol}`);
+
+            // Utiliser AdvancedAnalysis pour calculer les indicateurs
+            if (typeof window.AdvancedAnalysis === 'undefined') {
+                console.error('❌ AdvancedAnalysis not loaded!');
+                throw new Error('Technical analysis module not available');
+            }
+
+            // Préparer les données au format attendu par AdvancedAnalysis
+            const prices = timeSeries.data.map(candle => ({
+                timestamp: candle.timestamp,
+                datetime: candle.datetime,
+                open: candle.open,
+                high: candle.high,
+                low: candle.low,
+                close: candle.close,
+                volume: candle.volume
+            }));
+
+            // Calculer les 14 indicateurs techniques
+            const indicators = {
+                rsi: window.AdvancedAnalysis.calculateRSI(prices),
+                macd: window.AdvancedAnalysis.calculateMACD(prices),
+                stochastic: window.AdvancedAnalysis.calculateStochastic(prices),
+                williams: window.AdvancedAnalysis.calculateWilliams(prices),
+                adx: window.AdvancedAnalysis.calculateADX(prices),
+                obv: window.AdvancedAnalysis.calculateOBV(prices),
+                atr: window.AdvancedAnalysis.calculateATR(prices),
+                mfi: window.AdvancedAnalysis.calculateMFI(prices),
+                cci: window.AdvancedAnalysis.calculateCCI(prices),
+                ultimateOsc: window.AdvancedAnalysis.calculateUltimateOscillator(prices),
+                roc: window.AdvancedAnalysis.calculateROC(prices),
+                aroon: window.AdvancedAnalysis.calculateAroon(prices),
+                cmf: window.AdvancedAnalysis.calculateCMF(prices),
+                elderRay: window.AdvancedAnalysis.calculateElderRay(prices)
+            };
+
+            console.log('✅ Technical indicators calculated successfully');
+
+            // Transformer en AlphaVault Scores
+            const alphaVaultScores = this.scoringEngine.transformTechnicalIndicators(indicators, prices);
+
+            console.log(`🏆 AlphaVault Technical Scores:`, alphaVaultScores);
+
+            return {
+                type: 'technical_analysis',
+                symbol: symbol,
+                prices: prices,
+                indicators: indicators,
+                alphaVaultScores: alphaVaultScores,
+                chartConfig: {
+                    includeMACD: true,
+                    includeBollinger: true,
+                    includeRSI: true,
+                    includeVolume: true
+                }
+            };
+
+        } catch (error) {
+            console.error(`❌ Error fetching technical data for ${symbol}:`, error);
+            return { error: error.message, symbol: symbol };
         }
     }
 
