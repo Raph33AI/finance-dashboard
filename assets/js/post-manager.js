@@ -620,8 +620,10 @@ class PostManager {
     openShareAsMessageModal() {
         console.log('💬 Opening share modal with USERS & GROUPS tabs...');
 
+        // Fermer la modal de partage social
         this.closeShareModal();
 
+        // Créer ou récupérer la modal
         let modal = document.getElementById('shareMessageModal');
         
         if (!modal) {
@@ -639,7 +641,7 @@ class PostManager {
                     </div>
                     
                     <div class="share-modal-body">
-                        <!-- ✅ ONGLETS -->
+                        <!-- ✅ ONGLETS USERS / GROUPS -->
                         <div class="share-tabs">
                             <button class="share-tab active" data-tab="users">
                                 <i class="fas fa-user"></i>
@@ -662,7 +664,7 @@ class PostManager {
                             >
                         </div>
 
-                        <!-- ✅ LISTE UTILISATEURS -->
+                        <!-- ✅ CONTENU ONGLET USERS -->
                         <div class="share-content-tab active" data-content="users">
                             <div class="users-list-wrapper" id="shareUsersList">
                                 <div class="loading-spinner">
@@ -672,7 +674,7 @@ class PostManager {
                             </div>
                         </div>
 
-                        <!-- ✅ LISTE GROUPES -->
+                        <!-- ✅ CONTENU ONGLET GROUPS -->
                         <div class="share-content-tab" data-content="groups">
                             <div class="groups-list-wrapper" id="shareGroupsList">
                                 <div class="loading-spinner">
@@ -686,7 +688,7 @@ class PostManager {
             `;
             document.body.appendChild(modal);
 
-            // Event listeners
+            // ✅ EVENT LISTENERS
             const overlay = modal.querySelector('.share-modal-overlay');
             const closeBtn = modal.querySelector('.share-modal-close');
             const searchInput = modal.querySelector('#shareSearchInput');
@@ -695,16 +697,18 @@ class PostManager {
             overlay.addEventListener('click', () => this.closeShareMessageModal());
             closeBtn.addEventListener('click', () => this.closeShareMessageModal());
 
-            // ✅ Gestion des onglets
+            // ✅ GESTION DES ONGLETS
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabName = tab.dataset.tab;
                     
-                    // Activer l'onglet
+                    console.log('📑 Switching to tab:', tabName);
+                    
+                    // Activer l'onglet cliqué
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     
-                    // Afficher le contenu correspondant
+                    // Afficher le bon contenu
                     modal.querySelectorAll('.share-content-tab').forEach(content => {
                         content.classList.remove('active');
                         if (content.dataset.content === tabName) {
@@ -712,7 +716,7 @@ class PostManager {
                         }
                     });
                     
-                    // Changer le placeholder
+                    // Changer le placeholder et charger les données
                     if (tabName === 'users') {
                         searchInput.placeholder = 'Search users...';
                         this.loadUsersForShare();
@@ -721,11 +725,12 @@ class PostManager {
                         this.loadGroupsForShare();
                     }
                     
+                    // Reset search
                     searchInput.value = '';
                 });
             });
 
-            // Search avec debounce
+            // ✅ RECHERCHE AVEC DEBOUNCE
             let searchTimeout;
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
@@ -741,7 +746,7 @@ class PostManager {
                 }, 300);
             });
 
-            // Escape key
+            // ✅ ESCAPE KEY
             this.escapeMessageHandler = (e) => {
                 if (e.key === 'Escape' && modal.classList.contains('active')) {
                     this.closeShareMessageModal();
@@ -1066,6 +1071,164 @@ class PostManager {
     }
 
     /**
+     * ✅ NOUVEAU : Charger les groupes dont l'utilisateur est membre
+     */
+    async loadGroupsForShare() {
+        const groupsList = document.getElementById('shareGroupsList');
+        if (!groupsList) return;
+
+        groupsList.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading groups...</p>
+            </div>
+        `;
+
+        try {
+            console.log('📥 Loading groups for share...');
+            
+            const db = firebase.firestore();
+            
+            const groupsSnapshot = await db
+                .collection('conversations')
+                .where('type', '==', 'group')
+                .where('participants', 'array-contains', this.currentUser.uid)
+                .orderBy('lastMessageAt', 'desc')
+                .limit(50)
+                .get();
+
+            const groups = groupsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log('✅ Groups loaded:', groups.length);
+
+            this.renderGroupsList(groups);
+
+        } catch (error) {
+            console.error('❌ Error loading groups:', error);
+            groupsList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                    <p style="font-weight: 600;">Failed to load groups</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px;">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * ✅ NOUVEAU : Rechercher des groupes
+     */
+    async searchGroupsForShare(query) {
+        const groupsList = document.getElementById('shareGroupsList');
+        if (!groupsList) return;
+
+        if (!query || query.length < 2) {
+            await this.loadGroupsForShare();
+            return;
+        }
+
+        groupsList.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Searching...</p>
+            </div>
+        `;
+
+        try {
+            const db = firebase.firestore();
+            const queryLower = query.toLowerCase();
+            
+            const groupsSnapshot = await db
+                .collection('conversations')
+                .where('type', '==', 'group')
+                .where('participants', 'array-contains', this.currentUser.uid)
+                .get();
+
+            const groups = groupsSnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(group => {
+                    const name = (group.name || '').toLowerCase();
+                    return name.includes(queryLower);
+                })
+                .slice(0, 20);
+
+            this.renderGroupsList(groups, query);
+
+        } catch (error) {
+            console.error('❌ Error searching groups:', error);
+            groupsList.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <p>Search failed. Please try again.</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * ✅ NOUVEAU : Afficher la liste des groupes
+     */
+    renderGroupsList(groups, query = '') {
+        const groupsList = document.getElementById('shareGroupsList');
+        if (!groupsList) return;
+
+        if (groups.length === 0) {
+            const message = query 
+                ? `No groups found for "${this.escapeHtml(query)}"` 
+                : 'No groups available';
+            
+            groupsList.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <i class="fas fa-users-slash" style="font-size: 3rem; opacity: 0.3; margin-bottom: 16px;"></i>
+                    <p style="font-weight: 600; font-size: 1.1rem;">${message}</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px;">Create a group from the Messages page</p>
+                </div>
+            `;
+            return;
+        }
+
+        const groupsHTML = groups.map(group => {
+            const groupName = group.name || 'Group';
+            const avatar = group.photoURL || 
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128`;
+            
+            const membersCount = group.participants?.length || 0;
+
+            return `
+                <div class="user-select-item group-select-item" 
+                    onclick="window.postManager.sendPostAsGroupMessage('${group.id}', ${JSON.stringify(group).replace(/"/g, '&quot;')})">
+                    <div class="user-select-avatar-wrapper">
+                        <img src="${avatar}" 
+                            alt="${this.escapeHtml(groupName)}" 
+                            class="user-select-avatar"
+                            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=667eea&color=fff&size=128'">
+                        <div class="group-indicator-badge">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="user-select-info">
+                        <div class="user-select-name">
+                            <i class="fas fa-users" style="font-size: 0.8rem; color: #667eea; margin-right: 4px;"></i>
+                            ${this.escapeHtml(groupName)}
+                        </div>
+                        <div class="user-select-email">${membersCount} member${membersCount > 1 ? 's' : ''}</div>
+                    </div>
+                    
+                    <button class="user-select-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Send</span>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        groupsList.innerHTML = `<div class="users-select-list">${groupsHTML}</div>`;
+    }
+
+    /**
      * ✅ CORRECTION COMPLÈTE : Envoyer le post avec TOUTES les données
      * Ligne ~685 (remplacer toute la fonction)
      */
@@ -1219,7 +1382,7 @@ class PostManager {
      */
     async sendPostAsGroupMessage(groupId, groupData) {
         try {
-            console.log('📤 Sending COMPLETE post data to GROUP:', groupId);
+            console.log('📤 Sending post to GROUP:', groupId);
 
             this.closeShareMessageModal();
 
@@ -1228,14 +1391,14 @@ class PostManager {
                 return;
             }
 
-            // ✅ Récupérer le channel complet
+            // Récupérer le channel complet
             const channel = this.channels.find(c => c.id === this.post.channelId);
             
-            // ✅ Nettoyer le contenu pour l'extrait
+            // Nettoyer le contenu pour l'extrait
             const cleanContent = this.stripMarkdown(this.post.content || '');
             const excerpt = cleanContent.substring(0, 200).trim();
 
-            // ✅ STRUCTURE COMPLÈTE DES DONNÉES
+            // Structure complète des données
             const postData = {
                 postId: this.postId,
                 title: this.post.title || 'Untitled Post',
@@ -1263,12 +1426,12 @@ class PostManager {
                 url: window.location.href
             };
 
-            console.log('📊 Post data to send to GROUP:', postData);
+            console.log('📊 Sending to group:', postData);
 
             const db = firebase.firestore();
             const groupRef = db.collection('conversations').doc(groupId);
 
-            // ✅ Message de groupe
+            // Message de groupe
             const messageData = {
                 type: 'shared_post',
                 text: `📌 Shared a post: "${postData.title}"`,
@@ -1290,7 +1453,7 @@ class PostManager {
                 lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Incrémenter unread pour tous les membres sauf l'expéditeur
+            // Incrémenter unread pour tous sauf l'expéditeur
             groupData.participants.forEach(userId => {
                 if (userId !== this.currentUser.uid) {
                     updateData[`unreadCount.${userId}`] = firebase.firestore.FieldValue.increment(1);
@@ -1299,7 +1462,7 @@ class PostManager {
 
             await groupRef.update(updateData);
 
-            console.log('✅ Post shared successfully to GROUP');
+            console.log('✅ Post shared to group successfully');
 
             this.showSuccessNotification(`Post shared to ${groupData.name || 'group'}!`);
 
