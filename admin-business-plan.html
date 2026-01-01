@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Business Plan - AlphaVault AI Admin</title>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/admin-business-plan.css'>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration Firebase -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+
+    <!-- Chart Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+</head>
+<body>
+
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <!-- Admin Dashboard -->
+    <div class='layout-wrapper'>
+        
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Header with 3D Logo -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                stroke="url(#logoGradient)" 
+                                stroke-width="4" 
+                                fill="none" 
+                                stroke-linecap="round" 
+                                stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                stroke="url(#logoGradient)" 
+                                stroke-width="3" 
+                                fill="none" 
+                                stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION ADMIN ===== -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
+                    <button class="nav-folder" data-tooltip="Admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Analytics Dashboard</span>
+                        </a>
+                    </div>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-documentation.html' class='nav-link'>
+                            <i class='fas fa-book-open'></i>
+                            <span>Documentation</span>
+                        </a>
+                    </div>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-business-plan.html' class='nav-link active'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Business Plan</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">Admin</span>
+                            <span data-user-plan class="sidebar-user-plan">Administrator</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">Admin</h4>
+                                <p data-user-email class="user-dropdown-email">admin@alphavault-ai.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+
+        <!-- Main Content -->
+        <div class='main-content'>
+            <!-- Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class="page-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Business Plan
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' id="exportPdfBtn">
+                        <i class='fas fa-file-pdf'></i>
+                        <span class='btn-text'>Export PDF</span>
+                    </button>
+                    <button class='dashboard-btn' onclick="window.print()">
+                        <i class='fas fa-print'></i>
+                        <span class='btn-text'>Print</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+
+                <!-- Business Plan Header -->
+                <div class="bp-header">
+                    <div class="bp-header-content">
+                        <div class="bp-logo-section">
+                            <div class="bp-logo">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="bp-title-group">
+                                <h1 class="bp-title">AlphaVault AI</h1>
+                                <p class="bp-subtitle">AI-Powered Financial Intelligence Platform</p>
+                                <div class="bp-tagline">Empowering Individual Investors with Institutional-Grade Analytics</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bp-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="currentDate"></span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Global - Cloud-Based</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-building"></i>
+                                <span>B2C SaaS Model</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-code-branch"></i>
+                                <span>Version 3.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="bp-nav">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" data-section="executive">
+                            <i class="fas fa-briefcase"></i> Executive Summary
+                        </button>
+                        <button class="nav-tab" data-section="market">
+                            <i class="fas fa-chart-area"></i> Market Analysis
+                        </button>
+                        <button class="nav-tab" data-section="business-model">
+                            <i class="fas fa-puzzle-piece"></i> Business Model
+                        </button>
+                        <button class="nav-tab" data-section="financials">
+                            <i class="fas fa-dollar-sign"></i> Financial Projections
+                        </button>
+                        <button class="nav-tab" data-section="simulator">
+                            <i class="fas fa-sliders-h"></i> Scenario Simulator
+                        </button>
+                        <button class="nav-tab" data-section="unit-economics">
+                            <i class="fas fa-calculator"></i> Unit Economics
+                        </button>
+                        <button class="nav-tab" data-section="growth">
+                            <i class="fas fa-rocket"></i> Growth Strategy
+                        </button>
+                        <button class="nav-tab" data-section="competitive">
+                            <i class="fas fa-chess"></i> Competitive Analysis
+                        </button>
+                        <button class="nav-tab" data-section="risks">
+                            <i class="fas fa-exclamation-triangle"></i> Risk Analysis
+                        </button>
+                    </div>
+                </nav>
+
+                <!-- Business Plan Content -->
+                <div class="bp-content">
+
+                    <!-- ============================================
+                         SECTION 1: EXECUTIVE SUMMARY
+                         ============================================ -->
+                    <section class="bp-section active" id="executive">
+                        <h2 class="section-title">
+                            <i class="fas fa-briefcase"></i>
+                            Executive Summary
+                        </h2>
+
+                        <div class="executive-intro">
+                            <div class="mission-statement">
+                                <h3><i class="fas fa-bullseye"></i> Mission Statement</h3>
+                                <p class="mission-text">
+                                    To democratize institutional-grade financial intelligence by providing individual investors 
+                                    with AI-powered analytics, predictive models, and real-time market insights through an 
+                                    accessible, affordable, and user-friendly SaaS platform.
+                                </p>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-crosshairs"></i> Key Highlights
+                        </h3>
+
+                        <div class="highlights-grid">
+                            <div class="highlight-card">
+                                <div class="highlight-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="highlight-content">
+                                    <div class="highlight-label">Target Market</div>
+                                    <div class="highlight-value">$12.5B+</div>
+                                    <div class="highlight-desc">Global retail investment analytics market (2024)</div>
+                                </div>
+                            </div>
+
+                            <div class="highlight-card">
+                                <div class="highlight-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="highlight-content">
+                                    <div class="highlight-label">Revenue Model</div>
+                                    <div class="highlight-value">Freemium SaaS</div>
+                                    <div class="highlight-desc">3 tiers: Basic (Free), Pro ($10/mo), Platinum ($20/mo)</div>
+                                </div>
+                            </div>
+
+                            <div class="highlight-card">
+                                <div class="highlight-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="highlight-content">
+                                    <div class="highlight-label">Core Technology</div>
+                                    <div class="highlight-value">AI + ML</div>
+                                    <div class="highlight-desc">Gemini AI, predictive algorithms, real-time analytics</div>
+                                </div>
+                            </div>
+
+                            <div class="highlight-card">
+                                <div class="highlight-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="highlight-content">
+                                    <div class="highlight-label">5-Year Goal</div>
+                                    <div class="highlight-value">100K Users</div>
+                                    <div class="highlight-desc">$12M ARR with 15% paid conversion rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-clipboard-check"></i> Value Proposition
+                        </h3>
+
+                        <div class="value-props">
+                            <div class="value-prop-item">
+                                <div class="vp-number">1</div>
+                                <div class="vp-content">
+                                    <h4>Institutional-Grade Tools for Individual Investors</h4>
+                                    <p>Advanced M&A prediction, insider flow tracking, ML-powered trend analysis, Monte Carlo simulations, and risk parity optimization—previously only available to hedge funds and professional traders.</p>
+                                </div>
+                            </div>
+
+                            <div class="value-prop-item">
+                                <div class="vp-number">2</div>
+                                <div class="vp-content">
+                                    <h4>AI-Powered Financial Chatbot</h4>
+                                    <p>FinanceGPT provides instant answers to complex financial questions, generates custom analyses, and offers personalized investment recommendations 24/7.</p>
+                                </div>
+                            </div>
+
+                            <div class="value-prop-item">
+                                <div class="vp-number">3</div>
+                                <div class="vp-content">
+                                    <h4>Affordable Freemium Pricing</h4>
+                                    <p>Free tier provides basic analytics. Pro plan ($10/mo) unlocks advanced features. Platinum ($20/mo) includes AI chatbot and premium tools—10x cheaper than Bloomberg Terminal.</p>
+                                </div>
+                            </div>
+
+                            <div class="value-prop-item">
+                                <div class="vp-number">4</div>
+                                <div class="vp-content">
+                                    <h4>Real-Time Data & Automation</h4>
+                                    <p>Live market data, automated newsletters, instant alerts, and seamless integrations with Stripe, Firebase, and Cloudflare infrastructure for 99.9% uptime.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-trophy"></i> Competitive Advantages
+                        </h3>
+
+                        <div class="advantages-grid">
+                            <div class="advantage-card">
+                                <i class="fas fa-bolt advantage-icon"></i>
+                                <h4>Speed to Market</h4>
+                                <p>Fully operational platform with 30+ features, deployed on Cloudflare with global CDN for instant access.</p>
+                            </div>
+
+                            <div class="advantage-card">
+                                <i class="fas fa-shield-alt advantage-icon"></i>
+                                <h4>Data Security</h4>
+                                <p>Enterprise-grade Firebase authentication, encrypted data storage, SOC 2 compliance ready.</p>
+                            </div>
+
+                            <div class="advantage-card">
+                                <i class="fas fa-expand-arrows-alt advantage-icon"></i>
+                                <h4>Scalability</h4>
+                                <p>Serverless architecture (Cloudflare Workers) scales automatically from 100 to 1M users with zero infrastructure changes.</p>
+                            </div>
+
+                            <div class="advantage-card">
+                                <i class="fas fa-puzzle-piece advantage-icon"></i>
+                                <h4>Integration Ecosystem</h4>
+                                <p>Seamless connections to Stripe (payments), Resend (emails), Twelve Data (market data), SEC EDGAR (filings).</p>
+                            </div>
+
+                            <div class="advantage-card">
+                                <i class="fas fa-mobile-alt advantage-icon"></i>
+                                <h4>Mobile-First Design</h4>
+                                <p>100% responsive UI, optimized for desktop, tablet, and mobile with touch-friendly interactions.</p>
+                            </div>
+
+                            <div class="advantage-card">
+                                <i class="fas fa-brain advantage-icon"></i>
+                                <h4>AI Innovation</h4>
+                                <p>Proprietary ML models for trend prediction, sentiment analysis, and portfolio optimization—continuously improving with user data.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-lightbulb"></i> Problem We Solve
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8; margin-bottom: 16px;">
+                                <strong>The Challenge:</strong> Individual retail investors lack access to professional-grade financial tools. 
+                                Bloomberg Terminal costs $24,000/year, institutional research is behind paywalls, and free tools 
+                                provide only basic charts without predictive analytics or AI insights.
+                            </p>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                <strong>Our Solution:</strong> AlphaVault AI bridges this gap by offering institutional-quality analytics 
+                                at consumer-friendly prices ($10-$20/month), democratizing financial intelligence for millions of retail investors worldwide.
+                            </p>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 2: MARKET ANALYSIS
+                         ============================================ -->
+                    <section class="bp-section" id="market">
+                        <h2 class="section-title">
+                            <i class="fas fa-chart-area"></i>
+                            Market Analysis
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-globe-americas"></i> Total Addressable Market (TAM)
+                        </h3>
+
+                        <div class="market-metrics">
+                            <div class="market-metric-card tam">
+                                <div class="metric-header">
+                                    <i class="fas fa-globe"></i>
+                                    <span>TAM</span>
+                                </div>
+                                <div class="metric-value">$12.5B</div>
+                                <div class="metric-label">Global Retail Investment Analytics Market</div>
+                                <div class="metric-growth">+18.5% CAGR (2024-2029)</div>
+                            </div>
+
+                            <div class="market-metric-card sam">
+                                <div class="metric-header">
+                                    <i class="fas fa-crosshairs"></i>
+                                    <span>SAM</span>
+                                </div>
+                                <div class="metric-value">$3.2B</div>
+                                <div class="metric-label">Serviceable Available Market (English-speaking retail investors)</div>
+                                <div class="metric-growth">~25% of TAM</div>
+                            </div>
+
+                            <div class="market-metric-card som">
+                                <div class="metric-header">
+                                    <i class="fas fa-bullseye"></i>
+                                    <span>SOM</span>
+                                </div>
+                                <div class="metric-value">$160M</div>
+                                <div class="metric-label">Serviceable Obtainable Market (5-year target: 5% of SAM)</div>
+                                <div class="metric-growth">Conservative estimate</div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-users"></i> Target Customer Segments
+                        </h3>
+
+                        <div class="segments-grid">
+                            <div class="segment-card">
+                                <div class="segment-header">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <h4>Millennial/Gen Z Investors</h4>
+                                </div>
+                                <div class="segment-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Age Range:</span>
+                                        <span class="stat-value">25-40 years</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Portfolio Size:</span>
+                                        <span class="stat-value">$5K - $100K</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Tech Savviness:</span>
+                                        <span class="stat-value">High</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">% of Market:</span>
+                                        <span class="stat-value">45%</span>
+                                    </div>
+                                </div>
+                                <div class="segment-desc">
+                                    Digital natives seeking advanced tools to outperform traditional advisors. 
+                                    Comfortable with SaaS subscriptions, value AI/ML capabilities.
+                                </div>
+                            </div>
+
+                            <div class="segment-card">
+                                <div class="segment-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>Active Day Traders</h4>
+                                </div>
+                                <div class="segment-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Age Range:</span>
+                                        <span class="stat-value">30-55 years</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Trading Frequency:</span>
+                                        <span class="stat-value">Daily</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Data Needs:</span>
+                                        <span class="stat-value">Real-time</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">% of Market:</span>
+                                        <span class="stat-value">30%</span>
+                                    </div>
+                                </div>
+                                <div class="segment-desc">
+                                    Require technical indicators, insider flow data, M&A predictions. 
+                                    Willing to pay premium for edge in market movements.
+                                </div>
+                            </div>
+
+                            <div class="segment-card">
+                                <div class="segment-header">
+                                    <i class="fas fa-piggy-bank"></i>
+                                    <h4>Long-Term Investors</h4>
+                                </div>
+                                <div class="segment-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Age Range:</span>
+                                        <span class="stat-value">35-65 years</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Investment Horizon:</span>
+                                        <span class="stat-value">5-20 years</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Focus:</span>
+                                        <span class="stat-value">Portfolio optimization</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">% of Market:</span>
+                                        <span class="stat-value">25%</span>
+                                    </div>
+                                </div>
+                                <div class="segment-desc">
+                                    Value Monte Carlo simulations, risk parity tools, scenario analysis 
+                                    for retirement planning and wealth preservation.
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-chart-bar"></i> Market Size & Growth Chart
+                        </h3>
+
+                        <div class="chart-container">
+                            <canvas id="marketGrowthChart"></canvas>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-trend-up"></i> Market Trends & Drivers
+                        </h3>
+
+                        <div class="trends-grid">
+                            <div class="trend-card">
+                                <div class="trend-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <h4>Mobile Trading Boom</h4>
+                                <p>65% of retail trades now happen via mobile apps. Robinhood, Webull, and eToro have 
+                                onboarded 50M+ users in the last 3 years.</p>
+                                <div class="trend-stat">+127% YoY growth in mobile trading</div>
+                            </div>
+
+                            <div class="trend-card">
+                                <div class="trend-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h4>AI/ML Adoption</h4>
+                                <p>89% of investors under 40 prefer platforms with AI-driven insights. 
+                                Predictive analytics are becoming table stakes.</p>
+                                <div class="trend-stat">$2.1B invested in fintech AI (2023)</div>
+                            </div>
+
+                            <div class="trend-card">
+                                <div class="trend-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h4>Financial Literacy Gap</h4>
+                                <p>Only 24% of millennials demonstrate basic financial literacy. 
+                                Educational + actionable tools are in high demand.</p>
+                                <div class="trend-stat">76% seek learning-by-doing platforms</div>
+                            </div>
+
+                            <div class="trend-card">
+                                <div class="trend-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <h4>Democratization of Finance</h4>
+                                <p>Zero-commission trading, fractional shares, and accessible analytics 
+                                have leveled the playing field for retail investors.</p>
+                                <div class="trend-stat">$1.2T in retail assets (2024)</div>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 3: BUSINESS MODEL
+                         ============================================ -->
+                    <section class="bp-section" id="business-model">
+                        <h2 class="section-title">
+                            <i class="fas fa-puzzle-piece"></i>
+                            Business Model
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-tags"></i> Pricing Strategy
+                        </h3>
+
+                        <div class="pricing-tiers">
+                            <div class="pricing-card basic">
+                                <div class="pricing-header">
+                                    <div class="pricing-icon">
+                                        <i class="fas fa-rocket"></i>
+                                    </div>
+                                    <h3 class="pricing-name">Basic</h3>
+                                    <div class="pricing-price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">0</span>
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <div class="pricing-desc">Perfect for getting started</div>
+                                </div>
+                                <div class="pricing-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Basic stock analysis</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Real-time quotes (delayed 15 min)</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Budget dashboard</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>News terminal (basic)</span>
+                                    </div>
+                                    <div class="feature-item disabled">
+                                        <i class="fas fa-times"></i>
+                                        <span>Advanced analytics</span>
+                                    </div>
+                                    <div class="feature-item disabled">
+                                        <i class="fas fa-times"></i>
+                                        <span>AI chatbot</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-target">
+                                    <strong>Target Conversion:</strong> 70% of users remain free (customer acquisition)
+                                </div>
+                            </div>
+
+                            <div class="pricing-card pro featured">
+                                <div class="pricing-badge">Most Popular</div>
+                                <div class="pricing-header">
+                                    <div class="pricing-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <h3 class="pricing-name">Pro</h3>
+                                    <div class="pricing-price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">10</span>
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <div class="pricing-desc">For serious investors</div>
+                                </div>
+                                <div class="pricing-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Everything in Basic</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Advanced technical analysis (14 indicators)</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>M&A predictor</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Insider flow tracker</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Monte Carlo simulation</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Risk parity optimizer</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Real-time alerts</span>
+                                    </div>
+                                    <div class="feature-item disabled">
+                                        <i class="fas fa-times"></i>
+                                        <span>AI chatbot (Platinum only)</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-target">
+                                    <strong>Target Conversion:</strong> 20% of users upgrade to Pro
+                                </div>
+                            </div>
+
+                            <div class="pricing-card platinum">
+                                <div class="pricing-badge premium">Premium</div>
+                                <div class="pricing-header">
+                                    <div class="pricing-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <h3 class="pricing-name">Platinum</h3>
+                                    <div class="pricing-price">
+                                        <span class="currency">$</span>
+                                        <span class="amount">20</span>
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <div class="pricing-desc">Ultimate power user</div>
+                                </div>
+                                <div class="pricing-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Everything in Pro</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>AI Chatbot (FinanceGPT) - Unlimited</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Trend prediction (ML models)</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Analyst coverage reports</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Custom portfolio scenarios</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Priority support</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>API access (coming soon)</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Early access to new features</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-target">
+                                    <strong>Target Conversion:</strong> 10% of users upgrade to Platinum
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-funnel-dollar"></i> Revenue Streams
+                        </h3>
+
+                        <div class="revenue-streams">
+                            <div class="revenue-stream-card primary">
+                                <div class="stream-header">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <h4>Subscription Revenue (Primary)</h4>
+                                    <div class="stream-contribution">~85% of total revenue</div>
+                                </div>
+                                <div class="stream-breakdown">
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">Pro Plan ($10/mo):</span>
+                                        <span class="breakdown-value">~60% of paid users</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="breakdown-label">Platinum Plan ($20/mo):</span>
+                                        <span class="breakdown-value">~40% of paid users</span>
+                                    </div>
+                                </div>
+                                <p class="stream-desc">
+                                    Recurring monthly subscriptions provide predictable, scalable revenue. 
+                                    14-day free trial for all paid plans to increase conversion.
+                                </p>
+                            </div>
+
+                            <div class="revenue-stream-card secondary">
+                                <div class="stream-header">
+                                    <i class="fas fa-ad"></i>
+                                    <h4>Affiliate Revenue (Secondary)</h4>
+                                    <div class="stream-contribution">~10% of total revenue</div>
+                                </div>
+                                <p class="stream-desc">
+                                    Partner with brokers (Interactive Brokers, TD Ameritrade) for referral commissions 
+                                    when users open accounts. Estimated $50-$150 per conversion.
+                                </p>
+                            </div>
+
+                            <div class="revenue-stream-card tertiary">
+                                <div class="stream-header">
+                                    <i class="fas fa-plug"></i>
+                                    <h4>API Access (Future)</h4>
+                                    <div class="stream-contribution">~5% of total revenue (Year 3+)</div>
+                                </div>
+                                <p class="stream-desc">
+                                    Offer API access to institutional clients or advanced users for programmatic 
+                                    data retrieval. Enterprise tier at $100-$500/month.
+                                </p>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-arrow-right"></i> Customer Acquisition Strategy
+                        </h3>
+
+                        <div class="acquisition-channels">
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-google"></i>
+                                    <h4>SEO & Content Marketing</h4>
+                                    <span class="channel-cost">CAC: $5-$15</span>
+                                </div>
+                                <div class="channel-tactics">
+                                    <div class="tactic-item">✓ Financial blog (40+ articles on investing, analysis)</div>
+                                    <div class="tactic-item">✓ YouTube tutorials (screen recordings, how-tos)</div>
+                                    <div class="tactic-item">✓ Keyword targeting ("best stock analysis tool", "free portfolio tracker")</div>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Expected Traffic:</span>
+                                        <span class="metric-value">10K-50K organic visits/month (Year 1)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-facebook"></i>
+                                    <h4>Paid Social Ads</h4>
+                                    <span class="channel-cost">CAC: $20-$40</span>
+                                </div>
+                                <div class="channel-tactics">
+                                    <div class="tactic-item">✓ Facebook/Instagram ads targeting finance enthusiasts</div>
+                                    <div class="tactic-item">✓ LinkedIn ads for professional investors</div>
+                                    <div class="tactic-item">✓ Reddit promoted posts in r/investing, r/stocks</div>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Monthly Budget:</span>
+                                        <span class="metric-value">$5K-$20K (scaling over time)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fas fa-users"></i>
+                                    <h4>Referral Program</h4>
+                                    <span class="channel-cost">CAC: $10-$25</span>
+                                </div>
+                                <div class="channel-tactics">
+                                    <div class="tactic-item">✓ Give 1 month free Pro for each referral that upgrades</div>
+                                    <div class="tactic-item">✓ Viral loop: "Invite 3 friends, get Platinum free for 3 months"</div>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Virality Coefficient:</span>
+                                        <span class="metric-value">Target 0.4-0.6 (40-60% of users refer 1 friend)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-youtube"></i>
+                                    <h4>Influencer Partnerships</h4>
+                                    <span class="channel-cost">CAC: $15-$30</span>
+                                </div>
+                                <div class="channel-tactics">
+                                    <div class="tactic-item">✓ Sponsor finance YouTubers (100K-500K subs)</div>
+                                    <div class="tactic-item">✓ Provide affiliate codes with 30% commission</div>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Estimated Conversions:</span>
+                                        <span class="metric-value">200-500 signups per sponsored video</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 4: FINANCIAL PROJECTIONS
+                         ============================================ -->
+                    <section class="bp-section" id="financials">
+                        <h2 class="section-title">
+                            <i class="fas fa-dollar-sign"></i>
+                            Financial Projections (5-Year)
+                        </h2>
+
+                        <div class="projection-summary">
+                            <div class="projection-card">
+                                <div class="proj-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="proj-content">
+                                    <div class="proj-label">Year 5 ARR</div>
+                                    <div class="proj-value">$12.0M</div>
+                                    <div class="proj-growth">+285% CAGR</div>
+                                </div>
+                            </div>
+
+                            <div class="projection-card">
+                                <div class="proj-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="proj-content">
+                                    <div class="proj-label">Total Users (Year 5)</div>
+                                    <div class="proj-value">100,000</div>
+                                    <div class="proj-growth">15,000 paid subscribers</div>
+                                </div>
+                            </div>
+
+                            <div class="projection-card">
+                                <div class="proj-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="proj-content">
+                                    <div class="proj-label">Gross Margin (Year 5)</div>
+                                    <div class="proj-value">82%</div>
+                                    <div class="proj-growth">SaaS economics</div>
+                                </div>
+                            </div>
+
+                            <div class="projection-card">
+                                <div class="proj-icon">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                                <div class="proj-content">
+                                    <div class="proj-label">EBITDA (Year 5)</div>
+                                    <div class="proj-value">$2.8M</div>
+                                    <div class="proj-growth">23% margin</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-table"></i> 5-Year Revenue Projection
+                        </h3>
+
+                        <div class="table-responsive">
+                            <table class="financial-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Year 1</th>
+                                        <th>Year 2</th>
+                                        <th>Year 3</th>
+                                        <th>Year 4</th>
+                                        <th>Year 5</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="row-header">Total Users</td>
+                                        <td>5,000</td>
+                                        <td>15,000</td>
+                                        <td>35,000</td>
+                                        <td>65,000</td>
+                                        <td>100,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Free Users</td>
+                                        <td>3,500 (70%)</td>
+                                        <td>10,500 (70%)</td>
+                                        <td>24,500 (70%)</td>
+                                        <td>45,500 (70%)</td>
+                                        <td>70,000 (70%)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Paid Users</td>
+                                        <td>1,500 (30%)</td>
+                                        <td>4,500 (30%)</td>
+                                        <td>10,500 (30%)</td>
+                                        <td>19,500 (30%)</td>
+                                        <td>30,000 (30%)</td>
+                                    </tr>
+                                    <tr class="separator">
+                                        <td class="row-header">Pro Users ($10/mo)</td>
+                                        <td>900 (60%)</td>
+                                        <td>2,700 (60%)</td>
+                                        <td>6,300 (60%)</td>
+                                        <td>11,700 (60%)</td>
+                                        <td>18,000 (60%)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Platinum Users ($20/mo)</td>
+                                        <td>600 (40%)</td>
+                                        <td>1,800 (40%)</td>
+                                        <td>4,200 (40%)</td>
+                                        <td>7,800 (40%)</td>
+                                        <td>12,000 (40%)</td>
+                                    </tr>
+                                    <tr class="separator highlight">
+                                        <td class="row-header"><strong>MRR (Monthly Recurring Revenue)</strong></td>
+                                        <td><strong>$21,000</strong></td>
+                                        <td><strong>$63,000</strong></td>
+                                        <td><strong>$147,000</strong></td>
+                                        <td><strong>$273,000</strong></td>
+                                        <td><strong>$420,000</strong></td>
+                                    </tr>
+                                    <tr class="highlight">
+                                        <td class="row-header"><strong>ARR (Annual Recurring Revenue)</strong></td>
+                                        <td><strong>$252K</strong></td>
+                                        <td><strong>$756K</strong></td>
+                                        <td><strong>$1.76M</strong></td>
+                                        <td><strong>$3.28M</strong></td>
+                                        <td><strong>$5.04M</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Affiliate Revenue</td>
+                                        <td>$25K</td>
+                                        <td>$90K</td>
+                                        <td>$220K</td>
+                                        <td>$410K</td>
+                                        <td>$630K</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td class="row-header"><strong>Total Revenue</strong></td>
+                                        <td><strong>$277K</strong></td>
+                                        <td><strong>$846K</strong></td>
+                                        <td><strong>$1.98M</strong></td>
+                                        <td><strong>$3.69M</strong></td>
+                                        <td><strong>$5.67M</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-chart-line"></i> Revenue Growth Chart
+                        </h3>
+
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-file-invoice-dollar"></i> Expense Breakdown & P&L
+                        </h3>
+
+                        <div class="table-responsive">
+                            <table class="financial-table">
+                                <thead>
+                                    <tr>
+                                        <th>Expense Category</th>
+                                        <th>Year 1</th>
+                                        <th>Year 2</th>
+                                        <th>Year 3</th>
+                                        <th>Year 4</th>
+                                        <th>Year 5</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="row-header">Infrastructure (CF, Firebase, Stripe)</td>
+                                        <td>$12K</td>
+                                        <td>$30K</td>
+                                        <td>$60K</td>
+                                        <td>$100K</td>
+                                        <td>$150K</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">API Costs (Twelve Data, SEC, Gemini)</td>
+                                        <td>$8K</td>
+                                        <td>$20K</td>
+                                        <td>$40K</td>
+                                        <td>$70K</td>
+                                        <td>$100K</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Marketing & Ads</td>
+                                        <td>$60K</td>
+                                        <td>$150K</td>
+                                        <td>$300K</td>
+                                        <td>$500K</td>
+                                        <td>$750K</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Salaries (Team)</td>
+                                        <td>$80K</td>
+                                        <td>$200K</td>
+                                        <td>$400K</td>
+                                        <td>$700K</td>
+                                        <td>$1.2M</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Support & Operations</td>
+                                        <td>$10K</td>
+                                        <td>$25K</td>
+                                        <td>$50K</td>
+                                        <td>$80K</td>
+                                        <td>$120K</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-header">Legal & Compliance</td>
+                                        <td>$15K</td>
+                                        <td>$20K</td>
+                                        <td>$30K</td>
+                                        <td>$40K</td>
+                                        <td>$50K</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td class="row-header"><strong>Total Expenses</strong></td>
+                                        <td><strong>$185K</strong></td>
+                                        <td><strong>$445K</strong></td>
+                                        <td><strong>$880K</strong></td>
+                                        <td><strong>$1.49M</strong></td>
+                                        <td><strong>$2.37M</strong></td>
+                                    </tr>
+                                    <tr class="separator"></tr>
+                                    <tr class="highlight">
+                                        <td class="row-header"><strong>EBITDA</strong></td>
+                                        <td><strong>$92K</strong></td>
+                                        <td><strong>$401K</strong></td>
+                                        <td><strong>$1.10M</strong></td>
+                                        <td><strong>$2.20M</strong></td>
+                                        <td><strong>$3.30M</strong></td>
+                                    </tr>
+                                    <tr class="highlight success">
+                                        <td class="row-header"><strong>EBITDA Margin</strong></td>
+                                        <td><strong>33%</strong></td>
+                                        <td><strong>47%</strong></td>
+                                        <td><strong>56%</strong></td>
+                                        <td><strong>60%</strong></td>
+                                        <td><strong>58%</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="chart-container" style="margin-top: 30px;">
+                            <canvas id="profitabilityChart"></canvas>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 5: SCENARIO SIMULATOR
+                         ============================================ -->
+                    <section class="bp-section" id="simulator">
+                        <h2 class="section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            Interactive Scenario Simulator
+                        </h2>
+
+                        <div class="info-card">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-info-circle"></i> How to Use
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                Adjust the input parameters below to simulate different business scenarios. 
+                                The model will automatically recalculate MRR, ARR, costs, and profitability 
+                                based on your assumptions. Use this tool to stress-test growth strategies 
+                                and understand sensitivity to key variables.
+                            </p>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-cogs"></i> Input Parameters
+                        </h3>
+
+                        <div class="simulator-inputs">
+                            <div class="input-group">
+                                <label for="simTotalUsers">
+                                    <i class="fas fa-users"></i> Total Users (Year 1)
+                                </label>
+                                <input type="number" id="simTotalUsers" value="5000" min="100" max="100000" step="100">
+                                <div class="input-hint">Current: <span id="totalUsersValue">5,000</span></div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="simConversionRate">
+                                    <i class="fas fa-percentage"></i> Free → Paid Conversion Rate (%)
+                                </label>
+                                <input type="number" id="simConversionRate" value="30" min="5" max="50" step="1">
+                                <div class="input-hint">Current: <span id="conversionRateValue">30</span>%</div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="simProSplit">
+                                    <i class="fas fa-star"></i> Pro Plan % (of paid users)
+                                </label>
+                                <input type="number" id="simProSplit" value="60" min="30" max="80" step="5">
+                                <div class="input-hint">Current: <span id="proSplitValue">60</span>%</div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="simGrowthRate">
+                                    <i class="fas fa-chart-line"></i> Year-over-Year Growth Rate (%)
+                                </label>
+                                <input type="number" id="simGrowthRate" value="200" min="50" max="400" step="10">
+                                <div class="input-hint">Current: <span id="growthRateValue">200</span>%</div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="simCAC">
+                                    <i class="fas fa-dollar-sign"></i> Customer Acquisition Cost (CAC)
+                                </label>
+                                <input type="number" id="simCAC" value="25" min="5" max="100" step="5">
+                                <div class="input-hint">Current: $<span id="cacValue">25</span></div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="simChurnRate">
+                                    <i class="fas fa-user-times"></i> Monthly Churn Rate (%)
+                                </label>
+                                <input type="number" id="simChurnRate" value="5" min="1" max="15" step="0.5">
+                                <div class="input-hint">Current: <span id="churnRateValue">5</span>%</div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin: 30px 0;">
+                            <button class="simulator-btn" id="runSimulationBtn">
+                                <i class="fas fa-play"></i> Run Simulation
+                            </button>
+                            <button class="simulator-btn secondary" id="resetSimulationBtn">
+                                <i class="fas fa-undo"></i> Reset to Defaults
+                            </button>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-chart-bar"></i> Simulation Results
+                        </h3>
+
+                        <div class="simulation-results" id="simulationResults">
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">Year 1 MRR</div>
+                                    <div class="result-value" id="simY1MRR">$21,000</div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">Year 1 ARR</div>
+                                    <div class="result-value" id="simY1ARR">$252,000</div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">Year 5 ARR</div>
+                                    <div class="result-value" id="simY5ARR">$5.67M</div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">LTV:CAC Ratio</div>
+                                    <div class="result-value" id="simLTVCAC">3.2:1</div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">Payback Period</div>
+                                    <div class="result-value" id="simPayback">8 months</div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-icon">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                                <div class="result-content">
+                                    <div class="result-label">Year 5 EBITDA</div>
+                                    <div class="result-value" id="simY5EBITDA">$3.30M</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container" style="margin-top: 30px;">
+                            <canvas id="scenarioChart"></canvas>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-flask"></i> Pre-Configured Scenarios
+                        </h3>
+
+                        <div class="scenarios-grid">
+                            <div class="scenario-card conservative" data-scenario="conservative">
+                                <div class="scenario-header">
+                                    <i class="fas fa-turtle"></i>
+                                    <h4>Conservative Growth</h4>
+                                </div>
+                                <div class="scenario-params">
+                                    <div class="param-item">Total Users Y1: 3,000</div>
+                                    <div class="param-item">Conversion Rate: 20%</div>
+                                    <div class="param-item">YoY Growth: 150%</div>
+                                    <div class="param-item">CAC: $35</div>
+                                </div>
+                                <div class="scenario-result">
+                                    <strong>Year 5 ARR:</strong> $2.8M
+                                </div>
+                                <button class="apply-scenario-btn">Apply Scenario</button>
+                            </div>
+
+                            <div class="scenario-card base" data-scenario="base">
+                                <div class="scenario-header">
+                                    <i class="fas fa-balance-scale"></i>
+                                    <h4>Base Case (Default)</h4>
+                                </div>
+                                <div class="scenario-params">
+                                    <div class="param-item">Total Users Y1: 5,000</div>
+                                    <div class="param-item">Conversion Rate: 30%</div>
+                                    <div class="param-item">YoY Growth: 200%</div>
+                                    <div class="param-item">CAC: $25</div>
+                                </div>
+                                <div class="scenario-result">
+                                    <strong>Year 5 ARR:</strong> $5.67M
+                                </div>
+                                <button class="apply-scenario-btn">Apply Scenario</button>
+                            </div>
+
+                            <div class="scenario-card aggressive" data-scenario="aggressive">
+                                <div class="scenario-header">
+                                    <i class="fas fa-rocket"></i>
+                                    <h4>Aggressive Growth</h4>
+                                </div>
+                                <div class="scenario-params">
+                                    <div class="param-item">Total Users Y1: 10,000</div>
+                                    <div class="param-item">Conversion Rate: 40%</div>
+                                    <div class="param-item">YoY Growth: 300%</div>
+                                    <div class="param-item">CAC: $20</div>
+                                </div>
+                                <div class="scenario-result">
+                                    <strong>Year 5 ARR:</strong> $18.5M
+                                </div>
+                                <button class="apply-scenario-btn">Apply Scenario</button>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 6: UNIT ECONOMICS
+                         ============================================ -->
+                    <section class="bp-section" id="unit-economics">
+                        <h2 class="section-title">
+                            <i class="fas fa-calculator"></i>
+                            Unit Economics & Key Metrics
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-user-tag"></i> Customer Lifetime Value (LTV)
+                        </h3>
+
+                        <div class="ltv-calculation">
+                            <div class="calc-card">
+                                <h4><i class="fas fa-dollar-sign"></i> Average Revenue Per User (ARPU)</h4>
+                                <div class="calc-formula">
+                                    ARPU = (Pro Users × $10) + (Platinum Users × $20) / Total Paid Users
+                                </div>
+                                <div class="calc-result">
+                                    = (60% × $10) + (40% × $20) = <strong>$14/month</strong>
+                                </div>
+                            </div>
+
+                            <div class="calc-card">
+                                <h4><i class="fas fa-calendar-alt"></i> Average Customer Lifespan</h4>
+                                <div class="calc-formula">
+                                    Lifespan = 1 / Monthly Churn Rate
+                                </div>
+                                <div class="calc-result">
+                                    = 1 / 5% = <strong>20 months</strong>
+                                </div>
+                            </div>
+
+                            <div class="calc-card highlight">
+                                <h4><i class="fas fa-chart-line"></i> Lifetime Value (LTV)</h4>
+                                <div class="calc-formula">
+                                    LTV = ARPU × Customer Lifespan
+                                </div>
+                                <div class="calc-result">
+                                    = $14 × 20 months = <strong>$280</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-funnel-dollar"></i> Customer Acquisition Cost (CAC)
+                        </h3>
+
+                        <div class="cac-breakdown">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Channel</th>
+                                        <th>Cost Per Acquisition</th>
+                                        <th>% of Total Acquisitions</th>
+                                        <th>Weighted CAC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>SEO & Content</td>
+                                        <td>$10</td>
+                                        <td>30%</td>
+                                        <td>$3.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paid Social</td>
+                                        <td>$35</td>
+                                        <td>25%</td>
+                                        <td>$8.75</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Referral Program</td>
+                                        <td>$15</td>
+                                        <td>20%</td>
+                                        <td>$3.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Influencer Partnerships</td>
+                                        <td>$25</td>
+                                        <td>15%</td>
+                                        <td>$3.75</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Organic/Word of Mouth</td>
+                                        <td>$5</td>
+                                        <td>10%</td>
+                                        <td>$0.50</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td><strong>Blended CAC</strong></td>
+                                        <td colspan="2"></td>
+                                        <td><strong>$19.00</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-balance-scale"></i> LTV:CAC Ratio Analysis
+                        </h3>
+
+                        <div class="ltv-cac-analysis">
+                            <div class="ratio-card excellent">
+                                <div class="ratio-header">
+                                    <i class="fas fa-trophy"></i>
+                                    <h4>AlphaVault AI LTV:CAC</h4>
+                                </div>
+                                <div class="ratio-value">14.7:1</div>
+                                <div class="ratio-calc">$280 LTV / $19 CAC</div>
+                                <div class="ratio-verdict">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Excellent</strong> - Well above 3:1 benchmark
+                                </div>
+                            </div>
+
+                            <div class="ratio-benchmarks">
+                                <h4><i class="fas fa-chart-bar"></i> Industry Benchmarks</h4>
+                                <div class="benchmark-item">
+                                    <div class="benchmark-label">
+                                        <i class="fas fa-times-circle" style="color: var(--danger);"></i>
+                                        Poor (< 1:1)
+                                    </div>
+                                    <div class="benchmark-desc">Unsustainable - losing money on each customer</div>
+                                </div>
+                                <div class="benchmark-item">
+                                    <div class="benchmark-label">
+                                        <i class="fas fa-exclamation-circle" style="color: var(--warning);"></i>
+                                        Fair (1:1 to 3:1)
+                                    </div>
+                                    <div class="benchmark-desc">Break-even to marginal profitability</div>
+                                </div>
+                                <div class="benchmark-item">
+                                    <div class="benchmark-label">
+                                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                        Good (3:1 to 5:1)
+                                    </div>
+                                    <div class="benchmark-desc">Healthy SaaS metrics</div>
+                                </div>
+                                <div class="benchmark-item highlight">
+                                    <div class="benchmark-label">
+                                        <i class="fas fa-star" style="color: gold;"></i>
+                                        Excellent (> 5:1)
+                                    </div>
+                                    <div class="benchmark-desc">Outstanding - highly scalable model (AlphaVault: 14.7:1)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-clock"></i> Payback Period
+                        </h3>
+
+                        <div class="payback-calculation">
+                            <div class="payback-card">
+                                <h4><i class="fas fa-calculator"></i> Calculation</h4>
+                                <div class="calc-formula">
+                                    Payback Period = CAC / (ARPU × Gross Margin)
+                                </div>
+                                <div class="calc-steps">
+                                    <div class="step-item">CAC = $19</div>
+                                    <div class="step-item">ARPU = $14/month</div>
+                                    <div class="step-item">Gross Margin = 85%</div>
+                                </div>
+                                <div class="calc-result">
+                                    = $19 / ($14 × 0.85) = <strong>1.6 months</strong>
+                                </div>
+                            </div>
+
+                            <div class="payback-benchmark">
+                                <h4><i class="fas fa-check-double"></i> Industry Standard</h4>
+                                <p>Best-in-class SaaS companies aim for a payback period under <strong>12 months</strong>.</p>
+                                <p style="margin-top: 12px;">
+                                    <i class="fas fa-trophy" style="color: gold; margin-right: 8px;"></i>
+                                    <strong>AlphaVault AI: 1.6 months</strong> — Exceptional capital efficiency!
+                                </p>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-chart-pie"></i> Key Metrics Dashboard
+                        </h3>
+
+                        <div class="metrics-dashboard">
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="metric-label">Gross Margin</div>
+                                <div class="metric-value">85%</div>
+                                <div class="metric-trend positive">
+                                    <i class="fas fa-arrow-up"></i> Industry avg: 70-80%
+                                </div>
+                            </div>
+
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                    <i class="fas fa-user-times"></i>
+                                </div>
+                                <div class="metric-label">Monthly Churn</div>
+                                <div class="metric-value">5%</div>
+                                <div class="metric-trend positive">
+                                    <i class="fas fa-check"></i> Target: < 7%
+                                </div>
+                            </div>
+
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div class="metric-label">Net Revenue Retention</div>
+                                <div class="metric-value">105%</div>
+                                <div class="metric-trend positive">
+                                    <i class="fas fa-arrow-up"></i> Upgrades offset churn
+                                </div>
+                            </div>
+
+                            <div class="metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="metric-label">Magic Number</div>
+                                <div class="metric-value">1.2</div>
+                                <div class="metric-trend positive">
+                                    <i class="fas fa-check"></i> > 0.75 is efficient
+                                </div>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 7: GROWTH STRATEGY
+                         ============================================ -->
+                    <section class="bp-section" id="growth">
+                        <h2 class="section-title">
+                            <i class="fas fa-rocket"></i>
+                            Growth Strategy & Roadmap
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-road"></i> 18-Month Product Roadmap
+                        </h3>
+
+                        <div class="roadmap-timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker q1">Q1</div>
+                                <div class="timeline-content">
+                                    <h4>Foundation & Launch</h4>
+                                    <ul class="timeline-tasks">
+                                        <li><i class="fas fa-check-circle"></i> Core platform launch (DONE)</li>
+                                        <li><i class="fas fa-check-circle"></i> Freemium model activation (DONE)</li>
+                                        <li><i class="fas fa-spinner"></i> SEO optimization (50+ blog posts)</li>
+                                        <li><i class="fas fa-spinner"></i> Social media presence (Twitter, LinkedIn)</li>
+                                        <li><i class="fas fa-clock"></i> First 500 users milestone</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-marker q2">Q2</div>
+                                <div class="timeline-content">
+                                    <h4>User Growth & Engagement</h4>
+                                    <ul class="timeline-tasks">
+                                        <li><i class="fas fa-clock"></i> Paid ads campaign launch ($5K/month)</li>
+                                        <li><i class="fas fa-clock"></i> Referral program implementation</li>
+                                        <li><i class="fas fa-clock"></i> Mobile app (iOS/Android) development start</li>
+                                        <li><i class="fas fa-clock"></i> Community hub enhancements</li>
+                                        <li><i class="fas fa-clock"></i> Target: 2,000 users, 10% paid conversion</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-marker q3">Q3</div>
+                                <div class="timeline-content">
+                                    <h4>Feature Expansion & Partnerships</h4>
+                                    <ul class="timeline-tasks">
+                                        <li><i class="fas fa-clock"></i> Mobile app beta launch</li>
+                                        <li><i class="fas fa-clock"></i> Broker integrations (Interactive Brokers, TD)</li>
+                                        <li><i class="fas fa-clock"></i> Advanced portfolio backtesting</li>
+                                        <li><i class="fas fa-clock"></i> Influencer partnerships (3-5 YouTubers)</li>
+                                        <li><i class="fas fa-clock"></i> Target: 5,000 users, 15% paid conversion</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-marker q4">Q4</div>
+                                <div class="timeline-content">
+                                    <h4>Scale & Optimize</h4>
+                                    <ul class="timeline-tasks">
+                                        <li><i class="fas fa-clock"></i> API access tier launch</li>
+                                        <li><i class="fas fa-clock"></i> Enterprise features (multi-user accounts)</li>
+                                        <li><i class="fas fa-clock"></i> International expansion (German, French UI)</li>
+                                        <li><i class="fas fa-clock"></i> Advanced ML model improvements</li>
+                                        <li><i class="fas fa-clock"></i> Target: 10,000 users, 20% paid conversion</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-marker q5">Q5-Q6</div>
+                                <div class="timeline-content">
+                                    <h4>Scaling & Profitability</h4>
+                                    <ul class="timeline-tasks">
+                                        <li><i class="fas fa-clock"></i> Series A fundraising ($2-5M)</li>
+                                        <li><i class="fas fa-clock"></i> Team expansion (10+ employees)</li>
+                                        <li><i class="fas fa-clock"></i> White-label solutions for advisors</li>
+                                        <li><i class="fas fa-clock"></i> Crypto/DeFi analytics module</li>
+                                        <li><i class="fas fa-clock"></i> Target: 25,000 users, 25% paid conversion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-bullhorn"></i> Marketing & Distribution Channels
+                        </h3>
+
+                        <div class="marketing-channels">
+                            <div class="channel-detail-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-google"></i>
+                                    <h4>Content Marketing & SEO</h4>
+                                    <span class="priority-badge high">High Priority</span>
+                                </div>
+                                <div class="channel-strategy">
+                                    <h5>Strategy</h5>
+                                    <ul>
+                                        <li>Publish 10 blog posts/month on investing, technical analysis, portfolio management</li>
+                                        <li>Target long-tail keywords ("best M&A prediction tools", "free Monte Carlo simulator")</li>
+                                        <li>Build backlinks via guest posts on finance blogs (Seeking Alpha, Investopedia)</li>
+                                        <li>Create YouTube video tutorials (screen recordings, feature demos)</li>
+                                    </ul>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Target Traffic (Year 1):</span>
+                                        <span class="metric-value">30K organic visits/month</span>
+                                    </div>
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Estimated CAC:</span>
+                                        <span class="metric-value">$5-10 (time investment only)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-detail-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-facebook"></i>
+                                    <h4>Paid Social Advertising</h4>
+                                    <span class="priority-badge medium">Medium Priority</span>
+                                </div>
+                                <div class="channel-strategy">
+                                    <h5>Strategy</h5>
+                                    <ul>
+                                        <li>Facebook/Instagram carousel ads showcasing platform features</li>
+                                        <li>LinkedIn sponsored content targeting finance professionals</li>
+                                        <li>Reddit promoted posts in r/investing, r/stocks, r/wallstreetbets</li>
+                                        <li>Retargeting campaigns for free users to convert to paid</li>
+                                    </ul>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Monthly Budget:</span>
+                                        <span class="metric-value">$10K (Year 1) → $50K (Year 3)</span>
+                                    </div>
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Estimated CAC:</span>
+                                        <span class="metric-value">$25-40</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-detail-card">
+                                <div class="channel-header">
+                                    <i class="fas fa-users"></i>
+                                    <h4>Viral Referral Program</h4>
+                                    <span class="priority-badge high">High Priority</span>
+                                </div>
+                                <div class="channel-strategy">
+                                    <h5>Strategy</h5>
+                                    <ul>
+                                        <li><strong>Incentive:</strong> Refer a friend → both get 1 month Pro free</li>
+                                        <li><strong>Super Referral:</strong> Refer 5 friends → get Platinum free for 6 months</li>
+                                        <li>In-app prompts after successful analyses ("Share this prediction with friends!")</li>
+                                        <li>Shareable result cards (Twitter, LinkedIn, Discord)</li>
+                                    </ul>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Target Virality Coefficient:</span>
+                                        <span class="metric-value">0.5 (each user refers 0.5 new users)</span>
+                                    </div>
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Estimated CAC:</span>
+                                        <span class="metric-value">$10-15 (cost of free month)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="channel-detail-card">
+                                <div class="channel-header">
+                                    <i class="fab fa-youtube"></i>
+                                    <h4>Influencer Partnerships</h4>
+                                    <span class="priority-badge medium">Medium Priority</span>
+                                </div>
+                                <div class="channel-strategy">
+                                    <h5>Strategy</h5>
+                                    <ul>
+                                        <li>Partner with finance YouTubers (50K-500K subscribers)</li>
+                                        <li>Provide exclusive affiliate codes (30% commission on sales)</li>
+                                        <li>Sponsor educational videos ("How I analyze stocks using AlphaVault AI")</li>
+                                        <li>Target micro-influencers (10K-50K followers) on Twitter/X</li>
+                                    </ul>
+                                </div>
+                                <div class="channel-metrics">
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Estimated Conversions:</span>
+                                        <span class="metric-value">200-500 signups per sponsored video</span>
+                                    </div>
+                                    <div class="channel-metric">
+                                        <span class="metric-label">Estimated CAC:</span>
+                                        <span class="metric-value">$20-30 (sponsorship + commission)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-magnet"></i> Retention & Engagement Strategy
+                        </h3>
+
+                        <div class="retention-strategies">
+                            <div class="retention-card">
+                                <div class="retention-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <h4>Automated Alerts & Notifications</h4>
+                                <p>Email/push notifications for:</p>
+                                <ul>
+                                    <li>Insider trading activity in watchlist stocks</li>
+                                    <li>M&A prediction score changes</li>
+                                    <li>New analyst upgrades/downgrades</li>
+                                    <li>Portfolio value reaching targets</li>
+                                </ul>
+                            </div>
+
+                            <div class="retention-card">
+                                <div class="retention-icon">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <h4>Weekly Newsletter</h4>
+                                <p>Automated curated content:</p>
+                                <ul>
+                                    <li>Top 5 stocks to watch (AI-generated)</li>
+                                    <li>Market recap & macroeconomic analysis</li>
+                                    <li>New platform features & tips</li>
+                                    <li>User success stories</li>
+                                </ul>
+                            </div>
+
+                            <div class="retention-card">
+                                <div class="retention-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <h4>Gamification & Achievements</h4>
+                                <p>Unlock badges for:</p>
+                                <ul>
+                                    <li>First successful prediction</li>
+                                    <li>10 portfolio optimizations</li>
+                                    <li>30-day login streak</li>
+                                    <li>Sharing 5 analyses</li>
+                                </ul>
+                            </div>
+
+                            <div class="retention-card">
+                                <div class="retention-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h4>Educational Content</h4>
+                                <p>In-app learning modules:</p>
+                                <ul>
+                                    <li>Technical analysis 101</li>
+                                    <li>Understanding insider trading patterns</li>
+                                    <li>Portfolio risk management</li>
+                                    <li>Certification program (Premium feature)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 8: COMPETITIVE ANALYSIS
+                         ============================================ -->
+                    <section class="bp-section" id="competitive">
+                        <h2 class="section-title">
+                            <i class="fas fa-chess"></i>
+                            Competitive Analysis
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-table"></i> Competitor Comparison Matrix
+                        </h3>
+
+                        <div class="table-responsive">
+                            <table class="competitive-table">
+                                <thead>
+                                    <tr>
+                                        <th>Feature / Competitor</th>
+                                        <th class="us">AlphaVault AI</th>
+                                        <th>Bloomberg Terminal</th>
+                                        <th>Yahoo Finance</th>
+                                        <th>TradingView</th>
+                                        <th>Morningstar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="feature-name"><strong>Pricing (Monthly)</strong></td>
+                                        <td class="us"><strong>$0-$20</strong></td>
+                                        <td>$2,000+</td>
+                                        <td>Free</td>
+                                        <td>$15-$60</td>
+                                        <td>$35</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">AI-Powered Chatbot</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">M&A Prediction (AI)</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Insider Flow Tracking</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Monte Carlo Simulation</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Risk Parity Optimization</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">ML Trend Prediction</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Real-Time Market Data</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-minus-circle partial"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Budget Dashboard</td>
+                                        <td class="us"><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                        <td><i class="fas fa-times-circle no"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Mobile App</td>
+                                        <td class="us"><i class="fas fa-clock pending"></i> Q3 2024</td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                        <td><i class="fas fa-check-circle yes"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="feature-name">Target Audience</td>
+                                        <td class="us">Retail Investors</td>
+                                        <td>Institutions</td>
+                                        <td>Casual Investors</td>
+                                        <td>Active Traders</td>
+                                        <td>Long-Term Investors</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-medal"></i> Competitive Advantages
+                        </h3>
+
+                        <div class="competitive-advantages">
+                            <div class="advantage-detail-card">
+                                <div class="advantage-number">1</div>
+                                <div class="advantage-content">
+                                    <h4><i class="fas fa-dollar-sign"></i> Price Disruption</h4>
+                                    <p>
+                                        <strong>Bloomberg Terminal:</strong> $24,000/year (professional-only pricing)<br>
+                                        <strong>AlphaVault Platinum:</strong> $240/year (100x cheaper)<br>
+                                        <strong>Value Proposition:</strong> Institutional-grade tools at consumer prices = massive market disruption.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="advantage-detail-card">
+                                <div class="advantage-number">2</div>
+                                <div class="advantage-content">
+                                    <h4><i class="fas fa-robot"></i> AI-First Approach</h4>
+                                    <p>
+                                        <strong>FinanceGPT Chatbot:</strong> No competitor offers conversational AI for financial questions.<br>
+                                        <strong>ML Predictions:</strong> Proprietary models for trend forecasting, M&A, and insider patterns.<br>
+                                        <strong>Automation:</strong> Newsletters, alerts, portfolio rebalancing suggestions—all AI-driven.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="advantage-detail-card">
+                                <div class="advantage-number">3</div>
+                                <div class="advantage-content">
+                                    <h4><i class="fas fa-puzzle-piece"></i> All-in-One Platform</h4>
+                                    <p>
+                                        Competitors specialize in one area (TradingView = charts, Morningstar = research).<br>
+                                        <strong>AlphaVault AI:</strong> Combines budgeting, analysis, predictions, simulations, chatbot, and community in one unified platform.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="advantage-detail-card">
+                                <div class="advantage-number">4</div>
+                                <div class="advantage-content">
+                                    <h4><i class="fas fa-users"></i> Community-Driven</h4>
+                                    <p>
+                                        Built-in community hub for sharing analyses, strategies, and insights.<br>
+                                        Social features (comments, likes, follows) drive engagement and virality.<br>
+                                        Network effects: platform becomes more valuable as user base grows.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-shield-alt"></i> Barriers to Entry (Moats)
+                        </h3>
+
+                        <div class="moats-grid">
+                            <div class="moat-card">
+                                <div class="moat-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <h4>Proprietary AI Models</h4>
+                                <p>
+                                    Custom ML algorithms trained on millions of data points. 
+                                    Models improve continuously with user feedback, creating a data flywheel.
+                                </p>
+                            </div>
+
+                            <div class="moat-card">
+                                <div class="moat-icon">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <h4>Network Effects</h4>
+                                <p>
+                                    Community hub + social features create viral growth. 
+                                    Each new user adds value through shared analyses and discussions.
+                                </p>
+                            </div>
+
+                            <div class="moat-card">
+                                <div class="moat-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <h4>Data Aggregation</h4>
+                                <p>
+                                    Integrated data from 10+ sources (Twelve Data, SEC, Gemini AI, etc.). 
+                                    Time-intensive to replicate this infrastructure.
+                                </p>
+                            </div>
+
+                            <div class="moat-card">
+                                <div class="moat-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <h4>Brand & Trust</h4>
+                                <p>
+                                    First-mover advantage in AI-powered retail investing analytics. 
+                                    User trust builds over time through accurate predictions and quality service.
+                                </p>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 9: RISK ANALYSIS
+                         ============================================ -->
+                    <section class="bp-section" id="risks">
+                        <h2 class="section-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Risk Analysis & Mitigation
+                        </h2>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-shield-alt"></i> Key Risks & Mitigation Strategies
+                        </h3>
+
+                        <div class="risks-container">
+                            <div class="risk-card market-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity high">High Impact</div>
+                                    <h4><i class="fas fa-chart-line"></i> Market Risk: Prolonged Bear Market</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> Extended market downturn (2008-style recession) reduces retail investor activity and willingness to pay for analytics tools.
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Diversified Value Prop:</strong> Emphasize risk management tools (Risk Parity, Monte Carlo) that are MORE valuable during volatility.</li>
+                                        <li><strong>Counter-Cyclical Features:</strong> Add hedging strategies, put/call analysis, and recession-proof portfolio recommendations.</li>
+                                        <li><strong>Freemium Buffer:</strong> Strong free tier keeps users engaged even if they downgrade, ready to re-convert when market recovers.</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Medium (30% chance in next 5 years)</span>
+                                </div>
+                            </div>
+
+                            <div class="risk-card tech-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity medium">Medium Impact</div>
+                                    <h4><i class="fas fa-robot"></i> Technology Risk: AI Model Accuracy</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> ML prediction models underperform, leading to user distrust and churn.
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Transparency:</strong> Clearly communicate that predictions are probabilistic, not guarantees. Show accuracy backtests.</li>
+                                        <li><strong>Continuous Improvement:</strong> Monthly model retraining with latest data. A/B testing of new algorithms.</li>
+                                        <li><strong>Hybrid Approach:</strong> Combine AI predictions with fundamental analysis and user judgment (educational disclaimers).</li>
+                                        <li><strong>Diversified Offering:</strong> Predictions are only 1 of 30+ features. Users stay for portfolio tools, budgeting, chatbot, etc.</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Medium (40% chance of accuracy issues)</span>
+                                </div>
+                            </div>
+
+                            <div class="risk-card competitive-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity high">High Impact</div>
+                                    <h4><i class="fas fa-chess"></i> Competitive Risk: Big Tech Entry</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> Google/Apple/Bloomberg launch competing AI-powered retail investing platforms with massive marketing budgets.
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Niche Specialization:</strong> Focus on advanced users (active traders, quants) vs. mass market. Deepen technical features big tech won't prioritize.</li>
+                                        <li><strong>Community Moat:</strong> Build loyal user base with strong network effects before incumbents enter.</li>
+                                        <li><strong>Speed to Innovate:</strong> Small team = faster iteration. Ship features monthly vs. quarterly for large companies.</li>
+                                        <li><strong>Acquisition Opportunity:</strong> If we build strong traction (50K+ users), we become an attractive acquisition target for incumbents.</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Low-Medium (20% chance in next 3 years)</span>
+                                </div>
+                            </div>
+
+                            <div class="risk-card regulatory-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity medium">Medium Impact</div>
+                                    <h4><i class="fas fa-gavel"></i> Regulatory Risk: Financial Advice Compliance</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> Regulators (SEC) classify AI recommendations as "investment advice," requiring expensive licensing (RIA registration).
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Clear Disclaimers:</strong> "Not financial advice. For educational purposes only." Prominent on all pages.</li>
+                                        <li><strong>Positioning:</strong> Market as "analytical tool" not "advisory service." Users make own decisions.</li>
+                                        <li><strong>Legal Counsel:</strong> Work with fintech lawyers to ensure compliance with SEC regulations.</li>
+                                        <li><strong>Insurance:</strong> Obtain E&O (Errors & Omissions) insurance for additional protection.</li>
+                                        <li><strong>Pivot Option:</strong> If regulation tightens, pivot to B2B (license platform to registered advisors).</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Low (10% chance of strict enforcement)</span>
+                                </div>
+                            </div>
+
+                            <div class="risk-card data-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity medium">Medium Impact</div>
+                                    <h4><i class="fas fa-plug"></i> Data Risk: API Provider Dependency</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> Key data provider (Twelve Data, SEC API) shuts down, changes pricing dramatically, or experiences prolonged outage.
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Multi-Source Strategy:</strong> Integrate 2-3 backup data providers for critical feeds (Alpha Vantage, IEX Cloud, Polygon.io).</li>
+                                        <li><strong>Fallback Logic:</strong> Automatic failover in code if primary API is down.</li>
+                                        <li><strong>Data Caching:</strong> Cache historical data locally (Cloudflare Workers KV) to reduce API dependency.</li>
+                                        <li><strong>Long-Term Contracts:</strong> Negotiate multi-year pricing locks with key providers.</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Medium (30% chance of disruption)</span>
+                                </div>
+                            </div>
+
+                            <div class="risk-card team-risk">
+                                <div class="risk-header">
+                                    <div class="risk-severity low">Low Impact</div>
+                                    <h4><i class="fas fa-users"></i> Team Risk: Key Person Dependency</h4>
+                                </div>
+                                <div class="risk-description">
+                                    <strong>Scenario:</strong> Founder/lead developer leaves, causing development slowdown or loss of technical knowledge.
+                                </div>
+                                <div class="risk-mitigation">
+                                    <h5><i class="fas fa-shield-alt"></i> Mitigation</h5>
+                                    <ul>
+                                        <li><strong>Documentation:</strong> Comprehensive technical docs (already in place via admin-documentation.html).</li>
+                                        <li><strong>Code Comments:</strong> Well-documented codebase for easy onboarding of new developers.</li>
+                                        <li><strong>Team Expansion:</strong> Hire 2-3 developers by Year 2 to distribute knowledge.</li>
+                                        <li><strong>Equity Incentives:</strong> Offer vesting equity to retain key team members (4-year vesting with 1-year cliff).</li>
+                                    </ul>
+                                </div>
+                                <div class="risk-probability">
+                                    <span class="prob-label">Probability:</span>
+                                    <span class="prob-value">Low (15% chance)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title" style="margin-top: 40px;">
+                            <i class="fas fa-chart-pie"></i> Risk Matrix
+                        </h3>
+
+                        <div class="chart-container">
+                            <canvas id="riskMatrixChart"></canvas>
+                        </div>
+
+                    </section>
+
+                </div>
+
+                <!-- Footer -->
+                <footer style="margin-top: 60px; padding: 32px; text-align: center; background: var(--card-background); border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">
+                        <i class="fas fa-chart-pie"></i> AlphaVault AI Business Plan
+                    </div>
+                    <div style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 16px;">
+                        Confidential - For Internal Use Only
+                    </div>
+                    <div style="color: var(--text-light); font-size: 0.85rem;">
+                        Last Updated: <span id="footerDate"></span> | Version 3.0
+                    </div>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/dark-mode.js'></script>
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    <script src='assets/js/admin-business-plan.js'></script>
+    
+    <!-- User Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+
+        // Set dates
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        document.getElementById('footerDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    </script>
+</body>
+</html>
