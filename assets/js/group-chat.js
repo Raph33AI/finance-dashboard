@@ -61,7 +61,7 @@ class GroupChat {
     }
 
     async openGroup(groupId, groupData) {
-        console.log('💬 Opening group:', groupData.name);
+        console.log('💬 Opening GROUP chat:', groupData.name);
 
         this.currentGroupId = groupId;
         this.currentGroup = groupData;
@@ -71,6 +71,16 @@ class GroupChat {
 
         if (emptyState) emptyState.style.display = 'none';
         if (chatActive) chatActive.style.display = 'flex';
+
+        // ✅ CORRECTION : Activer après un délai pour s'assurer que chatEventManager est prêt
+        setTimeout(() => {
+            if (window.chatEventManager) {
+                window.chatEventManager.activateFor('group');
+                console.log('✅ ChatEventManager activated for GROUP chat');
+            } else {
+                console.error('❌ ChatEventManager not found!');
+            }
+        }, 100);
 
         await this.renderGroupHeader();
         await this.loadMessages();
