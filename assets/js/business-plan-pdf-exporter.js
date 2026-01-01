@@ -41,6 +41,8 @@ class BusinessPlanPDFExporter {
      */
     async sendPDF() {
         try {
+            console.log('🚀 Initiating PDF export...');
+            
             const emails = this.getEmails();
             if (emails.length === 0) {
                 this.showNotification('⚠ No recipients', 'Please enter at least one email address.', 'warning');
@@ -53,18 +55,36 @@ class BusinessPlanPDFExporter {
 
             this.showProgress(0, 'Preparing document...');
 
-            // ✅ CRÉER LE HTML DU BUSINESS PLAN
+            // ✅ CRÉER LE HTML
             const htmlContent = this.createBusinessPlanHTML(includeSimulator);
+            console.log('📝 HTML length:', htmlContent.length, 'characters');
 
             this.showProgress(20, 'Generating PDF with html2pdf.js...');
 
-            // ✅ GÉNÉRER PDF AVEC html2pdf.js
+            // ✅ GÉNÉRER PDF
             const pdfBlob = await this.generatePDFWithHtml2Pdf(htmlContent);
+            console.log('📦 PDF Blob size:', pdfBlob.size, 'bytes');
+            
+            // ⚠ VÉRIFIER SI LE PDF EST TROP PETIT (probablement vide)
+            if (pdfBlob.size < 5000) {
+                console.warn('⚠ PDF size is suspiciously small! Might be blank.');
+                
+                // Option : télécharger le PDF localement pour vérifier
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'debug-blank-pdf.pdf';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                throw new Error('Generated PDF is too small (probably blank). Check console logs.');
+            }
 
             this.showProgress(60, 'Converting to Base64...');
 
             // ✅ CONVERTIR EN BASE64
             const pdfBase64 = await this.blobToBase64(pdfBlob);
+            console.log('📊 Base64 length:', pdfBase64.length, 'characters');
 
             this.showProgress(70, 'Sending to server...');
 
@@ -102,51 +122,96 @@ class BusinessPlanPDFExporter {
     }
 
     /**
-     * 🎨 GÉNÉRER PDF AVEC html2pdf.js
+     * 🎨 GÉNÉRER PDF AVEC html2pdf.js (VERSION AMÉLIORÉE)
      */
-        async generatePDFWithHtml2Pdf(htmlContent) {
-            // Créer un élément temporaire hors écran
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '0';
-            document.body.appendChild(tempDiv);
+    async generatePDFWithHtml2Pdf(htmlContent) {
+        console.log('📄 Creating temporary container...');
+        
+        // ✅ Créer un conteneur VISIBLE mais caché par overflow
+        const container = document.createElement('div');
+        container.id = 'pdf-temp-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            z-index: -9999;
+            opacity: 0;
+            pointer-events: none;
+        `;
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        tempDiv.style.cssText = `
+            width: 210mm;
+            background: white;
+            position: relative;
+        `;
+        
+        container.appendChild(tempDiv);
+        document.body.appendChild(container);
 
-            try {
-                // Options html2pdf.js
-                const options = {
-                    margin: 10,
-                    filename: `AlphaVault_BusinessPlan_${new Date().toISOString().split('T')[0]}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        letterRendering: true
-                    },
-                    jsPDF: { 
-                        unit: 'mm', 
-                        format: 'a4', 
-                        orientation: 'portrait',
-                        compress: true
-                    },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-                };
+        try {
+            console.log('⏳ Waiting for DOM to render...');
+            
+            // ✅ ATTENDRE que le navigateur rende le DOM
+            await this.wait(500);
 
-                // Générer le PDF et retourner le Blob
-                const pdfBlob = await html2pdf()
-                    .set(options)
-                    .from(tempDiv)
-                    .output('blob');
+            console.log('🖨 Generating PDF with html2pdf.js...');
 
-                return pdfBlob;
+            // ✅ Options optimisées
+            const options = {
+                margin: [10, 10, 10, 10],
+                filename: `AlphaVault_BusinessPlan_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { 
+                    type: 'jpeg', 
+                    quality: 0.95 
+                },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true, // ✅ Activer les logs pour debug
+                    letterRendering: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.section'
+                }
+            };
 
-            } finally {
-                // Nettoyer l'élément temporaire
-                document.body.removeChild(tempDiv);
-            }
+            // ✅ Générer le PDF
+            const pdfBlob = await html2pdf()
+                .set(options)
+                .from(tempDiv)
+                .outputPdf('blob');
+
+            console.log('✅ PDF generated successfully:', pdfBlob.size, 'bytes');
+
+            return pdfBlob;
+
+        } catch (error) {
+            console.error('❌ PDF Generation Error:', error);
+            throw new Error(`PDF generation failed: ${error.message}`);
+        } finally {
+            // ✅ Nettoyer après un délai
+            setTimeout(() => {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                    console.log('🧹 Temporary container removed');
+                }
+            }, 1000);
         }
+    }
 
         /**
          * 🔄 CONVERTIR BLOB EN BASE64
