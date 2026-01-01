@@ -1803,7 +1803,18 @@ class ChatbotUI {
 
         // Conversations sidebar toggle
         this.elements.conversationsToggle?.addEventListener('click', () => {
-            this.elements.conversationsSidebar.classList.toggle('collapsed');
+            const sidebar = this.elements.conversationsSidebar;
+            if (sidebar) {
+                const isCollapsed = sidebar.classList.toggle('collapsed');
+                
+                // Changer l'icône du bouton
+                const icon = this.elements.conversationsToggle.querySelector('i');
+                if (icon) {
+                    icon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                }
+                
+                console.log(isCollapsed ? '📕 Sidebar collapsed' : '📖 Sidebar expanded');
+            }
         });
     }
 
