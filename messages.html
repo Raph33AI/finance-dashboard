@@ -557,5 +557,38 @@
         })();
     </script>
 
+    <script>
+    // 🔍 DIAGNOSTIC : Inspecter les bulles de messages
+    setTimeout(() => {
+        const bubbles = document.querySelectorAll('.chat-message-bubble');
+        
+        console.log('🔍 DIAGNOSTIC BULLES DE MESSAGES:');
+        console.log('Nombre de bulles:', bubbles.length);
+        
+        bubbles.forEach((bubble, index) => {
+            const computed = window.getComputedStyle(bubble);
+            const children = bubble.children;
+            
+            console.log(`\n📊 Bulle #${index + 1}:`);
+            console.log('- Texte:', bubble.textContent.substring(0, 50));
+            console.log('- Hauteur totale:', bubble.offsetHeight + 'px');
+            console.log('- Padding:', computed.padding);
+            console.log('- Line-height:', computed.lineHeight);
+            console.log('- Min-height:', computed.minHeight);
+            console.log('- Enfants HTML:', children.length);
+            
+            // ✅ Afficher le HTML interne
+            console.log('- HTML interne:', bubble.innerHTML);
+            
+            // ⚠ Détecter les éléments vides
+            Array.from(children).forEach((child, i) => {
+                if (child.offsetHeight > 20 && child.textContent.trim() === '') {
+                    console.warn(`⚠ Élément vide détecté (enfant #${i}):`, child);
+                }
+            });
+        });
+    }, 2000); // Attendre 2 secondes après le chargement
+    </script>
+
 </body>
 </html>

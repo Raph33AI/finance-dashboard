@@ -1420,4 +1420,63 @@ body.dark-mode .attachment-preview-item {
     }
 }
 
+/* ============================================
+   🔧 CORRECTION : BULLES COMPACTES
+   ============================================ */
+
+/* Message Container - Compact */
+.chat-message {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    min-height: auto !important; /* ✅ AJOUT */
+}
+
+/* Message Content - Compact */
+.chat-message-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-width: 65% !important;
+    width: auto !important;
+    min-height: auto !important; /* ✅ AJOUT */
+}
+
+/* Message Bubble - ULTRA COMPACT */
+.chat-message-bubble {
+    display: inline-block !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    min-width: 60px !important;
+    min-height: auto !important; /* ✅ AJOUT */
+    padding: 8px 12px !important; /* ✅ RÉDUIT de 10px/14px */
+    border-radius: 16px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important; /* ✅ CHANGÉ de pre-wrap */
+    line-height: 1.4 !important; /* ✅ RÉDUIT de 1.5 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* Text inside bubble - Compact */
+.chat-message-bubble p,
+.chat-message-bubble span,
+.chat-message-bubble div {
+    margin: 0 !important; /* ✅ AJOUT : Supprimer marges internes */
+    padding: 0 !important;
+    line-height: 1.4 !important;
+}
+
+/* Time - Compact */
+.chat-message-time {
+    font-size: 0.7rem !important;
+    color: #94a3b8 !important;
+    margin-top: 2px !important; /* ✅ RÉDUIT de 4px */
+    padding: 0 4px !important;
+    line-height: 1 !important; /* ✅ AJOUT */
+}
+
 console.log('✅ messages-hub.css loaded (v3.3 - PC: 340px panel + Mobile: uniform button spacing)');
