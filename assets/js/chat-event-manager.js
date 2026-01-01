@@ -104,10 +104,13 @@ class ChatEventManager {
 
     renderAttachmentPreview() {
         const preview = document.getElementById('attachmentPreview');
+        
         if (!preview) {
-            console.warn('⚠ attachmentPreview element not found');
+            console.error('❌ attachmentPreview element NOT FOUND in DOM!');
             return;
         }
+
+        console.log('📍 Preview element found:', preview);
 
         if (this.attachedFiles.length === 0) {
             preview.style.display = 'none';
@@ -116,7 +119,12 @@ class ChatEventManager {
             return;
         }
 
+        // ✅ FORCER L'AFFICHAGE
         preview.style.display = 'block';
+        preview.style.visibility = 'visible';
+        preview.style.opacity = '1';
+        preview.style.position = 'relative';
+        preview.style.zIndex = '10';
 
         const previewHTML = `
             <div class="attachment-preview-grid">
@@ -132,7 +140,7 @@ class ChatEventManager {
                                 : `<div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(102, 126, 234, 0.1); padding: 8px;">
                                     <i class="${icon}" style="font-size: 2rem; color: #667eea; margin-bottom: 4px;"></i>
                                     <span style="font-size: 0.7rem; color: #667eea; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">${file.name}</span>
-                                   </div>`
+                                </div>`
                             }
                             <button class="attachment-remove-btn" onclick="window.chatEventManager.removeFile(${index})" title="Remove">
                                 <i class="fas fa-times"></i>
@@ -144,7 +152,16 @@ class ChatEventManager {
         `;
 
         preview.innerHTML = previewHTML;
+        
         console.log(`✅ Preview rendered (${this.attachedFiles.length} file(s))`);
+        console.log('📐 Preview styles:', {
+            display: preview.style.display,
+            visibility: preview.style.visibility,
+            opacity: preview.style.opacity,
+            zIndex: preview.style.zIndex,
+            height: preview.offsetHeight + 'px',
+            width: preview.offsetWidth + 'px'
+        });
     }
 
     removeFile(index) {
