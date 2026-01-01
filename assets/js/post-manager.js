@@ -615,10 +615,10 @@ class PostManager {
        ========================================== */
 
     /**
-     * ✅ MODAL DE PARTAGE AVEC ONGLETS : Utilisateurs + Groupes
+     * ✅ MODAL DE PARTAGE AVEC ONGLETS : Utilisateurs OU Groupes (EXCLUSIF)
      */
     openShareAsMessageModal() {
-        console.log('💬 Opening share modal with USERS & GROUPS tabs...');
+        console.log('💬 Opening share modal - USERS ONLY by default...');
 
         // Fermer la modal de partage social
         this.closeShareModal();
@@ -664,7 +664,7 @@ class PostManager {
                             >
                         </div>
 
-                        <!-- ✅ CONTENU ONGLET USERS -->
+                        <!-- ✅ CONTENU ONGLET USERS (visible par défaut) -->
                         <div class="share-content-tab active" data-content="users">
                             <div class="users-list-wrapper" id="shareUsersList">
                                 <div class="loading-spinner">
@@ -674,13 +674,10 @@ class PostManager {
                             </div>
                         </div>
 
-                        <!-- ✅ CONTENU ONGLET GROUPS -->
+                        <!-- ✅ CONTENU ONGLET GROUPS (caché par défaut) -->
                         <div class="share-content-tab" data-content="groups">
                             <div class="groups-list-wrapper" id="shareGroupsList">
-                                <div class="loading-spinner">
-                                    <i class="fas fa-spinner fa-spin"></i>
-                                    <p>Loading groups...</p>
-                                </div>
+                                <!-- Sera chargé uniquement si on clique sur l'onglet -->
                             </div>
                         </div>
                     </div>
@@ -697,7 +694,7 @@ class PostManager {
             overlay.addEventListener('click', () => this.closeShareMessageModal());
             closeBtn.addEventListener('click', () => this.closeShareMessageModal());
 
-            // ✅ GESTION DES ONGLETS
+            // ✅ GESTION DES ONGLETS (EXCLUSIF)
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabName = tab.dataset.tab;
@@ -708,25 +705,25 @@ class PostManager {
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     
-                    // Afficher le bon contenu
+                    // ✅ AFFICHER UNIQUEMENT LE BON CONTENU (MASQUER L'AUTRE)
                     modal.querySelectorAll('.share-content-tab').forEach(content => {
-                        content.classList.remove('active');
                         if (content.dataset.content === tabName) {
                             content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
                         }
                     });
                     
-                    // Changer le placeholder et charger les données
+                    // ✅ CHARGER LES DONNÉES SELON L'ONGLET
                     if (tabName === 'users') {
                         searchInput.placeholder = 'Search users...';
+                        searchInput.value = '';
                         this.loadUsersForShare();
-                    } else {
+                    } else if (tabName === 'groups') {
                         searchInput.placeholder = 'Search groups...';
+                        searchInput.value = '';
                         this.loadGroupsForShare();
                     }
-                    
-                    // Reset search
-                    searchInput.value = '';
                 });
             });
 
@@ -755,8 +752,29 @@ class PostManager {
             document.addEventListener('keydown', this.escapeMessageHandler);
         }
 
-        // Charger les utilisateurs par défaut
+        // ✅ CHARGER UNIQUEMENT LES UTILISATEURS PAR DÉFAUT
         this.loadUsersForShare();
+
+        // Réinitialiser l'onglet actif (Users)
+        const tabs = modal.querySelectorAll('.share-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        modal.querySelector('[data-tab="users"]').classList.add('active');
+
+        // Réinitialiser le contenu visible
+        modal.querySelectorAll('.share-content-tab').forEach(content => {
+            if (content.dataset.content === 'users') {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        });
+
+        // Réinitialiser la recherche
+        const searchInput = modal.querySelector('#shareSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.placeholder = 'Search users...';
+        }
 
         // Afficher la modal
         const scrollY = window.scrollY;
