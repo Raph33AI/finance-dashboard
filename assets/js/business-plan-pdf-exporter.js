@@ -790,12 +790,6 @@ class BusinessPlanPDFExporter {
         </table>
     </div>
 
-    ${includeSimulator ? this.createSimulatorSection() : ''}
-`;
-    }
-
-    <!-- Suite du HTML dans createBusinessPlanHTML() -->
-
     <!-- SECTION 5: UNIT ECONOMICS -->
     <div class="section page-break-before">
         <h2 class="section-title">Unit Economics & Key Metrics</h2>
