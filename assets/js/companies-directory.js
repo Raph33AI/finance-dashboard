@@ -557,8 +557,8 @@ class CompaniesDirectory {
         
         // Update container class based on view
         container.className = this.currentView === 'grid' ? 'companies-grid' : 
-                              this.currentView === 'list' ? 'companies-list' : 
-                              'companies-compact';
+                            this.currentView === 'list' ? 'companies-list' : 
+                            'companies-compact';
         
         if (this.filteredCompanies.length === 0) {
             container.innerHTML = '';
@@ -568,29 +568,40 @@ class CompaniesDirectory {
         
         noResults.style.display = 'none';
         
-        container.innerHTML = this.filteredCompanies.map(company => `
-            <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")'>
-                <div class='company-header'>
-                    <div class='company-logo ${company.logoUrl ? 'loading' : ''}' data-ticker='${company.ticker}'>
-                        ${company.logoUrl 
-                            ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='CompaniesDirectory.handleLogoError(this, "${company.ticker}", "${company.name}")'>` 
-                            : company.name.substring(0, 2).toUpperCase()
-                        }
+        container.innerHTML = this.filteredCompanies.map(company => {
+            const initials = company.name.substring(0, 2).toUpperCase();
+            
+            return `
+                <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")'>
+                    <div class='company-header'>
+                        <div class='company-logo ${!company.logoUrl ? 'text-fallback' : ''}' data-ticker='${company.ticker}'>
+                            ${company.logoUrl 
+                                ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='CompaniesDirectory.handleLogoError(this, "${initials}")'>` 
+                                : initials
+                            }
+                        </div>
+                        <div class='company-info'>
+                            <div class='company-name' title='${company.name}'>${company.name}</div>
+                            <div class='company-ticker'>${company.ticker}</div>
+                        </div>
                     </div>
-                    <div class='company-info'>
-                        <div class='company-name' title='${company.name}'>${company.name}</div>
-                        <div class='company-ticker'>${company.ticker}</div>
+                    <div class='company-details'>
+                        <div class='company-detail'>
+                            <i class='fas fa-map-marker-alt'></i>
+                            <span class='company-region-badge'><i class='fas fa-globe'></i> ${company.region}</span>
+                        </div>
                     </div>
+                    <div class='company-sector' title='${company.sector}'>${company.sector}</div>
                 </div>
-                <div class='company-details'>
-                    <div class='company-detail'>
-                        <i class='fas fa-map-marker-alt'></i>
-                        <span class='company-region-badge'>${company.region}</span>
-                    </div>
-                </div>
-                <div class='company-sector' title='${company.sector}'>${company.sector}</div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+    }
+
+    static handleLogoError(img, initials) {
+        const logoDiv = img.parentElement;
+        logoDiv.classList.add('text-fallback');
+        logoDiv.innerHTML = initials;
+        console.log(`⚠ Logo not found, using fallback: ${initials}`);
     }
     
     static handleLogoError(img, ticker, name) {

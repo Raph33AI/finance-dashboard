@@ -307,39 +307,68 @@
     gap: 16px;
 }
 
+/* ✅ CORRECTION MAJEURE : Logo avec fallback texte visible */
 .company-logo {
     width: 64px;
     height: 64px;
+    min-width: 64px;
+    min-height: 64px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: white;
+    border: 2px solid rgba(102, 126, 234, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: 800;
+    color: #667eea;
+    font-weight: 900;
     font-size: 1.4rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
     overflow: hidden;
     position: relative;
+    transition: all 0.3s ease;
 }
 
+.company-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.25);
+}
+
+/* Logo avec image */
 .company-logo img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 8px;
+    padding: 10px;
     background: white;
     border-radius: 12px;
 }
 
-.company-logo.loading {
-    animation: pulse 1.5s ease-in-out infinite;
+/* Fallback texte (initiales) */
+.company-logo.text-fallback {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+/* Animation de chargement */
+.company-logo.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 .company-info {
@@ -351,7 +380,7 @@
     font-size: 1.1rem;
     font-weight: 800;
     color: var(--text-primary, #1e293b);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -359,13 +388,14 @@
 
 .company-ticker {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 5px 14px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .company-details {
@@ -391,13 +421,15 @@
 }
 
 .company-sector {
-    padding: 8px 16px;
-    background: rgba(16, 185, 129, 0.1);
+    padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
     color: #059669;
     border-radius: 10px;
     font-size: 0.85rem;
     font-weight: 700;
     text-align: center;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    line-height: 1.4;
 }
 
 .company-region-badge {
@@ -405,11 +437,12 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
     color: #2563eb;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 700;
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -441,7 +474,7 @@
 
 .companies-list .company-sector {
     flex: 0 0 auto;
-    min-width: 180px;
+    min-width: 200px;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -461,6 +494,8 @@
 .companies-compact .company-logo {
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
     font-size: 1.1rem;
 }
 
@@ -470,7 +505,7 @@
 
 .companies-compact .company-ticker {
     font-size: 0.75rem;
-    padding: 3px 8px;
+    padding: 3px 10px;
 }
 
 .companies-compact .company-details {
@@ -614,15 +649,18 @@
 .company-modal-logo {
     width: 120px;
     height: 120px;
+    min-width: 120px;
+    min-height: 120px;
     border-radius: 20px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: white;
+    border: 3px solid rgba(102, 126, 234, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: 800;
+    color: #667eea;
+    font-weight: 900;
     font-size: 2.5rem;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -636,6 +674,11 @@
     border-radius: 20px;
 }
 
+.company-modal-logo.text-fallback {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
 .company-modal-info {
     flex: 1;
     min-width: 0;
@@ -645,7 +688,7 @@
     font-size: 2rem;
     font-weight: 900;
     color: var(--text-primary, #1e293b);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     word-wrap: break-word;
 }
 
@@ -662,7 +705,7 @@
 }
 
 .detail-group {
-    background: rgba(102, 126, 234, 0.05);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.03));
     padding: 20px;
     border-radius: 16px;
     border: 1px solid rgba(102, 126, 234, 0.1);
@@ -682,6 +725,7 @@
     font-weight: 700;
     color: var(--text-primary, #1e293b);
     word-wrap: break-word;
+    line-height: 1.5;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -692,6 +736,15 @@ body.dark-mode .company-card,
 body.dark-mode .modal-content {
     background: rgba(15, 23, 42, 0.95);
     border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .company-logo {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .company-logo img {
+    background: rgba(30, 41, 59, 0.9);
 }
 
 body.dark-mode .filter-select {
@@ -706,12 +759,17 @@ body.dark-mode .search-bar input {
 }
 
 body.dark-mode .detail-group {
-    background: rgba(102, 126, 234, 0.08);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.05));
     border-color: rgba(102, 126, 234, 0.15);
 }
 
 body.dark-mode .modal-header {
     border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .company-modal-logo {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -831,6 +889,8 @@ body.dark-mode .modal-header {
     .company-logo {
         width: 56px;
         height: 56px;
+        min-width: 56px;
+        min-height: 56px;
         font-size: 1.2rem;
     }
     
@@ -840,7 +900,7 @@ body.dark-mode .modal-header {
     
     .company-ticker {
         font-size: 0.8rem;
-        padding: 3px 10px;
+        padding: 4px 12px;
     }
     
     /* List View Mobile */
@@ -877,6 +937,8 @@ body.dark-mode .modal-header {
     .companies-compact .company-logo {
         width: 40px;
         height: 40px;
+        min-width: 40px;
+        min-height: 40px;
     }
     
     /* Modal */
@@ -916,6 +978,8 @@ body.dark-mode .modal-header {
     .company-modal-logo {
         width: 100px;
         height: 100px;
+        min-width: 100px;
+        min-height: 100px;
         font-size: 2rem;
     }
     
@@ -966,6 +1030,8 @@ body.dark-mode .modal-header {
     .company-modal-logo {
         width: 80px;
         height: 80px;
+        min-width: 80px;
+        min-height: 80px;
         font-size: 1.6rem;
     }
     
