@@ -1126,7 +1126,7 @@ class CompaniesDirectory {
     }
     
     /**
-     * ✅ MODAL ENRICHI AVEC DONNÉES GOOGLE KNOWLEDGE GRAPH
+     * ✅ MODAL ENRICHI AVEC TOUTES LES DONNÉES GOOGLE KNOWLEDGE GRAPH
      */
     static async openCompanyModal(ticker) {
         const instance = window.companiesDirectoryInstance;
@@ -1139,9 +1139,12 @@ class CompaniesDirectory {
         
         // ✅ Afficher un loader
         modalContent.innerHTML = `
-            <div style='text-align: center; padding: 60px;'>
-                <i class='fas fa-spinner fa-spin' style='font-size: 3rem; color: #667eea;'></i>
-                <p style='margin-top: 20px; font-size: 1.1rem; color: #64748b;'>Loading company information...</p>
+            <div style='text-align: center; padding: 80px 20px;'>
+                <div class='chart-loading-spinner' style='margin: 0 auto 20px;'></div>
+                <div class='chart-loading-text'>Loading comprehensive company data...</div>
+                <p style='margin-top: 12px; font-size: 0.85rem; color: var(--text-tertiary);'>
+                    Fetching from Google Knowledge Graph API
+                </p>
             </div>
         `;
         
@@ -1155,105 +1158,284 @@ class CompaniesDirectory {
         const logoUrl = enrichedData?.images?.primary || company.logoUrl;
         
         // ✅ Description enrichie
+        const hasDescription = enrichedData?.description?.detailed || enrichedData?.description?.short;
         const description = enrichedData?.description?.detailed || enrichedData?.description?.short || 'No description available.';
         const descriptionUrl = enrichedData?.description?.source || enrichedData?.links?.wikipedia || '';
         
-        // ✅ NOUVEAU MODAL ENRICHI
+        // ✅ NOUVEAU MODAL ULTRA-ENRICHI
         modalContent.innerHTML = `
-            <div class='company-modal-header' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; margin: -24px -24px 24px -24px; position: relative; overflow: hidden;'>
+            <!-- ✨ HEADER PREMIUM avec Gradient Animé -->
+            <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 32px; border-radius: 24px 24px 0 0; margin: -24px -24px 32px -24px; position: relative; overflow: hidden;'>
                 <div style='position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px); animation: moveStripes 20s linear infinite;'></div>
-                <div class='company-modal-logo' style='width: 100px; height: 100px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); position: relative; z-index: 1;'>
-                    ${logoUrl 
-                        ? `<img src='${logoUrl}' alt='${company.name}' style='max-width: 80%; max-height: 80%; object-fit: contain;' onerror='this.parentElement.classList.add("text-fallback"); this.parentElement.innerHTML="${initials}"; this.parentElement.style.fontSize="2.5rem"; this.parentElement.style.fontWeight="900"; this.parentElement.style.color="#667eea";'>` 
-                        : `<div style='font-size: 2.5rem; font-weight: 900; color: #667eea;'>${initials}</div>`
-                    }
-                </div>
-                <h3 style='color: white; font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 8px; position: relative; z-index: 1;'>${company.name}</h3>
-                <div style='text-align: center; position: relative; z-index: 1;'>
-                    <span class='company-ticker' style='background: rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 20px; font-size: 1.1rem; font-weight: 800;'>${company.ticker}</span>
-                </div>
-            </div>
-            
-            ${enrichedData && enrichedData.found ? `
-                <!-- ✅ DESCRIPTION ENRICHIE -->
-                <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); padding: 24px; border-radius: 16px; margin-bottom: 24px;'>
-                    <h4 style='font-size: 1.2rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'>
-                        <i class='fas fa-info-circle' style='color: #667eea;'></i>
-                        About ${company.name}
-                    </h4>
-                    <p style='color: #475569; line-height: 1.7; font-size: 0.95rem;'>${description}</p>
-                    ${descriptionUrl ? `
-                        <a href='${descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; color: #667eea; font-weight: 700; font-size: 0.9rem; margin-top: 12px; text-decoration: none;'>
-                            Learn more <i class='fas fa-external-link-alt' style='font-size: 0.75rem;'></i>
-                        </a>
+                
+                <div style='position: relative; z-index: 1;'>
+                    <!-- Logo -->
+                    <div style='width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); border: 3px solid rgba(255, 255, 255, 0.5);'>
+                        ${logoUrl 
+                            ? `<img src='${logoUrl}' alt='${company.name}' style='max-width: 85%; max-height: 85%; object-fit: contain;' onerror='this.parentElement.innerHTML="${initials}"; this.parentElement.style.fontSize="2.5rem"; this.parentElement.style.fontWeight="900"; this.parentElement.style.color="#667eea"; this.parentElement.style.background="linear-gradient(135deg, #667eea, #764ba2)"; this.parentElement.style.webkitBackgroundClip="text"; this.parentElement.style.webkitTextFillColor="transparent";'>` 
+                            : `<div style='font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>${initials}</div>`
+                        }
+                    </div>
+                    
+                    <!-- Company Name -->
+                    <h2 style='color: white; font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 12px; text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);'>${company.name}</h2>
+                    
+                    <!-- Ticker Badge -->
+                    <div style='text-align: center; margin-bottom: 16px;'>
+                        <span style='background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; padding: 10px 24px; border-radius: 24px; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.4);'>${company.ticker}</span>
+                    </div>
+                    
+                    ${enrichedData && enrichedData.found ? `
+                    <!-- Confidence Badge -->
+                    <div style='text-align: center;'>
+                        <div style='display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 700; border: 2px solid rgba(16, 185, 129, 0.5);'>
+                            <i class='fas fa-check-circle'></i>
+                            <span>Verified by Google Knowledge Graph</span>
+                            <span style='background: rgba(255, 255, 255, 0.3); padding: 2px 8px; border-radius: 8px; font-size: 0.85rem;'>${enrichedData.metadata?.confidence?.toUpperCase() || 'HIGH'}</span>
+                        </div>
+                    </div>
                     ` : ''}
                 </div>
-            ` : ''}
-            
-            <!-- ✅ DÉTAILS PRINCIPAUX -->
-            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;'>
-                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #667eea;'>
-                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Sector</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${company.sector}</div>
-                </div>
-                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #10b981;'>
-                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Region</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${company.region}</div>
-                </div>
-                ${enrichedData && enrichedData.additionalInfo?.headquarters ? `
-                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #f59e0b;'>
-                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Headquarters</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.headquarters}</div>
-                </div>
-                ` : ''}
-                ${enrichedData && enrichedData.additionalInfo?.foundingDate ? `
-                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #8b5cf6;'>
-                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Founded</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.foundingDate}</div>
-                </div>
-                ` : ''}
-                ${enrichedData && enrichedData.additionalInfo?.industry ? `
-                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #ec4899;'>
-                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Industry</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.industry}</div>
-                </div>
-                ` : ''}
             </div>
             
-            ${enrichedData && (enrichedData.links?.officialWebsite || company.domain) ? `
-            <!-- ✅ LIEN SITE WEB -->
-            <div style='background: linear-gradient(135deg, #10b981, #059669); padding: 16px 24px; border-radius: 12px; margin-bottom: 24px;'>
-                <a href='${enrichedData.links?.officialWebsite || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
-                    <span style='display: flex; align-items: center; gap: 12px;'>
-                        <i class='fas fa-globe' style='font-size: 1.5rem;'></i>
-                        <span style='font-size: 1.1rem;'>Visit Official Website</span>
+            ${hasDescription ? `
+            <!-- ✨ DESCRIPTION SECTION -->
+            <div class='modal-section'>
+                <h4><i class='fas fa-info-circle'></i> About ${company.name}</h4>
+                <p style='color: var(--text-secondary); line-height: 1.8; font-size: 1rem; margin-bottom: 16px;'>${description}</p>
+                ${descriptionUrl ? `
+                    <a href='${descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 8px; color: #667eea; font-weight: 700; text-decoration: none; padding: 10px 20px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(102, 126, 234, 0.2)"; this.style.transform="translateX(4px)";' onmouseout='this.style.background="rgba(102, 126, 234, 0.1)"; this.style.transform="translateX(0)";'>
+                        <i class='fas fa-external-link-alt'></i>
+                        <span>Read more on Wikipedia</span>
+                    </a>
+                ` : ''}
+            </div>
+            ` : ''}
+            
+            <!-- ✨ BASIC INFO SECTION -->
+            <div class='modal-section'>
+                <h4><i class='fas fa-building'></i> Company Information</h4>
+                <div class='modal-detail-grid'>
+                    <div class='modal-detail-item' style='border-left-color: #667eea;'>
+                        <div class='detail-label'>Sector</div>
+                        <div class='detail-value'>${company.sector}</div>
+                    </div>
+                    <div class='modal-detail-item' style='border-left-color: #10b981;'>
+                        <div class='detail-label'>Region</div>
+                        <div class='detail-value'>${company.region}</div>
+                    </div>
+                    ${enrichedData?.classification?.primaryType ? `
+                    <div class='modal-detail-item' style='border-left-color: #f59e0b;'>
+                        <div class='detail-label'>Type</div>
+                        <div class='detail-value'>${enrichedData.classification.primaryType}</div>
+                    </div>
+                    ` : ''}
+                    ${enrichedData?.metadata?.resultScore ? `
+                    <div class='modal-detail-item' style='border-left-color: #8b5cf6;'>
+                        <div class='detail-label'>KG Score</div>
+                        <div class='detail-value'>${Math.round(enrichedData.metadata.resultScore).toLocaleString()}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            ${enrichedData && enrichedData.additionalInfo && Object.keys(enrichedData.additionalInfo).length > 0 ? `
+            <!-- ✨ DETAILED INFORMATION SECTION -->
+            <div class='modal-section' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));'>
+                <h4><i class='fas fa-database'></i> Detailed Information</h4>
+                <div class='modal-detail-grid'>
+                    ${enrichedData.additionalInfo.foundingDate ? `
+                    <div class='modal-detail-item' style='border-left-color: #3b82f6;'>
+                        <div class='detail-label'><i class='fas fa-calendar-alt' style='margin-right: 6px; color: #3b82f6;'></i>Founded</div>
+                        <div class='detail-value'>${enrichedData.additionalInfo.foundingDate}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.headquarters ? `
+                    <div class='modal-detail-item' style='border-left-color: #10b981;'>
+                        <div class='detail-label'><i class='fas fa-map-marker-alt' style='margin-right: 6px; color: #10b981;'></i>Headquarters</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.headquarters === 'object' ? JSON.stringify(enrichedData.additionalInfo.headquarters) : enrichedData.additionalInfo.headquarters}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.location ? `
+                    <div class='modal-detail-item' style='border-left-color: #14b8a6;'>
+                        <div class='detail-label'><i class='fas fa-location-dot' style='margin-right: 6px; color: #14b8a6;'></i>Location</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.location === 'object' ? JSON.stringify(enrichedData.additionalInfo.location) : enrichedData.additionalInfo.location}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.industry ? `
+                    <div class='modal-detail-item' style='border-left-color: #f59e0b;'>
+                        <div class='detail-label'><i class='fas fa-industry' style='margin-right: 6px; color: #f59e0b;'></i>Industry</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.industry === 'object' ? JSON.stringify(enrichedData.additionalInfo.industry) : enrichedData.additionalInfo.industry}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.numberOfEmployees ? `
+                    <div class='modal-detail-item' style='border-left-color: #8b5cf6;'>
+                        <div class='detail-label'><i class='fas fa-users' style='margin-right: 6px; color: #8b5cf6;'></i>Employees</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.numberOfEmployees === 'number' ? enrichedData.additionalInfo.numberOfEmployees.toLocaleString() : enrichedData.additionalInfo.numberOfEmployees}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.founder ? `
+                    <div class='modal-detail-item' style='border-left-color: #ec4899;'>
+                        <div class='detail-label'><i class='fas fa-user-tie' style='margin-right: 6px; color: #ec4899;'></i>Founder(s)</div>
+                        <div class='detail-value'>${Array.isArray(enrichedData.additionalInfo.founder) ? enrichedData.additionalInfo.founder.join(', ') : (typeof enrichedData.additionalInfo.founder === 'object' ? JSON.stringify(enrichedData.additionalInfo.founder) : enrichedData.additionalInfo.founder)}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.ceo ? `
+                    <div class='modal-detail-item' style='border-left-color: #06b6d4;'>
+                        <div class='detail-label'><i class='fas fa-crown' style='margin-right: 6px; color: #06b6d4;'></i>CEO</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.ceo === 'object' ? JSON.stringify(enrichedData.additionalInfo.ceo) : enrichedData.additionalInfo.ceo}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.stockSymbol || enrichedData.additionalInfo.tickerSymbol ? `
+                    <div class='modal-detail-item' style='border-left-color: #84cc16;'>
+                        <div class='detail-label'><i class='fas fa-chart-line' style='margin-right: 6px; color: #84cc16;'></i>Stock Symbol</div>
+                        <div class='detail-value'>${enrichedData.additionalInfo.stockSymbol || enrichedData.additionalInfo.tickerSymbol}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.stockExchange ? `
+                    <div class='modal-detail-item' style='border-left-color: #a855f7;'>
+                        <div class='detail-label'><i class='fas fa-building-columns' style='margin-right: 6px; color: #a855f7;'></i>Stock Exchange</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.stockExchange === 'object' ? JSON.stringify(enrichedData.additionalInfo.stockExchange) : enrichedData.additionalInfo.stockExchange}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.revenue ? `
+                    <div class='modal-detail-item' style='border-left-color: #22c55e;'>
+                        <div class='detail-label'><i class='fas fa-dollar-sign' style='margin-right: 6px; color: #22c55e;'></i>Revenue</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.revenue === 'object' ? JSON.stringify(enrichedData.additionalInfo.revenue) : enrichedData.additionalInfo.revenue}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.netIncome ? `
+                    <div class='modal-detail-item' style='border-left-color: #16a34a;'>
+                        <div class='detail-label'><i class='fas fa-coins' style='margin-right: 6px; color: #16a34a;'></i>Net Income</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.netIncome === 'object' ? JSON.stringify(enrichedData.additionalInfo.netIncome) : enrichedData.additionalInfo.netIncome}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.totalAssets ? `
+                    <div class='modal-detail-item' style='border-left-color: #0891b2;'>
+                        <div class='detail-label'><i class='fas fa-wallet' style='margin-right: 6px; color: #0891b2;'></i>Total Assets</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.totalAssets === 'object' ? JSON.stringify(enrichedData.additionalInfo.totalAssets) : enrichedData.additionalInfo.totalAssets}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.marketCap ? `
+                    <div class='modal-detail-item' style='border-left-color: #eab308;'>
+                        <div class='detail-label'><i class='fas fa-chart-pie' style='margin-right: 6px; color: #eab308;'></i>Market Cap</div>
+                        <div class='detail-value'>${typeof enrichedData.additionalInfo.marketCap === 'object' ? JSON.stringify(enrichedData.additionalInfo.marketCap) : enrichedData.additionalInfo.marketCap}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.website || enrichedData.additionalInfo.url ? `
+                    <div class='modal-detail-item' style='border-left-color: #6366f1;'>
+                        <div class='detail-label'><i class='fas fa-globe' style='margin-right: 6px; color: #6366f1;'></i>Website</div>
+                        <div class='detail-value' style='word-break: break-all;'>
+                            <a href='${enrichedData.additionalInfo.website || enrichedData.additionalInfo.url}' target='_blank' style='color: #667eea; text-decoration: none; font-weight: 700;'>${enrichedData.additionalInfo.website || enrichedData.additionalInfo.url}</a>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.telephone || enrichedData.additionalInfo.phone ? `
+                    <div class='modal-detail-item' style='border-left-color: #f43f5e;'>
+                        <div class='detail-label'><i class='fas fa-phone' style='margin-right: 6px; color: #f43f5e;'></i>Phone</div>
+                        <div class='detail-value'>${enrichedData.additionalInfo.telephone || enrichedData.additionalInfo.phone}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${enrichedData.additionalInfo.email ? `
+                    <div class='modal-detail-item' style='border-left-color: #fb923c;'>
+                        <div class='detail-label'><i class='fas fa-envelope' style='margin-right: 6px; color: #fb923c;'></i>Email</div>
+                        <div class='detail-value'>${enrichedData.additionalInfo.email}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+            
+            ${enrichedData?.links?.officialWebsite || company.domain ? `
+            <!-- ✨ OFFICIAL WEBSITE BUTTON -->
+            <div style='background: linear-gradient(135deg, #10b981, #059669); padding: 20px 28px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 12px 36px rgba(16, 185, 129, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 8px 24px rgba(16, 185, 129, 0.3)";'>
+                <a href='${enrichedData?.links?.officialWebsite || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
+                    <span style='display: flex; align-items: center; gap: 14px;'>
+                        <i class='fas fa-globe' style='font-size: 1.8rem;'></i>
+                        <span style='font-size: 1.15rem;'>Visit Official Website</span>
                     </span>
-                    <i class='fas fa-arrow-right'></i>
+                    <i class='fas fa-arrow-right' style='font-size: 1.3rem;'></i>
                 </a>
             </div>
             ` : ''}
             
-            <!-- ✅ ACTIONS -->
-            <div style='display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;'>
-                <a href='advanced-analysis.html?symbol=${company.ticker}' class='filter-btn' style='flex: 1; min-width: 200px; display: inline-flex; text-decoration: none; justify-content: center; background: linear-gradient(135deg, #667eea, #764ba2);'>
+            <!-- ✨ ACTIONS BUTTON -->
+            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;'>
+                <a href='advanced-analysis.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(102, 126, 234, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(102, 126, 234, 0.4)";'>
                     <i class='fas fa-chart-line'></i>
                     <span>Analyze ${company.ticker}</span>
                 </a>
-                <a href='trend-prediction.html?symbol=${company.ticker}' class='filter-btn' style='flex: 1; min-width: 200px; display: inline-flex; text-decoration: none; justify-content: center; background: linear-gradient(135deg, #10b981, #059669);'>
+                <a href='trend-prediction.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(59, 130, 246, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(59, 130, 246, 0.4)";'>
                     <i class='fas fa-brain'></i>
                     <span>Predict Trends</span>
                 </a>
             </div>
             
             ${enrichedData && enrichedData.found ? `
-            <!-- ✅ DATA SOURCE -->
-            <div style='margin-top: 24px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;'>
-                <div style='display: inline-flex; align-items: center; gap: 8px; color: #64748b; font-size: 0.85rem;'>
-                    <i class='fas fa-database'></i>
-                    <span>Data provided by Google Knowledge Graph</span>
+            <!-- ✨ DATA SOURCE & METADATA -->
+            <div style='margin-top: 32px; padding: 20px; background: rgba(241, 245, 249, 0.5); border-radius: 16px; border: 1px solid var(--glass-border);'>
+                <div style='display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;'>
+                    <div style='display: flex; align-items: center; gap: 10px;'>
+                        <i class='fas fa-database' style='color: #667eea; font-size: 1.2rem;'></i>
+                        <span style='color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;'>Data provided by Google Knowledge Graph API</span>
+                    </div>
+                    
+                    ${enrichedData.metadata?.knowledgeGraphId ? `
+                    <div style='display: flex; align-items: center; gap: 8px; background: rgba(102, 126, 234, 0.1); padding: 6px 14px; border-radius: 10px;'>
+                        <i class='fas fa-fingerprint' style='color: #667eea; font-size: 0.9rem;'></i>
+                        <span style='color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; font-family: monospace;'>${enrichedData.metadata.knowledgeGraphId}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${enrichedData.metadata?.totalResults > 1 ? `
+                <div style='margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border);'>
+                    <details style='cursor: pointer;'>
+                        <summary style='font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); user-select: none;'>
+                            <i class='fas fa-info-circle' style='margin-right: 6px; color: #3b82f6;'></i>
+                            Alternative Matches Found (${enrichedData.metadata.totalResults - 1})
+                        </summary>
+                        <div style='margin-top: 12px; display: flex; flex-direction: column; gap: 8px;'>
+                            ${enrichedData.metadata.alternativeMatches?.map(alt => `
+                                <div style='background: white; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #94a3b8;'>
+                                    <div style='font-weight: 700; color: var(--text-primary); font-size: 0.9rem;'>${alt.name}</div>
+                                    <div style='font-size: 0.75rem; color: var(--text-tertiary); margin-top: 4px;'>
+                                        Score: ${Math.round(alt.score)} | Type: ${alt.types?.[0] || 'Unknown'}
+                                    </div>
+                                </div>
+                            `).join('') || '<p style="color: var(--text-tertiary); font-size: 0.85rem;">No alternative matches available</p>'}
+                        </div>
+                    </details>
+                </div>
+                ` : ''}
+            </div>
+            ` : `
+            <!-- ⚠ NO ENRICHED DATA WARNING -->
+            <div style='margin-top: 24px; padding: 20px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; border-radius: 12px;'>
+                <div style='display: flex; align-items: center; gap: 12px;'>
+                    <i class='fas fa-exclamation-triangle' style='color: #f59e0b; font-size: 1.5rem;'></i>
+                    <div>
+                        <div style='font-weight: 800; color: var(--text-primary); margin-bottom: 4px;'>Limited Data Available</div>
+                        <div style='font-size: 0.9rem; color: var(--text-secondary);'>No additional information found in Google Knowledge Graph for this company.</div>
+                    </div>
                 </div>
             </div>
-            ` : ''}
+            `}
         `;
     }
     
