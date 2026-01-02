@@ -1281,13 +1281,3 @@ document.addEventListener('keydown', (e) => {
         CompaniesDirectory.closeModal();
     }
 });
-
-// ✅ Animation des stripes dans le modal header
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes moveStripes {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(50px, 50px); }
-    }
-`;
-document.head.appendChild(style);
