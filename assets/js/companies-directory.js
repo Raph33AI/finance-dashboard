@@ -912,6 +912,42 @@ class CompaniesDirectory {
             console.log(`⚠ Using text fallback: ${initials}`);
         }
     }
+
+    // ✅ GESTION ERREURS LOGOS (cascade d'APIs)
+    static handleLogoError(img, initials) {
+        const logoDiv = img.parentElement;
+        const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+        if (fallbacks.length > 0) {
+            const nextUrl = fallbacks.shift();
+            logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+            img.src = nextUrl;
+            console.log(`🔄 Trying fallback logo: ${nextUrl}`);
+        } else {
+            logoDiv.classList.add('text-fallback');
+            logoDiv.innerHTML = initials;
+            console.log(`⚠ Using text fallback: ${initials}`);
+        }
+    }
+    
+    // ✅ GESTION ERREURS LOGOS MODAL (même logique que la grille)
+    static handleModalLogoError(img, initials) {
+        const logoDiv = img.parentElement;
+        const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+        if (fallbacks.length > 0) {
+            const nextUrl = fallbacks.shift();
+            logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+            img.src = nextUrl;
+            console.log(`🔄 Modal: Trying fallback logo: ${nextUrl}`);
+        } else {
+            // Appliquer le style gradient pour le fallback texte
+            logoDiv.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            logoDiv.style.color = 'white';
+            logoDiv.innerHTML = `<div style='font-size: 2.5rem; font-weight: 900; color: white;'>${initials}</div>`;
+            console.log(`⚠ Modal: Using text fallback: ${initials}`);
+        }
+    }
     
     renderPagination() {
         const totalPages = Math.ceil(this.filteredCompanies.length / this.itemsPerPage);
@@ -1153,9 +1189,10 @@ class CompaniesDirectory {
         // ✅ Récupérer les données enrichies
         const enrichedData = await instance.fetchEnrichedData(company);
         
-        // ✅ Logo avec fallback
+        // ✅ Logo avec fallback (MÊME SYSTÈME QUE LA GRILLE)
         const initials = company.name.substring(0, 2).toUpperCase();
-        const logoUrl = enrichedData?.images?.primary || company.logoUrl;
+        const logoUrl = company.logoUrl; // Utiliser le logo de la grille
+        const logoFallbacks = company.logoFallbacks || [];
         
         // ✅ Description enrichie
         const hasDescription = enrichedData?.description?.detailed || enrichedData?.description?.short;
@@ -1170,10 +1207,10 @@ class CompaniesDirectory {
                 
                 <div style='position: relative; z-index: 1;'>
                     <!-- Logo -->
-                    <div style='width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); border: 3px solid rgba(255, 255, 255, 0.5);'>
+                    <div id='modalCompanyLogo' class='modal-company-logo' data-ticker='${company.ticker}' data-fallbacks='${JSON.stringify(logoFallbacks).replace(/'/g, '&apos;')}' data-initials='${initials}' style='width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); border: 3px solid rgba(255, 255, 255, 0.5); overflow: hidden;'>
                         ${logoUrl 
-                            ? `<img src='${logoUrl}' alt='${company.name}' style='max-width: 85%; max-height: 85%; object-fit: contain;' onerror='this.parentElement.innerHTML="${initials}"; this.parentElement.style.fontSize="2.5rem"; this.parentElement.style.fontWeight="900"; this.parentElement.style.color="#667eea"; this.parentElement.style.background="linear-gradient(135deg, #667eea, #764ba2)"; this.parentElement.style.webkitBackgroundClip="text"; this.parentElement.style.webkitTextFillColor="transparent";'>` 
-                            : `<div style='font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>${initials}</div>`
+                            ? `<img src='${logoUrl}' alt='${company.name}' style='width: 100%; height: 100%; object-fit: contain; padding: 12px; background: white; border-radius: 24px;' onerror='CompaniesDirectory.handleModalLogoError(this, "${initials}")'>` 
+                            : `<div style='font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${initials}</div>`
                         }
                     </div>
                     
