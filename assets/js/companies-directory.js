@@ -356,7 +356,127 @@ class CompaniesDirectory {
             'UPS': 'ups.com',
             'XPO': 'xpo.com',
             'JBHT': 'jbhunt.com',
-            'ODFL': 'odfl.com'
+            'ODFL': 'odfl.com',
+
+            // EUROPE - Tech
+            'SAP': 'sap.com',
+            'ASML': 'asml.com',
+            'ERIC': 'ericsson.com',
+            'NOK': 'nokia.com',
+            'STM': 'st.com',
+            
+            // Europe - Luxury
+            'LVMUY': 'lvmh.com',
+            'RMS.PA': 'hermes.com',
+            'KER.PA': 'kering.com',
+            'OR.PA': 'loreal.com',
+            'ADDYY': 'adidas.com',
+            'PMMAF': 'puma.com',
+            'ITX.MC': 'inditex.com',
+            'HNNMY': 'hm.com',
+            'BURBY': 'burberryplc.com',
+            'MONC.MI': 'moncler.com',
+            'CFRHF': 'richemont.com',
+            'SWGAY': 'swatchgroup.com',
+            'PANDY': 'pandoragroup.com',
+            
+            // Europe - Pharma
+            'NVO': 'novonordisk.com',
+            'RHHBY': 'roche.com',
+            'NVS': 'novartis.com',
+            'SNY': 'sanofi.com',
+            'AZN': 'astrazeneca.com',
+            'GSK': 'gsk.com',
+            'BAYRY': 'bayer.com',
+            'SMMNY': 'siemens-healthineers.com',
+            'FSNUY': 'fresenius.com',
+            'PHG': 'philips.com',
+            'LZAGY': 'lonza.com',
+            'GRFS': 'grifols.com',
+            
+            // Europe - Consumer
+            'CA.PA': 'carrefour.com',
+            'TSCDY': 'tesco.com',
+            'SBRY.L': 'sainsburys.co.uk',
+            'AD.AS': 'aholddelhaize.com',
+            'MKS.L': 'marksandspencer.com',
+            
+            // Europe - Food & Beverage
+            'NSRGY': 'nestle.com',
+            'DANOY': 'danone.com',
+            'UL': 'unilever.com',
+            'DEO': 'diageo.com',
+            'HEINY': 'heineken.com',
+            'CABGY': 'carlsberg.com',
+            'BUD': 'ab-inbev.com',
+            'PDRDY': 'pernod-ricard.com',
+            
+            // Europe - Energy
+            'SHEL': 'shell.com',
+            'BP': 'bp.com',
+            'TTE': 'totalenergies.com',
+            'EQNR': 'equinor.com',
+            'E': 'eni.com',
+            
+            // Europe - Industrials
+            'SIEGY': 'siemens.com',
+            'ABB': 'abb.com',
+            'EADSY': 'airbus.com',
+            'RYCEY': 'rolls-royce.com',
+            'BAESY': 'baesystems.com',
+            
+            // Europe - Automotive
+            'VWAGY': 'volkswagenag.com',
+            'BMWYY': 'bmwgroup.com',
+            'MBGAF': 'mercedes-benz.com',
+            'RACE': 'ferrari.com',
+            'STLA': 'stellantis.com',
+            
+            // Europe - Telecom
+            'VOD': 'vodafone.com',
+            'ORAN': 'orange.com',
+            'DTEGY': 'telekom.com',
+            
+            // Europe - Banking
+            'HSBC': 'hsbc.com',
+            'BCS': 'barclays.com',
+            'DB': 'db.com',
+            'UBS': 'ubs.com',
+            'ING': 'ing.com',
+            'SAN': 'santander.com',
+            'BBVA': 'bbva.com',
+            
+            // ASIE - Tech
+            'BABA': 'alibaba.com',
+            'TCEHY': 'tencent.com',
+            'SSNLF': 'samsung.com',
+            'TSM': 'tsmc.com',
+            'SONY': 'sony.com',
+            'BIDU': 'baidu.com',
+            'JD': 'jd.com',
+            'NIO': 'nio.com',
+            'SFTBY': 'softbank.jp',
+            'NTDOY': 'nintendo.com',
+            'INFY': 'infosys.com',
+            'WIT': 'wipro.com',
+            
+            // Asie - Finance
+            'HDB': 'hdfcbank.com',
+            'IBN': 'icicibank.com',
+            'MUFG': 'mufg.jp',
+            
+            // Asie - Automotive
+            'TM': 'toyota.com',
+            'HMC': 'honda.com',
+            'NSANY': 'nissan-global.com',
+            'HYMTF': 'hyundai.com',
+            
+            // Crypto
+            'BTC-USD': 'bitcoin.org',
+            'ETH-USD': 'ethereum.org',
+            'MARA': 'marathondh.com',
+            'RIOT': 'riotplatforms.com',
+            'MSTR': 'microstrategy.com'
         };
     }
     
@@ -916,132 +1036,6 @@ class CompaniesDirectory {
         document.getElementById('companyModal').classList.remove('active');
     }
 }
-
-// ✅ CONTINUATION DU MAPPING DOMAINES (Europe + Asie)
-// Ajoutez ces lignes dans buildCompleteDomainMapping() après les domaines USA
-
-// Dans la fonction buildCompleteDomainMapping(), continuez avec :
-/*
-            // EUROPE - Tech
-            'SAP': 'sap.com',
-            'ASML': 'asml.com',
-            'ERIC': 'ericsson.com',
-            'NOK': 'nokia.com',
-            'STM': 'st.com',
-            
-            // Europe - Luxury
-            'LVMUY': 'lvmh.com',
-            'RMS.PA': 'hermes.com',
-            'KER.PA': 'kering.com',
-            'OR.PA': 'loreal.com',
-            'ADDYY': 'adidas.com',
-            'PMMAF': 'puma.com',
-            'ITX.MC': 'inditex.com',
-            'HNNMY': 'hm.com',
-            'BURBY': 'burberryplc.com',
-            'MONC.MI': 'moncler.com',
-            'CFRHF': 'richemont.com',
-            'SWGAY': 'swatchgroup.com',
-            'PANDY': 'pandoragroup.com',
-            
-            // Europe - Pharma
-            'NVO': 'novonordisk.com',
-            'RHHBY': 'roche.com',
-            'NVS': 'novartis.com',
-            'SNY': 'sanofi.com',
-            'AZN': 'astrazeneca.com',
-            'GSK': 'gsk.com',
-            'BAYRY': 'bayer.com',
-            'SMMNY': 'siemens-healthineers.com',
-            'FSNUY': 'fresenius.com',
-            'PHG': 'philips.com',
-            'LZAGY': 'lonza.com',
-            'GRFS': 'grifols.com',
-            
-            // Europe - Consumer
-            'CA.PA': 'carrefour.com',
-            'TSCDY': 'tesco.com',
-            'SBRY.L': 'sainsburys.co.uk',
-            'AD.AS': 'aholddelhaize.com',
-            'MKS.L': 'marksandspencer.com',
-            
-            // Europe - Food & Beverage
-            'NSRGY': 'nestle.com',
-            'DANOY': 'danone.com',
-            'UL': 'unilever.com',
-            'DEO': 'diageo.com',
-            'HEINY': 'heineken.com',
-            'CABGY': 'carlsberg.com',
-            'BUD': 'ab-inbev.com',
-            'PDRDY': 'pernod-ricard.com',
-            
-            // Europe - Energy
-            'SHEL': 'shell.com',
-            'BP': 'bp.com',
-            'TTE': 'totalenergies.com',
-            'EQNR': 'equinor.com',
-            'E': 'eni.com',
-            
-            // Europe - Industrials
-            'SIEGY': 'siemens.com',
-            'ABB': 'abb.com',
-            'EADSY': 'airbus.com',
-            'RYCEY': 'rolls-royce.com',
-            'BAESY': 'baesystems.com',
-            
-            // Europe - Automotive
-            'VWAGY': 'volkswagenag.com',
-            'BMWYY': 'bmwgroup.com',
-            'MBGAF': 'mercedes-benz.com',
-            'RACE': 'ferrari.com',
-            'STLA': 'stellantis.com',
-            
-            // Europe - Telecom
-            'VOD': 'vodafone.com',
-            'ORAN': 'orange.com',
-            'DTEGY': 'telekom.com',
-            
-            // Europe - Banking
-            'HSBC': 'hsbc.com',
-            'BCS': 'barclays.com',
-            'DB': 'db.com',
-            'UBS': 'ubs.com',
-            'ING': 'ing.com',
-            'SAN': 'santander.com',
-            'BBVA': 'bbva.com',
-            
-            // ASIE - Tech
-            'BABA': 'alibaba.com',
-            'TCEHY': 'tencent.com',
-            'SSNLF': 'samsung.com',
-            'TSM': 'tsmc.com',
-            'SONY': 'sony.com',
-            'BIDU': 'baidu.com',
-            'JD': 'jd.com',
-            'NIO': 'nio.com',
-            'SFTBY': 'softbank.jp',
-            'NTDOY': 'nintendo.com',
-            'INFY': 'infosys.com',
-            'WIT': 'wipro.com',
-            
-            // Asie - Finance
-            'HDB': 'hdfcbank.com',
-            'IBN': 'icicibank.com',
-            'MUFG': 'mufg.jp',
-            
-            // Asie - Automotive
-            'TM': 'toyota.com',
-            'HMC': 'honda.com',
-            'NSANY': 'nissan-global.com',
-            'HYMTF': 'hyundai.com',
-            
-            // Crypto
-            'BTC-USD': 'bitcoin.org',
-            'ETH-USD': 'ethereum.org',
-            'MARA': 'marathondh.com',
-            'RIOT': 'riotplatforms.com',
-            'MSTR': 'microstrategy.com'
-*/
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
