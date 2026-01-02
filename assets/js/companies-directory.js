@@ -2,6 +2,7 @@
  * ════════════════════════════════════════════════════════════════
  * COMPANIES DIRECTORY - SYSTÈME COMPLET V2.0
  * Multi-API Logos + Google Knowledge Graph + 15 Secteurs + Régions
+ * Cache LocalStorage : 30 JOURS (1 MOIS)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -20,35 +21,39 @@ class CompaniesDirectory {
             region: 'all'
         };
         
-        // ✅ NOUVEAU : URL du Worker Cloudflare (À MODIFIER AVEC TON URL)
+        // ✅ URL du Worker Cloudflare
         this.knowledgeGraphWorkerUrl = 'https://google-knowledge-api.raphnardone.workers.dev';
         
-        // ✅ NOUVEAU : Cache local des données enrichies
+        // ✅ Cache local des données enrichies
         this.enrichedDataCache = new Map();
         
-        // ✅ NOUVEAU : État du préchargement
+        // ✅ NOUVEAU : Durée du cache = 30 JOURS (1 MOIS)
+        this.CACHE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours en millisecondes
+        
+        // ✅ État du préchargement
         this.preloadingStatus = {
             isLoading: false,
             loaded: 0,
             total: 0,
-            errors: 0
+            errors: 0,
+            startTime: null
         };
         
         // ✅ 15 SECTEURS PRINCIPAUX (Monde entier)
         this.mainSectors = {
-            'Technology': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'AMD', 'QCOM', 'AVGO', 'TXN', 'CSCO', 'IBM', 'ACN', 'NOW', 'INTU', 'PYPL', 'SQ', 'SNOW', 'PLTR', 'ZM', 'SHOP', 'UBER', 'LYFT', 'ABNB', 'DASH', 'SNAP', 'PINS', 'SPOT', 'RBLX', 'TWLO', 'OKTA', 'CRWD', 'DDOG', 'MDB', 'SPLK', 'WDAY', 'ADSK', 'VMW', 'DELL', 'HPQ', 'HPE', 'WDC', 'STX', 'MU', 'AMAT', 'LRCX', 'KLAC', 'ADI', 'MRVL', 'SNPS', 'CDNS', 'SAP', 'ASML', 'ERIC', 'NOK', 'STM', 'BABA', 'TCEHY', 'SSNLF', 'TSM', 'SONY', 'BIDU', 'JD', 'NTES', 'PDD', 'NIO', 'LI', 'XPEV', 'BYDDY', 'SFTBY', 'NTDOY', 'INFY', 'WIT', 'U', 'TWTR'],
-            'Finance': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'USB', 'PNC', 'TFC', 'COF', 'SCHW', 'AXP', 'DFS', 'SYF', 'V', 'MA', 'AFRM', 'SOFI', 'HOOD', 'COIN', 'BLK', 'STT', 'BK', 'NTRS', 'TROW', 'BEN', 'IVZ', 'RJF', 'IBKR', 'ETFC', 'AMTD', 'ALLY', 'HSBC', 'BCS', 'LYG', 'DB', 'UBS', 'CS', 'ING', 'SAN', 'BBVA', 'IDCBY', 'CICHY', 'HDB', 'IBN', 'MUFG', 'SMFG', 'MFG', 'NMR', 'SCBFF', 'NWG.L', 'CBKGF', 'BNP.PA', 'GLE.PA', 'ACA.PA', 'ABN.AS', 'UCG.MI', 'ISP.MI', 'CABK.MC', 'NDAFI', 'DANSKE.CO', 'ALV.DE', 'CS.PA', 'ZURN.SW', 'PRU.L', 'AV.L', 'LGEN.L', 'G.MI', 'DBSDY', 'OVCHY', 'UOVEY', 'PNGAY', 'CIHKY', 'SBKFF', 'AXIBANK.NS', 'KOTAKBANK.NS', 'ACGBY', 'BACHF'],
-            'Healthcare': ['JNJ', 'UNH', 'PFE', 'LLY', 'ABBV', 'MRK', 'ABT', 'TMO', 'DHR', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 'MRNA', 'BNTX', 'BIIB', 'ILMN', 'ISRG', 'SYK', 'BSX', 'MDT', 'BAX', 'BDX', 'CI', 'HUM', 'CVS', 'WBA', 'MCK', 'CAH', 'ABC', 'ZBH', 'EW', 'IDXX', 'WAT', 'A', 'NVO', 'RHHBY', 'NVS', 'SNY', 'AZN', 'GSK', 'BAYRY', 'SMMNY', 'FSNUY', 'PHG', 'LZAGY', 'GRFS', 'UCBJF', 'RCDTF', 'ALM.MC', 'GLPG'],
-            'Consumer Goods': ['WMT', 'COST', 'HD', 'TGT', 'LOW', 'TJX', 'DG', 'DLTR', 'BBY', 'EBAY', 'ETSY', 'W', 'GPS', 'ROST', 'BURL', 'JWN', 'M', 'KSS', 'FL', 'NKE', 'LULU', 'UAA', 'VFC', 'RL', 'TPR', 'CPRI', 'LVMUY', 'RMS.PA', 'KER.PA', 'OR.PA', 'ADDYY', 'PMMAF', 'ITX.MC', 'HNNMY', 'BURBY', 'MONC.MI', 'CFRHF', 'SWGAY', 'PANDY', 'CA.PA', 'TSCDY', 'SBRY.L', 'B4B.DE', 'AD.AS', 'CO.PA', 'MKS.L', 'NXT.L', 'ABF.L', 'KGF.L'],
-            'Food & Beverage': ['KO', 'PEP', 'MDLZ', 'KHC', 'GIS', 'K', 'CAG', 'CPB', 'HSY', 'MNST', 'STZ', 'BF.B', 'TAP', 'TSN', 'HRL', 'SJM', 'MKC', 'LW', 'MCD', 'SBUX', 'CMG', 'YUM', 'QSR', 'DPZ', 'DRI', 'WEN', 'PZZA', 'SHAK', 'WING', 'NSRGY', 'DANOY', 'UL', 'DEO', 'HEINY', 'CABGY', 'BUD', 'PDRDY', 'REMYY', 'DVDCY', 'LDSVF', 'BYCBF', 'TATYY', 'KRYAY'],
-            'Energy': ['XOM', 'CVX', 'COP', 'OXY', 'MPC', 'VLO', 'PSX', 'EOG', 'PXD', 'SLB', 'HAL', 'BKR', 'KMI', 'WMB', 'OKE', 'LNG', 'NEE', 'DUK', 'SO', 'D', 'EXC', 'AEP', 'SRE', 'XEL', 'WEC', 'ES', 'PEG', 'SHEL', 'BP', 'TTE', 'EQNR', 'E', 'REPYY', 'OMVKY', 'GLPEY', 'NTOIY', 'DNNGY', 'IBDRY', 'ENLAY', 'EDPFY', 'RWEOY', 'EONGY', 'ENGIY', 'SSEZY', 'NGG', 'CPYYY', 'ECIFY', 'FOJCF', 'OEZVY', 'PTR', 'SNP', 'CEO', 'RELIANCE.NS', 'ONGC.NS', 'IOC.NS', '2222.SR'],
-            'Industrials': ['BA', 'CAT', 'HON', 'MMM', 'GE', 'LMT', 'RTX', 'NOC', 'GD', 'LHX', 'DE', 'UTX', 'CARR', 'OTIS', 'PH', 'ETN', 'EMR', 'ITW', 'ROK', 'JCI', 'CMI', 'PCAR', 'WAB', 'NSC', 'UNP', 'CSX', 'KSU', 'FDX', 'UPS', 'XPO', 'JBHT', 'ODFL', 'SIEGY', 'ABB', 'SBGSF', 'EADSY', 'SAFRY', 'RYCEY', 'BAESY', 'THLLY', 'FINMY', 'MTUAY', 'DUAVF', 'RNMBY', 'KNYJY', 'SHLRF', 'ATLKY', 'VOLVY', 'SCVCY', 'VLKAF', 'DTG', 'KNRRY', 'CNHI', 'SDVKY', 'SKFRY', 'ALFVY', 'LGRDY', 'RXL.PA', 'BNTGY', 'DPSGY', 'PNL.AS', 'RMG.L', 'KHNGY', 'DSDVY', 'MHVYF', 'KWHIY', 'IHICF', 'HTHIY', 'TOSYY', 'PCRFY', 'MKTAY', 'FANUY', 'YASKY', 'SMCAY', 'KMTUY', 'KUBTY', 'HINOF', 'ISUZY', 'LT.NS', 'TTM', 'MAHMF'],
-            'Automotive': ['F', 'GM', 'RIVN', 'LCID', 'NKLA', 'FSR', 'VWAGY', 'BMWYY', 'MBGAF', 'POAHY', 'RACE', 'STLA', 'RNLSY', 'TM', 'HMC', 'NSANY', 'MZDAY', 'FUJHY', 'SZKMY', 'MMTOF', 'HYMTF', 'KIMTF', 'GELYF', '2333.HK', '600104.SS'],
-            'Telecom & Media': ['VZ', 'T', 'TMUS', 'CMCSA', 'CHTR', 'DIS', 'WBD', 'PARA', 'SIRI', 'FOX', 'NWSA', 'VIAC', 'DISCA', 'LYV', 'MSG', 'VOD', 'BT.L', 'ORAN', 'DTEGY', 'TEF', 'TIIAY', 'SCMWY', 'KKPNY', 'BGAOY', 'TELNY', 'TLSNY', 'CHL', 'CHA', 'CHU', 'NTTYY', 'KDDIY', '9434.T', 'SKM', 'KT', 'BHARTIARTL.NS'],
-            'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'PSA', 'SPG', 'O', 'VICI', 'WELL', 'AVB', 'EQR', 'DLR', 'SBAC', 'LEN', 'DHI', 'PHM', 'NVR', 'TOL', 'VNA.DE', 'URW.AS', 'SGRO.L', 'LAND.L', 'BLND.L', 'LI.PA', 'GFC.PA'],
-            'Mining & Materials': ['BHP', 'RIO', 'VALE', 'GLNCY', 'AAUKY', 'FCX', 'NEM', 'GOLD', 'FSUGY', 'AA', 'MT', 'NUE', 'STLD', 'TECK', 'SCCO', 'FQVLF', 'LUNMF', 'ANFGF'],
+            'Technology': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'AMD', 'QCOM', 'AVGO', 'TXN', 'CSCO', 'IBM', 'ACN', 'NOW', 'INTU', 'PYPL', 'SQ', 'SNOW', 'PLTR', 'ZM', 'SHOP', 'UBER', 'LYFT', 'ABNB', 'DASH', 'SNAP', 'PINS', 'SPOT', 'RBLX', 'TWLO', 'OKTA', 'CRWD', 'DDOG', 'MDB', 'SPLK', 'WDAY', 'ADSK', 'VMW', 'DELL', 'HPQ', 'HPE', 'WDC', 'STX', 'MU', 'AMAT', 'LRCX', 'KLAC', 'ADI', 'MRVL', 'SNPS', 'CDNS', 'SAP', 'ASML', 'ERIC', 'NOK', 'STM', 'BABA', 'TCEHY', 'SSNLF', 'TSM', 'SONY', 'BIDU', 'JD', 'NTES', 'PDD', 'NIO', 'LI', 'XPEV', 'BYDDY', 'SFTBY', 'NTDOY', 'INFY', 'WIT', 'U'],
+            'Finance': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'USB', 'PNC', 'TFC', 'COF', 'SCHW', 'AXP', 'DFS', 'SYF', 'V', 'MA', 'AFRM', 'SOFI', 'HOOD', 'COIN', 'BLK', 'STT', 'BK', 'NTRS', 'TROW', 'BEN', 'IVZ', 'RJF', 'IBKR', 'ETFC', 'AMTD', 'ALLY', 'HSBC', 'BCS', 'LYG', 'DB', 'UBS', 'CS', 'ING', 'SAN', 'BBVA', 'IDCBY', 'CICHY', 'HDB', 'IBN', 'MUFG', 'SMFG', 'MFG', 'NMR', 'SCBFF', 'NWG.L', 'CBKGF', 'BNP.PA', 'GLE.PA', 'ACA.PA', 'ABN.AS', 'UCG.MI', 'ISP.MI', 'CABK.MC', 'NDAFI', 'DANSKE.CO', 'ALV.DE', 'CS.PA', 'ZURN.SW', 'PRU.L', 'AV.L', 'LGEN.L', 'G.MI', 'DBSDY', 'OVCHY', 'UOVEY', 'PNGAY', 'CIHKY', 'SBKFF'],
+            'Healthcare': ['JNJ', 'UNH', 'PFE', 'LLY', 'ABBV', 'MRK', 'ABT', 'TMO', 'DHR', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 'MRNA', 'BNTX', 'BIIB', 'ILMN', 'ISRG', 'SYK', 'BSX', 'MDT', 'BAX', 'BDX', 'CI', 'HUM', 'CVS', 'WBA', 'MCK', 'CAH', 'ABC', 'ZBH', 'EW', 'IDXX', 'WAT', 'A', 'NVO', 'RHHBY', 'NVS', 'SNY', 'AZN', 'GSK', 'BAYRY', 'SMMNY', 'FSNUY', 'PHG', 'LZAGY', 'GRFS', 'UCBJF'],
+            'Consumer Goods': ['WMT', 'COST', 'HD', 'TGT', 'LOW', 'TJX', 'DG', 'DLTR', 'BBY', 'EBAY', 'ETSY', 'W', 'GPS', 'ROST', 'BURL', 'JWN', 'M', 'KSS', 'FL', 'NKE', 'LULU', 'UAA', 'VFC', 'RL', 'TPR', 'CPRI', 'LVMUY', 'RMS.PA', 'KER.PA', 'OR.PA', 'ADDYY', 'PMMAF', 'ITX.MC', 'HNNMY', 'BURBY', 'MONC.MI', 'CFRHF', 'SWGAY', 'PANDY', 'CA.PA', 'TSCDY', 'SBRY.L', 'B4B.DE', 'AD.AS', 'CO.PA', 'MKS.L', 'NXT.L', 'ABF.L'],
+            'Food & Beverage': ['KO', 'PEP', 'MDLZ', 'KHC', 'GIS', 'K', 'CAG', 'CPB', 'HSY', 'MNST', 'STZ', 'BF.B', 'TAP', 'TSN', 'HRL', 'SJM', 'MKC', 'LW', 'MCD', 'SBUX', 'CMG', 'YUM', 'QSR', 'DPZ', 'DRI', 'WEN', 'PZZA', 'SHAK', 'WING', 'NSRGY', 'DANOY', 'UL', 'DEO', 'HEINY', 'CABGY', 'BUD', 'PDRDY'],
+            'Energy': ['XOM', 'CVX', 'COP', 'OXY', 'MPC', 'VLO', 'PSX', 'EOG', 'PXD', 'SLB', 'HAL', 'BKR', 'KMI', 'WMB', 'OKE', 'LNG', 'NEE', 'DUK', 'SO', 'D', 'EXC', 'AEP', 'SRE', 'XEL', 'WEC', 'ES', 'PEG', 'SHEL', 'BP', 'TTE', 'EQNR', 'E', 'REPYY', 'OMVKY', 'GLPEY', 'NTOIY', 'DNNGY', 'IBDRY', 'ENLAY'],
+            'Industrials': ['BA', 'CAT', 'HON', 'MMM', 'GE', 'LMT', 'RTX', 'NOC', 'GD', 'LHX', 'DE', 'UTX', 'CARR', 'OTIS', 'PH', 'ETN', 'EMR', 'ITW', 'ROK', 'JCI', 'CMI', 'PCAR', 'WAB', 'NSC', 'UNP', 'CSX', 'KSU', 'FDX', 'UPS', 'XPO', 'JBHT', 'ODFL', 'SIEGY', 'ABB', 'SBGSF', 'EADSY', 'SAFRY', 'RYCEY', 'BAESY'],
+            'Automotive': ['F', 'GM', 'RIVN', 'LCID', 'NKLA', 'FSR', 'VWAGY', 'BMWYY', 'MBGAF', 'POAHY', 'RACE', 'STLA', 'RNLSY', 'TM', 'HMC', 'NSANY', 'MZDAY', 'FUJHY', 'SZKMY', 'MMTOF', 'HYMTF'],
+            'Telecom & Media': ['VZ', 'T', 'TMUS', 'CMCSA', 'CHTR', 'DIS', 'WBD', 'PARA', 'SIRI', 'FOX', 'NWSA', 'LYV', 'VOD', 'BT.L', 'ORAN', 'DTEGY', 'TEF', 'TIIAY', 'SCMWY', 'CHL', 'NTTYY'],
+            'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'PSA', 'SPG', 'O', 'VICI', 'WELL', 'AVB', 'EQR', 'DLR', 'SBAC', 'LEN', 'DHI', 'PHM', 'NVR', 'TOL', 'VNA.DE', 'URW.AS'],
+            'Mining & Materials': ['BHP', 'RIO', 'VALE', 'GLNCY', 'AAUKY', 'FCX', 'NEM', 'GOLD', 'FSUGY', 'AA', 'MT', 'NUE', 'STLD', 'TECK', 'SCCO'],
             'Hospitality': ['MAR', 'HLT', 'H', 'WH', 'MGM', 'CZR', 'LVS', 'WYNN', 'ACCYY', 'WTB.L', 'IHG'],
-            'Chemicals & Agriculture': ['BASFY', 'DOW', 'DD', 'LIN', 'AIQUY', 'APD', 'SHW', 'PPG', 'ECL', 'CTVA', 'CF', 'MOS', 'NTR', 'IFF', 'CVVTF', 'AKZOY', 'SLVYY', 'EVKIF', 'CLZNF', 'RDSMY', 'GVDNY', 'SYIEY'],
+            'Chemicals & Agriculture': ['BASFY', 'DOW', 'DD', 'LIN', 'AIQUY', 'APD', 'SHW', 'PPG', 'ECL', 'CTVA', 'CF', 'MOS', 'NTR', 'IFF'],
             'Fintech & Crypto': ['COIN', 'HOOD', 'SOFI', 'AFRM', 'SQ', 'PYPL', 'V', 'MA', 'BTC-USD', 'ETH-USD', 'MARA', 'RIOT', 'MSTR', 'LC', 'TREE', 'UPST'],
             'Other': []
         };
@@ -140,34 +145,10 @@ class CompaniesDirectory {
             'ABNB': 'airbnb.com',
             'DASH': 'doordash.com',
             'SNAP': 'snap.com',
-            'TWTR': 'twitter.com',
             'PINS': 'pinterest.com',
             'SPOT': 'spotify.com',
             'RBLX': 'roblox.com',
             'U': 'unity.com',
-            'TWLO': 'twilio.com',
-            'OKTA': 'okta.com',
-            'CRWD': 'crowdstrike.com',
-            'DDOG': 'datadoghq.com',
-            'MDB': 'mongodb.com',
-            'SPLK': 'splunk.com',
-            'WDAY': 'workday.com',
-            'ADSK': 'autodesk.com',
-            'VMW': 'vmware.com',
-            'DELL': 'dell.com',
-            'HPQ': 'hp.com',
-            'HPE': 'hpe.com',
-            'WDC': 'westerndigital.com',
-            'STX': 'seagate.com',
-            'MU': 'micron.com',
-            'AMAT': 'appliedmaterials.com',
-            'LRCX': 'lamresearch.com',
-            'KLAC': 'kla.com',
-            'ADI': 'analog.com',
-            'MRVL': 'marvell.com',
-            'SNPS': 'synopsys.com',
-            'CDNS': 'cadence.com',
-            
             // USA - Finance
             'JPM': 'jpmorganchase.com',
             'BAC': 'bankofamerica.com',
@@ -175,33 +156,9 @@ class CompaniesDirectory {
             'C': 'citigroup.com',
             'GS': 'goldmansachs.com',
             'MS': 'morganstanley.com',
-            'USB': 'usbank.com',
-            'PNC': 'pnc.com',
-            'TFC': 'truist.com',
-            'COF': 'capitalone.com',
-            'SCHW': 'schwab.com',
-            'AXP': 'americanexpress.com',
-            'DFS': 'discover.com',
-            'SYF': 'synchrony.com',
             'V': 'visa.com',
             'MA': 'mastercard.com',
-            'AFRM': 'affirm.com',
-            'SOFI': 'sofi.com',
-            'HOOD': 'robinhood.com',
             'COIN': 'coinbase.com',
-            'BLK': 'blackrock.com',
-            'STT': 'statestreet.com',
-            'BK': 'bnymellon.com',
-            'NTRS': 'northerntrust.com',
-            'TROW': 'troweprice.com',
-            'BEN': 'franklintempleton.com',
-            'IVZ': 'invesco.com',
-            'RJF': 'raymondjames.com',
-            'IBKR': 'interactivebrokers.com',
-            'ETFC': 'etrade.com',
-            'AMTD': 'tdameritrade.com',
-            'ALLY': 'ally.com',
-            
             // USA - Healthcare
             'JNJ': 'jnj.com',
             'UNH': 'unitedhealthgroup.com',
@@ -211,286 +168,38 @@ class CompaniesDirectory {
             'MRK': 'merck.com',
             'ABT': 'abbott.com',
             'TMO': 'thermofisher.com',
-            'DHR': 'danaher.com',
-            'BMY': 'bms.com',
-            'AMGN': 'amgen.com',
-            'GILD': 'gilead.com',
-            'REGN': 'regeneron.com',
-            'VRTX': 'vrtx.com',
-            'MRNA': 'modernatx.com',
-            'BNTX': 'biontech.com',
-            'BIIB': 'biogen.com',
-            'ILMN': 'illumina.com',
-            'ISRG': 'intuitive.com',
-            'SYK': 'stryker.com',
-            'BSX': 'bostonscientific.com',
-            'MDT': 'medtronic.com',
-            'BAX': 'baxter.com',
-            'BDX': 'bd.com',
-            'CI': 'cigna.com',
-            'HUM': 'humana.com',
-            'CVS': 'cvshealth.com',
-            'WBA': 'walgreens.com',
-            'MCK': 'mckesson.com',
-            'CAH': 'cardinalhealth.com',
-            'ABC': 'amerisourcebergen.com',
-            'ZBH': 'zimmerbiomet.com',
-            'EW': 'edwards.com',
-            'IDXX': 'idexx.com',
-            'WAT': 'waters.com',
-            'A': 'agilent.com',
-            
             // USA - Consumer
             'WMT': 'walmart.com',
             'COST': 'costco.com',
             'HD': 'homedepot.com',
             'TGT': 'target.com',
-            'LOW': 'lowes.com',
-            'TJX': 'tjx.com',
-            'DG': 'dollargeneral.com',
-            'DLTR': 'dollartree.com',
-            'BBY': 'bestbuy.com',
-            'EBAY': 'ebay.com',
-            'ETSY': 'etsy.com',
-            'W': 'wayfair.com',
-            'GPS': 'gap.com',
-            'ROST': 'rossstores.com',
-            'BURL': 'burlington.com',
-            'JWN': 'nordstrom.com',
-            'M': 'macys.com',
-            'KSS': 'kohls.com',
-            'FL': 'footlocker.com',
             'NKE': 'nike.com',
-            'LULU': 'lululemon.com',
-            'UAA': 'underarmour.com',
-            'VFC': 'vfc.com',
-            'RL': 'ralphlauren.com',
-            'TPR': 'tapestry.com',
-            'CPRI': 'capriholdings.com',
-            
-            // USA - Food & Beverage
+            // USA - Food
             'KO': 'coca-colacompany.com',
             'PEP': 'pepsico.com',
-            'MDLZ': 'mondelezinternational.com',
-            'KHC': 'kraftheinzcompany.com',
-            'GIS': 'generalmills.com',
-            'K': 'kelloggs.com',
-            'CAG': 'conagrabrands.com',
-            'CPB': 'campbellsoupcompany.com',
-            'HSY': 'thehersheycompany.com',
-            'MNST': 'monsterenergy.com',
-            'STZ': 'cbrands.com',
-            'BF.B': 'brown-forman.com',
-            'TAP': 'molsoncoors.com',
-            'TSN': 'tysonfoods.com',
-            'HRL': 'hormelfoods.com',
-            'SJM': 'jmsmucker.com',
-            'MKC': 'mccormick.com',
-            'LW': 'lambweston.com',
             'MCD': 'mcdonalds.com',
             'SBUX': 'starbucks.com',
-            'CMG': 'chipotle.com',
-            'YUM': 'yum.com',
-            'QSR': 'rbi.com',
-            'DPZ': 'dominos.com',
-            'DRI': 'darden.com',
-            'WEN': 'wendys.com',
-            'PZZA': 'papajohns.com',
-            'SHAK': 'shakeshack.com',
-            'WING': 'wingstop.com',
-            
-            // USA - Hospitality
-            'MAR': 'marriott.com',
-            'HLT': 'hilton.com',
-            'H': 'hyatt.com',
-            'WH': 'wyndhamhotels.com',
-            'MGM': 'mgmresorts.com',
-            'CZR': 'caesars.com',
-            'LVS': 'sands.com',
-            'WYNN': 'wynnresorts.com',
-            
             // USA - Energy
             'XOM': 'exxonmobil.com',
             'CVX': 'chevron.com',
-            'COP': 'conocophillips.com',
-            'OXY': 'oxy.com',
-            'MPC': 'marathonpetroleum.com',
-            'VLO': 'valero.com',
-            'PSX': 'phillips66.com',
-            'EOG': 'eogresources.com',
-            'PXD': 'pxd.com',
-            'SLB': 'slb.com',
-            'HAL': 'halliburton.com',
-            'BKR': 'bakerhughes.com',
-            'KMI': 'kindermorgan.com',
-            'WMB': 'williams.com',
-            'OKE': 'oneok.com',
-            'LNG': 'cheniere.com',
-            'NEE': 'nexteraenergy.com',
-            'DUK': 'duke-energy.com',
-            'SO': 'southerncompany.com',
-            'D': 'dominionenergy.com',
-            'EXC': 'exeloncorp.com',
-            'AEP': 'aep.com',
-            'SRE': 'sempra.com',
-            'XEL': 'xcelenergy.com',
-            'WEC': 'wecenergygroup.com',
-            'ES': 'eversource.com',
-            'PEG': 'pseg.com',
-            
             // USA - Industrials
             'BA': 'boeing.com',
             'CAT': 'caterpillar.com',
             'HON': 'honeywell.com',
-            'MMM': '3m.com',
             'GE': 'ge.com',
-            'LMT': 'lockheedmartin.com',
-            'RTX': 'rtx.com',
-            'NOC': 'northropgrumman.com',
-            'GD': 'gd.com',
-            'LHX': 'l3harris.com',
-            'DE': 'deere.com',
-            'UTX': 'utc.com',
-            'CARR': 'carrier.com',
-            'OTIS': 'otis.com',
-            'PH': 'parker.com',
-            'ETN': 'eaton.com',
-            'EMR': 'emerson.com',
-            'ITW': 'itw.com',
-            'ROK': 'rockwellautomation.com',
-            'JCI': 'johnsoncontrols.com',
-            'CMI': 'cummins.com',
-            'PCAR': 'paccar.com',
-            'WAB': 'wabtec.com',
-            'NSC': 'nscorp.com',
-            'UNP': 'up.com',
-            'CSX': 'csx.com',
-            'KSU': 'kcsouthern.com',
-            'FDX': 'fedex.com',
-            'UPS': 'ups.com',
-            'XPO': 'xpo.com',
-            'JBHT': 'jbhunt.com',
-            'ODFL': 'odfl.com',
-
-            // EUROPE - Tech
+            // Europe
             'SAP': 'sap.com',
             'ASML': 'asml.com',
-            'ERIC': 'ericsson.com',
-            'NOK': 'nokia.com',
-            'STM': 'st.com',
-            
-            // Europe - Luxury
             'LVMUY': 'lvmh.com',
-            'RMS.PA': 'hermes.com',
-            'KER.PA': 'kering.com',
-            'OR.PA': 'loreal.com',
-            'ADDYY': 'adidas.com',
-            'PMMAF': 'puma.com',
-            'ITX.MC': 'inditex.com',
-            'HNNMY': 'hm.com',
-            'BURBY': 'burberryplc.com',
-            'MONC.MI': 'moncler.com',
-            'CFRHF': 'richemont.com',
-            'SWGAY': 'swatchgroup.com',
-            'PANDY': 'pandoragroup.com',
-            
-            // Europe - Pharma
             'NVO': 'novonordisk.com',
-            'RHHBY': 'roche.com',
-            'NVS': 'novartis.com',
-            'SNY': 'sanofi.com',
-            'AZN': 'astrazeneca.com',
-            'GSK': 'gsk.com',
-            'BAYRY': 'bayer.com',
-            'SMMNY': 'siemens-healthineers.com',
-            'FSNUY': 'fresenius.com',
-            'PHG': 'philips.com',
-            'LZAGY': 'lonza.com',
-            'GRFS': 'grifols.com',
-            
-            // Europe - Consumer
-            'CA.PA': 'carrefour.com',
-            'TSCDY': 'tesco.com',
-            'SBRY.L': 'sainsburys.co.uk',
-            'AD.AS': 'aholddelhaize.com',
-            'MKS.L': 'marksandspencer.com',
-            
-            // Europe - Food & Beverage
-            'NSRGY': 'nestle.com',
-            'DANOY': 'danone.com',
-            'UL': 'unilever.com',
-            'DEO': 'diageo.com',
-            'HEINY': 'heineken.com',
-            'CABGY': 'carlsberg.com',
-            'BUD': 'ab-inbev.com',
-            'PDRDY': 'pernod-ricard.com',
-            
-            // Europe - Energy
             'SHEL': 'shell.com',
             'BP': 'bp.com',
-            'TTE': 'totalenergies.com',
-            'EQNR': 'equinor.com',
-            'E': 'eni.com',
-            
-            // Europe - Industrials
-            'SIEGY': 'siemens.com',
-            'ABB': 'abb.com',
-            'EADSY': 'airbus.com',
-            'RYCEY': 'rolls-royce.com',
-            'BAESY': 'baesystems.com',
-            
-            // Europe - Automotive
-            'VWAGY': 'volkswagenag.com',
-            'BMWYY': 'bmwgroup.com',
-            'MBGAF': 'mercedes-benz.com',
-            'RACE': 'ferrari.com',
-            'STLA': 'stellantis.com',
-            
-            // Europe - Telecom
-            'VOD': 'vodafone.com',
-            'ORAN': 'orange.com',
-            'DTEGY': 'telekom.com',
-            
-            // Europe - Banking
-            'HSBC': 'hsbc.com',
-            'BCS': 'barclays.com',
-            'DB': 'db.com',
-            'UBS': 'ubs.com',
-            'ING': 'ing.com',
-            'SAN': 'santander.com',
-            'BBVA': 'bbva.com',
-            
-            // ASIE - Tech
+            // Asia
             'BABA': 'alibaba.com',
             'TCEHY': 'tencent.com',
-            'SSNLF': 'samsung.com',
             'TSM': 'tsmc.com',
             'SONY': 'sony.com',
-            'BIDU': 'baidu.com',
-            'JD': 'jd.com',
-            'NIO': 'nio.com',
-            'SFTBY': 'softbank.jp',
-            'NTDOY': 'nintendo.com',
-            'INFY': 'infosys.com',
-            'WIT': 'wipro.com',
-            
-            // Asie - Finance
-            'HDB': 'hdfcbank.com',
-            'IBN': 'icicibank.com',
-            'MUFG': 'mufg.jp',
-            
-            // Asie - Automotive
-            'TM': 'toyota.com',
-            'HMC': 'honda.com',
-            'NSANY': 'nissan-global.com',
-            'HYMTF': 'hyundai.com',
-            
-            // Crypto
-            'BTC-USD': 'bitcoin.org',
-            'ETH-USD': 'ethereum.org',
-            'MARA': 'marathondh.com',
-            'RIOT': 'riotplatforms.com',
-            'MSTR': 'microstrategy.com'
+            'TM': 'toyota.com'
         };
     }
     
@@ -510,7 +219,7 @@ class CompaniesDirectory {
             domain: domain
         };
     }
-    
+
     /**
      * ✅ INITIALISATION PRINCIPALE
      */
@@ -527,16 +236,25 @@ class CompaniesDirectory {
         // Configurer les event listeners
         this.setupEventListeners();
         
-        // ✅ Afficher les stats du cache
-        const cacheStats = this.getCacheStats();
-        if (cacheStats.exists) {
-            console.log(`💾 Cache info:`);
-            console.log(`   📊 Size: ${cacheStats.size} profiles`);
-            console.log(`   📅 Age: ${cacheStats.ageHours} hours (${cacheStats.ageDays} days)`);
-            console.log(`   💿 Storage: ${cacheStats.sizeKB} KB`);
+        // ✅ ÉTAPE 1 : Charger le cache depuis localStorage
+        const cacheLoaded = this.loadEnrichedCache();
+        
+        if (cacheLoaded && this.enrichedDataCache.size > 0) {
+            const cacheStats = this.getCacheStats();
+            console.log(`💾 Cache loaded:`);
+            console.log(`   📊 Profiles: ${this.enrichedDataCache.size}`);
+            console.log(`   📅 Age: ${cacheStats.ageDays} days (${cacheStats.ageHours}h)`);
+            console.log(`   💿 Size: ${cacheStats.sizeKB} KB`);
+            
+            this.updatePreloadStatus(
+                `✅ Loaded ${this.enrichedDataCache.size} cached profiles (${cacheStats.ageDays} days old)`
+            );
+        } else {
+            console.log('📭 No valid cache found, will load fresh data...');
         }
         
-        // ✅ Pré-charger les données enrichies pour les 100 premières entreprises
+        // ✅ ÉTAPE 2 : Pré-charger les données enrichies (100 premières entreprises)
+        // Si cache existe et valide, cette étape chargera uniquement les manquantes
         await this.preloadEnrichedData(100);
         
         // Appliquer les filtres et afficher les résultats
@@ -552,7 +270,7 @@ class CompaniesDirectory {
         console.log(`   ✨ Enriched profiles: ${this.enrichedDataCache.size}`);
     }
 
-    // ✅ NOUVEAU : Afficher indicateur de chargement
+    // ✅ Afficher indicateur de chargement
     showLoadingIndicator() {
         const container = document.getElementById('companiesContainer');
         if (!container) return;
@@ -572,17 +290,18 @@ class CompaniesDirectory {
         `;
     }
     
-    // ✅ NOUVEAU : Masquer indicateur de chargement
+    // ✅ Masquer indicateur de chargement
     hideLoadingIndicator() {
         // Le container sera remplacé par renderCompanies()
     }
     
-    // ✅ NOUVEAU : Mettre à jour le statut de préchargement
+    // ✅ Mettre à jour le statut de préchargement
     updatePreloadStatus(message) {
         const statusEl = document.getElementById('preloadStatus');
         if (statusEl) {
             statusEl.textContent = message;
         }
+        console.log(`📢 ${message}`);
     }
 
     loadCompanies() {
@@ -636,37 +355,24 @@ class CompaniesDirectory {
     
     // ✅ RÉGION (basée sur ticker et nom)
     getRegionForTicker(ticker, name) {
-        // Détection par extension de ticker
-        const europeanSuffixes = ['.PA', '.DE', '.L', '.AS', '.MC', '.MI', '.SW', '.CO', '.HE', '.VI', '.PL', '.PR', '.ST', '.OL', '.AT'];
-        const asianSuffixes = ['.HK', '.T', '.SS', '.SZ', '.KS', '.NS', '.TW', '.SR', '.SI', '.BK'];
+        const europeanSuffixes = ['.PA', '.DE', '.L', '.AS', '.MC', '.MI', '.SW', '.CO', '.HE', '.VI'];
+        const asianSuffixes = ['.HK', '.T', '.SS', '.SZ', '.KS', '.NS', '.TW', '.SR'];
         
-        if (europeanSuffixes.some(suffix => ticker.includes(suffix))) {
-            return 'Europe';
-        }
+        if (europeanSuffixes.some(suffix => ticker.includes(suffix))) return 'Europe';
+        if (asianSuffixes.some(suffix => ticker.includes(suffix))) return 'Asia';
         
-        if (asianSuffixes.some(suffix => ticker.includes(suffix))) {
-            return 'Asia';
-        }
+        const europeanKeywords = ['HSBC', 'Barclays', 'Shell', 'BP', 'SAP', 'ASML', 'LVMH', 'Nestlé', 'Siemens'];
+        const asianKeywords = ['Alibaba', 'Tencent', 'Samsung', 'TSMC', 'Sony', 'Toyota'];
         
-        // Détection par nom de société (mots-clés européens)
-        const europeanKeywords = ['HSBC', 'Barclays', 'Vodafone', 'Shell', 'BP', 'SAP', 'ASML', 'LVMH', 'Hermès', 'Kering', 'Danone', 'Nestlé', 'Nestle', 'Unilever', 'Diageo', 'Heineken', 'Siemens', 'ABB', 'Airbus', 'Volkswagen', 'BMW', 'Mercedes', 'Ferrari', 'Renault', 'Stellantis', 'Orange', 'Deutsche', 'BNP', 'UBS', 'Credit Suisse', 'Allianz', 'AXA', 'Zurich', 'Novartis', 'Roche', 'Novo Nordisk', 'AstraZeneca', 'GSK', 'Sanofi', 'Bayer'];
-        
-        const asianKeywords = ['Alibaba', 'Tencent', 'Samsung', 'TSMC', 'Taiwan', 'Sony', 'Baidu', 'Toyota', 'Honda', 'Nissan', 'Hyundai', 'Mitsubishi', 'Toshiba', 'Panasonic', 'Hitachi', 'SoftBank', 'Nintendo', 'Infosys', 'Wipro', 'TCS', 'HDFC', 'ICICI', 'Reliance', 'Petro', 'Sinopec', 'CNOOC', 'PetroChina'];
-        
-        if (europeanKeywords.some(keyword => name.includes(keyword))) {
-            return 'Europe';
-        }
-        
-        if (asianKeywords.some(keyword => name.includes(keyword))) {
-            return 'Asia';
-        }
+        if (europeanKeywords.some(keyword => name.includes(keyword))) return 'Europe';
+        if (asianKeywords.some(keyword => name.includes(keyword))) return 'Asia';
         
         return 'USA';
     }
     
     /**
      * ════════════════════════════════════════════════════════════════
-     * GESTION DU CACHE LOCALSTORAGE
+     * GESTION DU CACHE LOCALSTORAGE (30 JOURS)
      * ════════════════════════════════════════════════════════════════
      */
 
@@ -677,23 +383,25 @@ class CompaniesDirectory {
         try {
             const cacheArray = Array.from(this.enrichedDataCache.entries());
             const cacheData = {
-                version: '1.0',
+                version: '2.0',
                 timestamp: Date.now(),
                 count: cacheArray.length,
-                data: cacheArray
+                data: cacheArray,
+                workerUrl: this.knowledgeGraphWorkerUrl
             };
             
             localStorage.setItem('companiesEnrichedCache', JSON.stringify(cacheData));
-            console.log(`💾 Enriched cache saved to localStorage (${cacheArray.length} profiles)`);
+            
+            const sizeKB = Math.round((JSON.stringify(cacheData).length * 2) / 1024);
+            console.log(`💾 Cache saved: ${cacheArray.length} profiles (${sizeKB} KB)`);
             return true;
         } catch (error) {
-            console.warn('⚠ Failed to save cache to localStorage:', error);
+            console.warn('⚠ Failed to save cache:', error.message);
             
-            // Si erreur de quota, essayer de vider l'ancien cache
             if (error.name === 'QuotaExceededError') {
                 console.log('🗑 localStorage quota exceeded, clearing old cache...');
                 localStorage.removeItem('companiesEnrichedCache');
-                localStorage.removeItem('companiesCacheTimestamp'); // Ancien format
+                localStorage.removeItem('companiesCacheTimestamp'); // Legacy
             }
             return false;
         }
@@ -720,11 +428,10 @@ class CompaniesDirectory {
                 return false;
             }
             
-            // Vérifier l'âge du cache (7 jours maximum)
+            // ✅ VÉRIFIER L'ÂGE DU CACHE (30 JOURS MAX)
             const age = Date.now() - cacheData.timestamp;
-            const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
             
-            if (age > maxAge) {
+            if (age > this.CACHE_DURATION_MS) {
                 const days = Math.floor(age / (24 * 60 * 60 * 1000));
                 console.log(`🗑 Cache expired (${days} days old), clearing...`);
                 localStorage.removeItem('companiesEnrichedCache');
@@ -735,16 +442,17 @@ class CompaniesDirectory {
             this.enrichedDataCache = new Map(cacheData.data);
             
             const hours = Math.floor(age / (60 * 60 * 1000));
-            console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles from localStorage`);
-            console.log(`   📅 Cache age: ${hours} hours`);
+            const days = Math.floor(age / (24 * 60 * 60 * 1000));
+            console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles`);
+            console.log(`   📅 Cache age: ${days} days (${hours} hours)`);
             console.log(`   ✅ Version: ${cacheData.version || 'legacy'}`);
+            console.log(`   ⏰ Expires in: ${30 - days} days`);
             
             return true;
             
         } catch (error) {
-            console.warn('⚠ Failed to load cache from localStorage:', error);
+            console.warn('⚠ Failed to load cache:', error.message);
             
-            // Nettoyer le cache corrompu
             try {
                 localStorage.removeItem('companiesEnrichedCache');
             } catch (e) {
@@ -765,228 +473,8 @@ class CompaniesDirectory {
             console.log('🗑 Enriched cache cleared');
             return true;
         } catch (error) {
-            console.warn('⚠ Failed to clear cache:', error);
+            console.warn('⚠ Failed to clear cache:', error.message);
             return false;
-        }
-    }
-
-    /**
-     * ════════════════════════════════════════════════════════════════
-     * PRÉCHARGEMENT DES DONNÉES ENRICHIES (AVEC CACHE)
-     * ════════════════════════════════════════════════════════════════
-     */
-
-    /**
-     * ✅ PRÉCHARGEMENT DES DONNÉES ENRICHIES (100 ENTREPRISES)
-     * @param {number} count - Nombre d'entreprises à précharger (défaut: 100)
-     * @param {boolean} forceRefresh - Forcer le rechargement sans utiliser le cache
-     */
-    async preloadEnrichedData(count = 100, forceRefresh = false) {
-        console.log(`🔄 Pre-loading enriched data for ${count} companies...`);
-        
-        // ✅ ÉTAPE 1 : Essayer de charger depuis le cache (sauf si forceRefresh)
-        if (!forceRefresh) {
-            const cacheLoaded = this.loadEnrichedCache();
-            
-            if (cacheLoaded && this.enrichedDataCache.size >= count) {
-                console.log(`✅ Using cached enriched data (${this.enrichedDataCache.size} profiles)`);
-                this.updatePreloadStatus(
-                    `✅ Loaded ${this.enrichedDataCache.size} cached profiles (from localStorage)`
-                );
-                
-                // Mettre à jour les stats immédiatement
-                this.updateStats();
-                
-                return;
-            } else if (cacheLoaded && this.enrichedDataCache.size > 0) {
-                console.log(`📦 Partial cache found (${this.enrichedDataCache.size} profiles), loading remaining...`);
-            }
-        } else {
-            console.log('🔄 Force refresh requested, ignoring cache...');
-            this.clearEnrichedCache();
-        }
-        
-        // ✅ ÉTAPE 2 : Initialiser le statut de préchargement
-        this.preloadingStatus.isLoading = true;
-        this.preloadingStatus.total = Math.min(count, this.allCompanies.length);
-        this.preloadingStatus.loaded = this.enrichedDataCache.size; // Partir du cache existant
-        this.preloadingStatus.errors = 0;
-        
-        // ✅ ÉTAPE 3 : Déterminer quelles entreprises charger
-        const topCompanies = this.allCompanies.slice(0, count);
-        
-        // Filtrer les entreprises déjà en cache (sauf si forceRefresh)
-        const companiesToLoad = forceRefresh 
-            ? topCompanies 
-            : topCompanies.filter(c => !this.enrichedDataCache.has(c.ticker));
-        
-        if (companiesToLoad.length === 0) {
-            console.log('✅ All companies already cached!');
-            this.preloadingStatus.isLoading = false;
-            this.updatePreloadStatus(
-                `✅ All ${this.enrichedDataCache.size} profiles already cached`
-            );
-            return;
-        }
-        
-        console.log(`📋 Need to load ${companiesToLoad.length} companies (${this.enrichedDataCache.size} already cached)`);
-        
-        // ✅ ÉTAPE 4 : Préparer les batches (50 entreprises max par batch)
-        const batchSize = 50;
-        const batches = [];
-        
-        for (let i = 0; i < companiesToLoad.length; i += batchSize) {
-            batches.push(companiesToLoad.slice(i, i + batchSize));
-        }
-        
-        console.log(`📦 Processing ${batches.length} batch(es) of up to ${batchSize} companies...`);
-        
-        // ✅ ÉTAPE 5 : Charger chaque batch
-        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-            const batch = batches[batchIndex];
-            const batchNum = batchIndex + 1;
-            const totalBatches = batches.length;
-            
-            this.updatePreloadStatus(
-                `⏳ Loading batch ${batchNum}/${totalBatches} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total} total)...`
-            );
-            
-            try {
-                console.log(`📤 Sending batch ${batchNum}/${totalBatches} (${batch.length} companies)...`);
-                
-                const response = await fetch(`${this.knowledgeGraphWorkerUrl}/batch-companies`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        companies: batch.map(c => ({ 
-                            name: c.name, 
-                            ticker: c.ticker 
-                        }))
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success && result.results) {
-                    let batchSuccess = 0;
-                    let batchErrors = 0;
-                    
-                    result.results.forEach(item => {
-                        if (item.data && item.data.found) {
-                            this.enrichedDataCache.set(item.ticker, item.data);
-                            this.preloadingStatus.loaded++;
-                            batchSuccess++;
-                        } else if (item.error) {
-                            console.warn(`⚠ Error for ${item.ticker}: ${item.error}`);
-                            this.preloadingStatus.errors++;
-                            batchErrors++;
-                        } else {
-                            // Données non trouvées (pas d'erreur, juste pas de résultat)
-                            console.log(`ℹ No data found for ${item.ticker}`);
-                            this.preloadingStatus.errors++;
-                            batchErrors++;
-                        }
-                    });
-                    
-                    console.log(`✅ Batch ${batchNum}/${totalBatches} completed: +${batchSuccess} enriched, ${batchErrors} errors`);
-                    console.log(`   📊 Total progress: ${this.enrichedDataCache.size} profiles loaded`);
-                    
-                } else {
-                    throw new Error(result.error || 'Invalid response format');
-                }
-                
-                // ✅ ÉTAPE 6 : Sauvegarder le cache après chaque batch réussi
-                this.saveEnrichedCache();
-                
-                // ✅ ÉTAPE 7 : Pause entre les batches pour éviter le rate limiting (100ms)
-                if (batchIndex < batches.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
-            } catch (error) {
-                console.error(`❌ Batch ${batchNum}/${totalBatches} failed:`, error.message);
-                this.preloadingStatus.errors += batch.length;
-                
-                // Continuer avec le batch suivant malgré l'erreur
-                this.updatePreloadStatus(
-                    `⚠ Batch ${batchNum} failed, continuing... (${this.preloadingStatus.loaded}/${this.preloadingStatus.total})`
-                );
-            }
-        }
-        
-        // ✅ ÉTAPE 8 : Finaliser
-        this.preloadingStatus.isLoading = false;
-        
-        const successRate = this.preloadingStatus.total > 0 
-            ? Math.round((this.enrichedDataCache.size / this.preloadingStatus.total) * 100) 
-            : 0;
-        
-        console.log(`✅ Pre-loading completed!`);
-        console.log(`   📊 Total requested: ${this.preloadingStatus.total}`);
-        console.log(`   ✅ Successfully loaded: ${this.enrichedDataCache.size} (${successRate}%)`);
-        console.log(`   ❌ Errors/Not found: ${this.preloadingStatus.errors}`);
-        console.log(`   💾 Cache saved to localStorage`);
-        
-        this.updatePreloadStatus(
-            `✅ Loaded ${this.enrichedDataCache.size} enriched profiles (${successRate}% success)`
-        );
-        
-        // Mettre à jour les stats affichées
-        this.updateStats();
-    }
-
-    /**
-     * ✅ RAFRAÎCHIR LES DONNÉES ENRICHIES (BOUTON MANUEL)
-     */
-    async refreshEnrichedData(count = 100) {
-        if (this.preloadingStatus.isLoading) {
-            alert('⏳ Data loading already in progress...\n\nPlease wait for the current operation to complete.');
-            return;
-        }
-        
-        const confirmed = confirm(
-            `🔄 Refresh enriched data for ${count} companies?\n\n` +
-            `• Current cache: ${this.enrichedDataCache.size} profiles\n` +
-            `• This will clear the cache and reload fresh data\n` +
-            `• Estimated time: 10-20 seconds\n\n` +
-            `Continue?`
-        );
-        
-        if (!confirmed) {
-            return;
-        }
-        
-        console.log('🔄 Manual refresh initiated...');
-        
-        // Afficher l'indicateur de chargement
-        this.showLoadingIndicator();
-        
-        try {
-            // Forcer le rechargement (forceRefresh = true)
-            await this.preloadEnrichedData(count, true);
-            
-            // Réafficher les résultats
-            this.applyFiltersAndPagination();
-            
-            alert(
-                `✅ Refresh completed!\n\n` +
-                `• Loaded: ${this.enrichedDataCache.size} profiles\n` +
-                `• Errors: ${this.preloadingStatus.errors}\n` +
-                `• Cache updated successfully`
-            );
-            
-        } catch (error) {
-            console.error('❌ Refresh failed:', error);
-            alert(`❌ Refresh failed: ${error.message}`);
-        } finally {
-            // Masquer l'indicateur de chargement
-            this.hideLoadingIndicator();
         }
     }
 
@@ -1008,28 +496,211 @@ class CompaniesDirectory {
             
             const cacheData = JSON.parse(cachedItem);
             const age = Date.now() - (cacheData.timestamp || 0);
-            const sizeKB = Math.round((cachedItem.length * 2) / 1024); // Approximation UTF-16
+            const sizeKB = Math.round((cachedItem.length * 2) / 1024);
+            const ageHours = Math.floor(age / (60 * 60 * 1000));
+            const ageDays = Math.floor(age / (24 * 60 * 60 * 1000));
+            const expiresInDays = Math.max(0, 30 - ageDays);
             
             return {
                 exists: true,
                 size: cacheData.count || 0,
                 age: age,
-                ageHours: Math.floor(age / (60 * 60 * 1000)),
-                ageDays: Math.floor(age / (24 * 60 * 60 * 1000)),
+                ageHours: ageHours,
+                ageDays: ageDays,
+                expiresInDays: expiresInDays,
                 sizeKB: sizeKB,
                 version: cacheData.version || 'legacy'
             };
             
         } catch (error) {
-            console.warn('⚠ Failed to get cache stats:', error);
+            console.warn('⚠ Failed to get cache stats:', error.message);
             return {
                 exists: false,
                 error: error.message
             };
         }
     }
-    
-    // ✅ NOUVEAU : Récupérer les données enrichies depuis Google Knowledge Graph
+
+    /**
+     * ════════════════════════════════════════════════════════════════
+     * PRÉCHARGEMENT DES DONNÉES ENRICHIES (AVEC CACHE 30 JOURS)
+     * ════════════════════════════════════════════════════════════════
+     */
+
+    /**
+     * ✅ PRÉCHARGEMENT DES DONNÉES ENRICHIES (100 ENTREPRISES)
+     */
+    async preloadEnrichedData(count = 100, forceRefresh = false) {
+        console.log(`🔄 Pre-loading enriched data for ${count} companies...`);
+        
+        // ✅ Si forceRefresh, vider le cache
+        if (forceRefresh) {
+            console.log('🔄 Force refresh requested, clearing cache...');
+            this.clearEnrichedCache();
+        }
+        
+        // ✅ Vérifier si le cache est déjà suffisant
+        if (!forceRefresh && this.enrichedDataCache.size >= count) {
+            const stats = this.getCacheStats();
+            console.log(`✅ Cache already sufficient (${this.enrichedDataCache.size} profiles)`);
+            console.log(`   📅 Expires in: ${stats.expiresInDays} days`);
+            this.updatePreloadStatus(
+                `✅ Loaded ${this.enrichedDataCache.size} cached profiles (expires in ${stats.expiresInDays} days)`
+            );
+            return;
+        }
+        
+        // ✅ Initialiser le statut
+        this.preloadingStatus.isLoading = true;
+        this.preloadingStatus.total = Math.min(count, this.allCompanies.length);
+        this.preloadingStatus.loaded = this.enrichedDataCache.size;
+        this.preloadingStatus.errors = 0;
+        this.preloadingStatus.startTime = Date.now();
+        
+        // ✅ Sélectionner les entreprises à charger
+        const topCompanies = this.allCompanies.slice(0, count);
+        const companiesToLoad = forceRefresh 
+            ? topCompanies 
+            : topCompanies.filter(c => !this.enrichedDataCache.has(c.ticker));
+        
+        if (companiesToLoad.length === 0) {
+            console.log('✅ All companies already cached!');
+            this.preloadingStatus.isLoading = false;
+            this.updatePreloadStatus(
+                `✅ All ${this.enrichedDataCache.size} profiles already cached`
+            );
+            return;
+        }
+        
+        console.log(`📋 Loading ${companiesToLoad.length} companies (${this.enrichedDataCache.size} already cached)`);
+        
+        // ✅ Préparer les batches (50 max par batch)
+        const batchSize = 50;
+        const batches = [];
+        
+        for (let i = 0; i < companiesToLoad.length; i += batchSize) {
+            batches.push(companiesToLoad.slice(i, i + batchSize));
+        }
+        
+        console.log(`📦 Processing ${batches.length} batch(es)...`);
+        
+        // ✅ Charger chaque batch
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+            const batch = batches[batchIndex];
+            const batchNum = batchIndex + 1;
+            
+            this.updatePreloadStatus(
+                `⏳ Batch ${batchNum}/${batches.length} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total})...`
+            );
+            
+            try {
+                const response = await fetch(`${this.knowledgeGraphWorkerUrl}/batch-companies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        companies: batch.map(c => ({ name: c.name, ticker: c.ticker }))
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.results) {
+                    let batchSuccess = 0;
+                    
+                    result.results.forEach(item => {
+                        if (item.data && item.data.found) {
+                            this.enrichedDataCache.set(item.ticker, item.data);
+                            this.preloadingStatus.loaded++;
+                            batchSuccess++;
+                        } else {
+                            this.preloadingStatus.errors++;
+                        }
+                    });
+                    
+                    console.log(`✅ Batch ${batchNum}: +${batchSuccess} enriched`);
+                } else {
+                    throw new Error(result.error || 'Invalid response');
+                }
+                
+                // ✅ Sauvegarder le cache après chaque batch
+                this.saveEnrichedCache();
+                
+                // ✅ Pause entre batches (100ms)
+                if (batchIndex < batches.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+            } catch (error) {
+                console.error(`❌ Batch ${batchNum} failed:`, error.message);
+                this.preloadingStatus.errors += batch.length;
+            }
+        }
+        
+        // ✅ Finaliser
+        this.preloadingStatus.isLoading = false;
+        const duration = ((Date.now() - this.preloadingStatus.startTime) / 1000).toFixed(1);
+        const stats = this.getCacheStats();
+        
+        console.log(`✅ Pre-loading completed in ${duration}s!`);
+        console.log(`   ✅ Loaded: ${this.enrichedDataCache.size}`);
+        console.log(`   ❌ Errors: ${this.preloadingStatus.errors}`);
+        console.log(`   📅 Cache expires in: ${stats.expiresInDays} days`);
+        
+        this.updatePreloadStatus(
+            `✅ ${this.enrichedDataCache.size} profiles loaded (expires in ${stats.expiresInDays} days)`
+        );
+        
+        this.updateStats();
+    }
+
+    /**
+     * ✅ RAFRAÎCHIR LES DONNÉES (BOUTON MANUEL)
+     */
+    async refreshEnrichedData(count = 100) {
+        if (this.preloadingStatus.isLoading) {
+            alert('⏳ Loading in progress...\n\nPlease wait.');
+            return;
+        }
+        
+        const stats = this.getCacheStats();
+        const confirmed = confirm(
+            `🔄 Refresh enriched data?\n\n` +
+            `• Current cache: ${this.enrichedDataCache.size} profiles\n` +
+            `• Cache age: ${stats.ageDays} days\n` +
+            `• Expires in: ${stats.expiresInDays} days\n\n` +
+            `This will reload fresh data.\nContinue?`
+        );
+        
+        if (!confirmed) return;
+        
+        this.showLoadingIndicator();
+        
+        try {
+            await this.preloadEnrichedData(count, true);
+            this.applyFiltersAndPagination();
+            
+            const newStats = this.getCacheStats();
+            alert(
+                `✅ Refresh completed!\n\n` +
+                `• Loaded: ${this.enrichedDataCache.size} profiles\n` +
+                `• Errors: ${this.preloadingStatus.errors}\n` +
+                `• Expires in: ${newStats.expiresInDays} days`
+            );
+        } catch (error) {
+            console.error('❌ Refresh failed:', error);
+            alert(`❌ Refresh failed: ${error.message}`);
+        } finally {
+            this.hideLoadingIndicator();
+        }
+    }
+
+    /**
+     * ✅ RÉCUPÉRER UNE DONNÉE ENRICHIE (avec cache)
+     */
     async fetchEnrichedData(company) {
         // Vérifier le cache
         if (this.enrichedDataCache.has(company.ticker)) {
@@ -1045,16 +716,17 @@ class CompaniesDirectory {
             
             if (result.success && result.data.found) {
                 this.enrichedDataCache.set(company.ticker, result.data);
+                this.saveEnrichedCache(); // Sauvegarder immédiatement
                 return result.data;
             }
             
             return null;
         } catch (error) {
-            console.error(`❌ Error fetching enriched data for ${company.ticker}:`, error);
+            console.error(`❌ Error fetching ${company.ticker}:`, error);
             return null;
         }
     }
-    
+
     setupEventListeners() {
         const searchInput = document.getElementById('companySearch');
         const clearBtn = document.getElementById('clearSearch');
@@ -1189,7 +861,7 @@ class CompaniesDirectory {
             const initials = company.name.substring(0, 2).toUpperCase();
             const fallbacksData = JSON.stringify(company.logoFallbacks || []);
             
-            // ✅ NOUVEAU : Badge si données enrichies disponibles
+            // ✅ Badge si données enrichies disponibles
             const hasEnrichedData = this.enrichedDataCache.has(company.ticker);
             const enrichedBadge = hasEnrichedData 
                 ? `<div class='enriched-badge' title='Enhanced with Google Knowledge Graph' style='position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);'><i class='fas fa-check'></i></div>`
@@ -1329,16 +1001,16 @@ class CompaniesDirectory {
         const regions = new Set(this.allCompanies.map(c => c.region));
         document.getElementById('totalRegions').textContent = regions.size;
         
-        // ✅ NOUVEAU : Afficher le nombre de profils enrichis
+        // ✅ Afficher le nombre de profils enrichis (si l'élément existe)
         const enrichedCount = this.enrichedDataCache.size;
         const enrichedStat = document.getElementById('enrichedProfiles');
         if (enrichedStat) {
             enrichedStat.textContent = enrichedCount.toLocaleString();
         }
         
+        // Populer le filtre secteur
         const sectorFilter = document.getElementById('sectorFilter');
         if (sectorFilter && sectorFilter.options.length === 1) {
-            // Utiliser les 15 secteurs principaux
             Object.keys(this.mainSectors).sort().forEach(sector => {
                 const option = document.createElement('option');
                 option.value = sector;
@@ -1453,7 +1125,9 @@ class CompaniesDirectory {
         });
     }
     
-    // ✅ NOUVEAU : MODAL ENRICHI AVEC DONNÉES GOOGLE KNOWLEDGE GRAPH
+    /**
+     * ✅ MODAL ENRICHI AVEC DONNÉES GOOGLE KNOWLEDGE GRAPH
+     */
     static async openCompanyModal(ticker) {
         const instance = window.companiesDirectoryInstance;
         const company = instance.allCompanies.find(c => c.ticker === ticker);
@@ -1478,19 +1152,24 @@ class CompaniesDirectory {
         
         // ✅ Logo avec fallback
         const initials = company.name.substring(0, 2).toUpperCase();
-        const logoUrl = enrichedData?.image || company.logoUrl;
+        const logoUrl = enrichedData?.images?.primary || company.logoUrl;
+        
+        // ✅ Description enrichie
+        const description = enrichedData?.description?.detailed || enrichedData?.description?.short || 'No description available.';
+        const descriptionUrl = enrichedData?.description?.source || enrichedData?.links?.wikipedia || '';
         
         // ✅ NOUVEAU MODAL ENRICHI
         modalContent.innerHTML = `
-            <div class='company-modal-header' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; margin: -24px -24px 24px -24px;'>
-                <div class='company-modal-logo' style='width: 100px; height: 100px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);'>
+            <div class='company-modal-header' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; margin: -24px -24px 24px -24px; position: relative; overflow: hidden;'>
+                <div style='position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px); animation: moveStripes 20s linear infinite;'></div>
+                <div class='company-modal-logo' style='width: 100px; height: 100px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); position: relative; z-index: 1;'>
                     ${logoUrl 
                         ? `<img src='${logoUrl}' alt='${company.name}' style='max-width: 80%; max-height: 80%; object-fit: contain;' onerror='this.parentElement.classList.add("text-fallback"); this.parentElement.innerHTML="${initials}"; this.parentElement.style.fontSize="2.5rem"; this.parentElement.style.fontWeight="900"; this.parentElement.style.color="#667eea";'>` 
                         : `<div style='font-size: 2.5rem; font-weight: 900; color: #667eea;'>${initials}</div>`
                     }
                 </div>
-                <h3 style='color: white; font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 8px;'>${company.name}</h3>
-                <div style='text-align: center;'>
+                <h3 style='color: white; font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 8px; position: relative; z-index: 1;'>${company.name}</h3>
+                <div style='text-align: center; position: relative; z-index: 1;'>
                     <span class='company-ticker' style='background: rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 20px; font-size: 1.1rem; font-weight: 800;'>${company.ticker}</span>
                 </div>
             </div>
@@ -1502,9 +1181,9 @@ class CompaniesDirectory {
                         <i class='fas fa-info-circle' style='color: #667eea;'></i>
                         About ${company.name}
                     </h4>
-                    <p style='color: #475569; line-height: 1.7; font-size: 0.95rem;'>${enrichedData.description || 'No description available.'}</p>
-                    ${enrichedData.descriptionUrl ? `
-                        <a href='${enrichedData.descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; color: #667eea; font-weight: 700; font-size: 0.9rem; margin-top: 12px; text-decoration: none;'>
+                    <p style='color: #475569; line-height: 1.7; font-size: 0.95rem;'>${description}</p>
+                    ${descriptionUrl ? `
+                        <a href='${descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; color: #667eea; font-weight: 700; font-size: 0.9rem; margin-top: 12px; text-decoration: none;'>
                             Learn more <i class='fas fa-external-link-alt' style='font-size: 0.75rem;'></i>
                         </a>
                     ` : ''}
@@ -1521,30 +1200,30 @@ class CompaniesDirectory {
                     <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Region</div>
                     <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${company.region}</div>
                 </div>
-                ${enrichedData && enrichedData.headquarters ? `
+                ${enrichedData && enrichedData.additionalInfo?.headquarters ? `
                 <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #f59e0b;'>
                     <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Headquarters</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.headquarters}</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.headquarters}</div>
                 </div>
                 ` : ''}
-                ${enrichedData && enrichedData.foundingDate ? `
+                ${enrichedData && enrichedData.additionalInfo?.foundingDate ? `
                 <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #8b5cf6;'>
                     <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Founded</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.foundingDate}</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.foundingDate}</div>
                 </div>
                 ` : ''}
-                ${enrichedData && enrichedData.industry ? `
+                ${enrichedData && enrichedData.additionalInfo?.industry ? `
                 <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #ec4899;'>
                     <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Industry</div>
-                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.industry}</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.additionalInfo.industry}</div>
                 </div>
                 ` : ''}
             </div>
             
-            ${enrichedData && (enrichedData.url || company.domain) ? `
+            ${enrichedData && (enrichedData.links?.officialWebsite || company.domain) ? `
             <!-- ✅ LIEN SITE WEB -->
             <div style='background: linear-gradient(135deg, #10b981, #059669); padding: 16px 24px; border-radius: 12px; margin-bottom: 24px;'>
-                <a href='${enrichedData.url || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
+                <a href='${enrichedData.links?.officialWebsite || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
                     <span style='display: flex; align-items: center; gap: 12px;'>
                         <i class='fas fa-globe' style='font-size: 1.5rem;'></i>
                         <span style='font-size: 1.1rem;'>Visit Official Website</span>
@@ -1581,8 +1260,6 @@ class CompaniesDirectory {
     static closeModal() {
         document.getElementById('companyModal').classList.remove('active');
     }
-
-    
 }
 
 // ✅ INITIALISATION
@@ -1604,3 +1281,13 @@ document.addEventListener('keydown', (e) => {
         CompaniesDirectory.closeModal();
     }
 });
+
+// ✅ Animation des stripes dans le modal header
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes moveStripes {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(50px, 50px); }
+    }
+`;
+document.head.appendChild(style);
