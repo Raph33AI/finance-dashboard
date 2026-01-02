@@ -685,3 +685,54 @@
         text-align: center;
     }
 }
+
+/* ========================================
+   VIDEO SENTIMENT BADGE
+   ======================================== */
+.video-sentiment-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+}
+
+.video-sentiment-badge.bullish {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.video-sentiment-badge.bearish {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+}
+
+.video-sentiment-badge.neutral {
+    background: rgba(100, 116, 139, 0.9);
+    color: white;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    grid-column: 1 / -1;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
