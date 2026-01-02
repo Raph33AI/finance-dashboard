@@ -511,19 +511,35 @@ class CompaniesDirectory {
         };
     }
     
-    // ✅ INITIALISATION PRINCIPALE
+    /**
+     * ✅ INITIALISATION PRINCIPALE
+     */
     async init() {
         console.log('🏢 Initializing Companies Directory...');
+        console.log(`   🌐 Worker URL: ${this.knowledgeGraphWorkerUrl}`);
         
         // Afficher un indicateur de chargement
         this.showLoadingIndicator();
         
+        // Charger la liste des entreprises
         this.loadCompanies();
+        
+        // Configurer les event listeners
         this.setupEventListeners();
         
-        // ✅ NOUVEAU : Pré-charger les données enrichies pour les 100 premières entreprises
+        // ✅ Afficher les stats du cache
+        const cacheStats = this.getCacheStats();
+        if (cacheStats.exists) {
+            console.log(`💾 Cache info:`);
+            console.log(`   📊 Size: ${cacheStats.size} profiles`);
+            console.log(`   📅 Age: ${cacheStats.ageHours} hours (${cacheStats.ageDays} days)`);
+            console.log(`   💿 Storage: ${cacheStats.sizeKB} KB`);
+        }
+        
+        // ✅ Pré-charger les données enrichies pour les 100 premières entreprises
         await this.preloadEnrichedData(100);
         
+        // Appliquer les filtres et afficher les résultats
         this.applyFiltersAndPagination();
         this.updateStats();
         this.renderCharts();
@@ -532,6 +548,8 @@ class CompaniesDirectory {
         this.hideLoadingIndicator();
         
         console.log('✅ Companies Directory initialized!');
+        console.log(`   📊 Total companies: ${this.allCompanies.length}`);
+        console.log(`   ✨ Enriched profiles: ${this.enrichedDataCache.size}`);
     }
 
     // ✅ NOUVEAU : Afficher indicateur de chargement
@@ -646,83 +664,369 @@ class CompaniesDirectory {
         return 'USA';
     }
     
-    // ✅ NOUVEAU : PRÉCHARGEMENT DES DONNÉES ENRICHIES (100 ENTREPRISES)
-    async preloadEnrichedData(count = 100) {
+    /**
+     * ════════════════════════════════════════════════════════════════
+     * GESTION DU CACHE LOCALSTORAGE
+     * ════════════════════════════════════════════════════════════════
+     */
+
+    /**
+     * ✅ SAUVEGARDER LE CACHE DANS LOCALSTORAGE
+     */
+    saveEnrichedCache() {
+        try {
+            const cacheArray = Array.from(this.enrichedDataCache.entries());
+            const cacheData = {
+                version: '1.0',
+                timestamp: Date.now(),
+                count: cacheArray.length,
+                data: cacheArray
+            };
+            
+            localStorage.setItem('companiesEnrichedCache', JSON.stringify(cacheData));
+            console.log(`💾 Enriched cache saved to localStorage (${cacheArray.length} profiles)`);
+            return true;
+        } catch (error) {
+            console.warn('⚠ Failed to save cache to localStorage:', error);
+            
+            // Si erreur de quota, essayer de vider l'ancien cache
+            if (error.name === 'QuotaExceededError') {
+                console.log('🗑 localStorage quota exceeded, clearing old cache...');
+                localStorage.removeItem('companiesEnrichedCache');
+                localStorage.removeItem('companiesCacheTimestamp'); // Ancien format
+            }
+            return false;
+        }
+    }
+
+    /**
+     * ✅ CHARGER LE CACHE DEPUIS LOCALSTORAGE
+     */
+    loadEnrichedCache() {
+        try {
+            const cachedItem = localStorage.getItem('companiesEnrichedCache');
+            
+            if (!cachedItem) {
+                console.log('📭 No cached data found');
+                return false;
+            }
+            
+            const cacheData = JSON.parse(cachedItem);
+            
+            // Vérifier la structure
+            if (!cacheData || !cacheData.data || !cacheData.timestamp) {
+                console.warn('⚠ Invalid cache structure, clearing...');
+                localStorage.removeItem('companiesEnrichedCache');
+                return false;
+            }
+            
+            // Vérifier l'âge du cache (7 jours maximum)
+            const age = Date.now() - cacheData.timestamp;
+            const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
+            
+            if (age > maxAge) {
+                const days = Math.floor(age / (24 * 60 * 60 * 1000));
+                console.log(`🗑 Cache expired (${days} days old), clearing...`);
+                localStorage.removeItem('companiesEnrichedCache');
+                return false;
+            }
+            
+            // Charger les données dans le Map
+            this.enrichedDataCache = new Map(cacheData.data);
+            
+            const hours = Math.floor(age / (60 * 60 * 1000));
+            console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles from localStorage`);
+            console.log(`   📅 Cache age: ${hours} hours`);
+            console.log(`   ✅ Version: ${cacheData.version || 'legacy'}`);
+            
+            return true;
+            
+        } catch (error) {
+            console.warn('⚠ Failed to load cache from localStorage:', error);
+            
+            // Nettoyer le cache corrompu
+            try {
+                localStorage.removeItem('companiesEnrichedCache');
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            
+            return false;
+        }
+    }
+
+    /**
+     * ✅ VIDER LE CACHE MANUELLEMENT
+     */
+    clearEnrichedCache() {
+        try {
+            this.enrichedDataCache.clear();
+            localStorage.removeItem('companiesEnrichedCache');
+            console.log('🗑 Enriched cache cleared');
+            return true;
+        } catch (error) {
+            console.warn('⚠ Failed to clear cache:', error);
+            return false;
+        }
+    }
+
+    /**
+     * ════════════════════════════════════════════════════════════════
+     * PRÉCHARGEMENT DES DONNÉES ENRICHIES (AVEC CACHE)
+     * ════════════════════════════════════════════════════════════════
+     */
+
+    /**
+     * ✅ PRÉCHARGEMENT DES DONNÉES ENRICHIES (100 ENTREPRISES)
+     * @param {number} count - Nombre d'entreprises à précharger (défaut: 100)
+     * @param {boolean} forceRefresh - Forcer le rechargement sans utiliser le cache
+     */
+    async preloadEnrichedData(count = 100, forceRefresh = false) {
         console.log(`🔄 Pre-loading enriched data for ${count} companies...`);
         
+        // ✅ ÉTAPE 1 : Essayer de charger depuis le cache (sauf si forceRefresh)
+        if (!forceRefresh) {
+            const cacheLoaded = this.loadEnrichedCache();
+            
+            if (cacheLoaded && this.enrichedDataCache.size >= count) {
+                console.log(`✅ Using cached enriched data (${this.enrichedDataCache.size} profiles)`);
+                this.updatePreloadStatus(
+                    `✅ Loaded ${this.enrichedDataCache.size} cached profiles (from localStorage)`
+                );
+                
+                // Mettre à jour les stats immédiatement
+                this.updateStats();
+                
+                return;
+            } else if (cacheLoaded && this.enrichedDataCache.size > 0) {
+                console.log(`📦 Partial cache found (${this.enrichedDataCache.size} profiles), loading remaining...`);
+            }
+        } else {
+            console.log('🔄 Force refresh requested, ignoring cache...');
+            this.clearEnrichedCache();
+        }
+        
+        // ✅ ÉTAPE 2 : Initialiser le statut de préchargement
         this.preloadingStatus.isLoading = true;
         this.preloadingStatus.total = Math.min(count, this.allCompanies.length);
-        this.preloadingStatus.loaded = 0;
+        this.preloadingStatus.loaded = this.enrichedDataCache.size; // Partir du cache existant
         this.preloadingStatus.errors = 0;
         
+        // ✅ ÉTAPE 3 : Déterminer quelles entreprises charger
         const topCompanies = this.allCompanies.slice(0, count);
         
-        // Batch de 50 entreprises à la fois (limite Worker)
+        // Filtrer les entreprises déjà en cache (sauf si forceRefresh)
+        const companiesToLoad = forceRefresh 
+            ? topCompanies 
+            : topCompanies.filter(c => !this.enrichedDataCache.has(c.ticker));
+        
+        if (companiesToLoad.length === 0) {
+            console.log('✅ All companies already cached!');
+            this.preloadingStatus.isLoading = false;
+            this.updatePreloadStatus(
+                `✅ All ${this.enrichedDataCache.size} profiles already cached`
+            );
+            return;
+        }
+        
+        console.log(`📋 Need to load ${companiesToLoad.length} companies (${this.enrichedDataCache.size} already cached)`);
+        
+        // ✅ ÉTAPE 4 : Préparer les batches (50 entreprises max par batch)
         const batchSize = 50;
         const batches = [];
         
-        for (let i = 0; i < topCompanies.length; i += batchSize) {
-            batches.push(topCompanies.slice(i, i + batchSize));
+        for (let i = 0; i < companiesToLoad.length; i += batchSize) {
+            batches.push(companiesToLoad.slice(i, i + batchSize));
         }
         
-        console.log(`📦 Processing ${batches.length} batches of ${batchSize} companies...`);
+        console.log(`📦 Processing ${batches.length} batch(es) of up to ${batchSize} companies...`);
         
+        // ✅ ÉTAPE 5 : Charger chaque batch
         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
             const batch = batches[batchIndex];
+            const batchNum = batchIndex + 1;
+            const totalBatches = batches.length;
             
             this.updatePreloadStatus(
-                `Loading batch ${batchIndex + 1}/${batches.length} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total} companies)...`
+                `⏳ Loading batch ${batchNum}/${totalBatches} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total} total)...`
             );
             
             try {
+                console.log(`📤 Sending batch ${batchNum}/${totalBatches} (${batch.length} companies)...`);
+                
                 const response = await fetch(`${this.knowledgeGraphWorkerUrl}/batch-companies`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                        companies: batch.map(c => ({ name: c.name, ticker: c.ticker }))
+                        companies: batch.map(c => ({ 
+                            name: c.name, 
+                            ticker: c.ticker 
+                        }))
                     })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const result = await response.json();
                 
-                if (result.success) {
+                if (result.success && result.results) {
+                    let batchSuccess = 0;
+                    let batchErrors = 0;
+                    
                     result.results.forEach(item => {
                         if (item.data && item.data.found) {
                             this.enrichedDataCache.set(item.ticker, item.data);
                             this.preloadingStatus.loaded++;
+                            batchSuccess++;
                         } else if (item.error) {
-                            console.warn(`⚠ Error for ${item.ticker}:`, item.error);
+                            console.warn(`⚠ Error for ${item.ticker}: ${item.error}`);
                             this.preloadingStatus.errors++;
+                            batchErrors++;
+                        } else {
+                            // Données non trouvées (pas d'erreur, juste pas de résultat)
+                            console.log(`ℹ No data found for ${item.ticker}`);
+                            this.preloadingStatus.errors++;
+                            batchErrors++;
                         }
                     });
                     
-                    console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${this.enrichedDataCache.size} total enriched`);
+                    console.log(`✅ Batch ${batchNum}/${totalBatches} completed: +${batchSuccess} enriched, ${batchErrors} errors`);
+                    console.log(`   📊 Total progress: ${this.enrichedDataCache.size} profiles loaded`);
+                    
                 } else {
-                    console.error(`❌ Batch ${batchIndex + 1} failed:`, result.error);
-                    this.preloadingStatus.errors += batch.length;
+                    throw new Error(result.error || 'Invalid response format');
                 }
                 
-                // Pause de 100ms entre chaque batch pour éviter le rate limiting
+                // ✅ ÉTAPE 6 : Sauvegarder le cache après chaque batch réussi
+                this.saveEnrichedCache();
+                
+                // ✅ ÉTAPE 7 : Pause entre les batches pour éviter le rate limiting (100ms)
                 if (batchIndex < batches.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
                 
             } catch (error) {
-                console.error(`❌ Batch ${batchIndex + 1} failed:`, error);
+                console.error(`❌ Batch ${batchNum}/${totalBatches} failed:`, error.message);
                 this.preloadingStatus.errors += batch.length;
+                
+                // Continuer avec le batch suivant malgré l'erreur
+                this.updatePreloadStatus(
+                    `⚠ Batch ${batchNum} failed, continuing... (${this.preloadingStatus.loaded}/${this.preloadingStatus.total})`
+                );
             }
         }
         
+        // ✅ ÉTAPE 8 : Finaliser
         this.preloadingStatus.isLoading = false;
         
+        const successRate = this.preloadingStatus.total > 0 
+            ? Math.round((this.enrichedDataCache.size / this.preloadingStatus.total) * 100) 
+            : 0;
+        
         console.log(`✅ Pre-loading completed!`);
-        console.log(`   📊 Total: ${this.preloadingStatus.total}`);
-        console.log(`   ✅ Loaded: ${this.enrichedDataCache.size}`);
-        console.log(`   ❌ Errors: ${this.preloadingStatus.errors}`);
+        console.log(`   📊 Total requested: ${this.preloadingStatus.total}`);
+        console.log(`   ✅ Successfully loaded: ${this.enrichedDataCache.size} (${successRate}%)`);
+        console.log(`   ❌ Errors/Not found: ${this.preloadingStatus.errors}`);
+        console.log(`   💾 Cache saved to localStorage`);
         
         this.updatePreloadStatus(
-            `✅ Loaded ${this.enrichedDataCache.size} enriched company profiles`
+            `✅ Loaded ${this.enrichedDataCache.size} enriched profiles (${successRate}% success)`
         );
+        
+        // Mettre à jour les stats affichées
+        this.updateStats();
+    }
+
+    /**
+     * ✅ RAFRAÎCHIR LES DONNÉES ENRICHIES (BOUTON MANUEL)
+     */
+    async refreshEnrichedData(count = 100) {
+        if (this.preloadingStatus.isLoading) {
+            alert('⏳ Data loading already in progress...\n\nPlease wait for the current operation to complete.');
+            return;
+        }
+        
+        const confirmed = confirm(
+            `🔄 Refresh enriched data for ${count} companies?\n\n` +
+            `• Current cache: ${this.enrichedDataCache.size} profiles\n` +
+            `• This will clear the cache and reload fresh data\n` +
+            `• Estimated time: 10-20 seconds\n\n` +
+            `Continue?`
+        );
+        
+        if (!confirmed) {
+            return;
+        }
+        
+        console.log('🔄 Manual refresh initiated...');
+        
+        // Afficher l'indicateur de chargement
+        this.showLoadingIndicator();
+        
+        try {
+            // Forcer le rechargement (forceRefresh = true)
+            await this.preloadEnrichedData(count, true);
+            
+            // Réafficher les résultats
+            this.applyFiltersAndPagination();
+            
+            alert(
+                `✅ Refresh completed!\n\n` +
+                `• Loaded: ${this.enrichedDataCache.size} profiles\n` +
+                `• Errors: ${this.preloadingStatus.errors}\n` +
+                `• Cache updated successfully`
+            );
+            
+        } catch (error) {
+            console.error('❌ Refresh failed:', error);
+            alert(`❌ Refresh failed: ${error.message}`);
+        } finally {
+            // Masquer l'indicateur de chargement
+            this.hideLoadingIndicator();
+        }
+    }
+
+    /**
+     * ✅ OBTENIR LES STATISTIQUES DU CACHE
+     */
+    getCacheStats() {
+        try {
+            const cachedItem = localStorage.getItem('companiesEnrichedCache');
+            
+            if (!cachedItem) {
+                return {
+                    exists: false,
+                    size: 0,
+                    age: 0,
+                    sizeKB: 0
+                };
+            }
+            
+            const cacheData = JSON.parse(cachedItem);
+            const age = Date.now() - (cacheData.timestamp || 0);
+            const sizeKB = Math.round((cachedItem.length * 2) / 1024); // Approximation UTF-16
+            
+            return {
+                exists: true,
+                size: cacheData.count || 0,
+                age: age,
+                ageHours: Math.floor(age / (60 * 60 * 1000)),
+                ageDays: Math.floor(age / (24 * 60 * 60 * 1000)),
+                sizeKB: sizeKB,
+                version: cacheData.version || 'legacy'
+            };
+            
+        } catch (error) {
+            console.warn('⚠ Failed to get cache stats:', error);
+            return {
+                exists: false,
+                error: error.message
+            };
+        }
     }
     
     // ✅ NOUVEAU : Récupérer les données enrichies depuis Google Knowledge Graph
@@ -1277,6 +1581,8 @@ class CompaniesDirectory {
     static closeModal() {
         document.getElementById('companyModal').classList.remove('active');
     }
+
+    
 }
 
 // ✅ INITIALISATION
