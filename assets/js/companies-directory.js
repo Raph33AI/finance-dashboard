@@ -1,9 +1,7 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * COMPANIES DIRECTORY - MAIN SCRIPT - 100% RESPONSIVE
- * AlphaVault AI - Répertoire des Entreprises Cotées
- * Logos automatiques via Google Favicons + Unavatar
- * Pagination 20 entreprises/page
+ * COMPANIES DIRECTORY - SYSTÈME COMPLET
+ * Multi-API Logos + 15 Secteurs Principaux + Filtres Région
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -22,12 +20,83 @@ class CompaniesDirectory {
             region: 'all'
         };
         
-        // ✅ Mapping domaines COMPLET (USA + Europe + Asie)
-        this.companyDomains = {
-            // USA - Tech
+        // ✅ 15 SECTEURS PRINCIPAUX (Monde entier)
+        this.mainSectors = {
+            'Technology': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'AMD', 'QCOM', 'AVGO', 'TXN', 'CSCO', 'IBM', 'ACN', 'NOW', 'INTU', 'PYPL', 'SQ', 'SNOW', 'PLTR', 'ZM', 'SHOP', 'UBER', 'LYFT', 'ABNB', 'DASH', 'SNAP', 'PINS', 'SPOT', 'RBLX', 'TWLO', 'OKTA', 'CRWD', 'DDOG', 'MDB', 'SPLK', 'WDAY', 'ADSK', 'VMW', 'DELL', 'HPQ', 'HPE', 'WDC', 'STX', 'MU', 'AMAT', 'LRCX', 'KLAC', 'ADI', 'MRVL', 'SNPS', 'CDNS', 'SAP', 'ASML', 'ERIC', 'NOK', 'STM', 'BABA', 'TCEHY', 'SSNLF', 'TSM', 'SONY', 'BIDU', 'JD', 'NTES', 'PDD', 'NIO', 'LI', 'XPEV', 'BYDDY', 'SFTBY', 'NTDOY', 'INFY', 'WIT', 'U', 'TWTR'],
+            'Finance': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'USB', 'PNC', 'TFC', 'COF', 'SCHW', 'AXP', 'DFS', 'SYF', 'V', 'MA', 'AFRM', 'SOFI', 'HOOD', 'COIN', 'BLK', 'STT', 'BK', 'NTRS', 'TROW', 'BEN', 'IVZ', 'RJF', 'IBKR', 'ETFC', 'AMTD', 'ALLY', 'HSBC', 'BCS', 'LYG', 'DB', 'UBS', 'CS', 'ING', 'SAN', 'BBVA', 'IDCBY', 'CICHY', 'HDB', 'IBN', 'MUFG', 'SMFG', 'MFG', 'NMR', 'SCBFF', 'NWG.L', 'CBKGF', 'BNP.PA', 'GLE.PA', 'ACA.PA', 'ABN.AS', 'UCG.MI', 'ISP.MI', 'CABK.MC', 'NDAFI', 'DANSKE.CO', 'ALV.DE', 'CS.PA', 'ZURN.SW', 'PRU.L', 'AV.L', 'LGEN.L', 'G.MI', 'DBSDY', 'OVCHY', 'UOVEY', 'PNGAY', 'CIHKY', 'SBKFF', 'AXIBANK.NS', 'KOTAKBANK.NS', 'ACGBY', 'BACHF'],
+            'Healthcare': ['JNJ', 'UNH', 'PFE', 'LLY', 'ABBV', 'MRK', 'ABT', 'TMO', 'DHR', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 'MRNA', 'BNTX', 'BIIB', 'ILMN', 'ISRG', 'SYK', 'BSX', 'MDT', 'BAX', 'BDX', 'CI', 'HUM', 'CVS', 'WBA', 'MCK', 'CAH', 'ABC', 'ZBH', 'EW', 'IDXX', 'WAT', 'A', 'NVO', 'RHHBY', 'NVS', 'SNY', 'AZN', 'GSK', 'BAYRY', 'SMMNY', 'FSNUY', 'PHG', 'LZAGY', 'GRFS', 'UCBJF', 'RCDTF', 'ALM.MC', 'GLPG'],
+            'Consumer Goods': ['WMT', 'COST', 'HD', 'TGT', 'LOW', 'TJX', 'DG', 'DLTR', 'BBY', 'EBAY', 'ETSY', 'W', 'GPS', 'ROST', 'BURL', 'JWN', 'M', 'KSS', 'FL', 'NKE', 'LULU', 'UAA', 'VFC', 'RL', 'TPR', 'CPRI', 'LVMUY', 'RMS.PA', 'KER.PA', 'OR.PA', 'ADDYY', 'PMMAF', 'ITX.MC', 'HNNMY', 'BURBY', 'MONC.MI', 'CFRHF', 'SWGAY', 'PANDY', 'CA.PA', 'TSCDY', 'SBRY.L', 'B4B.DE', 'AD.AS', 'CO.PA', 'MKS.L', 'NXT.L', 'ABF.L', 'KGF.L'],
+            'Food & Beverage': ['KO', 'PEP', 'MDLZ', 'KHC', 'GIS', 'K', 'CAG', 'CPB', 'HSY', 'MNST', 'STZ', 'BF.B', 'TAP', 'TSN', 'HRL', 'SJM', 'MKC', 'LW', 'MCD', 'SBUX', 'CMG', 'YUM', 'QSR', 'DPZ', 'DRI', 'WEN', 'PZZA', 'SHAK', 'WING', 'NSRGY', 'DANOY', 'UL', 'DEO', 'HEINY', 'CABGY', 'BUD', 'PDRDY', 'REMYY', 'DVDCY', 'LDSVF', 'BYCBF', 'TATYY', 'KRYAY'],
+            'Energy': ['XOM', 'CVX', 'COP', 'OXY', 'MPC', 'VLO', 'PSX', 'EOG', 'PXD', 'SLB', 'HAL', 'BKR', 'KMI', 'WMB', 'OKE', 'LNG', 'NEE', 'DUK', 'SO', 'D', 'EXC', 'AEP', 'SRE', 'XEL', 'WEC', 'ES', 'PEG', 'SHEL', 'BP', 'TTE', 'EQNR', 'E', 'REPYY', 'OMVKY', 'GLPEY', 'NTOIY', 'DNNGY', 'IBDRY', 'ENLAY', 'EDPFY', 'RWEOY', 'EONGY', 'ENGIY', 'SSEZY', 'NGG', 'CPYYY', 'ECIFY', 'FOJCF', 'OEZVY', 'PTR', 'SNP', 'CEO', 'RELIANCE.NS', 'ONGC.NS', 'IOC.NS', '2222.SR'],
+            'Industrials': ['BA', 'CAT', 'HON', 'MMM', 'GE', 'LMT', 'RTX', 'NOC', 'GD', 'LHX', 'DE', 'UTX', 'CARR', 'OTIS', 'PH', 'ETN', 'EMR', 'ITW', 'ROK', 'JCI', 'CMI', 'PCAR', 'WAB', 'NSC', 'UNP', 'CSX', 'KSU', 'FDX', 'UPS', 'XPO', 'JBHT', 'ODFL', 'SIEGY', 'ABB', 'SBGSF', 'EADSY', 'SAFRY', 'RYCEY', 'BAESY', 'THLLY', 'FINMY', 'MTUAY', 'DUAVF', 'RNMBY', 'KNYJY', 'SHLRF', 'ATLKY', 'VOLVY', 'SCVCY', 'VLKAF', 'DTG', 'KNRRY', 'CNHI', 'SDVKY', 'SKFRY', 'ALFVY', 'LGRDY', 'RXL.PA', 'BNTGY', 'DPSGY', 'PNL.AS', 'RMG.L', 'KHNGY', 'DSDVY', 'MHVYF', 'KWHIY', 'IHICF', 'HTHIY', 'TOSYY', 'PCRFY', 'MKTAY', 'FANUY', 'YASKY', 'SMCAY', 'KMTUY', 'KUBTY', 'HINOF', 'ISUZY', 'LT.NS', 'TTM', 'MAHMF'],
+            'Automotive': ['F', 'GM', 'RIVN', 'LCID', 'NKLA', 'FSR', 'VWAGY', 'BMWYY', 'MBGAF', 'POAHY', 'RACE', 'STLA', 'RNLSY', 'TM', 'HMC', 'NSANY', 'MZDAY', 'FUJHY', 'SZKMY', 'MMTOF', 'HYMTF', 'KIMTF', 'GELYF', '2333.HK', '600104.SS'],
+            'Telecom & Media': ['VZ', 'T', 'TMUS', 'CMCSA', 'CHTR', 'DIS', 'WBD', 'PARA', 'SIRI', 'FOX', 'NWSA', 'VIAC', 'DISCA', 'LYV', 'MSG', 'VOD', 'BT.L', 'ORAN', 'DTEGY', 'TEF', 'TIIAY', 'SCMWY', 'KKPNY', 'BGAOY', 'TELNY', 'TLSNY', 'CHL', 'CHA', 'CHU', 'NTTYY', 'KDDIY', '9434.T', 'SKM', 'KT', 'BHARTIARTL.NS'],
+            'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'PSA', 'SPG', 'O', 'VICI', 'WELL', 'AVB', 'EQR', 'DLR', 'SBAC', 'LEN', 'DHI', 'PHM', 'NVR', 'TOL', 'VNA.DE', 'URW.AS', 'SGRO.L', 'LAND.L', 'BLND.L', 'LI.PA', 'GFC.PA'],
+            'Mining & Materials': ['BHP', 'RIO', 'VALE', 'GLNCY', 'AAUKY', 'FCX', 'NEM', 'GOLD', 'FSUGY', 'AA', 'MT', 'NUE', 'STLD', 'TECK', 'SCCO', 'FQVLF', 'LUNMF', 'ANFGF'],
+            'Hospitality': ['MAR', 'HLT', 'H', 'WH', 'MGM', 'CZR', 'LVS', 'WYNN', 'ACCYY', 'WTB.L', 'IHG'],
+            'Chemicals & Agriculture': ['BASFY', 'DOW', 'DD', 'LIN', 'AIQUY', 'APD', 'SHW', 'PPG', 'ECL', 'CTVA', 'CF', 'MOS', 'NTR', 'IFF', 'CVVTF', 'AKZOY', 'SLVYY', 'EVKIF', 'CLZNF', 'RDSMY', 'GVDNY', 'SYIEY'],
+            'Fintech & Crypto': ['COIN', 'HOOD', 'SOFI', 'AFRM', 'SQ', 'PYPL', 'V', 'MA', 'BTC-USD', 'ETH-USD', 'MARA', 'RIOT', 'MSTR', 'LC', 'TREE', 'UPST'],
+            'Other': []
+        };
+        
+        // ✅ AUTO-GÉNÉRATION DE DOMAINES
+        this.autoGenerateDomain = (ticker, companyName) => {
+            let cleanName = companyName.toLowerCase()
+                .replace(/\s+inc\.?$/i, '')
+                .replace(/\s+corp(oration)?\.?$/i, '')
+                .replace(/\s+ltd\.?$/i, '')
+                .replace(/\s+plc\.?$/i, '')
+                .replace(/\s+sa\.?$/i, '')
+                .replace(/\s+nv\.?$/i, '')
+                .replace(/\s+ag\.?$/i, '')
+                .replace(/\s+gmbh\.?$/i, '')
+                .replace(/\s+holdings?\.?$/i, '')
+                .replace(/\s+group\.?$/i, '')
+                .replace(/\s+&\s+/g, '')
+                .replace(/\s+and\s+/g, '')
+                .replace(/\s+/g, '')
+                .replace(/[^a-z0-9]/g, '');
+            
+            const exceptions = {
+                'meta': 'meta.com',
+                'metaplatforms': 'meta.com',
+                'alphabet': 'abc.xyz',
+                'facebook': 'meta.com',
+                'google': 'google.com',
+                'xcorp': 'twitter.com',
+                'twitter': 'twitter.com',
+                'square': 'squareup.com',
+                'block': 'squareup.com',
+                '3m': '3m.com',
+                'lvmh': 'lvmh.com',
+                'hermes': 'hermes.com',
+                'loreal': 'loreal.com',
+                'berkshirehathaway': 'berkshirehathaway.com',
+                'jpmorgan': 'jpmorganchase.com',
+                'jpmorganchase': 'jpmorganchase.com',
+                'bankofamerica': 'bankofamerica.com',
+                'wellsfargo': 'wellsfargo.com'
+            };
+            
+            if (exceptions[cleanName]) {
+                return exceptions[cleanName];
+            }
+            
+            return `${cleanName}.com`;
+        };
+        
+        // ✅ MAPPING DOMAINES COMPLET
+        this.companyDomains = this.buildCompleteDomainMapping();
+        
+        this.init();
+    }
+    
+    buildCompleteDomainMapping() {
+        return {
+            // USA - Tech Giants
             'AAPL': 'apple.com',
             'MSFT': 'microsoft.com',
-            'GOOGL': 'google.com',
+            'GOOGL': 'abc.xyz',
             'AMZN': 'amazon.com',
             'META': 'meta.com',
             'TSLA': 'tesla.com',
@@ -57,9 +126,11 @@ class CompaniesDirectory {
             'ABNB': 'airbnb.com',
             'DASH': 'doordash.com',
             'SNAP': 'snap.com',
+            'TWTR': 'twitter.com',
             'PINS': 'pinterest.com',
             'SPOT': 'spotify.com',
             'RBLX': 'roblox.com',
+            'U': 'unity.com',
             'TWLO': 'twilio.com',
             'OKTA': 'okta.com',
             'CRWD': 'crowdstrike.com',
@@ -68,9 +139,20 @@ class CompaniesDirectory {
             'SPLK': 'splunk.com',
             'WDAY': 'workday.com',
             'ADSK': 'autodesk.com',
+            'VMW': 'vmware.com',
             'DELL': 'dell.com',
             'HPQ': 'hp.com',
+            'HPE': 'hpe.com',
+            'WDC': 'westerndigital.com',
+            'STX': 'seagate.com',
             'MU': 'micron.com',
+            'AMAT': 'appliedmaterials.com',
+            'LRCX': 'lamresearch.com',
+            'KLAC': 'kla.com',
+            'ADI': 'analog.com',
+            'MRVL': 'marvell.com',
+            'SNPS': 'synopsys.com',
+            'CDNS': 'cadence.com',
             
             // USA - Finance
             'JPM': 'jpmorganchase.com',
@@ -79,12 +161,32 @@ class CompaniesDirectory {
             'C': 'citigroup.com',
             'GS': 'goldmansachs.com',
             'MS': 'morganstanley.com',
+            'USB': 'usbank.com',
+            'PNC': 'pnc.com',
+            'TFC': 'truist.com',
+            'COF': 'capitalone.com',
             'SCHW': 'schwab.com',
             'AXP': 'americanexpress.com',
+            'DFS': 'discover.com',
+            'SYF': 'synchrony.com',
             'V': 'visa.com',
             'MA': 'mastercard.com',
+            'AFRM': 'affirm.com',
+            'SOFI': 'sofi.com',
+            'HOOD': 'robinhood.com',
             'COIN': 'coinbase.com',
             'BLK': 'blackrock.com',
+            'STT': 'statestreet.com',
+            'BK': 'bnymellon.com',
+            'NTRS': 'northerntrust.com',
+            'TROW': 'troweprice.com',
+            'BEN': 'franklintempleton.com',
+            'IVZ': 'invesco.com',
+            'RJF': 'raymondjames.com',
+            'IBKR': 'interactivebrokers.com',
+            'ETFC': 'etrade.com',
+            'AMTD': 'tdameritrade.com',
+            'ALLY': 'ally.com',
             
             // USA - Healthcare
             'JNJ': 'jnj.com',
@@ -103,9 +205,26 @@ class CompaniesDirectory {
             'VRTX': 'vrtx.com',
             'MRNA': 'modernatx.com',
             'BNTX': 'biontech.com',
+            'BIIB': 'biogen.com',
+            'ILMN': 'illumina.com',
             'ISRG': 'intuitive.com',
+            'SYK': 'stryker.com',
+            'BSX': 'bostonscientific.com',
             'MDT': 'medtronic.com',
+            'BAX': 'baxter.com',
+            'BDX': 'bd.com',
+            'CI': 'cigna.com',
+            'HUM': 'humana.com',
             'CVS': 'cvshealth.com',
+            'WBA': 'walgreens.com',
+            'MCK': 'mckesson.com',
+            'CAH': 'cardinalhealth.com',
+            'ABC': 'amerisourcebergen.com',
+            'ZBH': 'zimmerbiomet.com',
+            'EW': 'edwards.com',
+            'IDXX': 'idexx.com',
+            'WAT': 'waters.com',
+            'A': 'agilent.com',
             
             // USA - Consumer
             'WMT': 'walmart.com',
@@ -113,20 +232,97 @@ class CompaniesDirectory {
             'HD': 'homedepot.com',
             'TGT': 'target.com',
             'LOW': 'lowes.com',
+            'TJX': 'tjx.com',
+            'DG': 'dollargeneral.com',
+            'DLTR': 'dollartree.com',
+            'BBY': 'bestbuy.com',
+            'EBAY': 'ebay.com',
+            'ETSY': 'etsy.com',
+            'W': 'wayfair.com',
+            'GPS': 'gap.com',
+            'ROST': 'rossstores.com',
+            'BURL': 'burlington.com',
+            'JWN': 'nordstrom.com',
+            'M': 'macys.com',
+            'KSS': 'kohls.com',
+            'FL': 'footlocker.com',
             'NKE': 'nike.com',
             'LULU': 'lululemon.com',
-            'KO': 'coca-cola.com',
+            'UAA': 'underarmour.com',
+            'VFC': 'vfc.com',
+            'RL': 'ralphlauren.com',
+            'TPR': 'tapestry.com',
+            'CPRI': 'capriholdings.com',
+            
+            // USA - Food & Beverage
+            'KO': 'coca-colacompany.com',
             'PEP': 'pepsico.com',
             'MDLZ': 'mondelezinternational.com',
+            'KHC': 'kraftheinzcompany.com',
+            'GIS': 'generalmills.com',
+            'K': 'kelloggs.com',
+            'CAG': 'conagrabrands.com',
+            'CPB': 'campbellsoupcompany.com',
+            'HSY': 'thehersheycompany.com',
+            'MNST': 'monsterenergy.com',
+            'STZ': 'cbrands.com',
+            'BF.B': 'brown-forman.com',
+            'TAP': 'molsoncoors.com',
+            'TSN': 'tysonfoods.com',
+            'HRL': 'hormelfoods.com',
+            'SJM': 'jmsmucker.com',
+            'MKC': 'mccormick.com',
+            'LW': 'lambweston.com',
             'MCD': 'mcdonalds.com',
             'SBUX': 'starbucks.com',
+            'CMG': 'chipotle.com',
+            'YUM': 'yum.com',
+            'QSR': 'rbi.com',
+            'DPZ': 'dominos.com',
+            'DRI': 'darden.com',
+            'WEN': 'wendys.com',
+            'PZZA': 'papajohns.com',
+            'SHAK': 'shakeshack.com',
+            'WING': 'wingstop.com',
+            
+            // USA - Hospitality
+            'MAR': 'marriott.com',
+            'HLT': 'hilton.com',
+            'H': 'hyatt.com',
+            'WH': 'wyndhamhotels.com',
+            'MGM': 'mgmresorts.com',
+            'CZR': 'caesars.com',
+            'LVS': 'sands.com',
+            'WYNN': 'wynnresorts.com',
             
             // USA - Energy
             'XOM': 'exxonmobil.com',
             'CVX': 'chevron.com',
             'COP': 'conocophillips.com',
+            'OXY': 'oxy.com',
+            'MPC': 'marathonpetroleum.com',
+            'VLO': 'valero.com',
+            'PSX': 'phillips66.com',
+            'EOG': 'eogresources.com',
+            'PXD': 'pxd.com',
             'SLB': 'slb.com',
+            'HAL': 'halliburton.com',
+            'BKR': 'bakerhughes.com',
+            'KMI': 'kindermorgan.com',
+            'WMB': 'williams.com',
+            'OKE': 'oneok.com',
+            'LNG': 'cheniere.com',
             'NEE': 'nexteraenergy.com',
+            'DUK': 'duke-energy.com',
+            'SO': 'southerncompany.com',
+            'D': 'dominionenergy.com',
+            'EXC': 'exeloncorp.com',
+            'AEP': 'aep.com',
+            'SRE': 'sempra.com',
+            'XEL': 'xcelenergy.com',
+            'WEC': 'wecenergygroup.com',
+            'ES': 'eversource.com',
+            'PEG': 'pseg.com',
             
             // USA - Industrials
             'BA': 'boeing.com',
@@ -138,806 +334,59 @@ class CompaniesDirectory {
             'RTX': 'rtx.com',
             'NOC': 'northropgrumman.com',
             'GD': 'gd.com',
+            'LHX': 'l3harris.com',
             'DE': 'deere.com',
+            'UTX': 'utc.com',
+            'CARR': 'carrier.com',
+            'OTIS': 'otis.com',
+            'PH': 'parker.com',
+            'ETN': 'eaton.com',
+            'EMR': 'emerson.com',
+            'ITW': 'itw.com',
+            'ROK': 'rockwellautomation.com',
+            'JCI': 'johnsoncontrols.com',
+            'CMI': 'cummins.com',
+            'PCAR': 'paccar.com',
+            'WAB': 'wabtec.com',
+            'NSC': 'nscorp.com',
+            'UNP': 'up.com',
+            'CSX': 'csx.com',
+            'KSU': 'kcsouthern.com',
             'FDX': 'fedex.com',
             'UPS': 'ups.com',
-            
-            // USA - Automotive
-            'F': 'ford.com',
-            'GM': 'gm.com',
-            'RIVN': 'rivian.com',
-            'LCID': 'lucidmotors.com',
-            
-            // USA - Telecom
-            'VZ': 'verizon.com',
-            'T': 'att.com',
-            'TMUS': 't-mobile.com',
-            'CMCSA': 'comcast.com',
-            'DIS': 'thewaltdisneycompany.com',
-            'NWSA': 'newscorp.com',
-            
-            // USA - Real Estate
-            'AMT': 'americantower.com',
-            'PLD': 'prologis.com',
-            'EQIX': 'equinix.com',
-            
-            // USA - Mining
-            'BHP': 'bhp.com',
-            'RIO': 'riotinto.com',
-            'NEM': 'newmont.com',
-            
-            // ✅ EUROPE - Tech
-            'SAP': 'sap.com',
-            'ASML': 'asml.com',
-            'ERIC': 'ericsson.com',
-            'NOK': 'nokia.com',
-            'STM': 'st.com',
-            
-            // Europe - Luxury
-            'LVMUY': 'lvmh.com',
-            'RMS.PA': 'hermes.com',
-            'KER.PA': 'kering.com',
-            'CFRHF': 'richemont.com',
-            'SWGAY': 'swatchgroup.com',
-            'BURBY': 'burberryplc.com',
-            'MONC.MI': 'moncler.com',
-            
-            // Europe - Pharma
-            'NVO': 'novonordisk.com',
-            'RHHBY': 'roche.com',
-            'NVS': 'novartis.com',
-            'SNY': 'sanofi.com',
-            'AZN': 'astrazeneca.com',
-            'GSK': 'gsk.com',
-            'BAYRY': 'bayer.com',
-            
-            // Europe - Energy
-            'SHEL': 'shell.com',
-            'BP': 'bp.com',
-            'TTE': 'totalenergies.com',
-            'EQNR': 'equinor.com',
-            'E': 'eni.com',
-            
-            // Europe - Industrials
-            'SIEGY': 'siemens.com',
-            'ABB': 'abb.com',
-            'EADSY': 'airbus.com',
-            'RYCEY': 'rolls-royce.com',
-            'BAESY': 'baesystems.com',
-            
-            // Europe - Automotive
-            'VWAGY': 'volkswagen.com',
-            'BMWYY': 'bmw.com',
-            'MBGAF': 'mercedes-benz.com',
-            'STLA': 'stellantis.com',
-            'RACE': 'ferrari.com',
-            
-            // Europe - Telecom
-            'VOD': 'vodafone.com',
-            'ORAN': 'orange.com',
-            'DTEGY': 'telekom.com',
-            
-            // Europe - Consumer
-            'NSRGY': 'nestle.com',
-            'UL': 'unilever.com',
-            'DEO': 'diageo.com',
-            'HEINY': 'heineken.com',
-            'BUD': 'ab-inbev.com',
-            'ADDYY': 'adidas.com',
-            'TSCDY': 'tesco.com',
-            
-            // ✅ ASIE - Tech
-            'BABA': 'alibaba.com',
-            'TCEHY': 'tencent.com',
-            'TSM': 'tsmc.com',
-            'SSNLF': 'samsung.com',
-            'SONY': 'sony.com',
-            'BIDU': 'baidu.com',
-            'JD': 'jd.com',
-            'NIO': 'nio.com',
-            'LI': 'lixiang.com',
-            'XPEV': 'xiaopeng.com',
-            'BYDDY': 'byd.com',
-            'SFTBY': 'softbank.com',
-            'NTDOY': 'nintendo.com',
-            'INFY': 'infosys.com',
-            'WIT': 'wipro.com',
-            
-            // Asie - Finance
-            'HDB': 'hdfcbank.com',
-            'IBN': 'icicibank.com',
-            'MUFG': 'mufg.jp',
-            
-            // Asie - Automotive
-            'TM': 'toyota.com',
-            'HMC': 'honda.com',
-            'NSANY': 'nissan.com',
-            'HYMTF': 'hyundai.com',
-            
-            // Asie - Energy
-            'PTR': 'petrochina.com',
-            'SNP': 'sinopec.com'
+            'XPO': 'xpo.com',
+            'JBHT': 'jbhunt.com',
+            'ODFL': 'odfl.com'
         };
+    }
+    
+    // ✅ SYSTÈME DE LOGOS MULTI-API
+    getLogoUrl(ticker, companyName, domain) {
+        if (!domain) {
+            domain = this.autoGenerateDomain(ticker, companyName);
+        }
         
-        // ✅ Secteurs détaillés SANS "OUT EU"
-        this.detailedSectors = {
-            // USA - Technology
-            'AAPL': 'Technology - Consumer Electronics',
-            'MSFT': 'Technology - Software & Cloud',
-            'GOOGL': 'Technology - Internet Services & AI',
-            'AMZN': 'Technology - E-Commerce & Cloud (AWS)',
-            'META': 'Technology - Social Media & VR',
-            'TSLA': 'Automotive - Electric Vehicles & Energy',
-            'NVDA': 'Technology - Semiconductors (AI/GPU)',
-            'NFLX': 'Media - Streaming Entertainment',
-            'ADBE': 'Technology - Creative Software (Photoshop)',
-            'CRM': 'Technology - Enterprise CRM Software',
-            'ORCL': 'Technology - Database & Cloud',
-            'INTC': 'Technology - Semiconductors (CPUs)',
-            'AMD': 'Technology - Semiconductors (CPUs/GPUs)',
-            'QCOM': 'Technology - Mobile Chips & 5G',
-            'AVGO': 'Technology - Wireless Semiconductors',
-            'TXN': 'Technology - Analog Semiconductors',
-            'CSCO': 'Technology - Networking Equipment',
-            'IBM': 'Technology - Enterprise IT & Consulting',
-            'ACN': 'Consulting - IT Services & Strategy',
-            'NOW': 'Technology - Cloud Workflow Automation',
-            'INTU': 'Technology - Financial Software (QuickBooks)',
-            'PYPL': 'Fintech - Digital Payments',
-            'SQ': 'Fintech - Payment Processing',
-            'SNOW': 'Technology - Cloud Data Platform',
-            'PLTR': 'Technology - Big Data & AI Analytics',
-            'ZM': 'Technology - Video Communications',
-            'SHOP': 'Technology - E-Commerce Platform',
-            'UBER': 'Technology - Ride-Hailing & Delivery',
-            'LYFT': 'Technology - Ride-Sharing',
-            'ABNB': 'Technology - Vacation Rentals Platform',
-            'DASH': 'Technology - Food Delivery',
-            'SNAP': 'Technology - Social Media (Snapchat)',
-            'PINS': 'Technology - Visual Discovery Platform',
-            'SPOT': 'Media - Music Streaming',
-            'RBLX': 'Gaming - Metaverse Platform',
-            'TWLO': 'Technology - Cloud Communications API',
-            'OKTA': 'Cybersecurity - Identity Management',
-            'CRWD': 'Cybersecurity - Endpoint Protection',
-            'DDOG': 'Technology - Cloud Monitoring',
-            'MDB': 'Technology - NoSQL Database',
-            'SPLK': 'Technology - Data Analytics',
-            'WDAY': 'Technology - HR & Finance Cloud',
-            'ADSK': 'Technology - CAD & 3D Design',
-            'DELL': 'Technology - PCs & IT Infrastructure',
-            'HPQ': 'Technology - Personal Computing',
-            'HPE': 'Technology - Enterprise IT',
-            'WDC': 'Technology - Data Storage',
-            'STX': 'Technology - Hard Drives',
-            'MU': 'Technology - Memory Chips (DRAM)',
-            'AMAT': 'Technology - Semiconductor Equipment',
-            'LRCX': 'Technology - Chip Manufacturing Tools',
-            'KLAC': 'Technology - Wafer Inspection',
-            'ADI': 'Technology - Analog Semiconductors',
-            'MRVL': 'Technology - Data Infrastructure Chips',
-            'SNPS': 'Technology - Electronic Design Automation',
-            'CDNS': 'Technology - Chip Design Software',
-            
-            // USA - Finance & Banking
-            'JPM': 'Banking - Investment Banking',
-            'BAC': 'Banking - Commercial Banking',
-            'WFC': 'Banking - Diversified Banking',
-            'C': 'Banking - Global Banking',
-            'GS': 'Banking - Investment Banking & Trading',
-            'MS': 'Banking - Investment Banking',
-            'USB': 'Banking - Regional Banking',
-            'PNC': 'Banking - Regional Banking',
-            'TFC': 'Banking - Regional Banking (Truist)',
-            'COF': 'Banking - Consumer Banking & Credit Cards',
-            'SCHW': 'Financial Services - Discount Brokerage',
-            'AXP': 'Financial Services - Credit Cards & Travel',
-            'DFS': 'Financial Services - Credit Cards (Discover)',
-            'SYF': 'Financial Services - Consumer Credit',
-            'V': 'Fintech - Payment Networks',
-            'MA': 'Fintech - Payment Networks',
-            'AFRM': 'Fintech - Buy Now Pay Later',
-            'SOFI': 'Fintech - Digital Banking',
-            'HOOD': 'Fintech - Trading Platform',
-            'COIN': 'Fintech - Cryptocurrency Exchange',
-            'BLK': 'Asset Management - ETFs & Index Funds',
-            'STT': 'Financial Services - Custody & Asset Servicing',
-            'BK': 'Financial Services - Custody & Wealth',
-            'NTRS': 'Financial Services - Wealth Management',
-            'TROW': 'Asset Management - Mutual Funds',
-            'BEN': 'Asset Management - Franklin Templeton',
-            'IVZ': 'Asset Management - Invesco',
-            'RJF': 'Financial Services - Wealth Management',
-            'IBKR': 'Financial Services - Online Brokerage',
-            'ETFC': 'Financial Services - E-Trade',
-            'AMTD': 'Financial Services - TD Ameritrade',
-            'ALLY': 'Banking - Online Banking',
-            
-            // USA - Healthcare
-            'JNJ': 'Healthcare - Pharmaceuticals & Medical Devices',
-            'UNH': 'Healthcare - Health Insurance',
-            'PFE': 'Pharmaceuticals - Vaccines & Drugs',
-            'LLY': 'Pharmaceuticals - Diabetes & Oncology',
-            'ABBV': 'Pharmaceuticals - Immunology (Humira)',
-            'MRK': 'Pharmaceuticals - Vaccines & Oncology',
-            'ABT': 'Healthcare - Medical Devices & Diagnostics',
-            'TMO': 'Healthcare - Lab Equipment & Reagents',
-            'DHR': 'Healthcare - Life Sciences & Diagnostics',
-            'BMY': 'Pharmaceuticals - Oncology & Immunology',
-            'AMGN': 'Biotechnology - Biologics',
-            'GILD': 'Biotechnology - Antivirals (HIV/HCV)',
-            'REGN': 'Biotechnology - Monoclonal Antibodies',
-            'VRTX': 'Biotechnology - Gene Therapy (Cystic Fibrosis)',
-            'MRNA': 'Biotechnology - mRNA Vaccines',
-            'BNTX': 'Biotechnology - mRNA Vaccines (Pfizer Partner)',
-            'BIIB': 'Biotechnology - Neurology (Alzheimer)',
-            'ILMN': 'Healthcare - DNA Sequencing',
-            'ISRG': 'Medical Devices - Robotic Surgery (Da Vinci)',
-            'SYK': 'Medical Devices - Orthopedics',
-            'BSX': 'Medical Devices - Interventional Cardiology',
-            'MDT': 'Medical Devices - Cardiovascular',
-            'BAX': 'Healthcare - Renal & Hospital Products',
-            'BDX': 'Medical Devices - Syringes & Diagnostics',
-            'CI': 'Healthcare - Health Insurance (Cigna)',
-            'HUM': 'Healthcare - Health Insurance (Humana)',
-            'CVS': 'Healthcare - Pharmacy & PBM',
-            'WBA': 'Healthcare - Pharmacy Retail (Walgreens)',
-            'MCK': 'Healthcare - Pharmaceutical Distribution',
-            'CAH': 'Healthcare - Medical Supply Distribution',
-            'ABC': 'Healthcare - Pharmaceutical Distribution',
-            'ZBH': 'Medical Devices - Orthopedic Implants',
-            'EW': 'Medical Devices - Heart Valves',
-            'IDXX': 'Healthcare - Veterinary Diagnostics',
-            'WAT': 'Healthcare - Lab Instruments',
-            'A': 'Healthcare - Lab Equipment (Agilent)',
-            
-            // USA - Consumer & Retail
-            'WMT': 'Retail - Supermarkets & Hypermarkets',
-            'COST': 'Retail - Warehouse Clubs',
-            'HD': 'Retail - Home Improvement',
-            'TGT': 'Retail - Discount Department Stores',
-            'LOW': 'Retail - Home Improvement',
-            'TJX': 'Retail - Off-Price Apparel (TJ Maxx)',
-            'DG': 'Retail - Dollar Stores',
-            'DLTR': 'Retail - Dollar Stores (Dollar Tree)',
-            'BBY': 'Retail - Consumer Electronics',
-            'EBAY': 'Technology - Online Marketplace',
-            'ETSY': 'Technology - Handmade Goods Marketplace',
-            'W': 'Retail - Online Furniture (Wayfair)',
-            'GPS': 'Retail - Apparel (Gap, Old Navy)',
-            'ROST': 'Retail - Off-Price Apparel (Ross)',
-            'BURL': 'Retail - Off-Price Department Stores',
-            'JWN': 'Retail - Luxury Department Stores (Nordstrom)',
-            'M': 'Retail - Department Stores (Macy\'s)',
-            'KSS': 'Retail - Department Stores (Kohl\'s)',
-            'FL': 'Retail - Athletic Footwear (Foot Locker)',
-            'NKE': 'Consumer Goods - Athletic Footwear & Apparel',
-            'LULU': 'Consumer Goods - Athletic Apparel (Yoga)',
-            'UAA': 'Consumer Goods - Athletic Apparel (Under Armour)',
-            'VFC': 'Consumer Goods - Outdoor Apparel (Vans, North Face)',
-            'RL': 'Consumer Goods - Luxury Apparel (Ralph Lauren)',
-            'TPR': 'Consumer Goods - Luxury Accessories (Coach)',
-            'CPRI': 'Consumer Goods - Luxury Fashion (Versace)',
-            
-            // USA - Food & Beverage
-            'KO': 'Beverages - Soft Drinks (Coca-Cola)',
-            'PEP': 'Beverages & Food - Soft Drinks & Snacks',
-            'MDLZ': 'Food - Snacks & Confectionery (Oreo)',
-            'KHC': 'Food - Packaged Foods (Kraft, Heinz)',
-            'GIS': 'Food - Packaged Foods (Cheerios)',
-            'K': 'Food - Breakfast Cereals (Kellogg\'s)',
-            'CAG': 'Food - Packaged Foods (Conagra)',
-            'CPB': 'Food - Soups & Packaged Foods (Campbell)',
-            'HSY': 'Food - Chocolate & Confectionery (Hershey\'s)',
-            'MNST': 'Beverages - Energy Drinks (Monster)',
-            'STZ': 'Beverages - Beer & Wine (Corona)',
-            'BF.B': 'Beverages - Spirits (Jack Daniel\'s)',
-            'TAP': 'Beverages - Beer (Coors)',
-            'TSN': 'Food - Meat Processing (Tyson)',
-            'HRL': 'Food - Meat & Packaged Foods (Hormel)',
-            'SJM': 'Food - Jam & Coffee (Smucker\'s)',
-            'MKC': 'Food - Spices & Seasonings (McCormick)',
-            'LW': 'Food - Frozen Potato Products (Lamb Weston)',
-            
-            // USA - Restaurants
-            'MCD': 'Restaurants - Fast Food (McDonald\'s)',
-            'SBUX': 'Restaurants - Coffee Chains (Starbucks)',
-            'CMG': 'Restaurants - Fast Casual (Chipotle)',
-            'YUM': 'Restaurants - Fast Food (KFC, Taco Bell)',
-            'QSR': 'Restaurants - Fast Food (Burger King)',
-            'DPZ': 'Restaurants - Pizza Delivery (Domino\'s)',
-            'DRI': 'Restaurants - Casual Dining (Olive Garden)',
-            'WEN': 'Restaurants - Fast Food (Wendy\'s)',
-            'PZZA': 'Restaurants - Pizza (Papa John\'s)',
-            'SHAK': 'Restaurants - Fast Casual (Shake Shack)',
-            'WING': 'Restaurants - Chicken Wings (Wingstop)',
-            
-            // USA - Hospitality
-            'MAR': 'Hospitality - Hotels (Marriott)',
-            'HLT': 'Hospitality - Hotels (Hilton)',
-            'H': 'Hospitality - Hotels (Hyatt)',
-            'WH': 'Hospitality - Hotels (Wyndham)',
-            'MGM': 'Hospitality - Casinos (MGM Resorts)',
-            'CZR': 'Hospitality - Casinos (Caesars)',
-            'LVS': 'Hospitality - Casinos (Las Vegas Sands)',
-            'WYNN': 'Hospitality - Casinos (Wynn)',
-            
-            // USA - Energy
-            'XOM': 'Energy - Oil & Gas (Integrated)',
-            'CVX': 'Energy - Oil & Gas (Integrated)',
-            'COP': 'Energy - Oil & Gas (Exploration)',
-            'OXY': 'Energy - Oil & Gas (Occidental)',
-            'MPC': 'Energy - Oil Refining',
-            'VLO': 'Energy - Oil Refining (Valero)',
-            'PSX': 'Energy - Oil Refining (Phillips 66)',
-            'EOG': 'Energy - Oil & Gas (Shale)',
-            'PXD': 'Energy - Oil & Gas (Permian Basin)',
-            'SLB': 'Energy - Oilfield Services',
-            'HAL': 'Energy - Oilfield Services (Halliburton)',
-            'BKR': 'Energy - Oilfield Services (Baker Hughes)',
-            'KMI': 'Energy - Oil & Gas Pipelines',
-            'WMB': 'Energy - Natural Gas Pipelines',
-            'OKE': 'Energy - Midstream Energy',
-            'LNG': 'Energy - Liquefied Natural Gas',
-            'NEE': 'Utilities - Renewable Energy (Solar/Wind)',
-            'DUK': 'Utilities - Electric Power',
-            'SO': 'Utilities - Electric & Gas',
-            'D': 'Utilities - Electric & Gas (Dominion)',
-            'EXC': 'Utilities - Electric Power (Exelon)',
-            'AEP': 'Utilities - Electric Power',
-            'SRE': 'Utilities - Electric & Gas (Sempra)',
-            'XEL': 'Utilities - Electric & Gas (Xcel)',
-            'WEC': 'Utilities - Electric & Gas',
-            'ES': 'Utilities - Electric & Gas (Eversource)',
-            'PEG': 'Utilities - Electric & Gas (PSEG)',
-            
-            // USA - Industrials
-            'BA': 'Aerospace - Commercial Aircraft (Boeing)',
-            'CAT': 'Industrials - Construction Equipment',
-            'HON': 'Industrials - Aerospace & Automation',
-            'MMM': 'Industrials - Diversified Manufacturing (3M)',
-            'GE': 'Industrials - Aerospace & Power Turbines',
-            'LMT': 'Defense - Aerospace & Missiles',
-            'RTX': 'Defense - Aerospace (Raytheon)',
-            'NOC': 'Defense - Aerospace & Cyber',
-            'GD': 'Defense - Combat Systems & Submarines',
-            'LHX': 'Defense - Communications & Sensors',
-            'DE': 'Agriculture - Farm Equipment (John Deere)',
-            'UTX': 'Industrials - Aerospace (Legacy United Tech)',
-            'CARR': 'Industrials - HVAC Systems',
-            'OTIS': 'Industrials - Elevators & Escalators',
-            'PH': 'Industrials - Motion & Control',
-            'ETN': 'Industrials - Electrical Equipment',
-            'EMR': 'Industrials - Automation (Emerson)',
-            'ITW': 'Industrials - Diversified Manufacturing',
-            'ROK': 'Industrials - Industrial Automation',
-            'JCI': 'Industrials - Building Technology',
-            'CMI': 'Industrials - Diesel Engines (Cummins)',
-            'PCAR': 'Automotive - Heavy Trucks (Peterbilt)',
-            'WAB': 'Industrials - Rail Equipment (Wabtec)',
-            'NSC': 'Transportation - Freight Rail (Norfolk Southern)',
-            'UNP': 'Transportation - Freight Rail (Union Pacific)',
-            'CSX': 'Transportation - Freight Rail',
-            'KSU': 'Transportation - Freight Rail (Kansas City)',
-            'FDX': 'Logistics - Express Delivery (FedEx)',
-            'UPS': 'Logistics - Package Delivery',
-            'XPO': 'Logistics - Freight Transportation',
-            'JBHT': 'Logistics - Trucking (J.B. Hunt)',
-            'ODFL': 'Logistics - LTL Freight',
-            
-            // USA - Automotive
-            'F': 'Automotive - Vehicles (Ford)',
-            'GM': 'Automotive - Vehicles (General Motors)',
-            'RIVN': 'Automotive - Electric Trucks & SUVs',
-            'LCID': 'Automotive - Electric Luxury Sedans',
-            'NKLA': 'Automotive - Electric Trucks (Nikola)',
-            'FSR': 'Automotive - Electric Vehicles (Fisker)',
-            
-            // USA - Telecom & Media
-            'VZ': 'Telecommunications - Wireless (Verizon)',
-            'T': 'Telecommunications - Wireless & Media (AT&T)',
-            'TMUS': 'Telecommunications - Wireless (T-Mobile)',
-            'CMCSA': 'Media - Cable & Broadband (Comcast)',
-            'CHTR': 'Media - Cable & Broadband (Charter)',
-            'DIS': 'Media - Entertainment & Streaming (Disney+)',
-            'WBD': 'Media - Entertainment (Warner Bros)',
-            'PARA': 'Media - Entertainment (Paramount)',
-            'SIRI': 'Media - Satellite Radio (SiriusXM)',
-            'FOX': 'Media - Broadcasting (Fox)',
-            'NWSA': 'Media - Publishing (News Corp)',
-            'VIAC': 'Media - Broadcasting (ViacomCBS)',
-            'DISCA': 'Media - Broadcasting (Discovery)',
-            'LYV': 'Media - Live Entertainment (Ticketmaster)',
-            'MSG': 'Media - Sports & Entertainment (MSG)',
-            
-            // USA - Real Estate
-            'AMT': 'Real Estate - Cell Towers',
-            'PLD': 'Real Estate - Logistics Warehouses',
-            'CCI': 'Real Estate - Cell Towers (Crown Castle)',
-            'EQIX': 'Real Estate - Data Centers',
-            'PSA': 'Real Estate - Self-Storage',
-            'SPG': 'Real Estate - Shopping Malls',
-            'O': 'Real Estate - Retail Properties (Realty Income)',
-            'VICI': 'Real Estate - Casinos & Entertainment',
-            'WELL': 'Real Estate - Healthcare Properties',
-            'AVB': 'Real Estate - Apartments',
-            'EQR': 'Real Estate - Apartments',
-            'DLR': 'Real Estate - Data Centers (Digital Realty)',
-            'SBAC': 'Real Estate - Cell Towers (SBA)',
-            'LEN': 'Real Estate - Home Construction (Lennar)',
-            'DHI': 'Real Estate - Home Construction (DR Horton)',
-            'PHM': 'Real Estate - Home Construction (PulteGroup)',
-            'NVR': 'Real Estate - Home Construction',
-            'TOL': 'Real Estate - Home Construction (Toll Brothers)',
-            
-            // USA - Mining
-            'BHP': 'Mining - Diversified Metals (Iron Ore)',
-            'RIO': 'Mining - Iron Ore & Copper',
-            'VALE': 'Mining - Iron Ore (Brazil)',
-            'GLNCY': 'Mining - Diversified Metals (Glencore)',
-            'AAUKY': 'Mining - Platinum & Diamonds (Anglo American)',
-            'FCX': 'Mining - Copper (Freeport-McMoRan)',
-            'NEM': 'Mining - Gold (Newmont)',
-            'GOLD': 'Mining - Gold (Barrick)',
-            'FSUGY': 'Mining - Iron Ore (Fortescue)',
-            'AA': 'Mining - Aluminum (Alcoa)',
-            'MT': 'Industrials - Steel (ArcelorMittal)',
-            'NUE': 'Industrials - Steel (Nucor)',
-            'STLD': 'Industrials - Steel (Steel Dynamics)',
-            
-            // ✅ EUROPE - Technology
-            'SAP': 'Technology - Enterprise Software (Germany)',
-            'ASML': 'Technology - Semiconductor Equipment (Netherlands)',
-            'ERIC': 'Telecommunications - Network Equipment (Sweden)',
-            'NOK': 'Telecommunications - Mobile Networks (Finland)',
-            'IFX.DE': 'Technology - Semiconductors (Germany)',
-            'STM': 'Technology - Semiconductors (France/Italy)',
-            'CAP.PA': 'Consulting - IT Services (France)',
-            'DSY.PA': 'Technology - 3D Design Software (France)',
-            'AMS.MC': 'Technology - Travel Booking Systems (Spain)',
-            'WLN.PA': 'Fintech - Payment Processing (France)',
-            'SGE.L': 'Technology - Accounting Software (UK)',
-            'UBI.PA': 'Gaming - Video Games (France)',
-            'DHER.DE': 'Technology - Food Delivery (Germany)',
-            'ZAL.DE': 'Retail - Online Fashion (Germany)',
-            'JET.AS': 'Technology - Food Delivery (Netherlands)',
-            'TMV.DE': 'Technology - Remote Access Software (Germany)',
-            'PRX.AS': 'Technology - Internet Investments (Netherlands)',
-            'BKNG': 'Technology - Travel Booking (Netherlands)',
-            'EXPE': 'Technology - Travel Booking (USA)',
-            
-            // Europe - Luxury
-            'LVMUY': 'Luxury Goods - Fashion & Spirits (France)',
-            'RMS.PA': 'Luxury Goods - Leather Goods (France)',
-            'KER.PA': 'Luxury Goods - Fashion (Gucci) (France)',
-            'OR.PA': 'Consumer Goods - Cosmetics (L\'Oréal) (France)',
-            'ADDYY': 'Consumer Goods - Sportswear (Germany)',
-            'PMMAF': 'Consumer Goods - Sportswear (Puma) (Germany)',
-            'ITX.MC': 'Retail - Fast Fashion (Zara) (Spain)',
-            'HNNMY': 'Retail - Fast Fashion (H&M) (Sweden)',
-            'BURBY': 'Luxury Goods - Fashion (UK)',
-            'MONC.MI': 'Luxury Goods - Outerwear (Italy)',
-            'CFRHF': 'Luxury Goods - Jewelry (Cartier) (Switzerland)',
-            'SWGAY': 'Luxury Goods - Watches (Switzerland)',
-            'PANDY': 'Luxury Goods - Jewelry (Denmark)',
-            
-            // Europe - Pharma
-            'NVO': 'Pharmaceuticals - Diabetes Care (Denmark)',
-            'RHHBY': 'Pharmaceuticals - Oncology (Switzerland)',
-            'NVS': 'Pharmaceuticals - Generics & Drugs (Switzerland)',
-            'SNY': 'Pharmaceuticals - Vaccines (France)',
-            'AZN': 'Pharmaceuticals - Oncology (UK)',
-            'GSK': 'Pharmaceuticals - Vaccines & Respiratory (UK)',
-            'BAYRY': 'Pharmaceuticals & Agriculture (Germany)',
-            'SMMNY': 'Healthcare - Medical Imaging (Germany)',
-            'FSNUY': 'Healthcare - Dialysis & Hospital Products (Germany)',
-            'PHG': 'Healthcare - Medical Equipment (Philips) (Netherlands)',
-            'LZAGY': 'Healthcare - Biotech Manufacturing (Switzerland)',
-            'GRFS': 'Healthcare - Blood Products (Spain)',
-            'UCBJF': 'Pharmaceuticals - Neurology (Belgium)',
-            'RCDTF': 'Pharmaceuticals - Specialty Drugs (Italy)',
-            'ALM.MC': 'Pharmaceuticals - Dermatology (Spain)',
-            'GLPG': 'Biotechnology - Inflammation (Belgium)',
-            
-            // Europe - Consumer & Retail
-            'CA.PA': 'Retail - Supermarkets (France)',
-            'TSCDY': 'Retail - Supermarkets (UK)',
-            'SBRY.L': 'Retail - Supermarkets (UK)',
-            'B4B.DE': 'Retail - Wholesale (Germany)',
-            'AD.AS': 'Retail - Supermarkets (Netherlands)',
-            'CO.PA': 'Retail - Supermarkets (France)',
-            'MKS.L': 'Retail - Department Stores (UK)',
-            'NXT.L': 'Retail - Fashion (UK)',
-            'ABF.L': 'Retail - Discount Fashion (Primark) (UK)',
-            'KGF.L': 'Retail - Home Improvement (UK)',
-            
-            // Europe - Food & Beverage
-            'NSRGY': 'Food - Nutrition & Beverages (Nescafé) (Switzerland)',
-            'DANOY': 'Food - Dairy Products (France)',
-            'UL': 'Consumer Goods - Food & Personal Care (UK/Netherlands)',
-            'DEO': 'Beverages - Spirits (Johnnie Walker) (UK)',
-            'HEINY': 'Beverages - Beer (Netherlands)',
-            'CABGY': 'Beverages - Beer (Denmark)',
-            'BUD': 'Beverages - Beer (Belgium)',
-            'PDRDY': 'Beverages - Spirits (France)',
-            'REMYY': 'Beverages - Cognac (France)',
-            'DVDCY': 'Beverages - Spirits (Italy)',
-            'LDSVF': 'Food - Chocolate (Lindt) (Switzerland)',
-            'BYCBF': 'Food - Chocolate Manufacturing (Switzerland)',
-            'TATYY': 'Food - Sweeteners (UK)',
-            'KRYAY': 'Food - Ingredients & Flavors (Ireland)',
-            
-            // Europe - Hospitality
-            'ACCYY': 'Hospitality - Hotels (France)',
-            'WTB.L': 'Hospitality - Hotels (UK)',
-            'IHG': 'Hospitality - Hotels (InterContinental) (UK)',
-            
-            // Europe - Energy
-            'SHEL': 'Energy - Oil & Gas (UK)',
-            'BP': 'Energy - Oil & Gas (UK)',
-            'TTE': 'Energy - Oil & Gas (France)',
-            'EQNR': 'Energy - Oil & Gas (Norway)',
-            'E': 'Energy - Oil & Gas (Italy)',
-            'REPYY': 'Energy - Oil & Gas (Spain)',
-            'OMVKY': 'Energy - Oil & Gas (Austria)',
-            'GLPEY': 'Energy - Oil & Gas (Portugal)',
-            'NTOIY': 'Energy - Renewable Diesel (Finland)',
-            'DNNGY': 'Energy - Offshore Wind (Denmark)',
-            'IBDRY': 'Utilities - Renewable Energy (Spain)',
-            'ENLAY': 'Utilities - Electric Power (Italy)',
-            'EDPFY': 'Utilities - Renewable Energy (Portugal)',
-            'RWEOY': 'Utilities - Electric & Gas (Germany)',
-            'EONGY': 'Utilities - Electric & Gas (Germany)',
-            'ENGIY': 'Utilities - Gas & Electricity (France)',
-            'SSEZY': 'Utilities - Renewable Energy (UK)',
-            'NGG': 'Utilities - Gas & Electricity Distribution (UK)',
-            'CPYYY': 'Utilities - Gas & Electricity (UK)',
-            'ECIFY': 'Utilities - Nuclear & Hydro (France)',
-            'FOJCF': 'Utilities - Power Generation (Finland)',
-            'OEZVY': 'Utilities - Hydro Power (Austria)',
-            
-            // Europe - Industrials
-            'SIEGY': 'Industrials - Automation & Electrification (Germany)',
-            'ABB': 'Industrials - Robotics & Power Grids (Switzerland)',
-            'SBGSF': 'Industrials - Electrical Equipment (France)',
-            'EADSY': 'Aerospace - Commercial Aircraft (France)',
-            'SAFRY': 'Aerospace - Aircraft Engines (France)',
-            'RYCEY': 'Aerospace - Jet Engines (UK)',
-            'BAESY': 'Defense - Aerospace & Naval (UK)',
-            'THLLY': 'Defense - Aerospace & Cyber (France)',
-            'FINMY': 'Defense - Aerospace & Electronics (Italy)',
-            'MTUAY': 'Aerospace - Aircraft Engines (Germany)',
-            'DUAVF': 'Aerospace - Fighter Jets (France)',
-            'RNMBY': 'Defense - Weapons Systems (Germany)',
-            'KNYJY': 'Industrials - Elevators & Escalators (Finland)',
-            'SHLRF': 'Industrials - Elevators (Switzerland)',
-            'ATLKY': 'Industrials - Compressors & Vacuum (Sweden)',
-            'VOLVY': 'Automotive - Trucks & Buses (Sweden)',
-            'SCVCY': 'Automotive - Trucks (Sweden)',
-            'VLKAF': 'Automotive - Trucks (Germany)',
-            'DTG': 'Automotive - Trucks (Germany)',
-            'KNRRY': 'Automotive - Braking Systems (Germany)',
-            'CNHI': 'Agriculture - Tractors & Equipment (Italy)',
-            'KMTUY': 'Industrials - Construction Equipment (Japan/Europe)',
-            'SDVKY': 'Industrials - Mining & Construction Tools (Sweden)',
-            'SKFRY': 'Industrials - Bearings (Sweden)',
-            'ALFVY': 'Industrials - Heat Transfer Equipment (Sweden)',
-            'LGRDY': 'Industrials - Electrical Equipment (France)',
-            'RXL.PA': 'Distribution - Electrical Equipment (France)',
-            'BNTGY': 'Distribution - Chemicals (Germany)',
-            'DPSGY': 'Logistics - Mail & Parcel (Germany)',
-            'PNL.AS': 'Logistics - Mail & Parcel (Netherlands)',
-            'RMG.L': 'Logistics - Mail (UK)',
-            'KHNGY': 'Logistics - Freight Forwarding (Switzerland)',
-            'DSDVY': 'Logistics - Freight Forwarding (Denmark)',
-            
-            // Europe - Automotive
-            'VWAGY': 'Automotive - Vehicles (Volkswagen) (Germany)',
-            'BMWYY': 'Automotive - Luxury Vehicles (Germany)',
-            'MBGAF': 'Automotive - Luxury Vehicles (Mercedes) (Germany)',
-            'POAHY': 'Automotive - Sports Cars (Porsche) (Germany)',
-            'RACE': 'Automotive - Luxury Sports Cars (Ferrari) (Italy)',
-            'STLA': 'Automotive - Vehicles (Peugeot, Fiat) (France/Italy)',
-            'RNLSY': 'Automotive - Vehicles (France)',
-            
-            // Europe - Telecom
-            'VOD': 'Telecommunications - Mobile & Broadband (UK)',
-            'BT.L': 'Telecommunications - Fixed & Mobile (UK)',
-            'ORAN': 'Telecommunications - Mobile & Internet (France)',
-            'DTEGY': 'Telecommunications - Mobile & Broadband (Germany)',
-            'TEF': 'Telecommunications - Mobile & Broadband (Spain)',
-            'TIIAY': 'Telecommunications - Fixed & Mobile (Italy)',
-            'SCMWY': 'Telecommunications - Fixed & Mobile (Switzerland)',
-            'KKPNY': 'Telecommunications - Fixed & Mobile (Netherlands)',
-            'BGAOY': 'Telecommunications - Fixed & Mobile (Belgium)',
-            'TELNY': 'Telecommunications - Mobile (Norway)',
-            'TLSNY': 'Telecommunications - Mobile (Sweden)',
-            
-            // Europe - Banking
-            'HSBC': 'Banking - Global Banking (UK)',
-            'BCS': 'Banking - Investment Banking (UK)',
-            'SCBFF': 'Banking - Emerging Markets (UK)',
-            'LYG': 'Banking - Retail Banking (UK)',
-            'NWG.L': 'Banking - Retail Banking (UK)',
-            'DB': 'Banking - Investment Banking (Germany)',
-            'CBKGF': 'Banking - Commercial Banking (Germany)',
-            'UBS': 'Banking - Wealth Management (Switzerland)',
-            'CS': 'Banking - Investment Banking (Switzerland)',
-            'BNP.PA': 'Banking - Investment Banking (France)',
-            'GLE.PA': 'Banking - Commercial Banking (France)',
-            'ACA.PA': 'Banking - Regional Banking (France)',
-            'ING': 'Banking - Retail Banking (Netherlands)',
-            'ABN.AS': 'Banking - Retail Banking (Netherlands)',
-            'UCG.MI': 'Banking - Commercial Banking (Italy)',
-            'ISP.MI': 'Banking - Retail Banking (Italy)',
-            'SAN': 'Banking - Retail Banking (Spain)',
-            'BBVA': 'Banking - Commercial Banking (Spain)',
-            'CABK.MC': 'Banking - Retail Banking (Spain)',
-            'NDAFI': 'Banking - Retail Banking (Nordics)',
-            'DANSKE.CO': 'Banking - Retail Banking (Denmark)',
-            'ALV.DE': 'Insurance - Property & Casualty (Germany)',
-            'CS.PA': 'Insurance - Life & Property (France)',
-            'ZURN.SW': 'Insurance - Property & Casualty (Switzerland)',
-            'PRU.L': 'Insurance - Life Insurance (UK)',
-            'AV.L': 'Insurance - Life & General (UK)',
-            'LGEN.L': 'Insurance - Pensions & Investments (UK)',
-            'G.MI': 'Insurance - Life & Property (Italy)',
-            
-            // ✅ ASIE - Technology
-            'BABA': 'Technology - E-Commerce (Taobao, Tmall) (China)',
-            'TCEHY': 'Technology - Social Media & Gaming (WeChat) (China)',
-            'SSNLF': 'Technology - Consumer Electronics (Smartphones) (South Korea)',
-            'TSM': 'Technology - Semiconductor Manufacturing (Taiwan)',
-            'SONY': 'Technology - Gaming & Electronics (PlayStation) (Japan)',
-            'BIDU': 'Technology - Search Engine (China)',
-            'JD': 'Technology - E-Commerce (China)',
-            'NTES': 'Technology - Online Gaming (China)',
-            'PDD': 'Technology - E-Commerce (Pinduoduo) (China)',
-            '3690.HK': 'Technology - Food Delivery (Meituan) (China)',
-            'XIACF': 'Technology - Smartphones (China)',
-            'NIO': 'Automotive - Electric Vehicles (China)',
-            'LI': 'Automotive - Electric SUVs (Li Auto) (China)',
-            'XPEV': 'Automotive - Electric Vehicles (XPeng) (China)',
-            'BYDDY': 'Automotive - Electric Vehicles & Batteries (China)',
-            'RKUNY': 'Technology - E-Commerce & Fintech (Japan)',
-            'SFTBY': 'Conglomerate - Telecom & Investments (Japan)',
-            'NTDOY': 'Gaming - Console & Games (Nintendo Switch) (Japan)',
-            'KYCCF': 'Technology - Factory Automation (Japan)',
-            'TOELY': 'Technology - Semiconductor Equipment (Japan)',
-            '035420.KS': 'Technology - Internet Services (Naver) (South Korea)',
-            '035720.KS': 'Technology - Internet Services (Kakao) (South Korea)',
-            '000660.KS': 'Technology - Memory Chips (SK Hynix) (South Korea)',
-            '066570.KS': 'Technology - Consumer Electronics (LG) (South Korea)',
-            'INFY': 'Technology - IT Services & Consulting (India)',
-            'TCS.NS': 'Technology - IT Services (India)',
-            'WIT': 'Technology - IT Consulting (India)',
-            'HCLTECH.NS': 'Technology - IT Services (India)',
-            'TECHM.NS': 'Technology - IT Services (India)',
-            
-            // Asie - Banking
-            'IDCBY': 'Banking - Commercial Banking (China)',
-            'CICHY': 'Banking - Construction Loans (China)',
-            'ACGBY': 'Banking - Agricultural Banking (China)',
-            'BACHF': 'Banking - Commercial Banking (China)',
-            'PNGAY': 'Insurance & Banking - Life Insurance (China)',
-            'CIHKY': 'Banking - Commercial Banking (China)',
-            'HDB': 'Banking - Retail Banking (India)',
-            'IBN': 'Banking - Retail Banking (India)',
-            'SBKFF': 'Banking - Retail Banking (India)',
-            'AXIBANK.NS': 'Banking - Retail Banking (India)',
-            'KOTAKBANK.NS': 'Banking - Retail Banking (India)',
-            'MUFG': 'Banking - Commercial Banking (Japan)',
-            'SMFG': 'Banking - Commercial Banking (Japan)',
-            'MFG': 'Banking - Commercial Banking (Mizuho) (Japan)',
-            'NMR': 'Banking - Investment Banking (Japan)',
-            'DBSDY': 'Banking - Commercial Banking (Singapore)',
-            'OVCHY': 'Banking - Commercial Banking (Singapore)',
-            'UOVEY': 'Banking - Commercial Banking (Singapore)',
-            
-            // Asie - Automotive
-            'TM': 'Automotive - Vehicles (Toyota) (Japan)',
-            'HMC': 'Automotive - Motorcycles & Cars (Honda) (Japan)',
-            'NSANY': 'Automotive - Vehicles (Nissan) (Japan)',
-            'MZDAY': 'Automotive - Vehicles (Mazda) (Japan)',
-            'FUJHY': 'Automotive - Vehicles (Subaru) (Japan)',
-            'SZKMY': 'Automotive - Vehicles (Suzuki) (Japan)',
-            'MMTOF': 'Automotive - Vehicles (Mitsubishi) (Japan)',
-            'HYMTF': 'Automotive - Vehicles (Hyundai) (South Korea)',
-            'KIMTF': 'Automotive - Vehicles (Kia) (South Korea)',
-            'GELYF': 'Automotive - Vehicles (Geely) (China)',
-            '2333.HK': 'Automotive - Vehicles (Great Wall) (China)',
-            '600104.SS': 'Automotive - Vehicles (SAIC) (China)',
-            
-            // Asie - Energy
-            'PTR': 'Energy - Oil & Gas (China)',
-            'SNP': 'Energy - Oil & Gas Refining (China)',
-            'CEO': 'Energy - Offshore Oil & Gas (China)',
-            'RELIANCE.NS': 'Energy & Petrochemicals (India)',
-            'ONGC.NS': 'Energy - Oil & Gas Exploration (India)',
-            'IOC.NS': 'Energy - Oil Refining (India)',
-            '2222.SR': 'Energy - Oil & Gas (Saudi Arabia)',
-            
-            // Asie - Industrials
-            'MHVYF': 'Industrials - Heavy Industries (Japan)',
-            'KWHIY': 'Industrials - Heavy Industries (Japan)',
-            'IHICF': 'Industrials - Shipbuilding (Japan)',
-            'HTHIY': 'Industrials - Conglomerate (Hitachi) (Japan)',
-            'TOSYY': 'Industrials - Conglomerate (Toshiba) (Japan)',
-            'PCRFY': 'Industrials - Electronics (Panasonic) (Japan)',
-            'MKTAY': 'Industrials - Power Tools (Makita) (Japan)',
-            'FANUY': 'Industrials - Industrial Robots (Japan)',
-            'YASKY': 'Industrials - Industrial Robots (Japan)',
-            'SMCAY': 'Industrials - Pneumatic Components (Japan)',
-            'KMTUY': 'Industrials - Construction Equipment (Japan)',
-            'KUBTY': 'Agriculture - Tractors (Japan)',
-            'HINOF': 'Automotive - Trucks (Hino) (Japan)',
-            'ISUZY': 'Automotive - Trucks (Isuzu) (Japan)',
-            'LT.NS': 'Industrials - Infrastructure & Engineering (India)',
-            'TTM': 'Automotive - Vehicles (Tata Motors) (India)',
-            'MAHMF': 'Automotive - Vehicles (Mahindra) (India)',
-            
-            // Asie - Consumer
-            '9983.T': 'Retail - Fashion (Uniqlo) (Japan)',
-            'SVNDY': 'Retail - Convenience Stores (7-Eleven) (Japan)',
-            '2651.T': 'Retail - Convenience Stores (Lawson) (Japan)',
-            '8028.T': 'Retail - Convenience Stores (FamilyMart) (Japan)',
-            '3099.T': 'Retail - Department Stores (Japan)',
-            '8267.T': 'Retail - Supermarkets (Japan)',
-            '7453.T': 'Retail - Household Goods (Muji) (Japan)',
-            'SSDOY': 'Consumer Goods - Cosmetics (Japan)',
-            'KAOCF': 'Consumer Goods - Personal Care (Japan)',
-            '2020.HK': 'Consumer Goods - Sportswear (Anta) (China)',
-            '2331.HK': 'Consumer Goods - Sportswear (Li Ning) (China)',
-            
-            // Crypto
-            'BTC-USD': 'Cryptocurrency - Digital Currency (Bitcoin)',
-            'ETH-USD': 'Cryptocurrency - Smart Contracts (Ethereum)',
-            'MARA': 'Cryptocurrency - Bitcoin Mining',
-            'RIOT': 'Cryptocurrency - Bitcoin Mining',
-            'MSTR': 'Technology - Business Intelligence & Bitcoin Treasury',
-            
-            // Fintech
-            'LC': 'Fintech - Peer-to-Peer Lending',
-            'TREE': 'Fintech - Loan Marketplace',
-            'UPST': 'Fintech - AI Lending',
-            
-            // Chemicals
-            'BASFY': 'Chemicals - Diversified Chemicals (Germany)',
-            'DOW': 'Chemicals - Commodity Chemicals',
-            'DD': 'Chemicals - Specialty Materials (DuPont)',
-            'LIN': 'Chemicals - Industrial Gases',
-            'AIQUY': 'Chemicals - Industrial Gases (France)',
-            'APD': 'Chemicals - Industrial Gases',
-            'SHW': 'Chemicals - Paints & Coatings',
-            'PPG': 'Chemicals - Paints & Coatings',
-            'ECL': 'Chemicals - Cleaning & Sanitation',
-            'CTVA': 'Agriculture - Crop Protection',
-            'CF': 'Chemicals - Fertilizers',
-            'MOS': 'Chemicals - Fertilizers (Mosaic)',
-            'NTR': 'Agriculture - Fertilizers (Nutrien)',
-            'IFF': 'Chemicals - Flavors & Fragrances'
+        return {
+            primary: `https://img.logo.dev/${domain}?token=pk_X-WazSBJQn2GwW2hy9Lwpg`,
+            fallbacks: [
+                `https://logo.clearbit.com/${domain}`,
+                `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+                `https://unavatar.io/${domain}?fallback=false`
+            ],
+            domain: domain
         };
-        
-        this.init();
     }
     
     init() {
         console.log('🏢 Initializing Companies Directory...');
-        
-        // Load companies from entity database
         this.loadCompanies();
-        
-        // Setup event listeners
         this.setupEventListeners();
-        
-        // Render initial view
         this.applyFiltersAndPagination();
         this.updateStats();
         this.renderCharts();
-        
         console.log('✅ Companies Directory initialized!');
     }
-    
+
     loadCompanies() {
         if (!window.entityDB) {
             console.error('❌ EntityDatabase not found!');
@@ -948,22 +397,23 @@ class CompaniesDirectory {
         
         // Convert to array format
         this.allCompanies = Object.entries(companiesObj).map(([name, ticker]) => {
-            const sector = this.getDetailedSector(ticker);
-            const region = this.getRegionForTicker(ticker);
+            const sector = this.getMainSector(ticker);
+            const region = this.getRegionForTicker(ticker, name);
             const domain = this.companyDomains[ticker];
+            const logoUrls = this.getLogoUrl(ticker, name, domain);
             
             return {
                 name: name,
                 ticker: ticker,
                 sector: sector,
                 region: region,
-                domain: domain,
-                // ✅ API de logos GRATUITE : Google Favicons avec fallback Unavatar
-                logoUrl: domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : null
+                domain: logoUrls.domain,
+                logoUrl: logoUrls.primary,
+                logoFallbacks: logoUrls.fallbacks
             };
         });
         
-        // Remove duplicates (same ticker)
+        // Remove duplicates
         const seen = new Set();
         this.allCompanies = this.allCompanies.filter(company => {
             if (seen.has(company.ticker)) {
@@ -976,41 +426,40 @@ class CompaniesDirectory {
         console.log(`📊 Loaded ${this.allCompanies.length} companies`);
     }
     
-    getDetailedSector(ticker) {
-        return this.detailedSectors[ticker] || 'Other';
+    // ✅ SECTEUR PRINCIPAL (15 catégories)
+    getMainSector(ticker) {
+        for (const [sectorName, tickers] of Object.entries(this.mainSectors)) {
+            if (tickers.includes(ticker)) {
+                return sectorName;
+            }
+        }
+        return 'Other';
     }
     
-    getRegionForTicker(ticker) {
-        const sector = this.detailedSectors[ticker] || '';
+    // ✅ RÉGION (basée sur ticker et nom)
+    getRegionForTicker(ticker, name) {
+        // Détection par extension de ticker
+        const europeanSuffixes = ['.PA', '.DE', '.L', '.AS', '.MC', '.MI', '.SW', '.CO', '.HE', '.VI', '.PL', '.PR', '.ST', '.OL', '.AT'];
+        const asianSuffixes = ['.HK', '.T', '.SS', '.SZ', '.KS', '.NS', '.TW', '.SR', '.SI', '.BK'];
         
-        // Détection basée sur les parenthèses dans le secteur
-        if (sector.includes('(China)') || sector.includes('(Taiwan)') || 
-            sector.includes('(Japan)') || sector.includes('(South Korea)') ||
-            sector.includes('(India)') || sector.includes('(Singapore)') ||
-            sector.includes('(Hong Kong)') || sector.includes('(Saudi Arabia)')) {
+        if (europeanSuffixes.some(suffix => ticker.includes(suffix))) {
+            return 'Europe';
+        }
+        
+        if (asianSuffixes.some(suffix => ticker.includes(suffix))) {
             return 'Asia';
         }
         
-        if (sector.includes('(Germany)') || sector.includes('(France)') || 
-            sector.includes('(UK)') || sector.includes('(Switzerland)') ||
-            sector.includes('(Italy)') || sector.includes('(Spain)') ||
-            sector.includes('(Netherlands)') || sector.includes('(Sweden)') ||
-            sector.includes('(Belgium)') || sector.includes('(Denmark)') ||
-            sector.includes('(Norway)') || sector.includes('(Finland)') ||
-            sector.includes('(Austria)') || sector.includes('(Portugal)') ||
-            sector.includes('(Ireland)') || sector.includes('(Poland)')) {
+        // Détection par nom de société (mots-clés européens)
+        const europeanKeywords = ['HSBC', 'Barclays', 'Vodafone', 'Shell', 'BP', 'SAP', 'ASML', 'LVMH', 'Hermès', 'Kering', 'Danone', 'Nestlé', 'Nestle', 'Unilever', 'Diageo', 'Heineken', 'Siemens', 'ABB', 'Airbus', 'Volkswagen', 'BMW', 'Mercedes', 'Ferrari', 'Renault', 'Stellantis', 'Orange', 'Deutsche', 'BNP', 'UBS', 'Credit Suisse', 'Allianz', 'AXA', 'Zurich', 'Novartis', 'Roche', 'Novo Nordisk', 'AstraZeneca', 'GSK', 'Sanofi', 'Bayer'];
+        
+        const asianKeywords = ['Alibaba', 'Tencent', 'Samsung', 'TSMC', 'Taiwan', 'Sony', 'Baidu', 'Toyota', 'Honda', 'Nissan', 'Hyundai', 'Mitsubishi', 'Toshiba', 'Panasonic', 'Hitachi', 'SoftBank', 'Nintendo', 'Infosys', 'Wipro', 'TCS', 'HDFC', 'ICICI', 'Reliance', 'Petro', 'Sinopec', 'CNOOC', 'PetroChina'];
+        
+        if (europeanKeywords.some(keyword => name.includes(keyword))) {
             return 'Europe';
         }
         
-        // Fallback sur format ticker
-        if (ticker.includes('.PA') || ticker.includes('.DE') || ticker.includes('.L') || 
-            ticker.includes('.AS') || ticker.includes('.MC') || ticker.includes('.MI') ||
-            ticker.includes('.SW') || ticker.includes('.CO')) {
-            return 'Europe';
-        }
-        
-        if (ticker.includes('.HK') || ticker.includes('.T') || ticker.includes('.SS') || 
-            ticker.includes('.KS') || ticker.includes('.NS') || ticker.includes('.SR')) {
+        if (asianKeywords.some(keyword => name.includes(keyword))) {
             return 'Asia';
         }
         
@@ -1018,7 +467,6 @@ class CompaniesDirectory {
     }
     
     setupEventListeners() {
-        // Search
         const searchInput = document.getElementById('companySearch');
         const clearBtn = document.getElementById('clearSearch');
         
@@ -1037,7 +485,6 @@ class CompaniesDirectory {
             this.applyFiltersAndPagination();
         });
         
-        // Filters
         document.getElementById('sectorFilter')?.addEventListener('change', (e) => {
             this.filters.sector = e.target.value;
             this.currentPage = 1;
@@ -1055,7 +502,6 @@ class CompaniesDirectory {
             this.applyFiltersAndPagination();
         });
         
-        // Reset filters
         document.getElementById('resetFilters')?.addEventListener('click', () => {
             searchInput.value = '';
             this.filters = {
@@ -1072,7 +518,6 @@ class CompaniesDirectory {
             this.applyFiltersAndPagination();
         });
         
-        // View toggles
         document.querySelectorAll('.view-toggle').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.view-toggle').forEach(b => b.classList.remove('active'));
@@ -1102,8 +547,7 @@ class CompaniesDirectory {
         
         // Region filter
         if (this.filters.region !== 'all') {
-            const region = this.filters.region.charAt(0).toUpperCase() + this.filters.region.slice(1);
-            filtered = filtered.filter(company => company.region === region);
+            filtered = filtered.filter(company => company.region.toLowerCase() === this.filters.region.toLowerCase());
         }
         
         // Sort
@@ -1124,7 +568,7 @@ class CompaniesDirectory {
         
         this.filteredCompanies = filtered;
         
-        // ✅ Pagination
+        // Pagination
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
         this.displayedCompanies = filtered.slice(startIndex, endIndex);
@@ -1136,12 +580,10 @@ class CompaniesDirectory {
     
     renderCompanies() {
         const container = document.getElementById('companiesContainer');
-        const loadingState = document.getElementById('loadingState');
         const noResults = document.getElementById('noResults');
         
         if (!container) return;
         
-        // Update container class based on view
         container.className = this.currentView === 'grid' ? 'companies-grid' : 
                               this.currentView === 'list' ? 'companies-list' : 
                               'companies-compact';
@@ -1156,14 +598,17 @@ class CompaniesDirectory {
         
         container.innerHTML = this.displayedCompanies.map(company => {
             const initials = company.name.substring(0, 2).toUpperCase();
+            const fallbacksData = JSON.stringify(company.logoFallbacks || []);
             
             return `
                 <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")'>
                     <div class='company-header'>
-                        <div class='company-logo ${!company.logoUrl ? 'text-fallback' : ''}' data-ticker='${company.ticker}'>
+                        <div class='company-logo' 
+                             data-ticker='${company.ticker}' 
+                             data-fallbacks='${fallbacksData.replace(/'/g, '&apos;')}'>
                             ${company.logoUrl 
                                 ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='CompaniesDirectory.handleLogoError(this, "${initials}")'>` 
-                                : initials
+                                : `<div class='text-fallback'>${initials}</div>`
                             }
                         </div>
                         <div class='company-info'>
@@ -1183,7 +628,23 @@ class CompaniesDirectory {
         }).join('');
     }
     
-    // ✅ Pagination Render
+    // ✅ GESTION ERREURS LOGOS (cascade d'APIs)
+    static handleLogoError(img, initials) {
+        const logoDiv = img.parentElement;
+        const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+        if (fallbacks.length > 0) {
+            const nextUrl = fallbacks.shift();
+            logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+            img.src = nextUrl;
+            console.log(`🔄 Trying fallback logo: ${nextUrl}`);
+        } else {
+            logoDiv.classList.add('text-fallback');
+            logoDiv.innerHTML = initials;
+            console.log(`⚠ Using text fallback: ${initials}`);
+        }
+    }
+    
     renderPagination() {
         const totalPages = Math.ceil(this.filteredCompanies.length / this.itemsPerPage);
         
@@ -1196,7 +657,6 @@ class CompaniesDirectory {
         
         let paginationHTML = '';
         
-        // Previous button
         paginationHTML += `
             <button class='pagination-btn ${this.currentPage === 1 ? 'disabled' : ''}' 
                     onclick='CompaniesDirectory.goToPage(${this.currentPage - 1})' 
@@ -1205,7 +665,6 @@ class CompaniesDirectory {
             </button>
         `;
         
-        // Page numbers
         const maxVisiblePages = 5;
         let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -1237,7 +696,6 @@ class CompaniesDirectory {
             paginationHTML += `<button class='pagination-btn' onclick='CompaniesDirectory.goToPage(${totalPages})'>${totalPages}</button>`;
         }
         
-        // Next button
         paginationHTML += `
             <button class='pagination-btn ${this.currentPage === totalPages ? 'disabled' : ''}' 
                     onclick='CompaniesDirectory.goToPage(${this.currentPage + 1})' 
@@ -1248,7 +706,6 @@ class CompaniesDirectory {
         
         document.getElementById('paginationControls').innerHTML = paginationHTML;
         
-        // Update info
         const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.filteredCompanies.length);
         document.getElementById('paginationInfo').textContent = 
@@ -1260,36 +717,26 @@ class CompaniesDirectory {
         instance.currentPage = page;
         instance.applyFiltersAndPagination();
         
-        // Scroll to top
         document.querySelector('.companies-grid, .companies-list, .companies-compact')?.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'start' 
         });
     }
     
-    static handleLogoError(img, initials) {
-        const logoDiv = img.parentElement;
-        logoDiv.classList.add('text-fallback');
-        logoDiv.innerHTML = initials;
-        console.log(`⚠ Logo not found, using fallback: ${initials}`);
-    }
-    
     updateStats() {
         document.getElementById('totalCompanies').textContent = this.allCompanies.length.toLocaleString();
         document.getElementById('filteredCompanies').textContent = this.filteredCompanies.length.toLocaleString();
         
-        // Count unique sectors
         const sectors = new Set(this.allCompanies.map(c => c.sector));
         document.getElementById('totalSectors').textContent = sectors.size;
         
-        // Count unique regions
         const regions = new Set(this.allCompanies.map(c => c.region));
         document.getElementById('totalRegions').textContent = regions.size;
         
-        // Populate sector filter
         const sectorFilter = document.getElementById('sectorFilter');
         if (sectorFilter && sectorFilter.options.length === 1) {
-            Array.from(sectors).sort().forEach(sector => {
+            // Utiliser les 15 secteurs principaux
+            Object.keys(this.mainSectors).sort().forEach(sector => {
                 const option = document.createElement('option');
                 option.value = sector;
                 option.textContent = sector;
@@ -1297,7 +744,7 @@ class CompaniesDirectory {
             });
         }
     }
-    
+
     renderCharts() {
         this.renderSectorChart();
         this.renderRegionChart();
@@ -1308,15 +755,12 @@ class CompaniesDirectory {
         
         const sectorCounts = {};
         this.allCompanies.forEach(company => {
-            // Group by main sector (first part before " - ")
-            const mainSector = company.sector.split(' - ')[0];
-            sectorCounts[mainSector] = (sectorCounts[mainSector] || 0) + 1;
+            sectorCounts[company.sector] = (sectorCounts[company.sector] || 0) + 1;
         });
         
         const data = Object.entries(sectorCounts)
             .map(([name, y]) => ({ name, y }))
-            .sort((a, b) => b.y - a.y)
-            .slice(0, 15); // Top 15 sectors
+            .sort((a, b) => b.y - a.y);
         
         Highcharts.chart('sectorChart', {
             chart: {
@@ -1324,7 +768,7 @@ class CompaniesDirectory {
                 backgroundColor: 'transparent'
             },
             title: {
-                text: 'Companies by Main Sector (Top 15)',
+                text: 'Companies by Sector',
                 style: {
                     fontSize: '1.2rem',
                     fontWeight: '800'
@@ -1371,7 +815,7 @@ class CompaniesDirectory {
                 backgroundColor: 'transparent'
             },
             title: {
-                text: 'Companies by Geographic Region',
+                text: 'Companies by Region',
                 style: {
                     fontSize: '1.2rem',
                     fontWeight: '800'
@@ -1419,10 +863,10 @@ class CompaniesDirectory {
         
         modalContent.innerHTML = `
             <div class='company-modal-header'>
-                <div class='company-modal-logo ${!company.logoUrl ? 'text-fallback' : ''}'>
+                <div class='company-modal-logo'>
                     ${company.logoUrl 
                         ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='this.parentElement.classList.add("text-fallback"); this.parentElement.innerHTML="${initials}";'>` 
-                        : initials
+                        : `<div class='text-fallback'>${initials}</div>`
                     }
                 </div>
                 <div class='company-modal-info'>
@@ -1473,12 +917,137 @@ class CompaniesDirectory {
     }
 }
 
-// Initialize on DOM load
+// ✅ CONTINUATION DU MAPPING DOMAINES (Europe + Asie)
+// Ajoutez ces lignes dans buildCompleteDomainMapping() après les domaines USA
+
+// Dans la fonction buildCompleteDomainMapping(), continuez avec :
+/*
+            // EUROPE - Tech
+            'SAP': 'sap.com',
+            'ASML': 'asml.com',
+            'ERIC': 'ericsson.com',
+            'NOK': 'nokia.com',
+            'STM': 'st.com',
+            
+            // Europe - Luxury
+            'LVMUY': 'lvmh.com',
+            'RMS.PA': 'hermes.com',
+            'KER.PA': 'kering.com',
+            'OR.PA': 'loreal.com',
+            'ADDYY': 'adidas.com',
+            'PMMAF': 'puma.com',
+            'ITX.MC': 'inditex.com',
+            'HNNMY': 'hm.com',
+            'BURBY': 'burberryplc.com',
+            'MONC.MI': 'moncler.com',
+            'CFRHF': 'richemont.com',
+            'SWGAY': 'swatchgroup.com',
+            'PANDY': 'pandoragroup.com',
+            
+            // Europe - Pharma
+            'NVO': 'novonordisk.com',
+            'RHHBY': 'roche.com',
+            'NVS': 'novartis.com',
+            'SNY': 'sanofi.com',
+            'AZN': 'astrazeneca.com',
+            'GSK': 'gsk.com',
+            'BAYRY': 'bayer.com',
+            'SMMNY': 'siemens-healthineers.com',
+            'FSNUY': 'fresenius.com',
+            'PHG': 'philips.com',
+            'LZAGY': 'lonza.com',
+            'GRFS': 'grifols.com',
+            
+            // Europe - Consumer
+            'CA.PA': 'carrefour.com',
+            'TSCDY': 'tesco.com',
+            'SBRY.L': 'sainsburys.co.uk',
+            'AD.AS': 'aholddelhaize.com',
+            'MKS.L': 'marksandspencer.com',
+            
+            // Europe - Food & Beverage
+            'NSRGY': 'nestle.com',
+            'DANOY': 'danone.com',
+            'UL': 'unilever.com',
+            'DEO': 'diageo.com',
+            'HEINY': 'heineken.com',
+            'CABGY': 'carlsberg.com',
+            'BUD': 'ab-inbev.com',
+            'PDRDY': 'pernod-ricard.com',
+            
+            // Europe - Energy
+            'SHEL': 'shell.com',
+            'BP': 'bp.com',
+            'TTE': 'totalenergies.com',
+            'EQNR': 'equinor.com',
+            'E': 'eni.com',
+            
+            // Europe - Industrials
+            'SIEGY': 'siemens.com',
+            'ABB': 'abb.com',
+            'EADSY': 'airbus.com',
+            'RYCEY': 'rolls-royce.com',
+            'BAESY': 'baesystems.com',
+            
+            // Europe - Automotive
+            'VWAGY': 'volkswagenag.com',
+            'BMWYY': 'bmwgroup.com',
+            'MBGAF': 'mercedes-benz.com',
+            'RACE': 'ferrari.com',
+            'STLA': 'stellantis.com',
+            
+            // Europe - Telecom
+            'VOD': 'vodafone.com',
+            'ORAN': 'orange.com',
+            'DTEGY': 'telekom.com',
+            
+            // Europe - Banking
+            'HSBC': 'hsbc.com',
+            'BCS': 'barclays.com',
+            'DB': 'db.com',
+            'UBS': 'ubs.com',
+            'ING': 'ing.com',
+            'SAN': 'santander.com',
+            'BBVA': 'bbva.com',
+            
+            // ASIE - Tech
+            'BABA': 'alibaba.com',
+            'TCEHY': 'tencent.com',
+            'SSNLF': 'samsung.com',
+            'TSM': 'tsmc.com',
+            'SONY': 'sony.com',
+            'BIDU': 'baidu.com',
+            'JD': 'jd.com',
+            'NIO': 'nio.com',
+            'SFTBY': 'softbank.jp',
+            'NTDOY': 'nintendo.com',
+            'INFY': 'infosys.com',
+            'WIT': 'wipro.com',
+            
+            // Asie - Finance
+            'HDB': 'hdfcbank.com',
+            'IBN': 'icicibank.com',
+            'MUFG': 'mufg.jp',
+            
+            // Asie - Automotive
+            'TM': 'toyota.com',
+            'HMC': 'honda.com',
+            'NSANY': 'nissan-global.com',
+            'HYMTF': 'hyundai.com',
+            
+            // Crypto
+            'BTC-USD': 'bitcoin.org',
+            'ETH-USD': 'ethereum.org',
+            'MARA': 'marathondh.com',
+            'RIOT': 'riotplatforms.com',
+            'MSTR': 'microstrategy.com'
+*/
+
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.companiesDirectoryInstance = new CompaniesDirectory();
 });
 
-// Close modal on outside click
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('companyModal');
     if (e.target === modal) {
@@ -1486,7 +1055,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Close modal on Escape key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         CompaniesDirectory.closeModal();
