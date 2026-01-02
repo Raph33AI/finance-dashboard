@@ -1190,3 +1190,204 @@ body.dark-mode .pagination-btn:hover:not(.disabled) {
         font-size: 0.8rem;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   ENRICHED BADGE (Badge vert sur les cartes enrichies)
+   ════════════════════════════════════════════════════════════════ */
+.enriched-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.enriched-badge:hover {
+    transform: scale(1.2) rotate(15deg);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.6);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LOADING INDICATOR (Indicateur de chargement)
+   ════════════════════════════════════════════════════════════════ */
+#preloadStatus {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 600;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STAT CARD ENRICHED (Carte stat pour profils enrichis)
+   ════════════════════════════════════════════════════════════════ */
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover i {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Dark Mode */
+body.dark-mode .stat-card {
+    background: #1e293b;
+}
+
+body.dark-mode .stat-card i {
+    color: #818cf8;
+}
+
+body.dark-mode .stat-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .stat-label {
+    color: #94a3b8;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL ENRICHED STYLES (Styles pour le modal enrichi)
+   ════════════════════════════════════════════════════════════════ */
+.company-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 16px 16px 0 0;
+    margin: -24px -24px 24px -24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.company-modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.05) 10px,
+        rgba(255, 255, 255, 0.05) 20px
+    );
+    animation: moveStripes 20s linear infinite;
+}
+
+@keyframes moveStripes {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+.company-modal-logo {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.company-modal-logo img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE (Mobile)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .stat-card i {
+        font-size: 2rem;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .enriched-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+    
+    .company-modal-header {
+        padding: 20px;
+        margin: -16px -16px 16px -16px;
+    }
+    
+    .company-modal-logo {
+        width: 80px;
+        height: 80px;
+    }
+}

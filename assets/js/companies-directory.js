@@ -1,7 +1,7 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * COMPANIES DIRECTORY - SYSTÈME COMPLET
- * Multi-API Logos + 15 Secteurs Principaux + Filtres Région
+ * COMPANIES DIRECTORY - SYSTÈME COMPLET V2.0
+ * Multi-API Logos + Google Knowledge Graph + 15 Secteurs + Régions
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -18,6 +18,20 @@ class CompaniesDirectory {
             search: '',
             sector: 'all',
             region: 'all'
+        };
+        
+        // ✅ NOUVEAU : URL du Worker Cloudflare (À MODIFIER AVEC TON URL)
+        this.knowledgeGraphWorkerUrl = 'https://google-knowledge-api.raphnardone.workers.dev';
+        
+        // ✅ NOUVEAU : Cache local des données enrichies
+        this.enrichedDataCache = new Map();
+        
+        // ✅ NOUVEAU : État du préchargement
+        this.preloadingStatus = {
+            isLoading: false,
+            loaded: 0,
+            total: 0,
+            errors: 0
         };
         
         // ✅ 15 SECTEURS PRINCIPAUX (Monde entier)
@@ -497,14 +511,60 @@ class CompaniesDirectory {
         };
     }
     
-    init() {
+    // ✅ INITIALISATION PRINCIPALE
+    async init() {
         console.log('🏢 Initializing Companies Directory...');
+        
+        // Afficher un indicateur de chargement
+        this.showLoadingIndicator();
+        
         this.loadCompanies();
         this.setupEventListeners();
+        
+        // ✅ NOUVEAU : Pré-charger les données enrichies pour les 100 premières entreprises
+        await this.preloadEnrichedData(100);
+        
         this.applyFiltersAndPagination();
         this.updateStats();
         this.renderCharts();
+        
+        // Masquer l'indicateur de chargement
+        this.hideLoadingIndicator();
+        
         console.log('✅ Companies Directory initialized!');
+    }
+
+    // ✅ NOUVEAU : Afficher indicateur de chargement
+    showLoadingIndicator() {
+        const container = document.getElementById('companiesContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div style='grid-column: 1 / -1; text-align: center; padding: 80px 20px;'>
+                <div style='display: inline-block; position: relative;'>
+                    <i class='fas fa-spinner fa-spin' style='font-size: 4rem; color: #667eea;'></i>
+                    <div style='margin-top: 24px; font-size: 1.2rem; font-weight: 700; color: #1e293b;'>
+                        Loading Companies Directory...
+                    </div>
+                    <div id='preloadStatus' style='margin-top: 12px; font-size: 0.95rem; color: #64748b;'>
+                        Preparing data...
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // ✅ NOUVEAU : Masquer indicateur de chargement
+    hideLoadingIndicator() {
+        // Le container sera remplacé par renderCompanies()
+    }
+    
+    // ✅ NOUVEAU : Mettre à jour le statut de préchargement
+    updatePreloadStatus(message) {
+        const statusEl = document.getElementById('preloadStatus');
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
     }
 
     loadCompanies() {
@@ -584,6 +644,111 @@ class CompaniesDirectory {
         }
         
         return 'USA';
+    }
+    
+    // ✅ NOUVEAU : PRÉCHARGEMENT DES DONNÉES ENRICHIES (100 ENTREPRISES)
+    async preloadEnrichedData(count = 100) {
+        console.log(`🔄 Pre-loading enriched data for ${count} companies...`);
+        
+        this.preloadingStatus.isLoading = true;
+        this.preloadingStatus.total = Math.min(count, this.allCompanies.length);
+        this.preloadingStatus.loaded = 0;
+        this.preloadingStatus.errors = 0;
+        
+        const topCompanies = this.allCompanies.slice(0, count);
+        
+        // Batch de 50 entreprises à la fois (limite Worker)
+        const batchSize = 50;
+        const batches = [];
+        
+        for (let i = 0; i < topCompanies.length; i += batchSize) {
+            batches.push(topCompanies.slice(i, i + batchSize));
+        }
+        
+        console.log(`📦 Processing ${batches.length} batches of ${batchSize} companies...`);
+        
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+            const batch = batches[batchIndex];
+            
+            this.updatePreloadStatus(
+                `Loading batch ${batchIndex + 1}/${batches.length} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total} companies)...`
+            );
+            
+            try {
+                const response = await fetch(`${this.knowledgeGraphWorkerUrl}/batch-companies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        companies: batch.map(c => ({ name: c.name, ticker: c.ticker }))
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    result.results.forEach(item => {
+                        if (item.data && item.data.found) {
+                            this.enrichedDataCache.set(item.ticker, item.data);
+                            this.preloadingStatus.loaded++;
+                        } else if (item.error) {
+                            console.warn(`⚠ Error for ${item.ticker}:`, item.error);
+                            this.preloadingStatus.errors++;
+                        }
+                    });
+                    
+                    console.log(`✅ Batch ${batchIndex + 1}/${batches.length} completed: ${this.enrichedDataCache.size} total enriched`);
+                } else {
+                    console.error(`❌ Batch ${batchIndex + 1} failed:`, result.error);
+                    this.preloadingStatus.errors += batch.length;
+                }
+                
+                // Pause de 100ms entre chaque batch pour éviter le rate limiting
+                if (batchIndex < batches.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+            } catch (error) {
+                console.error(`❌ Batch ${batchIndex + 1} failed:`, error);
+                this.preloadingStatus.errors += batch.length;
+            }
+        }
+        
+        this.preloadingStatus.isLoading = false;
+        
+        console.log(`✅ Pre-loading completed!`);
+        console.log(`   📊 Total: ${this.preloadingStatus.total}`);
+        console.log(`   ✅ Loaded: ${this.enrichedDataCache.size}`);
+        console.log(`   ❌ Errors: ${this.preloadingStatus.errors}`);
+        
+        this.updatePreloadStatus(
+            `✅ Loaded ${this.enrichedDataCache.size} enriched company profiles`
+        );
+    }
+    
+    // ✅ NOUVEAU : Récupérer les données enrichies depuis Google Knowledge Graph
+    async fetchEnrichedData(company) {
+        // Vérifier le cache
+        if (this.enrichedDataCache.has(company.ticker)) {
+            return this.enrichedDataCache.get(company.ticker);
+        }
+        
+        try {
+            const response = await fetch(
+                `${this.knowledgeGraphWorkerUrl}/company-info?query=${encodeURIComponent(company.name)}&ticker=${company.ticker}`
+            );
+            
+            const result = await response.json();
+            
+            if (result.success && result.data.found) {
+                this.enrichedDataCache.set(company.ticker, result.data);
+                return result.data;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error(`❌ Error fetching enriched data for ${company.ticker}:`, error);
+            return null;
+        }
     }
     
     setupEventListeners() {
@@ -720,8 +885,15 @@ class CompaniesDirectory {
             const initials = company.name.substring(0, 2).toUpperCase();
             const fallbacksData = JSON.stringify(company.logoFallbacks || []);
             
+            // ✅ NOUVEAU : Badge si données enrichies disponibles
+            const hasEnrichedData = this.enrichedDataCache.has(company.ticker);
+            const enrichedBadge = hasEnrichedData 
+                ? `<div class='enriched-badge' title='Enhanced with Google Knowledge Graph' style='position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);'><i class='fas fa-check'></i></div>`
+                : '';
+            
             return `
-                <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")'>
+                <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")' style='position: relative; cursor: pointer;'>
+                    ${enrichedBadge}
                     <div class='company-header'>
                         <div class='company-logo' 
                              data-ticker='${company.ticker}' 
@@ -853,6 +1025,13 @@ class CompaniesDirectory {
         const regions = new Set(this.allCompanies.map(c => c.region));
         document.getElementById('totalRegions').textContent = regions.size;
         
+        // ✅ NOUVEAU : Afficher le nombre de profils enrichis
+        const enrichedCount = this.enrichedDataCache.size;
+        const enrichedStat = document.getElementById('enrichedProfiles');
+        if (enrichedStat) {
+            enrichedStat.textContent = enrichedCount.toLocaleString();
+        }
+        
         const sectorFilter = document.getElementById('sectorFilter');
         if (sectorFilter && sectorFilter.options.length === 1) {
             // Utiliser les 15 secteurs principaux
@@ -970,7 +1149,8 @@ class CompaniesDirectory {
         });
     }
     
-    static openCompanyModal(ticker) {
+    // ✅ NOUVEAU : MODAL ENRICHI AVEC DONNÉES GOOGLE KNOWLEDGE GRAPH
+    static async openCompanyModal(ticker) {
         const instance = window.companiesDirectoryInstance;
         const company = instance.allCompanies.find(c => c.ticker === ticker);
         
@@ -979,57 +1159,119 @@ class CompaniesDirectory {
         const modal = document.getElementById('companyModal');
         const modalContent = document.getElementById('companyModalContent');
         
-        const initials = company.name.substring(0, 2).toUpperCase();
-        
+        // ✅ Afficher un loader
         modalContent.innerHTML = `
-            <div class='company-modal-header'>
-                <div class='company-modal-logo'>
-                    ${company.logoUrl 
-                        ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='this.parentElement.classList.add("text-fallback"); this.parentElement.innerHTML="${initials}";'>` 
-                        : `<div class='text-fallback'>${initials}</div>`
+            <div style='text-align: center; padding: 60px;'>
+                <i class='fas fa-spinner fa-spin' style='font-size: 3rem; color: #667eea;'></i>
+                <p style='margin-top: 20px; font-size: 1.1rem; color: #64748b;'>Loading company information...</p>
+            </div>
+        `;
+        
+        modal.classList.add('active');
+        
+        // ✅ Récupérer les données enrichies
+        const enrichedData = await instance.fetchEnrichedData(company);
+        
+        // ✅ Logo avec fallback
+        const initials = company.name.substring(0, 2).toUpperCase();
+        const logoUrl = enrichedData?.image || company.logoUrl;
+        
+        // ✅ NOUVEAU MODAL ENRICHI
+        modalContent.innerHTML = `
+            <div class='company-modal-header' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; margin: -24px -24px 24px -24px;'>
+                <div class='company-modal-logo' style='width: 100px; height: 100px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);'>
+                    ${logoUrl 
+                        ? `<img src='${logoUrl}' alt='${company.name}' style='max-width: 80%; max-height: 80%; object-fit: contain;' onerror='this.parentElement.classList.add("text-fallback"); this.parentElement.innerHTML="${initials}"; this.parentElement.style.fontSize="2.5rem"; this.parentElement.style.fontWeight="900"; this.parentElement.style.color="#667eea";'>` 
+                        : `<div style='font-size: 2.5rem; font-weight: 900; color: #667eea;'>${initials}</div>`
                     }
                 </div>
-                <div class='company-modal-info'>
-                    <h3>${company.name}</h3>
-                    <div class='company-ticker'>${company.ticker}</div>
+                <h3 style='color: white; font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 8px;'>${company.name}</h3>
+                <div style='text-align: center;'>
+                    <span class='company-ticker' style='background: rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 20px; font-size: 1.1rem; font-weight: 800;'>${company.ticker}</span>
                 </div>
             </div>
             
-            <div class='company-modal-details'>
-                <div class='detail-group'>
-                    <h4>Sector</h4>
-                    <p>${company.sector}</p>
+            ${enrichedData && enrichedData.found ? `
+                <!-- ✅ DESCRIPTION ENRICHIE -->
+                <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); padding: 24px; border-radius: 16px; margin-bottom: 24px;'>
+                    <h4 style='font-size: 1.2rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'>
+                        <i class='fas fa-info-circle' style='color: #667eea;'></i>
+                        About ${company.name}
+                    </h4>
+                    <p style='color: #475569; line-height: 1.7; font-size: 0.95rem;'>${enrichedData.description || 'No description available.'}</p>
+                    ${enrichedData.descriptionUrl ? `
+                        <a href='${enrichedData.descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; color: #667eea; font-weight: 700; font-size: 0.9rem; margin-top: 12px; text-decoration: none;'>
+                            Learn more <i class='fas fa-external-link-alt' style='font-size: 0.75rem;'></i>
+                        </a>
+                    ` : ''}
                 </div>
-                <div class='detail-group'>
-                    <h4>Region</h4>
-                    <p>${company.region}</p>
+            ` : ''}
+            
+            <!-- ✅ DÉTAILS PRINCIPAUX -->
+            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;'>
+                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #667eea;'>
+                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Sector</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${company.sector}</div>
                 </div>
-                <div class='detail-group'>
-                    <h4>Ticker Symbol</h4>
-                    <p>${company.ticker}</p>
+                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #10b981;'>
+                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Region</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${company.region}</div>
                 </div>
-                ${company.domain ? `
-                <div class='detail-group'>
-                    <h4>Website</h4>
-                    <p><a href='https://${company.domain}' target='_blank' style='color: #667eea; text-decoration: none; font-weight: 700;'>${company.domain} <i class='fas fa-external-link-alt' style='font-size: 0.85rem; margin-left: 4px;'></i></a></p>
+                ${enrichedData && enrichedData.headquarters ? `
+                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #f59e0b;'>
+                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Headquarters</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.headquarters}</div>
+                </div>
+                ` : ''}
+                ${enrichedData && enrichedData.foundingDate ? `
+                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #8b5cf6;'>
+                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Founded</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.foundingDate}</div>
+                </div>
+                ` : ''}
+                ${enrichedData && enrichedData.industry ? `
+                <div style='background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #ec4899;'>
+                    <div style='font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Industry</div>
+                    <div style='font-size: 1.1rem; font-weight: 800; color: #1e293b;'>${enrichedData.industry}</div>
                 </div>
                 ` : ''}
             </div>
             
-            <div style='margin-top: 32px; text-align: center; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;'>
-                <a href='advanced-analysis.html?symbol=${company.ticker}' class='filter-btn' style='display: inline-flex; text-decoration: none;'>
+            ${enrichedData && (enrichedData.url || company.domain) ? `
+            <!-- ✅ LIEN SITE WEB -->
+            <div style='background: linear-gradient(135deg, #10b981, #059669); padding: 16px 24px; border-radius: 12px; margin-bottom: 24px;'>
+                <a href='${enrichedData.url || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
+                    <span style='display: flex; align-items: center; gap: 12px;'>
+                        <i class='fas fa-globe' style='font-size: 1.5rem;'></i>
+                        <span style='font-size: 1.1rem;'>Visit Official Website</span>
+                    </span>
+                    <i class='fas fa-arrow-right'></i>
+                </a>
+            </div>
+            ` : ''}
+            
+            <!-- ✅ ACTIONS -->
+            <div style='display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;'>
+                <a href='advanced-analysis.html?symbol=${company.ticker}' class='filter-btn' style='flex: 1; min-width: 200px; display: inline-flex; text-decoration: none; justify-content: center; background: linear-gradient(135deg, #667eea, #764ba2);'>
                     <i class='fas fa-chart-line'></i>
                     <span>Analyze ${company.ticker}</span>
                 </a>
-                <a href='trend-prediction.html?symbol=${company.ticker}' class='filter-btn' style='display: inline-flex; text-decoration: none; background: linear-gradient(135deg, #10b981, #059669);'>
+                <a href='trend-prediction.html?symbol=${company.ticker}' class='filter-btn' style='flex: 1; min-width: 200px; display: inline-flex; text-decoration: none; justify-content: center; background: linear-gradient(135deg, #10b981, #059669);'>
                     <i class='fas fa-brain'></i>
                     <span>Predict Trends</span>
                 </a>
             </div>
+            
+            ${enrichedData && enrichedData.found ? `
+            <!-- ✅ DATA SOURCE -->
+            <div style='margin-top: 24px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;'>
+                <div style='display: inline-flex; align-items: center; gap: 8px; color: #64748b; font-size: 0.85rem;'>
+                    <i class='fas fa-database'></i>
+                    <span>Data provided by Google Knowledge Graph</span>
+                </div>
+            </div>
+            ` : ''}
         `;
-        
-        document.getElementById('modalCompanyName').textContent = company.name;
-        modal.classList.add('active');
     }
     
     static closeModal() {
@@ -1037,11 +1279,12 @@ class CompaniesDirectory {
     }
 }
 
-// Initialize
+// ✅ INITIALISATION
 document.addEventListener('DOMContentLoaded', () => {
     window.companiesDirectoryInstance = new CompaniesDirectory();
 });
 
+// ✅ FERMETURE MODAL (clic extérieur)
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('companyModal');
     if (e.target === modal) {
@@ -1049,6 +1292,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// ✅ FERMETURE MODAL (touche Escape)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         CompaniesDirectory.closeModal();
