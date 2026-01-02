@@ -2394,4 +2394,153 @@ body.dark-mode .group-name-badge {
     overflow-x: hidden;
 }
 
+/* ====================================================
+   💬 CORRECTION FORMATAGE CARTES GROUPES/USERS
+   ==================================================== */
+
+.groups-list-wrapper {
+    padding: 12px 24px 24px 24px;
+    overflow-y: auto;
+}
+
+.user-select-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px 18px !important;
+    margin-bottom: 12px !important;
+    background: var(--background-primary, #ffffff) !important;
+    border: 2px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+body.dark-mode .user-select-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.user-select-item:hover {
+    transform: translateX(4px);
+    border-color: var(--msg-primary);
+    background: rgba(102, 126, 234, 0.05) !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.user-select-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+}
+
+.user-select-avatar {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 3px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+.user-select-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-select-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary, #1e293b);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark-mode .user-select-name {
+    color: var(--text-primary, #f8fafc);
+}
+
+.user-select-email {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.user-select-send-btn {
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+
+.user-select-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2, #667eea) !important;
+}
+
+/* Badge indicateur groupe */
+.user-type-indicator,
+.group-type-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: white;
+}
+
+body.dark-mode .user-type-indicator,
+body.dark-mode .group-type-indicator {
+    border-color: rgba(15, 23, 42, 0.98);
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+    .groups-list-wrapper {
+        padding: 12px 20px 20px 20px;
+    }
+    
+    .user-select-item {
+        padding: 14px 16px !important;
+        gap: 12px !important;
+    }
+    
+    .user-select-avatar-wrapper {
+        width: 46px;
+        height: 46px;
+    }
+    
+    .user-select-avatar {
+        width: 46px !important;
+        height: 46px !important;
+    }
+    
+    .user-select-send-btn span {
+        display: none;
+    }
+    
+    .user-select-send-btn {
+        padding: 10px 16px !important;
+    }
+}
+
 console.log('✅ messages-hub.css loaded (v3.4 - Complete Premium Edition)');
