@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Company Research - AlphaVault AI</title>
+    
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/company-research.css'>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/analytics-tracker.js"></script>
+</head>
+<body>
+
+    <script src="assets/js/theme.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        <!-- Sidebar (même que forex-converter.html) -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- ... (copier la sidebar complète du fichier forex) ... -->
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title'>
+                        <i class='fas fa-search-dollar'></i> Company Research & Analysis
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export' onclick='companyResearch.exportReport()'>
+                        <i class='fas fa-file-pdf'></i>
+                        <span class='btn-text'>Export Report</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- ========================================
+                     SEARCH SECTION
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-search'></i> Search Company
+                    </h2>
+                    
+                    <div class='search-container'>
+                        <div class='search-input-wrapper'>
+                            <i class='fas fa-building search-icon'></i>
+                            <input 
+                                type='text' 
+                                id='companySearchInput' 
+                                placeholder='Enter company name or ticker (e.g., Apple, AAPL, Tesla...)' 
+                                onkeypress='if(event.key==="Enter") companyResearch.search()'
+                            >
+                            <button class='search-clear-btn' onclick='companyResearch.clearSearch()' style='display: none;'>
+                                <i class='fas fa-times'></i>
+                            </button>
+                        </div>
+                        <button class='search-btn' onclick='companyResearch.search()'>
+                            <i class='fas fa-rocket'></i>
+                            <span>Analyze</span>
+                        </button>
+                    </div>
+                    
+                    <div class='search-suggestions' id='searchSuggestions' style='display: none;'></div>
+                </div>
+
+                <!-- ========================================
+                     LOADING STATE
+                     ======================================== -->
+                <div id='loadingSection' class='section' style='display: none;'>
+                    <div class='loading-container'>
+                        <div class='loading-spinner'></div>
+                        <h3 class='loading-text'>Analyzing <span id='loadingCompany'></span>...</h3>
+                        <p class='loading-subtitle'>Fetching market data, news, and YouTube insights</p>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     COMPANY OVERVIEW
+                     ======================================== -->
+                <div id='overviewSection' class='section' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-building'></i> Company Overview
+                    </h2>
+                    
+                    <div class='company-header' id='companyHeader'></div>
+                    
+                    <div class='company-metrics-grid' id='companyMetrics'></div>
+                </div>
+
+                <!-- ========================================
+                     MARKET ANALYSIS
+                     ======================================== -->
+                <div id='marketAnalysisSection' class='section' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-line'></i> Market & Sector Analysis
+                        <button class='info-btn' onclick='companyResearch.openModal("marketAnalysisInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='analysis-grid'>
+                        <!-- Sector Performance -->
+                        <div class='analysis-card'>
+                            <h3 class='analysis-card-title'>
+                                <i class='fas fa-industry'></i> Sector Performance
+                            </h3>
+                            <div id='sectorChart' class='chart' style='height: 300px;'></div>
+                        </div>
+                        
+                        <!-- Market Sentiment -->
+                        <div class='analysis-card'>
+                            <h3 class='analysis-card-title'>
+                                <i class='fas fa-brain'></i> AI Market Sentiment
+                            </h3>
+                            <div id='sentimentGauge' class='chart' style='height: 300px;'></div>
+                        </div>
+                        
+                        <!-- Competitive Positioning -->
+                        <div class='analysis-card full-width'>
+                            <h3 class='analysis-card-title'>
+                                <i class='fas fa-trophy'></i> Competitive Positioning
+                            </h3>
+                            <div id='competitiveChart' class='chart' style='height: 400px;'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     GOOGLE NEWS & INSIGHTS
+                     ======================================== -->
+                <div id='newsSection' class='section' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-newspaper'></i> Latest News & Insights
+                        <button class='info-btn' onclick='companyResearch.openModal("newsInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='news-filter-tabs'>
+                        <button class='filter-tab active' data-filter='all' onclick='companyResearch.filterNews("all")'>
+                            All News
+                        </button>
+                        <button class='filter-tab' data-filter='analysis' onclick='companyResearch.filterNews("analysis")'>
+                            Analysis
+                        </button>
+                        <button class='filter-tab' data-filter='earnings' onclick='companyResearch.filterNews("earnings")'>
+                            Earnings
+                        </button>
+                        <button class='filter-tab' data-filter='market' onclick='companyResearch.filterNews("market")'>
+                            Market
+                        </button>
+                    </div>
+                    
+                    <div id='newsGrid' class='news-grid'></div>
+                </div>
+
+                <!-- ========================================
+                     YOUTUBE ANALYSIS
+                     ======================================== -->
+                <div id='youtubeSection' class='section' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fab fa-youtube'></i> YouTube Analysis
+                        <button class='info-btn' onclick='companyResearch.openModal("youtubeInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='youtube-stats-grid' id='youtubeStats'></div>
+                    
+                    <div class='video-filter-controls'>
+                        <select id='videoSortSelector' onchange='companyResearch.sortVideos()'>
+                            <option value='relevance'>Most Relevant</option>
+                            <option value='viewCount'>Most Viewed</option>
+                            <option value='date'>Most Recent</option>
+                            <option value='rating'>Highest Rated</option>
+                        </select>
+                    </div>
+                    
+                    <div id='videosGrid' class='videos-grid'></div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-info-circle'></i> Powered by Google Custom Search API & YouTube Data API v3
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODALS
+         ======================================== -->
+    
+    <!-- Market Analysis Info Modal -->
+    <div id='marketAnalysisInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-chart-line'></i> Market & Sector Analysis</h2>
+                <button class='modal-close' onclick='companyResearch.closeModal("marketAnalysisInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is Market Analysis?</strong></p>
+                <p>Our AI analyzes the company's position within its sector and the broader market using:</p>
+                <ul>
+                    <li><strong>Sector Performance:</strong> Compares company performance vs. sector average</li>
+                    <li><strong>Market Sentiment:</strong> Aggregates news sentiment from major sources</li>
+                    <li><strong>Competitive Positioning:</strong> Benchmarks against key competitors</li>
+                    <li><strong>Trend Analysis:</strong> Identifies growth patterns and momentum</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Info Modal -->
+    <div id='newsInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-newspaper'></i> News & Insights</h2>
+                <button class='modal-close' onclick='companyResearch.closeModal("newsInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>News Sources:</strong></p>
+                <p>We aggregate news from top financial sources including Bloomberg, Reuters, CNBC, Financial Times, and more.</p>
+                <p><strong>Sentiment Analysis:</strong></p>
+                <p>Each article is analyzed for sentiment (Bullish, Bearish, Neutral) using AI natural language processing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube Info Modal -->
+    <div id='youtubeInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fab fa-youtube'></i> YouTube Analysis</h2>
+                <button class='modal-close' onclick='companyResearch.closeModal("youtubeInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What We Analyze:</strong></p>
+                <ul>
+                    <li><strong>Video Coverage:</strong> All videos mentioning the company</li>
+                    <li><strong>Engagement Metrics:</strong> Views, likes, comments</li>
+                    <li><strong>Sentiment Detection:</strong> Positive/negative video titles and descriptions</li>
+                    <li><strong>Influencer Mentions:</strong> Coverage by major financial YouTubers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/company-research.js'></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+</body>
+</html>
