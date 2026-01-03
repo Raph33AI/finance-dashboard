@@ -5400,8 +5400,8 @@ class AdminAnalyticsPro {
             
             this.cache.incrementCallCount();
             
-            // ✅ CHANGEMENT ICI
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-inbox?maxResults=50`);
+            // ✅ CHANGEMENT : 30 au lieu de 50
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-inbox?maxResults=30`);
             
             if (!response.ok) {
                 throw new Error(`Gmail inbox error: ${response.status}`);
