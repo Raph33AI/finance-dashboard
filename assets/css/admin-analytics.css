@@ -1868,3 +1868,315 @@ body.dark-mode .pagination-select {
         min-height: 200px;
     }
 }
+
+/* ========================================
+   🆕 GMAIL SEARCH RESULTS
+   ======================================== */
+.search-results-container {
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+.search-result-item {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.search-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.search-result-subject {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.search-result-snippet {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+/* ========================================
+   🆕 SIGNATURE MANAGEMENT
+   ======================================== */
+.signatures-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.signature-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .signature-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.signature-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.signature-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.signature-header i {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+.signature-header strong {
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.signature-email {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-left: auto;
+}
+
+.signature-preview {
+    min-height: 80px;
+    padding: 12px;
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+body.dark-mode .signature-preview {
+    background: rgba(15, 23, 42, 0.5);
+}
+
+/* ========================================
+   🆕 SIGNATURE EDITOR MODAL
+   ======================================== */
+.signature-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e2e8f0;
+    overflow-x: auto;
+}
+
+.signature-tab {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.signature-tab:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.signature-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.signature-tab i {
+    margin-right: 6px;
+}
+
+.signature-editor-container {
+    margin-bottom: 24px;
+}
+
+.signature-templates {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.template-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.template-buttons .btn-sm {
+    flex: 1;
+    min-width: 140px;
+}
+
+/* ========================================
+   🆕 EMAIL EDITOR STYLES
+   ======================================== */
+.email-editor {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    min-height: 200px;
+}
+
+body.dark-mode .email-editor {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+.email-editor .ql-toolbar {
+    background: #f8fafc;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+body.dark-mode .email-editor .ql-toolbar {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.email-editor .ql-container {
+    min-height: 180px;
+    font-size: 14px;
+}
+
+/* ========================================
+   🆕 DRAFTS CONTAINER
+   ======================================== */
+.drafts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.draft-item {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .draft-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.draft-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.draft-info {
+    flex: 1;
+}
+
+.draft-subject {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+body.dark-mode .draft-subject {
+    color: #f1f5f9;
+}
+
+.draft-to {
+    font-size: 0.85rem;
+    color: #667eea;
+    margin-bottom: 4px;
+}
+
+.draft-snippet {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.draft-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ========================================
+   🆕 ATTACHMENTS LIST
+   ======================================== */
+.attachments-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-item {
+    background: rgba(102, 126, 234, 0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.attachment-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attachment-info i {
+    color: #667eea;
+}
+
+.attachment-size {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-left: auto;
+}
+
+.btn-remove-attachment {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-attachment:hover {
+    background: #dc2626;
+}

@@ -2157,7 +2157,7 @@
                         </div>
                         
                         <!-- 📊 RÉSULTATS DE RECHERCHE -->
-                        <div id="gmail-search-results" class="search-results-container" style="display: none;"></div>
+                        <div id="gmail-search-results" class="search-results-container"></div>
                         
                         <!-- KPIs Grid -->
                         <div class="kpis-grid">
@@ -2227,6 +2227,82 @@
                                     <div class="kpi-label">Drafts</div>
                                     <div class="kpi-value" id="gmail-drafts-count">0</div>
                                     <div class="kpi-sublabel">Saved</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================
+                            🆕 SECTION: SIGNATURE MANAGEMENT
+                            ======================================== -->
+                        <div class="section" style="margin-top: 24px;">
+                            <div class="section-header-with-actions">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-signature"></i>
+                                    Email Signatures Manager
+                                </h4>
+                                <button class="btn-primary" onclick="adminAnalytics.openSignatureModal()">
+                                    <i class="fas fa-edit"></i> Edit Signatures
+                                </button>
+                                <div id="signatures-loading-indicator" style="display: none; text-align: center; padding: 20px; color: #64748b;">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                                    <p style="margin: 0;">Loading signatures from Firestore...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="signatures-preview-grid">
+                                <div class="signature-card" data-email="newsletter@alphavault-ai.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-newspaper"></i>
+                                        <strong>Newsletter</strong>
+                                        <span class="signature-email">newsletter@alphavault-ai.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-newsletter">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
+                                </div>
+                                
+                                <div class="signature-card" data-email="contact@alphavault-ai.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-envelope"></i>
+                                        <strong>Contact</strong>
+                                        <span class="signature-email">contact@alphavault-ai.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-contact">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
+                                </div>
+                                
+                                <div class="signature-card" data-email="info@alphavault-ai.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>Info</strong>
+                                        <span class="signature-email">info@alphavault-ai.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-info">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
+                                </div>
+                                
+                                <div class="signature-card" data-email="support@alphavault-ai.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-headset"></i>
+                                        <strong>Support</strong>
+                                        <span class="signature-email">support@alphavault-ai.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-support">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
+                                </div>
+                                
+                                <div class="signature-card" data-email="raphnardone@gmail.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-user"></i>
+                                        <strong>Personal</strong>
+                                        <span class="signature-email">raphnardone@gmail.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-personal">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2571,6 +2647,79 @@
                         <div class="gmail-modal-footer">
                             <button class="btn-secondary" onclick="adminAnalytics.closeThreadModal()">
                                 Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                    🆕 MODAL: SIGNATURE EDITOR
+                    ======================================== -->
+                <div id="signature-editor-modal" class="gmail-modal">
+                    <div class="gmail-modal-content gmail-modal-large">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-signature"></i> Edit Email Signatures</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeSignatureModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <!-- Tabs pour chaque adresse -->
+                            <div class="signature-tabs">
+                                <button class="signature-tab active" data-email="newsletter@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('newsletter@alphavault-ai.com')">
+                                    <i class="fas fa-newspaper"></i> Newsletter
+                                </button>
+                                <button class="signature-tab" data-email="contact@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('contact@alphavault-ai.com')">
+                                    <i class="fas fa-envelope"></i> Contact
+                                </button>
+                                <button class="signature-tab" data-email="info@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('info@alphavault-ai.com')">
+                                    <i class="fas fa-info-circle"></i> Info
+                                </button>
+                                <button class="signature-tab" data-email="support@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('support@alphavault-ai.com')">
+                                    <i class="fas fa-headset"></i> Support
+                                </button>
+                                <button class="signature-tab" data-email="raphnardone@gmail.com" onclick="adminAnalytics.switchSignatureTab('raphnardone@gmail.com')">
+                                    <i class="fas fa-user"></i> Personal
+                                </button>
+                            </div>
+                            
+                            <!-- Éditeur WYSIWYG pour la signature -->
+                            <div class="signature-editor-container">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #1e293b;">
+                                    Signature for: <span id="current-signature-email" style="color: #667eea;">newsletter@alphavault-ai.com</span>
+                                </label>
+                                <div id="signature-wysiwyg-editor" class="email-editor" style="min-height: 250px;"></div>
+                            </div>
+                            
+                            <!-- Templates prédéfinis -->
+                            <div class="signature-templates">
+                                <h4 style="margin-top: 24px; margin-bottom: 12px; color: #1e293b;">
+                                    <i class="fas fa-magic"></i> Quick Templates
+                                </h4>
+                                <div class="template-buttons">
+                                    <button class="btn-secondary btn-sm" onclick="adminAnalytics.applySignatureTemplate('minimal')">
+                                        <i class="fas fa-align-left"></i> Minimal
+                                    </button>
+                                    <button class="btn-secondary btn-sm" onclick="adminAnalytics.applySignatureTemplate('professional')">
+                                        <i class="fas fa-briefcase"></i> Professional
+                                    </button>
+                                    <button class="btn-secondary btn-sm" onclick="adminAnalytics.applySignatureTemplate('corporate')">
+                                        <i class="fas fa-building"></i> Corporate
+                                    </button>
+                                    <button class="btn-secondary btn-sm" onclick="adminAnalytics.applySignatureTemplate('modern')">
+                                        <i class="fas fa-rocket"></i> Modern
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.clearCurrentSignature()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <button class="btn-primary" onclick="adminAnalytics.saveCurrentSignature()">
+                                <i class="fas fa-save"></i> Save Signature
                             </button>
                         </div>
                     </div>

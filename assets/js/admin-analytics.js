@@ -373,6 +373,16 @@ class AdminAnalyticsPro {
         
         this.currentSection = 'dashboard';
         this.currentMRR = 0;
+
+        // ========================================
+        // 🆕 SIGNATURES EMAIL (FIRESTORE)
+        // ========================================
+        this.emailSignatures = {}; // Sera chargé depuis Firestore
+        this.currentSignatureEmail = 'newsletter@alphavault-ai.com';
+        this.signatureEditor = null;
+
+        // Charger les signatures au démarrage
+        // this.loadSignatures();
         
         // ========================================
         // 🆕 PROPRIÉTÉS POUR LA MESSAGERIE COMPLÈTE
@@ -433,6 +443,12 @@ class AdminAnalyticsPro {
             document.getElementById('admin-dashboard')?.style.setProperty('display', 'block');
             
             await this.loadLeafletLibrary();
+
+            // Charger les signatures email depuis Firestore
+            await this.loadSignatures();
+
+            // Setup listeners pour changer signature avec FROM
+            this.setupFromChangeListeners();
             
             this.displayCacheStats();
             this.initSectionTabs();
@@ -445,6 +461,8 @@ class AdminAnalyticsPro {
             await this.refreshAllDisplays();
             
             this.initEventListeners();
+            // Charger les brouillons Gmail
+            await this.loadGmailDrafts();
             
             console.log('✅ Admin Analytics PRO fully initialized');
         });
@@ -5687,11 +5705,344 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📧 SECTION 13B: GMAIL MANAGEMENT - ADVANCED FEATURES
+    // 📧 SECTION 13: GMAIL MANAGEMENT - ULTRA-COMPLETE
     // ========================================
     
+    async loadGmailStats() {
+        try {
+            console.log('📧 Loading Gmail stats...');
+            
+            const cacheKey = 'gmail-stats';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.gmailStats = cachedData;
+                this.displayGmailStats(cachedData);
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - skipping Gmail stats');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-stats`);
+            
+            if (!response.ok) {
+                throw new Error(`Gmail API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            this.cache.set(cacheKey, data.stats);
+            this.gmailStats = data.stats;
+            this.displayGmailStats(data.stats);
+            
+            console.log('✅ Gmail stats loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Gmail stats:', error);
+        }
+    }
+
+    displayGmailStats(stats) {
+        console.log('📧 Displaying Gmail stats:', stats);
+        
+        if (!stats) {
+            console.warn('⚠ No Gmail stats to display');
+            return;
+        }
+        
+        this.updateStat('gmail-total-emails', stats.total || 0);
+        this.updateStat('gmail-unread-emails', stats.unread || 0);
+        this.updateStat('gmail-spam-emails', stats.spam || 0);
+        this.updateStat('gmail-sent-emails', stats.sent || 0);
+        this.updateStat('gmail-unread-rate', `${stats.unreadRate || 0}%`);
+        this.updateStat('gmail-avg-response-time', `${stats.avgResponseTime || 0}h`);
+        
+        this.createGmailCategoryChart(stats.categories);
+        this.displayTopSenders(stats.topSenders);
+        
+        console.log('✅ Gmail stats displayed');
+    }
+
+    async loadGmailInbox() {
+        try {
+            console.log('📥 Loading Gmail inbox...');
+            
+            const cacheKey = 'gmail-inbox';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.gmailInbox = cachedData;
+                this.displayGmailInbox(cachedData);
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - using cached Gmail inbox');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-inbox?maxResults=30`);
+            
+            if (!response.ok) {
+                throw new Error(`Gmail inbox error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            this.cache.set(cacheKey, data.messages);
+            this.gmailInbox = data.messages;
+            this.displayGmailInbox(data.messages);
+            
+            console.log('✅ Gmail inbox loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading Gmail inbox:', error);
+        }
+    }
+
+    displayGmailInbox(messages) {
+        const tbody = document.getElementById('gmail-inbox-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (!messages || messages.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No emails available</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const renderEmailRow = (email, index, tbody) => {
+            const row = document.createElement('tr');
+            
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                adminAnalytics.viewEmail(email.id);
+            };
+            
+            if (email.isUnread) {
+                row.style.fontWeight = '600';
+                row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+            }
+            
+            row.onmouseenter = () => {
+                row.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+            };
+            row.onmouseleave = () => {
+                if (email.isUnread) {
+                    row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                } else {
+                    row.style.backgroundColor = '';
+                }
+            };
+            
+            const categoryBadge = this.getEmailCategoryBadge(email.category);
+            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.isUnread ? '<i class="fas fa-circle" style="font-size: 6px; color: #3b82f6; margin-right: 8px;"></i>' : ''}
+                    ${email.from}
+                </td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.subject}
+                </td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
+                    ${email.snippet}
+                </td>
+                <td>${categoryBadge}</td>
+                <td>${date}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openReplyModal('${email.id}')" title="Reply">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.markEmailAsRead('${email.id}')" title="Mark as read">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.archiveEmail('${email.id}')" title="Archive">
+                        <i class="fas fa-archive"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        };
+        
+        if (!window.paginationManagers['gmail-inbox-body']) {
+            window.paginationManagers['gmail-inbox-body'] = new PaginationManager(
+                'gmail-inbox-body',
+                messages,
+                renderEmailRow,
+                [10, 25, 50]
+            );
+        } else {
+            window.paginationManagers['gmail-inbox-body'].updateData(messages);
+        }
+        
+        window.paginationManagers['gmail-inbox-body'].render();
+        
+        console.log(`✅ Gmail inbox displayed (${messages.length} emails)`);
+    }
+
+    displayTopSenders(senders) {
+        const tbody = document.getElementById('gmail-top-senders-body');
+        if (!tbody || !senders) return;
+        
+        tbody.innerHTML = '';
+        
+        senders.forEach((sender, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${sender.email}
+                </td>
+                <td style="text-align: center; font-weight: 600; color: #667eea;">${sender.count}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        console.log('✅ Top senders displayed');
+    }
+
+    createGmailCategoryChart(categories) {
+        const canvas = document.getElementById('gmail-categories-chart');
+        if (!canvas || !categories) {
+            console.warn('⚠ Gmail categories chart canvas not found');
+            return;
+        }
+        
+        console.log('📊 Creating Gmail categories chart...');
+        
+        this.createChart('gmail-categories-chart', 'doughnut', {
+            labels: ['Support', 'Feedback', 'Commercial', 'Notification', 'Spam', 'Other'],
+            datasets: [{
+                data: [
+                    categories.support || 0,
+                    categories.feedback || 0,
+                    categories.commercial || 0,
+                    categories.notification || 0,
+                    categories.spam || 0,
+                    categories.other || 0
+                ],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(100, 116, 139, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        }, {
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Email Categories Distribution'
+                }
+            }
+        });
+        
+        console.log('✅ Gmail categories chart created');
+    }
+
+    getEmailCategoryBadge(category) {
+        const badges = {
+            support: '<span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📧 Support</span>',
+            feedback: '<span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669);">💬 Feedback</span>',
+            commercial: '<span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 Commercial</span>',
+            notification: '<span class="status-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🔔 Notification</span>',
+            spam: '<span class="status-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626);">⚠ Spam</span>',
+            other: '<span class="status-badge" style="background: linear-gradient(135deg, #64748b, #475569);">📁 Other</span>'
+        };
+        
+        return badges[category] || badges.other;
+    }
+
+    async markEmailAsRead(messageId) {
+        try {
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-action`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'markAsRead',
+                    messageId: messageId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to mark email as read');
+            }
+            
+            alert('✅ Email marked as read!');
+            await this.loadGmailInbox();
+            await this.loadGmailStats();
+            
+        } catch (error) {
+            console.error('❌ Error marking email as read:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+
+    async archiveEmail(messageId) {
+        try {
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-action`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'archive',
+                    messageId: messageId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to archive email');
+            }
+            
+            alert('✅ Email archived!');
+            await this.loadGmailInbox();
+            await this.loadGmailStats();
+            
+        } catch (error) {
+            console.error('❌ Error archiving email:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+
     // ========================================
-    // 📨 COMPOSER UN NOUVEAU EMAIL
+    // 📨 COMPOSE, REPLY, FORWARD
     // ========================================
     
     openComposeModal() {
@@ -5703,13 +6054,12 @@ class AdminAnalyticsPro {
             return;
         }
         
-        // Reset le formulaire
+        document.getElementById('compose-from').value = 'newsletter@alphavault-ai.com';
         document.getElementById('compose-to').value = '';
         document.getElementById('compose-cc').value = '';
         document.getElementById('compose-bcc').value = '';
         document.getElementById('compose-subject').value = '';
         
-        // Initialiser l'éditeur WYSIWYG (Quill.js)
         if (!this.composeEditor) {
             this.composeEditor = new Quill('#compose-body-editor', {
                 theme: 'snow',
@@ -5729,16 +6079,12 @@ class AdminAnalyticsPro {
             this.composeEditor.setText('');
         }
         
-        // Charger la signature si elle existe
-        if (this.emailSignature) {
-            this.composeEditor.clipboard.dangerouslyPasteHTML(this.composeEditor.getLength(), `<br><br>${this.emailSignature}`);
-        }
+        // 🆕 INJECTER LA SIGNATURE
+        this.injectSignature('compose');
         
-        // Reset attachments
         this.attachments = [];
         this.updateAttachmentsList('compose');
         
-        // Activer l'auto-save
         this.startAutoSaveDraft('compose');
         
         modal.style.display = 'flex';
@@ -5752,7 +6098,6 @@ class AdminAnalyticsPro {
             modal.style.display = 'none';
         }
         
-        // Stopper l'auto-save
         if (this.autoSaveDraftTimer) {
             clearInterval(this.autoSaveDraftTimer);
         }
@@ -5764,7 +6109,6 @@ class AdminAnalyticsPro {
         try {
             console.log('📤 Sending email...');
             
-            // 🆕 RÉCUPÉRER L'ADRESSE FROM
             const from = document.getElementById('compose-from').value.trim();
             const to = document.getElementById('compose-to').value.trim();
             const cc = document.getElementById('compose-cc').value.trim();
@@ -5789,7 +6133,7 @@ class AdminAnalyticsPro {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    from: from, // 🆕 AJOUT DU FROM
+                    from: from,
                     to: to,
                     cc: cc || undefined,
                     bcc: bcc || undefined,
@@ -5811,7 +6155,6 @@ class AdminAnalyticsPro {
             
             this.closeComposeModal();
             
-            // Recharger l'inbox
             await this.loadGmailInbox();
             await this.loadGmailStats();
             
@@ -5825,15 +6168,10 @@ class AdminAnalyticsPro {
         }
     }
     
-    // ========================================
-    // 📩 RÉPONDRE À UN EMAIL
-    // ========================================
-    
     async openReplyModal(messageId, replyAll = false) {
         try {
             console.log(`↩ Opening reply modal (messageId: ${messageId}, replyAll: ${replyAll})...`);
             
-            // Récupérer les détails du message
             const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
             
             if (!response.ok) {
@@ -5851,12 +6189,11 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            // Pré-remplir les champs
+            document.getElementById('reply-from').value = 'newsletter@alphavault-ai.com';
             document.getElementById('reply-to').value = message.from;
             document.getElementById('reply-cc').value = replyAll ? (message.cc || '') : '';
             document.getElementById('reply-subject').value = `Re: ${message.subject.replace(/^Re:\s*/i, '')}`;
             
-            // Initialiser l'éditeur
             if (!this.replyEditor) {
                 this.replyEditor = new Quill('#reply-body-editor', {
                     theme: 'snow',
@@ -5874,12 +6211,9 @@ class AdminAnalyticsPro {
                 this.replyEditor.setText('');
             }
             
-            // Ajouter la signature
-            if (this.emailSignature) {
-                this.replyEditor.clipboard.dangerouslyPasteHTML(`<br><br>${this.emailSignature}`);
-            }
+            // 🆕 INJECTER LA SIGNATURE
+            this.injectSignature('reply');
             
-            // Ajouter le message original cité
             const quotedMessage = `
                 <br><br>
                 <blockquote style="border-left: 3px solid #667eea; padding-left: 12px; margin: 12px 0; color: #64748b;">
@@ -5916,10 +6250,7 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            // 🆕 RÉCUPÉRER L'ADRESSE FROM (si sélecteur présent, sinon défaut)
-            const from = document.getElementById('reply-from')?.value || 
-                         document.getElementById('compose-from')?.value || 
-                         'newsletter@alphavault-ai.com';
+            const from = document.getElementById('reply-from')?.value || 'newsletter@alphavault-ai.com';
             
             const bodyHtml = this.replyEditor.root.innerHTML;
             const bodyText = this.replyEditor.getText();
@@ -5935,10 +6266,10 @@ class AdminAnalyticsPro {
                 },
                 body: JSON.stringify({
                     messageId: this.currentEmail.id,
-                    originalMessageId: this.currentEmail.messageId, // 🆕 CRUCIAL pour threading
-                    from: from, // 🆕 Ajouté
-                    to: this.currentEmail.from, // 🆕 Ajouté explicitement
-                    subject: this.currentEmail.subject, // 🆕 Ajouté explicitement
+                    originalMessageId: this.currentEmail.messageId,
+                    from: from,
+                    to: this.currentEmail.from,
+                    subject: this.currentEmail.subject,
                     threadId: this.currentEmail.threadId,
                     replyAll: replyAll,
                     bodyHtml: bodyHtml,
@@ -5970,10 +6301,6 @@ class AdminAnalyticsPro {
         }
     }
     
-    // ========================================
-    // ➡ TRANSFÉRER UN EMAIL
-    // ========================================
-    
     async openForwardModal(messageId) {
         try {
             console.log(`➡ Opening forward modal (messageId: ${messageId})...`);
@@ -5995,6 +6322,7 @@ class AdminAnalyticsPro {
                 return;
             }
             
+            document.getElementById('forward-from').value = 'newsletter@alphavault-ai.com';
             document.getElementById('forward-to').value = '';
             document.getElementById('forward-subject').value = `Fwd: ${message.subject.replace(/^Fwd:\s*/i, '')}`;
             
@@ -6026,7 +6354,6 @@ class AdminAnalyticsPro {
             `;
             this.forwardEditor.clipboard.dangerouslyPasteHTML(this.forwardEditor.getLength(), forwardedMessage);
             
-            // Afficher les pièces jointes
             if (message.attachments && message.attachments.length > 0) {
                 this.displayForwardedAttachments(message.attachments);
             }
@@ -6065,10 +6392,7 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            // 🆕 RÉCUPÉRER L'ADRESSE FROM (si sélecteur présent, sinon défaut)
-            const from = document.getElementById('forward-from')?.value || 
-                         document.getElementById('compose-from')?.value || 
-                         'newsletter@alphavault-ai.com';
+            const from = document.getElementById('forward-from')?.value || 'newsletter@alphavault-ai.com';
             
             const bodyHtml = this.forwardEditor.root.innerHTML;
             const bodyText = this.forwardEditor.getText();
@@ -6084,9 +6408,9 @@ class AdminAnalyticsPro {
                 },
                 body: JSON.stringify({
                     messageId: this.currentEmail.id,
-                    from: from, // 🆕 Ajouté
+                    from: from,
                     to: to,
-                    subject: this.currentEmail.subject, // 🆕 Ajouté explicitement
+                    subject: this.currentEmail.subject,
                     bodyHtml: bodyHtml,
                     bodyText: bodyText
                 })
@@ -6116,7 +6440,183 @@ class AdminAnalyticsPro {
     }
     
     // ========================================
-    // 📎 GESTION DES PIÈCES JOINTES
+    // 🔍 SEARCH EMAILS (CORRIGÉ)
+    // ========================================
+    
+    async searchEmails() {
+        try {
+            const query = document.getElementById('gmail-search-input').value.trim();
+            
+            if (!query) {
+                alert('⚠ Please enter a search query.');
+                return;
+            }
+            
+            console.log(`🔍 Searching emails with query: "${query}"...`);
+            
+            const searchBtn = document.getElementById('gmail-search-btn');
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-search?q=${encodeURIComponent(query)}&maxResults=20`);
+            
+            if (!response.ok) {
+                throw new Error('Search failed');
+            }
+            
+            const result = await response.json();
+            this.searchResults = result.messages || [];
+            
+            this.displaySearchResults();
+            
+            console.log(`✅ Found ${this.searchResults.length} results`);
+            
+        } catch (error) {
+            console.error('❌ Search error:', error);
+            alert('⚠ Search error: ' + error.message);
+        } finally {
+            const searchBtn = document.getElementById('gmail-search-btn');
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+        }
+    }
+    
+    displaySearchResults() {
+        const container = document.getElementById('gmail-search-results');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (this.searchResults.length === 0) {
+            container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No results found</p>';
+            return;
+        }
+        
+        // 🆕 AJOUTER UN TITRE
+        const title = document.createElement('h4');
+        title.style.cssText = 'margin-bottom: 16px; color: #1e293b; font-weight: 600;';
+        title.innerHTML = `<i class="fas fa-search"></i> Search Results (${this.searchResults.length})`;
+        container.appendChild(title);
+        
+        this.searchResults.forEach(email => {
+            const emailDiv = document.createElement('div');
+            emailDiv.className = 'search-result-item';
+            emailDiv.innerHTML = `
+                <div class="search-result-header">
+                    <strong>${email.from}</strong>
+                    <span class="email-date">${new Date(email.timestamp).toLocaleDateString()}</span>
+                </div>
+                <div class="search-result-subject">${email.subject}</div>
+                <div class="search-result-snippet">${email.snippet}</div>
+                <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+            container.appendChild(emailDiv);
+        });
+    }
+    
+    // ========================================
+    // 👁 VIEW EMAIL
+    // ========================================
+    
+    async viewEmail(messageId) {
+        try {
+            console.log(`👁 Loading email details (ID: ${messageId})...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to load email');
+            }
+            
+            const result = await response.json();
+            const message = result.message;
+            
+            this.currentEmail = message;
+            
+            const modal = document.getElementById('view-email-modal');
+            if (!modal) return;
+            
+            document.getElementById('view-email-from').textContent = message.from;
+            document.getElementById('view-email-to').textContent = message.to;
+            document.getElementById('view-email-subject').textContent = message.subject;
+            document.getElementById('view-email-date').textContent = new Date(message.timestamp).toLocaleString();
+            document.getElementById('view-email-body').innerHTML = message.bodyHtml || `<pre>${message.bodyText}</pre>`;
+            
+            const attContainer = document.getElementById('view-email-attachments');
+            if (message.attachments && message.attachments.length > 0) {
+                attContainer.innerHTML = '';
+                message.attachments.forEach(att => {
+                    const attDiv = document.createElement('div');
+                    attDiv.className = 'attachment-item';
+                    attDiv.innerHTML = `
+                        <i class="fas fa-paperclip"></i>
+                        <span>${att.filename}</span>
+                        <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                        <button class="btn-download" onclick="adminAnalytics.downloadAttachment('${message.id}', '${att.attachmentId}', '${att.filename}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    `;
+                    attContainer.appendChild(attDiv);
+                });
+            } else {
+                attContainer.innerHTML = '<p style="color: #64748b;">No attachments</p>';
+            }
+            
+            modal.style.display = 'flex';
+            
+            console.log('✅ Email details displayed');
+            
+        } catch (error) {
+            console.error('❌ Error loading email:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+    
+    closeViewEmailModal() {
+        const modal = document.getElementById('view-email-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentEmail = null;
+    }
+    
+    async downloadAttachment(messageId, attachmentId, filename) {
+        try {
+            console.log(`📎 Downloading attachment: ${filename}...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-attachment?messageId=${messageId}&attachmentId=${attachmentId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to download attachment');
+            }
+            
+            const result = await response.json();
+            
+            const byteCharacters = atob(result.data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            
+            console.log('✅ Attachment downloaded');
+            
+        } catch (error) {
+            console.error('❌ Download error:', error);
+            alert('⚠ Download error: ' + error.message);
+        }
+    }
+    
+    // ========================================
+    // 📎 ATTACHMENTS
     // ========================================
     
     handleFileUpload(event) {
@@ -6213,7 +6713,7 @@ class AdminAnalyticsPro {
     }
     
     // ========================================
-    // 💾 GESTION DES BROUILLONS
+    // 💾 DRAFTS
     // ========================================
     
     startAutoSaveDraft(context = 'compose') {
@@ -6223,7 +6723,7 @@ class AdminAnalyticsPro {
         
         this.autoSaveDraftTimer = setInterval(() => {
             this.saveDraft(context, true);
-        }, 30000); // Auto-save toutes les 30 secondes
+        }, 30000);
         
         console.log('✅ Auto-save draft activated (every 30s)');
     }
@@ -6293,6 +6793,8 @@ class AdminAnalyticsPro {
             
             const result = await response.json();
             this.gmailDrafts = result.drafts || [];
+            
+            this.updateStat('gmail-drafts-count', this.gmailDrafts.length);
             
             this.displayGmailDrafts();
             
@@ -6364,239 +6866,370 @@ class AdminAnalyticsPro {
     }
     
     // ========================================
-    // 🔍 RECHERCHE AVANCÉE
+    // ✍ SIGNATURE MANAGEMENT - FIRESTORE VERSION
     // ========================================
     
-    async searchEmails() {
+    async loadSignatures() {
         try {
-            const query = document.getElementById('gmail-search-input').value.trim();
+            console.log('📥 Loading email signatures from Firestore...');
             
-            if (!query) {
-                alert('⚠ Please enter a search query.');
-                return;
+            const signaturesSnapshot = await this.db.collection('email_signatures').get();
+            
+            if (signaturesSnapshot.empty) {
+                console.warn('⚠ No signatures found in Firestore, creating defaults...');
+                this.emailSignatures = this.getDefaultSignatures();
+                await this.saveAllSignaturesToFirestore();
+            } else {
+                this.emailSignatures = {};
+                
+                signaturesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.emailSignatures[data.email] = data.signature;
+                });
+                
+                console.log(`✅ ${signaturesSnapshot.size} signatures loaded from Firestore`);
             }
             
-            console.log(`🔍 Searching emails with query: "${query}"...`);
-            
-            const searchBtn = document.getElementById('gmail-search-btn');
-            searchBtn.disabled = true;
-            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-search?q=${encodeURIComponent(query)}&maxResults=20`);
-            
-            if (!response.ok) {
-                throw new Error('Search failed');
-            }
-            
-            const result = await response.json();
-            this.searchResults = result.messages || [];
-            
-            this.displaySearchResults();
-            
-            console.log(`✅ Found ${this.searchResults.length} results`);
+            this.displaySignaturePreviews();
             
         } catch (error) {
-            console.error('❌ Search error:', error);
-            alert('⚠ Search error: ' + error.message);
-        } finally {
-            const searchBtn = document.getElementById('gmail-search-btn');
-            searchBtn.disabled = false;
-            searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+            console.error('❌ Error loading signatures from Firestore:', error);
+            
+            // Fallback : Utiliser les signatures par défaut
+            this.emailSignatures = this.getDefaultSignatures();
+            this.displaySignaturePreviews();
         }
     }
     
-    displaySearchResults() {
-        const container = document.getElementById('gmail-search-results');
-        if (!container) return;
+    getDefaultSignatures() {
+        const baseSignature = `
+            <br><br>
+            <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px; line-height: 1.8;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">AV</div>
+                    <div>
+                        <strong style="color: #667eea; font-size: 16px;">AlphaVault AI</strong><br>
+                        <span style="color: #64748b; font-size: 13px;">Premium Financial Intelligence</span>
+                    </div>
+                </div>
+                <div style="color: #64748b; font-size: 13px;">
+                    📧 EMAIL_ADDRESS<br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a><br>
+                    💼 Real-time market analysis & AI-powered predictions
+                </div>
+            </div>
+        `;
         
-        container.innerHTML = '';
+        return {
+            'newsletter@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'newsletter@alphavault-ai.com'),
+            'contact@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'contact@alphavault-ai.com'),
+            'info@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'info@alphavault-ai.com'),
+            'support@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'support@alphavault-ai.com'),
+            'raphnardone@gmail.com': `
+                <br><br>
+                <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px;">
+                    <strong>Raphaël Nardone</strong><br>
+                    <span style="color: #64748b;">Founder & CEO - AlphaVault AI</span><br>
+                    📧 raphnardone@gmail.com<br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a>
+                </div>
+            `
+        };
+    }
+    
+    async saveAllSignaturesToFirestore() {
+        try {
+            console.log('💾 Saving default signatures to Firestore...');
+            
+            const batch = this.db.batch();
+            
+            Object.entries(this.emailSignatures).forEach(([email, signature]) => {
+                const docRef = this.db.collection('email_signatures').doc(email);
+                
+                batch.set(docRef, {
+                    email: email,
+                    signature: signature,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: ADMIN_EMAIL
+                });
+            });
+            
+            await batch.commit();
+            
+            console.log('✅ All signatures saved to Firestore');
+            
+        } catch (error) {
+            console.error('❌ Error saving signatures to Firestore:', error);
+            throw error;
+        }
+    }
+    
+    async saveSignatureToFirestore(email, signatureHTML) {
+        try {
+            console.log(`💾 Saving signature to Firestore for: ${email}`);
+            
+            await this.db.collection('email_signatures').doc(email).set({
+                email: email,
+                signature: signatureHTML,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: ADMIN_EMAIL
+            });
+            
+            console.log('✅ Signature saved to Firestore');
+            
+        } catch (error) {
+            console.error('❌ Error saving signature to Firestore:', error);
+            throw error;
+        }
+    }
+    
+    displaySignaturePreviews() {
+        Object.keys(this.emailSignatures).forEach(email => {
+            const key = email.split('@')[0].replace('.', '-');
+            const preview = document.getElementById(`signature-preview-${key}`);
+            if (preview) {
+                preview.innerHTML = this.emailSignatures[email] || '<em style="color: #64748b;">No signature defined</em>';
+            }
+        });
         
-        if (this.searchResults.length === 0) {
-            container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No results found</p>';
+        console.log('✅ Signature previews updated');
+    }
+    
+    openSignatureModal() {
+        const modal = document.getElementById('signature-editor-modal');
+        if (!modal) {
+            console.error('❌ Signature modal not found');
             return;
         }
         
-        this.searchResults.forEach(email => {
-            const emailDiv = document.createElement('div');
-            emailDiv.className = 'search-result-item';
-            emailDiv.innerHTML = `
-                <div class="search-result-header">
-                    <strong>${email.from}</strong>
-                    <span class="email-date">${new Date(email.timestamp).toLocaleDateString()}</span>
-                </div>
-                <div class="search-result-subject">${email.subject}</div>
-                <div class="search-result-snippet">${email.snippet}</div>
-                <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')">
-                    <i class="fas fa-eye"></i> View
-                </button>
-            `;
-            container.appendChild(emailDiv);
-        });
-    }
-    
-    // ========================================
-    // 👁 VUE DÉTAILLÉE D'UN EMAIL
-    // ========================================
-    
-    async viewEmail(messageId) {
-        try {
-            console.log(`👁 Loading email details (ID: ${messageId})...`);
-            
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to load email');
-            }
-            
-            const result = await response.json();
-            const message = result.message;
-            
-            this.currentEmail = message;
-            
-            const modal = document.getElementById('view-email-modal');
-            if (!modal) return;
-            
-            document.getElementById('view-email-from').textContent = message.from;
-            document.getElementById('view-email-to').textContent = message.to;
-            document.getElementById('view-email-subject').textContent = message.subject;
-            document.getElementById('view-email-date').textContent = new Date(message.timestamp).toLocaleString();
-            document.getElementById('view-email-body').innerHTML = message.bodyHtml || `<pre>${message.bodyText}</pre>`;
-            
-            // Afficher pièces jointes
-            const attContainer = document.getElementById('view-email-attachments');
-            if (message.attachments && message.attachments.length > 0) {
-                attContainer.innerHTML = '';
-                message.attachments.forEach(att => {
-                    const attDiv = document.createElement('div');
-                    attDiv.className = 'attachment-item';
-                    attDiv.innerHTML = `
-                        <i class="fas fa-paperclip"></i>
-                        <span>${att.filename}</span>
-                        <span class="attachment-size">${this.formatBytes(att.size)}</span>
-                        <button class="btn-download" onclick="adminAnalytics.downloadAttachment('${message.id}', '${att.attachmentId}', '${att.filename}')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    `;
-                    attContainer.appendChild(attDiv);
-                });
-            } else {
-                attContainer.innerHTML = '<p style="color: #64748b;">No attachments</p>';
-            }
-            
-            modal.style.display = 'flex';
-            
-            console.log('✅ Email details displayed');
-            
-        } catch (error) {
-            console.error('❌ Error loading email:', error);
-            alert('⚠ Error: ' + error.message);
-        }
-    }
-    
-    closeViewEmailModal() {
-        const modal = document.getElementById('view-email-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-        this.currentEmail = null;
-    }
-    
-    async downloadAttachment(messageId, attachmentId, filename) {
-        try {
-            console.log(`📎 Downloading attachment: ${filename}...`);
-            
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-attachment?messageId=${messageId}&attachmentId=${attachmentId}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to download attachment');
-            }
-            
-            const result = await response.json();
-            
-            // Convertir base64 en blob et télécharger
-            const byteCharacters = atob(result.data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray]);
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            
-            console.log('✅ Attachment downloaded');
-            
-        } catch (error) {
-            console.error('❌ Download error:', error);
-            alert('⚠ Download error: ' + error.message);
-        }
-    }
-    
-    // ========================================
-    // 🧵 VUE CONVERSATIONS (THREADS)
-    // ========================================
-    
-    async viewThread(threadId) {
-        try {
-            console.log(`🧵 Loading thread (ID: ${threadId})...`);
-            
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-thread?id=${threadId}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to load thread');
-            }
-            
-            const result = await response.json();
-            this.currentThread = result.messages;
-            
-            const modal = document.getElementById('thread-view-modal');
-            if (!modal) return;
-            
-            const container = document.getElementById('thread-messages-container');
-            container.innerHTML = '';
-            
-            result.messages.forEach((msg, index) => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'thread-message';
-                msgDiv.innerHTML = `
-                    <div class="thread-message-header">
-                        <strong>${msg.from}</strong>
-                        <span class="email-date">${new Date(msg.timestamp).toLocaleString()}</span>
-                    </div>
-                    <div class="thread-message-body">${msg.bodyHtml || `<pre>${msg.bodyText}</pre>`}</div>
-                    ${msg.attachments && msg.attachments.length > 0 ? `
-                        <div class="thread-message-attachments">
-                            ${msg.attachments.map(att => `
-                                <div class="attachment-item">
-                                    <i class="fas fa-paperclip"></i>
-                                    <span>${att.filename}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                `;
-                container.appendChild(msgDiv);
+        this.currentSignatureEmail = 'newsletter@alphavault-ai.com';
+        
+        if (!this.signatureEditor) {
+            this.signatureEditor = new Quill('#signature-wysiwyg-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Create your email signature...'
             });
-            
-            modal.style.display = 'flex';
-            
-            console.log(`✅ Thread loaded (${result.messages.length} messages)`);
-            
-        } catch (error) {
-            console.error('❌ Error loading thread:', error);
-            alert('⚠ Error: ' + error.message);
         }
+        
+        this.loadSignatureForEmail('newsletter@alphavault-ai.com');
+        
+        modal.style.display = 'flex';
+        
+        console.log('✅ Signature modal opened');
     }
     
-    closeThreadModal() {
-        const modal = document.getElementById('thread-view-modal');
+    closeSignatureModal() {
+        const modal = document.getElementById('signature-editor-modal');
         if (modal) {
             modal.style.display = 'none';
         }
-        this.currentThread = null;
+    }
+    
+    switchSignatureTab(email) {
+        this.currentSignatureEmail = email;
+        
+        document.querySelectorAll('.signature-tab').forEach(tab => {
+            if (tab.dataset.email === email) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        
+        document.getElementById('current-signature-email').textContent = email;
+        
+        this.loadSignatureForEmail(email);
+        
+        console.log(`✅ Switched to signature: ${email}`);
+    }
+    
+    loadSignatureForEmail(email) {
+        if (!this.signatureEditor) return;
+        
+        const signature = this.emailSignatures[email] || '';
+        
+        this.signatureEditor.root.innerHTML = signature;
+        
+        console.log(`✅ Signature loaded for: ${email}`);
+    }
+    
+    async saveCurrentSignature() {
+        if (!this.signatureEditor || !this.currentSignatureEmail) {
+            alert('⚠ No signature to save');
+            return;
+        }
+        
+        try {
+            const signatureHTML = this.signatureEditor.root.innerHTML;
+            
+            // Sauvegarder en mémoire
+            this.emailSignatures[this.currentSignatureEmail] = signatureHTML;
+            
+            // Sauvegarder dans Firestore
+            await this.saveSignatureToFirestore(this.currentSignatureEmail, signatureHTML);
+            
+            // Mettre à jour l'aperçu
+            this.displaySignaturePreviews();
+            
+            alert(`✅ Signature saved for ${this.currentSignatureEmail}!`);
+            
+            console.log(`✅ Signature saved for: ${this.currentSignatureEmail}`);
+            
+        } catch (error) {
+            console.error('❌ Error saving signature:', error);
+            alert('⚠ Error saving signature: ' + error.message);
+        }
+    }
+    
+    clearCurrentSignature() {
+        if (!this.signatureEditor) return;
+        
+        if (confirm('Clear this signature?')) {
+            this.signatureEditor.setText('');
+        }
+    }
+    
+    applySignatureTemplate(templateName) {
+        if (!this.signatureEditor || !this.currentSignatureEmail) return;
+        
+        const templates = {
+            minimal: `
+                <br><br>
+                <div style="color: #64748b; font-size: 14px;">
+                    <strong>AlphaVault AI</strong><br>
+                    ${this.currentSignatureEmail}<br>
+                    <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a>
+                </div>
+            `,
+            professional: `
+                <br><br>
+                <div style="border-left: 4px solid #667eea; padding-left: 12px; color: #1e293b; font-size: 14px;">
+                    <strong style="font-size: 16px;">AlphaVault AI</strong><br>
+                    <span style="color: #64748b;">Premium Financial Intelligence</span><br><br>
+                    📧 ${this.currentSignatureEmail}<br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a><br>
+                    📊 Real-time Market Analysis
+                </div>
+            `,
+            corporate: `
+                <br><br>
+                <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 14px; color: #1e293b;">
+                    <tr>
+                        <td style="padding-right: 20px; border-right: 2px solid #667eea;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 24px;">AV</div>
+                        </td>
+                        <td style="padding-left: 20px;">
+                            <strong style="font-size: 16px; color: #667eea;">AlphaVault AI</strong><br>
+                            <span style="color: #64748b; font-size: 13px;">Premium Financial Intelligence Platform</span><br><br>
+                            <span style="color: #64748b;">📧 ${this.currentSignatureEmail}</span><br>
+                            <span style="color: #64748b;">🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a></span>
+                        </td>
+                    </tr>
+                </table>
+            `,
+            modern: `
+                <br><br>
+                <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px;">AV</div>
+                        <div>
+                            <strong style="color: #667eea; font-size: 18px;">AlphaVault AI</strong><br>
+                            <span style="color: #64748b; font-size: 12px;">Financial Intelligence Redefined</span>
+                        </div>
+                    </div>
+                    <div style="color: #64748b; font-size: 13px; line-height: 1.8;">
+                        📧 ${this.currentSignatureEmail}<br>
+                        🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                        🚀 AI-Powered Market Predictions | 📊 Real-Time Analysis | 💎 Premium Insights
+                    </div>
+                </div>
+            `
+        };
+        
+        const template = templates[templateName];
+        
+        if (template) {
+            this.signatureEditor.root.innerHTML = template;
+            alert(`✅ Template "${templateName}" applied!`);
+        }
+    }
+    
+    injectSignature(context = 'compose') {
+        const fromSelect = document.getElementById(`${context}-from`);
+        if (!fromSelect) {
+            console.warn(`⚠ FROM selector not found for context: ${context}`);
+            return;
+        }
+        
+        const fromEmail = fromSelect.value;
+        
+        const signature = this.emailSignatures[fromEmail];
+        
+        if (!signature) {
+            console.warn(`⚠ No signature defined for: ${fromEmail}`);
+            return;
+        }
+        
+        const editor = context === 'compose' ? this.composeEditor : 
+                        context === 'reply' ? this.replyEditor : 
+                        context === 'forward' ? this.forwardEditor : null;
+        
+        if (!editor) {
+            console.warn(`⚠ Editor not found for context: ${context}`);
+            return;
+        }
+        
+        // Nettoyer les éventuelles anciennes signatures
+        const currentContent = editor.root.innerHTML;
+        
+        editor.clipboard.dangerouslyPasteHTML(editor.getLength(), signature);
+        
+        console.log(`✅ Signature injected for: ${fromEmail}`);
+    }
+    
+    // 🆕 Ajouter un listener pour changer la signature quand on change l'adresse FROM
+    setupFromChangeListeners() {
+        // Compose
+        const composeFrom = document.getElementById('compose-from');
+        if (composeFrom) {
+            composeFrom.addEventListener('change', () => {
+                if (this.composeEditor) {
+                    // Retirer l'ancienne signature et injecter la nouvelle
+                    this.injectSignature('compose');
+                }
+            });
+        }
+        
+        // Reply
+        const replyFrom = document.getElementById('reply-from');
+        if (replyFrom) {
+            replyFrom.addEventListener('change', () => {
+                if (this.replyEditor) {
+                    this.injectSignature('reply');
+                }
+            });
+        }
+        
+        // Forward
+        const forwardFrom = document.getElementById('forward-from');
+        if (forwardFrom) {
+            forwardFrom.addEventListener('change', () => {
+                if (this.forwardEditor) {
+                    this.injectSignature('forward');
+                }
+            });
+        }
+        
+        console.log('✅ FROM change listeners setup');
     }
 }
 
@@ -6667,7 +7300,6 @@ setTimeout(() => {
     diagnoseData();
 }, 5000);
 
-// Global function for export
 function exportAnalyticsData(type) {
     if (window.adminAnalytics) {
         window.adminAnalytics.exportData(type);
@@ -6676,4 +7308,3 @@ function exportAnalyticsData(type) {
         alert('Analytics system not ready. Please wait...');
     }
 }
-
