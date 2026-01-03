@@ -3450,3 +3450,41 @@ body.dark-mode .risk-card {
 /* ════════════════════════════════════════════════════════════════
    FIN DU CSS - VERSION 4.0 ULTRA DYNAMIQUE COMPLÈTE
    ════════════════════════════════════════════════════════════════ */
+
+/* Notifications de sauvegarde */
+.save-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 100000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.save-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.save-notification.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.save-notification.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.save-notification i {
+    font-size: 18px;
+}
