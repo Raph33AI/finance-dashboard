@@ -368,12 +368,6 @@
                             Real-time market intelligence from YouTube Data API v3
                         </span>
                     </div>
-                    <div class='toolbar-right'>
-                        <button class='dashboard-btn-sm' id='viewTrends'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>View Trends</span>
-                        </button>
-                    </div>
                 </div>
 
                 <!-- ========================================
@@ -405,10 +399,11 @@
                         <h2 class='section-title gradient-title'>
                             <i class='fas fa-trophy'></i> Top Trending Companies
                         </h2>
-                        <div class='time-range-selector' id='periodSelector'>
-                            <button class='time-btn active' data-range='week'>7 Days</button>
-                            <button class='time-btn' data-range='month'>1 Month</button>
-                            <button class='time-btn' data-range='quarter'>3 Months</button>
+                        <div class='time-range-selector'>
+                            <button class='time-btn active' onclick='companyResearch.changePeriod("week")'>7 Days</button>
+                            <button class='time-btn' onclick='companyResearch.changePeriod("month")'>1 Month</button>
+                            <button class='time-btn' onclick='companyResearch.changePeriod("quarter")'>3 Months</button>
+                            <button class='time-btn' onclick='companyResearch.changePeriod("year")'>1 Year</button>
                         </div>
                     </div>
                     

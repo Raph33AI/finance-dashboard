@@ -2,9 +2,7 @@
  * ====================================================================
  * ALPHAVAULT AI - YOUTUBE MARKET INTELLIGENCE ENGINE
  * ====================================================================
- * Version: 3.0 Ultra - Dual Mode System
- * Section 1: Global Market Dashboard (Top Trending Companies)
- * Section 2: Company-Specific Deep Dive
+ * Version: 4.0 Ultra - Full Data Display avec Logos
  */
 
 class YouTubeMarketIntelligence {
@@ -15,7 +13,8 @@ class YouTubeMarketIntelligence {
         this.marketData = {
             week: [],
             month: [],
-            quarter: []
+            quarter: [],
+            year: [] // ✅ NOUVEAU: Données 1 an
         };
         
         // Search Data Storage
@@ -24,28 +23,23 @@ class YouTubeMarketIntelligence {
         this.currentSort = 'relevance';
         this.videosData = [];
         
-        // Top Companies to Track (S&P 500 + Popular Stocks)
+        // Top Companies avec tickers et secteurs
         this.topCompanies = [
-            { name: 'Apple', ticker: 'AAPL', sector: 'Technology' },
-            { name: 'Microsoft', ticker: 'MSFT', sector: 'Technology' },
-            { name: 'Nvidia', ticker: 'NVDA', sector: 'Technology' },
-            { name: 'Tesla', ticker: 'TSLA', sector: 'Automotive' },
-            { name: 'Amazon', ticker: 'AMZN', sector: 'E-commerce' },
-            { name: 'Meta', ticker: 'META', sector: 'Social Media' },
-            { name: 'Alphabet', ticker: 'GOOGL', sector: 'Technology' },
-            { name: 'Berkshire Hathaway', ticker: 'BRK.B', sector: 'Finance' },
-            { name: 'Visa', ticker: 'V', sector: 'Finance' },
-            { name: 'JPMorgan', ticker: 'JPM', sector: 'Banking' },
-            { name: 'Johnson & Johnson', ticker: 'JNJ', sector: 'Healthcare' },
-            { name: 'Walmart', ticker: 'WMT', sector: 'Retail' },
-            { name: 'Mastercard', ticker: 'MA', sector: 'Finance' },
-            { name: 'Procter & Gamble', ticker: 'PG', sector: 'Consumer' },
-            { name: 'Netflix', ticker: 'NFLX', sector: 'Entertainment' },
-            { name: 'AMD', ticker: 'AMD', sector: 'Technology' },
-            { name: 'Palantir', ticker: 'PLTR', sector: 'Technology' },
-            { name: 'Coinbase', ticker: 'COIN', sector: 'Crypto' },
-            { name: 'Snowflake', ticker: 'SNOW', sector: 'Technology' },
-            { name: 'Rivian', ticker: 'RIVN', sector: 'Automotive' }
+            { name: 'Apple', ticker: 'AAPL', sector: 'Technology', domain: 'apple.com' },
+            { name: 'Microsoft', ticker: 'MSFT', sector: 'Technology', domain: 'microsoft.com' },
+            { name: 'Nvidia', ticker: 'NVDA', sector: 'Technology', domain: 'nvidia.com' },
+            { name: 'Tesla', ticker: 'TSLA', sector: 'Automotive', domain: 'tesla.com' },
+            { name: 'Amazon', ticker: 'AMZN', sector: 'E-commerce', domain: 'amazon.com' },
+            { name: 'Meta', ticker: 'META', sector: 'Social Media', domain: 'meta.com' },
+            { name: 'Alphabet', ticker: 'GOOGL', sector: 'Technology', domain: 'abc.xyz' },
+            { name: 'Netflix', ticker: 'NFLX', sector: 'Entertainment', domain: 'netflix.com' },
+            { name: 'AMD', ticker: 'AMD', sector: 'Technology', domain: 'amd.com' },
+            { name: 'Palantir', ticker: 'PLTR', sector: 'Technology', domain: 'palantir.com' },
+            { name: 'Coinbase', ticker: 'COIN', sector: 'Crypto', domain: 'coinbase.com' },
+            { name: 'Snowflake', ticker: 'SNOW', sector: 'Technology', domain: 'snowflake.com' },
+            { name: 'Rivian', ticker: 'RIVN', sector: 'Automotive', domain: 'rivian.com' },
+            { name: 'Salesforce', ticker: 'CRM', sector: 'Technology', domain: 'salesforce.com' },
+            { name: 'Adobe', ticker: 'ADBE', sector: 'Technology', domain: 'adobe.com' }
         ];
         
         this.init();
@@ -55,7 +49,7 @@ class YouTubeMarketIntelligence {
     // INITIALIZATION
     // ========================================
     init() {
-        console.log('🚀 YouTube Market Intelligence Engine v3.0 initialized');
+        console.log('🚀 YouTube Market Intelligence Engine v4.0 initialized');
         
         // Event Listeners
         const searchInput = document.getElementById('companySearchInput');
@@ -66,11 +60,17 @@ class YouTubeMarketIntelligence {
             });
         }
         
-        const periodSelector = document.getElementById('periodSelector');
+        const periodSelector = document.getElementById('periodSelectorSearch');
         if (periodSelector) {
             periodSelector.addEventListener('change', () => {
                 if (this.currentCompany) this.searchCompany();
             });
+        }
+        
+        // ✅ Supprimer le bouton View Trends
+        const viewTrendsBtn = document.getElementById('viewTrends');
+        if (viewTrendsBtn) {
+            viewTrendsBtn.style.display = 'none';
         }
         
         // Auto-load global dashboard
@@ -85,18 +85,23 @@ class YouTubeMarketIntelligence {
         
         this.showSection('globalLoadingSection');
         this.hideSection('globalDashboardSection');
+        this.hideSection('topCompaniesSection');
+        this.hideSection('sectorAnalysisSection');
+        this.hideSection('sentimentTrendsSection');
         
         try {
-            // Fetch data for all time periods in parallel
-            const [weekData, monthData, quarterData] = await Promise.all([
+            // ✅ Charger données 1 an au lieu de 3 mois
+            const [weekData, monthData, quarterData, yearData] = await Promise.all([
                 this.fetchMarketDataForPeriod('7days'),
                 this.fetchMarketDataForPeriod('1month'),
-                this.fetchMarketDataForPeriod('3months')
+                this.fetchMarketDataForPeriod('3months'),
+                this.fetchMarketDataForPeriod('1year') // ✅ NOUVEAU
             ]);
             
             this.marketData.week = weekData;
             this.marketData.month = monthData;
             this.marketData.quarter = quarterData;
+            this.marketData.year = yearData; // ✅ NOUVEAU
             
             // Render Dashboard
             this.renderGlobalStats();
@@ -106,6 +111,9 @@ class YouTubeMarketIntelligence {
             
             this.hideSection('globalLoadingSection');
             this.showSection('globalDashboardSection');
+            this.showSection('topCompaniesSection');
+            this.showSection('sectorAnalysisSection');
+            this.showSection('sentimentTrendsSection');
             
             console.log('✅ Global Dashboard loaded successfully');
             
@@ -120,7 +128,8 @@ class YouTubeMarketIntelligence {
         const periodDays = {
             '7days': 7,
             '1month': 30,
-            '3months': 90
+            '3months': 90,
+            '1year': 365 // ✅ NOUVEAU
         };
         
         const days = periodDays[period] || 30;
@@ -128,14 +137,14 @@ class YouTubeMarketIntelligence {
         
         const allCompaniesData = [];
         
-        // Fetch data for each company (limit to 10 for demo to avoid quota issues)
-        const companiesSubset = this.topCompanies.slice(0, 10);
+        // Fetch data pour chaque entreprise (limité à 15 pour éviter quota)
+        const companiesSubset = this.topCompanies.slice(0, 15);
         
         for (const company of companiesSubset) {
             try {
                 const videos = await this.fetchYouTubeVideos(
                     `${company.ticker} stock analysis`,
-                    10,
+                    20, // Plus de vidéos
                     'date',
                     dateFilter
                 );
@@ -143,15 +152,14 @@ class YouTubeMarketIntelligence {
                 const analysis = this.analyzeCompanyVideos(company, videos, period);
                 allCompaniesData.push(analysis);
                 
-                // Small delay to avoid rate limiting
-                await this.sleep(200);
+                // Small delay
+                await this.sleep(150);
                 
             } catch (error) {
                 console.warn(`⚠ Failed to fetch data for ${company.ticker}:`, error);
             }
         }
         
-        // Sort by popularity score
         return allCompaniesData.sort((a, b) => b.popularityScore - a.popularityScore);
     }
 
@@ -166,13 +174,12 @@ class YouTubeMarketIntelligence {
                 momentumScore: 0,
                 engagementScore: 0,
                 trendingLevel: 'Low',
-                videos: []
+                videos: [],
+                logoUrl: this.getLogoUrl(company.domain)
             };
         }
         
-        // Sentiment Analysis
         const sentimentCounts = { bullish: 0, bearish: 0, neutral: 0 };
-        let totalEngagement = 0;
         
         videos.forEach(video => {
             const sentiment = this.detectSentiment(
@@ -183,13 +190,12 @@ class YouTubeMarketIntelligence {
         
         const totalVideos = videos.length;
         
-        // Calculate Scores (0-100)
+        // Calculate Scores
         const sentimentScore = this.calculateSentimentScore(sentimentCounts, totalVideos);
         const popularityScore = this.calculatePopularityScore(totalVideos, period);
         const momentumScore = this.calculateMomentumScore(videos);
         const engagementScore = this.calculateEngagementScore(videos);
         
-        // Overall Trending Level
         const overallScore = (popularityScore + sentimentScore + momentumScore + engagementScore) / 4;
         const trendingLevel = this.getTrendingLevel(overallScore);
         
@@ -207,7 +213,22 @@ class YouTubeMarketIntelligence {
             engagementScore: Math.round(engagementScore),
             overallScore: Math.round(overallScore),
             trendingLevel,
-            videos: videos.slice(0, 3) // Keep top 3 videos
+            videos: videos.slice(0, 3),
+            logoUrl: this.getLogoUrl(company.domain)
+        };
+    }
+
+    // ✅ NOUVEAU: Système de logos multi-fallback
+    getLogoUrl(domain) {
+        if (!domain) return null;
+        
+        return {
+            primary: `https://img.logo.dev/${domain}?token=pk_X-WazSBJQn2GwW2hy9Lwpg`,
+            fallbacks: [
+                `https://logo.clearbit.com/${domain}`,
+                `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+                `https://unavatar.io/${domain}?fallback=false`
+            ]
         };
     }
 
@@ -231,11 +252,11 @@ class YouTubeMarketIntelligence {
     }
 
     calculatePopularityScore(videoCount, period) {
-        // Expected videos per period (baseline)
         const baseline = {
             '7days': 5,
             '1month': 15,
-            '3months': 40
+            '3months': 40,
+            '1year': 120 // ✅ NOUVEAU
         };
         
         const expected = baseline[period] || 15;
@@ -247,7 +268,6 @@ class YouTubeMarketIntelligence {
     calculateMomentumScore(videos) {
         if (!videos || videos.length < 2) return 0;
         
-        // Sort by date
         const sortedVideos = [...videos].sort((a, b) => 
             new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt)
         );
@@ -259,15 +279,13 @@ class YouTubeMarketIntelligence {
         
         const olderCount = videos.length - recentCount;
         
-        if (olderCount === 0) return 100; // All recent = high momentum
+        if (olderCount === 0) return 100;
         
         const momentumRatio = recentCount / olderCount;
         return Math.min(momentumRatio * 50, 100);
     }
 
     calculateEngagementScore(videos) {
-        // Placeholder: would need video details API call for real engagement
-        // For now, use video count as proxy
         return Math.min(videos.length * 5, 100);
     }
 
@@ -286,6 +304,7 @@ class YouTubeMarketIntelligence {
         const weekTotal = this.marketData.week.reduce((sum, c) => sum + c.videoCount, 0);
         const monthTotal = this.marketData.month.reduce((sum, c) => sum + c.videoCount, 0);
         const quarterTotal = this.marketData.quarter.reduce((sum, c) => sum + c.videoCount, 0);
+        const yearTotal = this.marketData.year.reduce((sum, c) => sum + c.videoCount, 0); // ✅ NOUVEAU
         
         const weekBullish = this.marketData.week.reduce((sum, c) => sum + c.sentiment.bullish, 0);
         const weekTotal_videos = this.marketData.week.reduce((sum, c) => sum + c.videoCount, 0);
@@ -300,7 +319,7 @@ class YouTubeMarketIntelligence {
                 </div>
                 <div class="stat-content">
                     <div class="stat-label">Videos (7 Days)</div>
-                    <div class="stat-value">${weekTotal}</div>
+                    <div class="stat-value">${weekTotal.toLocaleString()}</div>
                     <div class="stat-change positive">
                         <i class="fas fa-arrow-up"></i> ${Math.round((weekTotal / monthTotal) * 100)}% of month
                     </div>
@@ -334,14 +353,40 @@ class YouTubeMarketIntelligence {
             </div>
             
             <div class="global-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                    <i class="fas fa-calendar-year"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Year Total (365d)</div>
+                    <div class="stat-value">${yearTotal.toLocaleString()}</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-chart-bar"></i> Full Year
+                    </div>
+                </div>
+            </div>
+            
+            <div class="global-stat-card">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
                 <div class="stat-content">
                     <div class="stat-label">Quarter Total</div>
-                    <div class="stat-value">${quarterTotal}</div>
+                    <div class="stat-value">${quarterTotal.toLocaleString()}</div>
                     <div class="stat-change positive">
                         <i class="fas fa-chart-bar"></i> 3 Months
+                    </div>
+                </div>
+            </div>
+            
+            <div class="global-stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Monthly Total</div>
+                    <div class="stat-value">${monthTotal.toLocaleString()}</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-calendar"></i> 30 Days
                     </div>
                 </div>
             </div>
@@ -356,16 +401,22 @@ class YouTubeMarketIntelligence {
         if (data.length === 0) {
             document.getElementById('topCompaniesGrid').innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; color: #94a3b8; margin-bottom: 12px;"></i>
+                    <i class="fas fa-chart-line"></i>
                     <p>No data available for this period</p>
                 </div>
             `;
             return;
         }
         
-        const html = data.slice(0, 10).map((company, index) => {
+        const html = data.slice(0, 15).map((company, index) => {
             const trendIcon = this.getTrendIcon(company.trendingLevel);
             const sentimentClass = this.getSentimentClass(company.sentimentScore);
+            const initials = company.ticker.substring(0, 2).toUpperCase();
+            
+            // ✅ Logos avec fallback
+            const logoHtml = company.logoUrl 
+                ? `<img src="${company.logoUrl.primary}" alt="${company.name}" onerror="this.onerror=null; this.parentElement.innerHTML='${initials}';">`
+                : initials;
             
             return `
                 <div class="company-rank-card" onclick="document.getElementById('companySearchInput').value='${company.ticker}'; companyResearch.searchCompany();">
@@ -374,6 +425,9 @@ class YouTubeMarketIntelligence {
                     </div>
                     
                     <div class="company-info-compact">
+                        <div class="company-logo-compact">
+                            ${logoHtml}
+                        </div>
                         <div class="company-ticker">${company.ticker}</div>
                         <div class="company-name-small">${company.name}</div>
                         <div class="company-sector-tag">${company.sector}</div>
@@ -406,9 +460,9 @@ class YouTubeMarketIntelligence {
                             <div class="sentiment-fill bearish" style="width: ${(company.sentiment.bearish / company.videoCount) * 100}%"></div>
                         </div>
                         <div class="sentiment-legend-mini">
-                            <span><i class="fas fa-circle" style="color: var(--forex-success);"></i> ${company.sentiment.bullish}</span>
+                            <span><i class="fas fa-circle" style="color: var(--youtube-success);"></i> ${company.sentiment.bullish}</span>
                             <span><i class="fas fa-circle" style="color: #94a3b8;"></i> ${company.sentiment.neutral}</span>
-                            <span><i class="fas fa-circle" style="color: var(--forex-danger);"></i> ${company.sentiment.bearish}</span>
+                            <span><i class="fas fa-circle" style="color: var(--youtube-danger);"></i> ${company.sentiment.bearish}</span>
                         </div>
                     </div>
                 </div>
@@ -449,30 +503,28 @@ class YouTubeMarketIntelligence {
             const sentimentClass = this.getSentimentClass(sector.sentimentScore);
             
             return `
-                <div class="sector-card">
-                    <div class="sector-header">
-                        <h4>${sector.name}</h4>
-                        <div class="sector-sentiment ${sentimentClass}">
-                            ${sector.sentimentScore}%
-                        </div>
+                <div class="company-stat-card">
+                    <div class="stat-icon-small" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="fas fa-industry"></i>
                     </div>
-                    <div class="sector-stats">
-                        <div class="sector-stat">
-                            <i class="fas fa-video"></i>
-                            <span>${sector.videoCount} videos</span>
+                    <div>
+                        <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">${sector.name}</h4>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <i class="fas fa-video" style="color: var(--youtube-primary);"></i> ${sector.videoCount} videos
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <i class="fas fa-building" style="color: var(--youtube-primary);"></i> ${sector.companies.length} companies
+                            </div>
+                            <div style="font-size: 0.85rem;" class="${sentimentClass}">
+                                <i class="fas fa-chart-line"></i> ${sector.sentimentScore}% bullish
+                            </div>
                         </div>
-                        <div class="sector-stat">
-                            <i class="fas fa-building"></i>
-                            <span>${sector.companies.length} companies</span>
+                        <div class="sentiment-bar-mini">
+                            <div class="sentiment-fill bullish" style="width: ${(sector.bullish / sector.videoCount) * 100}%"></div>
+                            <div class="sentiment-fill neutral" style="width: ${(sector.neutral / sector.videoCount) * 100}%"></div>
+                            <div class="sentiment-fill bearish" style="width: ${(sector.bearish / sector.videoCount) * 100}%"></div>
                         </div>
-                    </div>
-                    <div class="sector-sentiment-bar">
-                        <div class="sentiment-fill bullish" style="width: ${(sector.bullish / sector.videoCount) * 100}%"></div>
-                        <div class="sentiment-fill neutral" style="width: ${(sector.neutral / sector.videoCount) * 100}%"></div>
-                        <div class="sentiment-fill bearish" style="width: ${(sector.bearish / sector.videoCount) * 100}%"></div>
-                    </div>
-                    <div class="sector-companies">
-                        ${sector.companies.slice(0, 5).join(', ')}${sector.companies.length > 5 ? '...' : ''}
                     </div>
                 </div>
             `;
@@ -482,15 +534,11 @@ class YouTubeMarketIntelligence {
     }
 
     renderSentimentTrends() {
-        // Placeholder for sentiment trend chart
         const html = `
-            <div class="sentiment-trend-placeholder">
-                <i class="fas fa-chart-area" style="font-size: 3rem; color: #94a3b8; margin-bottom: 16px;"></i>
-                <h4>Sentiment Trend Chart</h4>
-                <p>7-day, 30-day, 90-day sentiment evolution</p>
-                <p style="font-size: 0.9rem; color: var(--text-tertiary); margin-top: 8px;">
-                    Chart.js integration coming soon
-                </p>
+            <div class="empty-state">
+                <i class="fas fa-chart-area"></i>
+                <h3>Sentiment Trend Chart</h3>
+                <p>7-day, 30-day, 90-day, 365-day sentiment evolution</p>
             </div>
         `;
         
@@ -510,7 +558,7 @@ class YouTubeMarketIntelligence {
         }
         
         this.currentCompany = query;
-        this.currentPeriod = document.getElementById('periodSelector').value || '1month';
+        this.currentPeriod = document.getElementById('periodSelectorSearch').value || '1month';
         this.currentSort = document.getElementById('videoSortSelector').value || 'relevance';
         
         document.getElementById('loadingCompany').textContent = query;
@@ -529,16 +577,18 @@ class YouTubeMarketIntelligence {
                 dateFilter
             );
             
-            this.videosData = videos;
+            // ✅ CORRECTION FILTRE: Vérifier que les vidéos sont bien dans la période
+            const filteredVideos = this.filterVideosByPeriod(videos, days);
+            
+            this.videosData = filteredVideos;
             
             this.renderCompanyHeader(query);
-            this.renderCompanyStats(videos);
-            this.renderVideos(videos);
+            this.renderCompanyStats(filteredVideos);
+            this.renderVideos(filteredVideos);
             
             this.hideSection('searchLoadingSection');
             this.showSection('searchResultsSection');
             
-            // Scroll to results
             document.getElementById('searchResultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
             
         } catch (error) {
@@ -546,6 +596,16 @@ class YouTubeMarketIntelligence {
             this.hideSection('searchLoadingSection');
             this.showError('An error occurred. Please try again.');
         }
+    }
+
+    // ✅ NOUVEAU: Filtrage strict des vidéos par période
+    filterVideosByPeriod(videos, days) {
+        const cutoffDate = Date.now() - (days * 24 * 60 * 60 * 1000);
+        
+        return videos.filter(video => {
+            const publishedDate = new Date(video.snippet.publishedAt).getTime();
+            return publishedDate >= cutoffDate;
+        });
     }
 
     async fetchYouTubeVideos(query, maxResults = 20, order = 'relevance', dateFilter = null) {
@@ -591,7 +651,7 @@ class YouTubeMarketIntelligence {
         if (!videos || videos.length === 0) {
             document.getElementById('companyStatsGrid').innerHTML = `
                 <div class="empty-state">
-                    <i class="fab fa-youtube" style="font-size: 3rem; color: #ef4444; margin-bottom: 12px;"></i>
+                    <i class="fab fa-youtube"></i>
                     <p>No videos found for this period</p>
                 </div>
             `;
@@ -610,7 +670,6 @@ class YouTubeMarketIntelligence {
         const totalVideos = videos.length;
         const sentimentScore = Math.round((sentimentCounts.bullish / totalVideos) * 100);
         
-        // Recent videos (last 7 days)
         const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         const recentVideos = videos.filter(v => 
             new Date(v.snippet.publishedAt).getTime() > weekAgo
@@ -653,7 +712,7 @@ class YouTubeMarketIntelligence {
                 </div>
                 <div>
                     <div class="stat-label">Bullish Videos</div>
-                    <div class="stat-value-large" style="color: var(--forex-success);">${sentimentCounts.bullish}</div>
+                    <div class="stat-value-large" style="color: var(--youtube-success);">${sentimentCounts.bullish}</div>
                 </div>
             </div>
         `;
@@ -665,7 +724,7 @@ class YouTubeMarketIntelligence {
         if (!videos || videos.length === 0) {
             document.getElementById('videosGrid').innerHTML = `
                 <div class="empty-state">
-                    <i class="fab fa-youtube" style="font-size: 4rem; color: #ef4444; margin-bottom: 16px;"></i>
+                    <i class="fab fa-youtube"></i>
                     <h3>No videos found</h3>
                     <p>Try changing the period or search term.</p>
                 </div>
@@ -713,8 +772,8 @@ class YouTubeMarketIntelligence {
     // HELPER METHODS
     // ========================================
     detectSentiment(text) {
-        const bullishWords = ['buy', 'bullish', 'growth', 'profit', 'surge', 'record', 'strong', 'opportunity', 'breakout', 'moon', 'rally', 'upgrade', 'beat', 'soar', 'rise'];
-        const bearishWords = ['sell', 'bearish', 'loss', 'decline', 'drop', 'crash', 'weak', 'fall', 'warning', 'collapse', 'downgrade', 'miss', 'plunge', 'tank'];
+        const bullishWords = ['buy', 'bullish', 'growth', 'profit', 'surge', 'record', 'strong', 'opportunity', 'breakout', 'moon', 'rally', 'upgrade', 'beat', 'soar', 'rise', 'explode', 'rocket'];
+        const bearishWords = ['sell', 'bearish', 'loss', 'decline', 'drop', 'crash', 'weak', 'fall', 'warning', 'collapse', 'downgrade', 'miss', 'plunge', 'tank', 'dump'];
         
         const lowerText = text.toLowerCase();
         const bullishCount = bullishWords.filter(word => lowerText.includes(word)).length;
@@ -806,7 +865,7 @@ class YouTubeMarketIntelligence {
     }
 
     changePeriod(period) {
-        document.querySelectorAll('.period-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.time-btn').forEach(tab => tab.classList.remove('active'));
         event.target.classList.add('active');
         this.renderTopCompanies(period);
     }
