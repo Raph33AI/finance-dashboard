@@ -469,6 +469,10 @@
                         <i class="fas fa-brain"></i>
                         ML Predictions
                     </button>
+                    <button class="main-tab" data-section="gmail-management">
+                        <i class="fas fa-envelope"></i>
+                        Gmail Management
+                    </button>
                 </div>
 
                 <!-- REMPLACER LA SECTION DASHBOARD EXISTANTE PAR CECI -->
@@ -2105,6 +2109,152 @@
                             <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
                                 <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
                                 <p style="margin-top: 16px; color: #64748b;">Generating ML predictions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                    SECTION: GMAIL MANAGEMENT
+                    ======================================== -->
+                <div id="gmail-management" class="tab-section" data-section-content="gmail-management">
+                    <div class="section">
+                        <div class="section-header-with-actions">
+                            <h2 class='section-title'>
+                                <i class='fas fa-envelope'></i>
+                                Gmail Management
+                                <span class="section-subtitle">@alphavault-ai.com</span>
+                            </h2>
+                            <button class='dashboard-btn' id='exportGmailBtn' onclick="adminAnalytics.exportData('gmail')">
+                                <i class='fas fa-file-csv'></i>
+                                Export Gmail Data
+                            </button>
+                        </div>
+                        
+                        <!-- KPIs Grid -->
+                        <div class="kpis-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <i class="fas fa-inbox"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Total Emails</div>
+                                    <div class="kpi-value" id="gmail-total-emails">0</div>
+                                    <div class="kpi-sublabel">In inbox</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                    <i class="fas fa-envelope-open-text"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Unread Emails</div>
+                                    <div class="kpi-value" id="gmail-unread-emails">0</div>
+                                    <div class="kpi-sublabel">
+                                        Rate: <span id="gmail-unread-rate">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Spam Emails</div>
+                                    <div class="kpi-value" id="gmail-spam-emails">0</div>
+                                    <div class="kpi-sublabel">Blocked</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Sent Emails</div>
+                                    <div class="kpi-value" id="gmail-sent-emails">0</div>
+                                    <div class="kpi-sublabel">Total sent</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Avg Response Time</div>
+                                    <div class="kpi-value" id="gmail-avg-response-time">0h</div>
+                                    <div class="kpi-sublabel">Average</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Row -->
+                        <div class="charts-row">
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Email Categories
+                                </h4>
+                                <canvas id="gmail-categories-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-trophy"></i>
+                                    Top 10 Senders
+                                </h4>
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Sender</th>
+                                                <th>Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="gmail-top-senders-body">
+                                            <tr>
+                                                <td colspan="3" style="text-align: center; padding: 20px;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gmail Inbox Table -->
+                        <div class="table-wrapper">
+                            <h4 class="chart-title">
+                                <i class="fas fa-envelope"></i>
+                                Recent Emails (50 latest)
+                            </h4>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>From</th>
+                                            <th>Subject</th>
+                                            <th>Preview</th>
+                                            <th>Category</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gmail-inbox-body">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading Gmail inbox...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
