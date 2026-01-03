@@ -351,7 +351,6 @@ class AdminAnalyticsPro {
         this.allApiUsageData = [];
         this.allFeedbackData = [];
         this.allAlertsData = [];
-        // 🆕 NOUVELLES DONNÉES
         this.allRealEstateSimulations = [];
         this.allLoginHistory = [];
         this.allConversations = [];
@@ -374,6 +373,26 @@ class AdminAnalyticsPro {
         
         this.currentSection = 'dashboard';
         this.currentMRR = 0;
+        
+        // ========================================
+        // 🆕 PROPRIÉTÉS POUR LA MESSAGERIE COMPLÈTE
+        // ========================================
+        this.currentEmail = null;
+        this.currentThread = null;
+        this.gmailStats = null;
+        this.gmailInbox = [];
+        this.gmailDrafts = [];
+        this.gmailLabels = [];
+        this.gmailTemplates = [];
+        this.emailSignature = '';
+        this.searchResults = [];
+        this.attachments = [];
+        this.autoSaveDraftTimer = null;
+        
+        // Éditeurs Quill.js (seront initialisés dans les modales)
+        this.composeEditor = null;
+        this.replyEditor = null;
+        this.forwardEditor = null;
         
         this.init();
     }
@@ -5637,22 +5656,6 @@ class AdminAnalyticsPro {
     // ========================================
     // 📧 SECTION 13B: GMAIL MANAGEMENT - ADVANCED FEATURES
     // ========================================
-    
-    // 🆕 PROPRIÉTÉS POUR LA MESSAGERIE COMPLÈTE
-    constructor() {
-        // ... (garder le code existant)
-        
-        // 🆕 AJOUTS POUR MESSAGERIE
-        this.currentEmail = null;
-        this.currentThread = null;
-        this.gmailDrafts = [];
-        this.gmailLabels = [];
-        this.gmailTemplates = [];
-        this.emailSignature = '';
-        this.searchResults = [];
-        this.attachments = [];
-        this.autoSaveDraftTimer = null;
-    }
     
     // ========================================
     // 📨 COMPOSER UN NOUVEAU EMAIL
