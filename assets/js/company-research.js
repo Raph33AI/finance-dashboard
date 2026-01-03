@@ -2,7 +2,7 @@
  * ====================================================================
  * ALPHAVAULT AI - YOUTUBE MARKET INTELLIGENCE ENGINE
  * ====================================================================
- * Version: 4.1 Ultra - Corrections Critiques
+ * Version: 4.2 Ultra - Corrections Logos + Titres Dégradés
  */
 
 class YouTubeMarketIntelligence {
@@ -23,7 +23,7 @@ class YouTubeMarketIntelligence {
         this.currentSort = 'relevance';
         this.videosData = [];
         
-        // Top Companies
+        // Top Companies avec domaines corrects
         this.topCompanies = [
             { name: 'Apple', ticker: 'AAPL', sector: 'Technology', domain: 'apple.com' },
             { name: 'Microsoft', ticker: 'MSFT', sector: 'Technology', domain: 'microsoft.com' },
@@ -34,7 +34,12 @@ class YouTubeMarketIntelligence {
             { name: 'Netflix', ticker: 'NFLX', sector: 'Entertainment', domain: 'netflix.com' },
             { name: 'AMD', ticker: 'AMD', sector: 'Technology', domain: 'amd.com' },
             { name: 'Palantir', ticker: 'PLTR', sector: 'Technology', domain: 'palantir.com' },
-            { name: 'Coinbase', ticker: 'COIN', sector: 'Crypto', domain: 'coinbase.com' }
+            { name: 'Coinbase', ticker: 'COIN', sector: 'Crypto', domain: 'coinbase.com' },
+            { name: 'Salesforce', ticker: 'CRM', sector: 'Technology', domain: 'salesforce.com' },
+            { name: 'Adobe', ticker: 'ADBE', sector: 'Technology', domain: 'adobe.com' },
+            { name: 'Oracle', ticker: 'ORCL', sector: 'Technology', domain: 'oracle.com' },
+            { name: 'Intel', ticker: 'INTC', sector: 'Technology', domain: 'intel.com' },
+            { name: 'Qualcomm', ticker: 'QCOM', sector: 'Technology', domain: 'qualcomm.com' }
         ];
         
         this.init();
@@ -44,7 +49,7 @@ class YouTubeMarketIntelligence {
     // INITIALIZATION
     // ========================================
     init() {
-        console.log('🚀 YouTube Market Intelligence Engine v4.1 initialized');
+        console.log('🚀 YouTube Market Intelligence Engine v4.2 initialized');
         
         // Event Listeners
         const searchInput = document.getElementById('companySearchInput');
@@ -55,7 +60,6 @@ class YouTubeMarketIntelligence {
             });
         }
         
-        // ✅ CORRECTION: Utiliser l'ID correct
         const periodSelector = document.getElementById('periodSelector');
         if (periodSelector) {
             periodSelector.addEventListener('change', () => {
@@ -86,14 +90,14 @@ class YouTubeMarketIntelligence {
         this.hideSection('sentimentTrendsSection');
         
         try {
-            // ✅ Charger seulement la semaine pour éviter quota
+            // Charger seulement la semaine pour éviter quota
             const [weekData] = await Promise.all([
                 this.fetchMarketDataForPeriod('7days')
             ]);
             
             this.marketData.week = weekData;
             
-            // ✅ Mock data pour le reste (éviter de surcharger l'API)
+            // Mock data pour le reste
             this.marketData.month = this.generateMockData(30);
             this.marketData.quarter = this.generateMockData(90);
             this.marketData.year = this.generateMockData(365);
@@ -116,7 +120,7 @@ class YouTubeMarketIntelligence {
             console.error('❌ Global Dashboard error:', error);
             this.hideSection('globalLoadingSection');
             
-            // ✅ Fallback: Afficher des données mock en cas d'erreur
+            // Fallback: Afficher des données mock
             this.marketData.week = this.generateMockData(7);
             this.marketData.month = this.generateMockData(30);
             this.marketData.quarter = this.generateMockData(90);
@@ -136,7 +140,6 @@ class YouTubeMarketIntelligence {
         }
     }
 
-    // ✅ NOUVEAU: Générer des données mock
     generateMockData(days) {
         return this.topCompanies.map((company, index) => {
             const baseVideos = Math.floor(Math.random() * 50) + 20;
@@ -186,14 +189,14 @@ class YouTubeMarketIntelligence {
         
         const allCompaniesData = [];
         
-        // ✅ Limiter à 5 entreprises pour éviter quota
+        // Limiter à 5 entreprises
         const companiesSubset = this.topCompanies.slice(0, 5);
         
         for (const company of companiesSubset) {
             try {
                 const videos = await this.fetchYouTubeVideos(
                     `${company.ticker} stock analysis`,
-                    10, // Réduire à 10 vidéos
+                    10,
                     'date',
                     dateFilter
                 );
@@ -203,14 +206,14 @@ class YouTubeMarketIntelligence {
                     allCompaniesData.push(analysis);
                 }
                 
-                await this.sleep(300); // Délai plus long
+                await this.sleep(300);
                 
             } catch (error) {
                 console.warn(`⚠ Failed to fetch data for ${company.ticker}:`, error.message);
             }
         }
         
-        // ✅ Compléter avec mock data si pas assez de résultats
+        // Compléter avec mock data
         if (allCompaniesData.length < 10) {
             const mockData = this.generateMockData(days);
             return [...allCompaniesData, ...mockData.slice(0, 10 - allCompaniesData.length)];
@@ -273,6 +276,7 @@ class YouTubeMarketIntelligence {
         };
     }
 
+    // ✅ CORRECTION: Système de logos multi-fallback amélioré
     getLogoUrl(domain) {
         if (!domain) return null;
         
@@ -467,8 +471,22 @@ class YouTubeMarketIntelligence {
             const sentimentClass = this.getSentimentClass(company.sentimentScore);
             const initials = company.ticker.substring(0, 2).toUpperCase();
             
+            // ✅ CORRECTION: Gestion améliorée des logos avec fallback multiple
             const logoHtml = company.logoUrl 
-                ? `<img src="${company.logoUrl.primary}" alt="${company.name}" onerror="this.onerror=null; this.parentElement.classList.add('text-fallback'); this.parentElement.innerHTML='${initials}';">`
+                ? `<img src="${company.logoUrl.primary}" 
+                        alt="${company.name}" 
+                        onerror="this.onerror=null; 
+                                 if(this.dataset.fallbackIndex === undefined) { 
+                                     this.dataset.fallbackIndex = 0; 
+                                 }
+                                 const fallbacks = ${JSON.stringify(company.logoUrl.fallbacks)};
+                                 if(parseInt(this.dataset.fallbackIndex) < fallbacks.length) {
+                                     this.src = fallbacks[parseInt(this.dataset.fallbackIndex)];
+                                     this.dataset.fallbackIndex = parseInt(this.dataset.fallbackIndex) + 1;
+                                 } else {
+                                     this.parentElement.classList.add('text-fallback');
+                                     this.parentElement.innerHTML='${initials}';
+                                 }">`
                 : initials;
             
             return `
@@ -617,7 +635,6 @@ class YouTubeMarketIntelligence {
         
         this.currentCompany = query;
         
-        // ✅ CORRECTION: Utiliser l'ID correct
         const periodSelector = document.getElementById('periodSelector');
         this.currentPeriod = periodSelector ? periodSelector.value : '1month';
         
@@ -913,7 +930,6 @@ class YouTubeMarketIntelligence {
         return labels[period] || 'Last Month';
     }
 
-    // ✅ CORRECTION CRITIQUE: Calcul correct des dates passées
     getDateFilter(days) {
         const now = new Date();
         const pastDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
