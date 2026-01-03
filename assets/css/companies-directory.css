@@ -1,7 +1,7 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * COMPANIES DIRECTORY - PREMIUM GLASSMORPHISM DESIGN V3.0
- * Style basé sur Forex Converter Pro + Dropdowns + Bordures Dégradé
+ * COMPANIES DIRECTORY - PREMIUM GLASSMORPHISM DESIGN V3.1
+ * Style basé sur Forex Converter Pro + Dropdowns + Bordures Gradient Fines
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -220,7 +220,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   STATISTICS GRID
+   STATISTICS GRID - ✅ BORDURES GRADIENT FINES
    ======================================== */
 .stats-grid {
     display: grid;
@@ -237,7 +237,12 @@ body.dark-mode {
     align-items: center;
     gap: 20px;
     box-shadow: var(--glass-shadow);
-    border: 2px solid var(--glass-border);
+    /* ✅ BORDURE GRADIENT FINE (2px) */
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      var(--companies-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
@@ -258,7 +263,6 @@ body.dark-mode {
 .stat-card:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
-    border-color: var(--companies-primary);
 }
 
 .stat-card:hover::before {
@@ -307,7 +311,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   SEARCH & FILTERS (BORDURES DÉGRADÉ)
+   SEARCH & FILTERS - ✅ BORDURES GRADIENT FINES
    ======================================== */
 .search-toolbar {
     display: flex;
@@ -334,7 +338,8 @@ body.dark-mode {
 .search-bar input {
     width: 100%;
     padding: 18px 56px 18px 56px;
-    border: 3px solid transparent;
+    /* ✅ BORDURE GRADIENT FINE (2px) */
+    border: 2px solid transparent;
     border-radius: 16px;
     font-size: 1rem;
     font-weight: 600;
@@ -342,15 +347,18 @@ body.dark-mode {
     backdrop-filter: blur(20px) saturate(180%);
     color: var(--text-primary);
     transition: var(--transition-smooth);
-    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), var(--companies-gradient);
+    background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), 
+                      var(--companies-gradient);
     background-origin: border-box;
     background-clip: padding-box, border-box;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
 }
 
 .search-bar input:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 8px 24px rgba(102, 126, 234, 0.2);
-    border-color: transparent;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 
+                0 8px 24px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
 }
 
 .search-bar input::placeholder {
@@ -391,7 +399,8 @@ body.dark-mode {
     flex: 1;
     min-width: 180px;
     padding: 14px 40px 14px 16px;
-    border: 3px solid transparent;
+    /* ✅ BORDURE GRADIENT FINE (2px) */
+    border: 2px solid transparent;
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 600;
@@ -409,16 +418,18 @@ body.dark-mode {
     background-position: right 16px center, border-box, border-box;
     background-origin: padding-box, border-box, border-box;
     background-clip: padding-box, padding-box, border-box;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .filter-select:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
 }
 
 .filter-select:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1),
+                0 4px 16px rgba(102, 126, 234, 0.2);
 }
 
 .filter-btn {
