@@ -736,10 +736,36 @@ class YouTubeMarketIntelligence {
     }
 
     renderCompanyHeader(company) {
+        // ✅ Trouver l'entreprise correspondante pour récupérer le domaine
+        const companyData = this.topCompanies.find(c => 
+            c.ticker.toLowerCase() === company.toLowerCase() ||
+            c.name.toLowerCase() === company.toLowerCase()
+        );
+        
+        const initials = company.substring(0, 2).toUpperCase();
+        
+        // ✅ Générer les URLs de logos
+        let logoHtml = `<div class="text-fallback">${initials}</div>`;
+        let fallbacksData = '[]';
+        
+        if (companyData && companyData.domain) {
+            const logoUrls = this.getLogoUrl(companyData.domain);
+            if (logoUrls) {
+                fallbacksData = JSON.stringify(logoUrls.fallbacks || []);
+                logoHtml = `<img src="${logoUrls.primary}" 
+                                alt="${company}" 
+                                style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px;"
+                                onerror="YouTubeMarketIntelligence.handleLogoError(this, '${initials}')">`;
+            }
+        }
+        
         const html = `
             <div class="company-header-search">
-                <div class="company-icon-large">
-                    ${company.charAt(0).toUpperCase()}
+                <div class="company-icon-large" 
+                    data-ticker="${company}"
+                    data-fallbacks='${fallbacksData.replace(/'/g, '&apos;')}'
+                    style="overflow: hidden; background: white; border: 3px solid rgba(102, 126, 234, 0.2);">
+                    ${logoHtml}
                 </div>
                 <div>
                     <h3>${company}</h3>
