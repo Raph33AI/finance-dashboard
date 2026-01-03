@@ -3025,9 +3025,56 @@ function recalculateFinancialProjections() {
     
     renderFinancialProjectionsTable();
     renderMetricsTable();
+    updateProjectionSummaryCards();
     updateAllCharts();
     
     console.log('✅ Recalculation complete');
+}
+
+// ⚡ MISE À JOUR DES CARTES DE RÉSUMÉ FINANCIAL PROJECTIONS
+function updateProjectionSummaryCards() {
+    console.log('📊 Updating Financial Projections summary cards...');
+    
+    const year5 = FINANCIAL_DATA.projections.year5;
+    
+    // Sélectionner les cartes par leurs valeurs affichées
+    const cards = document.querySelectorAll('.projection-card');
+    
+    if (cards.length >= 4) {
+        // Carte 1: Year 5 ARR
+        const arrCard = cards[0];
+        const arrValue = arrCard.querySelector('.proj-value');
+        if (arrValue) {
+            arrValue.textContent = formatCurrency(year5.metrics.arr * 1000);
+        }
+        
+        // Carte 2: Total Users (Year 5)
+        const usersCard = cards[1];
+        const usersValue = usersCard.querySelector('.proj-value');
+        const usersGrowth = usersCard.querySelector('.proj-growth');
+        if (usersValue) {
+            usersValue.textContent = formatNumber(year5.users.total);
+        }
+        if (usersGrowth) {
+            usersGrowth.textContent = formatNumber(year5.users.paid) + ' paid subscribers';
+        }
+        
+        // Carte 3: Gross Margin (Year 5) - Cette valeur est fixe à 85%
+        // Pas de changement nécessaire
+        
+        // Carte 4: EBITDA (Year 5)
+        const ebitdaCard = cards[3];
+        const ebitdaValue = ebitdaCard.querySelector('.proj-value');
+        const ebitdaGrowth = ebitdaCard.querySelector('.proj-growth');
+        if (ebitdaValue) {
+            ebitdaValue.textContent = formatCurrency(year5.metrics.ebitda * 1000);
+        }
+        if (ebitdaGrowth) {
+            ebitdaGrowth.textContent = formatPercentage(year5.metrics.ebitdaMargin) + ' margin';
+        }
+    }
+    
+    console.log('✅ Summary cards updated');
 }
 
 function resetFinancialData() {
