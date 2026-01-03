@@ -1,9 +1,1624 @@
+// /**
+//  * ════════════════════════════════════════════════════════════════
+//  * 🏛 COMPANIES DIRECTORY - SYSTÈME COMPLET V3.1
+//  * Multi-API Logos + Google Knowledge Graph + 15 Secteurs + Régions
+//  * Cache FIRESTORE : Synchronisation multi-appareils ✨
+//  * ✅ NOUVEAU : Intégration rapports financiers SEC EDGAR
+//  * ════════════════════════════════════════════════════════════════
+//  */
+
+// class CompaniesDirectory {
+//     constructor() {
+//         this.allCompanies = [];
+//         this.filteredCompanies = [];
+//         this.displayedCompanies = [];
+//         this.currentView = 'grid';
+//         this.currentSort = 'name-asc';
+//         this.currentPage = 1;
+//         this.itemsPerPage = 20;
+//         this.filters = {
+//             search: '',
+//             sector: 'all',
+//             region: 'all'
+//         };
+        
+//         // ✅ URLs des Workers Cloudflare
+//         this.knowledgeGraphWorkerUrl = 'https://google-knowledge-api.raphnardone.workers.dev';
+//         this.secWorkerUrl = 'https://sec-edgar-api.raphnardone.workers.dev';
+        
+//         // ✅ Cache local des données enrichies
+//         this.enrichedDataCache = new Map();
+        
+//         // ✅ Durée du cache = 30 JOURS (1 MOIS)
+//         this.CACHE_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+        
+//         // ✅ État du préchargement
+//         this.preloadingStatus = {
+//             isLoading: false,
+//             loaded: 0,
+//             total: 0,
+//             errors: 0,
+//             startTime: null
+//         };
+        
+//         // ✅ 15 SECTEURS PRINCIPAUX (Monde entier)
+//         this.mainSectors = {
+//             'Technology': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'AMD', 'QCOM', 'AVGO', 'TXN', 'CSCO', 'IBM', 'ACN', 'NOW', 'INTU', 'PYPL', 'SQ', 'SNOW', 'PLTR', 'ZM', 'SHOP', 'UBER', 'LYFT', 'ABNB', 'DASH', 'SNAP', 'PINS', 'SPOT', 'RBLX', 'TWLO', 'OKTA', 'CRWD', 'DDOG', 'MDB', 'SPLK', 'WDAY', 'ADSK', 'VMW', 'DELL', 'HPQ', 'HPE', 'WDC', 'STX', 'MU', 'AMAT', 'LRCX', 'KLAC', 'ADI', 'MRVL', 'SNPS', 'CDNS', 'SAP', 'ASML', 'ERIC', 'NOK', 'STM', 'BABA', 'TCEHY', 'SSNLF', 'TSM', 'SONY', 'BIDU', 'JD', 'NTES', 'PDD', 'NIO', 'LI', 'XPEV', 'BYDDY', 'SFTBY', 'NTDOY', 'INFY', 'WIT', 'U'],
+//             'Finance': ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'USB', 'PNC', 'TFC', 'COF', 'SCHW', 'AXP', 'DFS', 'SYF', 'V', 'MA', 'AFRM', 'SOFI', 'HOOD', 'COIN', 'BLK', 'STT', 'BK', 'NTRS', 'TROW', 'BEN', 'IVZ', 'RJF', 'IBKR', 'ETFC', 'AMTD', 'ALLY', 'HSBC', 'BCS', 'LYG', 'DB', 'UBS', 'CS', 'ING', 'SAN', 'BBVA', 'IDCBY', 'CICHY', 'HDB', 'IBN', 'MUFG', 'SMFG', 'MFG', 'NMR', 'SCBFF', 'NWG.L', 'CBKGF', 'BNP.PA', 'GLE.PA', 'ACA.PA', 'ABN.AS', 'UCG.MI', 'ISP.MI', 'CABK.MC', 'NDAFI', 'DANSKE.CO', 'ALV.DE', 'CS.PA', 'ZURN.SW', 'PRU.L', 'AV.L', 'LGEN.L', 'G.MI', 'DBSDY', 'OVCHY', 'UOVEY', 'PNGAY', 'CIHKY', 'SBKFF'],
+//             'Healthcare': ['JNJ', 'UNH', 'PFE', 'LLY', 'ABBV', 'MRK', 'ABT', 'TMO', 'DHR', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 'MRNA', 'BNTX', 'BIIB', 'ILMN', 'ISRG', 'SYK', 'BSX', 'MDT', 'BAX', 'BDX', 'CI', 'HUM', 'CVS', 'WBA', 'MCK', 'CAH', 'ABC', 'ZBH', 'EW', 'IDXX', 'WAT', 'A', 'NVO', 'RHHBY', 'NVS', 'SNY', 'AZN', 'GSK', 'BAYRY', 'SMMNY', 'FSNUY', 'PHG', 'LZAGY', 'GRFS', 'UCBJF'],
+//             'Consumer Goods': ['WMT', 'COST', 'HD', 'TGT', 'LOW', 'TJX', 'DG', 'DLTR', 'BBY', 'EBAY', 'ETSY', 'W', 'GPS', 'ROST', 'BURL', 'JWN', 'M', 'KSS', 'FL', 'NKE', 'LULU', 'UAA', 'VFC', 'RL', 'TPR', 'CPRI', 'LVMUY', 'RMS.PA', 'KER.PA', 'OR.PA', 'ADDYY', 'PMMAF', 'ITX.MC', 'HNNMY', 'BURBY', 'MONC.MI', 'CFRHF', 'SWGAY', 'PANDY', 'CA.PA', 'TSCDY', 'SBRY.L', 'B4B.DE', 'AD.AS', 'CO.PA', 'MKS.L', 'NXT.L', 'ABF.L'],
+//             'Food & Beverage': ['KO', 'PEP', 'MDLZ', 'KHC', 'GIS', 'K', 'CAG', 'CPB', 'HSY', 'MNST', 'STZ', 'BF.B', 'TAP', 'TSN', 'HRL', 'SJM', 'MKC', 'LW', 'MCD', 'SBUX', 'CMG', 'YUM', 'QSR', 'DPZ', 'DRI', 'WEN', 'PZZA', 'SHAK', 'WING', 'NSRGY', 'DANOY', 'UL', 'DEO', 'HEINY', 'CABGY', 'BUD', 'PDRDY'],
+//             'Energy': ['XOM', 'CVX', 'COP', 'OXY', 'MPC', 'VLO', 'PSX', 'EOG', 'PXD', 'SLB', 'HAL', 'BKR', 'KMI', 'WMB', 'OKE', 'LNG', 'NEE', 'DUK', 'SO', 'D', 'EXC', 'AEP', 'SRE', 'XEL', 'WEC', 'ES', 'PEG', 'SHEL', 'BP', 'TTE', 'EQNR', 'E', 'REPYY', 'OMVKY', 'GLPEY', 'NTOIY', 'DNNGY', 'IBDRY', 'ENLAY'],
+//             'Industrials': ['BA', 'CAT', 'HON', 'MMM', 'GE', 'LMT', 'RTX', 'NOC', 'GD', 'LHX', 'DE', 'UTX', 'CARR', 'OTIS', 'PH', 'ETN', 'EMR', 'ITW', 'ROK', 'JCI', 'CMI', 'PCAR', 'WAB', 'NSC', 'UNP', 'CSX', 'KSU', 'FDX', 'UPS', 'XPO', 'JBHT', 'ODFL', 'SIEGY', 'ABB', 'SBGSF', 'EADSY', 'SAFRY', 'RYCEY', 'BAESY'],
+//             'Automotive': ['F', 'GM', 'RIVN', 'LCID', 'NKLA', 'FSR', 'VWAGY', 'BMWYY', 'MBGAF', 'POAHY', 'RACE', 'STLA', 'RNLSY', 'TM', 'HMC', 'NSANY', 'MZDAY', 'FUJHY', 'SZKMY', 'MMTOF', 'HYMTF'],
+//             'Telecom & Media': ['VZ', 'T', 'TMUS', 'CMCSA', 'CHTR', 'DIS', 'WBD', 'PARA', 'SIRI', 'FOX', 'NWSA', 'LYV', 'VOD', 'BT.L', 'ORAN', 'DTEGY', 'TEF', 'TIIAY', 'SCMWY', 'CHL', 'NTTYY'],
+//             'Real Estate': ['AMT', 'PLD', 'CCI', 'EQIX', 'PSA', 'SPG', 'O', 'VICI', 'WELL', 'AVB', 'EQR', 'DLR', 'SBAC', 'LEN', 'DHI', 'PHM', 'NVR', 'TOL', 'VNA.DE', 'URW.AS'],
+//             'Mining & Materials': ['BHP', 'RIO', 'VALE', 'GLNCY', 'AAUKY', 'FCX', 'NEM', 'GOLD', 'FSUGY', 'AA', 'MT', 'NUE', 'STLD', 'TECK', 'SCCO'],
+//             'Hospitality': ['MAR', 'HLT', 'H', 'WH', 'MGM', 'CZR', 'LVS', 'WYNN', 'ACCYY', 'WTB.L', 'IHG'],
+//             'Chemicals & Agriculture': ['BASFY', 'DOW', 'DD', 'LIN', 'AIQUY', 'APD', 'SHW', 'PPG', 'ECL', 'CTVA', 'CF', 'MOS', 'NTR', 'IFF'],
+//             'Fintech & Crypto': ['COIN', 'HOOD', 'SOFI', 'AFRM', 'SQ', 'PYPL', 'V', 'MA', 'BTC-USD', 'ETH-USD', 'MARA', 'RIOT', 'MSTR', 'LC', 'TREE', 'UPST'],
+//             'Other': []
+//         };
+        
+//         // ✅ AUTO-GÉNÉRATION DE DOMAINES
+//         this.autoGenerateDomain = (ticker, companyName) => {
+//             let cleanName = companyName.toLowerCase()
+//                 .replace(/\s+inc\.?$/i, '')
+//                 .replace(/\s+corp(oration)?\.?$/i, '')
+//                 .replace(/\s+ltd\.?$/i, '')
+//                 .replace(/\s+plc\.?$/i, '')
+//                 .replace(/\s+sa\.?$/i, '')
+//                 .replace(/\s+nv\.?$/i, '')
+//                 .replace(/\s+ag\.?$/i, '')
+//                 .replace(/\s+gmbh\.?$/i, '')
+//                 .replace(/\s+holdings?\.?$/i, '')
+//                 .replace(/\s+group\.?$/i, '')
+//                 .replace(/\s+&\s+/g, '')
+//                 .replace(/\s+and\s+/g, '')
+//                 .replace(/\s+/g, '')
+//                 .replace(/[^a-z0-9]/g, '');
+            
+//             const exceptions = {
+//                 'meta': 'meta.com',
+//                 'metaplatforms': 'meta.com',
+//                 'alphabet': 'abc.xyz',
+//                 'facebook': 'meta.com',
+//                 'google': 'google.com',
+//                 'xcorp': 'twitter.com',
+//                 'twitter': 'twitter.com',
+//                 'square': 'squareup.com',
+//                 'block': 'squareup.com',
+//                 '3m': '3m.com',
+//                 'lvmh': 'lvmh.com',
+//                 'hermes': 'hermes.com',
+//                 'loreal': 'loreal.com',
+//                 'berkshirehathaway': 'berkshirehathaway.com',
+//                 'jpmorgan': 'jpmorganchase.com',
+//                 'jpmorganchase': 'jpmorganchase.com',
+//                 'bankofamerica': 'bankofamerica.com',
+//                 'wellsfargo': 'wellsfargo.com'
+//             };
+            
+//             if (exceptions[cleanName]) {
+//                 return exceptions[cleanName];
+//             }
+            
+//             return `${cleanName}.com`;
+//         };
+        
+//         // ✅ MAPPING DOMAINES COMPLET
+//         this.companyDomains = this.buildCompleteDomainMapping();
+        
+//         this.init();
+//     }
+    
+//     buildCompleteDomainMapping() {
+//         return {
+//             'AAPL': 'apple.com',
+//             'MSFT': 'microsoft.com',
+//             'GOOGL': 'abc.xyz',
+//             'AMZN': 'amazon.com',
+//             'META': 'meta.com',
+//             'TSLA': 'tesla.com',
+//             'NVDA': 'nvidia.com',
+//             'NFLX': 'netflix.com',
+//             'ADBE': 'adobe.com',
+//             'CRM': 'salesforce.com',
+//             'ORCL': 'oracle.com',
+//             'INTC': 'intel.com',
+//             'AMD': 'amd.com',
+//             'QCOM': 'qualcomm.com',
+//             'AVGO': 'broadcom.com',
+//             'TXN': 'ti.com',
+//             'CSCO': 'cisco.com',
+//             'IBM': 'ibm.com',
+//             'ACN': 'accenture.com',
+//             'NOW': 'servicenow.com',
+//             'INTU': 'intuit.com',
+//             'PYPL': 'paypal.com',
+//             'SQ': 'squareup.com',
+//             'SNOW': 'snowflake.com',
+//             'PLTR': 'palantir.com',
+//             'ZM': 'zoom.us',
+//             'SHOP': 'shopify.com',
+//             'UBER': 'uber.com',
+//             'LYFT': 'lyft.com',
+//             'ABNB': 'airbnb.com',
+//             'DASH': 'doordash.com',
+//             'SNAP': 'snap.com',
+//             'PINS': 'pinterest.com',
+//             'SPOT': 'spotify.com',
+//             'RBLX': 'roblox.com',
+//             'U': 'unity.com',
+//             'JPM': 'jpmorganchase.com',
+//             'BAC': 'bankofamerica.com',
+//             'WFC': 'wellsfargo.com',
+//             'C': 'citigroup.com',
+//             'GS': 'goldmansachs.com',
+//             'MS': 'morganstanley.com',
+//             'V': 'visa.com',
+//             'MA': 'mastercard.com',
+//             'COIN': 'coinbase.com',
+//             'JNJ': 'jnj.com',
+//             'UNH': 'unitedhealthgroup.com',
+//             'PFE': 'pfizer.com',
+//             'LLY': 'lilly.com',
+//             'ABBV': 'abbvie.com',
+//             'MRK': 'merck.com',
+//             'ABT': 'abbott.com',
+//             'TMO': 'thermofisher.com',
+//             'WMT': 'walmart.com',
+//             'COST': 'costco.com',
+//             'HD': 'homedepot.com',
+//             'TGT': 'target.com',
+//             'NKE': 'nike.com',
+//             'KO': 'coca-colacompany.com',
+//             'PEP': 'pepsico.com',
+//             'MCD': 'mcdonalds.com',
+//             'SBUX': 'starbucks.com',
+//             'XOM': 'exxonmobil.com',
+//             'CVX': 'chevron.com',
+//             'BA': 'boeing.com',
+//             'CAT': 'caterpillar.com',
+//             'HON': 'honeywell.com',
+//             'GE': 'ge.com',
+//             'SAP': 'sap.com',
+//             'ASML': 'asml.com',
+//             'LVMUY': 'lvmh.com',
+//             'NVO': 'novonordisk.com',
+//             'SHEL': 'shell.com',
+//             'BP': 'bp.com',
+//             'BABA': 'alibaba.com',
+//             'TCEHY': 'tencent.com',
+//             'TSM': 'tsmc.com',
+//             'SONY': 'sony.com',
+//             'TM': 'toyota.com'
+//         };
+//     }
+    
+//     getLogoUrl(ticker, companyName, domain) {
+//         if (!domain) {
+//             domain = this.autoGenerateDomain(ticker, companyName);
+//         }
+        
+//         return {
+//             primary: `https://img.logo.dev/${domain}?token=pk_X-WazSBJQn2GwW2hy9Lwpg`,
+//             fallbacks: [
+//                 `https://logo.clearbit.com/${domain}`,
+//                 `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+//                 `https://unavatar.io/${domain}?fallback=false`
+//             ],
+//             domain: domain
+//         };
+//     }
+
+//     async init() {
+//         console.log('🏢 Initializing Companies Directory...');
+//         console.log(`   🌐 KG Worker: ${this.knowledgeGraphWorkerUrl}`);
+//         console.log(`   📊 SEC Worker: ${this.secWorkerUrl}`);
+        
+//         this.showLoadingIndicator();
+//         this.loadCompanies();
+//         this.setupEventListeners();
+        
+//         const cacheLoaded = await this.loadEnrichedCacheFromFirestore();
+        
+//         if (cacheLoaded && this.enrichedDataCache.size > 0) {
+//             const cacheStats = this.getCacheStats();
+//             console.log(`💾 Firestore cache loaded: ${this.enrichedDataCache.size} profiles (${cacheStats.ageDays} days old)`);
+//             this.updatePreloadStatus(`✅ Loaded ${this.enrichedDataCache.size} cached profiles from Firestore`);
+//         }
+        
+//         await this.preloadEnrichedData(100);
+        
+//         this.applyFiltersAndPagination();
+//         this.updateStats();
+//         this.renderCharts();
+//         this.hideLoadingIndicator();
+//         this.restoreDropdownStates();
+        
+//         console.log('✅ Companies Directory initialized!');
+//     }
+
+//     showLoadingIndicator() {
+//         const container = document.getElementById('companiesContainer');
+//         if (!container) return;
+        
+//         container.innerHTML = `
+//             <div style='grid-column: 1 / -1; text-align: center; padding: 80px 20px;'>
+//                 <div style='display: inline-block; position: relative;'>
+//                     <i class='fas fa-spinner fa-spin' style='font-size: 4rem; color: #667eea;'></i>
+//                     <div style='margin-top: 24px; font-size: 1.2rem; font-weight: 700; color: #1e293b;'>
+//                         Loading Companies Directory...
+//                     </div>
+//                     <div id='preloadStatus' style='margin-top: 12px; font-size: 0.95rem; color: #64748b;'>
+//                         Preparing data...
+//                     </div>
+//                 </div>
+//             </div>
+//         `;
+//     }
+    
+//     hideLoadingIndicator() {
+//         // Le container sera remplacé par renderCompanies()
+//     }
+    
+//     updatePreloadStatus(message) {
+//         const statusEl = document.getElementById('preloadStatus');
+//         if (statusEl) {
+//             statusEl.textContent = message;
+//         }
+//         console.log(`📢 ${message}`);
+//     }
+
+//     loadCompanies() {
+//         if (!window.entityDB) {
+//             console.error('❌ EntityDatabase not found!');
+//             return;
+//         }
+        
+//         const companiesObj = window.entityDB.companies;
+        
+//         this.allCompanies = Object.entries(companiesObj).map(([name, ticker]) => {
+//             const sector = this.getMainSector(ticker);
+//             const region = this.getRegionForTicker(ticker, name);
+//             const domain = this.companyDomains[ticker];
+//             const logoUrls = this.getLogoUrl(ticker, name, domain);
+            
+//             return {
+//                 name: name,
+//                 ticker: ticker,
+//                 sector: sector,
+//                 region: region,
+//                 domain: logoUrls.domain,
+//                 logoUrl: logoUrls.primary,
+//                 logoFallbacks: logoUrls.fallbacks
+//             };
+//         });
+        
+//         const seen = new Set();
+//         this.allCompanies = this.allCompanies.filter(company => {
+//             if (seen.has(company.ticker)) {
+//                 return false;
+//             }
+//             seen.add(company.ticker);
+//             return true;
+//         });
+        
+//         console.log(`📊 Loaded ${this.allCompanies.length} companies`);
+//     }
+    
+//     getMainSector(ticker) {
+//         for (const [sectorName, tickers] of Object.entries(this.mainSectors)) {
+//             if (tickers.includes(ticker)) {
+//                 return sectorName;
+//             }
+//         }
+//         return 'Other';
+//     }
+    
+//     getRegionForTicker(ticker, name) {
+//         const europeanSuffixes = ['.PA', '.DE', '.L', '.AS', '.MC', '.MI', '.SW', '.CO', '.HE', '.VI'];
+//         const asianSuffixes = ['.HK', '.T', '.SS', '.SZ', '.KS', '.NS', '.TW', '.SR'];
+        
+//         if (europeanSuffixes.some(suffix => ticker.includes(suffix))) return 'Europe';
+//         if (asianSuffixes.some(suffix => ticker.includes(suffix))) return 'Asia';
+        
+//         const europeanKeywords = ['HSBC', 'Barclays', 'Shell', 'BP', 'SAP', 'ASML', 'LVMH', 'Nestlé', 'Siemens'];
+//         const asianKeywords = ['Alibaba', 'Tencent', 'Samsung', 'TSMC', 'Sony', 'Toyota'];
+        
+//         if (europeanKeywords.some(keyword => name.includes(keyword))) return 'Europe';
+//         if (asianKeywords.some(keyword => name.includes(keyword))) return 'Asia';
+        
+//         return 'USA';
+//     }
+
+//     /**
+//      * ✅ ALTERNATIVE : Requêtes séparées pour chaque type de rapport
+//      */
+//     async fetchFinancialReports(ticker) {
+//         try {
+//             console.log(`📊 Fetching financial reports for ${ticker}...`);
+            
+//             // ✅ Récupérer chaque type séparément pour garantir la diversité
+//             const [tenK, tenQ, eightK] = await Promise.all([
+//                 // 10-K (Annual Reports) - 10 derniers
+//                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=10&types=10-K`).then(r => r.json()),
+//                 // 10-Q (Quarterly Reports) - 20 derniers (4 par an)
+//                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=10-Q`).then(r => r.json()),
+//                 // 8-K (Current Events) - 20 derniers
+//                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=8-K`).then(r => r.json())
+//             ]);
+            
+//             // ✅ Combiner tous les rapports
+//             const allReports = [
+//                 ...(tenK.reports || []),
+//                 ...(tenQ.reports || []),
+//                 ...(eightK.reports || [])
+//             ];
+            
+//             // ✅ Trier par date (plus récent en premier)
+//             allReports.sort((a, b) => new Date(b.filedDate) - new Date(a.filedDate));
+            
+//             const result = {
+//                 ticker: ticker,
+//                 cik: tenK.cik || tenQ.cik || eightK.cik,
+//                 companyName: tenK.companyName || tenQ.companyName || eightK.companyName,
+//                 count: allReports.length,
+//                 reports: allReports,
+//                 timestamp: new Date().toISOString(),
+//                 source: 'combined'
+//             };
+            
+//             console.log(`✅ Loaded ${result.count} financial reports for ${ticker}`);
+//             console.log(`   📋 Breakdown:`, {
+//                 '10-K': (tenK.reports || []).length,
+//                 '10-Q': (tenQ.reports || []).length,
+//                 '8-K': (eightK.reports || []).length
+//             });
+            
+//             return result;
+            
+//         } catch (error) {
+//             console.error(`❌ Error fetching financial reports for ${ticker}:`, error);
+//             return null;
+//         }
+//     }
+
+//     async saveEnrichedCacheToFirestore() {
+//         try {
+//             if (!firebase.auth().currentUser) {
+//                 console.warn('⚠ No user logged in, skipping Firestore cache save');
+//                 return false;
+//             }
+            
+//             const userId = firebase.auth().currentUser.uid;
+//             const cacheArray = Array.from(this.enrichedDataCache.entries());
+            
+//             const cacheData = {
+//                 version: '3.1',
+//                 timestamp: Date.now(),
+//                 count: cacheArray.length,
+//                 data: cacheArray,
+//                 workerUrl: this.knowledgeGraphWorkerUrl,
+//                 userId: userId,
+//                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+//             };
+            
+//             await firebase.firestore()
+//                 .collection('companiesCache')
+//                 .doc(userId)
+//                 .set(cacheData, { merge: true });
+            
+//             console.log(`💾 Firestore cache saved: ${cacheArray.length} profiles`);
+//             return true;
+//         } catch (error) {
+//             console.warn('⚠ Failed to save Firestore cache:', error.message);
+//             return false;
+//         }
+//     }
+
+//     async loadEnrichedCacheFromFirestore() {
+//         try {
+//             if (!firebase.auth().currentUser) {
+//                 console.warn('⚠ No user logged in, skipping Firestore cache load');
+//                 return false;
+//             }
+            
+//             const userId = firebase.auth().currentUser.uid;
+            
+//             const doc = await firebase.firestore()
+//                 .collection('companiesCache')
+//                 .doc(userId)
+//                 .get();
+            
+//             if (!doc.exists) {
+//                 console.log('📭 No Firestore cache found for this user');
+//                 return false;
+//             }
+            
+//             const cacheData = doc.data();
+            
+//             if (!cacheData || !cacheData.data || !cacheData.timestamp) {
+//                 console.warn('⚠ Invalid Firestore cache structure, clearing...');
+//                 await firebase.firestore()
+//                     .collection('companiesCache')
+//                     .doc(userId)
+//                     .delete();
+//                 return false;
+//             }
+            
+//             const age = Date.now() - cacheData.timestamp;
+            
+//             if (age > this.CACHE_DURATION_MS) {
+//                 const days = Math.floor(age / (24 * 60 * 60 * 1000));
+//                 console.log(`🗑 Firestore cache expired (${days} days old), clearing...`);
+//                 await firebase.firestore()
+//                     .collection('companiesCache')
+//                     .doc(userId)
+//                     .delete();
+//                 return false;
+//             }
+            
+//             this.enrichedDataCache = new Map(cacheData.data);
+            
+//             const days = Math.floor(age / (24 * 60 * 60 * 1000));
+//             console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles (${days} days old)`);
+            
+//             return true;
+            
+//         } catch (error) {
+//             console.warn('⚠ Failed to load Firestore cache:', error.message);
+//             return false;
+//         }
+//     }
+
+//     async clearEnrichedCacheFromFirestore() {
+//         try {
+//             this.enrichedDataCache.clear();
+            
+//             if (firebase.auth().currentUser) {
+//                 const userId = firebase.auth().currentUser.uid;
+//                 await firebase.firestore()
+//                     .collection('companiesCache')
+//                     .doc(userId)
+//                     .delete();
+//             }
+            
+//             console.log('🗑 Firestore enriched cache cleared');
+//             return true;
+//         } catch (error) {
+//             console.warn('⚠ Failed to clear Firestore cache:', error.message);
+//             return false;
+//         }
+//     }
+
+//     getCacheStats() {
+//         const size = this.enrichedDataCache.size;
+        
+//         if (size === 0) {
+//             return {
+//                 exists: false,
+//                 size: 0,
+//                 age: 0,
+//                 sizeKB: 0
+//             };
+//         }
+        
+//         return {
+//             exists: true,
+//             size: size,
+//             age: 0,
+//             ageHours: 0,
+//             ageDays: 0,
+//             expiresInDays: 30,
+//             sizeKB: 0,
+//             version: '3.1'
+//         };
+//     }
+
+//     async preloadEnrichedData(count = 100, forceRefresh = false) {
+//         console.log(`🔄 Pre-loading enriched data for ${count} companies...`);
+        
+//         if (forceRefresh) {
+//             console.log('🔄 Force refresh requested, clearing cache...');
+//             await this.clearEnrichedCacheFromFirestore();
+//         }
+        
+//         if (!forceRefresh && this.enrichedDataCache.size >= count) {
+//             console.log(`✅ Cache already sufficient (${this.enrichedDataCache.size} profiles)`);
+//             this.updatePreloadStatus(`✅ Loaded ${this.enrichedDataCache.size} cached profiles from Firestore`);
+//             return;
+//         }
+        
+//         this.preloadingStatus.isLoading = true;
+//         this.preloadingStatus.total = Math.min(count, this.allCompanies.length);
+//         this.preloadingStatus.loaded = this.enrichedDataCache.size;
+//         this.preloadingStatus.errors = 0;
+//         this.preloadingStatus.startTime = Date.now();
+        
+//         const topCompanies = this.allCompanies.slice(0, count);
+//         const companiesToLoad = forceRefresh 
+//             ? topCompanies 
+//             : topCompanies.filter(c => !this.enrichedDataCache.has(c.ticker));
+        
+//         if (companiesToLoad.length === 0) {
+//             console.log('✅ All companies already cached!');
+//             this.preloadingStatus.isLoading = false;
+//             this.updatePreloadStatus(`✅ All ${this.enrichedDataCache.size} profiles already cached`);
+//             return;
+//         }
+        
+//         console.log(`📋 Loading ${companiesToLoad.length} companies (${this.enrichedDataCache.size} already cached)`);
+        
+//         const batchSize = 50;
+//         const batches = [];
+        
+//         for (let i = 0; i < companiesToLoad.length; i += batchSize) {
+//             batches.push(companiesToLoad.slice(i, i + batchSize));
+//         }
+        
+//         console.log(`📦 Processing ${batches.length} batch(es)...`);
+        
+//         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+//             const batch = batches[batchIndex];
+//             const batchNum = batchIndex + 1;
+            
+//             this.updatePreloadStatus(`⏳ Batch ${batchNum}/${batches.length} (${this.preloadingStatus.loaded}/${this.preloadingStatus.total})...`);
+            
+//             try {
+//                 const response = await fetch(`${this.knowledgeGraphWorkerUrl}/batch-companies`, {
+//                     method: 'POST',
+//                     headers: { 'Content-Type': 'application/json' },
+//                     body: JSON.stringify({
+//                         companies: batch.map(c => ({ name: c.name, ticker: c.ticker }))
+//                     })
+//                 });
+                
+//                 if (!response.ok) {
+//                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+//                 }
+                
+//                 const result = await response.json();
+                
+//                 if (result.success && result.results) {
+//                     let batchSuccess = 0;
+                    
+//                     result.results.forEach(item => {
+//                         if (item.data && item.data.found) {
+//                             this.enrichedDataCache.set(item.ticker, item.data);
+//                             this.preloadingStatus.loaded++;
+//                             batchSuccess++;
+//                         } else {
+//                             this.preloadingStatus.errors++;
+//                         }
+//                     });
+                    
+//                     console.log(`✅ Batch ${batchNum}: +${batchSuccess} enriched`);
+//                 }
+                
+//                 await this.saveEnrichedCacheToFirestore();
+                
+//                 if (batchIndex < batches.length - 1) {
+//                     await new Promise(resolve => setTimeout(resolve, 100));
+//                 }
+                
+//             } catch (error) {
+//                 console.error(`❌ Batch ${batchNum} failed:`, error.message);
+//                 this.preloadingStatus.errors += batch.length;
+//             }
+//         }
+        
+//         this.preloadingStatus.isLoading = false;
+//         const duration = ((Date.now() - this.preloadingStatus.startTime) / 1000).toFixed(1);
+        
+//         console.log(`✅ Pre-loading completed in ${duration}s! (${this.enrichedDataCache.size} loaded, ${this.preloadingStatus.errors} errors)`);
+        
+//         this.updatePreloadStatus(`✅ ${this.enrichedDataCache.size} profiles loaded and synced to Firestore`);
+//         this.updateStats();
+//     }
+
+//     async fetchEnrichedData(company) {
+//         if (this.enrichedDataCache.has(company.ticker)) {
+//             return this.enrichedDataCache.get(company.ticker);
+//         }
+        
+//         try {
+//             const response = await fetch(
+//                 `${this.knowledgeGraphWorkerUrl}/company-info?query=${encodeURIComponent(company.name)}&ticker=${company.ticker}`
+//             );
+            
+//             const result = await response.json();
+            
+//             if (result.success && result.data.found) {
+//                 this.enrichedDataCache.set(company.ticker, result.data);
+//                 await this.saveEnrichedCacheToFirestore();
+//                 return result.data;
+//             }
+            
+//             return null;
+//         } catch (error) {
+//             console.error(`❌ Error fetching ${company.ticker}:`, error);
+//             return null;
+//         }
+//     }
+
+//     static toggleDropdown(sectionId) {
+//         const section = document.getElementById(sectionId);
+//         const toggle = section?.querySelector('.dropdown-toggle');
+//         const content = section?.querySelector('.dropdown-content');
+        
+//         if (!section || !toggle || !content) return;
+        
+//         const isOpen = content.classList.contains('open');
+        
+//         if (isOpen) {
+//             content.classList.remove('open');
+//             toggle.querySelector('i').classList.remove('fa-chevron-up');
+//             toggle.querySelector('i').classList.add('fa-chevron-down');
+//         } else {
+//             content.classList.add('open');
+//             toggle.querySelector('i').classList.remove('fa-chevron-down');
+//             toggle.querySelector('i').classList.add('fa-chevron-up');
+//         }
+        
+//         localStorage.setItem(`dropdown_${sectionId}`, isOpen ? 'closed' : 'open');
+//     }
+
+//     restoreDropdownStates() {
+//         const sections = ['combinedSection'];
+        
+//         sections.forEach(sectionId => {
+//             const state = localStorage.getItem(`dropdown_${sectionId}`);
+//             const section = document.getElementById(sectionId);
+//             const content = section?.querySelector('.dropdown-content');
+//             const toggle = section?.querySelector('.dropdown-toggle i');
+            
+//             if (!content || !toggle) return;
+            
+//             if (state === 'closed') {
+//                 content.classList.remove('open');
+//                 toggle.classList.remove('fa-chevron-up');
+//                 toggle.classList.add('fa-chevron-down');
+//             } else {
+//                 content.classList.add('open');
+//                 toggle.classList.remove('fa-chevron-down');
+//                 toggle.classList.add('fa-chevron-up');
+//             }
+//         });
+//     }
+
+//     setupEventListeners() {
+//         const searchInput = document.getElementById('companySearch');
+//         const clearBtn = document.getElementById('clearSearch');
+        
+//         searchInput?.addEventListener('input', (e) => {
+//             this.filters.search = e.target.value;
+//             clearBtn.style.display = e.target.value ? 'flex' : 'none';
+//             this.currentPage = 1;
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         clearBtn?.addEventListener('click', () => {
+//             searchInput.value = '';
+//             this.filters.search = '';
+//             clearBtn.style.display = 'none';
+//             this.currentPage = 1;
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         document.getElementById('sectorFilter')?.addEventListener('change', (e) => {
+//             this.filters.sector = e.target.value;
+//             this.currentPage = 1;
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         document.getElementById('regionFilter')?.addEventListener('change', (e) => {
+//             this.filters.region = e.target.value;
+//             this.currentPage = 1;
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         document.getElementById('sortBy')?.addEventListener('change', (e) => {
+//             this.currentSort = e.target.value;
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         document.getElementById('resetFilters')?.addEventListener('click', () => {
+//             searchInput.value = '';
+//             this.filters = {
+//                 search: '',
+//                 sector: 'all',
+//                 region: 'all'
+//             };
+//             document.getElementById('sectorFilter').value = 'all';
+//             document.getElementById('regionFilter').value = 'all';
+//             document.getElementById('sortBy').value = 'name-asc';
+//             this.currentSort = 'name-asc';
+//             this.currentPage = 1;
+//             clearBtn.style.display = 'none';
+//             this.applyFiltersAndPagination();
+//         });
+        
+//         document.querySelectorAll('.view-toggle').forEach(btn => {
+//             btn.addEventListener('click', (e) => {
+//                 document.querySelectorAll('.view-toggle').forEach(b => b.classList.remove('active'));
+//                 e.currentTarget.classList.add('active');
+//                 this.currentView = e.currentTarget.dataset.view;
+//                 this.renderCompanies();
+//             });
+//         });
+//     }
+    
+//     applyFiltersAndPagination() {
+//         let filtered = [...this.allCompanies];
+        
+//         if (this.filters.search) {
+//             const search = this.filters.search.toLowerCase();
+//             filtered = filtered.filter(company => 
+//                 company.name.toLowerCase().includes(search) ||
+//                 company.ticker.toLowerCase().includes(search)
+//             );
+//         }
+        
+//         if (this.filters.sector !== 'all') {
+//             filtered = filtered.filter(company => company.sector === this.filters.sector);
+//         }
+        
+//         if (this.filters.region !== 'all') {
+//             filtered = filtered.filter(company => company.region.toLowerCase() === this.filters.region.toLowerCase());
+//         }
+        
+//         filtered.sort((a, b) => {
+//             switch (this.currentSort) {
+//                 case 'name-asc':
+//                     return a.name.localeCompare(b.name);
+//                 case 'name-desc':
+//                     return b.name.localeCompare(a.name);
+//                 case 'ticker-asc':
+//                     return a.ticker.localeCompare(b.ticker);
+//                 case 'ticker-desc':
+//                     return b.ticker.localeCompare(a.ticker);
+//                 default:
+//                     return 0;
+//             }
+//         });
+        
+//         this.filteredCompanies = filtered;
+        
+//         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//         const endIndex = startIndex + this.itemsPerPage;
+//         this.displayedCompanies = filtered.slice(startIndex, endIndex);
+        
+//         this.renderCompanies();
+//         this.renderPagination();
+//         this.updateStats();
+//     }
+    
+//     renderCompanies() {
+//         const container = document.getElementById('companiesContainer');
+//         const noResults = document.getElementById('noResults');
+        
+//         if (!container) return;
+        
+//         container.className = this.currentView === 'grid' ? 'companies-grid' : 
+//                               this.currentView === 'list' ? 'companies-list' : 
+//                               'companies-compact';
+        
+//         if (this.displayedCompanies.length === 0) {
+//             container.innerHTML = '';
+//             noResults.style.display = 'block';
+//             return;
+//         }
+        
+//         noResults.style.display = 'none';
+        
+//         container.innerHTML = this.displayedCompanies.map(company => {
+//             const initials = company.name.substring(0, 2).toUpperCase();
+//             const fallbacksData = JSON.stringify(company.logoFallbacks || []);
+            
+//             const hasEnrichedData = this.enrichedDataCache.has(company.ticker);
+//             const enrichedBadge = hasEnrichedData 
+//                 ? `<div class='enriched-badge' title='Enhanced with Google Knowledge Graph' style='position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);'><i class='fas fa-check'></i></div>`
+//                 : '';
+            
+//             return `
+//                 <div class='company-card' onclick='CompaniesDirectory.openCompanyModal("${company.ticker}")' style='position: relative; cursor: pointer;'>
+//                     ${enrichedBadge}
+//                     <div class='company-header'>
+//                         <div class='company-logo' 
+//                              data-ticker='${company.ticker}' 
+//                              data-fallbacks='${fallbacksData.replace(/'/g, '&apos;')}'>
+//                             ${company.logoUrl 
+//                                 ? `<img src='${company.logoUrl}' alt='${company.name}' onerror='CompaniesDirectory.handleLogoError(this, "${initials}")'>` 
+//                                 : `<div class='text-fallback'>${initials}</div>`
+//                             }
+//                         </div>
+//                         <div class='company-info'>
+//                             <div class='company-name' title='${company.name}'>${company.name}</div>
+//                             <div class='company-ticker'>${company.ticker}</div>
+//                         </div>
+//                     </div>
+//                     <div class='company-details'>
+//                         <div class='company-detail'>
+//                             <i class='fas fa-map-marker-alt'></i>
+//                             <span class='company-region-badge'><i class='fas fa-globe'></i> ${company.region}</span>
+//                         </div>
+//                     </div>
+//                     <div class='company-sector' title='${company.sector}'>${company.sector}</div>
+//                 </div>
+//             `;
+//         }).join('');
+//     }
+    
+//     static handleLogoError(img, initials) {
+//         const logoDiv = img.parentElement;
+//         const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+//         if (fallbacks.length > 0) {
+//             const nextUrl = fallbacks.shift();
+//             logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+//             img.src = nextUrl;
+//         } else {
+//             logoDiv.classList.add('text-fallback');
+//             logoDiv.innerHTML = initials;
+//         }
+//     }
+    
+//     static handleModalLogoError(img, initials) {
+//         const logoDiv = img.parentElement;
+//         const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+//         if (fallbacks.length > 0) {
+//             const nextUrl = fallbacks.shift();
+//             logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+//             img.src = nextUrl;
+//         } else {
+//             logoDiv.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+//             logoDiv.style.color = 'white';
+//             logoDiv.innerHTML = `<div style='font-size: 2.5rem; font-weight: 900; color: white;'>${initials}</div>`;
+//         }
+//     }
+    
+//     renderPagination() {
+//         const totalPages = Math.ceil(this.filteredCompanies.length / this.itemsPerPage);
+        
+//         if (totalPages <= 1) {
+//             document.getElementById('paginationControls').style.display = 'none';
+//             return;
+//         }
+        
+//         document.getElementById('paginationControls').style.display = 'flex';
+        
+//         let paginationHTML = '';
+        
+//         paginationHTML += `
+//             <button class='pagination-btn ${this.currentPage === 1 ? 'disabled' : ''}' 
+//                     onclick='CompaniesDirectory.goToPage(${this.currentPage - 1})' 
+//                     ${this.currentPage === 1 ? 'disabled' : ''}>
+//                 <i class='fas fa-chevron-left'></i>
+//             </button>
+//         `;
+        
+//         const maxVisiblePages = 5;
+//         let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+//         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+//         if (endPage - startPage < maxVisiblePages - 1) {
+//             startPage = Math.max(1, endPage - maxVisiblePages + 1);
+//         }
+        
+//         if (startPage > 1) {
+//             paginationHTML += `<button class='pagination-btn' onclick='CompaniesDirectory.goToPage(1)'>1</button>`;
+//             if (startPage > 2) {
+//                 paginationHTML += `<span class='pagination-ellipsis'>...</span>`;
+//             }
+//         }
+        
+//         for (let i = startPage; i <= endPage; i++) {
+//             paginationHTML += `
+//                 <button class='pagination-btn ${i === this.currentPage ? 'active' : ''}' 
+//                         onclick='CompaniesDirectory.goToPage(${i})'>
+//                     ${i}
+//                 </button>
+//             `;
+//         }
+        
+//         if (endPage < totalPages) {
+//             if (endPage < totalPages - 1) {
+//                 paginationHTML += `<span class='pagination-ellipsis'>...</span>`;
+//             }
+//             paginationHTML += `<button class='pagination-btn' onclick='CompaniesDirectory.goToPage(${totalPages})'>${totalPages}</button>`;
+//         }
+        
+//         paginationHTML += `
+//             <button class='pagination-btn ${this.currentPage === totalPages ? 'disabled' : ''}' 
+//                     onclick='CompaniesDirectory.goToPage(${this.currentPage + 1})' 
+//                     ${this.currentPage === totalPages ? 'disabled' : ''}>
+//                 <i class='fas fa-chevron-right'></i>
+//             </button>
+//         `;
+        
+//         document.getElementById('paginationControls').innerHTML = paginationHTML;
+        
+//         const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+//         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.filteredCompanies.length);
+//         document.getElementById('paginationInfo').textContent = 
+//             `Showing ${startItem}-${endItem} of ${this.filteredCompanies.length} companies`;
+//     }
+    
+//     static goToPage(page) {
+//         const instance = window.companiesDirectoryInstance;
+//         instance.currentPage = page;
+//         instance.applyFiltersAndPagination();
+        
+//         document.querySelector('.companies-grid, .companies-list, .companies-compact')?.scrollIntoView({ 
+//             behavior: 'smooth', 
+//             block: 'start' 
+//         });
+//     }
+    
+//     updateStats() {
+//         document.getElementById('totalCompanies').textContent = this.allCompanies.length.toLocaleString();
+//         document.getElementById('filteredCompanies').textContent = this.filteredCompanies.length.toLocaleString();
+        
+//         const sectors = new Set(this.allCompanies.map(c => c.sector));
+//         document.getElementById('totalSectors').textContent = sectors.size;
+        
+//         const regions = new Set(this.allCompanies.map(c => c.region));
+//         document.getElementById('totalRegions').textContent = regions.size;
+        
+//         const sectorFilter = document.getElementById('sectorFilter');
+//         if (sectorFilter && sectorFilter.options.length === 1) {
+//             Object.keys(this.mainSectors).sort().forEach(sector => {
+//                 const option = document.createElement('option');
+//                 option.value = sector;
+//                 option.textContent = sector;
+//                 sectorFilter.appendChild(option);
+//             });
+//         }
+//     }
+
+//     renderCharts() {
+//         this.renderSectorChart();
+//         this.renderRegionChart();
+//     }
+    
+//     renderSectorChart() {
+//         if (typeof Highcharts === 'undefined') return;
+        
+//         const sectorCounts = {};
+//         this.allCompanies.forEach(company => {
+//             sectorCounts[company.sector] = (sectorCounts[company.sector] || 0) + 1;
+//         });
+        
+//         const data = Object.entries(sectorCounts)
+//             .map(([name, y]) => ({ name, y }))
+//             .sort((a, b) => b.y - a.y);
+        
+//         Highcharts.chart('sectorChart', {
+//             chart: {
+//                 type: 'pie',
+//                 backgroundColor: 'transparent'
+//             },
+//             title: {
+//                 text: 'Companies by Sector',
+//                 style: {
+//                     fontSize: '1.2rem',
+//                     fontWeight: '800'
+//                 }
+//             },
+//             plotOptions: {
+//                 pie: {
+//                     innerSize: '50%',
+//                     dataLabels: {
+//                         enabled: true,
+//                         format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+//                         style: {
+//                             fontSize: '11px',
+//                             fontWeight: '600'
+//                         }
+//                     }
+//                 }
+//             },
+//             series: [{
+//                 name: 'Companies',
+//                 colorByPoint: true,
+//                 data: data
+//             }],
+//             credits: {
+//                 enabled: false
+//             }
+//         });
+//     }
+    
+//     renderRegionChart() {
+//         if (typeof Highcharts === 'undefined') return;
+        
+//         const regionCounts = {};
+//         this.allCompanies.forEach(company => {
+//             regionCounts[company.region] = (regionCounts[company.region] || 0) + 1;
+//         });
+        
+//         const categories = Object.keys(regionCounts).sort();
+//         const data = categories.map(region => regionCounts[region]);
+        
+//         Highcharts.chart('regionChart', {
+//             chart: {
+//                 type: 'column',
+//                 backgroundColor: 'transparent'
+//             },
+//             title: {
+//                 text: 'Companies by Region',
+//                 style: {
+//                     fontSize: '1.2rem',
+//                     fontWeight: '800'
+//                 }
+//             },
+//             xAxis: {
+//                 categories: categories,
+//                 title: {
+//                     text: 'Region',
+//                     style: { fontWeight: '700' }
+//                 }
+//             },
+//             yAxis: {
+//                 title: {
+//                     text: 'Number of Companies',
+//                     style: { fontWeight: '700' }
+//                 },
+//                 gridLineColor: 'rgba(100, 116, 139, 0.1)'
+//             },
+//             series: [{
+//                 name: 'Companies',
+//                 data: data,
+//                 colorByPoint: true,
+//                 colors: ['#667eea', '#10b981', '#f59e0b']
+//             }],
+//             legend: {
+//                 enabled: false
+//             },
+//             credits: {
+//                 enabled: false
+//             }
+//         });
+//     }
+
+//     /**
+//      * ✅ MODAL ENRICHI AVEC TABLEAU RÉCAPITULATIF DES RAPPORTS FINANCIERS PAR ANNÉE
+//      */
+//     static async openCompanyModal(ticker) {
+//         const instance = window.companiesDirectoryInstance;
+//         const company = instance.allCompanies.find(c => c.ticker === ticker);
+        
+//         if (!company) return;
+        
+//         const modal = document.getElementById('companyModal');
+//         const modalContent = document.getElementById('companyModalContent');
+        
+//         // ✅ LOADER
+//         modalContent.innerHTML = `
+//             <div style='text-align: center; padding: 80px 20px;'>
+//                 <div class='chart-loading-spinner' style='margin: 0 auto 20px;'></div>
+//                 <div class='chart-loading-text'>Loading comprehensive company data...</div>
+//                 <p style='margin-top: 12px; font-size: 0.85rem; color: var(--text-tertiary);'>
+//                     Fetching from Google Knowledge Graph & SEC EDGAR APIs
+//                 </p>
+//             </div>
+//         `;
+        
+//         modal.classList.add('active');
+        
+//         // ✅ CHARGER EN PARALLÈLE : Données enrichies + Rapports financiers
+//         const [enrichedData, financialReports] = await Promise.all([
+//             instance.fetchEnrichedData(company),
+//             instance.fetchFinancialReports(company.ticker)
+//         ]);
+        
+//         // ✅ LOGO & INITIALS
+//         const initials = company.name.substring(0, 2).toUpperCase();
+//         const logoUrl = company.logoUrl;
+//         const logoFallbacks = company.logoFallbacks || [];
+        
+//         // ✅ DESCRIPTION
+//         const hasDescription = enrichedData?.description?.detailed || enrichedData?.description?.short;
+//         const description = enrichedData?.description?.detailed || enrichedData?.description?.short || 'No description available.';
+//         const descriptionUrl = enrichedData?.description?.source || enrichedData?.links?.wikipedia || '';
+        
+//         // ═══════════════════════════════════════════════════════════════
+//         // 📊 TRAITEMENT DES RAPPORTS FINANCIERS PAR ANNÉE
+//         // ═══════════════════════════════════════════════════════════════
+        
+//         let financialTableHTML = '';
+        
+//         if (financialReports && financialReports.reports && financialReports.reports.length > 0) {
+//             // ✅ GROUPER LES RAPPORTS PAR ANNÉE FISCALE
+//             const reportsByYear = {};
+            
+//             financialReports.reports.forEach(report => {
+//                 // Extraire l'année depuis filedDate (format: "2025-10-31T06:01:26-04:00")
+//                 const filedDate = new Date(report.filedDate);
+//                 const fiscalYear = filedDate.getFullYear();
+                
+//                 if (!reportsByYear[fiscalYear]) {
+//                     reportsByYear[fiscalYear] = {
+//                         '10-K': [],
+//                         '10-Q': [],
+//                         '8-K': []
+//                     };
+//                 }
+                
+//                 if (report.formType === '10-K') {
+//                     reportsByYear[fiscalYear]['10-K'].push(report);
+//                 } else if (report.formType === '10-Q') {
+//                     reportsByYear[fiscalYear]['10-Q'].push(report);
+//                 } else if (report.formType === '8-K') {
+//                     reportsByYear[fiscalYear]['8-K'].push(report);
+//                 }
+//             });
+            
+//             // ✅ TRIER LES ANNÉES (plus récente en premier)
+//             const sortedYears = Object.keys(reportsByYear).sort((a, b) => b - a);
+            
+//             // ✅ GÉNÉRER LE TABLEAU HTML
+//             financialTableHTML = `
+//             <div style='background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05)); padding: 28px; border-radius: 20px; margin-bottom: 28px; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08);'>
+//                 <h4 style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; font-size: 1.3rem; font-weight: 900; color: var(--text-primary);'>
+//                     <span style='display: flex; align-items: center; gap: 12px;'>
+//                         <i class='fas fa-file-invoice-dollar' style='color: #3b82f6; font-size: 1.5rem;'></i>
+//                         <span>Financial Reports Summary</span>
+//                     </span>
+//                     <a href='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${financialReports.cik}&type=&dateb=&owner=exclude&count=100' target='_blank' style='font-size: 0.85rem; color: #3b82f6; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(59, 130, 246, 0.2)";' onmouseout='this.style.background="rgba(59, 130, 246, 0.1)";'>
+//                         <span>View All on SEC.gov</span>
+//                         <i class='fas fa-external-link-alt'></i>
+//                     </a>
+//                 </h4>
+                
+//                 <!-- ✅ LÉGENDE DES TYPES DE RAPPORTS -->
+//                 <div style='display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding: 16px; background: white; border-radius: 12px; border: 1px solid rgba(203, 213, 225, 0.3);'>
+//                     <div style='display: flex; align-items: center; gap: 8px;'>
+//                         <div style='width: 12px; height: 12px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 3px;'></div>
+//                         <span style='font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);'>10-K (Annual Reports)</span>
+//                     </div>
+//                     <div style='display: flex; align-items: center; gap: 8px;'>
+//                         <div style='width: 12px; height: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 3px;'></div>
+//                         <span style='font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);'>10-Q (Quarterly Reports)</span>
+//                     </div>
+//                     <div style='display: flex; align-items: center; gap: 8px;'>
+//                         <div style='width: 12px; height: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 3px;'></div>
+//                         <span style='font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);'>8-K (Current Events)</span>
+//                     </div>
+//                 </div>
+                
+//                 <!-- ✅ TABLEAU RÉCAPITULATIF PAR ANNÉE -->
+//                 <div style='overflow-x: auto;'>
+//                     <table style='width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);'>
+//                         <thead>
+//                             <tr style='background: linear-gradient(135deg, #667eea, #764ba2);'>
+//                                 <th style='padding: 16px 20px; text-align: left; font-weight: 800; font-size: 0.9rem; color: white; letter-spacing: 0.5px; border-right: 1px solid rgba(255, 255, 255, 0.2);'>
+//                                     <i class='fas fa-calendar-alt' style='margin-right: 8px;'></i>FISCAL YEAR
+//                                 </th>
+//                                 <th style='padding: 16px 20px; text-align: center; font-weight: 800; font-size: 0.9rem; color: white; letter-spacing: 0.5px; border-right: 1px solid rgba(255, 255, 255, 0.2);'>
+//                                     <i class='fas fa-file-alt' style='margin-right: 8px;'></i>10-K
+//                                 </th>
+//                                 <th style='padding: 16px 20px; text-align: center; font-weight: 800; font-size: 0.9rem; color: white; letter-spacing: 0.5px; border-right: 1px solid rgba(255, 255, 255, 0.2);'>
+//                                     <i class='fas fa-file-invoice' style='margin-right: 8px;'></i>10-Q
+//                                 </th>
+//                                 <th style='padding: 16px 20px; text-align: center; font-weight: 800; font-size: 0.9rem; color: white; letter-spacing: 0.5px;'>
+//                                     <i class='fas fa-bell' style='margin-right: 8px;'></i>8-K
+//                                 </th>
+//                             </tr>
+//                         </thead>
+//                         <tbody>
+//                             ${sortedYears.map((year, index) => {
+//                                 const yearData = reportsByYear[year];
+//                                 const rowBg = index % 2 === 0 ? 'rgba(241, 245, 249, 0.5)' : 'white';
+                                
+//                                 return `
+//                                 <tr style='background: ${rowBg}; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(102, 126, 234, 0.08)";' onmouseout='this.style.background="${rowBg}";'>
+//                                     <!-- ANNÉE -->
+//                                     <td style='padding: 16px 20px; font-weight: 800; font-size: 1.1rem; color: var(--text-primary); border-right: 1px solid rgba(203, 213, 225, 0.2);'>
+//                                         <div style='display: flex; align-items: center; gap: 10px;'>
+//                                             <div style='width: 4px; height: 32px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 2px;'></div>
+//                                             <span style='background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${year}</span>
+//                                         </div>
+//                                     </td>
+                                    
+//                                     <!-- 10-K (ANNUAL) -->
+//                                     <td style='padding: 16px 20px; text-align: center; border-right: 1px solid rgba(203, 213, 225, 0.2);'>
+//                                         ${yearData['10-K'].length > 0 ? `
+//                                             ${yearData['10-K'].map(report => {
+//                                                 const filedDate = new Date(report.filedDate);
+//                                                 const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+//                                                 return `
+//                                                 <div style='margin-bottom: 8px;'>
+//                                                     <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(16, 185, 129, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(16, 185, 129, 0.3)";'>
+//                                                         <i class='fas fa-file-pdf'></i>
+//                                                         <span>${formattedDate}</span>
+//                                                     </a>
+//                                                 </div>
+//                                                 `;
+//                                             }).join('')}
+//                                         ` : `<span style='color: var(--text-tertiary); font-size: 0.85rem; font-weight: 600;'>—</span>`}
+//                                     </td>
+                                    
+//                                     <!-- 10-Q (QUARTERLY) -->
+//                                     <td style='padding: 16px 20px; text-align: center; border-right: 1px solid rgba(203, 213, 225, 0.2);'>
+//                                         ${yearData['10-Q'].length > 0 ? `
+//                                             ${yearData['10-Q'].map(report => {
+//                                                 const filedDate = new Date(report.filedDate);
+//                                                 const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+//                                                 return `
+//                                                 <div style='margin-bottom: 8px;'>
+//                                                     <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(59, 130, 246, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(59, 130, 246, 0.3)";'>
+//                                                         <i class='fas fa-file-alt'></i>
+//                                                         <span>${formattedDate}</span>
+//                                                     </a>
+//                                                 </div>
+//                                                 `;
+//                                             }).join('')}
+//                                         ` : `<span style='color: var(--text-tertiary); font-size: 0.85rem; font-weight: 600;'>—</span>`}
+//                                     </td>
+                                    
+//                                     <!-- 8-K (EVENTS) -->
+//                                     <td style='padding: 16px 20px; text-align: center;'>
+//                                         ${yearData['8-K'].length > 0 ? `
+//                                             <div style='display: flex; flex-direction: column; align-items: center; gap: 6px;'>
+//                                                 ${yearData['8-K'].slice(0, 3).map(report => {
+//                                                     const filedDate = new Date(report.filedDate);
+//                                                     const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+//                                                     return `
+//                                                     <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; text-decoration: none; border-radius: 8px; font-size: 0.75rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(245, 158, 11, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(245, 158, 11, 0.3)";'>
+//                                                         <i class='fas fa-bell'></i>
+//                                                         <span>${formattedDate}</span>
+//                                                     </a>
+//                                                     `;
+//                                                 }).join('')}
+//                                                 ${yearData['8-K'].length > 3 ? `
+//                                                     <span style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; margin-top: 4px;'>+ ${yearData['8-K'].length - 3} more</span>
+//                                                 ` : ''}
+//                                             </div>
+//                                         ` : `<span style='color: var(--text-tertiary); font-size: 0.85rem; font-weight: 600;'>—</span>`}
+//                                     </td>
+//                                 </tr>
+//                                 `;
+//                             }).join('')}
+//                         </tbody>
+//                     </table>
+//                 </div>
+                
+//                 <!-- ✅ STATISTIQUES GLOBALES -->
+//                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px;'>
+//                     <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+//                         <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Total Filings</div>
+//                         <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${financialReports.count}</div>
+//                     </div>
+//                     <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+//                         <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Years Covered</div>
+//                         <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${sortedYears.length}</div>
+//                     </div>
+//                     <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+//                         <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Latest Filing</div>
+//                         <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${sortedYears[0]}</div>
+//                     </div>
+//                 </div>
+//             </div>
+//             `;
+//         } else {
+//             // ✅ PAS DE RAPPORTS DISPONIBLES
+//             financialTableHTML = `
+//             <div style='margin-bottom: 24px; padding: 24px; background: rgba(241, 245, 249, 0.8); border-left: 4px solid #94a3b8; border-radius: 12px;'>
+//                 <div style='display: flex; align-items: center; gap: 14px;'>
+//                     <i class='fas fa-info-circle' style='color: #94a3b8; font-size: 1.5rem;'></i>
+//                     <div>
+//                         <div style='font-weight: 800; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;'>No Financial Reports Available</div>
+//                         <div style='color: var(--text-secondary); font-size: 0.9rem;'>No recent filings found from SEC EDGAR for this company.</div>
+//                     </div>
+//                 </div>
+//             </div>
+//             `;
+//         }
+        
+//         // ═══════════════════════════════════════════════════════════════
+//         // 🎨 GÉNÉRATION DU MODAL COMPLET
+//         // ═══════════════════════════════════════════════════════════════
+        
+//         modalContent.innerHTML = `
+//             <!-- ✨ HEADER PREMIUM -->
+//             <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 32px; border-radius: 24px 24px 0 0; margin: -24px -24px 32px -24px; position: relative; overflow: hidden;'>
+//                 <div style='position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px); animation: moveStripes 20s linear infinite;'></div>
+                
+//                 <div style='position: relative; z-index: 1;'>
+//                     <!-- Logo -->
+//                     <div id='modalCompanyLogo' class='modal-company-logo' data-ticker='${company.ticker}' data-fallbacks='${JSON.stringify(logoFallbacks).replace(/'/g, '&apos;')}' data-initials='${initials}' style='width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); border: 3px solid rgba(255, 255, 255, 0.5); overflow: hidden;'>
+//                         ${logoUrl 
+//                             ? `<img src='${logoUrl}' alt='${company.name}' style='width: 100%; height: 100%; object-fit: contain; padding: 12px; background: white; border-radius: 24px;' onerror='CompaniesDirectory.handleModalLogoError(this, "${initials}")'>` 
+//                             : `<div style='font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${initials}</div>`
+//                         }
+//                     </div>
+                    
+//                     <!-- Company Name -->
+//                     <h2 style='color: white; font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 12px; text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);'>${company.name}</h2>
+                    
+//                     <!-- Ticker Badge -->
+//                     <div style='text-align: center; margin-bottom: 16px;'>
+//                         <span style='background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; padding: 10px 24px; border-radius: 24px; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.4);'>${company.ticker}</span>
+//                     </div>
+                    
+//                     ${enrichedData && enrichedData.found ? `
+//                     <!-- Confidence Badge -->
+//                     <div style='text-align: center;'>
+//                         <div style='display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 700; border: 2px solid rgba(16, 185, 129, 0.5);'>
+//                             <i class='fas fa-check-circle'></i>
+//                             <span>Verified by Google Knowledge Graph</span>
+//                             ${enrichedData.metadata?.confidence ? `
+//                                 <span style='background: rgba(255, 255, 255, 0.3); padding: 2px 8px; border-radius: 8px; font-size: 0.85rem;'>${enrichedData.metadata.confidence.toUpperCase()}</span>
+//                             ` : ''}
+//                         </div>
+//                     </div>
+//                     ` : ''}
+//                 </div>
+//             </div>
+            
+//             ${hasDescription ? `
+//             <!-- ✨ DESCRIPTION SECTION -->
+//             <div style='margin-bottom: 28px;'>
+//                 <h4 style='display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px;'>
+//                     <i class='fas fa-info-circle' style='color: #667eea;'></i>
+//                     <span>About ${company.name}</span>
+//                 </h4>
+//                 <p style='color: var(--text-secondary); line-height: 1.8; font-size: 1rem; margin-bottom: 16px;'>${description}</p>
+//                 ${descriptionUrl ? `
+//                     <a href='${descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 8px; color: #667eea; font-weight: 700; text-decoration: none; padding: 10px 20px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(102, 126, 234, 0.2)"; this.style.transform="translateX(4px)";' onmouseout='this.style.background="rgba(102, 126, 234, 0.1)"; this.style.transform="translateX(0)";'>
+//                         <i class='fas fa-external-link-alt'></i>
+//                         <span>Read more on Wikipedia</span>
+//                     </a>
+//                 ` : ''}
+//             </div>
+//             ` : ''}
+            
+//             <!-- ✨ BASIC INFO SECTION -->
+//             <div style='margin-bottom: 28px;'>
+//                 <h4 style='display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px;'>
+//                     <i class='fas fa-building' style='color: #667eea;'></i>
+//                     <span>Company Information</span>
+//                 </h4>
+//                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;'>
+//                     <div style='background: rgba(102, 126, 234, 0.05); padding: 14px 18px; border-radius: 12px; border-left: 3px solid #667eea;'>
+//                         <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;'>Sector</div>
+//                         <div style='font-size: 1.05rem; font-weight: 700; color: var(--text-primary);'>${company.sector}</div>
+//                     </div>
+//                     <div style='background: rgba(16, 185, 129, 0.05); padding: 14px 18px; border-radius: 12px; border-left: 3px solid #10b981;'>
+//                         <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;'>Region</div>
+//                         <div style='font-size: 1.05rem; font-weight: 700; color: var(--text-primary);'>${company.region}</div>
+//                     </div>
+//                     ${enrichedData?.classification?.primaryType ? `
+//                     <div style='background: rgba(245, 158, 11, 0.05); padding: 14px 18px; border-radius: 12px; border-left: 3px solid #f59e0b;'>
+//                         <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;'>Type</div>
+//                         <div style='font-size: 1.05rem; font-weight: 700; color: var(--text-primary);'>${enrichedData.classification.primaryType}</div>
+//                     </div>
+//                     ` : ''}
+//                     ${enrichedData?.metadata?.resultScore ? `
+//                     <div style='background: rgba(139, 92, 246, 0.05); padding: 14px 18px; border-radius: 12px; border-left: 3px solid #8b5cf6; cursor: pointer;' onclick='CompaniesDirectory.showKGScoreModal(${enrichedData.metadata.resultScore})' title='Click for more information about KG Score'>
+//                         <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;'>
+//                             <i class='fas fa-info-circle' style='margin-right: 4px; color: #8b5cf6;'></i>KG Score
+//                         </div>
+//                         <div style='font-size: 1.05rem; font-weight: 700; color: var(--text-primary); text-decoration: underline;'>${Math.round(enrichedData.metadata.resultScore).toLocaleString()}</div>
+//                     </div>
+//                     ` : ''}
+//                 </div>
+//             </div>
+            
+//             ${enrichedData && enrichedData.additionalInfo && Object.keys(enrichedData.additionalInfo).length > 0 ? `
+//             <!-- ✨ DETAILED INFORMATION SECTION -->
+//             <div style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)); padding: 24px; border-radius: 16px; margin-bottom: 28px; border: 1px solid rgba(102, 126, 234, 0.2);'>
+//                 <h4 style='display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px;'>
+//                     <i class='fas fa-database' style='color: #667eea;'></i>
+//                     <span>Detailed Information</span>
+//                 </h4>
+//                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;'>
+//                     ${Object.entries(enrichedData.additionalInfo).map(([key, value]) => {
+//                         if (!value) return '';
+                        
+//                         const iconMap = {
+//                             'foundingDate': 'fa-calendar-alt',
+//                             'headquarters': 'fa-map-marker-alt',
+//                             'location': 'fa-location-dot',
+//                             'industry': 'fa-industry',
+//                             'numberOfEmployees': 'fa-users',
+//                             'founder': 'fa-user-tie',
+//                             'ceo': 'fa-crown',
+//                             'stockSymbol': 'fa-chart-line',
+//                             'tickerSymbol': 'fa-chart-line',
+//                             'stockExchange': 'fa-building-columns',
+//                             'revenue': 'fa-dollar-sign',
+//                             'netIncome': 'fa-coins',
+//                             'totalAssets': 'fa-wallet',
+//                             'marketCap': 'fa-chart-pie',
+//                             'website': 'fa-globe',
+//                             'url': 'fa-globe',
+//                             'telephone': 'fa-phone',
+//                             'phone': 'fa-phone',
+//                             'email': 'fa-envelope'
+//                         };
+                        
+//                         const icon = iconMap[key] || 'fa-info-circle';
+//                         const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        
+//                         let displayValue = value;
+//                         if (typeof value === 'object' && value !== null) {
+//                             displayValue = JSON.stringify(value);
+//                         }
+//                         if (Array.isArray(value)) {
+//                             displayValue = value.join(', ');
+//                         }
+                        
+//                         const isLink = key === 'website' || key === 'url';
+                        
+//                         return `
+//                         <div style='background: white; padding: 12px 16px; border-radius: 10px; border-left: 3px solid #667eea;'>
+//                             <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;'>
+//                                 <i class='fas ${icon}' style='margin-right: 4px;'></i>${label}
+//                             </div>
+//                             <div style='font-size: 0.9rem; font-weight: 600; color: var(--text-primary); word-break: break-word;'>
+//                                 ${isLink ? `<a href='${displayValue}' target='_blank' style='color: #667eea; text-decoration: none; font-weight: 700;'>${displayValue}</a>` : displayValue}
+//                             </div>
+//                         </div>
+//                         `;
+//                     }).join('')}
+//                 </div>
+//             </div>
+//             ` : ''}
+            
+//             <!-- ✅ TABLEAU RÉCAPITULATIF DES RAPPORTS FINANCIERS PAR ANNÉE -->
+//             ${financialTableHTML}
+            
+//             ${enrichedData?.links?.officialWebsite || company.domain ? `
+//             <!-- ✨ OFFICIAL WEBSITE BUTTON -->
+//             <div style='background: linear-gradient(135deg, #10b981, #059669); padding: 20px 28px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 12px 36px rgba(10, 185, 129, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 8px 24px rgba(16, 185, 129, 0.3)";'>
+//                 <a href='${enrichedData?.links?.officialWebsite || `https://${company.domain}`}' target='_blank' style='display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; font-weight: 700;'>
+//                     <span style='display: flex; align-items: center; gap: 14px;'>
+//                         <i class='fas fa-globe' style='font-size: 1.8rem;'></i>
+//                         <span style='font-size: 1.15rem;'>Visit Official Website</span>
+//                     </span>
+//                     <i class='fas fa-arrow-right' style='font-size: 1.3rem;'></i>
+//                 </a>
+//             </div>
+//             ` : ''}
+            
+//             <!-- ✨ ACTIONS BUTTON -->
+//             <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;'>
+//                 <a href='advanced-analysis.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(102, 126, 234, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(102, 126, 234, 0.4)";'>
+//                     <i class='fas fa-chart-line'></i>
+//                     <span>Analyze ${company.ticker}</span>
+//                 </a>
+//                 <a href='trend-prediction.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(59, 130, 246, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(59, 130, 246, 0.4)";'>
+//                     <i class='fas fa-brain'></i>
+//                     <span>Predict Trends</span>
+//                 </a>
+//             </div>
+            
+//             ${enrichedData && enrichedData.found ? `
+//             <!-- ✨ DATA SOURCE & METADATA -->
+//             <div style='margin-top: 32px; padding: 20px; background: rgba(241, 245, 249, 0.5); border-radius: 16px; border: 1px solid var(--glass-border);'>
+//                 <div style='display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;'>
+//                     <div style='display: flex; align-items: center; gap: 10px;'>
+//                         <i class='fas fa-database' style='color: #667eea; font-size: 1.2rem;'></i>
+//                         <span style='color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;'>Data provided by Google Knowledge Graph API & SEC EDGAR</span>
+//                     </div>
+                    
+//                     ${enrichedData.metadata?.knowledgeGraphId ? `
+//                     <div style='display: flex; align-items: center; gap: 8px; background: rgba(102, 126, 234, 0.1); padding: 6px 14px; border-radius: 10px;'>
+//                         <i class='fas fa-fingerprint' style='color: #667eea; font-size: 0.9rem;'></i>
+//                         <span style='color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; font-family: monospace;'>${enrichedData.metadata.knowledgeGraphId}</span>
+//                     </div>
+//                     ` : ''}
+//                 </div>
+//             </div>
+//             ` : `
+//             <!-- ⚠ NO ENRICHED DATA WARNING -->
+//             <div style='margin-top: 24px; padding: 20px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; border-radius: 12px;'>
+//                 <div style='display: flex; align-items: center; gap: 12px;'>
+//                     <i class='fas fa-exclamation-triangle' style='color: #f59e0b; font-size: 1.5rem;'></i>
+//                     <div>
+//                         <div style='font-weight: 800; color: var(--text-primary); margin-bottom: 4px;'>Limited Data Available</div>
+//                         <div style='font-size: 0.9rem; color: var(--text-secondary);'>No additional information found in Google Knowledge Graph for this company.</div>
+//                     </div>
+//                 </div>
+//             </div>
+//             `}
+//         `;
+//     }
+    
+//     static showKGScoreModal(score) {
+//         const kgModal = document.getElementById('kgScoreModal');
+//         const scoreValue = document.getElementById('kgScoreValue');
+//         const scoreInterpretation = document.getElementById('kgScoreInterpretation');
+        
+//         if (!kgModal) return;
+        
+//         scoreValue.textContent = Math.round(score).toLocaleString();
+        
+//         let interpretation = '';
+//         let color = '';
+//         let icon = '';
+        
+//         if (score >= 1000) {
+//             interpretation = '<strong>Exceptionally High Confidence</strong> - This entity is extremely well-documented in Google\'s Knowledge Graph with comprehensive verified information.';
+//             color = '#10b981';
+//             icon = 'fa-star';
+//         } else if (score >= 500) {
+//             interpretation = '<strong>High Confidence</strong> - Well-established entity with substantial verified information available.';
+//             color = '#3b82f6';
+//             icon = 'fa-check-circle';
+//         } else if (score >= 100) {
+//             interpretation = '<strong>Moderate Confidence</strong> - Entity recognized with verified basic information.';
+//             color = '#f59e0b';
+//             icon = 'fa-info-circle';
+//         } else {
+//             interpretation = '<strong>Lower Confidence</strong> - Limited verified information available for this entity.';
+//             color = '#ef4444';
+//             icon = 'fa-exclamation-triangle';
+//         }
+        
+//         scoreInterpretation.innerHTML = `
+//             <div style='display: flex; align-items: flex-start; gap: 12px;'>
+//                 <i class='fas ${icon}' style='color: ${color}; font-size: 1.5rem; margin-top: 4px;'></i>
+//                 <div style='flex: 1; line-height: 1.8;'>
+//                     <p style='margin-bottom: 12px;'>${interpretation}</p>
+//                     <div style='background: rgba(102, 126, 234, 0.1); padding: 12px 16px; border-radius: 10px; border-left: 3px solid ${color};'>
+//                         <strong>Your Score: ${Math.round(score).toLocaleString()}</strong>
+//                     </div>
+//                 </div>
+//             </div>
+//         `;
+        
+//         kgModal.classList.add('active');
+//     }
+    
+//     static closeModal() {
+//         document.getElementById('companyModal').classList.remove('active');
+//     }
+    
+//     static closeKGScoreModal() {
+//         document.getElementById('kgScoreModal').classList.remove('active');
+//     }
+// }
+
+// // ✅ INITIALISATION
+// document.addEventListener('DOMContentLoaded', () => {
+//     window.companiesDirectoryInstance = new CompaniesDirectory();
+// });
+
+// // ✅ FERMETURE MODAL (clic extérieur)
+// document.addEventListener('click', (e) => {
+//     const modal = document.getElementById('companyModal');
+//     const kgModal = document.getElementById('kgScoreModal');
+    
+//     if (e.target === modal) {
+//         CompaniesDirectory.closeModal();
+//     }
+    
+//     if (e.target === kgModal) {
+//         CompaniesDirectory.closeKGScoreModal();
+//     }
+// });
+
+// // ✅ FERMETURE MODAL (touche Escape)
+// document.addEventListener('keydown', (e) => {
+//     if (e.key === 'Escape') {
+//         CompaniesDirectory.closeModal();
+//         CompaniesDirectory.closeKGScoreModal();
+//     }
+// });
+
 /**
  * ════════════════════════════════════════════════════════════════
- * 🏛 COMPANIES DIRECTORY - SYSTÈME COMPLET V3.1
+ * 🏛 COMPANIES DIRECTORY - SYSTÈME COMPLET V3.2
  * Multi-API Logos + Google Knowledge Graph + 15 Secteurs + Régions
  * Cache FIRESTORE : Synchronisation multi-appareils ✨
- * ✅ NOUVEAU : Intégration rapports financiers SEC EDGAR
+ * ✅ NOUVEAU : Intégration rapports financiers SEC EDGAR (10-K/10-Q/8-K)
+ * ✅ NOUVEAU : Consolidated Statements of Comprehensive Income (10-K)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -333,31 +1948,22 @@ class CompaniesDirectory {
         return 'USA';
     }
 
-    /**
-     * ✅ ALTERNATIVE : Requêtes séparées pour chaque type de rapport
-     */
     async fetchFinancialReports(ticker) {
         try {
             console.log(`📊 Fetching financial reports for ${ticker}...`);
             
-            // ✅ Récupérer chaque type séparément pour garantir la diversité
             const [tenK, tenQ, eightK] = await Promise.all([
-                // 10-K (Annual Reports) - 10 derniers
                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=10&types=10-K`).then(r => r.json()),
-                // 10-Q (Quarterly Reports) - 20 derniers (4 par an)
                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=10-Q`).then(r => r.json()),
-                // 8-K (Current Events) - 20 derniers
                 fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=8-K`).then(r => r.json())
             ]);
             
-            // ✅ Combiner tous les rapports
             const allReports = [
                 ...(tenK.reports || []),
                 ...(tenQ.reports || []),
                 ...(eightK.reports || [])
             ];
             
-            // ✅ Trier par date (plus récent en premier)
             allReports.sort((a, b) => new Date(b.filedDate) - new Date(a.filedDate));
             
             const result = {
@@ -385,6 +1991,31 @@ class CompaniesDirectory {
         }
     }
 
+    // ✅ NOUVELLE FONCTION : Récupérer les états financiers 10-K détaillés
+    async fetch10KFinancialStatements(ticker, years = 3) {
+        try {
+            console.log(`📊 Fetching ${years} years of 10-K financial statements for ${ticker}...`);
+            
+            const response = await fetch(
+                `${this.secWorkerUrl}/api/sec/10k/financial-statements?ticker=${ticker}&years=${years}`
+            );
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            console.log(`✅ Loaded ${data.yearsRetrieved} years of 10-K financial statements`);
+            
+            return data;
+            
+        } catch (error) {
+            console.error(`❌ Error fetching 10-K financial statements for ${ticker}:`, error);
+            return null;
+        }
+    }
+
     async saveEnrichedCacheToFirestore() {
         try {
             if (!firebase.auth().currentUser) {
@@ -396,7 +2027,7 @@ class CompaniesDirectory {
             const cacheArray = Array.from(this.enrichedDataCache.entries());
             
             const cacheData = {
-                version: '3.1',
+                version: '3.2',
                 timestamp: Date.now(),
                 count: cacheArray.length,
                 data: cacheArray,
@@ -513,7 +2144,7 @@ class CompaniesDirectory {
             ageDays: 0,
             expiresInDays: 30,
             sizeKB: 0,
-            version: '3.1'
+            version: '3.2'
         };
     }
 
@@ -1085,7 +2716,8 @@ class CompaniesDirectory {
     }
 
     /**
-     * ✅ MODAL ENRICHI AVEC TABLEAU RÉCAPITULATIF DES RAPPORTS FINANCIERS PAR ANNÉE
+     * ✅ MODAL ENRICHI AVEC TABLEAUX RÉCAPITULATIFS DES RAPPORTS FINANCIERS
+     * ✅ NOUVEAU : Section dédiée 10-K Consolidated Statements of Comprehensive Income
      */
     static async openCompanyModal(ticker) {
         const instance = window.companiesDirectoryInstance;
@@ -1109,10 +2741,11 @@ class CompaniesDirectory {
         
         modal.classList.add('active');
         
-        // ✅ CHARGER EN PARALLÈLE : Données enrichies + Rapports financiers
-        const [enrichedData, financialReports] = await Promise.all([
+        // ✅ CHARGER EN PARALLÈLE : Données enrichies + Rapports financiers + États financiers 10-K
+        const [enrichedData, financialReports, tenKFinancials] = await Promise.all([
             instance.fetchEnrichedData(company),
-            instance.fetchFinancialReports(company.ticker)
+            instance.fetchFinancialReports(company.ticker),
+            instance.fetch10KFinancialStatements(company.ticker, 5) // 5 dernières années
         ]);
         
         // ✅ LOGO & INITIALS
@@ -1124,7 +2757,7 @@ class CompaniesDirectory {
         const hasDescription = enrichedData?.description?.detailed || enrichedData?.description?.short;
         const description = enrichedData?.description?.detailed || enrichedData?.description?.short || 'No description available.';
         const descriptionUrl = enrichedData?.description?.source || enrichedData?.links?.wikipedia || '';
-        
+
         // ═══════════════════════════════════════════════════════════════
         // 📊 TRAITEMENT DES RAPPORTS FINANCIERS PAR ANNÉE
         // ═══════════════════════════════════════════════════════════════
@@ -1136,7 +2769,6 @@ class CompaniesDirectory {
             const reportsByYear = {};
             
             financialReports.reports.forEach(report => {
-                // Extraire l'année depuis filedDate (format: "2025-10-31T06:01:26-04:00")
                 const filedDate = new Date(report.filedDate);
                 const fiscalYear = filedDate.getFullYear();
                 
@@ -1232,7 +2864,7 @@ class CompaniesDirectory {
                                                 const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                                 return `
                                                 <div style='margin-bottom: 8px;'>
-                                                    <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(16, 185, 129, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(16, 185, 129, 0.3)";'>
+                                                    <a href='${report.documentUrl || report.filingUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(16, 185, 129, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(16, 185, 129, 0.3)";'>
                                                         <i class='fas fa-file-pdf'></i>
                                                         <span>${formattedDate}</span>
                                                     </a>
@@ -1250,7 +2882,7 @@ class CompaniesDirectory {
                                                 const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                                 return `
                                                 <div style='margin-bottom: 8px;'>
-                                                    <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(59, 130, 246, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(59, 130, 246, 0.3)";'>
+                                                    <a href='${report.documentUrl || report.filingUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(59, 130, 246, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(59, 130, 246, 0.3)";'>
                                                         <i class='fas fa-file-alt'></i>
                                                         <span>${formattedDate}</span>
                                                     </a>
@@ -1268,7 +2900,7 @@ class CompaniesDirectory {
                                                     const filedDate = new Date(report.filedDate);
                                                     const formattedDate = filedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                                     return `
-                                                    <a href='${report.documentUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; text-decoration: none; border-radius: 8px; font-size: 0.75rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(245, 158, 11, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(245, 158, 11, 0.3)";'>
+                                                    <a href='${report.documentUrl || report.filingUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; text-decoration: none; border-radius: 8px; font-size: 0.75rem; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 4px 12px rgba(245, 158, 11, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 2px 8px rgba(245, 158, 11, 0.3)";'>
                                                         <i class='fas fa-bell'></i>
                                                         <span>${formattedDate}</span>
                                                     </a>
@@ -1313,6 +2945,153 @@ class CompaniesDirectory {
                     <div>
                         <div style='font-weight: 800; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;'>No Financial Reports Available</div>
                         <div style='color: var(--text-secondary); font-size: 0.9rem;'>No recent filings found from SEC EDGAR for this company.</div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ NOUVELLE SECTION : 10-K CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME
+        // ═══════════════════════════════════════════════════════════════
+        
+        let tenKFinancialsHTML = '';
+        
+        if (tenKFinancials && tenKFinancials.financialStatements && tenKFinancials.financialStatements.length > 0) {
+            tenKFinancialsHTML = `
+            <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05)); padding: 28px; border-radius: 20px; margin-bottom: 28px; border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);'>
+                <h4 style='display: flex; align-items: center; gap: 12px; font-size: 1.3rem; font-weight: 900; color: var(--text-primary); margin-bottom: 24px;'>
+                    <i class='fas fa-chart-bar' style='color: #10b981; font-size: 1.5rem;'></i>
+                    <span>Consolidated Statements of Comprehensive Income (Last ${tenKFinancials.yearsRetrieved} Years)</span>
+                </h4>
+                
+                <!-- ✅ TABLEAU DES ÉTATS FINANCIERS -->
+                <div style='overflow-x: auto; margin-bottom: 24px;'>
+                    <table style='width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);'>
+                        <thead>
+                            <tr style='background: linear-gradient(135deg, #10b981, #059669);'>
+                                <th style='padding: 14px 16px; color: white; text-align: left; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.5px;'>
+                                    <i class='fas fa-calendar-alt' style='margin-right: 8px;'></i>Fiscal Year
+                                </th>
+                                <th style='padding: 14px 16px; color: white; text-align: right; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.5px;'>
+                                    Net Income ($M)
+                                </th>
+                                <th style='padding: 14px 16px; color: white; text-align: right; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.5px;'>
+                                    Total Comprehensive Income ($M)
+                                </th>
+                                <th style='padding: 14px 16px; color: white; text-align: right; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.5px;'>
+                                    YoY Growth
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tenKFinancials.financialStatements.map((stmt, index) => {
+                                const yoy = tenKFinancials.yoyAnalysis?.find(a => a.currentYear?.fiscalYear === stmt.fiscalYear);
+                                const netIncome = stmt.comprehensiveIncome?.netIncome;
+                                const totalCompIncome = stmt.comprehensiveIncome?.totalComprehensiveIncome;
+                                const yoyGrowth = yoy?.netIncomeGrowth || '—';
+                                const growthValue = parseFloat(yoyGrowth);
+                                const growthColor = !isNaN(growthValue) && growthValue >= 0 ? '#10b981' : '#ef4444';
+                                const rowBg = index % 2 === 0 ? 'white' : 'rgba(241, 245, 249, 0.5)';
+                                
+                                return `
+                                <tr style='background: ${rowBg}; border-bottom: 1px solid rgba(203, 213, 225, 0.3); transition: all 0.3s ease;' onmouseover='this.style.background="rgba(16, 185, 129, 0.08)";' onmouseout='this.style.background="${rowBg}";'>
+                                    <td style='padding: 14px 16px; font-weight: 800; font-size: 1rem; color: var(--text-primary);'>
+                                        <div style='display: flex; align-items: center; gap: 8px;'>
+                                            <div style='width: 3px; height: 24px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 2px;'></div>
+                                            <span>${stmt.fiscalYear}</span>
+                                        </div>
+                                    </td>
+                                    <td style='padding: 14px 16px; text-align: right; font-weight: 700; font-size: 1rem; color: var(--text-primary);'>
+                                        ${netIncome !== null && netIncome !== undefined ? `$${netIncome.toLocaleString()}` : 'N/A'}
+                                    </td>
+                                    <td style='padding: 14px 16px; text-align: right; font-weight: 700; font-size: 1rem; color: var(--text-primary);'>
+                                        ${totalCompIncome !== null && totalCompIncome !== undefined ? `$${totalCompIncome.toLocaleString()}` : 'N/A'}
+                                    </td>
+                                    <td style='padding: 14px 16px; text-align: right; font-weight: 800; font-size: 1rem; color: ${growthColor};'>
+                                        ${yoyGrowth !== '—' ? `
+                                            <span style='display: inline-flex; align-items: center; gap: 4px; background: ${!isNaN(growthValue) && growthValue >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; padding: 4px 10px; border-radius: 6px;'>
+                                                <i class='fas fa-arrow-${!isNaN(growthValue) && growthValue >= 0 ? 'up' : 'down'}'></i>
+                                                ${yoyGrowth}
+                                            </span>
+                                        ` : `<span style='color: var(--text-tertiary);'>${yoyGrowth}</span>`}
+                                    </td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- ✅ DÉTAILS OCI (OTHER COMPREHENSIVE INCOME) -->
+                ${tenKFinancials.financialStatements.some(stmt => 
+                    stmt.comprehensiveIncome?.otherComprehensiveIncome && 
+                    Object.keys(stmt.comprehensiveIncome.otherComprehensiveIncome).length > 0
+                ) ? `
+                <div style='background: white; padding: 20px; border-radius: 12px; border: 1px solid rgba(203, 213, 225, 0.3);'>
+                    <h5 style='font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;'>
+                        <i class='fas fa-list-ul' style='color: #10b981;'></i>
+                        <span>Other Comprehensive Income (OCI) Breakdown - Latest Year</span>
+                    </h5>
+                    <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;'>
+                        ${Object.entries(tenKFinancials.financialStatements[0].comprehensiveIncome?.otherComprehensiveIncome || {}).map(([key, value]) => {
+                            const labels = {
+                                foreignCurrencyTranslation: 'Foreign Currency Translation',
+                                unrealizedGainsDerivatives: 'Unrealized Gains on Derivatives',
+                                fairValueDerivatives: 'Fair Value of Derivatives',
+                                marketableSecurities: 'Marketable Securities',
+                                pensionAdjustments: 'Pension Adjustments'
+                            };
+                            return `
+                            <div style='background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #10b981;'>
+                                <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;'>
+                                    ${labels[key] || key}
+                                </div>
+                                <div style='font-size: 1.1rem; font-weight: 800; color: var(--text-primary);'>
+                                    $${value?.toLocaleString() || 'N/A'}M
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- ✅ STATISTIQUES GLOBALES -->
+                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px;'>
+                    <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+                        <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Years Analyzed</div>
+                        <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${tenKFinancials.yearsRetrieved}</div>
+                    </div>
+                    ${tenKFinancials.financialStatements[0]?.comprehensiveIncome?.netIncome ? `
+                    <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+                        <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Latest Net Income</div>
+                        <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>$${tenKFinancials.financialStatements[0].comprehensiveIncome.netIncome.toLocaleString()}M</div>
+                    </div>
+                    ` : ''}
+                    ${tenKFinancials.yoyAnalysis && tenKFinancials.yoyAnalysis.length > 0 ? `
+                    <div style='background: white; padding: 14px 18px; border-radius: 10px; text-align: center; border: 1px solid rgba(203, 213, 225, 0.3);'>
+                        <div style='font-size: 0.75rem; color: var(--text-tertiary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>Avg YoY Growth</div>
+                        <div style='font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>
+                            ${(tenKFinancials.yoyAnalysis.reduce((sum, item) => {
+                                const growth = parseFloat(item.netIncomeGrowth);
+                                return sum + (isNaN(growth) ? 0 : growth);
+                            }, 0) / tenKFinancials.yoyAnalysis.filter(item => !isNaN(parseFloat(item.netIncomeGrowth))).length).toFixed(1)}%
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            `;
+        } else if (tenKFinancials && tenKFinancials.error) {
+            // ✅ ERREUR LORS DE LA RÉCUPÉRATION
+            tenKFinancialsHTML = `
+            <div style='margin-bottom: 24px; padding: 24px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; border-radius: 12px;'>
+                <div style='display: flex; align-items: center; gap: 14px;'>
+                    <i class='fas fa-exclamation-triangle' style='color: #f59e0b; font-size: 1.5rem;'></i>
+                    <div>
+                        <div style='font-weight: 800; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;'>Unable to Load 10-K Financial Statements</div>
+                        <div style='color: var(--text-secondary); font-size: 0.9rem;'>${tenKFinancials.error}</div>
                     </div>
                 </div>
             </div>
@@ -1469,6 +3248,9 @@ class CompaniesDirectory {
                 </div>
             </div>
             ` : ''}
+            
+            <!-- ✅ SECTION 10-K COMPREHENSIVE INCOME -->
+            ${tenKFinancialsHTML}
             
             <!-- ✅ TABLEAU RÉCAPITULATIF DES RAPPORTS FINANCIERS PAR ANNÉE -->
             ${financialTableHTML}
