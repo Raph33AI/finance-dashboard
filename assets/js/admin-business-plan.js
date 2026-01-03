@@ -2299,11 +2299,24 @@ if (typeof firebase === 'undefined' || !firebase.auth || !firebase.firestore) {
     console.log('✅ Firebase SDK loaded successfully');
 }
 
-// ⚡ VARIABLES GLOBALES (déclarées UNE SEULE FOIS)
-let db = null;
-let currentUserId = null;
-let businessPlanDocId = null;
-let autoSaveTimeout = null;
+// ⚡ VARIABLES GLOBALES (NE PAS REDÉCLARER db SI DÉJÀ EXISTANT)
+// ✅ CORRECTION : Vérifier si db existe déjà (déclaré dans firebase-config.js)
+if (typeof db === 'undefined') {
+    var db = null;
+}
+
+// Déclarer les autres variables seulement si pas déjà existantes
+if (typeof currentUserId === 'undefined') {
+    var currentUserId = null;
+}
+
+if (typeof businessPlanDocId === 'undefined') {
+    var businessPlanDocId = null;
+}
+
+if (typeof autoSaveTimeout === 'undefined') {
+    var autoSaveTimeout = null;
+}
 
 const isMobile = window.innerWidth <= 768;
 const isSmallMobile = window.innerWidth <= 480;
@@ -2332,7 +2345,10 @@ console.log('📱 Device Detection:', { width: window.innerWidth, isMobile, isSm
 // ⚡ INITIALISATION FIRESTORE
 function initializeFirestore() {
     try {
-        db = firebase.firestore();
+        // ✅ CORRECTION : Utiliser la db déjà existante ou l'initialiser
+        if (!db) {
+            db = firebase.firestore();
+        }
         
         // Écouter les changements d'authentification
         firebase.auth().onAuthStateChanged(user => {
