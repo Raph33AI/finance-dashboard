@@ -1378,3 +1378,29 @@ body.dark-mode .modal-company-logo img {
     font-weight: 600;
     margin-top: 4px;
 }
+
+/* ✅ ANIMATION DES RAYURES DANS LE HEADER */
+@keyframes moveStripes {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(50px, 50px);
+    }
+}
+
+/* ✅ STYLES POUR LE TABLEAU RESPONSIVE */
+@media (max-width: 768px) {
+    table {
+        font-size: 0.85rem;
+    }
+    
+    table th,
+    table td {
+        padding: 10px 14px !important;
+    }
+    
+    table th {
+        font-size: 0.8rem !important;
+    }
+}
