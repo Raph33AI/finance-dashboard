@@ -54,6 +54,10 @@
     <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 
+    <!-- Quill.js (Éditeur WYSIWYG) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -2115,7 +2119,7 @@
                 </div>
 
                 <!-- ========================================
-                    SECTION: GMAIL MANAGEMENT
+                    SECTION: GMAIL MANAGEMENT - ULTRA-COMPLETE
                     ======================================== -->
                 <div id="gmail-management" class="tab-section" data-section-content="gmail-management">
                     <div class="section">
@@ -2125,11 +2129,35 @@
                                 Gmail Management
                                 <span class="section-subtitle">@alphavault-ai.com</span>
                             </h2>
-                            <button class='dashboard-btn' id='exportGmailBtn' onclick="adminAnalytics.exportData('gmail')">
-                                <i class='fas fa-file-csv'></i>
-                                Export Gmail Data
+                            <div class="header-actions-group">
+                                <!-- 🆕 BOUTON COMPOSER -->
+                                <button class='dashboard-btn btn-primary' onclick="adminAnalytics.openComposeModal()">
+                                    <i class='fas fa-pen'></i>
+                                    Compose
+                                </button>
+                                <button class='dashboard-btn' onclick="adminAnalytics.exportData('gmail')">
+                                    <i class='fas fa-file-csv'></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 🔍 RECHERCHE AVANCÉE -->
+                        <div class="gmail-search-bar">
+                            <input 
+                                type="text" 
+                                id="gmail-search-input" 
+                                class="search-input" 
+                                placeholder="Search emails (e.g., from:user@domain.com, subject:invoice, has:attachment)" 
+                                onkeypress="if(event.key==='Enter') adminAnalytics.searchEmails()"
+                            />
+                            <button class="btn-search" id="gmail-search-btn" onclick="adminAnalytics.searchEmails()">
+                                <i class="fas fa-search"></i>
                             </button>
                         </div>
+                        
+                        <!-- 📊 RÉSULTATS DE RECHERCHE -->
+                        <div id="gmail-search-results" class="search-results-container" style="display: none;"></div>
                         
                         <!-- KPIs Grid -->
                         <div class="kpis-grid">
@@ -2187,6 +2215,18 @@
                                     <div class="kpi-label">Avg Response Time</div>
                                     <div class="kpi-value" id="gmail-avg-response-time">0h</div>
                                     <div class="kpi-sublabel">Average</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 🆕 DRAFTS KPI -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Drafts</div>
+                                    <div class="kpi-value" id="gmail-drafts-count">0</div>
+                                    <div class="kpi-sublabel">Saved</div>
                                 </div>
                             </div>
                         </div>
@@ -2256,6 +2296,240 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                        
+                        <!-- 🆕 DRAFTS SECTION -->
+                        <div class="table-wrapper">
+                            <h4 class="chart-title">
+                                <i class="fas fa-file-alt"></i>
+                                Saved Drafts
+                            </h4>
+                            <div id="gmail-drafts-list" class="drafts-container">
+                                <p style="color: #64748b; text-align: center; padding: 20px;">No drafts saved</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ========================================
+                     MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL
+                     ======================================== -->
+                
+                <!-- 🆕 MODAL: COMPOSE EMAIL -->
+                <div id="compose-email-modal" class="gmail-modal">
+                    <div class="gmail-modal-content">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-pen"></i> New Message</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeComposeModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="form-group">
+                                <label>To:</label>
+                                <input type="email" id="compose-to" class="form-input" placeholder="recipient@example.com" multiple>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Cc:</label>
+                                    <input type="email" id="compose-cc" class="form-input" placeholder="Optional">
+                                </div>
+                                <div class="form-group">
+                                    <label>Bcc:</label>
+                                    <input type="email" id="compose-bcc" class="form-input" placeholder="Optional">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Subject:</label>
+                                <input type="text" id="compose-subject" class="form-input" placeholder="Email subject">
+                            </div>
+                            
+                            <!-- 🆕 WYSIWYG EDITOR (Quill.js) -->
+                            <div class="form-group">
+                                <label>Message:</label>
+                                <div id="compose-body-editor" class="email-editor"></div>
+                            </div>
+                            
+                            <!-- 📎 ATTACHMENTS -->
+                            <div class="form-group">
+                                <label>Attachments:</label>
+                                <input 
+                                    type="file" 
+                                    id="compose-attach-file" 
+                                    multiple 
+                                    style="display: none;" 
+                                    onchange="adminAnalytics.handleFileUpload(event)"
+                                >
+                                <button class="btn-secondary" onclick="document.getElementById('compose-attach-file').click()">
+                                    <i class="fas fa-paperclip"></i> Attach Files
+                                </button>
+                                <div id="compose-attachments-list" class="attachments-list"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.saveDraft('compose')">
+                                <i class="fas fa-save"></i> Save Draft
+                            </button>
+                            <button class="btn-primary" id="send-email-btn" onclick="adminAnalytics.sendEmail()">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 🆕 MODAL: REPLY EMAIL -->
+                <div id="reply-email-modal" class="gmail-modal">
+                    <div class="gmail-modal-content">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-reply"></i> Reply</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeReplyModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="form-group">
+                                <label>To:</label>
+                                <input type="email" id="reply-to" class="form-input" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Cc:</label>
+                                <input type="email" id="reply-cc" class="form-input" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Subject:</label>
+                                <input type="text" id="reply-subject" class="form-input" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Your Reply:</label>
+                                <div id="reply-body-editor" class="email-editor"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.sendReply(true)">
+                                <i class="fas fa-reply-all"></i> Reply All
+                            </button>
+                            <button class="btn-primary" id="send-reply-btn" onclick="adminAnalytics.sendReply(false)">
+                                <i class="fas fa-reply"></i> Send Reply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 🆕 MODAL: FORWARD EMAIL -->
+                <div id="forward-email-modal" class="gmail-modal">
+                    <div class="gmail-modal-content">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-share"></i> Forward</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeForwardModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="form-group">
+                                <label>To:</label>
+                                <input type="email" id="forward-to" class="form-input" placeholder="recipient@example.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Subject:</label>
+                                <input type="text" id="forward-subject" class="form-input" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Add a message (optional):</label>
+                                <div id="forward-body-editor" class="email-editor"></div>
+                            </div>
+                            
+                            <div id="forward-original-attachments" class="attachments-container" style="display: none;">
+                                <label>Original Attachments:</label>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.closeForwardModal()">
+                                Cancel
+                            </button>
+                            <button class="btn-primary" id="send-forward-btn" onclick="adminAnalytics.sendForward()">
+                                <i class="fas fa-share"></i> Forward
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 🆕 MODAL: VIEW EMAIL -->
+                <div id="view-email-modal" class="gmail-modal">
+                    <div class="gmail-modal-content gmail-modal-large">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-envelope-open"></i> Email Details</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeViewEmailModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="email-details-header">
+                                <div class="detail-row">
+                                    <strong>From:</strong>
+                                    <span id="view-email-from"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <strong>To:</strong>
+                                    <span id="view-email-to"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <strong>Subject:</strong>
+                                    <span id="view-email-subject"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <strong>Date:</strong>
+                                    <span id="view-email-date"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="email-body-content" id="view-email-body"></div>
+                            
+                            <div class="email-attachments-section">
+                                <h4>Attachments:</h4>
+                                <div id="view-email-attachments"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id)">
+                                <i class="fas fa-reply"></i> Reply
+                            </button>
+                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id, true)">
+                                <i class="fas fa-reply-all"></i> Reply All
+                            </button>
+                            <button class="btn-secondary" onclick="adminAnalytics.openForwardModal(adminAnalytics.currentEmail.id)">
+                                <i class="fas fa-share"></i> Forward
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 🆕 MODAL: THREAD VIEW -->
+                <div id="thread-view-modal" class="gmail-modal">
+                    <div class="gmail-modal-content gmail-modal-large">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-comments"></i> Conversation</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeThreadModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div id="thread-messages-container" class="thread-container"></div>
                         </div>
                     </div>
                 </div>

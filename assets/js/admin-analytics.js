@@ -5633,6 +5633,916 @@ class AdminAnalyticsPro {
             alert('⚠ Error: ' + error.message);
         }
     }
+
+    // ========================================
+    // 📧 SECTION 13B: GMAIL MANAGEMENT - ADVANCED FEATURES
+    // ========================================
+    
+    // 🆕 PROPRIÉTÉS POUR LA MESSAGERIE COMPLÈTE
+    constructor() {
+        // ... (garder le code existant)
+        
+        // 🆕 AJOUTS POUR MESSAGERIE
+        this.currentEmail = null;
+        this.currentThread = null;
+        this.gmailDrafts = [];
+        this.gmailLabels = [];
+        this.gmailTemplates = [];
+        this.emailSignature = '';
+        this.searchResults = [];
+        this.attachments = [];
+        this.autoSaveDraftTimer = null;
+    }
+    
+    // ========================================
+    // 📨 COMPOSER UN NOUVEAU EMAIL
+    // ========================================
+    
+    openComposeModal() {
+        console.log('✉ Opening compose modal...');
+        
+        const modal = document.getElementById('compose-email-modal');
+        if (!modal) {
+            console.error('❌ Compose modal not found');
+            return;
+        }
+        
+        // Reset le formulaire
+        document.getElementById('compose-to').value = '';
+        document.getElementById('compose-cc').value = '';
+        document.getElementById('compose-bcc').value = '';
+        document.getElementById('compose-subject').value = '';
+        
+        // Initialiser l'éditeur WYSIWYG (Quill.js)
+        if (!this.composeEditor) {
+            this.composeEditor = new Quill('#compose-body-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Write your message here...'
+            });
+        } else {
+            this.composeEditor.setText('');
+        }
+        
+        // Charger la signature si elle existe
+        if (this.emailSignature) {
+            this.composeEditor.clipboard.dangerouslyPasteHTML(this.composeEditor.getLength(), `<br><br>${this.emailSignature}`);
+        }
+        
+        // Reset attachments
+        this.attachments = [];
+        this.updateAttachmentsList('compose');
+        
+        // Activer l'auto-save
+        this.startAutoSaveDraft('compose');
+        
+        modal.style.display = 'flex';
+        
+        console.log('✅ Compose modal opened');
+    }
+    
+    closeComposeModal() {
+        const modal = document.getElementById('compose-email-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        
+        // Stopper l'auto-save
+        if (this.autoSaveDraftTimer) {
+            clearInterval(this.autoSaveDraftTimer);
+        }
+        
+        console.log('✅ Compose modal closed');
+    }
+    
+    async sendEmail() {
+        try {
+            console.log('📤 Sending email...');
+            
+            const to = document.getElementById('compose-to').value.trim();
+            const cc = document.getElementById('compose-cc').value.trim();
+            const bcc = document.getElementById('compose-bcc').value.trim();
+            const subject = document.getElementById('compose-subject').value.trim();
+            
+            if (!to || !subject) {
+                alert('⚠ Please fill in recipient and subject fields.');
+                return;
+            }
+            
+            const bodyHtml = this.composeEditor.root.innerHTML;
+            const bodyText = this.composeEditor.getText();
+            
+            const sendBtn = document.getElementById('send-email-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to: to,
+                    cc: cc || undefined,
+                    bcc: bcc || undefined,
+                    subject: subject,
+                    bodyHtml: bodyHtml,
+                    bodyText: bodyText,
+                    attachments: this.attachments
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to send email');
+            }
+            
+            const result = await response.json();
+            
+            console.log('✅ Email sent:', result);
+            alert('✅ Email sent successfully!');
+            
+            this.closeComposeModal();
+            
+            // Recharger l'inbox
+            await this.loadGmailInbox();
+            await this.loadGmailStats();
+            
+        } catch (error) {
+            console.error('❌ Error sending email:', error);
+            alert('⚠ Error sending email: ' + error.message);
+        } finally {
+            const sendBtn = document.getElementById('send-email-btn');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+        }
+    }
+    
+    // ========================================
+    // 📩 RÉPONDRE À UN EMAIL
+    // ========================================
+    
+    async openReplyModal(messageId, replyAll = false) {
+        try {
+            console.log(`↩ Opening reply modal (messageId: ${messageId}, replyAll: ${replyAll})...`);
+            
+            // Récupérer les détails du message
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch message details');
+            }
+            
+            const result = await response.json();
+            const message = result.message;
+            
+            this.currentEmail = message;
+            
+            const modal = document.getElementById('reply-email-modal');
+            if (!modal) {
+                console.error('❌ Reply modal not found');
+                return;
+            }
+            
+            // Pré-remplir les champs
+            document.getElementById('reply-to').value = message.from;
+            document.getElementById('reply-cc').value = replyAll ? (message.cc || '') : '';
+            document.getElementById('reply-subject').value = `Re: ${message.subject.replace(/^Re:\s*/i, '')}`;
+            
+            // Initialiser l'éditeur
+            if (!this.replyEditor) {
+                this.replyEditor = new Quill('#reply-body-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Write your reply...'
+                });
+            } else {
+                this.replyEditor.setText('');
+            }
+            
+            // Ajouter la signature
+            if (this.emailSignature) {
+                this.replyEditor.clipboard.dangerouslyPasteHTML(`<br><br>${this.emailSignature}`);
+            }
+            
+            // Ajouter le message original cité
+            const quotedMessage = `
+                <br><br>
+                <blockquote style="border-left: 3px solid #667eea; padding-left: 12px; margin: 12px 0; color: #64748b;">
+                    <p><strong>On ${new Date(message.timestamp).toLocaleString()}, ${message.from} wrote:</strong></p>
+                    ${message.bodyHtml || message.bodyText || ''}
+                </blockquote>
+            `;
+            this.replyEditor.clipboard.dangerouslyPasteHTML(this.replyEditor.getLength(), quotedMessage);
+            
+            modal.style.display = 'flex';
+            
+            console.log('✅ Reply modal opened');
+            
+        } catch (error) {
+            console.error('❌ Error opening reply modal:', error);
+            alert('⚠ Error loading email details: ' + error.message);
+        }
+    }
+    
+    closeReplyModal() {
+        const modal = document.getElementById('reply-email-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentEmail = null;
+    }
+    
+    async sendReply(replyAll = false) {
+        try {
+            console.log(`📤 Sending reply (replyAll: ${replyAll})...`);
+            
+            if (!this.currentEmail) {
+                alert('⚠ Original email not found.');
+                return;
+            }
+            
+            const bodyHtml = this.replyEditor.root.innerHTML;
+            const bodyText = this.replyEditor.getText();
+            
+            const sendBtn = document.getElementById('send-reply-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-reply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    messageId: this.currentEmail.id,
+                    threadId: this.currentEmail.threadId,
+                    replyAll: replyAll,
+                    bodyHtml: bodyHtml,
+                    bodyText: bodyText
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to send reply');
+            }
+            
+            const result = await response.json();
+            
+            console.log('✅ Reply sent:', result);
+            alert('✅ Reply sent successfully!');
+            
+            this.closeReplyModal();
+            
+            await this.loadGmailInbox();
+            await this.loadGmailStats();
+            
+        } catch (error) {
+            console.error('❌ Error sending reply:', error);
+            alert('⚠ Error sending reply: ' + error.message);
+        } finally {
+            const sendBtn = document.getElementById('send-reply-btn');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-reply"></i> Send Reply';
+        }
+    }
+    
+    // ========================================
+    // ➡ TRANSFÉRER UN EMAIL
+    // ========================================
+    
+    async openForwardModal(messageId) {
+        try {
+            console.log(`➡ Opening forward modal (messageId: ${messageId})...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch message details');
+            }
+            
+            const result = await response.json();
+            const message = result.message;
+            
+            this.currentEmail = message;
+            
+            const modal = document.getElementById('forward-email-modal');
+            if (!modal) {
+                console.error('❌ Forward modal not found');
+                return;
+            }
+            
+            document.getElementById('forward-to').value = '';
+            document.getElementById('forward-subject').value = `Fwd: ${message.subject.replace(/^Fwd:\s*/i, '')}`;
+            
+            if (!this.forwardEditor) {
+                this.forwardEditor = new Quill('#forward-body-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link'],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Add a message (optional)...'
+                });
+            } else {
+                this.forwardEditor.setText('');
+            }
+            
+            const forwardedMessage = `
+                <br><br>
+                ---------- Forwarded message ---------<br>
+                <strong>From:</strong> ${message.from}<br>
+                <strong>Date:</strong> ${new Date(message.timestamp).toLocaleString()}<br>
+                <strong>Subject:</strong> ${message.subject}<br>
+                <br>
+                ${message.bodyHtml || message.bodyText || ''}
+            `;
+            this.forwardEditor.clipboard.dangerouslyPasteHTML(this.forwardEditor.getLength(), forwardedMessage);
+            
+            // Afficher les pièces jointes
+            if (message.attachments && message.attachments.length > 0) {
+                this.displayForwardedAttachments(message.attachments);
+            }
+            
+            modal.style.display = 'flex';
+            
+            console.log('✅ Forward modal opened');
+            
+        } catch (error) {
+            console.error('❌ Error opening forward modal:', error);
+            alert('⚠ Error loading email details: ' + error.message);
+        }
+    }
+    
+    closeForwardModal() {
+        const modal = document.getElementById('forward-email-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentEmail = null;
+    }
+    
+    async sendForward() {
+        try {
+            console.log('📤 Forwarding email...');
+            
+            if (!this.currentEmail) {
+                alert('⚠ Original email not found.');
+                return;
+            }
+            
+            const to = document.getElementById('forward-to').value.trim();
+            
+            if (!to) {
+                alert('⚠ Please enter a recipient.');
+                return;
+            }
+            
+            const bodyHtml = this.forwardEditor.root.innerHTML;
+            const bodyText = this.forwardEditor.getText();
+            
+            const sendBtn = document.getElementById('send-forward-btn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Forwarding...';
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-forward`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    messageId: this.currentEmail.id,
+                    to: to,
+                    bodyHtml: bodyHtml,
+                    bodyText: bodyText
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to forward email');
+            }
+            
+            const result = await response.json();
+            
+            console.log('✅ Email forwarded:', result);
+            alert('✅ Email forwarded successfully!');
+            
+            this.closeForwardModal();
+            
+            await this.loadGmailInbox();
+            
+        } catch (error) {
+            console.error('❌ Error forwarding email:', error);
+            alert('⚠ Error forwarding email: ' + error.message);
+        } finally {
+            const sendBtn = document.getElementById('send-forward-btn');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-share"></i> Forward';
+        }
+    }
+    
+    // ========================================
+    // 📎 GESTION DES PIÈCES JOINTES
+    // ========================================
+    
+    handleFileUpload(event) {
+        const files = event.target.files;
+        
+        if (!files || files.length === 0) return;
+        
+        Array.from(files).forEach(file => {
+            if (file.size > 25 * 1024 * 1024) {
+                alert(`⚠ File "${file.name}" is too large (max 25MB)`);
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                
+                this.attachments.push({
+                    filename: file.name,
+                    mimeType: file.type,
+                    size: file.size,
+                    data: base64Data
+                });
+                
+                this.updateAttachmentsList('compose');
+                
+                console.log(`✅ File attached: ${file.name} (${this.formatBytes(file.size)})`);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    removeAttachment(index) {
+        this.attachments.splice(index, 1);
+        this.updateAttachmentsList('compose');
+        console.log(`✅ Attachment removed (index: ${index})`);
+    }
+    
+    updateAttachmentsList(context = 'compose') {
+        const container = document.getElementById(`${context}-attachments-list`);
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (this.attachments.length === 0) {
+            container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">No attachments</p>';
+            return;
+        }
+        
+        this.attachments.forEach((att, index) => {
+            const attDiv = document.createElement('div');
+            attDiv.className = 'attachment-item';
+            attDiv.innerHTML = `
+                <div class="attachment-info">
+                    <i class="fas fa-paperclip"></i>
+                    <span>${att.filename}</span>
+                    <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                </div>
+                <button class="btn-remove-attachment" onclick="adminAnalytics.removeAttachment(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(attDiv);
+        });
+    }
+    
+    displayForwardedAttachments(attachments) {
+        const container = document.getElementById('forward-original-attachments');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (!attachments || attachments.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'block';
+        
+        attachments.forEach(att => {
+            const attDiv = document.createElement('div');
+            attDiv.className = 'attachment-item';
+            attDiv.innerHTML = `
+                <div class="attachment-info">
+                    <i class="fas fa-paperclip"></i>
+                    <span>${att.filename}</span>
+                    <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                </div>
+            `;
+            container.appendChild(attDiv);
+        });
+    }
+    
+    // ========================================
+    // 💾 GESTION DES BROUILLONS
+    // ========================================
+    
+    startAutoSaveDraft(context = 'compose') {
+        if (this.autoSaveDraftTimer) {
+            clearInterval(this.autoSaveDraftTimer);
+        }
+        
+        this.autoSaveDraftTimer = setInterval(() => {
+            this.saveDraft(context, true);
+        }, 30000); // Auto-save toutes les 30 secondes
+        
+        console.log('✅ Auto-save draft activated (every 30s)');
+    }
+    
+    async saveDraft(context = 'compose', auto = false) {
+        try {
+            const to = document.getElementById(`${context}-to`).value.trim();
+            const subject = document.getElementById(`${context}-subject`).value.trim();
+            
+            if (!to && !subject) {
+                if (!auto) {
+                    alert('⚠ Please enter at least a recipient or subject.');
+                }
+                return;
+            }
+            
+            const editor = context === 'compose' ? this.composeEditor : this.replyEditor;
+            const bodyHtml = editor.root.innerHTML;
+            const bodyText = editor.getText();
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-save-draft`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to: to || undefined,
+                    cc: document.getElementById(`${context}-cc`)?.value.trim() || undefined,
+                    subject: subject || undefined,
+                    bodyHtml: bodyHtml,
+                    bodyText: bodyText
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to save draft');
+            }
+            
+            const result = await response.json();
+            
+            if (auto) {
+                console.log('💾 Draft auto-saved');
+            } else {
+                console.log('✅ Draft saved:', result);
+                alert('✅ Draft saved successfully!');
+            }
+            
+            await this.loadGmailDrafts();
+            
+        } catch (error) {
+            console.error('❌ Error saving draft:', error);
+            if (!auto) {
+                alert('⚠ Error saving draft: ' + error.message);
+            }
+        }
+    }
+    
+    async loadGmailDrafts() {
+        try {
+            console.log('💾 Loading Gmail drafts...');
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-drafts`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to load drafts');
+            }
+            
+            const result = await response.json();
+            this.gmailDrafts = result.drafts || [];
+            
+            this.displayGmailDrafts();
+            
+            console.log(`✅ ${this.gmailDrafts.length} drafts loaded`);
+            
+        } catch (error) {
+            console.error('❌ Error loading drafts:', error);
+        }
+    }
+    
+    displayGmailDrafts() {
+        const container = document.getElementById('gmail-drafts-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (this.gmailDrafts.length === 0) {
+            container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No drafts saved</p>';
+            return;
+        }
+        
+        this.gmailDrafts.forEach(draft => {
+            const draftDiv = document.createElement('div');
+            draftDiv.className = 'draft-item';
+            draftDiv.innerHTML = `
+                <div class="draft-info">
+                    <div class="draft-subject">${draft.subject || '(No subject)'}</div>
+                    <div class="draft-to">To: ${draft.to || 'N/A'}</div>
+                    <div class="draft-snippet">${draft.snippet || ''}</div>
+                </div>
+                <div class="draft-actions">
+                    <button class="btn-action" onclick="adminAnalytics.openDraft('${draft.id}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn-action btn-danger" onclick="adminAnalytics.deleteDraft('${draft.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(draftDiv);
+        });
+    }
+    
+    async deleteDraft(draftId) {
+        try {
+            if (!confirm('Delete this draft?')) return;
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-delete-draft`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    draftId: draftId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete draft');
+            }
+            
+            alert('✅ Draft deleted!');
+            await this.loadGmailDrafts();
+            
+        } catch (error) {
+            console.error('❌ Error deleting draft:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+    
+    // ========================================
+    // 🔍 RECHERCHE AVANCÉE
+    // ========================================
+    
+    async searchEmails() {
+        try {
+            const query = document.getElementById('gmail-search-input').value.trim();
+            
+            if (!query) {
+                alert('⚠ Please enter a search query.');
+                return;
+            }
+            
+            console.log(`🔍 Searching emails with query: "${query}"...`);
+            
+            const searchBtn = document.getElementById('gmail-search-btn');
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-search?q=${encodeURIComponent(query)}&maxResults=20`);
+            
+            if (!response.ok) {
+                throw new Error('Search failed');
+            }
+            
+            const result = await response.json();
+            this.searchResults = result.messages || [];
+            
+            this.displaySearchResults();
+            
+            console.log(`✅ Found ${this.searchResults.length} results`);
+            
+        } catch (error) {
+            console.error('❌ Search error:', error);
+            alert('⚠ Search error: ' + error.message);
+        } finally {
+            const searchBtn = document.getElementById('gmail-search-btn');
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+        }
+    }
+    
+    displaySearchResults() {
+        const container = document.getElementById('gmail-search-results');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (this.searchResults.length === 0) {
+            container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No results found</p>';
+            return;
+        }
+        
+        this.searchResults.forEach(email => {
+            const emailDiv = document.createElement('div');
+            emailDiv.className = 'search-result-item';
+            emailDiv.innerHTML = `
+                <div class="search-result-header">
+                    <strong>${email.from}</strong>
+                    <span class="email-date">${new Date(email.timestamp).toLocaleDateString()}</span>
+                </div>
+                <div class="search-result-subject">${email.subject}</div>
+                <div class="search-result-snippet">${email.snippet}</div>
+                <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+            container.appendChild(emailDiv);
+        });
+    }
+    
+    // ========================================
+    // 👁 VUE DÉTAILLÉE D'UN EMAIL
+    // ========================================
+    
+    async viewEmail(messageId) {
+        try {
+            console.log(`👁 Loading email details (ID: ${messageId})...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-message?id=${messageId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to load email');
+            }
+            
+            const result = await response.json();
+            const message = result.message;
+            
+            this.currentEmail = message;
+            
+            const modal = document.getElementById('view-email-modal');
+            if (!modal) return;
+            
+            document.getElementById('view-email-from').textContent = message.from;
+            document.getElementById('view-email-to').textContent = message.to;
+            document.getElementById('view-email-subject').textContent = message.subject;
+            document.getElementById('view-email-date').textContent = new Date(message.timestamp).toLocaleString();
+            document.getElementById('view-email-body').innerHTML = message.bodyHtml || `<pre>${message.bodyText}</pre>`;
+            
+            // Afficher pièces jointes
+            const attContainer = document.getElementById('view-email-attachments');
+            if (message.attachments && message.attachments.length > 0) {
+                attContainer.innerHTML = '';
+                message.attachments.forEach(att => {
+                    const attDiv = document.createElement('div');
+                    attDiv.className = 'attachment-item';
+                    attDiv.innerHTML = `
+                        <i class="fas fa-paperclip"></i>
+                        <span>${att.filename}</span>
+                        <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                        <button class="btn-download" onclick="adminAnalytics.downloadAttachment('${message.id}', '${att.attachmentId}', '${att.filename}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    `;
+                    attContainer.appendChild(attDiv);
+                });
+            } else {
+                attContainer.innerHTML = '<p style="color: #64748b;">No attachments</p>';
+            }
+            
+            modal.style.display = 'flex';
+            
+            console.log('✅ Email details displayed');
+            
+        } catch (error) {
+            console.error('❌ Error loading email:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+    
+    closeViewEmailModal() {
+        const modal = document.getElementById('view-email-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentEmail = null;
+    }
+    
+    async downloadAttachment(messageId, attachmentId, filename) {
+        try {
+            console.log(`📎 Downloading attachment: ${filename}...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-attachment?messageId=${messageId}&attachmentId=${attachmentId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to download attachment');
+            }
+            
+            const result = await response.json();
+            
+            // Convertir base64 en blob et télécharger
+            const byteCharacters = atob(result.data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray]);
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            
+            console.log('✅ Attachment downloaded');
+            
+        } catch (error) {
+            console.error('❌ Download error:', error);
+            alert('⚠ Download error: ' + error.message);
+        }
+    }
+    
+    // ========================================
+    // 🧵 VUE CONVERSATIONS (THREADS)
+    // ========================================
+    
+    async viewThread(threadId) {
+        try {
+            console.log(`🧵 Loading thread (ID: ${threadId})...`);
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-thread?id=${threadId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to load thread');
+            }
+            
+            const result = await response.json();
+            this.currentThread = result.messages;
+            
+            const modal = document.getElementById('thread-view-modal');
+            if (!modal) return;
+            
+            const container = document.getElementById('thread-messages-container');
+            container.innerHTML = '';
+            
+            result.messages.forEach((msg, index) => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'thread-message';
+                msgDiv.innerHTML = `
+                    <div class="thread-message-header">
+                        <strong>${msg.from}</strong>
+                        <span class="email-date">${new Date(msg.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="thread-message-body">${msg.bodyHtml || `<pre>${msg.bodyText}</pre>`}</div>
+                    ${msg.attachments && msg.attachments.length > 0 ? `
+                        <div class="thread-message-attachments">
+                            ${msg.attachments.map(att => `
+                                <div class="attachment-item">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>${att.filename}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(msgDiv);
+            });
+            
+            modal.style.display = 'flex';
+            
+            console.log(`✅ Thread loaded (${result.messages.length} messages)`);
+            
+        } catch (error) {
+            console.error('❌ Error loading thread:', error);
+            alert('⚠ Error: ' + error.message);
+        }
+    }
+    
+    closeThreadModal() {
+        const modal = document.getElementById('thread-view-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentThread = null;
+    }
 }
 
 // ========================================

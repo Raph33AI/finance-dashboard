@@ -1464,3 +1464,407 @@ body.dark-mode .pagination-select {
         opacity: 0.4;
     }
 }
+
+/* ========================================
+   GMAIL MANAGEMENT - ADVANCED FEATURES
+   ======================================== */
+
+/* 🔍 SEARCH BAR */
+.gmail-search-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-search {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+/* 📊 SEARCH RESULTS */
+.search-results-container {
+    margin-bottom: 24px;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.search-result-item {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    transition: var(--transition-smooth);
+}
+
+.search-result-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.search-result-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.search-result-subject {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.search-result-snippet {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* 📧 GMAIL MODALS */
+.gmail-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.gmail-modal-content {
+    background: white;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.gmail-modal-large {
+    max-width: 1000px;
+}
+
+.gmail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 24px 24px 0 0;
+}
+
+.gmail-modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.btn-close-modal {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    color: white;
+    font-size: 1.2rem;
+}
+
+.btn-close-modal:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.gmail-modal-body {
+    padding: 32px;
+}
+
+.gmail-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px 32px;
+    border-top: 2px solid rgba(0, 0, 0, 0.06);
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 0 0 24px 24px;
+}
+
+/* 📝 FORM ELEMENTS */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* 🎨 WYSIWYG EDITOR (Quill.js) */
+.email-editor {
+    min-height: 300px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background: white;
+}
+
+.ql-toolbar {
+    border-radius: 12px 12px 0 0 !important;
+    background: rgba(248, 250, 252, 0.8) !important;
+}
+
+.ql-container {
+    border-radius: 0 0 12px 12px !important;
+    font-size: 1rem !important;
+}
+
+/* 📎 ATTACHMENTS */
+.attachments-list {
+    margin-top: 12px;
+}
+
+.attachment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.attachment-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.attachment-size {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.btn-remove-attachment {
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #ef4444;
+    transition: var(--transition-smooth);
+}
+
+.btn-remove-attachment:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* 💾 DRAFTS */
+.drafts-container {
+    display: grid;
+    gap: 16px;
+}
+
+.draft-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid #8b5cf6;
+    transition: var(--transition-smooth);
+}
+
+.draft-item:hover {
+    background: rgba(139, 92, 246, 0.1);
+    transform: translateX(4px);
+}
+
+.draft-info {
+    flex: 1;
+}
+
+.draft-subject {
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.draft-to {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.draft-snippet {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.draft-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* 👁 EMAIL DETAILS VIEW */
+.email-details-header {
+    background: rgba(102, 126, 234, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.email-body-content {
+    padding: 20px;
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    min-height: 200px;
+}
+
+.email-attachments-section h4 {
+    margin-bottom: 12px;
+    color: #1e293b;
+}
+
+/* 🧵 THREAD VIEW */
+.thread-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.thread-message {
+    padding: 20px;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.thread-message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.thread-message-body {
+    margin-bottom: 12px;
+}
+
+.thread-message-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* 🎨 ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width: 768px) {
+    .gmail-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .email-editor {
+        min-height: 200px;
+    }
+}
