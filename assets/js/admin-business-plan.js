@@ -501,6 +501,7 @@ function initializeFinancialProjections() {
     renderRevenueBreakdownTable();
     renderExpensesBreakdownTable();
     renderMetricsTable();
+    updateProjectionSummaryCards();
     renderUnitEconomics();
     
     console.log('✅ Financial projections initialized');
