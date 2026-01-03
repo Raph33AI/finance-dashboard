@@ -279,93 +279,107 @@
             
             <div class='container'>
                 
-                <!-- STATISTICS OVERVIEW -->
-                <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-chart-bar'></i> Global Statistics
-                    </h2>
+                <!-- ✅ STATISTICS OVERVIEW - DROPDOWN -->
+                <div class='dropdown-section' id='statsSection'>
+                    <div class='dropdown-header' onclick='CompaniesDirectory.toggleDropdown("statsSection")'>
+                        <h2 class='dropdown-title'>
+                            <i class='fas fa-chart-bar'></i> Global Statistics
+                        </h2>
+                        <button class='dropdown-toggle' type='button'>
+                            <i class='fas fa-chevron-down'></i>
+                        </button>
+                    </div>
                     
-                    <div class='stats-grid' id='statsGrid'>
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #667eea, #764ba2);'>
-                                <i class='fas fa-building'></i>
+                    <div class='dropdown-content open'>
+                        <div class='stats-grid' id='statsGrid'>
+                            <div class='stat-card'>
+                                <div class='stat-icon' style='background: linear-gradient(135deg, #667eea, #764ba2);'>
+                                    <i class='fas fa-building'></i>
+                                </div>
+                                <div class='stat-content'>
+                                    <div class='stat-value' id='totalCompanies'>0</div>
+                                    <div class='stat-label'>Total Companies</div>
+                                </div>
                             </div>
-                            <div class='stat-content'>
-                                <div class='stat-value' id='totalCompanies'>0</div>
-                                <div class='stat-label'>Total Companies</div>
+                            
+                            <div class='stat-card'>
+                                <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
+                                    <i class='fas fa-globe-americas'></i>
+                                </div>
+                                <div class='stat-content'>
+                                    <div class='stat-value' id='totalRegions'>0</div>
+                                    <div class='stat-label'>Regions</div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
-                                <i class='fas fa-globe-americas'></i>
+                            
+                            <div class='stat-card'>
+                                <div class='stat-icon' style='background: linear-gradient(135deg, #f59e0b, #d97706);'>
+                                    <i class='fas fa-layer-group'></i>
+                                </div>
+                                <div class='stat-content'>
+                                    <div class='stat-value' id='totalSectors'>0</div>
+                                    <div class='stat-label'>Sectors</div>
+                                </div>
                             </div>
-                            <div class='stat-content'>
-                                <div class='stat-value' id='totalRegions'>0</div>
-                                <div class='stat-label'>Regions</div>
-                            </div>
-                        </div>
-                        
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #f59e0b, #d97706);'>
-                                <i class='fas fa-layer-group'></i>
-                            </div>
-                            <div class='stat-content'>
-                                <div class='stat-value' id='totalSectors'>0</div>
-                                <div class='stat-label'>Sectors</div>
-                            </div>
-                        </div>
-                        
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #3b82f6, #2563eb);'>
-                                <i class='fas fa-search'></i>
-                            </div>
-                            <div class='stat-content'>
-                                <div class='stat-value' id='filteredCompanies'>0</div>
-                                <div class='stat-label'>Filtered Results</div>
+                            
+                            <div class='stat-card'>
+                                <div class='stat-icon' style='background: linear-gradient(135deg, #3b82f6, #2563eb);'>
+                                    <i class='fas fa-search'></i>
+                                </div>
+                                <div class='stat-content'>
+                                    <div class='stat-value' id='filteredCompanies'>0</div>
+                                    <div class='stat-label'>Filtered Results</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SEARCH & FILTERS -->
-                <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-filter'></i> Search & Filters
-                    </h2>
+                <!-- ✅ SEARCH & FILTERS - DROPDOWN -->
+                <div class='dropdown-section' id='filtersSection'>
+                    <div class='dropdown-header' onclick='CompaniesDirectory.toggleDropdown("filtersSection")'>
+                        <h2 class='dropdown-title'>
+                            <i class='fas fa-filter'></i> Search & Filters
+                        </h2>
+                        <button class='dropdown-toggle' type='button'>
+                            <i class='fas fa-chevron-down'></i>
+                        </button>
+                    </div>
                     
-                    <div class='search-toolbar'>
-                        <div class='search-bar'>
-                            <i class='fas fa-search'></i>
-                            <input type='text' id='companySearch' placeholder='Search by company name or ticker (e.g., Apple, AAPL, NVDA)...'>
-                            <button class='clear-btn' id='clearSearch' style='display: none;'>
-                                <i class='fas fa-times'></i>
-                            </button>
-                        </div>
-                        
-                        <div class='filter-controls'>
-                            <select id='sectorFilter' class='filter-select'>
-                                <option value='all'>All Sectors</option>
-                            </select>
+                    <div class='dropdown-content open'>
+                        <div class='search-toolbar'>
+                            <div class='search-bar'>
+                                <i class='fas fa-search'></i>
+                                <input type='text' id='companySearch' placeholder='Search by company name or ticker (e.g., Apple, AAPL, NVDA)...'>
+                                <button class='clear-btn' id='clearSearch' style='display: none;'>
+                                    <i class='fas fa-times'></i>
+                                </button>
+                            </div>
                             
-                            <select id='regionFilter' class='filter-select'>
-                                <option value='all'>All Regions</option>
-                                <option value='usa'>USA</option>
-                                <option value='europe'>Europe</option>
-                                <option value='asia'>Asia</option>
-                            </select>
-                            
-                            <select id='sortBy' class='filter-select'>
-                                <option value='name-asc'>Name (A-Z)</option>
-                                <option value='name-desc'>Name (Z-A)</option>
-                                <option value='ticker-asc'>Ticker (A-Z)</option>
-                                <option value='ticker-desc'>Ticker (Z-A)</option>
-                            </select>
-                            
-                            <button class='filter-btn' id='resetFilters'>
-                                <i class='fas fa-redo'></i>
-                                <span>Reset</span>
-                            </button>
+                            <div class='filter-controls'>
+                                <select id='sectorFilter' class='filter-select'>
+                                    <option value='all'>All Sectors</option>
+                                </select>
+                                
+                                <select id='regionFilter' class='filter-select'>
+                                    <option value='all'>All Regions</option>
+                                    <option value='usa'>USA</option>
+                                    <option value='europe'>Europe</option>
+                                    <option value='asia'>Asia</option>
+                                </select>
+                                
+                                <select id='sortBy' class='filter-select'>
+                                    <option value='name-asc'>Name (A-Z)</option>
+                                    <option value='name-desc'>Name (Z-A)</option>
+                                    <option value='ticker-asc'>Ticker (A-Z)</option>
+                                    <option value='ticker-desc'>Ticker (Z-A)</option>
+                                </select>
+                                
+                                <button class='filter-btn' id='resetFilters'>
+                                    <i class='fas fa-redo'></i>
+                                    <span>Reset</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -431,14 +445,14 @@
 
                 <footer>
                     <p>
-                        <i class='fas fa-info-circle'></i> Companies Directory - AlphaVault AI Database
+                        <i class='fas fa-info-circle'></i> Companies Directory - AlphaVault AI Database (Synced via Firestore)
                     </p>
                 </footer>
             </div>
         </div>
     </div>
 
-    <!-- COMPANY DETAIL MODAL -->
+    <!-- ✅ COMPANY DETAIL MODAL -->
     <div id='companyModal' class='modal'>
         <div class='modal-content modal-large'>
             <div class='modal-header'>
@@ -448,6 +462,83 @@
             <div class='modal-body'>
                 <div class='company-modal-content' id='companyModalContent'>
                     <!-- Content will be inserted by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ KG SCORE MODAL EXPLICATIF -->
+    <div id='kgScoreModal' class='modal'>
+        <div class='modal-content' style='max-width: 600px;'>
+            <div class='modal-header'>
+                <h2 class='gradient-title'>
+                    <i class='fas fa-info-circle'></i> Knowledge Graph Score
+                </h2>
+                <button class='modal-close' onclick='CompaniesDirectory.closeKGScoreModal()'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div style='text-align: center; margin-bottom: 24px;'>
+                    <div style='font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600;'>Current Score</div>
+                    <div id='kgScoreValue' style='font-size: 3.5rem; font-weight: 900; background: var(--companies-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;'>0</div>
+                </div>
+
+                <div class='kg-score-explanation'>
+                    <h3 style='font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;'>
+                        <i class='fas fa-lightbulb' style='color: #f59e0b;'></i>
+                        What is the KG Score?
+                    </h3>
+                    <p style='color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;'>
+                        The <strong>Knowledge Graph (KG) Score</strong> is a confidence metric provided by Google's Knowledge Graph API. It represents how well-documented and verified an entity is within Google's vast knowledge base.
+                    </p>
+
+                    <div style='background: var(--glass-bg); padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6; margin-bottom: 20px;'>
+                        <h4 style='font-size: 1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'>
+                            <i class='fas fa-chart-line' style='color: #3b82f6;'></i>
+                            Score Interpretation
+                        </h4>
+                        <div id='kgScoreInterpretation' style='color: var(--text-secondary); line-height: 1.8;'>
+                            <!-- Dynamic interpretation will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class='kg-score-scale'>
+                        <div class='kg-score-scale-item'>
+                            <div class='kg-score-scale-value'>0-100</div>
+                            <div class='kg-score-scale-label'>Low</div>
+                        </div>
+                        <div class='kg-score-scale-item'>
+                            <div class='kg-score-scale-value'>100-500</div>
+                            <div class='kg-score-scale-label'>Moderate</div>
+                        </div>
+                        <div class='kg-score-scale-item'>
+                            <div class='kg-score-scale-value'>500-1000</div>
+                            <div class='kg-score-scale-label'>High</div>
+                        </div>
+                        <div class='kg-score-scale-item'>
+                            <div class='kg-score-scale-value'>1000+</div>
+                            <div class='kg-score-scale-label'>Exceptional</div>
+                        </div>
+                    </div>
+
+                    <div style='margin-top: 24px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3);'>
+                        <h4 style='font-size: 0.9rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;'>
+                            <i class='fas fa-graduation-cap' style='color: #3b82f6;'></i>
+                            Factors Influencing KG Score
+                        </h4>
+                        <ul style='color: var(--text-secondary); line-height: 1.8; margin: 0; padding-left: 20px; font-size: 0.9rem;'>
+                            <li>Amount of verified information available</li>
+                            <li>Number of authoritative sources (Wikipedia, official websites)</li>
+                            <li>Entity prominence and global recognition</li>
+                            <li>Data freshness and update frequency</li>
+                            <li>Cross-reference validation across multiple databases</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style='margin-top: 24px; text-align: center;'>
+                    <button onclick='CompaniesDirectory.closeKGScoreModal()' style='background: var(--companies-gradient); color: white; border: none; padding: 14px 32px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 6px 24px rgba(102, 126, 234, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 4px 16px rgba(102, 126, 234, 0.4)";'>
+                        <i class='fas fa-check'></i> Got it!
+                    </button>
                 </div>
             </div>
         </div>

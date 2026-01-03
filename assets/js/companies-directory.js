@@ -1,8 +1,8 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * COMPANIES DIRECTORY - SYSTÈME COMPLET V2.0
+ * COMPANIES DIRECTORY - SYSTÈME COMPLET V3.0
  * Multi-API Logos + Google Knowledge Graph + 15 Secteurs + Régions
- * Cache LocalStorage : 30 JOURS (1 MOIS)
+ * Cache FIRESTORE : Synchronisation multi-appareils ✨
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -236,25 +236,23 @@ class CompaniesDirectory {
         // Configurer les event listeners
         this.setupEventListeners();
         
-        // ✅ ÉTAPE 1 : Charger le cache depuis localStorage
-        const cacheLoaded = this.loadEnrichedCache();
+        // ✅ ÉTAPE 1 : Charger le cache depuis FIRESTORE
+        const cacheLoaded = await this.loadEnrichedCacheFromFirestore();
         
         if (cacheLoaded && this.enrichedDataCache.size > 0) {
             const cacheStats = this.getCacheStats();
-            console.log(`💾 Cache loaded:`);
+            console.log(`💾 Firestore cache loaded:`);
             console.log(`   📊 Profiles: ${this.enrichedDataCache.size}`);
             console.log(`   📅 Age: ${cacheStats.ageDays} days (${cacheStats.ageHours}h)`);
-            console.log(`   💿 Size: ${cacheStats.sizeKB} KB`);
             
             this.updatePreloadStatus(
-                `✅ Loaded ${this.enrichedDataCache.size} cached profiles (${cacheStats.ageDays} days old)`
+                `✅ Loaded ${this.enrichedDataCache.size} cached profiles from Firestore (${cacheStats.ageDays} days old)`
             );
         } else {
-            console.log('📭 No valid cache found, will load fresh data...');
+            console.log('📭 No valid Firestore cache found, will load fresh data...');
         }
         
         // ✅ ÉTAPE 2 : Pré-charger les données enrichies (100 premières entreprises)
-        // Si cache existe et valide, cette étape chargera uniquement les manquantes
         await this.preloadEnrichedData(100);
         
         // Appliquer les filtres et afficher les résultats
@@ -264,6 +262,9 @@ class CompaniesDirectory {
         
         // Masquer l'indicateur de chargement
         this.hideLoadingIndicator();
+        
+        // ✅ Restaurer l'état des dropdowns
+        this.restoreDropdownStates();
         
         console.log('✅ Companies Directory initialized!');
         console.log(`   📊 Total companies: ${this.allCompanies.length}`);
@@ -372,59 +373,77 @@ class CompaniesDirectory {
     
     /**
      * ════════════════════════════════════════════════════════════════
-     * GESTION DU CACHE LOCALSTORAGE (30 JOURS)
+     * GESTION DU CACHE FIRESTORE (30 JOURS) - SYNC MULTI-APPAREILS
      * ════════════════════════════════════════════════════════════════
      */
 
     /**
-     * ✅ SAUVEGARDER LE CACHE DANS LOCALSTORAGE
+     * ✅ SAUVEGARDER LE CACHE DANS FIRESTORE
      */
-    saveEnrichedCache() {
+    async saveEnrichedCacheToFirestore() {
         try {
+            if (!firebase.auth().currentUser) {
+                console.warn('⚠ No user logged in, skipping Firestore cache save');
+                return false;
+            }
+            
+            const userId = firebase.auth().currentUser.uid;
             const cacheArray = Array.from(this.enrichedDataCache.entries());
+            
             const cacheData = {
-                version: '2.0',
+                version: '3.0',
                 timestamp: Date.now(),
                 count: cacheArray.length,
                 data: cacheArray,
-                workerUrl: this.knowledgeGraphWorkerUrl
+                workerUrl: this.knowledgeGraphWorkerUrl,
+                userId: userId,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            localStorage.setItem('companiesEnrichedCache', JSON.stringify(cacheData));
+            await firebase.firestore()
+                .collection('companiesCache')
+                .doc(userId)
+                .set(cacheData, { merge: true });
             
-            const sizeKB = Math.round((JSON.stringify(cacheData).length * 2) / 1024);
-            console.log(`💾 Cache saved: ${cacheArray.length} profiles (${sizeKB} KB)`);
+            console.log(`💾 Firestore cache saved: ${cacheArray.length} profiles`);
             return true;
         } catch (error) {
-            console.warn('⚠ Failed to save cache:', error.message);
-            
-            if (error.name === 'QuotaExceededError') {
-                console.log('🗑 localStorage quota exceeded, clearing old cache...');
-                localStorage.removeItem('companiesEnrichedCache');
-                localStorage.removeItem('companiesCacheTimestamp'); // Legacy
-            }
+            console.warn('⚠ Failed to save Firestore cache:', error.message);
             return false;
         }
     }
 
     /**
-     * ✅ CHARGER LE CACHE DEPUIS LOCALSTORAGE
+     * ✅ CHARGER LE CACHE DEPUIS FIRESTORE
      */
-    loadEnrichedCache() {
+    async loadEnrichedCacheFromFirestore() {
         try {
-            const cachedItem = localStorage.getItem('companiesEnrichedCache');
-            
-            if (!cachedItem) {
-                console.log('📭 No cached data found');
+            if (!firebase.auth().currentUser) {
+                console.warn('⚠ No user logged in, skipping Firestore cache load');
                 return false;
             }
             
-            const cacheData = JSON.parse(cachedItem);
+            const userId = firebase.auth().currentUser.uid;
+            
+            const doc = await firebase.firestore()
+                .collection('companiesCache')
+                .doc(userId)
+                .get();
+            
+            if (!doc.exists) {
+                console.log('📭 No Firestore cache found for this user');
+                return false;
+            }
+            
+            const cacheData = doc.data();
             
             // Vérifier la structure
             if (!cacheData || !cacheData.data || !cacheData.timestamp) {
-                console.warn('⚠ Invalid cache structure, clearing...');
-                localStorage.removeItem('companiesEnrichedCache');
+                console.warn('⚠ Invalid Firestore cache structure, clearing...');
+                await firebase.firestore()
+                    .collection('companiesCache')
+                    .doc(userId)
+                    .delete();
                 return false;
             }
             
@@ -433,8 +452,11 @@ class CompaniesDirectory {
             
             if (age > this.CACHE_DURATION_MS) {
                 const days = Math.floor(age / (24 * 60 * 60 * 1000));
-                console.log(`🗑 Cache expired (${days} days old), clearing...`);
-                localStorage.removeItem('companiesEnrichedCache');
+                console.log(`🗑 Firestore cache expired (${days} days old), clearing...`);
+                await firebase.firestore()
+                    .collection('companiesCache')
+                    .doc(userId)
+                    .delete();
                 return false;
             }
             
@@ -443,7 +465,7 @@ class CompaniesDirectory {
             
             const hours = Math.floor(age / (60 * 60 * 1000));
             const days = Math.floor(age / (24 * 60 * 60 * 1000));
-            console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles`);
+            console.log(`💾 Loaded ${this.enrichedDataCache.size} cached profiles from Firestore`);
             console.log(`   📅 Cache age: ${days} days (${hours} hours)`);
             console.log(`   ✅ Version: ${cacheData.version || 'legacy'}`);
             console.log(`   ⏰ Expires in: ${30 - days} days`);
@@ -451,29 +473,30 @@ class CompaniesDirectory {
             return true;
             
         } catch (error) {
-            console.warn('⚠ Failed to load cache:', error.message);
-            
-            try {
-                localStorage.removeItem('companiesEnrichedCache');
-            } catch (e) {
-                // Ignore cleanup errors
-            }
-            
+            console.warn('⚠ Failed to load Firestore cache:', error.message);
             return false;
         }
     }
 
     /**
-     * ✅ VIDER LE CACHE MANUELLEMENT
+     * ✅ VIDER LE CACHE FIRESTORE MANUELLEMENT
      */
-    clearEnrichedCache() {
+    async clearEnrichedCacheFromFirestore() {
         try {
             this.enrichedDataCache.clear();
-            localStorage.removeItem('companiesEnrichedCache');
-            console.log('🗑 Enriched cache cleared');
+            
+            if (firebase.auth().currentUser) {
+                const userId = firebase.auth().currentUser.uid;
+                await firebase.firestore()
+                    .collection('companiesCache')
+                    .doc(userId)
+                    .delete();
+            }
+            
+            console.log('🗑 Firestore enriched cache cleared');
             return true;
         } catch (error) {
-            console.warn('⚠ Failed to clear cache:', error.message);
+            console.warn('⚠ Failed to clear Firestore cache:', error.message);
             return false;
         }
     }
@@ -482,48 +505,33 @@ class CompaniesDirectory {
      * ✅ OBTENIR LES STATISTIQUES DU CACHE
      */
     getCacheStats() {
-        try {
-            const cachedItem = localStorage.getItem('companiesEnrichedCache');
-            
-            if (!cachedItem) {
-                return {
-                    exists: false,
-                    size: 0,
-                    age: 0,
-                    sizeKB: 0
-                };
-            }
-            
-            const cacheData = JSON.parse(cachedItem);
-            const age = Date.now() - (cacheData.timestamp || 0);
-            const sizeKB = Math.round((cachedItem.length * 2) / 1024);
-            const ageHours = Math.floor(age / (60 * 60 * 1000));
-            const ageDays = Math.floor(age / (24 * 60 * 60 * 1000));
-            const expiresInDays = Math.max(0, 30 - ageDays);
-            
-            return {
-                exists: true,
-                size: cacheData.count || 0,
-                age: age,
-                ageHours: ageHours,
-                ageDays: ageDays,
-                expiresInDays: expiresInDays,
-                sizeKB: sizeKB,
-                version: cacheData.version || 'legacy'
-            };
-            
-        } catch (error) {
-            console.warn('⚠ Failed to get cache stats:', error.message);
+        const size = this.enrichedDataCache.size;
+        
+        if (size === 0) {
             return {
                 exists: false,
-                error: error.message
+                size: 0,
+                age: 0,
+                sizeKB: 0
             };
         }
+        
+        // Estimation basée sur la Map actuelle
+        return {
+            exists: true,
+            size: size,
+            age: 0,
+            ageHours: 0,
+            ageDays: 0,
+            expiresInDays: 30,
+            sizeKB: 0,
+            version: '3.0'
+        };
     }
 
     /**
      * ════════════════════════════════════════════════════════════════
-     * PRÉCHARGEMENT DES DONNÉES ENRICHIES (AVEC CACHE 30 JOURS)
+     * PRÉCHARGEMENT DES DONNÉES ENRICHIES (AVEC CACHE FIRESTORE)
      * ════════════════════════════════════════════════════════════════
      */
 
@@ -536,16 +544,15 @@ class CompaniesDirectory {
         // ✅ Si forceRefresh, vider le cache
         if (forceRefresh) {
             console.log('🔄 Force refresh requested, clearing cache...');
-            this.clearEnrichedCache();
+            await this.clearEnrichedCacheFromFirestore();
         }
         
         // ✅ Vérifier si le cache est déjà suffisant
         if (!forceRefresh && this.enrichedDataCache.size >= count) {
             const stats = this.getCacheStats();
             console.log(`✅ Cache already sufficient (${this.enrichedDataCache.size} profiles)`);
-            console.log(`   📅 Expires in: ${stats.expiresInDays} days`);
             this.updatePreloadStatus(
-                `✅ Loaded ${this.enrichedDataCache.size} cached profiles (expires in ${stats.expiresInDays} days)`
+                `✅ Loaded ${this.enrichedDataCache.size} cached profiles from Firestore`
             );
             return;
         }
@@ -626,8 +633,8 @@ class CompaniesDirectory {
                     throw new Error(result.error || 'Invalid response');
                 }
                 
-                // ✅ Sauvegarder le cache après chaque batch
-                this.saveEnrichedCache();
+                // ✅ Sauvegarder le cache dans Firestore après chaque batch
+                await this.saveEnrichedCacheToFirestore();
                 
                 // ✅ Pause entre batches (100ms)
                 if (batchIndex < batches.length - 1) {
@@ -643,15 +650,13 @@ class CompaniesDirectory {
         // ✅ Finaliser
         this.preloadingStatus.isLoading = false;
         const duration = ((Date.now() - this.preloadingStatus.startTime) / 1000).toFixed(1);
-        const stats = this.getCacheStats();
         
         console.log(`✅ Pre-loading completed in ${duration}s!`);
         console.log(`   ✅ Loaded: ${this.enrichedDataCache.size}`);
         console.log(`   ❌ Errors: ${this.preloadingStatus.errors}`);
-        console.log(`   📅 Cache expires in: ${stats.expiresInDays} days`);
         
         this.updatePreloadStatus(
-            `✅ ${this.enrichedDataCache.size} profiles loaded (expires in ${stats.expiresInDays} days)`
+            `✅ ${this.enrichedDataCache.size} profiles loaded and synced to Firestore`
         );
         
         this.updateStats();
@@ -666,13 +671,10 @@ class CompaniesDirectory {
             return;
         }
         
-        const stats = this.getCacheStats();
         const confirmed = confirm(
             `🔄 Refresh enriched data?\n\n` +
-            `• Current cache: ${this.enrichedDataCache.size} profiles\n` +
-            `• Cache age: ${stats.ageDays} days\n` +
-            `• Expires in: ${stats.expiresInDays} days\n\n` +
-            `This will reload fresh data.\nContinue?`
+            `• Current cache: ${this.enrichedDataCache.size} profiles\n\n` +
+            `This will reload fresh data and sync to Firestore.\nContinue?`
         );
         
         if (!confirmed) return;
@@ -683,12 +685,11 @@ class CompaniesDirectory {
             await this.preloadEnrichedData(count, true);
             this.applyFiltersAndPagination();
             
-            const newStats = this.getCacheStats();
             alert(
                 `✅ Refresh completed!\n\n` +
                 `• Loaded: ${this.enrichedDataCache.size} profiles\n` +
                 `• Errors: ${this.preloadingStatus.errors}\n` +
-                `• Expires in: ${newStats.expiresInDays} days`
+                `• Synced to Firestore for multi-device access`
             );
         } catch (error) {
             console.error('❌ Refresh failed:', error);
@@ -716,7 +717,7 @@ class CompaniesDirectory {
             
             if (result.success && result.data.found) {
                 this.enrichedDataCache.set(company.ticker, result.data);
-                this.saveEnrichedCache(); // Sauvegarder immédiatement
+                await this.saveEnrichedCacheToFirestore(); // Sauvegarder immédiatement dans Firestore
                 return result.data;
             }
             
@@ -725,6 +726,65 @@ class CompaniesDirectory {
             console.error(`❌ Error fetching ${company.ticker}:`, error);
             return null;
         }
+    }
+
+    /**
+     * ════════════════════════════════════════════════════════════════
+     * GESTION DES DROPDOWNS (SECTIONS STATISTICS & FILTERS)
+     * ════════════════════════════════════════════════════════════════
+     */
+
+    /**
+     * ✅ TOGGLE DROPDOWN SECTION
+     */
+    static toggleDropdown(sectionId) {
+        const section = document.getElementById(sectionId);
+        const toggle = section?.querySelector('.dropdown-toggle');
+        const content = section?.querySelector('.dropdown-content');
+        
+        if (!section || !toggle || !content) return;
+        
+        const isOpen = content.classList.contains('open');
+        
+        if (isOpen) {
+            content.classList.remove('open');
+            toggle.querySelector('i').classList.remove('fa-chevron-up');
+            toggle.querySelector('i').classList.add('fa-chevron-down');
+        } else {
+            content.classList.add('open');
+            toggle.querySelector('i').classList.remove('fa-chevron-down');
+            toggle.querySelector('i').classList.add('fa-chevron-up');
+        }
+        
+        // ✅ Sauvegarder l'état dans localStorage
+        localStorage.setItem(`dropdown_${sectionId}`, isOpen ? 'closed' : 'open');
+    }
+
+    /**
+     * ✅ RESTAURER L'ÉTAT DES DROPDOWNS
+     */
+    restoreDropdownStates() {
+        const sections = ['statsSection', 'filtersSection'];
+        
+        sections.forEach(sectionId => {
+            const state = localStorage.getItem(`dropdown_${sectionId}`);
+            const section = document.getElementById(sectionId);
+            const content = section?.querySelector('.dropdown-content');
+            const toggle = section?.querySelector('.dropdown-toggle i');
+            
+            if (!content || !toggle) return;
+            
+            if (state === 'closed') {
+                content.classList.remove('open');
+                toggle.classList.remove('fa-chevron-up');
+                toggle.classList.add('fa-chevron-down');
+            } else {
+                // Par défaut: ouvert
+                content.classList.add('open');
+                toggle.classList.remove('fa-chevron-down');
+                toggle.classList.add('fa-chevron-up');
+            }
+        });
     }
 
     setupEventListeners() {
@@ -896,23 +956,6 @@ class CompaniesDirectory {
         }).join('');
     }
     
-    // ✅ GESTION ERREURS LOGOS (cascade d'APIs)
-    static handleLogoError(img, initials) {
-        const logoDiv = img.parentElement;
-        const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
-        
-        if (fallbacks.length > 0) {
-            const nextUrl = fallbacks.shift();
-            logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
-            img.src = nextUrl;
-            console.log(`🔄 Trying fallback logo: ${nextUrl}`);
-        } else {
-            logoDiv.classList.add('text-fallback');
-            logoDiv.innerHTML = initials;
-            console.log(`⚠ Using text fallback: ${initials}`);
-        }
-    }
-
     // ✅ GESTION ERREURS LOGOS (cascade d'APIs)
     static handleLogoError(img, initials) {
         const logoDiv = img.parentElement;
@@ -1268,9 +1311,9 @@ class CompaniesDirectory {
                     </div>
                     ` : ''}
                     ${enrichedData?.metadata?.resultScore ? `
-                    <div class='modal-detail-item' style='border-left-color: #8b5cf6;'>
-                        <div class='detail-label'>KG Score</div>
-                        <div class='detail-value'>${Math.round(enrichedData.metadata.resultScore).toLocaleString()}</div>
+                    <div class='modal-detail-item' style='border-left-color: #8b5cf6; cursor: pointer;' onclick='CompaniesDirectory.showKGScoreModal(${enrichedData.metadata.resultScore})' title='Click for more information about KG Score'>
+                        <div class='detail-label'><i class='fas fa-info-circle' style='margin-right: 4px; color: #8b5cf6;'></i> KG Score</div>
+                        <div class='detail-value' style='text-decoration: underline;'>${Math.round(enrichedData.metadata.resultScore).toLocaleString()}</div>
                     </div>
                     ` : ''}
                 </div>
@@ -1476,8 +1519,62 @@ class CompaniesDirectory {
         `;
     }
     
+    /**
+     * ✅ MODAL KG SCORE EXPLICATIF
+     */
+    static showKGScoreModal(score) {
+        const kgModal = document.getElementById('kgScoreModal');
+        const scoreValue = document.getElementById('kgScoreValue');
+        const scoreInterpretation = document.getElementById('kgScoreInterpretation');
+        
+        if (!kgModal) return;
+        
+        scoreValue.textContent = Math.round(score).toLocaleString();
+        
+        // ✅ Interprétation basée sur le score
+        let interpretation = '';
+        let color = '';
+        let icon = '';
+        
+        if (score >= 1000) {
+            interpretation = '<strong>Exceptionally High Confidence</strong> - This entity is extremely well-documented in Google\'s Knowledge Graph with comprehensive verified information.';
+            color = '#10b981';
+            icon = 'fa-star';
+        } else if (score >= 500) {
+            interpretation = '<strong>High Confidence</strong> - Well-established entity with substantial verified information available.';
+            color = '#3b82f6';
+            icon = 'fa-check-circle';
+        } else if (score >= 100) {
+            interpretation = '<strong>Moderate Confidence</strong> - Entity recognized with verified basic information.';
+            color = '#f59e0b';
+            icon = 'fa-info-circle';
+        } else {
+            interpretation = '<strong>Lower Confidence</strong> - Limited verified information available for this entity.';
+            color = '#ef4444';
+            icon = 'fa-exclamation-triangle';
+        }
+        
+        scoreInterpretation.innerHTML = `
+            <div style='display: flex; align-items: flex-start; gap: 12px;'>
+                <i class='fas ${icon}' style='color: ${color}; font-size: 1.5rem; margin-top: 4px;'></i>
+                <div style='flex: 1; line-height: 1.8;'>
+                    <p style='margin-bottom: 12px;'>${interpretation}</p>
+                    <div style='background: rgba(102, 126, 234, 0.1); padding: 12px 16px; border-radius: 10px; border-left: 3px solid ${color};'>
+                        <strong>Your Score: ${Math.round(score).toLocaleString()}</strong>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        kgModal.classList.add('active');
+    }
+    
     static closeModal() {
         document.getElementById('companyModal').classList.remove('active');
+    }
+    
+    static closeKGScoreModal() {
+        document.getElementById('kgScoreModal').classList.remove('active');
     }
 }
 
@@ -1489,8 +1586,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ✅ FERMETURE MODAL (clic extérieur)
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('companyModal');
+    const kgModal = document.getElementById('kgScoreModal');
+    
     if (e.target === modal) {
         CompaniesDirectory.closeModal();
+    }
+    
+    if (e.target === kgModal) {
+        CompaniesDirectory.closeKGScoreModal();
     }
 });
 
@@ -1498,5 +1601,6 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         CompaniesDirectory.closeModal();
+        CompaniesDirectory.closeKGScoreModal();
     }
 });
