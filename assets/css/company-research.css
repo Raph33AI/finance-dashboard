@@ -1033,3 +1033,14 @@ h1, h2, h3 {
     color: var(--text-secondary);
     font-weight: 600;
 }
+
+.company-logo-compact.text-fallback {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}

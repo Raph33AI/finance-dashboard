@@ -290,6 +290,21 @@ class YouTubeMarketIntelligence {
         };
     }
 
+    
+    static handleLogoError(img, initials) {
+        const logoDiv = img.parentElement;
+        const fallbacks = JSON.parse(logoDiv.dataset.fallbacks || '[]');
+        
+        if (fallbacks.length > 0) {
+            const nextUrl = fallbacks.shift();
+            logoDiv.dataset.fallbacks = JSON.stringify(fallbacks);
+            img.src = nextUrl;
+        } else {
+            logoDiv.classList.add('text-fallback');
+            logoDiv.innerHTML = initials;
+        }
+    }
+
     // ========================================
     // SCORING ALGORITHMS
     // ========================================
@@ -471,23 +486,15 @@ class YouTubeMarketIntelligence {
             const sentimentClass = this.getSentimentClass(company.sentimentScore);
             const initials = company.ticker.substring(0, 2).toUpperCase();
             
-            // ✅ CORRECTION: Gestion améliorée des logos avec fallback multiple
-            const logoHtml = company.logoUrl 
-                ? `<img src="${company.logoUrl.primary}" 
+            // ✅ CORRECTION : Système de logos multi-fallback identique à companies-directory.js
+            const fallbacksData = JSON.stringify(company.logoUrl?.fallbacks || []);
+            const primaryLogoUrl = company.logoUrl?.primary || '';
+            
+            const logoHtml = primaryLogoUrl 
+                ? `<img src="${primaryLogoUrl}" 
                         alt="${company.name}" 
-                        onerror="this.onerror=null; 
-                                 if(this.dataset.fallbackIndex === undefined) { 
-                                     this.dataset.fallbackIndex = 0; 
-                                 }
-                                 const fallbacks = ${JSON.stringify(company.logoUrl.fallbacks)};
-                                 if(parseInt(this.dataset.fallbackIndex) < fallbacks.length) {
-                                     this.src = fallbacks[parseInt(this.dataset.fallbackIndex)];
-                                     this.dataset.fallbackIndex = parseInt(this.dataset.fallbackIndex) + 1;
-                                 } else {
-                                     this.parentElement.classList.add('text-fallback');
-                                     this.parentElement.innerHTML='${initials}';
-                                 }">`
-                : initials;
+                        onerror="YouTubeMarketIntelligence.handleLogoError(this, '${initials}')">`
+                : `<div class="text-fallback">${initials}</div>`;
             
             return `
                 <div class="company-rank-card" onclick="document.getElementById('companySearchInput').value='${company.ticker}'; companyResearch.searchCompany();">
@@ -496,7 +503,9 @@ class YouTubeMarketIntelligence {
                     </div>
                     
                     <div class="company-info-compact">
-                        <div class="company-logo-compact">
+                        <div class="company-logo-compact" 
+                            data-ticker="${company.ticker}"
+                            data-fallbacks='${fallbacksData.replace(/'/g, '&apos;')}'>
                             ${logoHtml}
                         </div>
                         <div class="company-ticker">${company.ticker}</div>
