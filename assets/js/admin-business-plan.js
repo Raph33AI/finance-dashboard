@@ -2299,24 +2299,13 @@ if (typeof firebase === 'undefined' || !firebase.auth || !firebase.firestore) {
     console.log('✅ Firebase SDK loaded successfully');
 }
 
-// ⚡ VARIABLES GLOBALES (NE PAS REDÉCLARER db SI DÉJÀ EXISTANT)
-// ✅ CORRECTION : Vérifier si db existe déjà (déclaré dans firebase-config.js)
-if (typeof db === 'undefined') {
-    var db = null;
-}
+// ⚡ UTILISER LES VARIABLES FIREBASE DÉJÀ DÉCLARÉES DANS firebase-config.js
+// ✅ NE PAS REDÉCLARER db, auth, app (ils existent déjà via window.firebaseDb, etc.)
 
-// Déclarer les autres variables seulement si pas déjà existantes
-if (typeof currentUserId === 'undefined') {
-    var currentUserId = null;
-}
-
-if (typeof businessPlanDocId === 'undefined') {
-    var businessPlanDocId = null;
-}
-
-if (typeof autoSaveTimeout === 'undefined') {
-    var autoSaveTimeout = null;
-}
+// Variables spécifiques au Business Plan (nouvelles)
+let currentUserId = null;
+let businessPlanDocId = null;
+let autoSaveTimeout = null;
 
 const isMobile = window.innerWidth <= 768;
 const isSmallMobile = window.innerWidth <= 480;
@@ -2345,13 +2334,19 @@ console.log('📱 Device Detection:', { width: window.innerWidth, isMobile, isSm
 // ⚡ INITIALISATION FIRESTORE
 function initializeFirestore() {
     try {
-        // ✅ CORRECTION : Utiliser la db déjà existante ou l'initialiser
-        if (!db) {
-            db = firebase.firestore();
+        // ✅ Utiliser les références Firebase déjà initialisées
+        const db = window.firebaseDb || firebase.firestore();
+        const auth = window.firebaseAuth || firebase.auth();
+        
+        if (!db || !auth) {
+            console.error('❌ Firebase DB or Auth not available');
+            return;
         }
         
+        console.log('✅ Using existing Firebase instances');
+        
         // Écouter les changements d'authentification
-        firebase.auth().onAuthStateChanged(user => {
+        auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
                 console.log('✅ User authenticated:', user.email);
@@ -2365,7 +2360,7 @@ function initializeFirestore() {
             }
         });
         
-        console.log('✅ Firestore initialized');
+        console.log('✅ Firestore initialized for Business Plan');
     } catch (error) {
         console.error('❌ Firestore initialization error:', error);
     }
@@ -2373,8 +2368,16 @@ function initializeFirestore() {
 
 // ⚡ CHARGER LES DONNÉES DEPUIS FIRESTORE
 async function loadBusinessPlanFromFirestore() {
-    if (!currentUserId || !db) {
-        console.warn('⚠ Cannot load data: No user or Firestore not initialized');
+    if (!currentUserId) {
+        console.warn('⚠ Cannot load data: No user authenticated');
+        return;
+    }
+    
+    // ✅ Utiliser la référence Firestore existante
+    const db = window.firebaseDb || firebase.firestore();
+    
+    if (!db) {
+        console.error('❌ Firestore not available');
         return;
     }
     
@@ -2424,8 +2427,16 @@ async function loadBusinessPlanFromFirestore() {
 
 // ⚡ SAUVEGARDER LES DONNÉES DANS FIRESTORE
 async function saveBusinessPlanToFirestore() {
-    if (!currentUserId || !db) {
-        console.warn('⚠ Cannot save: No user or Firestore not initialized');
+    if (!currentUserId) {
+        console.warn('⚠ Cannot save: No user authenticated');
+        return;
+    }
+    
+    // ✅ Utiliser la référence Firestore existante
+    const db = window.firebaseDb || firebase.firestore();
+    
+    if (!db) {
+        console.error('❌ Firestore not available');
         return;
     }
     
