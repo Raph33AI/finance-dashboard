@@ -334,27 +334,49 @@ class CompaniesDirectory {
     }
 
     /**
-     * ✅ NOUVELLE MÉTHODE : Récupérer les rapports financiers SEC
+     * ✅ ALTERNATIVE : Requêtes séparées pour chaque type de rapport
      */
     async fetchFinancialReports(ticker) {
         try {
             console.log(`📊 Fetching financial reports for ${ticker}...`);
             
-            const response = await fetch(
-                `${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=10&types=10-K,10-Q,8-K`
-            );
+            // ✅ Récupérer chaque type séparément pour garantir la diversité
+            const [tenK, tenQ, eightK] = await Promise.all([
+                // 10-K (Annual Reports) - 10 derniers
+                fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=10&types=10-K`).then(r => r.json()),
+                // 10-Q (Quarterly Reports) - 20 derniers (4 par an)
+                fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=10-Q`).then(r => r.json()),
+                // 8-K (Current Events) - 20 derniers
+                fetch(`${this.secWorkerUrl}/api/sec/company-filings?ticker=${ticker}&limit=20&types=8-K`).then(r => r.json())
+            ]);
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
+            // ✅ Combiner tous les rapports
+            const allReports = [
+                ...(tenK.reports || []),
+                ...(tenQ.reports || []),
+                ...(eightK.reports || [])
+            ];
             
-            const result = await response.json();
+            // ✅ Trier par date (plus récent en premier)
+            allReports.sort((a, b) => new Date(b.filedDate) - new Date(a.filedDate));
             
-            if (result.error) {
-                throw new Error(result.error);
-            }
+            const result = {
+                ticker: ticker,
+                cik: tenK.cik || tenQ.cik || eightK.cik,
+                companyName: tenK.companyName || tenQ.companyName || eightK.companyName,
+                count: allReports.length,
+                reports: allReports,
+                timestamp: new Date().toISOString(),
+                source: 'combined'
+            };
             
             console.log(`✅ Loaded ${result.count} financial reports for ${ticker}`);
+            console.log(`   📋 Breakdown:`, {
+                '10-K': (tenK.reports || []).length,
+                '10-Q': (tenQ.reports || []).length,
+                '8-K': (eightK.reports || []).length
+            });
+            
             return result;
             
         } catch (error) {
@@ -1061,198 +1083,6 @@ class CompaniesDirectory {
             }
         });
     }
-    
-    // /**
-    //  * ✅ MODAL ENRICHI AVEC RAPPORTS FINANCIERS SEC
-    //  */
-    // static async openCompanyModal(ticker) {
-    //     const instance = window.companiesDirectoryInstance;
-    //     const company = instance.allCompanies.find(c => c.ticker === ticker);
-        
-    //     if (!company) return;
-        
-    //     const modal = document.getElementById('companyModal');
-    //     const modalContent = document.getElementById('companyModalContent');
-        
-    //     modalContent.innerHTML = `
-    //         <div style='text-align: center; padding: 80px 20px;'>
-    //             <div class='chart-loading-spinner' style='margin: 0 auto 20px;'></div>
-    //             <div class='chart-loading-text'>Loading comprehensive company data...</div>
-    //             <p style='margin-top: 12px; font-size: 0.85rem; color: var(--text-tertiary);'>
-    //                 Fetching from Google Knowledge Graph & SEC EDGAR APIs
-    //             </p>
-    //         </div>
-    //     `;
-        
-    //     modal.classList.add('active');
-        
-    //     // ✅ CHARGER EN PARALLÈLE
-    //     const [enrichedData, financialReports] = await Promise.all([
-    //         instance.fetchEnrichedData(company),
-    //         instance.fetchFinancialReports(company.ticker)
-    //     ]);
-        
-    //     const initials = company.name.substring(0, 2).toUpperCase();
-    //     const logoUrl = company.logoUrl;
-    //     const logoFallbacks = company.logoFallbacks || [];
-        
-    //     const hasDescription = enrichedData?.description?.detailed || enrichedData?.description?.short;
-    //     const description = enrichedData?.description?.detailed || enrichedData?.description?.short || 'No description available.';
-    //     const descriptionUrl = enrichedData?.description?.source || enrichedData?.links?.wikipedia || '';
-        
-    //     // ✅ SECTION RAPPORTS FINANCIERS
-    //     const reportsHTML = financialReports && financialReports.reports && financialReports.reports.length > 0 ? `
-    //     <div style='background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.05)); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid rgba(59, 130, 246, 0.2);'>
-    //         <h4 style='display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);'>
-    //             <i class='fas fa-file-invoice-dollar' style='color: #3b82f6;'></i>
-    //             <span>Recent Financial Reports & Earnings</span>
-    //         </h4>
-            
-    //         ${financialReports.reports.slice(0, 5).map(report => {
-    //             const reportDate = new Date(report.filedDate);
-    //             const formattedDate = reportDate.toLocaleDateString('en-US', { 
-    //                 year: 'numeric', 
-    //                 month: 'short', 
-    //                 day: 'numeric' 
-    //             });
-                
-    //             let badgeClass = 'current';
-    //             let badgeColor = 'linear-gradient(135deg, #f59e0b, #d97706)';
-    //             if (report.formType === '10-K') {
-    //                 badgeClass = 'annual';
-    //                 badgeColor = 'linear-gradient(135deg, #10b981, #059669)';
-    //             } else if (report.formType === '10-Q') {
-    //                 badgeClass = 'quarterly';
-    //                 badgeColor = 'linear-gradient(135deg, #3b82f6, #2563eb)';
-    //             }
-                
-    //             let reportTypeLabel = report.formType;
-    //             if (report.formType === '10-K') reportTypeLabel = '10-K (Annual)';
-    //             else if (report.formType === '10-Q') reportTypeLabel = '10-Q (Quarterly)';
-    //             else if (report.formType === '8-K') reportTypeLabel = '8-K (Current)';
-                
-    //             return `
-    //             <div style='background: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(203, 213, 225, 0.25); transition: all 0.3s ease; cursor: pointer;' onclick='window.open("${report.documentUrl}", "_blank")' onmouseover='this.style.borderColor="rgba(59, 130, 246, 0.5)"; this.style.transform="translateX(4px)"; this.style.boxShadow="0 4px 16px rgba(59, 130, 246, 0.15)";' onmouseout='this.style.borderColor="rgba(203, 213, 225, 0.25)"; this.style.transform="translateX(0)"; this.style.boxShadow="none";'>
-    //                 <div style='display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;'>
-    //                     <div style='flex: 1; min-width: 200px;'>
-    //                         <div style='display: flex; align-items: center; gap: 10px; margin-bottom: 6px;'>
-    //                             <span style='display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; color: white; background: ${badgeColor};'>${reportTypeLabel}</span>
-    //                             <span style='color: var(--text-tertiary); font-size: 0.85rem; font-weight: 600;'>${formattedDate}</span>
-    //                         </div>
-    //                         <div style='color: var(--text-primary); font-weight: 700; font-size: 0.95rem;'>
-    //                             ${report.title}
-    //                         </div>
-    //                         ${report.summary ? `
-    //                         <div style='color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; line-height: 1.5;'>
-    //                             ${report.summary.substring(0, 150)}${report.summary.length > 150 ? '...' : ''}
-    //                         </div>
-    //                         ` : ''}
-    //                     </div>
-                        
-    //                     <div style='display: flex; align-items: center; gap: 12px;'>
-    //                         <a href='${report.filingUrl}' target='_blank' onclick='event.stopPropagation();' style='color: #667eea; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(102, 126, 234, 0.2)";' onmouseout='this.style.background="rgba(102, 126, 234, 0.1)";'>
-    //                             <i class='fas fa-file-alt'></i>
-    //                             <span>Filing</span>
-    //                         </a>
-    //                         <a href='${report.documentUrl}' target='_blank' onclick='event.stopPropagation();' style='color: white; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);' onmouseover='this.style.transform="translateY(-2px)"; this.style.boxShadow="0 6px 18px rgba(59, 130, 246, 0.5)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 4px 12px rgba(59, 130, 246, 0.3)";'>
-    //                             <i class='fas fa-eye'></i>
-    //                             <span>View</span>
-    //                         </a>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //             `;
-    //         }).join('')}
-            
-    //         ${financialReports.reports.length > 5 ? `
-    //         <div style='text-align: center; margin-top: 16px;'>
-    //             <a href='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${financialReports.cik}&type=&dateb=&owner=exclude&count=100' target='_blank' style='color: #3b82f6; text-decoration: none; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(59, 130, 246, 0.2)"; this.style.transform="translateX(4px)";' onmouseout='this.style.background="rgba(59, 130, 246, 0.1)"; this.style.transform="translateX(0)";'>
-    //                 <span>View All ${financialReports.count} Filings on SEC.gov</span>
-    //                 <i class='fas fa-arrow-right'></i>
-    //             </a>
-    //         </div>
-    //         ` : ''}
-    //     </div>
-    //     ` : `
-    //     <div style='margin-bottom: 24px; padding: 20px; background: rgba(241, 245, 249, 0.5); border-left: 4px solid #94a3b8; border-radius: 12px;'>
-    //         <div style='display: flex; align-items: center; gap: 12px;'>
-    //             <i class='fas fa-info-circle' style='color: #94a3b8; font-size: 1.3rem;'></i>
-    //             <div style='color: var(--text-secondary); font-size: 0.95rem;'>No recent financial reports available from SEC EDGAR.</div>
-    //         </div>
-    //     </div>
-    //     `;
-        
-    //     // ✅ MODAL HTML COMPLET
-    //     modalContent.innerHTML = `
-    //         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 32px; border-radius: 24px 24px 0 0; margin: -24px -24px 32px -24px; position: relative; overflow: hidden;'>
-    //             <div style='position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px); animation: moveStripes 20s linear infinite;'></div>
-                
-    //             <div style='position: relative; z-index: 1;'>
-    //                 <div id='modalCompanyLogo' class='modal-company-logo' data-ticker='${company.ticker}' data-fallbacks='${JSON.stringify(logoFallbacks).replace(/'/g, '&apos;')}' data-initials='${initials}' style='width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); border: 3px solid rgba(255, 255, 255, 0.5); overflow: hidden;'>
-    //                     ${logoUrl 
-    //                         ? `<img src='${logoUrl}' alt='${company.name}' style='width: 100%; height: 100%; object-fit: contain; padding: 12px; background: white; border-radius: 24px;' onerror='CompaniesDirectory.handleModalLogoError(this, "${initials}")'>` 
-    //                         : `<div style='font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'>${initials}</div>`
-    //                     }
-    //                 </div>
-                    
-    //                 <h2 style='color: white; font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 12px; text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);'>${company.name}</h2>
-                    
-    //                 <div style='text-align: center; margin-bottom: 16px;'>
-    //                     <span style='background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; padding: 10px 24px; border-radius: 24px; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.4);'>${company.ticker}</span>
-    //                 </div>
-                    
-    //                 ${enrichedData && enrichedData.found ? `
-    //                 <div style='text-align: center;'>
-    //                     <div style='display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 700; border: 2px solid rgba(16, 185, 129, 0.5);'>
-    //                         <i class='fas fa-check-circle'></i>
-    //                         <span>Verified by Google Knowledge Graph</span>
-    //                     </div>
-    //                 </div>
-    //                 ` : ''}
-    //             </div>
-    //         </div>
-            
-    //         ${hasDescription ? `
-    //         <div style='margin-bottom: 24px;'>
-    //             <h4 style='font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; color: var(--text-primary);'><i class='fas fa-info-circle'></i> About ${company.name}</h4>
-    //             <p style='color: var(--text-secondary); line-height: 1.8; font-size: 1rem; margin-bottom: 16px;'>${description}</p>
-    //             ${descriptionUrl ? `
-    //                 <a href='${descriptionUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 8px; color: #667eea; font-weight: 700; text-decoration: none; padding: 10px 20px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; transition: all 0.3s ease;' onmouseover='this.style.background="rgba(102, 126, 234, 0.2)"; this.style.transform="translateX(4px)";' onmouseout='this.style.background="rgba(102, 126, 234, 0.1)"; this.style.transform="translateX(0)";'>
-    //                     <i class='fas fa-external-link-alt'></i>
-    //                     <span>Read more on Wikipedia</span>
-    //                 </a>
-    //             ` : ''}
-    //         </div>
-    //         ` : ''}
-            
-    //         <div style='margin-bottom: 24px;'>
-    //             <h4 style='font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; color: var(--text-primary);'><i class='fas fa-building'></i> Company Information</h4>
-    //             <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;'>
-    //                 <div style='background: rgba(102, 126, 234, 0.05); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #667eea;'>
-    //                     <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 4px;'>Sector</div>
-    //                     <div style='font-size: 1rem; font-weight: 700; color: var(--text-primary);'>${company.sector}</div>
-    //                 </div>
-    //                 <div style='background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #10b981;'>
-    //                     <div style='font-size: 0.8rem; color: var(--text-tertiary); font-weight: 700; margin-bottom: 4px;'>Region</div>
-    //                     <div style='font-size: 1rem; font-weight: 700; color: var(--text-primary);'>${company.region}</div>
-    //                 </div>
-    //             </div>
-    //         </div>
-            
-    //         ${reportsHTML}
-            
-    //         <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;'>
-    //             <a href='advanced-analysis.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(102, 126, 234, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(102, 126, 234, 0.4)";'>
-    //                 <i class='fas fa-chart-line'></i>
-    //                 <span>Analyze ${company.ticker}</span>
-    //             </a>
-    //             <a href='trend-prediction.html?symbol=${company.ticker}' style='background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; text-decoration: none; padding: 16px 24px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;' onmouseover='this.style.transform="translateY(-4px)"; this.style.boxShadow="0 10px 32px rgba(59, 130, 246, 0.6)";' onmouseout='this.style.transform="translateY(0)"; this.style.boxShadow="0 6px 20px rgba(59, 130, 246, 0.4)";'>
-    //                 <i class='fas fa-brain'></i>
-    //                 <span>Predict Trends</span>
-    //             </a>
-    //         </div>
-    //     `;
-    // }
 
     /**
      * ✅ MODAL ENRICHI AVEC TABLEAU RÉCAPITULATIF DES RAPPORTS FINANCIERS PAR ANNÉE
