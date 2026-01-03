@@ -393,6 +393,15 @@ class AdminAnalyticsPro {
         this.composeEditor = null;
         this.replyEditor = null;
         this.forwardEditor = null;
+
+        // 🆕 LISTE DES ADRESSES ALPHAVAULT
+        this.alphavaultAddresses = [
+            { email: 'newsletter@alphavault-ai.com', label: 'Newsletter' },
+            { email: 'contact@alphavault-ai.com', label: 'Contact' },
+            { email: 'info@alphavault-ai.com', label: 'Info' },
+            { email: 'support@alphavault-ai.com', label: 'Support' },
+            { email: 'raphnardone@gmail.com', label: 'Personal (Gmail)' }
+        ];
         
         this.init();
     }
@@ -5460,10 +5469,28 @@ class AdminAnalyticsPro {
         const renderEmailRow = (email, index, tbody) => {
             const row = document.createElement('tr');
             
+            // ✅ RENDRE LA LIGNE CLIQUABLE
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                adminAnalytics.viewEmail(email.id);
+            };
+            
             if (email.isUnread) {
                 row.style.fontWeight = '600';
                 row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
             }
+            
+            // ✅ AJOUTER HOVER EFFECT
+            row.onmouseenter = () => {
+                row.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+            };
+            row.onmouseleave = () => {
+                if (email.isUnread) {
+                    row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                } else {
+                    row.style.backgroundColor = '';
+                }
+            };
             
             const categoryBadge = this.getEmailCategoryBadge(email.category);
             const date = new Date(email.timestamp).toLocaleDateString('en-US', {
@@ -5487,7 +5514,13 @@ class AdminAnalyticsPro {
                 </td>
                 <td>${categoryBadge}</td>
                 <td>${date}</td>
-                <td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openReplyModal('${email.id}')" title="Reply">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
+                        <i class="fas fa-share"></i>
+                    </button>
                     <button class="btn-action btn-sm" onclick="adminAnalytics.markEmailAsRead('${email.id}')" title="Mark as read">
                         <i class="fas fa-check"></i>
                     </button>
@@ -5731,6 +5764,8 @@ class AdminAnalyticsPro {
         try {
             console.log('📤 Sending email...');
             
+            // 🆕 RÉCUPÉRER L'ADRESSE FROM
+            const from = document.getElementById('compose-from').value.trim();
             const to = document.getElementById('compose-to').value.trim();
             const cc = document.getElementById('compose-cc').value.trim();
             const bcc = document.getElementById('compose-bcc').value.trim();
@@ -5754,6 +5789,7 @@ class AdminAnalyticsPro {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    from: from, // 🆕 AJOUT DU FROM
                     to: to,
                     cc: cc || undefined,
                     bcc: bcc || undefined,
@@ -5771,7 +5807,7 @@ class AdminAnalyticsPro {
             const result = await response.json();
             
             console.log('✅ Email sent:', result);
-            alert('✅ Email sent successfully!');
+            alert(`✅ Email sent successfully from ${from}!`);
             
             this.closeComposeModal();
             
@@ -5880,6 +5916,11 @@ class AdminAnalyticsPro {
                 return;
             }
             
+            // 🆕 RÉCUPÉRER L'ADRESSE FROM (si sélecteur présent, sinon défaut)
+            const from = document.getElementById('reply-from')?.value || 
+                         document.getElementById('compose-from')?.value || 
+                         'newsletter@alphavault-ai.com';
+            
             const bodyHtml = this.replyEditor.root.innerHTML;
             const bodyText = this.replyEditor.getText();
             
@@ -5894,6 +5935,10 @@ class AdminAnalyticsPro {
                 },
                 body: JSON.stringify({
                     messageId: this.currentEmail.id,
+                    originalMessageId: this.currentEmail.messageId, // 🆕 CRUCIAL pour threading
+                    from: from, // 🆕 Ajouté
+                    to: this.currentEmail.from, // 🆕 Ajouté explicitement
+                    subject: this.currentEmail.subject, // 🆕 Ajouté explicitement
                     threadId: this.currentEmail.threadId,
                     replyAll: replyAll,
                     bodyHtml: bodyHtml,
@@ -6020,6 +6065,11 @@ class AdminAnalyticsPro {
                 return;
             }
             
+            // 🆕 RÉCUPÉRER L'ADRESSE FROM (si sélecteur présent, sinon défaut)
+            const from = document.getElementById('forward-from')?.value || 
+                         document.getElementById('compose-from')?.value || 
+                         'newsletter@alphavault-ai.com';
+            
             const bodyHtml = this.forwardEditor.root.innerHTML;
             const bodyText = this.forwardEditor.getText();
             
@@ -6034,7 +6084,9 @@ class AdminAnalyticsPro {
                 },
                 body: JSON.stringify({
                     messageId: this.currentEmail.id,
+                    from: from, // 🆕 Ajouté
                     to: to,
+                    subject: this.currentEmail.subject, // 🆕 Ajouté explicitement
                     bodyHtml: bodyHtml,
                     bodyText: bodyText
                 })

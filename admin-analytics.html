@@ -2312,7 +2312,7 @@
                 </div>
                 
                 <!-- ========================================
-                     MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL
+                     MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL, THREAD
                      ======================================== -->
                 
                 <!-- 🆕 MODAL: COMPOSE EMAIL -->
@@ -2326,6 +2326,18 @@
                         </div>
                         
                         <div class="gmail-modal-body">
+                            <!-- 🆕 SÉLECTEUR FROM -->
+                            <div class="form-group">
+                                <label>From:</label>
+                                <select id="compose-from" class="form-input">
+                                    <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
+                                    <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
+                                    <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
+                                    <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                </select>
+                            </div>
+                            
                             <div class="form-group">
                                 <label>To:</label>
                                 <input type="email" id="compose-to" class="form-input" placeholder="recipient@example.com" multiple>
@@ -2392,6 +2404,18 @@
                         </div>
                         
                         <div class="gmail-modal-body">
+                            <!-- 🆕 SÉLECTEUR FROM (AJOUTÉ) -->
+                            <div class="form-group">
+                                <label>From:</label>
+                                <select id="reply-from" class="form-input">
+                                    <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
+                                    <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
+                                    <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
+                                    <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                </select>
+                            </div>
+                            
                             <div class="form-group">
                                 <label>To:</label>
                                 <input type="email" id="reply-to" class="form-input" readonly>
@@ -2435,6 +2459,18 @@
                         </div>
                         
                         <div class="gmail-modal-body">
+                            <!-- 🆕 SÉLECTEUR FROM (AJOUTÉ) -->
+                            <div class="form-group">
+                                <label>From:</label>
+                                <select id="forward-from" class="form-input">
+                                    <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
+                                    <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
+                                    <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
+                                    <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                </select>
+                            </div>
+                            
                             <div class="form-group">
                                 <label>To:</label>
                                 <input type="email" id="forward-to" class="form-input" placeholder="recipient@example.com">
@@ -2505,7 +2541,7 @@
                         </div>
                         
                         <div class="gmail-modal-footer">
-                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id)">
+                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id, false)">
                                 <i class="fas fa-reply"></i> Reply
                             </button>
                             <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id, true)">
@@ -2530,6 +2566,12 @@
                         
                         <div class="gmail-modal-body">
                             <div id="thread-messages-container" class="thread-container"></div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.closeThreadModal()">
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
