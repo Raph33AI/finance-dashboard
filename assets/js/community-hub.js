@@ -480,24 +480,6 @@ class CommunityHub {
         this.loadPosts();
     }
 
-    // Fonction pour toggle la section des filtres
-    toggleFiltersSection() {
-        const content = document.getElementById('communityFiltersContent');
-        const toggleBtn = document.getElementById('communityFiltersToggleBtn');
-        
-        if (content && toggleBtn) {
-            const isCollapsed = content.classList.contains('collapsed');
-            
-            if (isCollapsed) {
-                content.classList.remove('collapsed');
-                toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
-            } else {
-                content.classList.add('collapsed');
-                toggleBtn.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
-            }
-        }
-    }
-
     stripMarkdown(text) {
         return text
             .replace(/[#*_~`]/g, '')

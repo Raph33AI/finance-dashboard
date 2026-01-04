@@ -369,62 +369,51 @@
             </header>
             
             <div class='container'>
-                <!-- ✨ SECTION AVEC DROPDOWN COLLAPSIBLE -->
+                <!-- ✨ CHANNELS SECTION (SANS DROPDOWN) -->
                 <div class='section'>
-                    <!-- Header avec bouton toggle -->
-                    <div class='community-filters-header' onclick='window.communityHub.toggleFiltersSection()'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-sliders-h'></i> Community Filters & Stats
-                        </h2>
-                        <button class='community-filters-toggle-btn' id='communityFiltersToggleBtn'>
-                            <i class='fas fa-chevron-down'></i>
-                        </button>
+                    <h2 class='section-title'>
+                        <i class='fas fa-folder'></i> Channels
+                    </h2>
+                    
+                    <div class="channels-scroll" id="channelsScroll" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 24px;">
+                        <!-- Dynamically populated -->
                     </div>
+                </div>
 
-                    <!-- Container collapsible -->
-                    <div class='community-filters-content collapsed' id='communityFiltersContent'>
-                        
-                        <!-- ===== 1. COMMUNITY STATS ===== -->
-                        <div class="community-header-stats">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #3B82F6, #1D4ED8);">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalPosts">0</div>
-                                    <div class="stat-label">Total Posts</div>
-                                </div>
+                <!-- ✅ STATISTIQUES COMMUNAUTÉ (OPTIONNEL - SÉPARÉ) -->
+                <div class='section' style='margin-top: 24px;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-bar'></i> Community Stats
+                    </h2>
+                    
+                    <div class="community-header-stats" style="margin-top: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #3B82F6, #1D4ED8);">
+                                <i class="fas fa-file-alt"></i>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #8B5CF6, #6366F1);">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalMembers">0</div>
-                                    <div class="stat-label">Members</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
-                                    <i class="fas fa-calendar-day"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="postsToday">0</div>
-                                    <div class="stat-label">Posts Today</div>
-                                </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalPosts">0</div>
+                                <div class="stat-label">Total Posts</div>
                             </div>
                         </div>
-
-                        <!-- ===== 2. CHANNELS NAVIGATION ===== -->
-                        <div class="channels-section-wrapper">
-                            <h3 class="subsection-title">
-                                <i class="fas fa-folder"></i> Channels
-                            </h3>
-                            <div class="channels-scroll" id="channelsScroll">
-                                <!-- Dynamically populated -->
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #8B5CF6, #6366F1);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalMembers">0</div>
+                                <div class="stat-label">Members</div>
                             </div>
                         </div>
-
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="postsToday">0</div>
+                                <div class="stat-label">Posts Today</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
