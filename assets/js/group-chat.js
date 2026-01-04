@@ -1,10 +1,10 @@
 /* ============================================
-   GROUP-CHAT.JS v1.2
+   GROUP-CHAT.JS v1.3 - PREMIUM SHARED POSTS
    💬 Gestion complète des conversations de groupe
+   ✅ Rendu identique des posts partagés (comme private-chat.js)
    ✅ Envoi/réception de messages groupe
-   ✅ Upload fichiers via ChatEventManager (CORRIGÉ)
+   ✅ Upload fichiers via ChatEventManager
    ✅ Gestion des membres (ajouter/retirer)
-   ✅ Quitter le groupe
    ============================================ */
 
 class GroupChat {
@@ -20,7 +20,7 @@ class GroupChat {
     }
 
     async initialize() {
-        console.log('👥 Initializing Group Chat v1.2...');
+        console.log('👥 Initializing Group Chat v1.3 (Premium Shared Posts)...');
         
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
@@ -42,7 +42,6 @@ class GroupChat {
         if (emptyState) emptyState.style.display = 'none';
         if (chatActive) chatActive.style.display = 'flex';
 
-        // ✅ CORRECTION : Activer le ChatEventManager pour les groupes
         setTimeout(() => {
             if (window.chatEventManager) {
                 window.chatEventManager.activateFor('group');
@@ -93,7 +92,6 @@ class GroupChat {
         if (emptyState) emptyState.style.display = 'flex';
         if (chatActive) chatActive.style.display = 'none';
 
-        // ✅ Nettoyer les attachments via le manager
         if (window.chatEventManager) {
             window.chatEventManager.clearAttachments();
         }
@@ -196,6 +194,12 @@ class GroupChat {
             ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
             : 'Now';
 
+        // ✅ NOUVEAU : Détecter et afficher les posts partagés
+        if (message.type === 'shared_post' && message.sharedPost) {
+            return this.renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time);
+        }
+
+        // Messages normaux (texte + pièces jointes)
         let attachmentHTML = '';
         if (message.attachments && message.attachments.length > 0) {
             attachmentHTML = message.attachments.map(att => {
@@ -262,20 +266,214 @@ class GroupChat {
         `;
     }
 
+    /**
+     * ✅ NOUVEAU : Rendu PREMIUM des posts partagés (IDENTIQUE à private-chat.js)
+     */
+    renderSharedPostBubble(message, messageId, isOwn, senderData, displayName, avatar, time) {
+        const post = message.sharedPost;
+        
+        if (!post) {
+            console.error('❌ Missing sharedPost data in message:', messageId);
+            return this.createGroupMessageBubble(message, messageId);
+        }
+        
+        const deleteBtn = isOwn ? `
+            <button class="message-delete-btn" 
+                    onclick="event.stopPropagation(); window.groupChat.deleteMessage('${messageId}')"
+                    title="Delete message">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        ` : '';
+
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
+
+        // ✅ Nom de l'expéditeur (pour les groupes uniquement)
+        const senderNameHTML = !isOwn ? `
+            <div class="group-message-sender" style="font-size: 0.75rem; font-weight: 700; color: #667eea; margin-bottom: 6px;">
+                ${this.escapeHtml(displayName)}
+            </div>
+        ` : '';
+
+        // ✅ Nettoyage des données
+        const cleanTitle = this.stripHtml(post.title || 'Untitled Post').trim() || 'Untitled Post';
+        const cleanAuthor = this.stripHtml(post.authorName || 'Unknown Author').trim() || 'Unknown Author';
+        const cleanExcerpt = this.stripHtml(post.excerpt || '').trim();
+        
+        // ✅ Channel badge
+        const channelName = post.channelName || 'General';
+        const channelIcon = post.channelIcon || '📝';
+        const channelColor = this.getChannelColor(channelName);
+        
+        // ✅ Avatar de l'auteur du post
+        const authorAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanAuthor)}&background=3B82F6&color=fff&size=80`;
+        const authorAvatar = post.authorPhoto || authorAvatarFallback;
+        
+        // ✅ Badge plan de l'auteur
+        const authorPlanBadge = this.getMinimalPlanBadge(post.authorPlan);
+        
+        // ✅ Date de publication
+        let postDateHTML = '';
+        if (post.createdAt) {
+            const postDate = post.createdAt.toDate ? post.createdAt.toDate() : new Date(post.createdAt);
+            const formattedDate = this.formatPostDate(postDate);
+            postDateHTML = `
+                <span class="shared-post-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    ${formattedDate}
+                </span>
+            `;
+        }
+        
+        // ✅ Image de couverture (si disponible)
+        let coverImageHTML = '';
+        if (post.coverImage) {
+            coverImageHTML = `
+                <div class="shared-post-cover">
+                    <img src="${post.coverImage}" 
+                        alt="Post cover" 
+                        loading="lazy"
+                        onerror="this.style.display='none'">
+                </div>
+            `;
+        }
+        
+        // ✅ Extrait du contenu
+        let excerptHTML = '';
+        if (cleanExcerpt) {
+            const truncatedExcerpt = cleanExcerpt.length > 120 
+                ? cleanExcerpt.substring(0, 120) + '...' 
+                : cleanExcerpt;
+            
+            excerptHTML = `
+                <div class="shared-post-excerpt">
+                    ${this.escapeHtml(truncatedExcerpt)}
+                </div>
+            `;
+        }
+        
+        // ✅ Statistiques
+        let statsHTML = '';
+        if (post.views || post.likes || post.commentsCount) {
+            const stats = [];
+            
+            if (post.views) {
+                stats.push(`<span><i class="fas fa-eye"></i> ${this.formatNumber(post.views)}</span>`);
+            }
+            if (post.likes) {
+                stats.push(`<span><i class="fas fa-heart"></i> ${this.formatNumber(post.likes)}</span>`);
+            }
+            if (post.commentsCount) {
+                stats.push(`<span><i class="fas fa-comments"></i> ${this.formatNumber(post.commentsCount)}</span>`);
+            }
+            
+            if (stats.length > 0) {
+                statsHTML = `
+                    <div class="shared-post-stats">
+                        ${stats.join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        // ✅ Tags
+        let tagsHTML = '';
+        if (post.tags && post.tags.length > 0) {
+            const displayTags = post.tags.slice(0, 3);
+            tagsHTML = `
+                <div class="shared-post-tags">
+                    ${displayTags.map(tag => `<span class="shared-post-tag">#${this.escapeHtml(tag)}</span>`).join('')}
+                    ${post.tags.length > 3 ? `<span class="shared-post-tag-more">+${post.tags.length - 3}</span>` : ''}
+                </div>
+            `;
+        }
+        
+        const postUrl = post.url || '#';
+
+        return `
+            <div class="chat-message ${isOwn ? 'own' : ''} shared-post-message" data-message-id="${messageId}">
+                <img src="${avatar}" 
+                    alt="${this.escapeHtml(displayName)}" 
+                    class="chat-message-avatar" 
+                    onclick="window.groupChat.navigateToProfile('${senderData.uid || message.senderId}')"
+                    onerror="this.src='${fallbackAvatar}'"
+                    loading="lazy">
+                
+                <div class="chat-message-content">
+                    ${senderNameHTML}
+                    
+                    <div class="chat-message-bubble shared-post-bubble-premium">
+                        
+                        <!-- Header Premium -->
+                        <div class="shared-post-header-premium">
+                            <div class="shared-post-badge">
+                                <i class="fas fa-share-square"></i>
+                                <span>Shared Post</span>
+                            </div>
+                            <div class="shared-post-channel-badge" style="background: ${channelColor}15; color: ${channelColor}; border-left: 3px solid ${channelColor};">
+                                <span>${channelIcon}</span>
+                                <span>${this.escapeHtml(channelName)}</span>
+                            </div>
+                        </div>
+                        
+                        ${coverImageHTML}
+                        
+                        <!-- Contenu Principal -->
+                        <div class="shared-post-body-premium" onclick="window.open('${postUrl}', '_blank')">
+                            
+                            <!-- Titre -->
+                            <h3 class="shared-post-title-premium">${this.escapeHtml(cleanTitle)}</h3>
+                            
+                            ${excerptHTML}
+                            
+                            <!-- Auteur + Date -->
+                            <div class="shared-post-author-section">
+                                <img src="${authorAvatar}" 
+                                    alt="${this.escapeHtml(cleanAuthor)}" 
+                                    class="shared-post-author-avatar"
+                                    onerror="this.src='${authorAvatarFallback}'"
+                                    loading="lazy">
+                                <div class="shared-post-author-info">
+                                    <div class="shared-post-author-name">
+                                        ${this.escapeHtml(cleanAuthor)}
+                                        ${authorPlanBadge}
+                                    </div>
+                                    ${postDateHTML}
+                                </div>
+                            </div>
+                            
+                            ${tagsHTML}
+                            ${statsHTML}
+                        </div>
+                        
+                        <!-- Bouton View Post -->
+                        <a href="${postUrl}" 
+                           target="_blank" 
+                           class="shared-post-view-btn-premium" 
+                           onclick="event.stopPropagation()">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>View Full Post</span>
+                        </a>
+                    </div>
+                    
+                    <div class="chat-message-time">${time}</div>
+                </div>
+                
+                ${deleteBtn}
+            </div>
+        `;
+    }
+
     async sendMessage() {
         const messageInput = document.getElementById('chatMessageInput');
         if (!messageInput) return;
 
         const text = messageInput.value.trim();
-        
-        // ✅ CORRECTION : Récupérer les fichiers du manager global
         const attachedFiles = window.chatEventManager ? window.chatEventManager.getAttachedFiles() : [];
         
         if (!text && attachedFiles.length === 0) return;
 
         if (!this.currentGroupId) {
             console.error('❌ CRITICAL: No group ID found!');
-            console.error('⚠ Please select a group first');
             return;
         }
 
@@ -324,7 +522,6 @@ class GroupChat {
 
             messageInput.value = '';
             
-            // ✅ Nettoyer les attachments via le manager
             if (window.chatEventManager) {
                 window.chatEventManager.clearAttachments();
             }
@@ -569,6 +766,86 @@ class GroupChat {
         window.location.href = `public-profile.html?id=${userId}`;
     }
 
+    /* ==========================================
+       ✅ HELPER FUNCTIONS (Identiques à private-chat.js)
+       ========================================== */
+
+    /**
+     * ✅ Couleur dynamique par channel
+     */
+    getChannelColor(channelName) {
+        const colorMap = {
+            'Market Intelligence': '#3B82F6',
+            'IPO Hub': '#8B5CF6',
+            'M&A Insights': '#EC4899',
+            'Portfolio Strategies': '#10B981',
+            'Economic Analysis': '#F59E0B',
+            'Trading Ideas': '#EF4444',
+            'Tech & Innovation': '#06B6D4',
+            'ESG & Sustainability': '#84CC16'
+        };
+        
+        return colorMap[channelName] || '#667eea';
+    }
+
+    /**
+     * ✅ Badge plan minimal
+     */
+    getMinimalPlanBadge(plan) {
+        const badges = {
+            'platinum': '<span class="mini-plan-badge platinum"><i class="fas fa-crown"></i></span>',
+            'pro': '<span class="mini-plan-badge pro"><i class="fas fa-star"></i></span>',
+            'basic': '<span class="mini-plan-badge basic">B</span>'
+        };
+        
+        return badges[plan] || '';
+    }
+
+    /**
+     * ✅ Formatage de date pour posts
+     */
+    formatPostDate(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+        });
+    }
+
+    /**
+     * ✅ Formatage de nombres
+     */
+    formatNumber(num) {
+        if (!num) return '0';
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+
+    /**
+     * ✅ Suppression du HTML (pour texte brut)
+     */
+    stripHtml(html) {
+        if (!html) return '';
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
     getFileIcon(fileName) {
         const ext = fileName.split('.').pop().toLowerCase();
         const iconMap = {
@@ -619,4 +896,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-console.log('✅ group-chat.js loaded (v1.2 - ChatEventManager Support)');
+console.log('✅ group-chat.js loaded (v1.3 - Premium Shared Posts)');
