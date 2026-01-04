@@ -447,33 +447,54 @@ async function loadFollowersList() {
 }
 
 // ============================================
-// ✅ GESTION DES POSTS SAUVEGARDÉS
+// ✅ GESTION DES POSTS SAUVEGARDÉS (VERSION DEBUG)
 // ============================================
 
 async function loadSavedPosts() {
     const savedPostsList = document.getElementById('savedPostsList');
     const savedPostsCountEl = document.getElementById('savedPostsCount');
     
-    if (!currentUserData || !currentUserData.uid) return;
+    if (!currentUserData || !currentUserData.uid) {
+        console.error('❌ No currentUserData or uid');
+        return;
+    }
     
-    console.log('🔄 Chargement des posts sauvegardés avec listener temps réel...');
+    console.log('🔄 Chargement des posts sauvegardés...');
+    console.log('👤 User ID:', currentUserData.uid);
     
     try {
-        // ✅ ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
+        // ✅ PATH DE DEBUG
+        const savedPostsPath = `users/${currentUserData.uid}/savedPosts`;
+        console.log('📂 Firestore path:', savedPostsPath);
+        
+        // ✅ TESTER D'ABORD SANS ORDERBY (pour éviter erreur d'index)
         firebase.firestore()
             .collection('users')
             .doc(currentUserData.uid)
             .collection('savedPosts')
-            .orderBy('savedAt', 'desc')
             .onSnapshot(async (savedPostsSnapshot) => {
                 
-                console.log(`📊 ${savedPostsSnapshot.size} posts sauvegardés détectés`);
+                console.log('📊 Snapshot received!');
+                console.log('📊 Number of saved posts:', savedPostsSnapshot.size);
+                console.log('📊 Is empty:', savedPostsSnapshot.empty);
+                
+                // Log des documents reçus
+                if (!savedPostsSnapshot.empty) {
+                    savedPostsSnapshot.docs.forEach((doc, index) => {
+                        console.log(`   📄 Document ${index + 1}:`, {
+                            id: doc.id,
+                            savedAt: doc.data().savedAt,
+                            postTitle: doc.data().postData?.title
+                        });
+                    });
+                }
                 
                 if (savedPostsCountEl) {
                     savedPostsCountEl.textContent = savedPostsSnapshot.size;
                 }
                 
                 if (savedPostsSnapshot.empty) {
+                    console.log('ℹ No saved posts found');
                     savedPostsList.innerHTML = `
                         <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                             <i class="fas fa-bookmark" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
@@ -488,22 +509,44 @@ async function loadSavedPosts() {
                     return;
                 }
                 
-                // Récupérer les données des posts sauvegardés
-                const savedPosts = savedPostsSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        postId: doc.id,
-                        savedAt: data.savedAt,
-                        ...data.postData
-                    };
-                });
+                console.log('🔄 Processing saved posts...');
+                
+                // ✅ RÉCUPÉRER ET TRIER MANUELLEMENT (évite problème d'index)
+                const savedPosts = savedPostsSnapshot.docs
+                    .map(doc => {
+                        const data = doc.data();
+                        return {
+                            postId: doc.id,
+                            savedAt: data.savedAt,
+                            ...data.postData
+                        };
+                    })
+                    .sort((a, b) => {
+                        // Tri manuel par savedAt (desc)
+                        if (!a.savedAt) return 1;
+                        if (!b.savedAt) return -1;
+                        return b.savedAt.toMillis() - a.savedAt.toMillis();
+                    });
+                
+                console.log('✅ Posts sorted:', savedPosts.length);
                 
                 // Afficher la liste
-                const savedPostsHTML = savedPosts.map(post => {
+                const savedPostsHTML = savedPosts.map((post, index) => {
+                    console.log(`   🎨 Rendering post ${index + 1}:`, post.title);
+                    
                     const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
                     const excerpt = post.excerpt || 'No preview available';
                     const coverImage = post.coverImage || 'https://via.placeholder.com/400x200?text=No+Image';
-                    const savedDate = post.savedAt ? formatRelativeTime(post.savedAt.toDate()) : 'Recently';
+                    
+                    // ✅ GESTION SÉCURISÉE DU TIMESTAMP
+                    let savedDate = 'Recently';
+                    try {
+                        if (post.savedAt && post.savedAt.toDate) {
+                            savedDate = formatRelativeTime(post.savedAt.toDate());
+                        }
+                    } catch (dateError) {
+                        console.warn('⚠ Error formatting date for post:', post.postId, dateError);
+                    }
                     
                     return `
                         <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
@@ -551,21 +594,39 @@ async function loadSavedPosts() {
                 console.log(`✅ ${savedPosts.length} posts sauvegardés affichés (temps réel)`);
                 
             }, (error) => {
-                console.error('❌ Erreur listener Saved Posts:', error);
+                console.error('❌ ===== FIRESTORE LISTENER ERROR =====');
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                console.error('=======================================');
+                
+                // ✅ AFFICHER L'ERREUR À L'UTILISATEUR
                 savedPostsList.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #EF4444;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
-                        <p>Failed to load saved posts</p>
+                        <p style="font-weight: 700;">Failed to load saved posts</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">${error.message}</p>
+                        ${error.code === 'failed-precondition' ? `
+                            <p style="font-size: 0.85rem; margin-top: 12px; color: #F59E0B;">
+                                ⚠ Missing Firestore index. Check browser console for details.
+                            </p>
+                        ` : ''}
                     </div>
                 `;
             });
         
     } catch (error) {
-        console.error('❌ Erreur lors du chargement des posts sauvegardés:', error);
+        console.error('❌ ===== FATAL ERROR IN loadSavedPosts() =====');
+        console.error('Error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('==============================================');
+        
         savedPostsList.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #EF4444;">
                 <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
-                <p>Failed to load saved posts</p>
+                <p style="font-weight: 700;">Fatal error loading saved posts</p>
+                <p style="font-size: 0.9rem; margin-top: 8px;">${error.message}</p>
             </div>
         `;
     }
