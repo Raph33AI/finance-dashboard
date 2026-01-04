@@ -5839,8 +5839,17 @@ class AdminAnalyticsPro {
             let bodyHtml = this.composeEditor.root.innerHTML;
             const bodyText = this.composeEditor.getText();
             
-            // 🆕 INJECTION DE LA PHOTO DE PROFIL DANS LE HTML
-            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
+            // 🆕 INJECTION DE LA SIGNATURE AVEC PHOTO
+            const signature = this.generateSignatureWithPicture(from);
+            
+            if (signature) {
+                // Vérifier si une signature existe déjà
+                if (!bodyHtml.includes('border-top: 2px solid #667eea')) {
+                    bodyHtml += signature;
+                }
+            }
+            
+            console.log('✅ Signature with photo injected for:', from);
             
             const sendBtn = document.getElementById('send-email-btn');
             sendBtn.disabled = true;
@@ -5975,8 +5984,20 @@ class AdminAnalyticsPro {
             let bodyHtml = this.replyEditor.root.innerHTML;
             const bodyText = this.replyEditor.getText();
             
-            // 🆕 INJECTION DE LA PHOTO DE PROFIL
-            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
+            // 🆕 INJECTION DE LA SIGNATURE AVEC PHOTO
+            const signature = this.generateSignatureWithPicture(from);
+            
+            if (signature) {
+                // Extraire uniquement le contenu de la réponse (avant le quoted message)
+                const quotedStart = bodyHtml.indexOf('<blockquote');
+                if (quotedStart > -1) {
+                    const replyContent = bodyHtml.substring(0, quotedStart);
+                    const quotedContent = bodyHtml.substring(quotedStart);
+                    bodyHtml = replyContent + signature + '<br>' + quotedContent;
+                } else {
+                    bodyHtml += signature;
+                }
+            }
             
             const sendBtn = document.getElementById('send-reply-btn');
             sendBtn.disabled = true;
@@ -6122,8 +6143,20 @@ class AdminAnalyticsPro {
             let bodyHtml = this.forwardEditor.root.innerHTML;
             const bodyText = this.forwardEditor.getText();
             
-            // 🆕 INJECTION DE LA PHOTO DE PROFIL
-            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
+            // 🆕 INJECTION DE LA SIGNATURE AVEC PHOTO
+            const signature = this.generateSignatureWithPicture(from);
+            
+            if (signature) {
+                // Ajouter la signature avant le message transféré
+                const forwardedStart = bodyHtml.indexOf('---------- Forwarded message');
+                if (forwardedStart > -1) {
+                    const yourMessage = bodyHtml.substring(0, forwardedStart);
+                    const forwardedContent = bodyHtml.substring(forwardedStart);
+                    bodyHtml = yourMessage + signature + '<br><br>' + forwardedContent;
+                } else {
+                    bodyHtml += signature;
+                }
+            }
             
             const sendBtn = document.getElementById('send-forward-btn');
             sendBtn.disabled = true;
@@ -7259,50 +7292,50 @@ class AdminAnalyticsPro {
     getDefaultProfilePictures() {
         return {
             'raphael.nardone@alphavault-ai.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/assets/images/raphael-nardone.jpg',
+                type: 'url',
                 initials: 'RN',
-                bgColor: 'linear-gradient(135deg, #667eea, #764ba2)',
+                bgColor: '#667eea',
                 name: 'Raphaël Nardone',
-                title: 'Founder & CEO'
+                title: 'Founder & CEO - AlphaVault AI'
             },
             'newsletter@alphavault-ai.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/apple-touch-icon.png',
+                type: 'url',
                 initials: 'AV',
-                bgColor: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                bgColor: '#3b82f6',
                 name: 'AlphaVault AI',
                 title: 'Newsletter Team'
             },
             'contact@alphavault-ai.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/apple-touch-icon.png',
+                type: 'url',
                 initials: 'AV',
-                bgColor: 'linear-gradient(135deg, #10b981, #059669)',
+                bgColor: '#10b981',
                 name: 'AlphaVault AI',
                 title: 'Contact Team'
             },
             'info@alphavault-ai.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/apple-touch-icon.png',
+                type: 'url',
                 initials: 'AV',
-                bgColor: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                bgColor: '#f59e0b',
                 name: 'AlphaVault AI',
                 title: 'Information Team'
             },
             'support@alphavault-ai.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/apple-touch-icon.png',
+                type: 'url',
                 initials: 'AV',
-                bgColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                bgColor: '#8b5cf6',
                 name: 'AlphaVault AI',
                 title: 'Support Team'
             },
             'raphnardone@gmail.com': {
-                url: '',
-                type: 'initials',
+                url: 'https://Raph33AI.github.io/assets/images/raphael-nardone.jpg',
+                type: 'url',
                 initials: 'RN',
-                bgColor: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                bgColor: '#ef4444',
                 name: 'Raphaël Nardone',
                 title: 'Personal'
             }
@@ -7413,27 +7446,26 @@ class AdminAnalyticsPro {
         const data = this.emailProfilePictures?.[email];
         
         if (!data) {
-            // Fallback : utiliser Gravatar
+            // Fallback : logo AlphaVault par défaut
             return `
-                <img src="https://www.gravatar.com/avatar/${this.md5(email)}?s=${size}&d=identicon" 
-                    alt="${email}" 
+                <img src="https://Raph33AI.github.io/apple-touch-icon.png" 
+                    alt="AlphaVault AI" 
                     style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
                 />
             `;
         }
         
-        // 🔥 PRIORITÉ 1 : URL EXTERNE (Meilleure compatibilité email)
+        // 🔥 URL EXTERNE (GitHub Pages - Meilleure compatibilité)
         if (data.type === 'url' && data.url && data.url.startsWith('http')) {
             return `
                 <img src="${data.url}" 
                     alt="${data.name || email}" 
                     style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
-                    onerror="this.src='https://www.gravatar.com/avatar/${this.md5(email)}?s=${size}&d=identicon';"
                 />
             `;
         }
         
-        // 🔥 PRIORITÉ 2 : IMAGE EN BASE64 (Fonctionne dans certains clients)
+        // 🔥 IMAGE BASE64 (fallback)
         if (data.type === 'upload' && data.url && data.url.startsWith('data:image')) {
             return `
                 <img src="${data.url}" 
@@ -7443,10 +7475,13 @@ class AdminAnalyticsPro {
             `;
         }
         
-        // 🔥 FALLBACK : INITIALES (Compatible partout)
+        // 🔥 INITIALES (fallback final)
+        const initials = data.initials || 'AV';
+        const bgColor = data.bgColor || '#667eea';
+        
         return `
-            <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                ${data.initials}
+            <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                ${initials}
             </div>
         `;
     }
@@ -7656,33 +7691,31 @@ class AdminAnalyticsPro {
         
         if (!pictureData) return null;
         
-        // 🔥 GÉNÉRER LE HTML DE LA PHOTO (compatible email)
+        // Générer le HTML de la photo (60px pour la signature)
         const pictureHTML = this.generateProfilePictureHTML(email, 60);
         
         return `
             <br><br>
-            <div style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; font-family: Arial, sans-serif; color: #1e293b; font-size: 14px; line-height: 1.8;">
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
-                    <tr>
-                        <td style="padding-right: 16px; vertical-align: top;">
-                            ${pictureHTML}
-                        </td>
-                        <td style="vertical-align: top;">
-                            <strong style="color: #667eea; font-size: 17px; display: block; margin-bottom: 4px;">
-                                ${pictureData.name || email.split('@')[0]}
-                            </strong>
-                            <span style="color: #64748b; font-size: 13px; display: block; margin-bottom: 12px;">
-                                ${pictureData.title || 'AlphaVault AI'}
-                            </span>
-                            <div style="color: #64748b; font-size: 13px; line-height: 1.6;">
-                                📧 ${email}<br>
-                                🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
-                                💼 Real-time market analysis & AI-powered predictions
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            <table cellpadding="0" cellspacing="0" border="0" style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; font-family: Arial, sans-serif; color: #1e293b; font-size: 14px; line-height: 1.8; border-collapse: collapse;">
+                <tr>
+                    <td style="padding-right: 16px; vertical-align: top; width: 76px;">
+                        ${pictureHTML}
+                    </td>
+                    <td style="vertical-align: top;">
+                        <strong style="color: #667eea; font-size: 17px; display: block; margin-bottom: 4px;">
+                            ${pictureData.name || email.split('@')[0]}
+                        </strong>
+                        <span style="color: #64748b; font-size: 13px; display: block; margin-bottom: 12px;">
+                            ${pictureData.title || 'AlphaVault AI'}
+                        </span>
+                        <div style="color: #64748b; font-size: 13px; line-height: 1.6;">
+                            📧 ${email}<br>
+                            🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                            💼 Real-time market analysis & AI-powered predictions
+                        </div>
+                    </td>
+                </tr>
+            </table>
         `;
     }
 
