@@ -460,32 +460,76 @@
     <script src="assets/js/private-chat-system.js"></script>
     <script src='assets/js/public-profile.js'></script>
 
-    <!-- User Menu Script -->
+    <!-- ============================================
+         ✅ FIX MENU UTILISATEUR
+         ============================================ -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
             
-            if (sidebarUserTrigger && sidebarUserDropdown) {
-                sidebarUserTrigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebarUserTrigger.classList.toggle('active');
-                    sidebarUserDropdown.classList.toggle('active');
-                });
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
                 
-                document.addEventListener('click', (e) => {
-                    if (!sidebarUserDropdown.contains(e.target) && 
-                        !sidebarUserTrigger.contains(e.target)) {
-                        sidebarUserTrigger.classList.remove('active');
-                        sidebarUserDropdown.classList.remove('active');
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                console.log('✅ Adding click event to trigger...');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('👆 User menu trigger clicked!');
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                        console.log('🔽 Closing dropdown');
+                    } else {
+                        freshDropdown.classList.add('active');
+                        console.log('🔼 Opening dropdown');
+                    }
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
                     }
                 });
                 
-                sidebarUserDropdown.addEventListener('click', (e) => {
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
+                
+                console.log('✅ User menu initialized successfully!');
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
             }
-        });
+        })();
     </script>
 
     <script src="assets/js/admin-visibility.js"></script>
