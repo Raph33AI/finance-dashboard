@@ -1,8 +1,8 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.3
-   ✅ SANS DUPLICATION (système anti-doublon renforcé)
-   ✅ 100% RESPONSIVE MOBILE
-   ✅ Scroll vertical interne (max 4 éléments)
+   PROFILE.JS - Gestion de la page profil v4.4
+   ✅ SCROLLBAR VISIBLE SUR PC
+   ✅ ÉLÉMENTS CENTRÉS SUR MOBILE
+   ✅ SANS DUPLICATION
    ============================================ */
 
 // Variables globales
@@ -21,11 +21,11 @@ class InfiniteScrollManager {
         this.lastVisible = null;
         this.isLoading = false;
         this.hasMore = true;
-        this.loadedIds = new Set(); // ✅ Anti-duplication
+        this.loadedIds = new Set();
         this.observer = null;
         this.container = null;
         this.sentinel = null;
-        this.loadMoreDebounce = null; // ✅ Débounce pour éviter appels multiples
+        this.loadMoreDebounce = null;
     }
 
     init() {
@@ -35,10 +35,10 @@ class InfiniteScrollManager {
             return;
         }
 
-        // ✅ STYLES RESPONSIVES
+        // ✅ STYLES RESPONSIVES AVEC SCROLLBAR VISIBLE
         const isMobile = window.innerWidth <= 768;
-        this.container.style.maxHeight = isMobile ? '400px' : '600px'; // Hauteur adaptative
-        this.container.style.overflowY = 'auto';
+        this.container.style.maxHeight = isMobile ? '400px' : '600px';
+        this.container.style.overflowY = 'scroll'; // ✅ SCROLL TOUJOURS VISIBLE
         this.container.style.overflowX = 'hidden';
         this.container.style.position = 'relative';
         this.container.style.paddingRight = '8px';
@@ -57,7 +57,6 @@ class InfiniteScrollManager {
             (entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !this.isLoading && this.hasMore) {
-                        // ✅ Débounce pour éviter appels multiples
                         clearTimeout(this.loadMoreDebounce);
                         this.loadMoreDebounce = setTimeout(() => {
                             this.loadMore();
@@ -74,7 +73,7 @@ class InfiniteScrollManager {
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId} (responsive)`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (responsive + scrollbar)`);
     }
 
     async loadMore() {
@@ -93,7 +92,6 @@ class InfiniteScrollManager {
             
             console.log(`✅ Received ${result.items.length} items for ${this.listId}`);
 
-            // ✅ FILTRAGE STRICT DES DOUBLONS
             const newItems = [];
             for (const item of result.items) {
                 const id = item.uid || item.postId;
@@ -118,7 +116,6 @@ class InfiniteScrollManager {
                 this.render(newItems);
             }
 
-            // Vérifier s'il y a encore des éléments
             if (result.items.length < this.itemsPerPage) {
                 this.hasMore = false;
                 this.showEndMessage();
@@ -195,7 +192,6 @@ class InfiniteScrollManager {
         if (this.container) {
             this.container.innerHTML = '';
             
-            // Recréer le sentinel
             this.sentinel = document.createElement('div');
             this.sentinel.id = `${this.listId}-sentinel`;
             this.sentinel.style.cssText = 'height: 1px; width: 100%; pointer-events: none;';
@@ -237,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    // ✅ Ajouter les styles responsives
     addCustomScrollbarStyles();
     addResponsiveStyles();
     
@@ -251,12 +246,9 @@ window.addEventListener('userDataLoaded', (e) => {
     console.log('✅ Données utilisateur reçues:', currentUserData);
     
     loadUserData(currentUserData);
-    
-    // ✅ Initialiser les gestionnaires de scroll infini
     initInfiniteScroll();
 });
 
-// ✅ Réinitialiser les hauteurs sur resize
 window.addEventListener('resize', () => {
     const isMobile = window.innerWidth <= 768;
     const maxHeight = isMobile ? '400px' : '600px';
@@ -277,18 +269,19 @@ function addCustomScrollbarStyles() {
     const style = document.createElement('style');
     style.id = 'custom-scrollbar-styles';
     style.textContent = `
-        /* Scrollbar pour les sections */
+        /* ✅ SCROLLBAR TOUJOURS VISIBLE SUR PC */
         #followingList::-webkit-scrollbar,
         #followersList::-webkit-scrollbar,
         #savedPostsList::-webkit-scrollbar {
-            width: 8px;
+            width: 10px; /* ✅ Augmenté pour meilleure visibilité */
         }
         
         #followingList::-webkit-scrollbar-track,
         #followersList::-webkit-scrollbar-track,
         #savedPostsList::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.08);
             border-radius: 10px;
+            margin: 4px;
         }
         
         #followingList::-webkit-scrollbar-thumb,
@@ -297,6 +290,7 @@ function addCustomScrollbarStyles() {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 10px;
             transition: background 0.3s ease;
+            min-height: 40px; /* ✅ Hauteur minimale pour faciliter le clic */
         }
         
         #followingList::-webkit-scrollbar-thumb:hover,
@@ -310,20 +304,27 @@ function addCustomScrollbarStyles() {
         #followersList,
         #savedPostsList {
             scrollbar-width: thin;
-            scrollbar-color: #667eea rgba(0, 0, 0, 0.05);
+            scrollbar-color: #667eea rgba(0, 0, 0, 0.08);
         }
         
+        /* Dark mode */
         body.dark-mode #followingList::-webkit-scrollbar-track,
         body.dark-mode #followersList::-webkit-scrollbar-track,
         body.dark-mode #savedPostsList::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        body.dark-mode #followingList,
+        body.dark-mode #followersList,
+        body.dark-mode #savedPostsList {
+            scrollbar-color: #667eea rgba(255, 255, 255, 0.08);
         }
     `;
     document.head.appendChild(style);
 }
 
 // ============================================
-// 🆕 STYLES RESPONSIVE MOBILE
+// 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE)
 // ============================================
 
 function addResponsiveStyles() {
@@ -332,56 +333,94 @@ function addResponsiveStyles() {
     style.textContent = `
         /* ===== RESPONSIVE MOBILE ===== */
         @media (max-width: 768px) {
-            /* Réduire padding des cards */
+            /* ✅ CENTRAGE DES WRAPPERS */
+            .following-item-wrapper,
+            .follower-item-wrapper,
+            .saved-post-item-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            /* ✅ CENTRAGE DES CARDS */
             .following-item,
             .follower-item,
             .saved-post-item {
                 flex-direction: column !important;
-                padding: 12px !important;
-                gap: 12px !important;
+                align-items: center !important;
+                text-align: center !important;
+                padding: 20px !important;
+                gap: 16px !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             
-            /* Centrer avatars sur mobile */
+            /* ✅ CENTRAGE DES CONTENUS */
+            .following-item > div,
+            .follower-item > div,
+            .saved-post-item > div {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                width: 100% !important;
+            }
+            
+            /* Avatars centrés */
             .following-item img,
             .follower-item img {
-                width: 50px !important;
-                height: 50px !important;
+                width: 60px !important;
+                height: 60px !important;
                 margin: 0 auto !important;
             }
             
-            /* Réduire taille des images de posts */
+            /* Images de posts centrées */
             .saved-post-item img {
-                width: 80px !important;
-                height: 80px !important;
+                width: 100px !important;
+                height: 100px !important;
+                margin: 0 auto !important;
             }
             
-            /* Adapter les boutons */
+            /* Titres centrés */
+            .following-item h4,
+            .follower-item h4,
+            .saved-post-item h4 {
+                font-size: 1.1rem !important;
+                text-align: center !important;
+                width: 100% !important;
+            }
+            
+            /* Paragraphes centrés */
+            .following-item p,
+            .follower-item p,
+            .saved-post-item p {
+                font-size: 0.9rem !important;
+                text-align: center !important;
+                white-space: normal !important;
+                width: 100% !important;
+            }
+            
+            /* Stats centrées */
+            .following-item > div > div,
+            .follower-item > div > div,
+            .saved-post-item > div > div {
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                flex-wrap: wrap !important;
+                gap: 12px !important;
+                width: 100% !important;
+            }
+            
+            /* Boutons centrés et pleine largeur */
             .following-item button,
             .follower-item button,
             .saved-post-item button {
                 width: 100% !important;
-                padding: 8px 16px !important;
-                font-size: 0.9rem !important;
-            }
-            
-            /* Textes plus petits */
-            .following-item h4,
-            .follower-item h4,
-            .saved-post-item h4 {
-                font-size: 1rem !important;
-            }
-            
-            .following-item p,
-            .follower-item p,
-            .saved-post-item p {
-                font-size: 0.85rem !important;
-            }
-            
-            /* Stats en colonne sur très petits écrans */
-            .following-item > div > div,
-            .follower-item > div > div,
-            .saved-post-item > div > div {
-                flex-wrap: wrap !important;
+                max-width: 280px !important;
+                padding: 12px 24px !important;
+                font-size: 0.95rem !important;
+                margin: 0 auto !important;
             }
         }
         
@@ -393,23 +432,30 @@ function addResponsiveStyles() {
                 max-height: 350px !important;
             }
             
-            /* Réduire encore les avatars */
+            /* Avatars plus petits */
             .following-item img,
             .follower-item img {
-                width: 40px !important;
-                height: 40px !important;
+                width: 50px !important;
+                height: 50px !important;
             }
             
             .saved-post-item img {
-                width: 60px !important;
-                height: 60px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            /* Padding réduit */
+            .following-item,
+            .follower-item,
+            .saved-post-item {
+                padding: 16px !important;
             }
             
             /* Titres plus petits */
             .following-item h4,
             .follower-item h4,
             .saved-post-item h4 {
-                font-size: 0.95rem !important;
+                font-size: 1rem !important;
             }
         }
     `;
@@ -423,22 +469,18 @@ function addResponsiveStyles() {
 function initInfiniteScroll() {
     console.log('🔄 Initializing infinite scroll managers...');
 
-    // Détruire les anciens managers
     if (followingScrollManager) followingScrollManager.destroy();
     if (followersScrollManager) followersScrollManager.destroy();
     if (savedPostsScrollManager) savedPostsScrollManager.destroy();
 
-    // Following
     followingScrollManager = new InfiniteScrollManager('followingList', loadFollowingBatch, 4);
     followingScrollManager.render = renderFollowingItems;
     followingScrollManager.init();
 
-    // Followers
     followersScrollManager = new InfiniteScrollManager('followersList', loadFollowersBatch, 4);
     followersScrollManager.render = renderFollowersItems;
     followersScrollManager.init();
 
-    // Saved Posts
     savedPostsScrollManager = new InfiniteScrollManager('savedPostsList', loadSavedPostsBatch, 4);
     savedPostsScrollManager.render = renderSavedPostsItems;
     savedPostsScrollManager.init();
@@ -499,7 +541,6 @@ async function loadFollowingBatch(lastVisible, limit) {
 
     const validItems = items.filter(item => item !== null);
 
-    // Mettre à jour le compteur une seule fois
     if (!lastVisible) {
         const totalSnapshot = await firebase.firestore()
             .collection('users')
@@ -522,8 +563,6 @@ async function loadFollowingBatch(lastVisible, limit) {
 function renderFollowingItems(newItems) {
     if (newItems.length === 0) return;
 
-    const isMobile = window.innerWidth <= 768;
-
     newItems.forEach((user) => {
         const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
                            user.email?.split('@')[0] || 'Unknown User';
@@ -534,7 +573,7 @@ function renderFollowingItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'following-item-wrapper';
         itemDiv.style.marginBottom = '16px';
-        itemDiv.setAttribute('data-user-id', user.uid); // ✅ Traçabilité
+        itemDiv.setAttribute('data-user-id', user.uid);
         itemDiv.innerHTML = `
             <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -670,7 +709,7 @@ function renderFollowersItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'follower-item-wrapper';
         itemDiv.style.marginBottom = '16px';
-        itemDiv.setAttribute('data-user-id', user.uid); // ✅ Traçabilité
+        itemDiv.setAttribute('data-user-id', user.uid);
         itemDiv.innerHTML = `
             <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -728,7 +767,6 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 
     console.log(`📥 Loading saved posts batch (limit: ${limit}, lastVisible: ${lastVisible ? 'yes' : 'no'})...`);
 
-    // ✅ IMPORTANT: Pas d'orderBy ici car savedPosts n'a pas d'index
     let query = firebase.firestore()
         .collection('users')
         .doc(currentUserData.uid)
@@ -743,14 +781,13 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 
     console.log(`✅ Saved posts snapshot size: ${snapshot.size}`);
 
-    // ✅ Tri manuel APRÈS récupération
     const items = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
             postId: doc.id,
             savedAt: data.savedAt,
             ...data.postData,
-            _docSnapshot: doc // ✅ Garder le snapshot pour pagination
+            _docSnapshot: doc
         };
     }).sort((a, b) => {
         if (!a.savedAt) return 1;
@@ -797,7 +834,7 @@ function renderSavedPostsItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'saved-post-item-wrapper';
         itemDiv.style.marginBottom = '16px';
-        itemDiv.setAttribute('data-post-id', post.postId); // ✅ Traçabilité
+        itemDiv.setAttribute('data-post-id', post.postId);
         itemDiv.innerHTML = `
             <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
                 <img 
@@ -891,7 +928,6 @@ async function unfollowUser(userId) {
         
         showToast('success', 'Success', 'User unfollowed successfully');
         
-        // ✅ Reset complet pour éviter duplications
         followingScrollManager.reset();
         setTimeout(() => {
             followingScrollManager.loadMore();
@@ -934,7 +970,6 @@ async function removeFollower(userId) {
         
         showToast('success', 'Success', 'Follower removed successfully');
         
-        // ✅ Reset complet
         followersScrollManager.reset();
         setTimeout(() => {
             followersScrollManager.loadMore();
@@ -963,7 +998,6 @@ async function removeSavedPost(postId) {
         
         showToast('success', 'Success', 'Post removed from saved');
         
-        // ✅ Reset complet
         savedPostsScrollManager.reset();
         setTimeout(() => {
             savedPostsScrollManager.loadMore();
@@ -1564,7 +1598,6 @@ async function logout() {
     }
 }
 
-// Animation de sortie pour les toasts
 const toastStyle = document.createElement('style');
 toastStyle.textContent = `
     @keyframes slideOutRight {
@@ -1580,4 +1613,4 @@ toastStyle.textContent = `
 `;
 document.head.appendChild(toastStyle);
 
-console.log('✅ Script de profil chargé (v4.3 - Sans duplication + Responsive Mobile)');
+console.log('✅ Script de profil chargé (v4.4 - Scrollbar PC + Centrage Mobile)');
