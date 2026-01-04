@@ -3602,3 +3602,199 @@ body.dark-mode .conditional-options {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================================
+   🆕 SENT EMAILS SECTION STYLING
+   ======================================== */
+
+.sent-email-row {
+    transition: background-color 0.2s ease;
+}
+
+.sent-email-row:hover {
+    background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+.sent-email-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #10b981;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Profile Pictures Grid */
+.profile-pictures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.profile-picture-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-picture-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+.profile-picture-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-picture-info {
+    text-align: center;
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.profile-email {
+    font-size: 0.9rem;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.profile-title {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.profile-picture-actions {
+    width: 100%;
+}
+
+.picture-type-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.picture-type-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.picture-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.picture-type-option .option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.picture-type-option input[type="radio"]:checked + .option-content {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.picture-type-option .option-content i {
+    font-size: 1.5rem;
+}
+
+.conditional-options {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+}
+
+/* Image Resize Controls Overlay (CORRIGÉ) */
+.image-resize-controls-overlay {
+    position: fixed;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 10px 16px;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+    z-index: 999999;
+    pointer-events: auto;
+}
+
+.img-resize-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.img-resize-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.img-resize-input {
+    width: 80px;
+    padding: 6px 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    font-size: 14px;
+}
+
+.img-resize-input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
+}
+
+.img-resize-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.img-selected {
+    outline: 3px solid #667eea;
+    outline-offset: 4px;
+    border-radius: 8px;
+}

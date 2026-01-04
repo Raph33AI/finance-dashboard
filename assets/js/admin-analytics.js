@@ -5362,7 +5362,8 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📧 GMAIL MANAGEMENT - MÉTHODES COMPLÈTES
+    // 📧 GMAIL MANAGEMENT - SECTION COMPLÈTE CORRIGÉE
+    // Version: 4.2.0 - Full Gmail Integration with Profile Pictures
     // ========================================
 
     async loadGmailStats() {
@@ -5562,6 +5563,131 @@ class AdminAnalyticsPro {
         console.log(`✅ Gmail inbox displayed (${messages.length} emails)`);
     }
 
+    // 🆕 LOAD SENT EMAILS
+    async loadSentEmails() {
+        try {
+            console.log('📤 Loading sent emails...');
+            
+            const cacheKey = 'gmail-sent';
+            const cachedData = this.cache.get(cacheKey);
+            
+            if (cachedData) {
+                this.gmailSent = cachedData;
+                this.displaySentEmails(cachedData);
+                return;
+            }
+            
+            if (!this.cache.canMakeCall()) {
+                console.warn('⚠ Rate limit reached - using cached sent emails');
+                return;
+            }
+            
+            this.cache.incrementCallCount();
+            
+            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-sent?maxResults=30`);
+            
+            if (!response.ok) {
+                throw new Error(`Gmail sent emails error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            this.cache.set(cacheKey, data.messages);
+            this.gmailSent = data.messages;
+            this.displaySentEmails(data.messages);
+            
+            console.log('✅ Sent emails loaded from API');
+            
+        } catch (error) {
+            console.error('❌ Error loading sent emails:', error);
+        }
+    }
+
+    // 🆕 DISPLAY SENT EMAILS
+    displaySentEmails(messages) {
+        const tbody = document.getElementById('gmail-sent-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (!messages || messages.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-paper-plane" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No sent emails</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const renderSentRow = (email, index, tbody) => {
+            const row = document.createElement('tr');
+            
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                this.viewEmail(email.id);
+            };
+            
+            row.onmouseenter = () => {
+                row.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+            };
+            row.onmouseleave = () => {
+                row.style.backgroundColor = '';
+            };
+            
+            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <i class="fas fa-paper-plane" style="font-size: 10px; color: #10b981; margin-right: 8px;"></i>
+                    ${email.to}
+                </td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.subject}
+                </td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
+                    ${email.snippet || ''}
+                </td>
+                <td>${date}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')" title="View">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        };
+        
+        if (!window.paginationManagers) window.paginationManagers = {};
+        
+        if (!window.paginationManagers['gmail-sent-body']) {
+            window.paginationManagers['gmail-sent-body'] = new PaginationManager(
+                'gmail-sent-body',
+                messages,
+                renderSentRow,
+                [10, 25, 50]
+            );
+        } else {
+            window.paginationManagers['gmail-sent-body'].updateData(messages);
+        }
+        
+        window.paginationManagers['gmail-sent-body'].render();
+        
+        console.log(`✅ Sent emails displayed (${messages.length} emails)`);
+    }
+
     getEmailCategoryBadge(category) {
         const badges = {
             support: '<span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">📧 Support</span>',
@@ -5630,7 +5756,7 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📨 COMPOSE, REPLY, FORWARD
+    // 📨 COMPOSE, REPLY, FORWARD - AVEC INJECTION PHOTOS
     // ========================================
 
     openComposeModal() {
@@ -5642,7 +5768,6 @@ class AdminAnalyticsPro {
             return;
         }
         
-        // 🆕 DÉFINIR LA NOUVELLE ADRESSE PAR DÉFAUT
         document.getElementById('compose-from').value = 'raphael.nardone@alphavault-ai.com';
         document.getElementById('compose-to').value = '';
         document.getElementById('compose-cc').value = '';
@@ -5693,6 +5818,7 @@ class AdminAnalyticsPro {
         console.log('✅ Compose modal closed');
     }
 
+    // 🆕 SEND EMAIL AVEC INJECTION PHOTO DE PROFIL
     async sendEmail() {
         try {
             console.log('📤 Sending email...');
@@ -5708,8 +5834,11 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            const bodyHtml = this.composeEditor.root.innerHTML;
+            let bodyHtml = this.composeEditor.root.innerHTML;
             const bodyText = this.composeEditor.getText();
+            
+            // 🆕 INJECTION DE LA PHOTO DE PROFIL DANS LE HTML
+            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
             
             const sendBtn = document.getElementById('send-email-btn');
             sendBtn.disabled = true;
@@ -5745,6 +5874,7 @@ class AdminAnalyticsPro {
             
             await this.loadGmailInbox();
             await this.loadGmailStats();
+            await this.loadSentEmails();
             
         } catch (error) {
             console.error('❌ Error sending email:', error);
@@ -5777,7 +5907,7 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            document.getElementById('reply-from').value = 'newsletter@alphavault-ai.com';
+            document.getElementById('reply-from').value = 'raphael.nardone@alphavault-ai.com';
             document.getElementById('reply-to').value = message.from;
             document.getElementById('reply-cc').value = replyAll ? (message.cc || '') : '';
             document.getElementById('reply-subject').value = `Re: ${message.subject.replace(/^Re:\s*/i, '')}`;
@@ -5828,6 +5958,7 @@ class AdminAnalyticsPro {
         this.currentEmail = null;
     }
 
+    // 🆕 SEND REPLY AVEC INJECTION PHOTO DE PROFIL
     async sendReply(replyAll = false) {
         try {
             console.log(`📤 Sending reply (replyAll: ${replyAll})...`);
@@ -5837,10 +5968,13 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            const from = document.getElementById('reply-from')?.value || 'newsletter@alphavault-ai.com';
+            const from = document.getElementById('reply-from')?.value || 'raphael.nardone@alphavault-ai.com';
             
-            const bodyHtml = this.replyEditor.root.innerHTML;
+            let bodyHtml = this.replyEditor.root.innerHTML;
             const bodyText = this.replyEditor.getText();
+            
+            // 🆕 INJECTION DE LA PHOTO DE PROFIL
+            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
             
             const sendBtn = document.getElementById('send-reply-btn');
             sendBtn.disabled = true;
@@ -5877,6 +6011,7 @@ class AdminAnalyticsPro {
             
             await this.loadGmailInbox();
             await this.loadGmailStats();
+            await this.loadSentEmails();
             
         } catch (error) {
             console.error('❌ Error sending reply:', error);
@@ -5909,7 +6044,7 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            document.getElementById('forward-from').value = 'newsletter@alphavault-ai.com';
+            document.getElementById('forward-from').value = 'raphael.nardone@alphavault-ai.com';
             document.getElementById('forward-to').value = '';
             document.getElementById('forward-subject').value = `Fwd: ${message.subject.replace(/^Fwd:\s*/i, '')}`;
             
@@ -5963,6 +6098,7 @@ class AdminAnalyticsPro {
         this.currentEmail = null;
     }
 
+    // 🆕 SEND FORWARD AVEC INJECTION PHOTO DE PROFIL
     async sendForward() {
         try {
             console.log('📤 Forwarding email...');
@@ -5979,10 +6115,13 @@ class AdminAnalyticsPro {
                 return;
             }
             
-            const from = document.getElementById('forward-from')?.value || 'newsletter@alphavault-ai.com';
+            const from = document.getElementById('forward-from')?.value || 'raphael.nardone@alphavault-ai.com';
             
-            const bodyHtml = this.forwardEditor.root.innerHTML;
+            let bodyHtml = this.forwardEditor.root.innerHTML;
             const bodyText = this.forwardEditor.getText();
+            
+            // 🆕 INJECTION DE LA PHOTO DE PROFIL
+            bodyHtml = this.injectProfilePictureIntoHTML(from, bodyHtml);
             
             const sendBtn = document.getElementById('send-forward-btn');
             sendBtn.disabled = true;
@@ -6015,6 +6154,7 @@ class AdminAnalyticsPro {
             this.closeForwardModal();
             
             await this.loadGmailInbox();
+            await this.loadSentEmails();
             
         } catch (error) {
             console.error('❌ Error forwarding email:', error);
@@ -6024,6 +6164,44 @@ class AdminAnalyticsPro {
             sendBtn.disabled = false;
             sendBtn.innerHTML = '<i class="fas fa-share"></i> Forward';
         }
+    }
+
+    // 🆕 FONCTION UTILITAIRE : INJECTION PHOTO DE PROFIL DANS HTML
+    injectProfilePictureIntoHTML(fromEmail, bodyHtml) {
+        if (!this.emailProfilePictures || !this.emailProfilePictures[fromEmail]) {
+            return bodyHtml;
+        }
+        
+        const pictureData = this.emailProfilePictures[fromEmail];
+        let profilePictureHTML = '';
+        
+        if (pictureData.type === 'upload' && pictureData.url) {
+            // Image en base64 (déjà prête pour l'email)
+            profilePictureHTML = `<img src="${pictureData.url}" alt="${pictureData.name || fromEmail}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />`;
+        } else if (pictureData.type === 'url' && pictureData.url) {
+            // URL externe
+            profilePictureHTML = `<img src="${pictureData.url}" alt="${pictureData.name || fromEmail}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />`;
+        } else {
+            // Initiales (fallback)
+            profilePictureHTML = `
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: ${pictureData.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    ${pictureData.initials}
+                </div>
+            `;
+        }
+        
+        // Remplacer le placeholder générique par la vraie photo
+        const signatureRegex = /<div style="[^"]*border-top:[^"]*">[\s\S]*?<div style="[^"]*display:\s*flex[^"]*">/i;
+        
+        if (signatureRegex.test(bodyHtml)) {
+            // Remplacer les initiales génériques par la photo réelle
+            bodyHtml = bodyHtml.replace(
+                /<(?:img[^>]*|div style="width:\s*\d+px;\s*height:\s*\d+px;[^>]*>(?:AV|RN|[A-Z]{2,3})<\/div)>/,
+                profilePictureHTML
+            );
+        }
+        
+        return bodyHtml;
     }
 
     // ========================================
@@ -6518,10 +6696,6 @@ class AdminAnalyticsPro {
         }
     }
 
-    // ========================================
-    // ✍ SIGNATURE MANAGEMENT - FIRESTORE (SECTION CORRIGÉE)
-    // ========================================
-
     getDefaultSignatures() {
         const baseSignature = `
             <br><br>
@@ -6627,7 +6801,7 @@ class AdminAnalyticsPro {
         
         const emailKeyMap = {
             'newsletter@alphavault-ai.com': 'newsletter',
-            'raphael.nardone@alphavault-ai.com': 'raphael', // 🆕
+            'raphael.nardone@alphavault-ai.com': 'raphael',
             'contact@alphavault-ai.com': 'contact',
             'info@alphavault-ai.com': 'info',
             'support@alphavault-ai.com': 'support',
@@ -6654,7 +6828,6 @@ class AdminAnalyticsPro {
             return;
         }
         
-        // 🆕 DÉFINIR LA NOUVELLE ADRESSE PAR DÉFAUT
         this.currentSignatureEmail = 'raphael.nardone@alphavault-ai.com';
         
         if (!this.signatureEditor) {
@@ -6675,7 +6848,6 @@ class AdminAnalyticsPro {
             this.setupImageResizer();
         }
         
-        // 🆕 CHARGER LA SIGNATURE DE RAPHAEL PAR DÉFAUT
         this.loadSignatureForEmail('raphael.nardone@alphavault-ai.com');
         
         modal.style.display = 'flex';
@@ -6689,7 +6861,6 @@ class AdminAnalyticsPro {
             modal.style.display = 'none';
         }
         
-        // 🆕 Nettoyer les contrôles d'image
         if (this.removeImageControls) {
             this.removeImageControls();
         }
@@ -6892,7 +7063,7 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR (VERSION FINALE CORRIGÉE)
+    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR
     // ========================================
 
     setupImageResizer() {
@@ -6901,14 +7072,11 @@ class AdminAnalyticsPro {
         let selectedImage = null;
         let controlsElement = null;
         
-        // Fonction pour créer les contrôles
         const createControls = (img) => {
-            // Supprimer les anciens contrôles
             if (controlsElement) {
                 controlsElement.remove();
             }
             
-            // Créer le conteneur de contrôles (HORS de l'éditeur Quill)
             controlsElement = document.createElement('div');
             controlsElement.className = 'image-resize-controls-overlay';
             controlsElement.innerHTML = `
@@ -6922,12 +7090,8 @@ class AdminAnalyticsPro {
                 </button>
             `;
             
-            // Positionner les contrôles par rapport à l'image
             const updateControlsPosition = () => {
                 const rect = img.getBoundingClientRect();
-                const modalContent = document.querySelector('#signature-editor-modal .gmail-modal-body');
-                const modalRect = modalContent ? modalContent.getBoundingClientRect() : { top: 0, left: 0 };
-                
                 controlsElement.style.position = 'fixed';
                 controlsElement.style.top = `${rect.bottom + 10}px`;
                 controlsElement.style.left = `${rect.left + (rect.width / 2)}px`;
@@ -6936,11 +7100,8 @@ class AdminAnalyticsPro {
             };
             
             updateControlsPosition();
-            
-            // Ajouter au body (pas à l'éditeur)
             document.body.appendChild(controlsElement);
             
-            // Event listeners pour les boutons
             const btnMinus = controlsElement.querySelector('.img-resize-minus');
             const btnPlus = controlsElement.querySelector('.img-resize-plus');
             const input = controlsElement.querySelector('.img-resize-input');
@@ -6984,7 +7145,6 @@ class AdminAnalyticsPro {
                 e.stopPropagation();
             });
             
-            // Mettre à jour la position lors du scroll
             const modalBody = document.querySelector('#signature-editor-modal .gmail-modal-body');
             if (modalBody) {
                 modalBody.addEventListener('scroll', updateControlsPosition);
@@ -6993,7 +7153,6 @@ class AdminAnalyticsPro {
             return controlsElement;
         };
         
-        // Fonction pour supprimer les contrôles
         const removeControls = () => {
             if (controlsElement) {
                 controlsElement.remove();
@@ -7005,36 +7164,29 @@ class AdminAnalyticsPro {
             }
         };
         
-        // Écouter les clics dans l'éditeur
         this.signatureEditor.root.addEventListener('click', (e) => {
             const clickedImg = e.target.closest('img');
             
             if (clickedImg) {
-                // Désélectionner l'ancienne image
                 if (selectedImage && selectedImage !== clickedImg) {
                     selectedImage.classList.remove('img-selected');
                 }
                 
-                // Sélectionner la nouvelle image
                 selectedImage = clickedImg;
                 selectedImage.classList.add('img-selected');
                 
-                // Créer les contrôles
                 createControls(clickedImg);
                 
                 console.log('✅ Image selected, controls displayed');
             }
         });
         
-        // Fermer les contrôles si on clique en dehors
         document.addEventListener('click', (e) => {
-            // Si on clique en dehors de l'éditeur ET en dehors des contrôles
             if (!e.target.closest('.ql-editor') && !e.target.closest('.image-resize-controls-overlay')) {
                 removeControls();
             }
         });
         
-        // Fermer les contrôles si on ferme le modal
         const modal = document.getElementById('signature-editor-modal');
         if (modal) {
             const closeBtn = modal.querySelector('.btn-close-modal');
@@ -7043,209 +7195,9 @@ class AdminAnalyticsPro {
             }
         }
         
-        // Stocker la fonction de nettoyage
         this.removeImageControls = removeControls;
         
         console.log('✅ Image resizer setup complete');
-    }
-
-    showImageResizeControls(img) {
-        // Supprimer les contrôles existants
-        this.hideImageResizeControls();
-        
-        // Créer le conteneur de contrôles
-        const controls = document.createElement('div');
-        controls.className = 'image-resize-controls';
-        controls.style.cssText = `
-            position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 10px 16px;
-            border-radius: 24px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
-            z-index: 1000;
-        `;
-        
-        // Bouton réduire
-        const btnMinus = document.createElement('button');
-        btnMinus.className = 'image-resize-btn';
-        btnMinus.innerHTML = '<i class="fas fa-minus"></i>';
-        btnMinus.style.cssText = `
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        `;
-        btnMinus.addEventListener('mouseenter', () => {
-            btnMinus.style.background = 'rgba(255, 255, 255, 0.3)';
-            btnMinus.style.transform = 'scale(1.1)';
-        });
-        btnMinus.addEventListener('mouseleave', () => {
-            btnMinus.style.background = 'rgba(255, 255, 255, 0.2)';
-            btnMinus.style.transform = 'scale(1)';
-        });
-        btnMinus.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.resizeImage(img, -50);
-        });
-        
-        // Input taille
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.className = 'image-size-input';
-        input.value = Math.round(img.width);
-        input.min = '50';
-        input.max = '800';
-        input.step = '10';
-        input.style.cssText = `
-            width: 80px;
-            padding: 6px 10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-weight: 600;
-            text-align: center;
-            font-size: 14px;
-        `;
-        input.addEventListener('focus', () => {
-            input.style.background = 'rgba(255, 255, 255, 0.3)';
-            input.style.outline = 'none';
-        });
-        input.addEventListener('blur', () => {
-            input.style.background = 'rgba(255, 255, 255, 0.2)';
-        });
-        input.addEventListener('change', (e) => {
-            e.stopPropagation();
-            const newWidth = parseInt(input.value);
-            if (newWidth >= 50 && newWidth <= 800) {
-                img.style.width = newWidth + 'px';
-                img.style.height = 'auto';
-                img.setAttribute('width', newWidth);
-            }
-        });
-        input.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-        
-        // Label "px"
-        const label = document.createElement('span');
-        label.textContent = 'px';
-        label.style.cssText = 'color: white; font-weight: 600; font-size: 14px;';
-        
-        // Bouton agrandir
-        const btnPlus = document.createElement('button');
-        btnPlus.className = 'image-resize-btn';
-        btnPlus.innerHTML = '<i class="fas fa-plus"></i>';
-        btnPlus.style.cssText = `
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        `;
-        btnPlus.addEventListener('mouseenter', () => {
-            btnPlus.style.background = 'rgba(255, 255, 255, 0.3)';
-            btnPlus.style.transform = 'scale(1.1)';
-        });
-        btnPlus.addEventListener('mouseleave', () => {
-            btnPlus.style.background = 'rgba(255, 255, 255, 0.2)';
-            btnPlus.style.transform = 'scale(1)';
-        });
-        btnPlus.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.resizeImage(img, 50);
-        });
-        
-        // Assembler les contrôles
-        controls.appendChild(btnMinus);
-        controls.appendChild(input);
-        controls.appendChild(label);
-        controls.appendChild(btnPlus);
-        
-        // Assurer que le parent a une position relative
-        const parent = img.parentElement;
-        if (parent) {
-            const originalPosition = window.getComputedStyle(parent).position;
-            if (originalPosition === 'static') {
-                parent.style.position = 'relative';
-            }
-            parent.appendChild(controls);
-        }
-        
-        // Stocker l'image et l'input pour référence
-        this.currentSelectedImage = img;
-        this.currentSizeInput = input;
-        
-        console.log('✅ Image resize controls displayed');
-    }
-
-    hideImageResizeControls() {
-        const existingControls = document.querySelectorAll('.image-resize-controls');
-        existingControls.forEach(control => control.remove());
-        this.currentSelectedImage = null;
-        this.currentSizeInput = null;
-    }
-
-    resizeImage(img, delta) {
-        if (!img) return;
-        
-        const currentWidth = img.width || parseInt(img.style.width) || 200;
-        const newWidth = Math.max(50, Math.min(800, currentWidth + delta));
-        
-        img.style.width = newWidth + 'px';
-        img.style.height = 'auto';
-        img.setAttribute('width', newWidth);
-        
-        // Mettre à jour l'input si présent
-        if (this.currentSizeInput) {
-            this.currentSizeInput.value = newWidth;
-        }
-        
-        console.log(`✅ Image resized to ${newWidth}px`);
-    }
-
-    // ========================================
-    // 🛠 UTILITY METHODS
-    // ========================================
-
-    formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) return '0 Bytes';
-        
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
-
-    updateStat(elementId, value) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent = value;
-        }
     }
 
     // ========================================
@@ -7274,9 +7226,11 @@ class AdminAnalyticsPro {
                     const data = doc.data();
                     this.emailProfilePictures[data.email] = {
                         url: data.url || '',
-                        type: data.type || 'initials', // 'initials', 'upload', 'url'
+                        type: data.type || 'initials',
                         initials: data.initials || 'AV',
                         bgColor: data.bgColor || '#667eea',
+                        name: data.name || '',
+                        title: data.title || '',
                         updatedAt: data.updatedAt
                     };
                 });
@@ -7301,7 +7255,7 @@ class AdminAnalyticsPro {
     getDefaultProfilePictures() {
         return {
             'raphael.nardone@alphavault-ai.com': {
-                url: '', // Vide = utilise les initiales
+                url: '',
                 type: 'initials',
                 initials: 'RN',
                 bgColor: 'linear-gradient(135deg, #667eea, #764ba2)',
@@ -7455,7 +7409,6 @@ class AdminAnalyticsPro {
         const data = this.emailProfilePictures?.[email];
         
         if (!data) {
-            // Fallback : initiales par défaut
             return `
                 <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
                     AV
@@ -7464,12 +7417,10 @@ class AdminAnalyticsPro {
         }
         
         if (data.type === 'upload' && data.url) {
-            // Photo uploadée
             return `
                 <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
             `;
         } else if (data.type === 'url' && data.url) {
-            // URL externe
             return `
                 <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                 <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: none; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
@@ -7477,7 +7428,6 @@ class AdminAnalyticsPro {
                 </div>
             `;
         } else {
-            // Initiales
             return `
                 <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     ${data.initials}
@@ -7503,7 +7453,6 @@ class AdminAnalyticsPro {
         document.getElementById('profile-picture-bg-color').value = data.bgColor || '#667eea';
         document.getElementById('profile-picture-url').value = (data.type === 'url') ? data.url : '';
         
-        // Radio buttons
         if (data.type === 'upload' && data.url) {
             document.getElementById('picture-type-upload').checked = true;
         } else if (data.type === 'url' && data.url) {
@@ -7532,13 +7481,11 @@ class AdminAnalyticsPro {
         
         if (!file) return;
         
-        // Vérifier le type
         if (!file.type.startsWith('image/')) {
             alert('⚠ Please upload an image file (JPG, PNG, GIF)');
             return;
         }
         
-        // Vérifier la taille (max 2MB)
         if (file.size > 2 * 1024 * 1024) {
             alert('⚠ Image is too large. Maximum size: 2MB');
             return;
@@ -7549,13 +7496,10 @@ class AdminAnalyticsPro {
         reader.onload = (e) => {
             const base64Data = e.target.result;
             
-            // Stocker temporairement
             this.currentUploadedImage = base64Data;
             
-            // Sélectionner le radio "upload"
             document.getElementById('picture-type-upload').checked = true;
             
-            // Mettre à jour la prévisualisation
             this.updateProfilePicturePreview();
             
             console.log('✅ Image uploaded successfully');
@@ -7653,20 +7597,15 @@ class AdminAnalyticsPro {
                 }
             }
             
-            // Sauvegarder localement
             this.emailProfilePictures[this.currentEditingEmail] = pictureData;
             
-            // Sauvegarder dans Firestore
             await this.saveProfilePictureToFirestore(this.currentEditingEmail, pictureData);
             
-            // Mettre à jour l'affichage
             this.displayProfilePicturesManager();
             this.updateAllSignaturesWithPictures();
             
-            // Fermer le modal
             this.closeProfilePictureModal();
             
-            // Reset
             this.currentUploadedImage = null;
             
             alert(`✅ Profile picture saved for ${this.currentEditingEmail}!`);
@@ -7680,7 +7619,6 @@ class AdminAnalyticsPro {
     }
 
     updateAllSignaturesWithPictures() {
-        // Mettre à jour les signatures avec les photos de profil
         Object.keys(this.emailSignatures).forEach(email => {
             const signature = this.generateSignatureWithPicture(email);
             if (signature) {
@@ -7724,7 +7662,6 @@ class AdminAnalyticsPro {
         
         if (!confirm(`Delete profile picture for ${this.currentEditingEmail}?`)) return;
         
-        // Réinitialiser aux valeurs par défaut
         const defaultData = this.getDefaultProfilePictures()[this.currentEditingEmail];
         
         if (defaultData) {
@@ -7735,6 +7672,29 @@ class AdminAnalyticsPro {
             this.closeProfilePictureModal();
             
             alert('✅ Profile picture reset to default!');
+        }
+    }
+
+    // ========================================
+    // 🛠 UTILITY METHODS
+    // ========================================
+
+    formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    updateStat(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
         }
     }
 }

@@ -2365,6 +2365,45 @@
                                 <p style="color: #64748b; text-align: center; padding: 20px;">No drafts saved</p>
                             </div>
                         </div>
+
+                        <!-- ========================================
+                            🆕 SECTION: SENT EMAILS (EMAILS ENVOYÉS)
+                            ======================================== -->
+                        <div class="table-wrapper" style="margin-top: 24px;">
+                            <div class="section-header-with-actions">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Sent Emails (30 latest)
+                                </h4>
+                                <button class="dashboard-btn btn-secondary" onclick="adminAnalytics.loadSentEmails()">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span class="btn-text">Refresh</span>
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>To</th>
+                                            <th>Subject</th>
+                                            <th>Preview</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gmail-sent-body">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading sent emails...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
