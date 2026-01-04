@@ -2270,15 +2270,15 @@ input[type="text"]:focus {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* ✅✅ NOM D'ENTREPRISE EN BLANC */
+/* ✅✅ NOM D'ENTREPRISE EN BLANC (EXACTEMENT LA MÊME COULEUR) */
 .stock-name {
     display: block;
     font-size: 0.95rem;
     color: white !important;
     font-weight: 600;
     margin-top: 4px;
-    opacity: 0.9;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    opacity: 1 !important; /* ✅ 100% opacité = même couleur que le ticker */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* ✅ Même ombre que le ticker */
 }
 
 /* ✅ DARK MODE SUPPORT */
@@ -2293,14 +2293,14 @@ body.dark-mode .stock-logo-container:hover {
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* ✅ DARK MODE - Texte également en blanc */
+/* ✅ DARK MODE - Texte également en blanc (même couleur) */
 body.dark-mode .stock-info h2 {
     color: white !important;
 }
 
 body.dark-mode .stock-name {
     color: white !important;
-    opacity: 0.85;
+    opacity: 1 !important; /* ✅ 100% opacité en dark mode aussi */
 }
 
 /* ═══════════════════════════════════════════════════════
