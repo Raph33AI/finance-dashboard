@@ -1441,29 +1441,3 @@ body.dark-mode .toast-message {
         opacity: 0.9;
     }
 }
-
-/* Wrappers centrés */
-.following-item-wrapper,
-.follower-item-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Cards centrées */
-.following-item,
-.follower-item {
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-}
-
-/* Contenus centrés */
-.following-item > div,
-.follower-item > div {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    width: 100% !important;
-}
