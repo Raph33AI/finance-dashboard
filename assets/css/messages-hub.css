@@ -2631,8 +2631,43 @@ body.dark-mode .chat-message.own .shared-post-stats {
     background: linear-gradient(135deg, #764ba2, #667eea) !important;
 }
 
-/* ============================================
-   FIN DE LA CORRECTION
-   ============================================ */
+/* ✅ CORRECTION : Channel badge toujours VIOLET */
+.shared-post-channel-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    /* ✅ Forcer le violet */
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+    border-left: 3px solid #667eea !important;
+}
+
+body.dark-mode .shared-post-channel-badge {
+    background: rgba(102, 126, 234, 0.15) !important;
+    color: #818cf8 !important;
+    border-left-color: #818cf8 !important;
+}
+
+.shared-post-channel-badge span:first-child {
+    font-size: 0.85rem;
+}
+
+/* ✅ S'assurer que le texte reste violet mêmee dans .own */
+.chat-message.own .shared-post-channel-badge {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+    border-left-color: #667eea !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-channel-badge {
+    background: rgba(102, 126, 234, 0.15) !important;
+    color: #818cf8 !important;
+    border-left-color: #818cf8 !important;
+}
 
 console.log('✅ messages-hub.css loaded (v3.4 - Complete Premium Edition)');
