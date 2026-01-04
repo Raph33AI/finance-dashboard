@@ -6865,3 +6865,26 @@ body.dark-mode .shared-post-view-btn {
 /* ════════════════════════════════════════════════════════════════
    ✅ FIN DES AJOUTS CSS
    ════════════════════════════════════════════════════════════════ */
+
+   /* ============================================
+   BOOKMARK BUTTON STYLES
+   ============================================ */
+
+.bookmark-btn.saved {
+    background: linear-gradient(135deg, #F59E0B, #F97316) !important;
+    color: white !important;
+    border-color: #F59E0B !important;
+}
+
+.bookmark-btn.saved:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.bookmark-btn i {
+    transition: transform 0.3s ease;
+}
+
+.bookmark-btn.saved i {
+    transform: scale(1.2);
+}

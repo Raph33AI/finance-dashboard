@@ -1256,6 +1256,159 @@ class CommunityFirebaseService {
             return [];
         }
     }
+
+    /* ==========================================
+    🔖 GESTION DES POSTS SAUVEGARDÉS
+    ========================================== */
+
+    /**
+     * Sauvegarder un post dans les favoris de l'utilisateur
+     */
+    async savePost(postId, postData) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) throw new Error('User not authenticated');
+
+            console.log('🔖 Saving post:', postId);
+
+            // Récupérer les infos du channel
+            let channelName = 'Community';
+            let channelIcon = '📰';
+            
+            if (postData.channelId) {
+                try {
+                    const channelDoc = await this.db.collection('channels').doc(postData.channelId).get();
+                    if (channelDoc.exists) {
+                        const channelData = channelDoc.data();
+                        channelName = channelData.name || channelName;
+                        channelIcon = channelData.icon || channelIcon;
+                    }
+                } catch (channelError) {
+                    console.warn('⚠ Could not fetch channel info:', channelError);
+                }
+            }
+
+            const savedPostData = {
+                postId: postId,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                
+                // Snapshot du post
+                postData: {
+                    title: postData.title || 'Untitled Post',
+                    content: postData.content || '',
+                    excerpt: this.stripMarkdown(postData.content || '').substring(0, 200).trim() || 'No preview available',
+                    authorId: postData.authorId,
+                    authorName: postData.authorName || 'Unknown Author',
+                    authorPhoto: postData.authorPhoto || null,
+                    authorPlan: postData.authorPlan || 'free',
+                    channelId: postData.channelId,
+                    channelName: channelName,
+                    channelIcon: channelIcon,
+                    tags: postData.tags || [],
+                    views: postData.views || 0,
+                    likes: postData.likes?.length || 0,
+                    commentsCount: postData.commentsCount || 0,
+                    coverImage: (postData.images && postData.images.length > 0) ? postData.images[0] : null,
+                    createdAt: postData.createdAt || firebase.firestore.Timestamp.now()
+                }
+            };
+
+            await this.db.collection('users')
+                .doc(user.uid)
+                .collection('savedPosts')
+                .doc(postId)
+                .set(savedPostData);
+
+            console.log('✅ Post saved to favorites');
+            return { success: true, saved: true };
+
+        } catch (error) {
+            console.error('❌ Error saving post:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retirer un post des favoris
+     */
+    async unsavePost(postId) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) throw new Error('User not authenticated');
+
+            console.log('🗑 Removing saved post:', postId);
+
+            await this.db.collection('users')
+                .doc(user.uid)
+                .collection('savedPosts')
+                .doc(postId)
+                .delete();
+
+            console.log('✅ Post removed from favorites');
+            return { success: true, saved: false };
+
+        } catch (error) {
+            console.error('❌ Error removing saved post:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Vérifier si un post est sauvegardé
+     */
+    async isPostSaved(postId) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) return false;
+
+            const savedPostDoc = await this.db.collection('users')
+                .doc(user.uid)
+                .collection('savedPosts')
+                .doc(postId)
+                .get();
+
+            return savedPostDoc.exists;
+
+        } catch (error) {
+            console.error('❌ Error checking saved status:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Toggle save/unsave d'un post (similaire à toggleLike)
+     */
+    async toggleSave(postId, postData) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) throw new Error('User not authenticated');
+
+            const isSaved = await this.isPostSaved(postId);
+
+            if (isSaved) {
+                await this.unsavePost(postId);
+                return { saved: false };
+            } else {
+                await this.savePost(postId, postData);
+                return { saved: true };
+            }
+
+        } catch (error) {
+            console.error('❌ Error toggling save:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Utilitaire pour nettoyer le markdown (réutilisé depuis post-manager)
+     */
+    stripMarkdown(text) {
+        if (!text) return '';
+        return text
+            .replace(/[#*_~`]/g, '')
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+            .replace(/\n/g, ' ');
+    }
 }
 
 // Initialiser le service

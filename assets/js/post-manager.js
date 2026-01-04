@@ -71,13 +71,16 @@ class PostManager {
         }
     }
 
-    renderPost() {
+    async renderPost() {
         if (this.loadingElement) {
             this.loadingElement.style.display = 'none';
         }
 
         const isAuthor = this.currentUser && this.post.authorId === this.currentUser.uid;
         const hasLiked = this.post.likes && this.post.likes.includes(this.currentUser?.uid);
+        
+        // ✅ Vérifier si le post est sauvegardé
+        const isSaved = await this.checkIfPostIsSaved();
 
         this.postContainer.innerHTML = `
             ${this.renderPostHeader(isAuthor)}
@@ -88,6 +91,14 @@ class PostManager {
         `;
 
         this.attachEventListeners();
+        
+        // ✅ Mettre à jour le bouton bookmark si nécessaire
+        const bookmarkBtn = this.postContainer.querySelector('[data-action="bookmark"]');
+        if (bookmarkBtn && isSaved) {
+            bookmarkBtn.classList.add('saved');
+            bookmarkBtn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+        }
+        
         document.getElementById('commentsSection').style.display = 'block';
     }
 
@@ -178,6 +189,9 @@ class PostManager {
     }
 
     renderPostActions(hasLiked) {
+        // ✅ CORRECTION : Ajouter le paramètre isSaved
+        const isSaved = false; // Sera mis à jour dans renderPost()
+        
         return `
             <div class="post-actions-bar">
                 <button class="action-btn like-btn ${hasLiked ? 'liked' : ''}" data-action="like">
@@ -188,9 +202,9 @@ class PostManager {
                     <i class="fas fa-share-alt"></i>
                     Share
                 </button>
-                <button class="action-btn bookmark-btn" data-action="bookmark">
+                <button class="action-btn bookmark-btn ${isSaved ? 'saved' : ''}" data-action="bookmark">
                     <i class="fas fa-bookmark"></i>
-                    Save
+                    ${isSaved ? 'Saved' : 'Save'}
                 </button>
             </div>
         `;
@@ -208,6 +222,10 @@ class PostManager {
 
         const shareBtn = this.postContainer.querySelector('[data-action="share"]');
         if (shareBtn) shareBtn.addEventListener('click', () => this.handleShare());
+
+        // ✅ NOUVEAU : Gestionnaire bookmark
+        const bookmarkBtn = this.postContainer.querySelector('[data-action="bookmark"]');
+        if (bookmarkBtn) bookmarkBtn.addEventListener('click', () => this.handleBookmark());
 
         const imageWrappers = this.postContainer.querySelectorAll('.post-image-wrapper');
         imageWrappers.forEach(wrapper => {
@@ -1175,6 +1193,111 @@ class PostManager {
                 </button>
             </div>
         `;
+    }
+
+    // ============================================
+    // 📌 GESTION DES POSTS SAUVEGARDÉS
+    // ============================================
+
+    async handleBookmark() {
+        try {
+            if (!this.currentUser) {
+                alert('Please login to save posts');
+                return;
+            }
+
+            const bookmarkBtn = this.postContainer.querySelector('[data-action="bookmark"]');
+            if (!bookmarkBtn) return;
+
+            // ✅ Utiliser le service
+            const result = await window.communityService.toggleSave(this.postId, this.post);
+
+            if (result.saved) {
+                bookmarkBtn.classList.add('saved');
+                bookmarkBtn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                this.showSuccessNotification('Post saved successfully');
+            } else {
+                bookmarkBtn.classList.remove('saved');
+                bookmarkBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save';
+                this.showSuccessNotification('Post removed from saved');
+            }
+
+        } catch (error) {
+            console.error('❌ Error bookmarking post:', error);
+            alert('Failed to save post');
+        }
+    }
+
+    async savePost() {
+        try {
+            const db = firebase.firestore();
+            const channel = this.channels.find(c => c.id === this.post.channelId);
+            
+            const savedPostData = {
+                postId: this.postId,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                
+                // Snapshot du post
+                postData: {
+                    title: this.post.title || 'Untitled Post',
+                    content: this.post.content || '',
+                    excerpt: this.stripMarkdown(this.post.content || '').substring(0, 200).trim() || 'No preview available',
+                    authorId: this.post.authorId,
+                    authorName: this.post.authorName || 'Unknown Author',
+                    authorPhoto: this.post.authorPhoto || null,
+                    authorPlan: this.post.authorPlan || 'free',
+                    channelId: this.post.channelId,
+                    channelName: channel ? channel.name : 'General',
+                    channelIcon: channel ? channel.icon : '📝',
+                    tags: this.post.tags || [],
+                    views: this.post.views || 0,
+                    likes: this.post.likes?.length || 0,
+                    commentsCount: this.post.commentsCount || 0,
+                    coverImage: (this.post.images && this.post.images.length > 0) ? this.post.images[0] : null,
+                    createdAt: this.post.createdAt || firebase.firestore.Timestamp.now()
+                }
+            };
+
+            await db.collection('users')
+                .doc(this.currentUser.uid)
+                .collection('savedPosts')
+                .doc(this.postId)
+                .set(savedPostData);
+
+            console.log('✅ Post saved to favorites');
+
+        } catch (error) {
+            console.error('❌ Error saving post:', error);
+            throw error;
+        }
+    }
+
+    async unsavePost() {
+        try {
+            const db = firebase.firestore();
+
+            await db.collection('users')
+                .doc(this.currentUser.uid)
+                .collection('savedPosts')
+                .doc(this.postId)
+                .delete();
+
+            console.log('✅ Post removed from favorites');
+
+        } catch (error) {
+            console.error('❌ Error removing saved post:', error);
+            throw error;
+        }
+    }
+
+    async checkIfPostIsSaved() {
+        try {
+            // ✅ Utiliser le service
+            return await window.communityService.isPostSaved(this.postId);
+        } catch (error) {
+            console.error('❌ Error checking saved status:', error);
+            return false;
+        }
     }
 }
 

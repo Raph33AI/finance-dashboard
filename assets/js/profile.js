@@ -446,6 +446,156 @@ async function loadFollowersList() {
     }
 }
 
+// ============================================
+// ✅ GESTION DES POSTS SAUVEGARDÉS
+// ============================================
+
+async function loadSavedPosts() {
+    const savedPostsList = document.getElementById('savedPostsList');
+    const savedPostsCountEl = document.getElementById('savedPostsCount');
+    
+    if (!currentUserData || !currentUserData.uid) return;
+    
+    console.log('🔄 Chargement des posts sauvegardés avec listener temps réel...');
+    
+    try {
+        // ✅ ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
+        firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('savedPosts')
+            .orderBy('savedAt', 'desc')
+            .onSnapshot(async (savedPostsSnapshot) => {
+                
+                console.log(`📊 ${savedPostsSnapshot.size} posts sauvegardés détectés`);
+                
+                if (savedPostsCountEl) {
+                    savedPostsCountEl.textContent = savedPostsSnapshot.size;
+                }
+                
+                if (savedPostsSnapshot.empty) {
+                    savedPostsList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <i class="fas fa-bookmark" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p style="font-size: 1.1rem; font-weight: 700;">No saved posts yet</p>
+                            <p style="font-size: 0.9rem; margin-top: 8px;">Save interesting posts to find them easily!</p>
+                            <a href="community-hub.html" class="btn-save" style="margin-top: 20px; display: inline-flex; text-decoration: none;">
+                                <i class="fas fa-home"></i>
+                                Explore Community
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Récupérer les données des posts sauvegardés
+                const savedPosts = savedPostsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        postId: doc.id,
+                        savedAt: data.savedAt,
+                        ...data.postData
+                    };
+                });
+                
+                // Afficher la liste
+                const savedPostsHTML = savedPosts.map(post => {
+                    const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
+                    const excerpt = post.excerpt || 'No preview available';
+                    const coverImage = post.coverImage || 'https://via.placeholder.com/400x200?text=No+Image';
+                    const savedDate = post.savedAt ? formatRelativeTime(post.savedAt.toDate()) : 'Recently';
+                    
+                    return `
+                        <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
+                            <img 
+                                src="${coverImage}" 
+                                alt="${escapeHtml(post.title)}" 
+                                style="width: 120px; height: 120px; border-radius: 8px; object-fit: cover; flex-shrink: 0;"
+                                onerror="this.src='https://via.placeholder.com/120?text=No+Image'"
+                            >
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 8px;">
+                                        ${channelBadge}
+                                    </span>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                                        <i class="fas fa-clock"></i> Saved ${savedDate}
+                                    </span>
+                                </div>
+                                <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${escapeHtml(post.title)}
+                                </h4>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    ${escapeHtml(excerpt)}
+                                </p>
+                                <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <span><i class="fas fa-eye"></i> ${post.views || 0} views</span>
+                                    <span><i class="fas fa-heart"></i> ${post.likes || 0} likes</span>
+                                    <span><i class="fas fa-comments"></i> ${post.commentsCount || 0} comments</span>
+                                </div>
+                            </div>
+                            <button 
+                                class="btn-danger" 
+                                onclick="event.stopPropagation(); removeSavedPost('${post.postId}')"
+                                style="padding: 10px 20px; height: fit-content; white-space: nowrap;"
+                            >
+                                <i class="fas fa-trash-alt"></i>
+                                Remove
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+                savedPostsList.innerHTML = savedPostsHTML;
+                
+                console.log(`✅ ${savedPosts.length} posts sauvegardés affichés (temps réel)`);
+                
+            }, (error) => {
+                console.error('❌ Erreur listener Saved Posts:', error);
+                savedPostsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #EF4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>Failed to load saved posts</p>
+                    </div>
+                `;
+            });
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des posts sauvegardés:', error);
+        savedPostsList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #EF4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                <p>Failed to load saved posts</p>
+            </div>
+        `;
+    }
+}
+
+async function removeSavedPost(postId) {
+    if (!confirm('Remove this post from your saved posts?')) return;
+    
+    try {
+        if (!currentUserData || !currentUserData.uid) {
+            throw new Error('User not authenticated');
+        }
+        
+        await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('savedPosts')
+            .doc(postId)
+            .delete();
+        
+        showToast('success', 'Success', 'Post removed from saved');
+        
+        console.log('✅ Post retiré des favoris');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du retrait du post sauvegardé:', error);
+        showToast('error', 'Error', 'Failed to remove saved post');
+    }
+}
+
 async function removeFollower(userId) {
     if (!confirm('Are you sure you want to remove this follower?')) return;
     
