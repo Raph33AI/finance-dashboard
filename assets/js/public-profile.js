@@ -259,96 +259,120 @@ class PublicProfile {
             
             console.log('📂 Likes collection path:', likesRef.path);
             
-            // ✅ Récupérer les likes (sans orderBy si pas d'index)
-            let likesSnapshot;
-            try {
-                likesSnapshot = await likesRef
-                    .orderBy('likedAt', 'desc')
-                    .limit(50)
-                    .get();
-            } catch (orderError) {
-                console.warn('⚠ OrderBy failed, trying without ordering:', orderError);
-                likesSnapshot = await likesRef.limit(50).get();
-            }
+            // ✅ Récupérer les likes (sans orderBy pour éviter l'erreur d'index)
+            const likesSnapshot = await likesRef.limit(100).get();
 
             console.log('📊 Liked posts snapshot:', {
                 empty: likesSnapshot.empty,
-                size: likesSnapshot.size,
-                docs: likesSnapshot.docs.length
+                size: likesSnapshot.size
             });
 
             if (likesSnapshot.empty) {
-                console.warn('⚠ No liked posts found');
+                console.log('⚠ No liked posts found');
                 this.likedPosts = [];
                 const countEl = document.getElementById('likedTabCount');
                 if (countEl) countEl.textContent = '0';
                 return;
             }
 
-            const postIds = likesSnapshot.docs.map(doc => {
-                const data = doc.data();
-                console.log('   ✓ Liked post:', {
-                    postId: doc.id,
-                    likedAt: data.likedAt?.toDate(),
-                    data: data
-                });
-                return doc.id;
-            });
+            const likedPostsData = likesSnapshot.docs.map(doc => ({
+                postId: doc.id,
+                likedAt: doc.data().likedAt,
+                ...doc.data()
+            }));
             
-            console.log('📋 Total post IDs to fetch:', postIds.length);
+            console.log('📋 Total liked posts references:', likedPostsData.length);
+            console.log('   Post IDs:', likedPostsData.map(p => p.postId));
 
-            // ✅ NOUVEAU : Chercher dans les 2 collections (posts ET community_posts)
+            // ✅ Récupérer les posts par batch de 10 (limite Firestore)
             const batchSize = 10;
-            const allPosts = [];
+            const validPosts = [];
+            const orphanedPostIds = [];
             
-            for (let i = 0; i < postIds.length; i += batchSize) {
-                const batchIds = postIds.slice(i, i + batchSize);
+            for (let i = 0; i < likedPostsData.length; i += batchSize) {
+                const batchData = likedPostsData.slice(i, i + batchSize);
+                const batchIds = batchData.map(p => p.postId);
+                
                 console.log(`📦 Fetching batch ${Math.floor(i/batchSize) + 1}:`, batchIds);
                 
-                // ✅ Chercher dans la collection "posts"
-                const postsSnapshot = await firebase.firestore()
+                // Chercher dans "posts"
+                const batchSnapshot = await firebase.firestore()
                     .collection('posts')
                     .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
                     .get();
                 
-                console.log(`   ✓ Batch ${Math.floor(i/batchSize) + 1} from 'posts':`, postsSnapshot.size, 'posts');
+                console.log(`   ✓ Found ${batchSnapshot.size} posts in this batch`);
                 
-                // ✅ Chercher dans la collection "community_posts" (ancienne structure)
-                const communityPostsSnapshot = await firebase.firestore()
-                    .collection('community_posts')
-                    .where(firebase.firestore.FieldPath.documentId(), 'in', batchIds)
-                    .get();
+                // Créer un Set des IDs trouvés
+                const foundIds = new Set(batchSnapshot.docs.map(doc => doc.id));
                 
-                console.log(`   ✓ Batch ${Math.floor(i/batchSize) + 1} from 'community_posts':`, communityPostsSnapshot.size, 'posts');
+                // Ajouter les posts trouvés
+                batchSnapshot.docs.forEach(doc => {
+                    const postData = doc.data();
+                    validPosts.push({
+                        id: doc.id,
+                        ...postData,
+                        createdAt: postData.createdAt?.toDate()
+                    });
+                    console.log('      ✅', doc.id);
+                });
                 
-                // ✅ Combiner les résultats
-                allPosts.push(...postsSnapshot.docs);
-                allPosts.push(...communityPostsSnapshot.docs);
+                // Identifier les orphelins
+                batchIds.forEach(postId => {
+                    if (!foundIds.has(postId)) {
+                        orphanedPostIds.push(postId);
+                        console.warn('      ⚠ Orphaned:', postId);
+                    }
+                });
             }
 
-            console.log('📊 Total posts fetched:', allPosts.length);
+            console.log('📊 Results:', {
+                validPosts: validPosts.length,
+                orphanedPosts: orphanedPostIds.length
+            });
 
-            this.likedPosts = allPosts.map(doc => {
-                if (!doc.exists) {
-                    console.warn('⚠ Post not found:', doc.id);
-                    return null;
+            // ✅ NETTOYER les références orphelines automatiquement
+            if (orphanedPostIds.length > 0) {
+                console.log('🧹 Cleaning', orphanedPostIds.length, 'orphaned references...');
+                
+                const currentUser = firebase.auth().currentUser;
+                const canClean = currentUser && currentUser.uid === this.userId;
+                
+                if (canClean) {
+                    const batch = firebase.firestore().batch();
+                    
+                    orphanedPostIds.forEach(orphanedId => {
+                        const ref = firebase.firestore()
+                            .collection('users')
+                            .doc(this.userId)
+                            .collection('likedPosts')
+                            .doc(orphanedId);
+                        
+                        batch.delete(ref);
+                    });
+                    
+                    await batch.commit();
+                    console.log('✅ Orphaned references cleaned successfully');
+                } else {
+                    console.log('⚠ Cannot clean orphaned posts (not the profile owner)');
                 }
-                const postData = doc.data();
-                return {
-                    id: doc.id,
-                    ...postData,
-                    createdAt: postData.createdAt?.toDate()
-                };
-            }).filter(post => post !== null);
+            }
+
+            // ✅ Trier par date de like (du plus récent au plus ancien)
+            this.likedPosts = validPosts.sort((a, b) => {
+                const dateA = a.createdAt || new Date(0);
+                const dateB = b.createdAt || new Date(0);
+                return dateB - dateA;
+            });
 
             const countEl = document.getElementById('likedTabCount');
             if (countEl) countEl.textContent = this.likedPosts.length;
             
-            console.log(`✅ ${this.likedPosts.length} liked posts loaded successfully`);
+            console.log(`✅ ${this.likedPosts.length} valid liked posts loaded`);
             
             // ✅ Force render si on est sur l'onglet "liked"
             if (this.currentTab === 'liked') {
-                console.log('🔄 Forcing render of liked posts tab');
+                console.log('🔄 Rendering liked posts tab');
                 this.renderTabContent();
             }
             
@@ -356,8 +380,7 @@ class PublicProfile {
             console.error('❌ Error loading liked posts:', error);
             console.error('Error details:', {
                 code: error.code,
-                message: error.message,
-                stack: error.stack
+                message: error.message
             });
             
             this.likedPosts = [];
