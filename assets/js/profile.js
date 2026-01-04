@@ -1,8 +1,8 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.2
-   ✅ INFINITE SCROLL avec hauteur fixe par section
-   ✅ Scroll vertical interne (max 4 éléments visibles)
-   ✅ Chargement progressif (4 items par batch)
+   PROFILE.JS - Gestion de la page profil v4.3
+   ✅ SANS DUPLICATION (système anti-doublon renforcé)
+   ✅ 100% RESPONSIVE MOBILE
+   ✅ Scroll vertical interne (max 4 éléments)
    ============================================ */
 
 // Variables globales
@@ -10,7 +10,7 @@ let currentUserData = null;
 let isEditingPersonalInfo = false;
 
 // ============================================
-// 🆕 SYSTÈME D'INFINITE SCROLL AVEC SCROLL INTERNE
+// 🆕 SYSTÈME D'INFINITE SCROLL SANS DUPLICATION
 // ============================================
 
 class InfiniteScrollManager {
@@ -21,10 +21,11 @@ class InfiniteScrollManager {
         this.lastVisible = null;
         this.isLoading = false;
         this.hasMore = true;
-        this.loadedIds = new Set();
+        this.loadedIds = new Set(); // ✅ Anti-duplication
         this.observer = null;
         this.container = null;
         this.sentinel = null;
+        this.loadMoreDebounce = null; // ✅ Débounce pour éviter appels multiples
     }
 
     init() {
@@ -34,33 +35,38 @@ class InfiniteScrollManager {
             return;
         }
 
-        // ✅ APPLIQUER LES STYLES POUR SCROLL INTERNE
-        this.container.style.maxHeight = '600px'; // Hauteur pour ~4 éléments
+        // ✅ STYLES RESPONSIVES
+        const isMobile = window.innerWidth <= 768;
+        this.container.style.maxHeight = isMobile ? '400px' : '600px'; // Hauteur adaptative
         this.container.style.overflowY = 'auto';
         this.container.style.overflowX = 'hidden';
         this.container.style.position = 'relative';
-        this.container.style.paddingRight = '8px'; // Espace pour scrollbar
+        this.container.style.paddingRight = '8px';
         
-        // Vider le container
+        // Vider complètement le container
         this.container.innerHTML = '';
 
-        // Créer le sentinel (élément invisible qui déclenche le chargement)
+        // Créer le sentinel
         this.sentinel = document.createElement('div');
         this.sentinel.id = `${this.listId}-sentinel`;
         this.sentinel.style.cssText = 'height: 1px; width: 100%; pointer-events: none;';
         this.container.appendChild(this.sentinel);
 
-        // ✅ Observer le sentinel DANS le conteneur scrollable
+        // Observer le sentinel
         this.observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !this.isLoading && this.hasMore) {
-                        this.loadMore();
+                        // ✅ Débounce pour éviter appels multiples
+                        clearTimeout(this.loadMoreDebounce);
+                        this.loadMoreDebounce = setTimeout(() => {
+                            this.loadMore();
+                        }, 100);
                     }
                 });
             },
             { 
-                root: this.container, // ✅ Observer le scroll INTERNE
+                root: this.container,
                 threshold: 0,
                 rootMargin: '50px'
             }
@@ -68,33 +74,45 @@ class InfiniteScrollManager {
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId} (internal scroll)`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (responsive)`);
     }
 
     async loadMore() {
-        if (this.isLoading || !this.hasMore) return;
+        if (this.isLoading || !this.hasMore) {
+            console.log(`⏸ ${this.listId}: Skip loading (isLoading: ${this.isLoading}, hasMore: ${this.hasMore})`);
+            return;
+        }
 
         this.isLoading = true;
         this.showLoader();
 
         try {
-            console.log(`📥 Loading batch for ${this.listId}...`);
+            console.log(`📥 Loading batch for ${this.listId}... (Already loaded: ${this.loadedIds.size})`);
             
             const result = await this.loadFunction(this.lastVisible, this.itemsPerPage);
             
             console.log(`✅ Received ${result.items.length} items for ${this.listId}`);
 
-            // Filtrer les doublons
-            const newItems = result.items.filter(item => {
+            // ✅ FILTRAGE STRICT DES DOUBLONS
+            const newItems = [];
+            for (const item of result.items) {
                 const id = item.uid || item.postId;
-                if (this.loadedIds.has(id)) {
-                    return false;
+                
+                if (!id) {
+                    console.warn('⚠ Item without ID:', item);
+                    continue;
                 }
+                
+                if (this.loadedIds.has(id)) {
+                    console.log(`🔄 Duplicate detected and skipped: ${id}`);
+                    continue;
+                }
+                
                 this.loadedIds.add(id);
-                return true;
-            });
+                newItems.push(item);
+            }
 
-            console.log(`✅ ${newItems.length} new items after deduplication`);
+            console.log(`✅ ${newItems.length} new items after strict deduplication (Total loaded: ${this.loadedIds.size})`);
 
             if (newItems.length > 0) {
                 this.render(newItems);
@@ -104,6 +122,7 @@ class InfiniteScrollManager {
             if (result.items.length < this.itemsPerPage) {
                 this.hasMore = false;
                 this.showEndMessage();
+                console.log(`✅ ${this.listId}: No more items to load`);
             }
 
             this.lastVisible = result.lastVisible;
@@ -166,6 +185,8 @@ class InfiniteScrollManager {
     }
 
     reset() {
+        console.log(`🔄 Resetting ${this.listId}...`);
+        
         this.loadedIds.clear();
         this.lastVisible = null;
         this.hasMore = true;
@@ -185,7 +206,7 @@ class InfiniteScrollManager {
             }
         }
 
-        console.log(`🔄 ${this.listId} reset`);
+        console.log(`✅ ${this.listId} reset complete`);
     }
 
     destroy() {
@@ -193,6 +214,7 @@ class InfiniteScrollManager {
             this.observer.disconnect();
             this.observer = null;
         }
+        clearTimeout(this.loadMoreDebounce);
         console.log(`🗑 ${this.listId} destroyed`);
     }
 }
@@ -215,8 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
-    // ✅ Ajouter les styles pour scrollbar personnalisée
+    // ✅ Ajouter les styles responsives
     addCustomScrollbarStyles();
+    addResponsiveStyles();
     
     initializeEventListeners();
     
@@ -233,12 +256,26 @@ window.addEventListener('userDataLoaded', (e) => {
     initInfiniteScroll();
 });
 
+// ✅ Réinitialiser les hauteurs sur resize
+window.addEventListener('resize', () => {
+    const isMobile = window.innerWidth <= 768;
+    const maxHeight = isMobile ? '400px' : '600px';
+    
+    ['followingList', 'followersList', 'savedPostsList'].forEach(listId => {
+        const container = document.getElementById(listId);
+        if (container) {
+            container.style.maxHeight = maxHeight;
+        }
+    });
+});
+
 // ============================================
 // 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE
 // ============================================
 
 function addCustomScrollbarStyles() {
     const style = document.createElement('style');
+    style.id = 'custom-scrollbar-styles';
     style.textContent = `
         /* Scrollbar pour les sections */
         #followingList::-webkit-scrollbar,
@@ -286,13 +323,107 @@ function addCustomScrollbarStyles() {
 }
 
 // ============================================
+// 🆕 STYLES RESPONSIVE MOBILE
+// ============================================
+
+function addResponsiveStyles() {
+    const style = document.createElement('style');
+    style.id = 'profile-responsive-styles';
+    style.textContent = `
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 768px) {
+            /* Réduire padding des cards */
+            .following-item,
+            .follower-item,
+            .saved-post-item {
+                flex-direction: column !important;
+                padding: 12px !important;
+                gap: 12px !important;
+            }
+            
+            /* Centrer avatars sur mobile */
+            .following-item img,
+            .follower-item img {
+                width: 50px !important;
+                height: 50px !important;
+                margin: 0 auto !important;
+            }
+            
+            /* Réduire taille des images de posts */
+            .saved-post-item img {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            /* Adapter les boutons */
+            .following-item button,
+            .follower-item button,
+            .saved-post-item button {
+                width: 100% !important;
+                padding: 8px 16px !important;
+                font-size: 0.9rem !important;
+            }
+            
+            /* Textes plus petits */
+            .following-item h4,
+            .follower-item h4,
+            .saved-post-item h4 {
+                font-size: 1rem !important;
+            }
+            
+            .following-item p,
+            .follower-item p,
+            .saved-post-item p {
+                font-size: 0.85rem !important;
+            }
+            
+            /* Stats en colonne sur très petits écrans */
+            .following-item > div > div,
+            .follower-item > div > div,
+            .saved-post-item > div > div {
+                flex-wrap: wrap !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Hauteur réduite sur très petits écrans */
+            #followingList,
+            #followersList,
+            #savedPostsList {
+                max-height: 350px !important;
+            }
+            
+            /* Réduire encore les avatars */
+            .following-item img,
+            .follower-item img {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            .saved-post-item img {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            
+            /* Titres plus petits */
+            .following-item h4,
+            .follower-item h4,
+            .saved-post-item h4 {
+                font-size: 0.95rem !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// ============================================
 // 🆕 INITIALISATION INFINITE SCROLL
 // ============================================
 
 function initInfiniteScroll() {
     console.log('🔄 Initializing infinite scroll managers...');
 
-    // Détruire les anciens managers si existants
+    // Détruire les anciens managers
     if (followingScrollManager) followingScrollManager.destroy();
     if (followersScrollManager) followersScrollManager.destroy();
     if (savedPostsScrollManager) savedPostsScrollManager.destroy();
@@ -324,7 +455,7 @@ async function loadFollowingBatch(lastVisible, limit) {
         throw new Error('No user data');
     }
 
-    console.log(`📥 Loading following batch (limit: ${limit})...`);
+    console.log(`📥 Loading following batch (limit: ${limit}, lastVisible: ${lastVisible ? 'yes' : 'no'})...`);
 
     let query = firebase.firestore()
         .collection('users')
@@ -368,6 +499,7 @@ async function loadFollowingBatch(lastVisible, limit) {
 
     const validItems = items.filter(item => item !== null);
 
+    // Mettre à jour le compteur une seule fois
     if (!lastVisible) {
         const totalSnapshot = await firebase.firestore()
             .collection('users')
@@ -390,7 +522,9 @@ async function loadFollowingBatch(lastVisible, limit) {
 function renderFollowingItems(newItems) {
     if (newItems.length === 0) return;
 
-    newItems.forEach((user, index) => {
+    const isMobile = window.innerWidth <= 768;
+
+    newItems.forEach((user) => {
         const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
                            user.email?.split('@')[0] || 'Unknown User';
         const avatar = user.photoURL || 
@@ -400,12 +534,13 @@ function renderFollowingItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'following-item-wrapper';
         itemDiv.style.marginBottom = '16px';
+        itemDiv.setAttribute('data-user-id', user.uid); // ✅ Traçabilité
         itemDiv.innerHTML = `
             <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
                     src="${avatar}" 
                     alt="${escapeHtml(displayName)}" 
-                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(59, 130, 246, 0.3); cursor: pointer;"
+                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(59, 130, 246, 0.3); cursor: pointer; flex-shrink: 0;"
                     onclick="window.location.href='public-profile.html?id=${user.uid}'"
                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
                 >
@@ -424,7 +559,7 @@ function renderFollowingItems(newItems) {
                 <button 
                     class="btn-danger" 
                     onclick="unfollowUser('${user.uid}')"
-                    style="padding: 10px 20px; white-space: nowrap;"
+                    style="padding: 10px 20px; white-space: nowrap; flex-shrink: 0;"
                 >
                     <i class="fas fa-user-minus"></i>
                     Unfollow
@@ -459,7 +594,7 @@ async function loadFollowersBatch(lastVisible, limit) {
         throw new Error('No user data');
     }
 
-    console.log(`📥 Loading followers batch (limit: ${limit})...`);
+    console.log(`📥 Loading followers batch (limit: ${limit}, lastVisible: ${lastVisible ? 'yes' : 'no'})...`);
 
     let query = firebase.firestore()
         .collection('users')
@@ -525,7 +660,7 @@ async function loadFollowersBatch(lastVisible, limit) {
 function renderFollowersItems(newItems) {
     if (newItems.length === 0) return;
 
-    newItems.forEach((user, index) => {
+    newItems.forEach((user) => {
         const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
                            user.email?.split('@')[0] || 'Unknown User';
         const avatar = user.photoURL || 
@@ -535,12 +670,13 @@ function renderFollowersItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'follower-item-wrapper';
         itemDiv.style.marginBottom = '16px';
+        itemDiv.setAttribute('data-user-id', user.uid); // ✅ Traçabilité
         itemDiv.innerHTML = `
             <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
                     src="${avatar}" 
                     alt="${escapeHtml(displayName)}" 
-                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer;"
+                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(139, 92, 246, 0.3); cursor: pointer; flex-shrink: 0;"
                     onclick="window.location.href='public-profile.html?id=${user.uid}'"
                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128'"
                 >
@@ -559,7 +695,7 @@ function renderFollowersItems(newItems) {
                 <button 
                     class="btn-secondary" 
                     onclick="removeFollower('${user.uid}')"
-                    style="padding: 10px 20px; white-space: nowrap;"
+                    style="padding: 10px 20px; white-space: nowrap; flex-shrink: 0;"
                 >
                     <i class="fas fa-user-times"></i>
                     Remove
@@ -590,8 +726,9 @@ async function loadSavedPostsBatch(lastVisible, limit) {
         throw new Error('No user data');
     }
 
-    console.log(`📥 Loading saved posts batch (limit: ${limit})...`);
+    console.log(`📥 Loading saved posts batch (limit: ${limit}, lastVisible: ${lastVisible ? 'yes' : 'no'})...`);
 
+    // ✅ IMPORTANT: Pas d'orderBy ici car savedPosts n'a pas d'index
     let query = firebase.firestore()
         .collection('users')
         .doc(currentUserData.uid)
@@ -606,12 +743,14 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 
     console.log(`✅ Saved posts snapshot size: ${snapshot.size}`);
 
+    // ✅ Tri manuel APRÈS récupération
     const items = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
             postId: doc.id,
             savedAt: data.savedAt,
-            ...data.postData
+            ...data.postData,
+            _docSnapshot: doc // ✅ Garder le snapshot pour pagination
         };
     }).sort((a, b) => {
         if (!a.savedAt) return 1;
@@ -641,7 +780,7 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 function renderSavedPostsItems(newItems) {
     if (newItems.length === 0) return;
 
-    newItems.forEach((post, index) => {
+    newItems.forEach((post) => {
         const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
         const cleanExcerpt = cleanHtmlContent(post.excerpt || post.content || 'No preview available');
         const coverImage = post.coverImage || 'https://via.placeholder.com/400x200?text=No+Image';
@@ -658,6 +797,7 @@ function renderSavedPostsItems(newItems) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'saved-post-item-wrapper';
         itemDiv.style.marginBottom = '16px';
+        itemDiv.setAttribute('data-post-id', post.postId); // ✅ Traçabilité
         itemDiv.innerHTML = `
             <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
                 <img 
@@ -667,7 +807,7 @@ function renderSavedPostsItems(newItems) {
                     onerror="this.src='https://via.placeholder.com/120?text=No+Image'"
                 >
                 <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                         <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 8px;">
                             ${channelBadge}
                         </span>
@@ -681,7 +821,7 @@ function renderSavedPostsItems(newItems) {
                     <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                         ${cleanExcerpt}
                     </p>
-                    <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                    <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary); flex-wrap: wrap;">
                         <span><i class="fas fa-eye"></i> ${post.views || 0} views</span>
                         <span><i class="fas fa-heart"></i> ${post.likes || 0} likes</span>
                         <span><i class="fas fa-comments"></i> ${post.commentsCount || 0} comments</span>
@@ -690,7 +830,7 @@ function renderSavedPostsItems(newItems) {
                 <button 
                     class="btn-danger" 
                     onclick="event.stopPropagation(); removeSavedPost('${post.postId}')"
-                    style="padding: 10px 20px; height: fit-content; white-space: nowrap;"
+                    style="padding: 10px 20px; height: fit-content; white-space: nowrap; flex-shrink: 0;"
                 >
                     <i class="fas fa-trash-alt"></i>
                     Remove
@@ -751,8 +891,11 @@ async function unfollowUser(userId) {
         
         showToast('success', 'Success', 'User unfollowed successfully');
         
+        // ✅ Reset complet pour éviter duplications
         followingScrollManager.reset();
-        followingScrollManager.loadMore();
+        setTimeout(() => {
+            followingScrollManager.loadMore();
+        }, 100);
         
     } catch (error) {
         console.error('❌ Error unfollowing:', error);
@@ -791,8 +934,11 @@ async function removeFollower(userId) {
         
         showToast('success', 'Success', 'Follower removed successfully');
         
+        // ✅ Reset complet
         followersScrollManager.reset();
-        followersScrollManager.loadMore();
+        setTimeout(() => {
+            followersScrollManager.loadMore();
+        }, 100);
         
     } catch (error) {
         console.error('❌ Error removing follower:', error);
@@ -817,8 +963,11 @@ async function removeSavedPost(postId) {
         
         showToast('success', 'Success', 'Post removed from saved');
         
+        // ✅ Reset complet
         savedPostsScrollManager.reset();
-        savedPostsScrollManager.loadMore();
+        setTimeout(() => {
+            savedPostsScrollManager.loadMore();
+        }, 100);
         
     } catch (error) {
         console.error('❌ Error removing saved post:', error);
@@ -1415,7 +1564,7 @@ async function logout() {
     }
 }
 
-// Animation de sortie pour les toast
+// Animation de sortie pour les toasts
 const toastStyle = document.createElement('style');
 toastStyle.textContent = `
     @keyframes slideOutRight {
@@ -1431,4 +1580,4 @@ toastStyle.textContent = `
 `;
 document.head.appendChild(toastStyle);
 
-console.log('✅ Script de profil chargé (v4.2 - Scroll interne par section)');
+console.log('✅ Script de profil chargé (v4.3 - Sans duplication + Responsive Mobile)');
