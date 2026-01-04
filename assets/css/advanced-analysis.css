@@ -4956,3 +4956,212 @@ body.dark-mode .ai-factor-item {
 }
 
 /* ✅ FIN DU CSS OPTIMISÉ */
+
+/* ═══════════════════════════════════════════════════════
+   🏢 COMPANY LOGOS SYSTEM - ADVANCED ANALYSIS
+   ═══════════════════════════════════════════════════════ */
+
+/* ✅ Logo Container dans Stock Header */
+.stock-logo-container {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(102, 126, 234, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.stock-logo-container:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* ✅ Logo Image */
+.stock-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 10px;
+    transition: transform 0.3s ease;
+}
+
+.stock-logo-container:hover .stock-logo {
+    transform: scale(1.08);
+}
+
+/* ✅ Fallback Initiales */
+.logo-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.5px;
+}
+
+/* ✅ Adaptation Stock Header avec Logo */
+.stock-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.stock-info h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stock-name {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #64748b);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* ✅ DARK MODE SUPPORT */
+body.dark-mode .stock-logo-container {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
+    border-color: rgba(102, 126, 234, 0.25);
+}
+
+body.dark-mode .stock-logo-container:hover {
+    border-color: rgba(102, 126, 234, 0.45);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   📊 WATCHLIST LOGOS (si applicable)
+   ═══════════════════════════════════════════════════════ */
+
+.watchlist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.watchlist-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateX(4px);
+}
+
+.watchlist-logo {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1.5px solid rgba(102, 126, 234, 0.12);
+}
+
+.watchlist-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+}
+
+.watchlist-logo .logo-initials {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.watchlist-ticker {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary, #1e293b);
+}
+
+.watchlist-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #64748b);
+    font-weight: 500;
+}
+
+/* ✅ DARK MODE - Watchlist */
+body.dark-mode .watchlist-item {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(71, 85, 105, 0.3);
+}
+
+body.dark-mode .watchlist-item:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .watchlist-logo {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .stock-logo-container {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+        border-radius: 12px;
+    }
+    
+    .logo-initials {
+        font-size: 1.1rem;
+    }
+    
+    .stock-info {
+        gap: 12px;
+    }
+    
+    .stock-info h2 {
+        font-size: 1.5rem;
+    }
+    
+    .watchlist-logo {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    
+    .watchlist-logo .logo-initials {
+        font-size: 0.85rem;
+    }
+}
