@@ -2197,33 +2197,33 @@ input[type="text"]:focus {
 }
 
 /* ═══════════════════════════════════════════════════════
-   🏢 COMPANY LOGOS SYSTEM - ALPHAVAULT SCORE ENGINE
+   🏢 COMPANY LOGOS SYSTEM - STOCK HEADER
    ═══════════════════════════════════════════════════════ */
 
-/* ✅ Logo Container dans Stock Header */
+/* ✅ Logo Container */
 .stock-logo-container {
     width: 64px;
     height: 64px;
     min-width: 64px;
     min-height: 64px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.08));
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    border: 2px solid rgba(102, 126, 234, 0.15);
+    border: 2px solid rgba(102, 126, 234, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
 .stock-logo-container:hover {
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2),
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    border-color: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.4);
 }
 
 /* ✅ Logo Image */
@@ -2254,83 +2254,56 @@ input[type="text"]:focus {
     letter-spacing: 0.5px;
 }
 
-/* ✅ Adaptation Stock Header avec Logo */
+/* ✅ Adaptation Stock Info avec Logo */
 .stock-info {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-/* ✅✅ TICKER EN BLANC */
+/* ✅✅ TICKER EN VIOLET (gradient) */
 .stock-info h2 {
     margin: 0;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 900;
-    color: white !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
-/* ✅✅ NOM D'ENTREPRISE EN BLANC (EXACTEMENT LA MÊME COULEUR) */
+/* ✅✅ NOM D'ENTREPRISE EN VIOLET */
 .stock-name {
     display: block;
-    font-size: 0.95rem;
-    color: white !important;
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
     font-weight: 600;
+    color: var(--ml-primary) !important;
     margin-top: 4px;
-    opacity: 1 !important; /* ✅ 100% opacité = même couleur que le ticker */
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* ✅ Même ombre que le ticker */
+    opacity: 1 !important;
 }
 
-/* ✅ DARK MODE SUPPORT */
-body.dark-mode .stock-logo-container {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
-    border-color: rgba(102, 126, 234, 0.25);
+/* ✅ Stock Price Info (à droite) */
+.stock-price {
+    text-align: right;
 }
 
-body.dark-mode .stock-logo-container:hover {
-    border-color: rgba(102, 126, 234, 0.45);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.stock-price .price {
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
+    font-weight: 800;
+    background: var(--ml-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
 }
 
-/* ✅ DARK MODE - Texte également en blanc (même couleur) */
-body.dark-mode .stock-info h2 {
-    color: white !important;
+.stock-price .change {
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
+    font-weight: 600;
 }
 
-body.dark-mode .stock-name {
-    color: white !important;
-    opacity: 1 !important; /* ✅ 100% opacité en dark mode aussi */
-}
-
-/* ═══════════════════════════════════════════════════════
-   📱 RESPONSIVE
-   ═══════════════════════════════════════════════════════ */
-
-@media (max-width: 768px) {
-    .stock-logo-container {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        min-height: 48px;
-        border-radius: 12px;
-    }
-    
-    .logo-initials {
-        font-size: 1.1rem;
-    }
-    
-    .stock-info {
-        gap: 12px;
-    }
-    
-    .stock-info h2 {
-        font-size: 1.5rem;
-    }
-    
-    .stock-name {
-        font-size: 0.85rem;
-    }
+.change.neutral {
+    color: var(--text-secondary);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2343,7 +2316,7 @@ body.dark-mode .stock-name {
     gap: 16px;
     margin-top: 24px;
     padding-top: 24px;
-    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid rgba(102, 126, 234, 0.15);
 }
 
 /* ✅ Badge Individuel */
@@ -2351,32 +2324,31 @@ body.dark-mode .stock-name {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.06));
     backdrop-filter: blur(20px) saturate(180%);
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(102, 126, 234, 0.2);
     border-radius: 16px;
     padding: 14px 20px;
     flex: 1;
     min-width: 200px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .parameter-badge:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12));
-    border-color: rgba(255, 255, 255, 0.35);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    border-color: rgba(102, 126, 234, 0.35);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* ✅ Icône du Badge */
 .parameter-badge > i {
     font-size: 1.8rem;
-    color: white;
     opacity: 0.95;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 6px rgba(102, 126, 234, 0.2));
     transition: transform 0.3s ease;
 }
 
@@ -2384,17 +2356,17 @@ body.dark-mode .stock-name {
     transform: scale(1.15) rotate(-5deg);
 }
 
-/* ✅ Couleurs spécifiques par badge */
+/* ✅ Couleurs spécifiques par badge (VIOLET THEME) */
 #horizonBadge > i {
-    color: #60a5fa; /* Bleu clair */
+    color: #667eea; /* Bleu violet */
 }
 
 #trainingBadge > i {
-    color: #34d399; /* Vert */
+    color: #8b5cf6; /* Violet */
 }
 
 #modelsBadge > i {
-    color: #a78bfa; /* Violet */
+    color: #a78bfa; /* Violet clair */
 }
 
 /* ✅ Informations du Badge */
@@ -2410,15 +2382,16 @@ body.dark-mode .stock-name {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    color: rgba(102, 126, 234, 0.7);
 }
 
 .parameter-value {
     font-size: 1.1rem;
     font-weight: 900;
-    color: white;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     line-height: 1.2;
 }
 
@@ -2454,26 +2427,64 @@ body.dark-mode .stock-name {
    🌙 DARK MODE
    ═══════════════════════════════════════════════════════ */
 
+body.dark-mode .stock-logo-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.12));
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .stock-logo-container:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ✅ DARK MODE - Texte reste en violet gradient */
+body.dark-mode .stock-info h2 {
+    background: linear-gradient(135deg, #818cf8, #a78bfa) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+body.dark-mode .stock-name {
+    color: #a78bfa !important;
+}
+
 body.dark-mode .analysis-parameters {
-    border-top-color: rgba(71, 85, 105, 0.3);
+    border-top-color: rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .parameter-badge {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.5));
-    border-color: rgba(71, 85, 105, 0.4);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    border-color: rgba(102, 126, 234, 0.3);
 }
 
 body.dark-mode .parameter-badge:hover {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.7));
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.18), rgba(118, 75, 162, 0.15));
     border-color: rgba(102, 126, 234, 0.5);
 }
 
 body.dark-mode .parameter-label {
-    color: rgba(241, 245, 249, 0.6);
+    color: rgba(129, 140, 248, 0.7);
 }
 
 body.dark-mode .parameter-value {
-    color: rgba(241, 245, 249, 0.95);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-mode #horizonBadge > i {
+    color: #818cf8;
+}
+
+body.dark-mode #trainingBadge > i {
+    color: #a78bfa;
+}
+
+body.dark-mode #modelsBadge > i {
+    color: #c4b5fd;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2505,6 +2516,30 @@ body.dark-mode .parameter-value {
 }
 
 @media (max-width: 768px) {
+    .stock-logo-container {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+        border-radius: 12px;
+    }
+    
+    .logo-initials {
+        font-size: 1.1rem;
+    }
+    
+    .stock-info {
+        gap: 12px;
+    }
+    
+    .stock-info h2 {
+        font-size: 1.5rem;
+    }
+    
+    .stock-name {
+        font-size: 0.85rem;
+    }
+    
     .analysis-parameters {
         flex-direction: column;
         gap: 10px;
@@ -2516,9 +2551,35 @@ body.dark-mode .parameter-value {
         min-width: unset;
         width: 100%;
     }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stock-price {
+        text-align: left;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
+    .stock-logo-container {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 10px;
+    }
+    
+    .logo-initials {
+        font-size: 1rem;
+    }
+    
+    .stock-info {
+        gap: 10px;
+    }
+    
     .parameter-badge {
         padding: 10px 14px;
         gap: 10px;
