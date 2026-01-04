@@ -672,7 +672,8 @@ class AdminAnalyticsPro {
                 this.loadCloudflareCache(),
                 this.loadCloudflareReferrers(),
                 this.loadGmailStats(),
-                this.loadGmailInbox()
+                this.loadGmailInbox(),
+                this.loadSentEmails()
             ]);
             console.log('✅ Third-party analytics loaded');
             
@@ -5686,6 +5687,223 @@ class AdminAnalyticsPro {
         window.paginationManagers['gmail-sent-body'].render();
         
         console.log(`✅ Sent emails displayed (${messages.length} emails)`);
+    }
+
+    // ========================================
+    // 📬 MODALS: OPEN/CLOSE INBOX & SENT
+    // ========================================
+
+    openInboxModal() {
+        console.log('📬 Opening Inbox modal...');
+        
+        const modal = document.getElementById('inbox-modal');
+        if (!modal) {
+            console.error('❌ Inbox modal not found');
+            return;
+        }
+        
+        // Charger les emails si pas encore chargés
+        if (!this.gmailInbox || this.gmailInbox.length === 0) {
+            this.loadGmailInbox();
+        }
+        
+        // Remplir le tbody de la modal
+        this.displayInboxInModal();
+        
+        modal.style.display = 'flex';
+        console.log('✅ Inbox modal opened');
+    }
+
+    closeInboxModal() {
+        const modal = document.getElementById('inbox-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        console.log('✅ Inbox modal closed');
+    }
+
+    displayInboxInModal() {
+        const tbody = document.getElementById('inbox-modal-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (!this.gmailInbox || this.gmailInbox.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No emails available</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        this.gmailInbox.forEach((email, index) => {
+            const row = document.createElement('tr');
+            
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                this.viewEmail(email.id);
+            };
+            
+            if (email.isUnread) {
+                row.style.fontWeight = '600';
+                row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+            }
+            
+            row.onmouseenter = () => {
+                row.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+            };
+            row.onmouseleave = () => {
+                if (email.isUnread) {
+                    row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                } else {
+                    row.style.backgroundColor = '';
+                }
+            };
+            
+            const categoryBadge = this.getEmailCategoryBadge(email.category);
+            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.isUnread ? '<i class="fas fa-circle" style="font-size: 6px; color: #3b82f6; margin-right: 8px;"></i>' : ''}
+                    ${email.from}
+                </td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.subject}
+                </td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
+                    ${email.snippet}
+                </td>
+                <td>${categoryBadge}</td>
+                <td>${date}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openReplyModal('${email.id}')" title="Reply">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.markEmailAsRead('${email.id}')" title="Mark as read">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.archiveEmail('${email.id}')" title="Archive">
+                        <i class="fas fa-archive"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Inbox modal populated with ${this.gmailInbox.length} emails`);
+    }
+
+    openSentModal() {
+        console.log('📤 Opening Sent modal...');
+        
+        const modal = document.getElementById('sent-modal');
+        if (!modal) {
+            console.error('❌ Sent modal not found');
+            return;
+        }
+        
+        // Charger les emails envoyés si pas encore chargés
+        if (!this.gmailSent || this.gmailSent.length === 0) {
+            this.loadSentEmails();
+        }
+        
+        // Remplir le tbody de la modal
+        this.displaySentInModal();
+        
+        modal.style.display = 'flex';
+        console.log('✅ Sent modal opened');
+    }
+
+    closeSentModal() {
+        const modal = document.getElementById('sent-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        console.log('✅ Sent modal closed');
+    }
+
+    displaySentInModal() {
+        const tbody = document.getElementById('sent-modal-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (!this.gmailSent || this.gmailSent.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-paper-plane" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 0;">No sent emails</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        this.gmailSent.forEach((email, index) => {
+            const row = document.createElement('tr');
+            
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                this.viewEmail(email.id);
+            };
+            
+            row.onmouseenter = () => {
+                row.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+            };
+            row.onmouseleave = () => {
+                row.style.backgroundColor = '';
+            };
+            
+            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <i class="fas fa-paper-plane" style="font-size: 10px; color: #10b981; margin-right: 8px;"></i>
+                    ${email.to}
+                </td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${email.subject}
+                </td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
+                    ${email.snippet || ''}
+                </td>
+                <td>${date}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')" title="View">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+        
+        console.log(`✅ Sent modal populated with ${this.gmailSent.length} emails`);
     }
 
     getEmailCategoryBadge(category) {

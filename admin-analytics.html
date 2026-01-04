@@ -2109,11 +2109,24 @@
                                 <span class="section-subtitle">@alphavault-ai.com</span>
                             </h2>
                             <div class="header-actions-group">
+                                <!-- 🆕 BOUTON OUVRIR INBOX -->
+                                <button class='dashboard-btn btn-primary' onclick="adminAnalytics.openInboxModal()">
+                                    <i class='fas fa-inbox'></i>
+                                    <span class="btn-text">Received</span>
+                                </button>
+                                
+                                <!-- 🆕 BOUTON OUVRIR SENT -->
+                                <button class='dashboard-btn btn-primary' onclick="adminAnalytics.openSentModal()">
+                                    <i class='fas fa-paper-plane'></i>
+                                    <span class="btn-text">Sent</span>
+                                </button>
+                                
                                 <!-- BOUTON COMPOSER -->
                                 <button class='dashboard-btn btn-primary' onclick="adminAnalytics.openComposeModal()">
                                     <i class='fas fa-pen'></i>
                                     <span class="btn-text">Compose</span>
                                 </button>
+                                
                                 <button class='dashboard-btn dashboard-btn-export' onclick="adminAnalytics.exportData('gmail')">
                                     <i class='fas fa-file-csv'></i>
                                     <span class="btn-text">Export</span>
@@ -2842,6 +2855,87 @@
                     });
                 });
                 </script>
+
+                <!-- ========================================
+                    MODAL: INBOX (EMAILS REÇUS)
+                    ======================================== -->
+                <div id="inbox-modal" class="gmail-modal">
+                    <div class="gmail-modal-content gmail-modal-large">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-inbox"></i> Inbox - Received Emails</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeInboxModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>From</th>
+                                            <th>Subject</th>
+                                            <th>Preview</th>
+                                            <th>Category</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inbox-modal-body">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.closeInboxModal()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                    MODAL: SENT (EMAILS ENVOYÉS)
+                    ======================================== -->
+                <div id="sent-modal" class="gmail-modal">
+                    <div class="gmail-modal-content gmail-modal-large">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-paper-plane"></i> Sent Emails</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeSentModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>To</th>
+                                            <th>Subject</th>
+                                            <th>Preview</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sent-modal-body">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.closeSentModal()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- ========================================
                      SECTION: ML PREDICTIONS
