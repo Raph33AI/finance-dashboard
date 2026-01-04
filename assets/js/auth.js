@@ -780,7 +780,8 @@ function clearAllErrors() {
 // ============================================
 
 /**
- * Enable/disable button loading state
+ * Enable/disable button loading state (WITHOUT SPINNER)
+ * ✅ VERSION SANS ANIMATION
  */
 function setButtonLoading(buttonId, isLoading) {
     const button = document.getElementById(buttonId);
@@ -788,11 +789,13 @@ function setButtonLoading(buttonId, isLoading) {
     if (!button) return;
     
     if (isLoading) {
-        button.classList.add('loading');
         button.disabled = true;
+        button.style.opacity = '0.7'; // Optionnel : effet visuel discret
+        button.style.cursor = 'not-allowed';
     } else {
-        button.classList.remove('loading');
         button.disabled = false;
+        button.style.opacity = '1';
+        button.style.cursor = 'pointer';
     }
 }
 
