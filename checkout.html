@@ -8,37 +8,19 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/checkout.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Font Awesome -->
@@ -46,9 +28,6 @@
     
     <!-- Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
-    
-    <!-- Favicon -->
-    <!-- <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg"> -->
 </head>
 
 <body class="checkout-page">
@@ -82,20 +61,29 @@
 
         <!-- Plan Selector -->
         <div class="plan-selector">
-            <!-- ✅ BASIC PLAN - Fonctionnalités mises à jour -->
-            <div class="plan-option selected" data-plan="basic">
+            <!-- ═══════════════════════════════════════════════════════
+                 BASIC PLAN - 9 PAGES
+                 ═══════════════════════════════════════════════════ -->
+            <div class="plan-option" data-plan="basic">
                 <h3 class="plan-name">AlphaVault Basic</h3>
                 <div class="plan-price">
                     <span class="amount">FREE</span>
                 </div>
                 <ul class="plan-features">
-                    <!-- ✅ Pages Basic incluses -->
-                    <li><i class="fas fa-check-circle"></i> Financial Dashboard</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>9 Pages Access</strong></li>
+                    <li><i class="fas fa-check-circle"></i> Dashboard Budget</li>
+                    <li><i class="fas fa-check-circle"></i> Community Hub</li>
                     <li><i class="fas fa-check-circle"></i> Monte Carlo Simulations</li>
                     <li><i class="fas fa-check-circle"></i> Portfolio Optimizer</li>
+                    <li><i class="fas fa-check-circle"></i> Real Estate Simulator</li>
+                    <li><i class="fas fa-check-circle"></i> Economic Dashboard</li>
+                    <li><i class="fas fa-check-circle"></i> Companies Directory</li>
                 </ul>
             </div>
-            <!-- ✅ PRO PLAN - Fonctionnalités mises à jour -->
+            
+            <!-- ═══════════════════════════════════════════════════════
+                 PRO PLAN - 17 PAGES
+                 ═══════════════════════════════════════════════════ -->
             <div class="plan-option selected" data-plan="pro" data-price="10">
                 <div class="plan-badge">🔥 Most Popular</div>
                 <h3 class="plan-name">AlphaVault Pro</h3>
@@ -105,26 +93,22 @@
                     <span class="period">/month</span>
                 </div>
                 <ul class="plan-features">
-                    <!-- ✅ Pages Basic incluses -->
-                    <li><i class="fas fa-check-circle"></i> Financial Dashboard</li>
-                    <li><i class="fas fa-check-circle"></i> Monte Carlo Simulations</li>
-                    <li><i class="fas fa-check-circle"></i> Portfolio Optimizer</li>
-                    
-                    <!-- ✅ Pages Pro exclusives -->
+                    <li><i class="fas fa-check-circle"></i> <strong>17 Pages Access</strong></li>
+                    <li><i class="fas fa-check-circle"></i> Everything in Basic</li>
                     <li><i class="fas fa-check-circle"></i> Investment Analytics</li>
-                    <li><i class="fas fa-check-circle"></i> Risk Parity Optimization</li>
+                    <li><i class="fas fa-check-circle"></i> Risk Parity</li>
                     <li><i class="fas fa-check-circle"></i> Scenario Analysis</li>
-                    <li><i class="fas fa-check-circle"></i> Real-Time Market Data</li>
-                    <li><i class="fas fa-check-circle"></i> Trend Prediction AI</li>
-                    <li><i class="fas fa-check-circle"></i> Market Intelligence</li>
-                    
-                    <!-- ✅ Fonctionnalités supplémentaires -->
-                    <li><i class="fas fa-check-circle"></i> Unlimited Alphy AI Chatbot</li>
-                    <li><i class="fas fa-check-circle"></i> Advanced Analytics Tools</li>
+                    <li><i class="fas fa-check-circle"></i> Advanced Analysis (14 indicators)</li>
+                    <li><i class="fas fa-check-circle"></i> Forex Converter (38 currencies)</li>
+                    <li><i class="fas fa-check-circle"></i> Inflation Calculator</li>
+                    <li><i class="fas fa-check-circle"></i> Interest Rate Tracker</li>
+                    <li><i class="fas fa-check-circle"></i> News Terminal</li>
                 </ul>
             </div>
 
-            <!-- ✅ PLATINUM PLAN - Fonctionnalités mises à jour -->
+            <!-- ═══════════════════════════════════════════════════════
+                 PLATINUM PLAN - 25 PAGES (AI/ML)
+                 ═══════════════════════════════════════════════════ -->
             <div class="plan-option" data-plan="platinum" data-price="20">
                 <div class="plan-badge platinum">💎 Platinum</div>
                 <h3 class="plan-name">AlphaVault Platinum</h3>
@@ -134,26 +118,22 @@
                     <span class="period">/month</span>
                 </div>
                 <ul class="plan-features">
-                    <!-- ✅ Tout ce qui est dans Pro -->
-                    <li><i class="fas fa-check-circle"></i> Everything in Pro Plan</li>
-                    
-                    <!-- ✅ Pages Platinum exclusives -->
-                    <li><i class="fas fa-check-circle"></i> Advanced Analysis Tools</li>
-                    <li><i class="fas fa-check-circle"></i> Analyst Coverage & Ratings</li>
-                    <li><i class="fas fa-check-circle"></i> Full-Page AI Chatbot</li>
-                    <li><i class="fas fa-check-circle"></i> Company Deep Insights</li>
-                    <li><i class="fas fa-check-circle"></i> Earnings & Estimates Reports</li>
-                    
-                    <!-- ✅ Fonctionnalités Platinum exclusives -->
-                    <li><i class="fas fa-check-circle"></i> Advanced M&A Screening</li>
-                    <li><i class="fas fa-check-circle"></i> White-Label Reports</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>25 Pages - Full Platform</strong></li>
+                    <li><i class="fas fa-check-circle"></i> Everything in Pro</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>IPO Intelligence</strong> (AI Scoring)</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Insider Flow Tracker</strong> (14 classes)</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>M&A Predictor</strong> (6 AI factors)</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Trend Prediction ML</strong></li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Market Sentiment</strong> (AI)</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Trending Topics</strong></li>
+                    <li><i class="fas fa-check-circle"></i> <strong>YouTube Intelligence</strong></li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Recession Indicators</strong></li>
                     <li><i class="fas fa-check-circle"></i> Priority Support 24/7</li>
-                    <li><i class="fas fa-check-circle"></i> Black-Litterman Optimization</li>
                 </ul>
             </div>
         </div>
 
-        <!-- ✅ Section Code Promo (SANS suggestions de codes) -->
+        <!-- Promo Section -->
         <div class="promo-section">
             <h3 class="promo-title">
                 <i class="fas fa-tag"></i>
@@ -174,10 +154,8 @@
                 </button>
             </div>
             
-            <!-- Message de validation/erreur -->
             <div id="promoMessage" class="promo-message hidden"></div>
             
-            <!-- Affichage de la réduction appliquée -->
             <div id="promoApplied" class="promo-applied hidden">
                 <div class="promo-badge-success">
                     <i class="fas fa-check-circle"></i>
@@ -189,7 +167,7 @@
             </div>
         </div>
 
-        <!-- ✅ Récapitulatif des Prix -->
+        <!-- Price Summary -->
         <div class="price-summary">
             <div class="summary-row">
                 <span class="summary-label">Selected Plan:</span>
@@ -219,13 +197,11 @@
                 </div>
             </div>
             
-            <!-- Badge pour accès gratuit à vie -->
             <div class="free-access-badge hidden" id="freeAccessBadge">
                 <i class="fas fa-gift"></i>
                 <span>Free lifetime access included!</span>
             </div>
             
-            <!-- ✅ Badge pour accès trial 14 jours -->
             <div class="free-access-badge hidden" id="trialAccessBadge" style="background: linear-gradient(135deg, #10b981, #059669); border-color: rgba(16, 185, 129, 0.4);">
                 <i class="fas fa-clock"></i>
                 <span><span id="trialDays">14</span>-day free access - No credit card required!</span>
@@ -263,10 +239,8 @@
                 >
             </div>
 
-            <!-- ✅ Groupe de carte bancaire (peut être caché dynamiquement) -->
             <div class="form-group" id="cardDetailsGroup">
                 <label for="card-element" class="form-label">Card Details</label>
-                <!-- Stripe Card Element sera inséré ici -->
                 <div id="card-element"></div>
                 <div id="card-errors" role="alert"></div>
             </div>

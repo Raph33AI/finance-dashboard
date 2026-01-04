@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL SYSTEM - AlphaVault AI
-   VERSION 4.3 - TRIAL RATE LIMITING CORRECTION
-   Trial = Pro rate limits (6/min, 200/day)
+   VERSION 5.0 - RÉPARTITION PRO/PLATINUM OPTIMISÉE
+   Gap élevé entre Pro et Platinum (AI/ML features exclusives)
    ═══════════════════════════════════════════════════════════════ */
 
-console.log('🔐 Access Control System v4.3 initialized');
+console.log('🔐 Access Control System v5.0 initialized');
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION DES PLANS ET ACCÈS
@@ -21,7 +21,7 @@ const ACCESS_LEVELS = {
         message: 'Please choose a subscription plan to access our features.'
     },
     
-    // ✅✅✅ PLAN GRATUIT (DOIT AVOIR STATUT ACTIF)
+    // ✅ PLAN GRATUIT (DOIT AVOIR STATUT ACTIF)
     free: {
         name: 'Free',
         level: 0,
@@ -29,18 +29,15 @@ const ACCESS_LEVELS = {
         requiresExplicitActivation: true,
         pages: [
             'dashboard-financier.html',
-            'real-estate-tax-simulator.html',
-            'monte-carlo.html',
-            'economic-dashboard.html',
-            'portfolio-optimizer.html'
+            'community-hub.html',
+            'create-post.html',
+            'messages.html',
+            'monte-carlo.html'
         ],
         features: [
             'portfolio-tracking',
-            'real-estate',
-            'basic-data',
-            'monte-carlo-basic',
-            'macro-economic',
-            'portfolio-optimization-basic'
+            'community',
+            'monte-carlo-basic'
         ]
     },
     
@@ -51,18 +48,24 @@ const ACCESS_LEVELS = {
         requiresActiveSubscription: true,
         pages: [
             'dashboard-financier.html',
-            'real-estate-tax-simulator.html',
+            'community-hub.html',
+            'create-post.html',
+            'messages.html',
             'monte-carlo.html',
+            'real-estate-tax-simulator.html',
+            'portfolio-optimizer.html',
             'economic-dashboard.html',
-            'portfolio-optimizer.html'
+            'companies-directory.html'
         ],
         features: [
             'portfolio-tracking',
+            'community',
             'real-estate',
             'basic-data',
             'monte-carlo-basic',
             'macro-economic',
-            'portfolio-optimization-basic'
+            'portfolio-optimization-basic',
+            'companies-directory'
         ]
     },
     
@@ -72,35 +75,43 @@ const ACCESS_LEVELS = {
         level: 1,
         requiresActiveSubscription: true,
         pages: [
+            // Pages communes
             'dashboard-financier.html',
+            'community-hub.html',
+            'create-post.html',
+            'messages.html',
             'monte-carlo.html',
-            'portfolio-optimizer.html',
-            'investments-analytics.html',
+            // Pages BASIC
             'real-estate-tax-simulator.html',
+            'portfolio-optimizer.html',
+            'economic-dashboard.html',
+            'companies-directory.html',
+            // Pages PRO
+            'investment-analytics.html',
             'risk-parity.html',
             'scenario-analysis.html',
             'advanced-analysis.html',
-            'trend-prediction.html',
             'forex-converter.html',
-            'news-terminal.html',
-            'economic-dashboard.html',
             'inflation-calculator.html',
-            'chatbot-fullpage.html'
+            'interest-rate-tracker.html',
+            'news-terminal.html'
         ],
         features: [
             'all-basic',
             'portfolio-tracking',
+            'community',
             'advanced-analytics',
             'real-estate',
             'risk-parity',
             'scenario-analysis',
             'real-time-data',
-            'trend-prediction',
             'forex',
             'market-intelligence',
             'macro-economic',
             'inflation',
-            'chatbot'
+            'interest-rates',
+            'news-terminal',
+            'technical-analysis'
         ]
     },
     
@@ -110,35 +121,43 @@ const ACCESS_LEVELS = {
         level: 1,
         requiresActiveSubscription: false,
         pages: [
+            // Pages communes
             'dashboard-financier.html',
+            'community-hub.html',
+            'create-post.html',
+            'messages.html',
             'monte-carlo.html',
-            'portfolio-optimizer.html',
-            'investments-analytics.html',
+            // Pages BASIC
             'real-estate-tax-simulator.html',
+            'portfolio-optimizer.html',
+            'economic-dashboard.html',
+            'companies-directory.html',
+            // Pages PRO
+            'investment-analytics.html',
             'risk-parity.html',
             'scenario-analysis.html',
             'advanced-analysis.html',
-            'trend-prediction.html',
             'forex-converter.html',
-            'news-terminal.html',
-            'economic-dashboard.html',
             'inflation-calculator.html',
-            'chatbot-fullpage.html'
+            'interest-rate-tracker.html',
+            'news-terminal.html'
         ],
         features: [
             'all-basic',
             'portfolio-tracking',
+            'community',
             'advanced-analytics',
             'real-estate',
             'risk-parity',
             'scenario-analysis',
             'real-time-data',
-            'trend-prediction',
             'forex',
             'market-intelligence',
             'macro-economic',
             'inflation',
-            'chatbot'
+            'interest-rates',
+            'news-terminal',
+            'technical-analysis'
         ]
     },
     
@@ -160,14 +179,14 @@ const ACCESS_LEVELS = {
         features: ['all']
     },
     
-    // ✅✅✅ TRIAL (14 jours gratuits) - ACCÈS COMPLET MAIS RATE LIMITING PRO
+    // ✅ TRIAL (14 jours gratuits) - ACCÈS COMPLET MAIS RATE LIMITING PRO
     trial: {
         name: 'Trial',
-        level: 2, // ✅ Niveau 2 pour accès à toutes les pages
+        level: 2,
         requiresActiveSubscription: false,
         requiresTrialValidation: true,
-        pages: ['all'], // ✅ Accès à TOUTES les pages pendant le trial
-        features: ['all'] // ✅ Accès à TOUTES les fonctionnalités
+        pages: ['all'],
+        features: ['all']
     }
 };
 
@@ -178,6 +197,7 @@ const ACCESS_LEVELS = {
 const PAGE_CATEGORIES = {
     public: [
         'index.html',
+        'landing.html',
         'about.html',
         'auth.html',
         'checkout.html',
@@ -201,35 +221,45 @@ const PAGE_CATEGORIES = {
         'troubleshooting.html'
     ],
     
-    basic: [
+    // ✅ PAGES ACCESSIBLES À TOUS (FREE, BASIC, PRO, PLATINUM)
+    common: [
         'dashboard-financier.html',
-        'real-estate-tax-simulator.html',
-        'monte-carlo.html',
-        'economic-dashboard.html',
-        'portfolio-optimizer.html'
+        'community-hub.html',
+        'create-post.html',
+        'messages.html',
+        'monte-carlo.html'
     ],
     
-    pro: [
-        'dashboard-financier.html',
-        'monte-carlo.html',
-        'portfolio-optimizer.html',
-        'investments-analytics.html',
+    // ✅ PAGES BASIC (Niveau 0) - +4 pages
+    basic: [
         'real-estate-tax-simulator.html',
+        'portfolio-optimizer.html',
+        'economic-dashboard.html',
+        'companies-directory.html'
+    ],
+    
+    // ✅ PAGES PRO (Niveau 1) - +8 pages
+    pro: [
+        'investment-analytics.html',
         'risk-parity.html',
         'scenario-analysis.html',
         'advanced-analysis.html',
-        'trend-prediction.html',
         'forex-converter.html',
-        'news-terminal.html',
-        'economic-dashboard.html',
         'inflation-calculator.html',
-        'chatbot-fullpage.html'
+        'interest-rate-tracker.html',
+        'news-terminal.html'
     ],
     
+    // ✅ PAGES PLATINUM (Niveau 2) - +8 pages AI/ML
     platinum: [
-        'advanced-analysis.html',
-        'chatbot-fullpage.html',
-        'company-insights.html'
+        'ipo-intelligence.html',
+        'insider-flow-tracker.html',
+        'ma-predictor.html',
+        'trend-prediction.html',
+        'market-sentiment.html',
+        'trending-topics.html',
+        'company-research.html',
+        'recession-indicator.html'
     ],
     
     demo: [
@@ -287,7 +317,7 @@ async function checkPageAccess(pageName) {
         console.log('🎟 Promo code: ' + (promoCode || 'none'));
         console.log('⏰ Trial ends at: ' + (trialEndsAt || 'N/A'));
         
-        // ✅✅✅ 4 - VÉRIFICATION STRICTE : PLAN FREE + INACTIVE = NONE
+        // ✅ 4 - VÉRIFICATION STRICTE : PLAN FREE + INACTIVE = NONE
         if (userPlan === 'free' && (subscriptionStatus === 'inactive' || subscriptionStatus === 'none' || subscriptionStatus === 'cancelled')) {
             console.warn('⛔ Plan "free" with inactive status - treating as NO subscription');
             userPlan = 'none';
@@ -308,7 +338,19 @@ async function checkPageAccess(pageName) {
             return true;
         }
         
-        // ✅✅✅ 7 - BLOCAGE STRICT : UTILISATEURS SANS ABONNEMENT VALIDE
+        // ✅ 7 - PAGES COMMUNES (accessibles à tous les plans actifs)
+        if (PAGE_CATEGORIES.common.includes(pageName)) {
+            if (userPlan === 'none' || userPlan === '' || !userPlan) {
+                console.warn('⛔ User has NO valid subscription - access denied to common page');
+                showUpgradeModal('none', 'no_subscription');
+                return false;
+            }
+            console.log('✅ Access granted (Common page - available to all active plans)');
+            sessionStorage.removeItem('accessDenied');
+            return true;
+        }
+        
+        // ✅ 8 - BLOCAGE STRICT : UTILISATEURS SANS ABONNEMENT VALIDE
         if (userPlan === 'none' || userPlan === '' || !userPlan) {
             console.warn('⛔ User has NO valid subscription plan');
             console.warn('   Plan: ' + userPlan);
@@ -317,7 +359,7 @@ async function checkPageAccess(pageName) {
             return false;
         }
         
-        // ✅✅✅ 8 - GESTION DU TRIAL (PRIORITÉ ABSOLUE)
+        // ✅ 9 - GESTION DU TRIAL (PRIORITÉ ABSOLUE)
         if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
@@ -329,7 +371,6 @@ async function checkPageAccess(pageName) {
                 console.log('✅ Trial still active (expires in ' + daysLeft + ' days)');
                 console.log('🎁 TRIAL MODE ACTIVATED - Full page access with Pro rate limits');
                 
-                // ✅ Toujours niveau 2 pour accès complet
                 userPlan = 'trial';
                 ACCESS_LEVELS.trial.level = 2;
                 
@@ -341,7 +382,7 @@ async function checkPageAccess(pageName) {
                 return false;
             }
         }
-        // 9 - Gestion des codes promo FREE
+        // 10 - Gestion des codes promo FREE
         else if (promoCode === 'FREEPRO') {
             userPlan = 'freepro';
             console.log('🎁 Promo code applied: FREEPRO - Plan upgraded to: freepro');
@@ -350,7 +391,7 @@ async function checkPageAccess(pageName) {
             console.log('🎁 Promo code applied: FREEPLATINUM - Plan upgraded to: freeplatinum');
         }
         
-        // 10 - VÉRIFIER LE STATUT D'ABONNEMENT
+        // 11 - VÉRIFIER LE STATUT D'ABONNEMENT
         const planConfig = ACCESS_LEVELS[userPlan];
         
         if (!planConfig) {
@@ -359,7 +400,7 @@ async function checkPageAccess(pageName) {
             return false;
         }
         
-        // ✅✅✅ VÉRIFICATION STRICTE DU STATUT
+        // ✅ VÉRIFICATION STRICTE DU STATUT
         if (planConfig.requiresActiveSubscription) {
             const validStatuses = ['active', 'trialing', 'active_free'];
             
@@ -377,7 +418,7 @@ async function checkPageAccess(pageName) {
         
         console.log('🔑 Effective access level: ' + userPlan + ' (level ' + planConfig.level + ')');
         
-        // 11 - VÉRIFIER L'ACCÈS À LA PAGE
+        // 12 - VÉRIFIER L'ACCÈS À LA PAGE
         
         // Vérifier si la page est dans la liste d'accès du plan
         const allowedPages = planConfig.pages || [];
@@ -424,7 +465,14 @@ async function checkPageAccess(pageName) {
 // ═══════════════════════════════════════════════════════════════
 
 function getPageRequiredLevel(pageName) {
-    if (PAGE_CATEGORIES.public.includes(pageName) || PAGE_CATEGORIES.authenticated_only.includes(pageName) || PAGE_CATEGORIES.demo.includes(pageName)) {
+    if (PAGE_CATEGORIES.public.includes(pageName) || 
+        PAGE_CATEGORIES.authenticated_only.includes(pageName) || 
+        PAGE_CATEGORIES.demo.includes(pageName)) {
+        return -1;
+    }
+    
+    // Pages communes = niveau -1 (accessible à tous)
+    if (PAGE_CATEGORIES.common.includes(pageName)) {
         return -1;
     }
     
@@ -465,7 +513,6 @@ function showUpgradeModal(currentPlan, reason) {
         no_subscription: {
             title: 'Welcome to AlphaVault AI!',
             description: 'You need to choose a subscription plan to access our premium features. Start with a 14-day free trial!',
-            // icon: '🎯',
             icon: '',
             suggestedPlan: 'Pro',
             ctaText: 'Choose Your Plan',
@@ -475,7 +522,6 @@ function showUpgradeModal(currentPlan, reason) {
         basic_required: {
             title: 'Basic Plan Required',
             description: 'This page requires at least a Basic subscription plan.',
-            // icon: '📊',
             icon: ' ',
             suggestedPlan: 'Basic',
             ctaText: 'Upgrade to Basic',
@@ -484,7 +530,6 @@ function showUpgradeModal(currentPlan, reason) {
         pro_required: {
             title: 'Pro Feature',
             description: 'This page requires the Pro or Platinum plan.',
-            // icon: '👑',
             icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'Upgrade to Pro',
@@ -493,7 +538,6 @@ function showUpgradeModal(currentPlan, reason) {
         platinum_required: {
             title: 'Platinum Exclusive',
             description: 'This page is exclusively available with the Platinum plan.',
-            // icon: '💎',
             icon: ' ',
             suggestedPlan: 'Platinum',
             ctaText: 'Upgrade to Platinum',
@@ -502,7 +546,6 @@ function showUpgradeModal(currentPlan, reason) {
         expired: {
             title: 'Subscription Expired',
             description: 'Your subscription has expired. Renew now to regain access to premium features.',
-            // icon: '⏰',
             icon: ' ',
             suggestedPlan: currentPlan,
             ctaText: 'Renew Subscription',
@@ -511,7 +554,6 @@ function showUpgradeModal(currentPlan, reason) {
         trial_expired: {
             title: 'Trial Expired',
             description: 'Your 14-day free trial has ended. Upgrade now to continue enjoying premium features!',
-            // icon: '⏰',
             icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'Subscribe Now',
@@ -520,7 +562,6 @@ function showUpgradeModal(currentPlan, reason) {
         insufficient: {
             title: 'Premium Access Required',
             description: 'Upgrade your plan to access this premium feature.',
-            // icon: '🔐',
             icon: ' ',
             suggestedPlan: 'Pro',
             ctaText: 'View Plans',
@@ -819,14 +860,14 @@ window.ACCESS_LEVELS = ACCESS_LEVELS;
 window.PAGE_CATEGORIES = PAGE_CATEGORIES;
 window.getPageRequiredLevel = getPageRequiredLevel;
 
-console.log('✅ Access Control System v4.3 ready');
+console.log('✅ Access Control System v5.0 ready');
 console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
+console.log('🎯 Pages Common (all plans): 5');
+console.log('📦 Pages Basic: +4 (total 9)');
+console.log('👑 Pages Pro: +8 (total 17)');
+console.log('💎 Pages Platinum: +8 AI/ML (total 25)');
 console.log('⏰ Trial expiration check: enabled');
 console.log('🛒 Upgrade redirects to: checkout.html');
-console.log('🚫 Plan "free" with "inactive" status: BLOCKED');
-console.log('✨ Dedicated modal for users without subscription: ENABLED');
-console.log('🤖 Chatbot blocking on access denied: ENABLED');
-console.log('🎁 Trial: Full page access + PRO rate limits (6/min, 200/day)');
 
 // ═══════════════════════════════════════════════════════════════
 //  RATE LIMITING SYSTEM - VERSION 1.1
@@ -871,10 +912,9 @@ const RATE_LIMITS = {
         api: { enabled: true, perMinute: 8, dailyLimit: 400 }
     },
     
-    // ✅✅✅ CORRECTION : TRIAL = PRO RATE LIMITS
     trial: {
-        chatbot: { dailyLimit: -1, enabled: true }, // Chatbot illimité
-        api: { enabled: true, perMinute: 6, dailyLimit: 200 } // ✅ MÊME QUE PRO (pas Platinum)
+        chatbot: { dailyLimit: -1, enabled: true },
+        api: { enabled: true, perMinute: 6, dailyLimit: 200 }
     }
 };
 
@@ -1170,7 +1210,6 @@ function showQuotaModal(type, quotaInfo) {
         chatbot: {
             title: 'Chatbot Limit Reached',
             description: 'You have used all your chatbot messages for today (' + quotaInfo.limit + ' messages).',
-            // icon: '🤖',
             icon: ' ',
             upgradeText: 'Upgrade to Pro for unlimited chatbot access!',
             upgradeTarget: 'pro'
@@ -1180,7 +1219,6 @@ function showQuotaModal(type, quotaInfo) {
             description: quotaInfo.reason === 'rate_limit_exceeded' 
                 ? 'You have exceeded the rate limit. Please wait ' + quotaInfo.retryAfter + ' seconds.'
                 : 'You have used all your API requests for today (' + quotaInfo.limit + ' requests).',
-            // icon: '⏱',
             icon: ' ',
             upgradeText: quotaInfo.upgradeRequired === 'platinum' 
                 ? 'Upgrade to Platinum for higher API limits!' 
@@ -1190,7 +1228,6 @@ function showQuotaModal(type, quotaInfo) {
         api_disabled: {
             title: 'API Access Required',
             description: 'API access is only available for Pro and Platinum plans.',
-            // icon: '🚀',
             icon: ' ',
             upgradeText: 'Upgrade to Pro to unlock API access!',
             upgradeTarget: 'pro'
