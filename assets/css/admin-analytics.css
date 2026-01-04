@@ -3233,3 +3233,119 @@ body.dark-mode #particles-canvas {
         page-break-inside: avoid;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   🖼 IMAGE RESIZE CONTROLS (SIGNATURE EDITOR) - CORRIGÉ
+   ════════════════════════════════════════════════════════════════ */
+
+.image-resize-controls {
+    position: absolute !important;
+    bottom: -50px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    padding: 10px 16px !important;
+    border-radius: 24px !important;
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5) !important;
+    z-index: 10000 !important;
+    animation: slideUpFade 0.3s ease !important;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.image-resize-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    color: white !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+}
+
+.image-resize-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+.image-resize-btn:active {
+    transform: scale(0.95) !important;
+}
+
+.image-size-input {
+    width: 80px !important;
+    padding: 6px 10px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    font-size: 14px !important;
+}
+
+.image-size-input:focus {
+    outline: none !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Sélecteur d'image dans l'éditeur Quill */
+.ql-editor img {
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    border: 3px solid transparent !important;
+    border-radius: 8px !important;
+}
+
+.ql-editor img:hover {
+    border-color: rgba(102, 126, 234, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+.ql-editor img.selected {
+    border-color: #764ba2 !important;
+    box-shadow: 0 8px 24px rgba(118, 75, 162, 0.5) !important;
+}
+
+/* Assurer que le conteneur Quill permet le positionnement absolu */
+.ql-editor p,
+.ql-editor div {
+    position: relative !important;
+}
+
+/* Responsive pour les contrôles */
+@media (max-width: 480px) {
+    .image-resize-controls {
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        bottom: -45px !important;
+    }
+    
+    .image-resize-btn {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    .image-size-input {
+        width: 60px !important;
+        font-size: 12px !important;
+        padding: 4px 8px !important;
+    }
+}

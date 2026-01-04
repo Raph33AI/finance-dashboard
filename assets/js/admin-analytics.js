@@ -6862,26 +6862,31 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR
+    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR (VERSION CORRIGÉE)
     // ========================================
 
     setupImageResizer() {
         if (!this.signatureEditor) return;
         
         let selectedImage = null;
-        let resizeControls = null;
         
+        // Écouter les clics dans l'éditeur
         this.signatureEditor.root.addEventListener('click', (e) => {
+            // Si on clique sur une image
             if (e.target.tagName === 'IMG') {
-                if (selectedImage) {
+                // Désélectionner l'image précédente
+                if (selectedImage && selectedImage !== e.target) {
                     selectedImage.classList.remove('selected');
+                    this.hideImageResizeControls();
                 }
                 
                 selectedImage = e.target;
                 selectedImage.classList.add('selected');
                 
                 this.showImageResizeControls(selectedImage);
-            } else {
+            } 
+            // Si on clique ailleurs (pas sur une image ni sur les contrôles)
+            else if (!e.target.closest('.image-resize-controls')) {
                 if (selectedImage) {
                     selectedImage.classList.remove('selected');
                     selectedImage = null;
@@ -6894,56 +6899,179 @@ class AdminAnalyticsPro {
     }
 
     showImageResizeControls(img) {
+        // Supprimer les contrôles existants
         this.hideImageResizeControls();
         
+        // Créer le conteneur de contrôles
         const controls = document.createElement('div');
         controls.className = 'image-resize-controls';
-        controls.innerHTML = `
-            <button class="image-resize-btn" onclick="adminAnalytics.resizeImage(-20)">
-                <i class="fas fa-minus"></i>
-            </button>
-            <input type="number" class="image-size-input" id="image-width-input" value="${img.width}" min="50" max="800" step="10">
-            <span style="color: white; font-weight: 600;">px</span>
-            <button class="image-resize-btn" onclick="adminAnalytics.resizeImage(20)">
-                <i class="fas fa-plus"></i>
-            </button>
+        controls.style.cssText = `
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 10px 16px;
+            border-radius: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+            z-index: 1000;
         `;
         
-        img.parentElement.style.position = 'relative';
-        img.parentElement.appendChild(controls);
+        // Bouton réduire
+        const btnMinus = document.createElement('button');
+        btnMinus.className = 'image-resize-btn';
+        btnMinus.innerHTML = '<i class="fas fa-minus"></i>';
+        btnMinus.style.cssText = `
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        `;
+        btnMinus.addEventListener('mouseenter', () => {
+            btnMinus.style.background = 'rgba(255, 255, 255, 0.3)';
+            btnMinus.style.transform = 'scale(1.1)';
+        });
+        btnMinus.addEventListener('mouseleave', () => {
+            btnMinus.style.background = 'rgba(255, 255, 255, 0.2)';
+            btnMinus.style.transform = 'scale(1)';
+        });
+        btnMinus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.resizeImage(img, -50);
+        });
         
-        this.currentSelectedImage = img;
-        
-        const input = document.getElementById('image-width-input');
-        input.addEventListener('change', () => {
+        // Input taille
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'image-size-input';
+        input.value = Math.round(img.width);
+        input.min = '50';
+        input.max = '800';
+        input.step = '10';
+        input.style.cssText = `
+            width: 80px;
+            padding: 6px 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+        `;
+        input.addEventListener('focus', () => {
+            input.style.background = 'rgba(255, 255, 255, 0.3)';
+            input.style.outline = 'none';
+        });
+        input.addEventListener('blur', () => {
+            input.style.background = 'rgba(255, 255, 255, 0.2)';
+        });
+        input.addEventListener('change', (e) => {
+            e.stopPropagation();
             const newWidth = parseInt(input.value);
             if (newWidth >= 50 && newWidth <= 800) {
                 img.style.width = newWidth + 'px';
                 img.style.height = 'auto';
+                img.setAttribute('width', newWidth);
             }
         });
+        input.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Label "px"
+        const label = document.createElement('span');
+        label.textContent = 'px';
+        label.style.cssText = 'color: white; font-weight: 600; font-size: 14px;';
+        
+        // Bouton agrandir
+        const btnPlus = document.createElement('button');
+        btnPlus.className = 'image-resize-btn';
+        btnPlus.innerHTML = '<i class="fas fa-plus"></i>';
+        btnPlus.style.cssText = `
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        `;
+        btnPlus.addEventListener('mouseenter', () => {
+            btnPlus.style.background = 'rgba(255, 255, 255, 0.3)';
+            btnPlus.style.transform = 'scale(1.1)';
+        });
+        btnPlus.addEventListener('mouseleave', () => {
+            btnPlus.style.background = 'rgba(255, 255, 255, 0.2)';
+            btnPlus.style.transform = 'scale(1)';
+        });
+        btnPlus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.resizeImage(img, 50);
+        });
+        
+        // Assembler les contrôles
+        controls.appendChild(btnMinus);
+        controls.appendChild(input);
+        controls.appendChild(label);
+        controls.appendChild(btnPlus);
+        
+        // Assurer que le parent a une position relative
+        const parent = img.parentElement;
+        if (parent) {
+            const originalPosition = window.getComputedStyle(parent).position;
+            if (originalPosition === 'static') {
+                parent.style.position = 'relative';
+            }
+            parent.appendChild(controls);
+        }
+        
+        // Stocker l'image et l'input pour référence
+        this.currentSelectedImage = img;
+        this.currentSizeInput = input;
+        
+        console.log('✅ Image resize controls displayed');
     }
 
     hideImageResizeControls() {
-        const existingControls = document.querySelector('.image-resize-controls');
-        if (existingControls) {
-            existingControls.remove();
-        }
+        const existingControls = document.querySelectorAll('.image-resize-controls');
+        existingControls.forEach(control => control.remove());
+        this.currentSelectedImage = null;
+        this.currentSizeInput = null;
     }
 
-    resizeImage(delta) {
-        if (!this.currentSelectedImage) return;
+    resizeImage(img, delta) {
+        if (!img) return;
         
-        const currentWidth = this.currentSelectedImage.width;
+        const currentWidth = img.width || parseInt(img.style.width) || 200;
         const newWidth = Math.max(50, Math.min(800, currentWidth + delta));
         
-        this.currentSelectedImage.style.width = newWidth + 'px';
-        this.currentSelectedImage.style.height = 'auto';
+        img.style.width = newWidth + 'px';
+        img.style.height = 'auto';
+        img.setAttribute('width', newWidth);
         
-        const input = document.getElementById('image-width-input');
-        if (input) {
-            input.value = newWidth;
+        // Mettre à jour l'input si présent
+        if (this.currentSizeInput) {
+            this.currentSizeInput.value = newWidth;
         }
+        
+        console.log(`✅ Image resized to ${newWidth}px`);
     }
 
     // ========================================
