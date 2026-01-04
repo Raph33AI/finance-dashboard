@@ -1857,18 +1857,27 @@ class ForexConverter {
             return { macd: [], signal: [], histogram: [] };
         }
         
+        console.log(`📊 MACD Calculation: EMA12=${ema12.length} points, EMA26=${ema26.length} points`);
+        
+        // ✅ Créer des Maps pour faciliter la recherche par timestamp
+        const ema12Map = new Map(ema12.map(item => [item[0], item[1]]));
+        const ema26Map = new Map(ema26.map(item => [item[0], item[1]]));
+        
         const macd = [];
-        const signal = [];
-        const histogram = [];
-
-        // ✅ CALCUL MACD (EMA12 - EMA26)
-        const minLength = Math.min(ema12.length, ema26.length);
-        for (let i = 0; i < minLength; i++) {
-            if (ema12[i] && ema26[i] && ema12[i][0] === ema26[i][0]) {
-                const macdValue = ema12[i][1] - ema26[i][1];
-                macd.push([ema12[i][0], parseFloat(macdValue.toFixed(4))]);
+        
+        // ✅ CALCUL MACD (EMA12 - EMA26) pour les timestamps communs uniquement
+        for (const [timestamp, ema26Value] of ema26Map) {
+            if (ema12Map.has(timestamp)) {
+                const ema12Value = ema12Map.get(timestamp);
+                const macdValue = ema12Value - ema26Value;
+                macd.push([timestamp, parseFloat(macdValue.toFixed(4))]);
             }
         }
+
+        // ✅ Trier par timestamp (important pour l'EMA du signal)
+        macd.sort((a, b) => a[0] - b[0]);
+        
+        console.log(`📈 MACD Line: ${macd.length} points calculated`);
 
         // ✅ VÉRIFICATION : Assez de données pour Signal (9 minimum)
         if (macd.length < 9) {
@@ -1878,15 +1887,26 @@ class ForexConverter {
 
         // ✅ CALCUL SIGNAL LINE (EMA 9 du MACD)
         const signalLine = this.calculateEMAValues(macd, 9);
+        console.log(`📉 Signal Line: ${signalLine.length} points calculated`);
         
-        // ✅ CALCUL HISTOGRAM (MACD - Signal)
-        for (let i = 0; i < macd.length; i++) {
-            if (signalLine[i] && macd[i][0] === signalLine[i][0]) {
-                signal.push(signalLine[i]);
-                const histValue = macd[i][1] - signalLine[i][1];
-                histogram.push([macd[i][0], parseFloat(histValue.toFixed(4))]);
+        // ✅ Créer une Map pour la signal line
+        const signalMap = new Map(signalLine.map(item => [item[0], item[1]]));
+        
+        const signal = [];
+        const histogram = [];
+        
+        // ✅ CALCUL HISTOGRAM (MACD - Signal) pour les timestamps communs
+        for (const [timestamp, macdValue] of macd) {
+            if (signalMap.has(timestamp)) {
+                const signalValue = signalMap.get(timestamp);
+                signal.push([timestamp, signalValue]);
+                const histValue = macdValue - signalValue;
+                histogram.push([timestamp, parseFloat(histValue.toFixed(4))]);
             }
         }
+        
+        console.log(`📊 Histogram: ${histogram.length} points calculated`);
+        console.log(`✅ MACD calculation complete!`);
 
         return { macd, signal, histogram };
     }
