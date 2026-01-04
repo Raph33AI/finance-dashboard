@@ -2098,7 +2098,7 @@
                 </div>
 
                 <!-- ========================================
-                    SECTION: GMAIL MANAGEMENT - ULTRA-COMPLETE
+                    SECTION: GMAIL MANAGEMENT - ARCHITECTURE GMAIL
                     ======================================== -->
                 <div id="gmail-management" class="tab-section" data-section-content="gmail-management">
                     <div class="section">
@@ -2109,14 +2109,14 @@
                                 <span class="section-subtitle">@alphavault-ai.com</span>
                             </h2>
                             <div class="header-actions-group">
-                                <!-- 🆕 BOUTON COMPOSER -->
+                                <!-- BOUTON COMPOSER -->
                                 <button class='dashboard-btn btn-primary' onclick="adminAnalytics.openComposeModal()">
                                     <i class='fas fa-pen'></i>
-                                    Compose
+                                    <span class="btn-text">Compose</span>
                                 </button>
-                                <button class='dashboard-btn' onclick="adminAnalytics.exportData('gmail')">
+                                <button class='dashboard-btn dashboard-btn-export' onclick="adminAnalytics.exportData('gmail')">
                                     <i class='fas fa-file-csv'></i>
-                                    Export
+                                    <span class="btn-text">Export</span>
                                 </button>
                             </div>
                         </div>
@@ -2132,11 +2132,12 @@
                             />
                             <button class="btn-search" id="gmail-search-btn" onclick="adminAnalytics.searchEmails()">
                                 <i class="fas fa-search"></i>
+                                <span class="btn-text">Search</span>
                             </button>
                         </div>
                         
                         <!-- 📊 RÉSULTATS DE RECHERCHE -->
-                        <div id="gmail-search-results" class="search-results-container"></div>
+                        <div id="gmail-search-results" class="search-results-container" style="display: none;"></div>
                         
                         <!-- KPIs Grid -->
                         <div class="kpis-grid">
@@ -2197,7 +2198,7 @@
                                 </div>
                             </div>
                             
-                            <!-- 🆕 DRAFTS KPI -->
+                            <!-- DRAFTS KPI -->
                             <div class="kpi-card">
                                 <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                                     <i class="fas fa-file-alt"></i>
@@ -2211,7 +2212,7 @@
                         </div>
 
                         <!-- ========================================
-                            🆕 SECTION: SIGNATURE MANAGEMENT
+                            SECTION: SIGNATURE MANAGEMENT
                             ======================================== -->
                         <div class="section" style="margin-top: 24px;">
                             <div class="section-header-with-actions">
@@ -2222,10 +2223,11 @@
                                 <button class="btn-primary" onclick="adminAnalytics.openSignatureModal()">
                                     <i class="fas fa-edit"></i> Edit Signatures
                                 </button>
-                                <div id="signatures-loading-indicator" style="display: none; text-align: center; padding: 20px; color: #64748b;">
-                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
-                                    <p style="margin: 0;">Loading signatures from Firestore...</p>
-                                </div>
+                            </div>
+                            
+                            <div id="signatures-loading-indicator" style="display: none; text-align: center; padding: 20px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                                <p style="margin: 0;">Loading signatures from Firestore...</p>
                             </div>
                             
                             <div class="signatures-preview-grid">
@@ -2286,42 +2288,6 @@
                             </div>
                         </div>
                         
-                        <!-- Charts Row -->
-                        <div class="charts-row">
-                            <div class="chart-wrapper">
-                                <h4 class="chart-title">
-                                    <i class="fas fa-chart-pie"></i>
-                                    Email Categories
-                                </h4>
-                                <canvas id="gmail-categories-chart"></canvas>
-                            </div>
-                            
-                            <div class="chart-wrapper">
-                                <h4 class="chart-title">
-                                    <i class="fas fa-trophy"></i>
-                                    Top 10 Senders
-                                </h4>
-                                <div class="table-responsive">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Sender</th>
-                                                <th>Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="gmail-top-senders-body">
-                                            <tr>
-                                                <td colspan="3" style="text-align: center; padding: 20px;">
-                                                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <!-- Gmail Inbox Table -->
                         <div class="table-wrapper">
                             <h4 class="chart-title">
@@ -2353,7 +2319,7 @@
                             </div>
                         </div>
                         
-                        <!-- 🆕 DRAFTS SECTION -->
+                        <!-- DRAFTS SECTION -->
                         <div class="table-wrapper">
                             <h4 class="chart-title">
                                 <i class="fas fa-file-alt"></i>
@@ -2365,12 +2331,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- ========================================
-                     MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL, THREAD
-                     ======================================== -->
-                
-                <!-- 🆕 MODAL: COMPOSE EMAIL -->
+                    MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL, SIGNATURE EDITOR
+                    ======================================== -->
+
+                <!-- MODAL: COMPOSE EMAIL -->
                 <div id="compose-email-modal" class="gmail-modal">
                     <div class="gmail-modal-content">
                         <div class="gmail-modal-header">
@@ -2381,7 +2347,7 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- 🆕 SÉLECTEUR FROM -->
+                            <!-- SÉLECTEUR FROM -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="compose-from" class="form-input">
@@ -2414,13 +2380,13 @@
                                 <input type="text" id="compose-subject" class="form-input" placeholder="Email subject">
                             </div>
                             
-                            <!-- 🆕 WYSIWYG EDITOR (Quill.js) -->
+                            <!-- WYSIWYG EDITOR (Quill.js) -->
                             <div class="form-group">
                                 <label>Message:</label>
                                 <div id="compose-body-editor" class="email-editor"></div>
                             </div>
                             
-                            <!-- 📎 ATTACHMENTS -->
+                            <!-- ATTACHMENTS -->
                             <div class="form-group">
                                 <label>Attachments:</label>
                                 <input 
@@ -2447,8 +2413,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 🆕 MODAL: REPLY EMAIL -->
+
+                <!-- MODAL: REPLY EMAIL -->
                 <div id="reply-email-modal" class="gmail-modal">
                     <div class="gmail-modal-content">
                         <div class="gmail-modal-header">
@@ -2459,7 +2425,7 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- 🆕 SÉLECTEUR FROM (AJOUTÉ) -->
+                            <!-- SÉLECTEUR FROM -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="reply-from" class="form-input">
@@ -2502,8 +2468,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 🆕 MODAL: FORWARD EMAIL -->
+
+                <!-- MODAL: FORWARD EMAIL -->
                 <div id="forward-email-modal" class="gmail-modal">
                     <div class="gmail-modal-content">
                         <div class="gmail-modal-header">
@@ -2514,7 +2480,7 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- 🆕 SÉLECTEUR FROM (AJOUTÉ) -->
+                            <!-- SÉLECTEUR FROM -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="forward-from" class="form-input">
@@ -2548,7 +2514,7 @@
                         
                         <div class="gmail-modal-footer">
                             <button class="btn-secondary" onclick="adminAnalytics.closeForwardModal()">
-                                Cancel
+                                <i class="fas fa-times"></i> Cancel
                             </button>
                             <button class="btn-primary" id="send-forward-btn" onclick="adminAnalytics.sendForward()">
                                 <i class="fas fa-share"></i> Forward
@@ -2556,8 +2522,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 🆕 MODAL: VIEW EMAIL -->
+
+                <!-- MODAL: VIEW EMAIL -->
                 <div id="view-email-modal" class="gmail-modal">
                     <div class="gmail-modal-content gmail-modal-large">
                         <div class="gmail-modal-header">
@@ -2608,32 +2574,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 🆕 MODAL: THREAD VIEW -->
-                <div id="thread-view-modal" class="gmail-modal">
-                    <div class="gmail-modal-content gmail-modal-large">
-                        <div class="gmail-modal-header">
-                            <h3><i class="fas fa-comments"></i> Conversation</h3>
-                            <button class="btn-close-modal" onclick="adminAnalytics.closeThreadModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="gmail-modal-body">
-                            <div id="thread-messages-container" class="thread-container"></div>
-                        </div>
-                        
-                        <div class="gmail-modal-footer">
-                            <button class="btn-secondary" onclick="adminAnalytics.closeThreadModal()">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- ========================================
-                    🆕 MODAL: SIGNATURE EDITOR
-                    ======================================== -->
+                <!-- MODAL: SIGNATURE EDITOR -->
                 <div id="signature-editor-modal" class="gmail-modal">
                     <div class="gmail-modal-content gmail-modal-large">
                         <div class="gmail-modal-header">

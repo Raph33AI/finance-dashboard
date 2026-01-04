@@ -446,6 +446,8 @@ class AdminAnalyticsPro {
 
             // Charger les signatures email depuis Firestore
             await this.loadSignatures();
+            await this.loadGmailStats();
+            await this.loadGmailInbox();
 
             // Setup listeners pour changer signature avec FROM
             this.setupFromChangeListeners();
@@ -463,6 +465,7 @@ class AdminAnalyticsPro {
             this.initEventListeners();
             // Charger les brouillons Gmail
             await this.loadGmailDrafts();
+            this.setupFromChangeListeners();
             
             console.log('✅ Admin Analytics PRO fully initialized');
         });
@@ -5359,355 +5362,9 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 📧 SECTION 13: GMAIL MANAGEMENT
+    // 📧 GMAIL MANAGEMENT - MÉTHODES COMPLÈTES
     // ========================================
-    
-    async loadGmailStats() {
-        try {
-            console.log('📧 Loading Gmail stats...');
-            
-            const cacheKey = 'gmail-stats';
-            const cachedData = this.cache.get(cacheKey);
-            
-            if (cachedData) {
-                this.gmailStats = cachedData;
-                this.displayGmailStats(cachedData);
-                return;
-            }
-            
-            if (!this.cache.canMakeCall()) {
-                console.warn('⚠ Rate limit reached - skipping Gmail stats');
-                return;
-            }
-            
-            this.cache.incrementCallCount();
-            
-            // ✅ CHANGEMENT ICI
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-stats`);
-            
-            if (!response.ok) {
-                throw new Error(`Gmail API error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            this.cache.set(cacheKey, data.stats);
-            this.gmailStats = data.stats;
-            this.displayGmailStats(data.stats);
-            
-            console.log('✅ Gmail stats loaded from API');
-            
-        } catch (error) {
-            console.error('❌ Error loading Gmail stats:', error);
-        }
-    }
 
-    displayGmailStats(stats) {
-        console.log('📧 Displaying Gmail stats:', stats);
-        
-        if (!stats) {
-            console.warn('⚠ No Gmail stats to display');
-            return;
-        }
-        
-        this.updateStat('gmail-total-emails', stats.total || 0);
-        this.updateStat('gmail-unread-emails', stats.unread || 0);
-        this.updateStat('gmail-spam-emails', stats.spam || 0);
-        this.updateStat('gmail-sent-emails', stats.sent || 0);
-        this.updateStat('gmail-unread-rate', `${stats.unreadRate || 0}%`);
-        this.updateStat('gmail-avg-response-time', `${stats.avgResponseTime || 0}h`);
-        
-        // Créer le graphique des catégories
-        this.createGmailCategoryChart(stats.categories);
-        
-        // Afficher les top expéditeurs
-        this.displayTopSenders(stats.topSenders);
-        
-        console.log('✅ Gmail stats displayed');
-    }
-
-    async loadGmailInbox() {
-        try {
-            console.log('📥 Loading Gmail inbox...');
-            
-            const cacheKey = 'gmail-inbox';
-            const cachedData = this.cache.get(cacheKey);
-            
-            if (cachedData) {
-                this.gmailInbox = cachedData;
-                this.displayGmailInbox(cachedData);
-                return;
-            }
-            
-            if (!this.cache.canMakeCall()) {
-                console.warn('⚠ Rate limit reached - using cached Gmail inbox');
-                return;
-            }
-            
-            this.cache.incrementCallCount();
-            
-            // ✅ CHANGEMENT : 30 au lieu de 50
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-inbox?maxResults=30`);
-            
-            if (!response.ok) {
-                throw new Error(`Gmail inbox error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            this.cache.set(cacheKey, data.messages);
-            this.gmailInbox = data.messages;
-            this.displayGmailInbox(data.messages);
-            
-            console.log('✅ Gmail inbox loaded from API');
-            
-        } catch (error) {
-            console.error('❌ Error loading Gmail inbox:', error);
-        }
-    }
-
-    displayGmailInbox(messages) {
-        const tbody = document.getElementById('gmail-inbox-body');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        
-        if (!messages || messages.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
-                        <p style="margin: 0;">No emails available</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        const renderEmailRow = (email, index, tbody) => {
-            const row = document.createElement('tr');
-            
-            // ✅ RENDRE LA LIGNE CLIQUABLE
-            row.style.cursor = 'pointer';
-            row.onclick = () => {
-                adminAnalytics.viewEmail(email.id);
-            };
-            
-            if (email.isUnread) {
-                row.style.fontWeight = '600';
-                row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-            }
-            
-            // ✅ AJOUTER HOVER EFFECT
-            row.onmouseenter = () => {
-                row.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
-            };
-            row.onmouseleave = () => {
-                if (email.isUnread) {
-                    row.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-                } else {
-                    row.style.backgroundColor = '';
-                }
-            };
-            
-            const categoryBadge = this.getEmailCategoryBadge(email.category);
-            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${email.isUnread ? '<i class="fas fa-circle" style="font-size: 6px; color: #3b82f6; margin-right: 8px;"></i>' : ''}
-                    ${email.from}
-                </td>
-                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${email.subject}
-                </td>
-                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
-                    ${email.snippet}
-                </td>
-                <td>${categoryBadge}</td>
-                <td>${date}</td>
-                <td onclick="event.stopPropagation()">
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.openReplyModal('${email.id}')" title="Reply">
-                        <i class="fas fa-reply"></i>
-                    </button>
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
-                        <i class="fas fa-share"></i>
-                    </button>
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.markEmailAsRead('${email.id}')" title="Mark as read">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.archiveEmail('${email.id}')" title="Archive">
-                        <i class="fas fa-archive"></i>
-                    </button>
-                </td>
-            `;
-            
-            tbody.appendChild(row);
-        };
-        
-        if (!window.paginationManagers['gmail-inbox-body']) {
-            window.paginationManagers['gmail-inbox-body'] = new PaginationManager(
-                'gmail-inbox-body',
-                messages,
-                renderEmailRow,
-                [10, 25, 50]
-            );
-        } else {
-            window.paginationManagers['gmail-inbox-body'].updateData(messages);
-        }
-        
-        window.paginationManagers['gmail-inbox-body'].render();
-        
-        console.log(`✅ Gmail inbox displayed (${messages.length} emails)`);
-    }
-
-    displayTopSenders(senders) {
-        const tbody = document.getElementById('gmail-top-senders-body');
-        if (!tbody || !senders) return;
-        
-        tbody.innerHTML = '';
-        
-        senders.forEach((sender, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${sender.email}
-                </td>
-                <td style="text-align: center; font-weight: 600; color: #667eea;">${sender.count}</td>
-            `;
-            tbody.appendChild(row);
-        });
-        
-        console.log('✅ Top senders displayed');
-    }
-
-    createGmailCategoryChart(categories) {
-        const canvas = document.getElementById('gmail-categories-chart');
-        if (!canvas || !categories) {
-            console.warn('⚠ Gmail categories chart canvas not found');
-            return;
-        }
-        
-        console.log('📊 Creating Gmail categories chart...');
-        
-        this.createChart('gmail-categories-chart', 'doughnut', {
-            labels: ['Support', 'Feedback', 'Commercial', 'Notification', 'Spam', 'Other'],
-            datasets: [{
-                data: [
-                    categories.support || 0,
-                    categories.feedback || 0,
-                    categories.commercial || 0,
-                    categories.notification || 0,
-                    categories.spam || 0,
-                    categories.other || 0
-                ],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(100, 116, 139, 0.8)'
-                ],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        }, {
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                },
-                title: {
-                    display: true,
-                    text: 'Email Categories Distribution'
-                }
-            }
-        });
-        
-        console.log('✅ Gmail categories chart created');
-    }
-
-    getEmailCategoryBadge(category) {
-        const badges = {
-            support: '<span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📧 Support</span>',
-            feedback: '<span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669);">💬 Feedback</span>',
-            commercial: '<span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 Commercial</span>',
-            notification: '<span class="status-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🔔 Notification</span>',
-            spam: '<span class="status-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626);">⚠ Spam</span>',
-            other: '<span class="status-badge" style="background: linear-gradient(135deg, #64748b, #475569);">📁 Other</span>'
-        };
-        
-        return badges[category] || badges.other;
-    }
-
-    async markEmailAsRead(messageId) {
-        try {
-            // ✅ CHANGEMENT ICI
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-action`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'markAsRead',
-                    messageId: messageId
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to mark email as read');
-            }
-            
-            alert('✅ Email marked as read!');
-            await this.loadGmailInbox();
-            await this.loadGmailStats();
-            
-        } catch (error) {
-            console.error('❌ Error marking email as read:', error);
-            alert('⚠ Error: ' + error.message);
-        }
-    }
-
-    async archiveEmail(messageId) {
-        try {
-            // ✅ CHANGEMENT ICI
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-action`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'archive',
-                    messageId: messageId
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to archive email');
-            }
-            
-            alert('✅ Email archived!');
-            await this.loadGmailInbox();
-            await this.loadGmailStats();
-            
-        } catch (error) {
-            console.error('❌ Error archiving email:', error);
-            alert('⚠ Error: ' + error.message);
-        }
-    }
-
-    // ========================================
-    // 📧 SECTION 13: GMAIL MANAGEMENT - ULTRA-COMPLETE
-    // ========================================
-    
     async loadGmailStats() {
         try {
             console.log('📧 Loading Gmail stats...');
@@ -5761,9 +5418,6 @@ class AdminAnalyticsPro {
         this.updateStat('gmail-sent-emails', stats.sent || 0);
         this.updateStat('gmail-unread-rate', `${stats.unreadRate || 0}%`);
         this.updateStat('gmail-avg-response-time', `${stats.avgResponseTime || 0}h`);
-        
-        this.createGmailCategoryChart(stats.categories);
-        this.displayTopSenders(stats.topSenders);
         
         console.log('✅ Gmail stats displayed');
     }
@@ -5830,7 +5484,7 @@ class AdminAnalyticsPro {
             
             row.style.cursor = 'pointer';
             row.onclick = () => {
-                adminAnalytics.viewEmail(email.id);
+                this.viewEmail(email.id);
             };
             
             if (email.isUnread) {
@@ -5890,6 +5544,8 @@ class AdminAnalyticsPro {
             tbody.appendChild(row);
         };
         
+        if (!window.paginationManagers) window.paginationManagers = {};
+        
         if (!window.paginationManagers['gmail-inbox-body']) {
             window.paginationManagers['gmail-inbox-body'] = new PaginationManager(
                 'gmail-inbox-body',
@@ -5906,82 +5562,14 @@ class AdminAnalyticsPro {
         console.log(`✅ Gmail inbox displayed (${messages.length} emails)`);
     }
 
-    displayTopSenders(senders) {
-        const tbody = document.getElementById('gmail-top-senders-body');
-        if (!tbody || !senders) return;
-        
-        tbody.innerHTML = '';
-        
-        senders.forEach((sender, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${sender.email}
-                </td>
-                <td style="text-align: center; font-weight: 600; color: #667eea;">${sender.count}</td>
-            `;
-            tbody.appendChild(row);
-        });
-        
-        console.log('✅ Top senders displayed');
-    }
-
-    createGmailCategoryChart(categories) {
-        const canvas = document.getElementById('gmail-categories-chart');
-        if (!canvas || !categories) {
-            console.warn('⚠ Gmail categories chart canvas not found');
-            return;
-        }
-        
-        console.log('📊 Creating Gmail categories chart...');
-        
-        this.createChart('gmail-categories-chart', 'doughnut', {
-            labels: ['Support', 'Feedback', 'Commercial', 'Notification', 'Spam', 'Other'],
-            datasets: [{
-                data: [
-                    categories.support || 0,
-                    categories.feedback || 0,
-                    categories.commercial || 0,
-                    categories.notification || 0,
-                    categories.spam || 0,
-                    categories.other || 0
-                ],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(100, 116, 139, 0.8)'
-                ],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        }, {
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                },
-                title: {
-                    display: true,
-                    text: 'Email Categories Distribution'
-                }
-            }
-        });
-        
-        console.log('✅ Gmail categories chart created');
-    }
-
     getEmailCategoryBadge(category) {
         const badges = {
-            support: '<span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📧 Support</span>',
-            feedback: '<span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669);">💬 Feedback</span>',
-            commercial: '<span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰 Commercial</span>',
-            notification: '<span class="status-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🔔 Notification</span>',
-            spam: '<span class="status-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626);">⚠ Spam</span>',
-            other: '<span class="status-badge" style="background: linear-gradient(135deg, #64748b, #475569);">📁 Other</span>'
+            support: '<span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">📧 Support</span>',
+            feedback: '<span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">💬 Feedback</span>',
+            commercial: '<span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">💰 Commercial</span>',
+            notification: '<span class="status-badge" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">🔔 Notification</span>',
+            spam: '<span class="status-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">⚠ Spam</span>',
+            other: '<span class="status-badge" style="background: linear-gradient(135deg, #64748b, #475569); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">📁 Other</span>'
         };
         
         return badges[category] || badges.other;
@@ -6044,7 +5632,7 @@ class AdminAnalyticsPro {
     // ========================================
     // 📨 COMPOSE, REPLY, FORWARD
     // ========================================
-    
+
     openComposeModal() {
         console.log('✉ Opening compose modal...');
         
@@ -6079,7 +5667,6 @@ class AdminAnalyticsPro {
             this.composeEditor.setText('');
         }
         
-        // 🆕 INJECTER LA SIGNATURE
         this.injectSignature('compose');
         
         this.attachments = [];
@@ -6091,7 +5678,7 @@ class AdminAnalyticsPro {
         
         console.log('✅ Compose modal opened');
     }
-    
+
     closeComposeModal() {
         const modal = document.getElementById('compose-email-modal');
         if (modal) {
@@ -6104,7 +5691,7 @@ class AdminAnalyticsPro {
         
         console.log('✅ Compose modal closed');
     }
-    
+
     async sendEmail() {
         try {
             console.log('📤 Sending email...');
@@ -6167,7 +5754,7 @@ class AdminAnalyticsPro {
             sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
         }
     }
-    
+
     async openReplyModal(messageId, replyAll = false) {
         try {
             console.log(`↩ Opening reply modal (messageId: ${messageId}, replyAll: ${replyAll})...`);
@@ -6211,7 +5798,6 @@ class AdminAnalyticsPro {
                 this.replyEditor.setText('');
             }
             
-            // 🆕 INJECTER LA SIGNATURE
             this.injectSignature('reply');
             
             const quotedMessage = `
@@ -6232,7 +5818,7 @@ class AdminAnalyticsPro {
             alert('⚠ Error loading email details: ' + error.message);
         }
     }
-    
+
     closeReplyModal() {
         const modal = document.getElementById('reply-email-modal');
         if (modal) {
@@ -6240,7 +5826,7 @@ class AdminAnalyticsPro {
         }
         this.currentEmail = null;
     }
-    
+
     async sendReply(replyAll = false) {
         try {
             console.log(`📤 Sending reply (replyAll: ${replyAll})...`);
@@ -6300,7 +5886,7 @@ class AdminAnalyticsPro {
             sendBtn.innerHTML = '<i class="fas fa-reply"></i> Send Reply';
         }
     }
-    
+
     async openForwardModal(messageId) {
         try {
             console.log(`➡ Opening forward modal (messageId: ${messageId})...`);
@@ -6367,7 +5953,7 @@ class AdminAnalyticsPro {
             alert('⚠ Error loading email details: ' + error.message);
         }
     }
-    
+
     closeForwardModal() {
         const modal = document.getElementById('forward-email-modal');
         if (modal) {
@@ -6375,7 +5961,7 @@ class AdminAnalyticsPro {
         }
         this.currentEmail = null;
     }
-    
+
     async sendForward() {
         try {
             console.log('📤 Forwarding email...');
@@ -6438,11 +6024,11 @@ class AdminAnalyticsPro {
             sendBtn.innerHTML = '<i class="fas fa-share"></i> Forward';
         }
     }
-    
+
     // ========================================
-    // 🔍 SEARCH EMAILS (CORRIGÉ)
+    // 🔍 SEARCH EMAILS
     // ========================================
-    
+
     async searchEmails() {
         try {
             const query = document.getElementById('gmail-search-input').value.trim();
@@ -6455,6 +6041,8 @@ class AdminAnalyticsPro {
             console.log(`🔍 Searching emails with query: "${query}"...`);
             
             const searchBtn = document.getElementById('gmail-search-btn');
+            const resultsContainer = document.getElementById('gmail-search-results');
+            
             searchBtn.disabled = true;
             searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
@@ -6469,6 +6057,8 @@ class AdminAnalyticsPro {
             
             this.displaySearchResults();
             
+            resultsContainer.style.display = 'block';
+            
             console.log(`✅ Found ${this.searchResults.length} results`);
             
         } catch (error) {
@@ -6477,10 +6067,10 @@ class AdminAnalyticsPro {
         } finally {
             const searchBtn = document.getElementById('gmail-search-btn');
             searchBtn.disabled = false;
-            searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+            searchBtn.innerHTML = '<i class="fas fa-search"></i><span class="btn-text">Search</span>';
         }
     }
-    
+
     displaySearchResults() {
         const container = document.getElementById('gmail-search-results');
         if (!container) return;
@@ -6488,19 +6078,24 @@ class AdminAnalyticsPro {
         container.innerHTML = '';
         
         if (this.searchResults.length === 0) {
-            container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No results found</p>';
+            container.innerHTML = `
+                <p style="color: #64748b; text-align: center; padding: 20px;">
+                    <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                    No results found
+                </p>
+            `;
             return;
         }
         
-        // 🆕 AJOUTER UN TITRE
         const title = document.createElement('h4');
-        title.style.cssText = 'margin-bottom: 16px; color: #1e293b; font-weight: 600;';
+        title.style.cssText = 'margin-bottom: 16px; color: #1e293b; font-weight: 700;';
         title.innerHTML = `<i class="fas fa-search"></i> Search Results (${this.searchResults.length})`;
         container.appendChild(title);
         
         this.searchResults.forEach(email => {
             const emailDiv = document.createElement('div');
             emailDiv.className = 'search-result-item';
+            emailDiv.onclick = () => this.viewEmail(email.id);
             emailDiv.innerHTML = `
                 <div class="search-result-header">
                     <strong>${email.from}</strong>
@@ -6508,18 +6103,15 @@ class AdminAnalyticsPro {
                 </div>
                 <div class="search-result-subject">${email.subject}</div>
                 <div class="search-result-snippet">${email.snippet}</div>
-                <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')">
-                    <i class="fas fa-eye"></i> View
-                </button>
             `;
             container.appendChild(emailDiv);
         });
     }
-    
+
     // ========================================
     // 👁 VIEW EMAIL
     // ========================================
-    
+
     async viewEmail(messageId) {
         try {
             console.log(`👁 Loading email details (ID: ${messageId})...`);
@@ -6551,9 +6143,11 @@ class AdminAnalyticsPro {
                     const attDiv = document.createElement('div');
                     attDiv.className = 'attachment-item';
                     attDiv.innerHTML = `
-                        <i class="fas fa-paperclip"></i>
-                        <span>${att.filename}</span>
-                        <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                        <div class="attachment-info">
+                            <i class="fas fa-paperclip"></i>
+                            <span>${att.filename}</span>
+                            <span class="attachment-size">${this.formatBytes(att.size)}</span>
+                        </div>
                         <button class="btn-download" onclick="adminAnalytics.downloadAttachment('${message.id}', '${att.attachmentId}', '${att.filename}')">
                             <i class="fas fa-download"></i>
                         </button>
@@ -6573,7 +6167,7 @@ class AdminAnalyticsPro {
             alert('⚠ Error: ' + error.message);
         }
     }
-    
+
     closeViewEmailModal() {
         const modal = document.getElementById('view-email-modal');
         if (modal) {
@@ -6581,7 +6175,7 @@ class AdminAnalyticsPro {
         }
         this.currentEmail = null;
     }
-    
+
     async downloadAttachment(messageId, attachmentId, filename) {
         try {
             console.log(`📎 Downloading attachment: ${filename}...`);
@@ -6614,15 +6208,17 @@ class AdminAnalyticsPro {
             alert('⚠ Download error: ' + error.message);
         }
     }
-    
+
     // ========================================
     // 📎 ATTACHMENTS
     // ========================================
-    
+
     handleFileUpload(event) {
         const files = event.target.files;
         
         if (!files || files.length === 0) return;
+        
+        if (!this.attachments) this.attachments = [];
         
         Array.from(files).forEach(file => {
             if (file.size > 25 * 1024 * 1024) {
@@ -6650,21 +6246,21 @@ class AdminAnalyticsPro {
             reader.readAsDataURL(file);
         });
     }
-    
+
     removeAttachment(index) {
         this.attachments.splice(index, 1);
         this.updateAttachmentsList('compose');
         console.log(`✅ Attachment removed (index: ${index})`);
     }
-    
+
     updateAttachmentsList(context = 'compose') {
         const container = document.getElementById(`${context}-attachments-list`);
         if (!container) return;
         
         container.innerHTML = '';
         
-        if (this.attachments.length === 0) {
-            container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">No attachments</p>';
+        if (!this.attachments || this.attachments.length === 0) {
+            container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">No attachments</p>';
             return;
         }
         
@@ -6684,7 +6280,7 @@ class AdminAnalyticsPro {
             container.appendChild(attDiv);
         });
     }
-    
+
     displayForwardedAttachments(attachments) {
         const container = document.getElementById('forward-original-attachments');
         if (!container) return;
@@ -6697,6 +6293,11 @@ class AdminAnalyticsPro {
         }
         
         container.style.display = 'block';
+        
+        const label = document.createElement('label');
+        label.textContent = 'Original Attachments:';
+        label.style.cssText = 'font-weight: 700; margin-bottom: 8px; display: block;';
+        container.appendChild(label);
         
         attachments.forEach(att => {
             const attDiv = document.createElement('div');
@@ -6711,11 +6312,11 @@ class AdminAnalyticsPro {
             container.appendChild(attDiv);
         });
     }
-    
+
     // ========================================
     // 💾 DRAFTS
     // ========================================
-    
+
     startAutoSaveDraft(context = 'compose') {
         if (this.autoSaveDraftTimer) {
             clearInterval(this.autoSaveDraftTimer);
@@ -6727,7 +6328,7 @@ class AdminAnalyticsPro {
         
         console.log('✅ Auto-save draft activated (every 30s)');
     }
-    
+
     async saveDraft(context = 'compose', auto = false) {
         try {
             const to = document.getElementById(`${context}-to`).value.trim();
@@ -6741,6 +6342,8 @@ class AdminAnalyticsPro {
             }
             
             const editor = context === 'compose' ? this.composeEditor : this.replyEditor;
+            if (!editor) return;
+            
             const bodyHtml = editor.root.innerHTML;
             const bodyText = editor.getText();
             
@@ -6780,7 +6383,7 @@ class AdminAnalyticsPro {
             }
         }
     }
-    
+
     async loadGmailDrafts() {
         try {
             console.log('💾 Loading Gmail drafts...');
@@ -6804,14 +6407,14 @@ class AdminAnalyticsPro {
             console.error('❌ Error loading drafts:', error);
         }
     }
-    
+
     displayGmailDrafts() {
         const container = document.getElementById('gmail-drafts-list');
         if (!container) return;
         
         container.innerHTML = '';
         
-        if (this.gmailDrafts.length === 0) {
+        if (!this.gmailDrafts || this.gmailDrafts.length === 0) {
             container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px;">No drafts saved</p>';
             return;
         }
@@ -6837,7 +6440,7 @@ class AdminAnalyticsPro {
             container.appendChild(draftDiv);
         });
     }
-    
+
     async deleteDraft(draftId) {
         try {
             if (!confirm('Delete this draft?')) return;
@@ -6864,14 +6467,19 @@ class AdminAnalyticsPro {
             alert('⚠ Error: ' + error.message);
         }
     }
-    
+
     // ========================================
-    // ✍ SIGNATURE MANAGEMENT - FIRESTORE VERSION
+    // ✍ SIGNATURE MANAGEMENT - FIRESTORE
     // ========================================
-    
+
     async loadSignatures() {
         try {
             console.log('📥 Loading email signatures from Firestore...');
+            
+            const loadingIndicator = document.getElementById('signatures-loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
             
             const signaturesSnapshot = await this.db.collection('email_signatures').get();
             
@@ -6892,15 +6500,23 @@ class AdminAnalyticsPro {
             
             this.displaySignaturePreviews();
             
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            
         } catch (error) {
             console.error('❌ Error loading signatures from Firestore:', error);
             
-            // Fallback : Utiliser les signatures par défaut
             this.emailSignatures = this.getDefaultSignatures();
             this.displaySignaturePreviews();
+            
+            const loadingIndicator = document.getElementById('signatures-loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
         }
     }
-    
+
     getDefaultSignatures() {
         const baseSignature = `
             <br><br>
@@ -6936,7 +6552,7 @@ class AdminAnalyticsPro {
             `
         };
     }
-    
+
     async saveAllSignaturesToFirestore() {
         try {
             console.log('💾 Saving default signatures to Firestore...');
@@ -6950,7 +6566,7 @@ class AdminAnalyticsPro {
                     email: email,
                     signature: signature,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    createdBy: ADMIN_EMAIL
+                    createdBy: ADMIN_EMAIL || 'admin'
                 });
             });
             
@@ -6963,7 +6579,7 @@ class AdminAnalyticsPro {
             throw error;
         }
     }
-    
+
     async saveSignatureToFirestore(email, signatureHTML) {
         try {
             console.log(`💾 Saving signature to Firestore for: ${email}`);
@@ -6972,7 +6588,7 @@ class AdminAnalyticsPro {
                 email: email,
                 signature: signatureHTML,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                createdBy: ADMIN_EMAIL
+                createdBy: ADMIN_EMAIL || 'admin'
             });
             
             console.log('✅ Signature saved to Firestore');
@@ -6982,10 +6598,22 @@ class AdminAnalyticsPro {
             throw error;
         }
     }
-    
+
     displaySignaturePreviews() {
+        if (!this.emailSignatures) return;
+        
+        const emailKeyMap = {
+            'newsletter@alphavault-ai.com': 'newsletter',
+            'contact@alphavault-ai.com': 'contact',
+            'info@alphavault-ai.com': 'info',
+            'support@alphavault-ai.com': 'support',
+            'raphnardone@gmail.com': 'personal'
+        };
+        
         Object.keys(this.emailSignatures).forEach(email => {
-            const key = email.split('@')[0].replace('.', '-');
+            const key = emailKeyMap[email];
+            if (!key) return;
+            
             const preview = document.getElementById(`signature-preview-${key}`);
             if (preview) {
                 preview.innerHTML = this.emailSignatures[email] || '<em style="color: #64748b;">No signature defined</em>';
@@ -6994,7 +6622,7 @@ class AdminAnalyticsPro {
         
         console.log('✅ Signature previews updated');
     }
-    
+
     openSignatureModal() {
         const modal = document.getElementById('signature-editor-modal');
         if (!modal) {
@@ -7018,6 +6646,9 @@ class AdminAnalyticsPro {
                 },
                 placeholder: 'Create your email signature...'
             });
+            
+            // 🆕 AJOUTER LE LISTENER POUR SÉLECTION D'IMAGE
+            this.setupImageResizer();
         }
         
         this.loadSignatureForEmail('newsletter@alphavault-ai.com');
@@ -7026,14 +6657,14 @@ class AdminAnalyticsPro {
         
         console.log('✅ Signature modal opened');
     }
-    
+
     closeSignatureModal() {
         const modal = document.getElementById('signature-editor-modal');
         if (modal) {
             modal.style.display = 'none';
         }
     }
-    
+
     switchSignatureTab(email) {
         this.currentSignatureEmail = email;
         
@@ -7051,9 +6682,9 @@ class AdminAnalyticsPro {
         
         console.log(`✅ Switched to signature: ${email}`);
     }
-    
+
     loadSignatureForEmail(email) {
-        if (!this.signatureEditor) return;
+        if (!this.signatureEditor || !this.emailSignatures) return;
         
         const signature = this.emailSignatures[email] || '';
         
@@ -7061,7 +6692,7 @@ class AdminAnalyticsPro {
         
         console.log(`✅ Signature loaded for: ${email}`);
     }
-    
+
     async saveCurrentSignature() {
         if (!this.signatureEditor || !this.currentSignatureEmail) {
             alert('⚠ No signature to save');
@@ -7071,13 +6702,10 @@ class AdminAnalyticsPro {
         try {
             const signatureHTML = this.signatureEditor.root.innerHTML;
             
-            // Sauvegarder en mémoire
             this.emailSignatures[this.currentSignatureEmail] = signatureHTML;
             
-            // Sauvegarder dans Firestore
             await this.saveSignatureToFirestore(this.currentSignatureEmail, signatureHTML);
             
-            // Mettre à jour l'aperçu
             this.displaySignaturePreviews();
             
             alert(`✅ Signature saved for ${this.currentSignatureEmail}!`);
@@ -7089,7 +6717,7 @@ class AdminAnalyticsPro {
             alert('⚠ Error saving signature: ' + error.message);
         }
     }
-    
+
     clearCurrentSignature() {
         if (!this.signatureEditor) return;
         
@@ -7097,7 +6725,7 @@ class AdminAnalyticsPro {
             this.signatureEditor.setText('');
         }
     }
-    
+
     applySignatureTemplate(templateName) {
         if (!this.signatureEditor || !this.currentSignatureEmail) return;
         
@@ -7162,7 +6790,7 @@ class AdminAnalyticsPro {
             alert(`✅ Template "${templateName}" applied!`);
         }
     }
-    
+
     injectSignature(context = 'compose') {
         const fromSelect = document.getElementById(`${context}-from`);
         if (!fromSelect) {
@@ -7171,6 +6799,11 @@ class AdminAnalyticsPro {
         }
         
         const fromEmail = fromSelect.value;
+        
+        if (!this.emailSignatures) {
+            console.warn('⚠ Email signatures not loaded yet');
+            return;
+        }
         
         const signature = this.emailSignatures[fromEmail];
         
@@ -7188,38 +6821,34 @@ class AdminAnalyticsPro {
             return;
         }
         
-        // Nettoyer les éventuelles anciennes signatures
-        const currentContent = editor.root.innerHTML;
-        
-        editor.clipboard.dangerouslyPasteHTML(editor.getLength(), signature);
+        editor.clipboard.dangerouslyPasteHTML(0, signature);
         
         console.log(`✅ Signature injected for: ${fromEmail}`);
     }
-    
-    // 🆕 Ajouter un listener pour changer la signature quand on change l'adresse FROM
+
     setupFromChangeListeners() {
-        // Compose
         const composeFrom = document.getElementById('compose-from');
         if (composeFrom) {
             composeFrom.addEventListener('change', () => {
                 if (this.composeEditor) {
-                    // Retirer l'ancienne signature et injecter la nouvelle
+                    this.composeEditor.setText('');
                     this.injectSignature('compose');
                 }
             });
         }
         
-        // Reply
         const replyFrom = document.getElementById('reply-from');
         if (replyFrom) {
             replyFrom.addEventListener('change', () => {
                 if (this.replyEditor) {
+                    const currentContent = this.replyEditor.root.innerHTML;
+                    const signatureRemoved = currentContent.split('<br><br>')[0];
+                    this.replyEditor.root.innerHTML = signatureRemoved;
                     this.injectSignature('reply');
                 }
             });
         }
         
-        // Forward
         const forwardFrom = document.getElementById('forward-from');
         if (forwardFrom) {
             forwardFrom.addEventListener('change', () => {
@@ -7230,6 +6859,114 @@ class AdminAnalyticsPro {
         }
         
         console.log('✅ FROM change listeners setup');
+    }
+
+    // ========================================
+    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR
+    // ========================================
+
+    setupImageResizer() {
+        if (!this.signatureEditor) return;
+        
+        let selectedImage = null;
+        let resizeControls = null;
+        
+        this.signatureEditor.root.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                if (selectedImage) {
+                    selectedImage.classList.remove('selected');
+                }
+                
+                selectedImage = e.target;
+                selectedImage.classList.add('selected');
+                
+                this.showImageResizeControls(selectedImage);
+            } else {
+                if (selectedImage) {
+                    selectedImage.classList.remove('selected');
+                    selectedImage = null;
+                }
+                this.hideImageResizeControls();
+            }
+        });
+        
+        console.log('✅ Image resizer setup complete');
+    }
+
+    showImageResizeControls(img) {
+        this.hideImageResizeControls();
+        
+        const controls = document.createElement('div');
+        controls.className = 'image-resize-controls';
+        controls.innerHTML = `
+            <button class="image-resize-btn" onclick="adminAnalytics.resizeImage(-20)">
+                <i class="fas fa-minus"></i>
+            </button>
+            <input type="number" class="image-size-input" id="image-width-input" value="${img.width}" min="50" max="800" step="10">
+            <span style="color: white; font-weight: 600;">px</span>
+            <button class="image-resize-btn" onclick="adminAnalytics.resizeImage(20)">
+                <i class="fas fa-plus"></i>
+            </button>
+        `;
+        
+        img.parentElement.style.position = 'relative';
+        img.parentElement.appendChild(controls);
+        
+        this.currentSelectedImage = img;
+        
+        const input = document.getElementById('image-width-input');
+        input.addEventListener('change', () => {
+            const newWidth = parseInt(input.value);
+            if (newWidth >= 50 && newWidth <= 800) {
+                img.style.width = newWidth + 'px';
+                img.style.height = 'auto';
+            }
+        });
+    }
+
+    hideImageResizeControls() {
+        const existingControls = document.querySelector('.image-resize-controls');
+        if (existingControls) {
+            existingControls.remove();
+        }
+    }
+
+    resizeImage(delta) {
+        if (!this.currentSelectedImage) return;
+        
+        const currentWidth = this.currentSelectedImage.width;
+        const newWidth = Math.max(50, Math.min(800, currentWidth + delta));
+        
+        this.currentSelectedImage.style.width = newWidth + 'px';
+        this.currentSelectedImage.style.height = 'auto';
+        
+        const input = document.getElementById('image-width-input');
+        if (input) {
+            input.value = newWidth;
+        }
+    }
+
+    // ========================================
+    // 🛠 UTILITY METHODS
+    // ========================================
+
+    formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    updateStat(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
     }
 }
 
