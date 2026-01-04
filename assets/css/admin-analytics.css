@@ -3798,3 +3798,198 @@ body.dark-mode .conditional-options {
     outline-offset: 4px;
     border-radius: 8px;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   📱 EMAIL SIGNATURES MANAGER - CORRECTIONS MOBILE
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Grid signatures - 1 colonne sur tablette/mobile */
+    .signatures-preview-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+    }
+    
+    /* Signature Card - Padding réduit */
+    .signature-card {
+        padding: 16px;
+    }
+    
+    /* Signature Header - Layout vertical sur mobile */
+    .signature-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+        padding-bottom: 16px;
+    }
+    
+    /* Email signature - Affichage amélioré */
+    .signature-email {
+        margin-left: 0 !important;
+        font-size: 0.8rem;
+        word-break: break-all;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    /* Header avec actions - Stack vertical */
+    .section-header-with-actions {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+    }
+    
+    .section-header-with-actions .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Signature Preview - Meilleure lisibilité */
+    .signature-preview {
+        font-size: 0.85rem;
+        padding: 10px;
+        overflow-x: auto;
+        max-width: 100%;
+    }
+    
+    /* Loading indicator */
+    #signatures-loading-indicator {
+        padding: 16px !important;
+    }
+    
+    #signatures-loading-indicator i {
+        font-size: 1.3rem !important;
+    }
+    
+    #signatures-loading-indicator p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Très petits écrans - Optimisations supplémentaires */
+    .signature-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .signature-header {
+        gap: 6px;
+        padding-bottom: 12px;
+    }
+    
+    .signature-header i {
+        font-size: 1rem;
+    }
+    
+    .signature-header strong {
+        font-size: 0.95rem;
+    }
+    
+    .signature-email {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+    
+    .signature-preview {
+        font-size: 0.8rem;
+        padding: 8px;
+        min-height: 80px;
+    }
+    
+    .chart-title {
+        font-size: 0.95rem;
+        gap: 8px;
+    }
+    
+    .chart-title i {
+        font-size: 1rem;
+    }
+    
+    /* Bouton Edit Signatures - Texte condensé */
+    .section-header-with-actions .btn-primary {
+        font-size: 0.9rem;
+        padding: 12px 16px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🔧 CORRECTIONS SPÉCIFIQUES POUR SIGNATURE HEADER
+   ════════════════════════════════════════════════════════════════ */
+
+/* Assurer que le header ne déborde jamais */
+.signature-header {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.signature-header strong,
+.signature-header span {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Amélioration de la lisibilité des signatures preview */
+.signature-preview {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.signature-preview * {
+    max-width: 100%;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 AMÉLIORATION VISUELLE MOBILE (BONUS)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Espacement vertical entre les cards */
+    .signatures-preview-grid .signature-card {
+        margin-bottom: 0;
+    }
+    
+    /* Amélioration hover sur mobile (tactile) */
+    .signature-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Header icons - Meilleure visibilité */
+    .signature-header i {
+        flex-shrink: 0;
+    }
+    
+    /* Preview empty state - Plus visible */
+    .signature-preview em {
+        display: block;
+        text-align: center;
+        padding: 20px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🔍 FIX POUR EMAILS LONGS (DÉPASSEMENT)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .signature-email {
+        font-size: 0.7rem;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Afficher l'email complet au clic/touch */
+    .signature-email:active,
+    .signature-email:focus {
+        white-space: normal;
+        word-break: break-all;
+    }
+}
