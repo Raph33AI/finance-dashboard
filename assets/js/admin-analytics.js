@@ -6663,6 +6663,11 @@ class AdminAnalyticsPro {
         if (modal) {
             modal.style.display = 'none';
         }
+        
+        // 🆕 Nettoyer les contrôles d'image
+        if (this.removeImageControls) {
+            this.removeImageControls();
+        }
     }
 
     switchSignatureTab(email) {
@@ -6862,38 +6867,159 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR (VERSION CORRIGÉE)
+    // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR (VERSION FINALE CORRIGÉE)
     // ========================================
 
     setupImageResizer() {
         if (!this.signatureEditor) return;
         
         let selectedImage = null;
+        let controlsElement = null;
+        
+        // Fonction pour créer les contrôles
+        const createControls = (img) => {
+            // Supprimer les anciens contrôles
+            if (controlsElement) {
+                controlsElement.remove();
+            }
+            
+            // Créer le conteneur de contrôles (HORS de l'éditeur Quill)
+            controlsElement = document.createElement('div');
+            controlsElement.className = 'image-resize-controls-overlay';
+            controlsElement.innerHTML = `
+                <button class="img-resize-btn img-resize-minus" title="Reduce size">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" class="img-resize-input" value="${Math.round(img.width || 200)}" min="50" max="800" step="10">
+                <span class="img-resize-label">px</span>
+                <button class="img-resize-btn img-resize-plus" title="Increase size">
+                    <i class="fas fa-plus"></i>
+                </button>
+            `;
+            
+            // Positionner les contrôles par rapport à l'image
+            const updateControlsPosition = () => {
+                const rect = img.getBoundingClientRect();
+                const modalContent = document.querySelector('#signature-editor-modal .gmail-modal-body');
+                const modalRect = modalContent ? modalContent.getBoundingClientRect() : { top: 0, left: 0 };
+                
+                controlsElement.style.position = 'fixed';
+                controlsElement.style.top = `${rect.bottom + 10}px`;
+                controlsElement.style.left = `${rect.left + (rect.width / 2)}px`;
+                controlsElement.style.transform = 'translateX(-50%)';
+                controlsElement.style.zIndex = '999999';
+            };
+            
+            updateControlsPosition();
+            
+            // Ajouter au body (pas à l'éditeur)
+            document.body.appendChild(controlsElement);
+            
+            // Event listeners pour les boutons
+            const btnMinus = controlsElement.querySelector('.img-resize-minus');
+            const btnPlus = controlsElement.querySelector('.img-resize-plus');
+            const input = controlsElement.querySelector('.img-resize-input');
+            
+            btnMinus.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const currentWidth = img.width || parseInt(img.style.width) || 200;
+                const newWidth = Math.max(50, currentWidth - 50);
+                img.style.width = newWidth + 'px';
+                img.style.height = 'auto';
+                img.setAttribute('width', newWidth);
+                input.value = newWidth;
+                updateControlsPosition();
+            });
+            
+            btnPlus.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const currentWidth = img.width || parseInt(img.style.width) || 200;
+                const newWidth = Math.min(800, currentWidth + 50);
+                img.style.width = newWidth + 'px';
+                img.style.height = 'auto';
+                img.setAttribute('width', newWidth);
+                input.value = newWidth;
+                updateControlsPosition();
+            });
+            
+            input.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const newWidth = parseInt(input.value);
+                if (newWidth >= 50 && newWidth <= 800) {
+                    img.style.width = newWidth + 'px';
+                    img.style.height = 'auto';
+                    img.setAttribute('width', newWidth);
+                    updateControlsPosition();
+                }
+            });
+            
+            input.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+            
+            // Mettre à jour la position lors du scroll
+            const modalBody = document.querySelector('#signature-editor-modal .gmail-modal-body');
+            if (modalBody) {
+                modalBody.addEventListener('scroll', updateControlsPosition);
+            }
+            
+            return controlsElement;
+        };
+        
+        // Fonction pour supprimer les contrôles
+        const removeControls = () => {
+            if (controlsElement) {
+                controlsElement.remove();
+                controlsElement = null;
+            }
+            if (selectedImage) {
+                selectedImage.classList.remove('img-selected');
+                selectedImage = null;
+            }
+        };
         
         // Écouter les clics dans l'éditeur
         this.signatureEditor.root.addEventListener('click', (e) => {
-            // Si on clique sur une image
-            if (e.target.tagName === 'IMG') {
-                // Désélectionner l'image précédente
-                if (selectedImage && selectedImage !== e.target) {
-                    selectedImage.classList.remove('selected');
-                    this.hideImageResizeControls();
+            const clickedImg = e.target.closest('img');
+            
+            if (clickedImg) {
+                // Désélectionner l'ancienne image
+                if (selectedImage && selectedImage !== clickedImg) {
+                    selectedImage.classList.remove('img-selected');
                 }
                 
-                selectedImage = e.target;
-                selectedImage.classList.add('selected');
+                // Sélectionner la nouvelle image
+                selectedImage = clickedImg;
+                selectedImage.classList.add('img-selected');
                 
-                this.showImageResizeControls(selectedImage);
-            } 
-            // Si on clique ailleurs (pas sur une image ni sur les contrôles)
-            else if (!e.target.closest('.image-resize-controls')) {
-                if (selectedImage) {
-                    selectedImage.classList.remove('selected');
-                    selectedImage = null;
-                }
-                this.hideImageResizeControls();
+                // Créer les contrôles
+                createControls(clickedImg);
+                
+                console.log('✅ Image selected, controls displayed');
             }
         });
+        
+        // Fermer les contrôles si on clique en dehors
+        document.addEventListener('click', (e) => {
+            // Si on clique en dehors de l'éditeur ET en dehors des contrôles
+            if (!e.target.closest('.ql-editor') && !e.target.closest('.image-resize-controls-overlay')) {
+                removeControls();
+            }
+        });
+        
+        // Fermer les contrôles si on ferme le modal
+        const modal = document.getElementById('signature-editor-modal');
+        if (modal) {
+            const closeBtn = modal.querySelector('.btn-close-modal');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', removeControls);
+            }
+        }
+        
+        // Stocker la fonction de nettoyage
+        this.removeImageControls = removeControls;
         
         console.log('✅ Image resizer setup complete');
     }
