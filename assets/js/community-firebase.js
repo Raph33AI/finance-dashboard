@@ -372,41 +372,110 @@ class CommunityFirebaseService {
         }
     }
 
+    /* ==========================================
+    📧 NOTIFICATION EMAIL - VERSION CORRIGÉE
+    ========================================== */
+
+    /**
+     * Récupère TOUS les utilisateurs avec pagination automatique
+     * @returns {Promise<Array>} Liste complète des utilisateurs
+     */
+    async getAllUsersWithPagination() {
+        const BATCH_SIZE = 500; // Limite Firestore
+        let allUsers = [];
+        let lastDoc = null;
+        let hasMore = true;
+        let batchCount = 0;
+
+        console.log('📊 Starting user retrieval with pagination...');
+
+        try {
+            while (hasMore) {
+                batchCount++;
+                console.log(`📦 Fetching batch ${batchCount}...`);
+
+                // Construire la requête
+                let query = this.db.collection('users').limit(BATCH_SIZE);
+
+                // Continuer après le dernier document
+                if (lastDoc) {
+                    query = query.startAfter(lastDoc);
+                }
+
+                const snapshot = await query.get();
+
+                // Si vide, on a terminé
+                if (snapshot.empty) {
+                    console.log('✅ No more users to fetch');
+                    hasMore = false;
+                    break;
+                }
+
+                // Ajouter les utilisateurs récupérés
+                snapshot.docs.forEach(doc => {
+                    const userData = doc.data();
+                    if (userData.email && userData.email.trim() !== '') {
+                        allUsers.push({
+                            uid: doc.id,
+                            email: userData.email,
+                            name: userData.displayName || 'Member',
+                            plan: userData.plan || 'free'
+                        });
+                    }
+                });
+
+                // Sauvegarder le dernier document pour pagination
+                lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
+                // Si moins de BATCH_SIZE, c'est la dernière page
+                if (snapshot.docs.length < BATCH_SIZE) {
+                    hasMore = false;
+                }
+
+                console.log(`✅ Batch ${batchCount}: ${snapshot.docs.length} users | Total: ${allUsers.length}`);
+            }
+
+            console.log(`🎉 TOTAL USERS RETRIEVED: ${allUsers.length}`);
+            return allUsers;
+
+        } catch (error) {
+            console.error('❌ Error fetching users with pagination:', error);
+            throw error;
+        }
+    }
+
     /**
      * 📧 Envoyer une notification email à tous les utilisateurs lors d'une publication
+     * VERSION CORRIGÉE AVEC PAGINATION
      */
     async sendBlogPostNotification(postData, postId) {
         try {
-            console.log('📧 Sending blog post notifications...');
+            console.log('📧 Starting blog post notification process...');
+            console.log('📄 Post:', postData.title);
 
-            // ✅ CORRECTION : Récupérer TOUS les utilisateurs (on filtrera côté client)
-            const usersSnapshot = await this.db
-                .collection('users')
-                .get();
+            // ✅ CORRECTION : Récupérer TOUS les utilisateurs avec pagination
+            const allUsers = await this.getAllUsersWithPagination();
 
-            if (usersSnapshot.empty) {
-                console.warn('⚠ No users found in database');
-                return;
+            if (allUsers.length === 0) {
+                console.warn('⚠ No users found to notify');
+                return { success: false, sent: 0, failed: 0 };
             }
 
-            // ✅ Filtrer les utilisateurs (exclure l'auteur et ceux sans email)
-            const recipients = usersSnapshot.docs
-                .filter(doc => doc.id !== postData.authorId) // Exclure l'auteur
-                .map(doc => {
-                    const userData = doc.data();
-                    return {
-                        email: userData.email,
-                        name: userData.displayName || 'Member'
-                    };
-                })
-                .filter(user => user.email && user.email.trim() !== ''); // Filtrer ceux sans email
+            // ✅ Filtrer : exclure l'auteur du post
+            const recipients = allUsers
+                .filter(user => user.uid !== postData.authorId)
+                .map(user => ({
+                    email: user.email,
+                    name: user.name
+                }));
 
             if (recipients.length === 0) {
-                console.warn('⚠ No users to notify (all users filtered out)');
-                return;
+                console.warn('⚠ No recipients after filtering (author excluded)');
+                return { success: false, sent: 0, failed: 0 };
             }
 
-            console.log(`📤 Notifying ${recipients.length} users...`);
+            console.log(`📤 Sending emails to ${recipients.length} users...`);
+            console.log(`   (${allUsers.length} total users - ${allUsers.length - recipients.length} filtered out)`);
 
             // ✅ Récupérer les infos du channel
             let channelName = 'Community';
@@ -442,6 +511,7 @@ class CommunityFirebaseService {
             const WORKER_URL = 'https://message-notification-sender.raphnardone.workers.dev/send-blog-post';
             
             console.log('📡 Calling notification worker:', WORKER_URL);
+            console.log(`📊 Payload size: ${recipients.length} recipients`);
             
             const response = await fetch(WORKER_URL, {
                 method: 'POST',
@@ -452,18 +522,62 @@ class CommunityFirebaseService {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Worker error: ${errorData.error || response.statusText}`);
+                const errorText = await response.text();
+                console.error('❌ Worker response error:', errorText);
+                throw new Error(`Worker error (${response.status}): ${errorText}`);
             }
 
             const result = await response.json();
-            console.log('✅ Blog post notifications sent:', result);
-
+            
+            console.log('✅ Blog post notifications sent successfully!');
+            console.log(`   📧 Sent: ${result.sent || recipients.length}`);
+            console.log(`   ❌ Failed: ${result.failed || 0}`);
+            
             return result;
 
         } catch (error) {
             console.error('❌ Error sending blog post notifications:', error);
+            console.error('📋 Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+            
             // Ne pas bloquer la création du post en cas d'erreur d'email
+            return {
+                success: false,
+                sent: 0,
+                failed: 0,
+                error: error.message
+            };
+        }
+    }
+
+    /* ==========================================
+    🧪 DEBUG - COMPTER LES UTILISATEURS
+    ========================================== */
+
+    /**
+     * Compter le nombre total d'utilisateurs (pour debug)
+     */
+    async debugCountAllUsers() {
+        try {
+            console.log('🔢 Counting all users in Firestore...');
+            
+            const allUsers = await this.getAllUsersWithPagination();
+            
+            console.log('📊 USER COUNT REPORT:');
+            console.log(`   👥 Total users: ${allUsers.length}`);
+            console.log(`   📧 With email: ${allUsers.filter(u => u.email).length}`);
+            console.log(`   ❌ Without email: ${allUsers.filter(u => !u.email).length}`);
+            
+            // Afficher les 10 premiers
+            console.log('📋 First 10 users:', allUsers.slice(0, 10));
+            
+            return allUsers.length;
+            
+        } catch (error) {
+            console.error('❌ Error counting users:', error);
+            return 0;
         }
     }
 
