@@ -3800,42 +3800,107 @@ body.dark-mode .conditional-options {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   📱 EMAIL SIGNATURES MANAGER - CORRECTIONS MOBILE
+   📱 EMAIL SIGNATURES MANAGER - FIX DÉFINITIF DÉBORDEMENT MOBILE
    ════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    /* Grid signatures - 1 colonne sur tablette/mobile */
+    /* Grid signatures - 1 colonne */
     .signatures-preview-grid {
         grid-template-columns: 1fr !important;
         gap: 16px;
+        max-width: 100%;
+        overflow: hidden;
     }
     
-    /* Signature Card - Padding réduit */
+    /* Signature Card - Conteneur principal */
     .signature-card {
-        padding: 16px;
+        padding: 14px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
     
-    /* Signature Header - Layout vertical sur mobile */
+    /* Signature Header - Layout vertical */
     .signature-header {
         flex-direction: column;
         align-items: flex-start !important;
         gap: 8px;
-        padding-bottom: 16px;
+        padding-bottom: 12px;
+        max-width: 100%;
+        overflow: hidden;
     }
     
-    /* Email signature - Affichage amélioré */
+    .signature-header i {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .signature-header strong {
+        font-size: 0.95rem;
+        max-width: 100%;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Email badge - Gestion dépassement */
     .signature-email {
         margin-left: 0 !important;
-        font-size: 0.8rem;
-        word-break: break-all;
+        font-size: 0.75rem !important;
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
         color: #667eea;
         background: rgba(102, 126, 234, 0.1);
-        padding: 4px 10px;
+        padding: 4px 8px;
         border-radius: 8px;
         font-weight: 600;
+        max-width: 100% !important;
+        display: inline-block;
+        box-sizing: border-box;
     }
     
-    /* Header avec actions - Stack vertical */
+    /* 🔥 SIGNATURE PREVIEW - FIX CRITIQUE */
+    .signature-preview {
+        font-size: 0.8rem !important;
+        padding: 10px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Forcer tous les enfants à respecter la largeur */
+    .signature-preview * {
+        max-width: 100% !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Éléments spécifiques (texte, liens, paragraphes) */
+    .signature-preview p,
+    .signature-preview div,
+    .signature-preview span,
+    .signature-preview a,
+    .signature-preview strong,
+    .signature-preview em {
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+        hyphens: auto !important;
+    }
+    
+    /* URLs et emails dans la preview */
+    .signature-preview a[href*="http"],
+    .signature-preview a[href*="mailto"] {
+        word-break: break-all !important;
+        display: inline-block;
+        max-width: 100%;
+    }
+    
+    /* Section header avec actions */
     .section-header-with-actions {
         flex-direction: column;
         align-items: stretch !important;
@@ -3847,149 +3912,128 @@ body.dark-mode .conditional-options {
         justify-content: center;
     }
     
-    /* Signature Preview - Meilleure lisibilité */
-    .signature-preview {
-        font-size: 0.85rem;
-        padding: 10px;
-        overflow-x: auto;
-        max-width: 100%;
-    }
-    
     /* Loading indicator */
     #signatures-loading-indicator {
         padding: 16px !important;
-    }
-    
-    #signatures-loading-indicator i {
-        font-size: 1.3rem !important;
-    }
-    
-    #signatures-loading-indicator p {
-        font-size: 0.9rem;
+        max-width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    /* Très petits écrans - Optimisations supplémentaires */
+    /* Petits écrans - Optimisation supplémentaire */
     .signature-card {
-        padding: 12px;
-        border-radius: 12px;
+        padding: 12px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .signature-preview {
+        font-size: 0.75rem !important;
+        padding: 8px !important;
+        min-height: 80px;
     }
     
     .signature-header {
         gap: 6px;
-        padding-bottom: 12px;
-    }
-    
-    .signature-header i {
-        font-size: 1rem;
-    }
-    
-    .signature-header strong {
-        font-size: 0.95rem;
+        padding-bottom: 10px;
     }
     
     .signature-email {
-        font-size: 0.75rem;
-        padding: 3px 8px;
-    }
-    
-    .signature-preview {
-        font-size: 0.8rem;
-        padding: 8px;
-        min-height: 80px;
+        font-size: 0.7rem !important;
+        padding: 3px 6px;
     }
     
     .chart-title {
-        font-size: 0.95rem;
-        gap: 8px;
-    }
-    
-    .chart-title i {
-        font-size: 1rem;
-    }
-    
-    /* Bouton Edit Signatures - Texte condensé */
-    .section-header-with-actions .btn-primary {
         font-size: 0.9rem;
-        padding: 12px 16px;
+        gap: 6px;
+    }
+    
+    .section-header-with-actions .btn-primary {
+        font-size: 0.85rem;
+        padding: 10px 14px;
     }
 }
 
 /* ════════════════════════════════════════════════════════════════
-   🔧 CORRECTIONS SPÉCIFIQUES POUR SIGNATURE HEADER
-   ════════════════════════════════════════════════════════════════ */
-
-/* Assurer que le header ne déborde jamais */
-.signature-header {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.signature-header strong,
-.signature-header span {
-    max-width: 100%;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-}
-
-/* Amélioration de la lisibilité des signatures preview */
-.signature-preview {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-}
-
-.signature-preview * {
-    max-width: 100%;
-}
-
-/* ════════════════════════════════════════════════════════════════
-   🎨 AMÉLIORATION VISUELLE MOBILE (BONUS)
+   🔧 FIX GLOBAL POUR TOUTES LES SECTIONS
    ════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    /* Espacement vertical entre les cards */
-    .signatures-preview-grid .signature-card {
-        margin-bottom: 0;
+    /* S'assurer que la section parente ne crée pas de débordement */
+    .section {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }
     
-    /* Amélioration hover sur mobile (tactile) */
+    /* Grille parente */
+    .signatures-preview-grid {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Empêcher tout débordement horizontal */
+    body,
+    html {
+        overflow-x: hidden !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   🎨 AMÉLIORATION VISUELLE (BONUS)
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Hover/Active states pour mobile */
     .signature-card:active {
         transform: scale(0.98);
         transition: transform 0.1s ease;
     }
     
-    /* Header icons - Meilleure visibilité */
-    .signature-header i {
-        flex-shrink: 0;
-    }
-    
-    /* Preview empty state - Plus visible */
+    /* Empty state preview */
     .signature-preview em {
         display: block;
         text-align: center;
-        padding: 20px 10px;
-        font-size: 0.9rem;
+        padding: 16px 8px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+    
+    /* Icônes header - Taille cohérente */
+    .signature-header i {
+        width: 20px;
+        text-align: center;
     }
 }
 
 /* ════════════════════════════════════════════════════════════════
-   🔍 FIX POUR EMAILS LONGS (DÉPASSEMENT)
+   🔍 FIX POUR CONTENU HTML COMPLEXE DANS SIGNATURES
    ════════════════════════════════════════════════════════════════ */
 
-@media (max-width: 480px) {
-    .signature-email {
-        font-size: 0.7rem;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+@media (max-width: 768px) {
+    /* Tables dans les signatures */
+    .signature-preview table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
     }
     
-    /* Afficher l'email complet au clic/touch */
-    .signature-email:active,
-    .signature-email:focus {
-        white-space: normal;
-        word-break: break-all;
+    .signature-preview table td,
+    .signature-preview table th {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Images dans les signatures */
+    .signature-preview img {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+    }
+    
+    /* Logos/avatars */
+    .signature-preview img[width] {
+        width: auto !important;
+        max-width: 60px !important;
     }
 }
