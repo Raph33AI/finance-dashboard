@@ -1,7 +1,7 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.5
-   ✅ SCROLLBAR TOUJOURS VISIBLE SUR PC (CORRIGÉ)
-   ✅ "ALL ITEMS LOADED" CENTRÉ SUR MOBILE (CORRIGÉ)
+   PROFILE.JS - Gestion de la page profil v4.4
+   ✅ SCROLLBAR VISIBLE SUR PC
+   ✅ ÉLÉMENTS CENTRÉS SUR MOBILE
    ✅ SANS DUPLICATION
    ============================================ */
 
@@ -35,17 +35,16 @@ class InfiniteScrollManager {
             return;
         }
 
-        // ✅ CORRECTION PC : FORCER LA SCROLLBAR VISIBLE EN PERMANENCE
+        // ✅ STYLES RESPONSIVES AVEC SCROLLBAR FORCÉE
         const isMobile = window.innerWidth <= 768;
         
+        // ✅ Appliquer les styles INLINE pour garantir leur application
         this.container.style.cssText = `
             max-height: ${isMobile ? '400px' : '600px'};
-            min-height: ${isMobile ? '300px' : '500px'};
             overflow-y: scroll !important;
             overflow-x: hidden !important;
             position: relative;
             padding-right: 8px;
-            -webkit-overflow-scrolling: touch;
         `;
         
         // Vider complètement le container
@@ -164,32 +163,20 @@ class InfiniteScrollManager {
         const existingEnd = document.getElementById(`${this.listId}-end`);
         if (existingEnd) return;
 
-        // ✅ CORRECTION MOBILE : CENTRAGE GARANTI
         const endMsg = document.createElement('div');
         endMsg.id = `${this.listId}-end`;
-        endMsg.className = 'infinite-scroll-end-message'; // Classe pour ciblage CSS
-        endMsg.style.cssText = `
-            text-align: center; 
-            padding: 20px; 
-            color: var(--text-secondary); 
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            gap: 8px;
-        `;
-        endMsg.innerHTML = `<i class="fas fa-check-circle"></i> <span>All items loaded</span>`;
+        endMsg.style.cssText = 'text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.9rem;';
+        endMsg.innerHTML = `<i class="fas fa-check-circle"></i> All items loaded`;
         
         this.container.insertBefore(endMsg, this.sentinel);
     }
 
     showError(message) {
         const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = 'text-align: center; padding: 20px; color: #EF4444; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%;';
+        errorDiv.style.cssText = 'text-align: center; padding: 20px; color: #EF4444;';
         errorDiv.innerHTML = `
             <i class="fas fa-exclamation-triangle"></i>
-            <p style="margin-top: 8px;">${message}</p>
+            <p>${message}</p>
         `;
         this.container.insertBefore(errorDiv, this.sentinel);
     }
@@ -269,43 +256,44 @@ window.addEventListener('userDataLoaded', (e) => {
 window.addEventListener('resize', () => {
     const isMobile = window.innerWidth <= 768;
     const maxHeight = isMobile ? '400px' : '600px';
-    const minHeight = isMobile ? '300px' : '500px';
     
     ['followingList', 'followersList', 'savedPostsList'].forEach(listId => {
         const container = document.getElementById(listId);
         if (container) {
             container.style.maxHeight = maxHeight;
-            container.style.minHeight = minHeight;
         }
     });
 });
+
+// ============================================
+// 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE
+// ============================================
 
 // ============================================
 // 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE (PC)
 // ============================================
 
 function addCustomScrollbarStyles() {
+    // Supprimer l'ancien style s'il existe
     const oldStyle = document.getElementById('custom-scrollbar-styles');
     if (oldStyle) oldStyle.remove();
     
     const style = document.createElement('style');
     style.id = 'custom-scrollbar-styles';
     style.textContent = `
-        /* ✅ FORCER LA SCROLLBAR TOUJOURS VISIBLE SUR PC */
+        /* ✅ FORCER LA SCROLLBAR VISIBLE SUR PC */
         #followingList,
         #followersList,
         #savedPostsList {
-            overflow-y: scroll !important;
+            overflow-y: scroll !important; /* ✅ Force scroll visible */
             overflow-x: hidden !important;
-            scrollbar-gutter: stable; /* Réserve l'espace pour la scrollbar */
         }
         
         /* Scrollbar Webkit (Chrome, Edge, Safari) */
         #followingList::-webkit-scrollbar,
         #followersList::-webkit-scrollbar,
         #savedPostsList::-webkit-scrollbar {
-            width: 14px !important; /* ✅ Largeur augmentée pour meilleure visibilité */
-            display: block !important;
+            width: 12px; /* ✅ Largeur visible */
         }
         
         #followingList::-webkit-scrollbar-track,
@@ -323,7 +311,7 @@ function addCustomScrollbarStyles() {
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: padding-box;
-            min-height: 50px;
+            min-height: 50px; /* ✅ Hauteur minimale pour faciliter le clic */
             transition: background 0.3s ease;
         }
         
@@ -345,7 +333,7 @@ function addCustomScrollbarStyles() {
         #followingList,
         #followersList,
         #savedPostsList {
-            scrollbar-width: auto !important; /* ✅ Changé de 'thin' à 'auto' pour meilleure visibilité */
+            scrollbar-width: thin;
             scrollbar-color: #667eea rgba(0, 0, 0, 0.08);
         }
         
@@ -364,17 +352,18 @@ function addCustomScrollbarStyles() {
     `;
     document.head.appendChild(style);
     
-    console.log('✅ Scrollbar styles applied (always visible)');
+    console.log('✅ Scrollbar styles applied');
 }
 
 // ============================================
 // 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE)
 // ============================================
 
+// ============================================
+// 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE UNIQUEMENT SUR MOBILE)
+// ============================================
+
 function addResponsiveStyles() {
-    const oldStyle = document.getElementById('profile-responsive-styles');
-    if (oldStyle) oldStyle.remove();
-    
     const style = document.createElement('style');
     style.id = 'profile-responsive-styles';
     style.textContent = `
@@ -394,12 +383,6 @@ function addResponsiveStyles() {
             .saved-post-item > div {
                 text-align: left !important;
             }
-            
-            /* Message de fin aligné à gauche sur PC */
-            .infinite-scroll-end-message {
-                justify-content: flex-start !important;
-                padding-left: 16px !important;
-            }
         }
         
         /* ===== MOBILE : CENTRAGE ACTIVÉ ===== */
@@ -411,20 +394,6 @@ function addResponsiveStyles() {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-            }
-            
-            /* ✅ CENTRAGE DU MESSAGE "ALL ITEMS LOADED" */
-            .infinite-scroll-end-message {
-                justify-content: center !important;
-                text-align: center !important;
-                width: 100% !important;
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-            }
-            
-            .infinite-scroll-end-message i {
-                margin-right: 8px;
             }
             
             /* ✅ CENTRAGE DES CARDS */
@@ -515,7 +484,6 @@ function addResponsiveStyles() {
             #followersList,
             #savedPostsList {
                 max-height: 350px !important;
-                min-height: 280px !important;
             }
             
             /* Avatars plus petits */
@@ -546,8 +514,6 @@ function addResponsiveStyles() {
         }
     `;
     document.head.appendChild(style);
-    
-    console.log('✅ Responsive styles applied (mobile centering)');
 }
 
 // ============================================
@@ -1701,4 +1667,4 @@ toastStyle.textContent = `
 `;
 document.head.appendChild(toastStyle);
 
-console.log('✅ Script de profil chargé (v4.5 - SCROLLBAR PC CORRIGÉE + CENTRAGE MOBILE CORRIGÉ)');
+console.log('✅ Script de profil chargé (v4.4 - Scrollbar PC + Centrage Mobile)');
