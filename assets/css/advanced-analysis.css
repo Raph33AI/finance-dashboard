@@ -5022,22 +5022,24 @@ body.dark-mode .ai-factor-item {
     gap: 20px;
 }
 
+/* ✅✅ TICKER EN BLANC */
 .stock-info h2 {
     margin: 0;
     font-size: 2rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: white !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* ✅✅ NOM D'ENTREPRISE EN BLANC */
 .stock-name {
     display: block;
     font-size: 0.95rem;
-    color: var(--text-secondary, #64748b);
+    color: white !important;
     font-weight: 600;
     margin-top: 4px;
+    opacity: 0.9;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* ✅ DARK MODE SUPPORT */
@@ -5050,6 +5052,16 @@ body.dark-mode .stock-logo-container:hover {
     border-color: rgba(102, 126, 234, 0.45);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ✅ DARK MODE - Texte également en blanc */
+body.dark-mode .stock-info h2 {
+    color: white !important;
+}
+
+body.dark-mode .stock-name {
+    color: white !important;
+    opacity: 0.85;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -5130,7 +5142,7 @@ body.dark-mode .watchlist-logo {
 }
 
 /* ═══════════════════════════════════════════════════════
-   📱 RESPONSIVE
+   📱 RESPONSIVEE
    ═══════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
@@ -5152,6 +5164,10 @@ body.dark-mode .watchlist-logo {
     
     .stock-info h2 {
         font-size: 1.5rem;
+    }
+    
+    .stock-name {
+        font-size: 0.85rem;
     }
     
     .watchlist-logo {
