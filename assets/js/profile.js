@@ -1,7 +1,8 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.0
-   ✅ INFINITE SCROLL pour Following, Followers, Saved Posts
+   PROFILE.JS - Gestion de la page profil v4.1
+   ✅ INFINITE SCROLL CORRIGÉ (sans duplication)
    ✅ Chargement progressif (4 items par batch)
+   ✅ Loader contrôlé
    ============================================ */
 
 // Variables globales
@@ -9,7 +10,7 @@ let currentUserData = null;
 let isEditingPersonalInfo = false;
 
 // ============================================
-// 🆕 SYSTÈME D'INFINITE SCROLL
+// 🆕 SYSTÈME D'INFINITE SCROLL CORRIGÉ
 // ============================================
 
 class InfiniteScrollManager {
@@ -20,19 +21,27 @@ class InfiniteScrollManager {
         this.lastVisible = null;
         this.isLoading = false;
         this.hasMore = true;
-        this.items = [];
+        this.loadedIds = new Set(); // ✅ Éviter les doublons
         this.observer = null;
+        this.container = null;
+        this.sentinel = null;
     }
 
     init() {
-        const listElement = document.getElementById(this.listId);
-        if (!listElement) return;
+        this.container = document.getElementById(this.listId);
+        if (!this.container) {
+            console.error(`❌ Container ${this.listId} not found`);
+            return;
+        }
 
-        // Créer le sentinel (élément déclencheur)
-        const sentinel = document.createElement('div');
-        sentinel.id = `${this.listId}-sentinel`;
-        sentinel.style.height = '1px';
-        listElement.appendChild(sentinel);
+        // Vider le container
+        this.container.innerHTML = '';
+
+        // Créer le sentinel (élément invisible qui déclenche le chargement)
+        this.sentinel = document.createElement('div');
+        this.sentinel.id = `${this.listId}-sentinel`;
+        this.sentinel.style.cssText = 'height: 1px; width: 100%; pointer-events: none;';
+        this.container.appendChild(this.sentinel);
 
         // Observer le sentinel
         this.observer = new IntersectionObserver(
@@ -43,10 +52,15 @@ class InfiniteScrollManager {
                     }
                 });
             },
-            { threshold: 0.1 }
+            { 
+                threshold: 0,
+                rootMargin: '100px' // Charger un peu avant d'atteindre le bas
+            }
         );
 
-        this.observer.observe(sentinel);
+        this.observer.observe(this.sentinel);
+
+        console.log(`✅ Infinite Scroll initialized for ${this.listId}`);
     }
 
     async loadMore() {
@@ -56,18 +70,39 @@ class InfiniteScrollManager {
         this.showLoader();
 
         try {
+            console.log(`📥 Loading batch for ${this.listId}...`);
+            
             const result = await this.loadFunction(this.lastVisible, this.itemsPerPage);
             
-            if (result.items.length < this.itemsPerPage) {
-                this.hasMore = false;
+            console.log(`✅ Received ${result.items.length} items for ${this.listId}`);
+
+            // Filtrer les doublons
+            const newItems = result.items.filter(item => {
+                const id = item.uid || item.postId;
+                if (this.loadedIds.has(id)) {
+                    return false;
+                }
+                this.loadedIds.add(id);
+                return true;
+            });
+
+            console.log(`✅ ${newItems.length} new items after deduplication`);
+
+            if (newItems.length > 0) {
+                this.render(newItems);
             }
 
-            this.items = [...this.items, ...result.items];
+            // Vérifier s'il y a encore des éléments
+            if (result.items.length < this.itemsPerPage) {
+                this.hasMore = false;
+                this.showEndMessage();
+            }
+
             this.lastVisible = result.lastVisible;
-            
-            this.render(result.items);
+
         } catch (error) {
-            console.error('❌ Error loading more items:', error);
+            console.error(`❌ Error loading more items for ${this.listId}:`, error);
+            this.showError(error.message);
         } finally {
             this.isLoading = false;
             this.hideLoader();
@@ -75,10 +110,8 @@ class InfiniteScrollManager {
     }
 
     showLoader() {
-        const listElement = document.getElementById(this.listId);
         const existingLoader = document.getElementById(`${this.listId}-loader`);
-        
-        if (existingLoader) return;
+        if (existingLoader) return; // Déjà affiché
 
         const loader = document.createElement('div');
         loader.id = `${this.listId}-loader`;
@@ -88,42 +121,72 @@ class InfiniteScrollManager {
             <p style="margin-top: 12px; font-size: 0.9rem;">Loading more...</p>
         `;
         
-        const sentinel = document.getElementById(`${this.listId}-sentinel`);
-        if (sentinel) {
-            listElement.insertBefore(loader, sentinel);
-        }
+        this.container.insertBefore(loader, this.sentinel);
     }
 
     hideLoader() {
         const loader = document.getElementById(`${this.listId}-loader`);
-        if (loader) loader.remove();
+        if (loader) {
+            loader.remove();
+        }
+    }
+
+    showEndMessage() {
+        const existingEnd = document.getElementById(`${this.listId}-end`);
+        if (existingEnd) return;
+
+        const endMsg = document.createElement('div');
+        endMsg.id = `${this.listId}-end`;
+        endMsg.style.cssText = 'text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.9rem;';
+        endMsg.innerHTML = `<i class="fas fa-check-circle"></i> All items loaded`;
+        
+        this.container.insertBefore(endMsg, this.sentinel);
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'text-align: center; padding: 20px; color: #EF4444;';
+        errorDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>${message}</p>
+        `;
+        this.container.insertBefore(errorDiv, this.sentinel);
     }
 
     render(newItems) {
         // Cette méthode sera surchargée par chaque instance
+        console.warn('⚠ render() should be overridden');
     }
 
     reset() {
-        this.items = [];
+        this.loadedIds.clear();
         this.lastVisible = null;
         this.hasMore = true;
-        const listElement = document.getElementById(this.listId);
-        if (listElement) {
-            listElement.innerHTML = '';
-            const sentinel = document.createElement('div');
-            sentinel.id = `${this.listId}-sentinel`;
-            sentinel.style.height = '1px';
-            listElement.appendChild(sentinel);
+        this.isLoading = false;
+        
+        if (this.container) {
+            this.container.innerHTML = '';
+            
+            // Recréer le sentinel
+            this.sentinel = document.createElement('div');
+            this.sentinel.id = `${this.listId}-sentinel`;
+            this.sentinel.style.cssText = 'height: 1px; width: 100%; pointer-events: none;';
+            this.container.appendChild(this.sentinel);
+            
             if (this.observer) {
-                this.observer.observe(sentinel);
+                this.observer.observe(this.sentinel);
             }
         }
+
+        console.log(`🔄 ${this.listId} reset`);
     }
 
     destroy() {
         if (this.observer) {
             this.observer.disconnect();
+            this.observer = null;
         }
+        console.log(`🗑 ${this.listId} destroyed`);
     }
 }
 
@@ -165,35 +228,29 @@ window.addEventListener('userDataLoaded', (e) => {
 // ============================================
 
 function initInfiniteScroll() {
+    console.log('🔄 Initializing infinite scroll managers...');
+
+    // Détruire les anciens managers si existants
+    if (followingScrollManager) followingScrollManager.destroy();
+    if (followersScrollManager) followersScrollManager.destroy();
+    if (savedPostsScrollManager) savedPostsScrollManager.destroy();
+
     // Following
-    followingScrollManager = new InfiniteScrollManager(
-        'followingList',
-        loadFollowingBatch,
-        4
-    );
+    followingScrollManager = new InfiniteScrollManager('followingList', loadFollowingBatch, 4);
     followingScrollManager.render = renderFollowingItems;
     followingScrollManager.init();
-    followingScrollManager.loadMore();
 
     // Followers
-    followersScrollManager = new InfiniteScrollManager(
-        'followersList',
-        loadFollowersBatch,
-        4
-    );
+    followersScrollManager = new InfiniteScrollManager('followersList', loadFollowersBatch, 4);
     followersScrollManager.render = renderFollowersItems;
     followersScrollManager.init();
-    followersScrollManager.loadMore();
 
     // Saved Posts
-    savedPostsScrollManager = new InfiniteScrollManager(
-        'savedPostsList',
-        loadSavedPostsBatch,
-        4
-    );
+    savedPostsScrollManager = new InfiniteScrollManager('savedPostsList', loadSavedPostsBatch, 4);
     savedPostsScrollManager.render = renderSavedPostsItems;
     savedPostsScrollManager.init();
-    savedPostsScrollManager.loadMore();
+
+    console.log('✅ All infinite scroll managers initialized');
 }
 
 // ============================================
@@ -204,6 +261,8 @@ async function loadFollowingBatch(lastVisible, limit) {
     if (!currentUserData || !currentUserData.uid) {
         throw new Error('No user data');
     }
+
+    console.log(`📥 Loading following batch (limit: ${limit})...`);
 
     let query = firebase.firestore()
         .collection('users')
@@ -218,40 +277,48 @@ async function loadFollowingBatch(lastVisible, limit) {
 
     const snapshot = await query.get();
 
+    console.log(`✅ Following snapshot size: ${snapshot.size}`);
+
     // Charger les données des utilisateurs
     const items = await Promise.all(
         snapshot.docs.map(async (doc) => {
             const followedUserId = doc.id;
             const followedAt = doc.data().followedAt;
             
-            const userDoc = await firebase.firestore()
-                .collection('users')
-                .doc(followedUserId)
-                .get();
-            
-            if (!userDoc.exists) return null;
-            
-            return {
-                uid: followedUserId,
-                ...userDoc.data(),
-                followedAt: followedAt,
-                _docRef: doc
-            };
+            try {
+                const userDoc = await firebase.firestore()
+                    .collection('users')
+                    .doc(followedUserId)
+                    .get();
+                
+                if (!userDoc.exists) return null;
+                
+                return {
+                    uid: followedUserId,
+                    ...userDoc.data(),
+                    followedAt: followedAt
+                };
+            } catch (error) {
+                console.warn(`⚠ Could not load user ${followedUserId}:`, error);
+                return null;
+            }
         })
     );
 
     const validItems = items.filter(item => item !== null);
 
-    // Mettre à jour le compteur
-    const totalSnapshot = await firebase.firestore()
-        .collection('users')
-        .doc(currentUserData.uid)
-        .collection('following')
-        .get();
-    
-    const followingCountEl = document.getElementById('followingCount');
-    if (followingCountEl) {
-        followingCountEl.textContent = totalSnapshot.size;
+    // Mettre à jour le compteur (une seule fois au premier chargement)
+    if (!lastVisible) {
+        const totalSnapshot = await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('following')
+            .get();
+        
+        const followingCountEl = document.getElementById('followingCount');
+        if (followingCountEl) {
+            followingCountEl.textContent = totalSnapshot.size;
+        }
     }
 
     return {
@@ -261,8 +328,7 @@ async function loadFollowingBatch(lastVisible, limit) {
 }
 
 function renderFollowingItems(newItems) {
-    const listElement = document.getElementById('followingList');
-    const sentinel = document.getElementById('followingList-sentinel');
+    if (newItems.length === 0) return;
 
     newItems.forEach((user, index) => {
         const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
@@ -272,7 +338,7 @@ function renderFollowingItems(newItems) {
         const bio = user.bio || 'No biography';
 
         const itemDiv = document.createElement('div');
-        itemDiv.style.marginBottom = '24px';
+        itemDiv.className = 'following-item-wrapper';
         itemDiv.innerHTML = `
             <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -303,21 +369,17 @@ function renderFollowingItems(newItems) {
                     Unfollow
                 </button>
             </div>
-            ${followingScrollManager.items.length + index < followingScrollManager.items.length + newItems.length - 1 || followingScrollManager.hasMore ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 12px 0;"></div>
+            ${index < newItems.length - 1 ? `
+                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
             ` : ''}
         `;
 
-        if (sentinel) {
-            listElement.insertBefore(itemDiv, sentinel);
-        } else {
-            listElement.appendChild(itemDiv);
-        }
+        followingScrollManager.container.insertBefore(itemDiv, followingScrollManager.sentinel);
     });
 
-    // Afficher message si aucun résultat
-    if (followingScrollManager.items.length === 0 && !followingScrollManager.hasMore) {
-        listElement.innerHTML = `
+    // Message si aucun résultat
+    if (followingScrollManager.loadedIds.size === 0 && !followingScrollManager.hasMore) {
+        followingScrollManager.container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                 <i class="fas fa-user-friends" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p style="font-size: 1.1rem; font-weight: 700;">You're not following anyone yet</p>
@@ -340,6 +402,8 @@ async function loadFollowersBatch(lastVisible, limit) {
         throw new Error('No user data');
     }
 
+    console.log(`📥 Loading followers batch (limit: ${limit})...`);
+
     let query = firebase.firestore()
         .collection('users')
         .doc(currentUserData.uid)
@@ -353,38 +417,46 @@ async function loadFollowersBatch(lastVisible, limit) {
 
     const snapshot = await query.get();
 
+    console.log(`✅ Followers snapshot size: ${snapshot.size}`);
+
     const items = await Promise.all(
         snapshot.docs.map(async (doc) => {
             const followerId = doc.id;
             const followedAt = doc.data().followedAt;
             
-            const userDoc = await firebase.firestore()
-                .collection('users')
-                .doc(followerId)
-                .get();
-            
-            if (!userDoc.exists) return null;
-            
-            return {
-                uid: followerId,
-                ...userDoc.data(),
-                followedAt: followedAt,
-                _docRef: doc
-            };
+            try {
+                const userDoc = await firebase.firestore()
+                    .collection('users')
+                    .doc(followerId)
+                    .get();
+                
+                if (!userDoc.exists) return null;
+                
+                return {
+                    uid: followerId,
+                    ...userDoc.data(),
+                    followedAt: followedAt
+                };
+            } catch (error) {
+                console.warn(`⚠ Could not load user ${followerId}:`, error);
+                return null;
+            }
         })
     );
 
     const validItems = items.filter(item => item !== null);
 
-    const totalSnapshot = await firebase.firestore()
-        .collection('users')
-        .doc(currentUserData.uid)
-        .collection('followers')
-        .get();
-    
-    const followersCountEl = document.getElementById('followersCount');
-    if (followersCountEl) {
-        followersCountEl.textContent = totalSnapshot.size;
+    if (!lastVisible) {
+        const totalSnapshot = await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('followers')
+            .get();
+        
+        const followersCountEl = document.getElementById('followersCount');
+        if (followersCountEl) {
+            followersCountEl.textContent = totalSnapshot.size;
+        }
     }
 
     return {
@@ -394,8 +466,7 @@ async function loadFollowersBatch(lastVisible, limit) {
 }
 
 function renderFollowersItems(newItems) {
-    const listElement = document.getElementById('followersList');
-    const sentinel = document.getElementById('followersList-sentinel');
+    if (newItems.length === 0) return;
 
     newItems.forEach((user, index) => {
         const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
@@ -405,7 +476,7 @@ function renderFollowersItems(newItems) {
         const bio = user.bio || 'No biography';
 
         const itemDiv = document.createElement('div');
-        itemDiv.style.marginBottom = '24px';
+        itemDiv.className = 'follower-item-wrapper';
         itemDiv.innerHTML = `
             <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -436,20 +507,16 @@ function renderFollowersItems(newItems) {
                     Remove
                 </button>
             </div>
-            ${followersScrollManager.items.length + index < followersScrollManager.items.length + newItems.length - 1 || followersScrollManager.hasMore ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 12px 0;"></div>
+            ${index < newItems.length - 1 ? `
+                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
             ` : ''}
         `;
 
-        if (sentinel) {
-            listElement.insertBefore(itemDiv, sentinel);
-        } else {
-            listElement.appendChild(itemDiv);
-        }
+        followersScrollManager.container.insertBefore(itemDiv, followersScrollManager.sentinel);
     });
 
-    if (followersScrollManager.items.length === 0 && !followersScrollManager.hasMore) {
-        listElement.innerHTML = `
+    if (followersScrollManager.loadedIds.size === 0 && !followersScrollManager.hasMore) {
+        followersScrollManager.container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                 <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p style="font-size: 1.1rem; font-weight: 700;">No followers yet</p>
@@ -468,6 +535,8 @@ async function loadSavedPostsBatch(lastVisible, limit) {
         throw new Error('No user data');
     }
 
+    console.log(`📥 Loading saved posts batch (limit: ${limit})...`);
+
     let query = firebase.firestore()
         .collection('users')
         .doc(currentUserData.uid)
@@ -480,13 +549,14 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 
     const snapshot = await query.get();
 
+    console.log(`✅ Saved posts snapshot size: ${snapshot.size}`);
+
     const items = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
             postId: doc.id,
             savedAt: data.savedAt,
-            ...data.postData,
-            _docRef: doc
+            ...data.postData
         };
     }).sort((a, b) => {
         if (!a.savedAt) return 1;
@@ -494,15 +564,17 @@ async function loadSavedPostsBatch(lastVisible, limit) {
         return b.savedAt.toMillis() - a.savedAt.toMillis();
     });
 
-    const totalSnapshot = await firebase.firestore()
-        .collection('users')
-        .doc(currentUserData.uid)
-        .collection('savedPosts')
-        .get();
-    
-    const savedPostsCountEl = document.getElementById('savedPostsCount');
-    if (savedPostsCountEl) {
-        savedPostsCountEl.textContent = totalSnapshot.size;
+    if (!lastVisible) {
+        const totalSnapshot = await firebase.firestore()
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('savedPosts')
+            .get();
+        
+        const savedPostsCountEl = document.getElementById('savedPostsCount');
+        if (savedPostsCountEl) {
+            savedPostsCountEl.textContent = totalSnapshot.size;
+        }
     }
 
     return {
@@ -512,8 +584,7 @@ async function loadSavedPostsBatch(lastVisible, limit) {
 }
 
 function renderSavedPostsItems(newItems) {
-    const listElement = document.getElementById('savedPostsList');
-    const sentinel = document.getElementById('savedPostsList-sentinel');
+    if (newItems.length === 0) return;
 
     newItems.forEach((post, index) => {
         const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
@@ -530,7 +601,7 @@ function renderSavedPostsItems(newItems) {
         }
 
         const itemDiv = document.createElement('div');
-        itemDiv.style.marginBottom = '24px';
+        itemDiv.className = 'saved-post-item-wrapper';
         itemDiv.innerHTML = `
             <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
                 <img 
@@ -569,20 +640,16 @@ function renderSavedPostsItems(newItems) {
                     Remove
                 </button>
             </div>
-            ${savedPostsScrollManager.items.length + index < savedPostsScrollManager.items.length + newItems.length - 1 || savedPostsScrollManager.hasMore ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 12px 0;"></div>
+            ${index < newItems.length - 1 ? `
+                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
             ` : ''}
         `;
 
-        if (sentinel) {
-            listElement.insertBefore(itemDiv, sentinel);
-        } else {
-            listElement.appendChild(itemDiv);
-        }
+        savedPostsScrollManager.container.insertBefore(itemDiv, savedPostsScrollManager.sentinel);
     });
 
-    if (savedPostsScrollManager.items.length === 0 && !savedPostsScrollManager.hasMore) {
-        listElement.innerHTML = `
+    if (savedPostsScrollManager.loadedIds.size === 0 && !savedPostsScrollManager.hasMore) {
+        savedPostsScrollManager.container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                 <i class="fas fa-bookmark" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p style="font-size: 1.1rem; font-weight: 700;">No saved posts yet</p>
@@ -708,7 +775,7 @@ async function removeSavedPost(postId) {
 }
 
 // ============================================
-// RESTE DU CODE (inchangé)
+// CHARGEMENT DES DONNÉES UTILISATEUR
 // ============================================
 
 function loadUserData(userData) {
@@ -796,6 +863,10 @@ async function loadUserStats(userId) {
         if (portfoliosCountEl) portfoliosCountEl.textContent = '—';
     }
 }
+
+// ============================================
+// GESTIONNAIRES D'ÉVÉNEMENTS
+// ============================================
 
 function initializeEventListeners() {
     const editPersonalInfoBtn = document.getElementById('editPersonalInfo');
@@ -956,6 +1027,11 @@ async function handlePersonalInfoSubmit(e) {
             el.textContent = `${firstName} ${lastName}`;
         });
         
+        const sidebarUserName = document.querySelector('.sidebar-user-name');
+        if (sidebarUserName) {
+            sidebarUserName.textContent = `${firstName} ${lastName}`;
+        }
+        
         toggleEditPersonalInfo(false);
         
         showToast('success', 'Success!', 'Your information has been updated');
@@ -1028,6 +1104,11 @@ async function handleAvatarChange(e) {
             img.src = downloadURL;
         });
         
+        const sidebarAvatar = document.querySelector('.sidebar-user-avatar img');
+        if (sidebarAvatar) {
+            sidebarAvatar.src = downloadURL;
+        }
+        
         showToast('success', 'Success!', 'Your profile picture has been updated on Cloudflare R2');
         
     } catch (error) {
@@ -1039,6 +1120,10 @@ async function handleAvatarChange(e) {
             errorMessage = 'Upload service not available. Please refresh the page.';
         } else if (error.message.includes('not authenticated')) {
             errorMessage = 'You must be logged in to upload a photo.';
+        } else if (error.message.includes('File too large')) {
+            errorMessage = 'Image too large. Maximum 5MB.';
+        } else if (error.message.includes('Invalid file type')) {
+            errorMessage = 'Invalid file format. Use JPG, PNG, GIF or WebP.';
         }
         
         showToast('error', 'Error', errorMessage);
@@ -1097,6 +1182,13 @@ async function handleDeleteAccount() {
     
     if (!confirmed) return;
     
+    const doubleConfirmed = confirm(
+        '🔴 LAST CONFIRMATION 🔴\n\n' +
+        'Do you REALLY want to delete your account?'
+    );
+    
+    if (!doubleConfirmed) return;
+    
     try {
         const user = firebase.auth().currentUser;
         
@@ -1128,6 +1220,10 @@ async function handleDeleteAccount() {
         }
     }
 }
+
+// ============================================
+// UTILITAIRES
+// ============================================
 
 function cleanHtmlContent(htmlString) {
     if (!htmlString) return 'No preview available';
@@ -1267,6 +1363,7 @@ async function logout() {
     }
 }
 
+// Animation de sortie pour les toasts
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideOutRight {
@@ -1282,4 +1379,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('✅ Script de profil chargé (v4.0 - avec Infinite Scroll)');
+console.log('✅ Script de profil chargé (v4.1 - Infinite Scroll CORRIGÉ)');
