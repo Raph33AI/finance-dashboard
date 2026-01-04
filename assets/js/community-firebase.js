@@ -739,6 +739,9 @@ class CommunityFirebaseService {
             const user = this.auth.currentUser;
             if (!user) throw new Error('User not authenticated');
 
+            console.log('❤ Toggling like for post:', postId);
+            console.log('👤 User:', user.uid, user.email);
+
             const postRef = this.db.collection('posts').doc(postId);
             const postDoc = await postRef.get();
             
@@ -748,22 +751,84 @@ class CommunityFirebaseService {
             const likes = postData.likes || [];
             const hasLiked = likes.includes(user.uid);
 
+            console.log('📊 Current likes:', likes.length, '| Is liked:', hasLiked);
+
             if (hasLiked) {
+                // ❌ UNLIKE
+                console.log('💔 Unliking post...');
+                
+                // 1. Retirer du tableau likes du post
                 await postRef.update({
                     likes: firebase.firestore.FieldValue.arrayRemove(user.uid)
                 });
+                console.log('   ✓ Removed from post.likes array');
+
+                // 2. ✅ NOUVEAU : Supprimer de la sous-collection likedPosts
+                const likedPostRef = this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('likedPosts')
+                    .doc(postId);
+                
+                console.log('   🗑 Deleting from:', likedPostRef.path);
+                
+                await likedPostRef.delete();
+                console.log('   ✓ Deleted from likedPosts subcollection');
+
+                console.log('✅ Post unliked successfully');
+                
                 return { liked: false, count: likes.length - 1 };
+                
             } else {
+                // ✅ LIKE
+                console.log('❤ Liking post...');
+                
+                // 1. Ajouter au tableau likes du post
                 await postRef.update({
                     likes: firebase.firestore.FieldValue.arrayUnion(user.uid)
                 });
-                // ✅ AJOUT : Recalculer les points de l'auteur du post
+                console.log('   ✓ Added to post.likes array');
+
+                // 2. ✅ NOUVEAU : Ajouter à la sous-collection likedPosts
+                const likedPostRef = this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('likedPosts')
+                    .doc(postId);
+                
+                const likedPostData = {
+                    likedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    postId: postId,
+                    postTitle: postData.title || '',
+                    postAuthor: postData.authorName || '',
+                    channelId: postData.channelId || ''
+                };
+                
+                console.log('   💾 Saving to:', likedPostRef.path);
+                console.log('   📄 Data:', likedPostData);
+                
+                await likedPostRef.set(likedPostData);
+                console.log('   ✓ Saved to likedPosts subcollection');
+
+                // 3. Vérifier que ça a bien été sauvegardé
+                const verifyDoc = await likedPostRef.get();
+                console.log('   🔍 Verification:', verifyDoc.exists ? '✅ EXISTS' : '❌ NOT FOUND');
+                if (verifyDoc.exists) {
+                    console.log('   📄 Saved data:', verifyDoc.data());
+                }
+
+                // 4. Recalculer les points de l'auteur du post
                 await this.recalculateUserPoints(postData.authorId);
+                
+                console.log('✅ Post liked successfully');
+                
                 return { liked: true, count: likes.length + 1 };
             }
 
         } catch (error) {
             console.error('❌ Error toggling like:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
             throw error;
         }
     }
