@@ -446,6 +446,7 @@ class AdminAnalyticsPro {
 
             // Charger les signatures email depuis Firestore
             await this.loadSignatures();
+            await this.loadProfilePictures();
             await this.loadGmailStats();
             await this.loadGmailInbox();
 
@@ -7240,6 +7241,8 @@ class AdminAnalyticsPro {
             }
             
             this.displayProfilePicturesManager();
+            
+            // 🆕 METTRE À JOUR TOUTES LES SIGNATURES AVEC LES PHOTOS
             this.updateAllSignaturesWithPictures();
             
             if (loadingIndicator) {
@@ -7410,31 +7413,47 @@ class AdminAnalyticsPro {
         const data = this.emailProfilePictures?.[email];
         
         if (!data) {
+            // Fallback : utiliser Gravatar
             return `
-                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
-                    AV
-                </div>
+                <img src="https://www.gravatar.com/avatar/${this.md5(email)}?s=${size}&d=identicon" 
+                    alt="${email}" 
+                    style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
+                />
             `;
         }
         
-        if (data.type === 'upload' && data.url) {
+        // 🔥 PRIORITÉ 1 : URL EXTERNE (Meilleure compatibilité email)
+        if (data.type === 'url' && data.url && data.url.startsWith('http')) {
             return `
-                <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
-            `;
-        } else if (data.type === 'url' && data.url) {
-            return `
-                <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: none; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
-                    ${data.initials}
-                </div>
-            `;
-        } else {
-            return `
-                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    ${data.initials}
-                </div>
+                <img src="${data.url}" 
+                    alt="${data.name || email}" 
+                    style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
+                    onerror="this.src='https://www.gravatar.com/avatar/${this.md5(email)}?s=${size}&d=identicon';"
+                />
             `;
         }
+        
+        // 🔥 PRIORITÉ 2 : IMAGE EN BASE64 (Fonctionne dans certains clients)
+        if (data.type === 'upload' && data.url && data.url.startsWith('data:image')) {
+            return `
+                <img src="${data.url}" 
+                    alt="${data.name || email}" 
+                    style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
+                />
+            `;
+        }
+        
+        // 🔥 FALLBACK : INITIALES (Compatible partout)
+        return `
+            <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                ${data.initials}
+            </div>
+        `;
+    }
+
+    // Fonction MD5 pour Gravatar
+    md5(string) {
+        return CryptoJS.MD5(string.trim().toLowerCase()).toString();
     }
 
     openProfilePictureModal(email) {
@@ -7637,23 +7656,32 @@ class AdminAnalyticsPro {
         
         if (!pictureData) return null;
         
+        // 🔥 GÉNÉRER LE HTML DE LA PHOTO (compatible email)
         const pictureHTML = this.generateProfilePictureHTML(email, 60);
         
         return `
             <br><br>
-            <div style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; color: #1e293b; font-size: 14px; line-height: 1.8;">
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                    ${pictureHTML}
-                    <div>
-                        <strong style="color: #667eea; font-size: 17px;">${pictureData.name || email.split('@')[0]}</strong><br>
-                        <span style="color: #64748b; font-size: 13px;">${pictureData.title || 'AlphaVault AI'}</span>
-                    </div>
-                </div>
-                <div style="color: #64748b; font-size: 13px;">
-                    📧 ${email}<br>
-                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
-                    💼 Real-time market analysis & AI-powered predictions
-                </div>
+            <div style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; font-family: Arial, sans-serif; color: #1e293b; font-size: 14px; line-height: 1.8;">
+                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+                    <tr>
+                        <td style="padding-right: 16px; vertical-align: top;">
+                            ${pictureHTML}
+                        </td>
+                        <td style="vertical-align: top;">
+                            <strong style="color: #667eea; font-size: 17px; display: block; margin-bottom: 4px;">
+                                ${pictureData.name || email.split('@')[0]}
+                            </strong>
+                            <span style="color: #64748b; font-size: 13px; display: block; margin-bottom: 12px;">
+                                ${pictureData.title || 'AlphaVault AI'}
+                            </span>
+                            <div style="color: #64748b; font-size: 13px; line-height: 1.6;">
+                                📧 ${email}<br>
+                                🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                                💼 Real-time market analysis & AI-powered predictions
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         `;
     }
