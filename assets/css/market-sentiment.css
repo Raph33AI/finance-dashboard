@@ -132,21 +132,37 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SENTIMENT MAIN CARD
+   SENTIMENT MAIN CARD - VERSION RESPONSIVE OPTIMISÉE
    ═══════════════════════════════════════════════════════════════ */
 
 .sentiment-main-card {
     background: var(--card-bg);
     border-radius: 24px;
     padding: 40px;
-    display: grid;
-    grid-template-columns: 400px 1fr;
-    gap: 48px;
-    align-items: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--glass-border);
     position: relative;
     z-index: 1;
+}
+
+/* ✅ HEADER CENTRÉ */
+.breakdown-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 32px;
+    text-align: center; /* ✅ Centré */
+    width: 100%;
+}
+
+/* ✅ GRID LAYOUT DESKTOP */
+.sentiment-visual-wrapper {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 48px;
+    align-items: center;
 }
 
 .sentiment-visual {
@@ -159,6 +175,15 @@
     position: relative;
     width: 320px;
     height: 320px;
+    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.3));
+}
+
+#sentimentGauge {
+    transition: transform 0.3s ease;
+}
+
+#sentimentGauge:hover {
+    transform: scale(1.05);
 }
 
 .gauge-center {
@@ -168,6 +193,7 @@
     transform: translate(-50%, -50%);
     text-align: center;
     z-index: 10;
+    pointer-events: none;
 }
 
 .gauge-value {
@@ -178,7 +204,17 @@
     -webkit-text-fill-color: transparent;
     line-height: 1;
     margin-bottom: 12px;
-    text-shadow: 0 4px 24px rgba(102, 126, 234, 0.3);
+    filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 6px 24px rgba(102, 126, 234, 0.8));
+    }
 }
 
 .gauge-label {
@@ -190,23 +226,13 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SENTIMENT BREAKDOWN (ALIGNEMENT CORRIGÉ)
+   SENTIMENT BREAKDOWN (BARRES)
    ═══════════════════════════════════════════════════════════════ */
 
 .sentiment-breakdown {
     display: flex;
     flex-direction: column;
     gap: 20px;
-}
-
-.breakdown-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
-    text-align: left;
 }
 
 .breakdown-item {
@@ -316,6 +342,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    margin-top: 8px;
 }
 
 .total-analyzed span {
@@ -324,6 +351,186 @@
     -webkit-text-fill-color: transparent;
     font-size: 1.3rem;
     font-weight: 900;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE TABLETTE (< 1200px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+    .sentiment-visual-wrapper {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .sentiment-visual {
+        justify-content: center;
+    }
+    
+    .gauge-wrapper {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .gauge-value {
+        font-size: 4rem;
+    }
+    
+    .gauge-label {
+        font-size: 1.1rem;
+    }
+    
+    .breakdown-title {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE (< 768px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .sentiment-main-card {
+        padding: 24px 16px;
+    }
+    
+    .sentiment-visual-wrapper {
+        gap: 24px;
+    }
+    
+    .gauge-wrapper {
+        width: 240px;
+        height: 240px;
+        margin: 0 auto;
+    }
+    
+    .gauge-value {
+        font-size: 3.5rem;
+    }
+    
+    .gauge-label {
+        font-size: 1rem;
+        letter-spacing: 1px;
+    }
+    
+    .breakdown-title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+    
+    .breakdown-item {
+        padding: 16px;
+    }
+    
+    .breakdown-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .breakdown-label {
+        font-size: 1rem;
+    }
+    
+    .breakdown-value {
+        font-size: 1.5rem;
+    }
+    
+    .breakdown-bar {
+        height: 6px;
+    }
+    
+    .total-analyzed {
+        font-size: 0.95rem;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .total-analyzed span {
+        font-size: 1.2rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE PETIT MOBILE (< 480px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .sentiment-main-card {
+        padding: 20px 12px;
+        border-radius: 16px;
+    }
+    
+    .gauge-wrapper {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .gauge-value {
+        font-size: 3rem;
+    }
+    
+    .gauge-label {
+        font-size: 0.9rem;
+    }
+    
+    .breakdown-title {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+    }
+    
+    .breakdown-item {
+        padding: 14px;
+        border-radius: 12px;
+    }
+    
+    .breakdown-header {
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .breakdown-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .breakdown-label {
+        font-size: 0.95rem;
+    }
+    
+    .breakdown-value {
+        font-size: 1.3rem;
+    }
+    
+    .breakdown-bar {
+        height: 5px;
+    }
+    
+    .breakdown-item:hover {
+        transform: translateX(4px); /* Moins d'effet sur mobile */
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════ */
+
+body.dark-mode .gauge-wrapper {
+    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.5));
+}
+
+body.dark-mode .sentiment-main-card {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .breakdown-item {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .breakdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -754,66 +961,3 @@ body.dark-mode .breakdown-item:hover {
     margin-top: 12px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DOUGHNUT CHART - EFFET GLOW PREMIUM
-   ═══════════════════════════════════════════════════════════════ */
-
-.gauge-wrapper {
-    position: relative;
-    width: 320px;
-    height: 320px;
-    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.3)); /* ✨ Ombre portée */
-}
-
-#sentimentGauge {
-    transition: transform 0.3s ease;
-}
-
-#sentimentGauge:hover {
-    transform: scale(1.05); /* ✨ Zoom léger au survol */
-}
-
-.gauge-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 10;
-    pointer-events: none; /* ✅ Permet le clic sur le chart en dessous */
-}
-
-.gauge-value {
-    font-size: 5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-    margin-bottom: 12px;
-    /* ✨ Effet glow sur le texte */
-    filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
-    animation: pulseGlow 3s ease-in-out infinite;
-}
-
-@keyframes pulseGlow {
-    0%, 100% {
-        filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
-    }
-    50% {
-        filter: drop-shadow(0 6px 24px rgba(102, 126, 234, 0.8));
-    }
-}
-
-.gauge-label {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-/* ✨ Mode sombre */
-body.dark-mode .gauge-wrapper {
-    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.5));
-}

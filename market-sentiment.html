@@ -379,61 +379,78 @@
                     </div>
                     
                     <div class='sentiment-main-card'>
-                        <div class='sentiment-visual'>
-                            <div class='gauge-wrapper'>
-                                <canvas id='sentimentGauge'></canvas>
-                                <div class='gauge-center'>
-                                    <div class='gauge-value' id='globalSentimentValue'>0</div>
-                                    <div class='gauge-label' id='globalSentimentLabel'>Neutral</div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- ✅ TITRE CENTRÉ EN HAUT -->
+                        <div class='breakdown-title'>Sentiment Distribution</div>
                         
-                        <div class='sentiment-breakdown'>
-                            <div class='breakdown-title'>Sentiment Distribution</div>
+                        <!-- ✅ WRAPPER POUR GRID LAYOUT (Doughnut + Barres) -->
+                        <div class='sentiment-visual-wrapper'>
                             
-                            <div class='breakdown-item positive'>
-                                <div class='breakdown-header'>
-                                    <div class='breakdown-icon'>
-                                        <i class='fas fa-arrow-up'></i>
+                            <!-- ═══════════════════════════════════════════════════════════
+                                DOUGHNUT CHART (GAUCHE SUR DESKTOP)
+                                ═══════════════════════════════════════════════════════════ -->
+                            <div class='sentiment-visual'>
+                                <div class='gauge-wrapper'>
+                                    <canvas id='sentimentGauge'></canvas>
+                                    <div class='gauge-center'>
+                                        <div class='gauge-value' id='globalSentimentValue'>0</div>
+                                        <div class='gauge-label' id='globalSentimentLabel'>Neutral</div>
                                     </div>
-                                    <div class='breakdown-label'>Bullish</div>
-                                    <div class='breakdown-value' id='positiveCount'>0</div>
-                                </div>
-                                <div class='breakdown-bar'>
-                                    <div class='breakdown-bar-fill positive' id='positiveBar' style='width: 0%'></div>
                                 </div>
                             </div>
                             
-                            <div class='breakdown-item neutral'>
-                                <div class='breakdown-header'>
-                                    <div class='breakdown-icon'>
-                                        <i class='fas fa-minus'></i>
+                            <!-- ═══════════════════════════════════════════════════════════
+                                BARRES DE SENTIMENT (DROITE SUR DESKTOP)
+                                ═══════════════════════════════════════════════════════════ -->
+                            <div class='sentiment-breakdown'>
+                                
+                                <!-- BARRE POSITIVE (BULLISH) -->
+                                <div class='breakdown-item positive'>
+                                    <div class='breakdown-header'>
+                                        <div class='breakdown-icon'>
+                                            <i class='fas fa-arrow-up'></i>
+                                        </div>
+                                        <div class='breakdown-label'>Bullish</div>
+                                        <div class='breakdown-value' id='positiveCount'>0</div>
                                     </div>
-                                    <div class='breakdown-label'>Neutral</div>
-                                    <div class='breakdown-value' id='neutralCount'>0</div>
-                                </div>
-                                <div class='breakdown-bar'>
-                                    <div class='breakdown-bar-fill neutral' id='neutralBar' style='width: 0%'></div>
-                                </div>
-                            </div>
-                            
-                            <div class='breakdown-item negative'>
-                                <div class='breakdown-header'>
-                                    <div class='breakdown-icon'>
-                                        <i class='fas fa-arrow-down'></i>
+                                    <div class='breakdown-bar'>
+                                        <div class='breakdown-bar-fill positive' id='positiveBar' style='width: 0%'></div>
                                     </div>
-                                    <div class='breakdown-label'>Bearish</div>
-                                    <div class='breakdown-value' id='negativeCount'>0</div>
                                 </div>
-                                <div class='breakdown-bar'>
-                                    <div class='breakdown-bar-fill negative' id='negativeBar' style='width: 0%'></div>
+                                
+                                <!-- BARRE NEUTRAL -->
+                                <div class='breakdown-item neutral'>
+                                    <div class='breakdown-header'>
+                                        <div class='breakdown-icon'>
+                                            <i class='fas fa-minus'></i>
+                                        </div>
+                                        <div class='breakdown-label'>Neutral</div>
+                                        <div class='breakdown-value' id='neutralCount'>0</div>
+                                    </div>
+                                    <div class='breakdown-bar'>
+                                        <div class='breakdown-bar-fill neutral' id='neutralBar' style='width: 0%'></div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class='total-analyzed'>
-                                <i class='fas fa-newspaper'></i>
-                                <span id='totalAnalyzed'>0</span> articles analyzed
+                                
+                                <!-- BARRE NEGATIVE (BEARISH) -->
+                                <div class='breakdown-item negative'>
+                                    <div class='breakdown-header'>
+                                        <div class='breakdown-icon'>
+                                            <i class='fas fa-arrow-down'></i>
+                                        </div>
+                                        <div class='breakdown-label'>Bearish</div>
+                                        <div class='breakdown-value' id='negativeCount'>0</div>
+                                    </div>
+                                    <div class='breakdown-bar'>
+                                        <div class='breakdown-bar-fill negative' id='negativeBar' style='width: 0%'></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- TOTAL ARTICLES ANALYSÉS -->
+                                <div class='total-analyzed'>
+                                    <i class='fas fa-newspaper'></i>
+                                    <span id='totalAnalyzed'>0</span> articles analyzed
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
