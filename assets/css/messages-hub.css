@@ -2543,4 +2543,96 @@ body.dark-mode .group-type-indicator {
     }
 }
 
+/* ============================================
+   🔧 CORRECTION : Posts partagés TOUJOURS blancs
+   (Même pour les messages envoyés par soi-même)
+   ============================================ */
+
+/* ✅ Forcer le fond blanc/dark pour les posts partagés */
+.chat-message.own .shared-post-bubble-premium {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95)) !important;
+    border: 1px solid rgba(102, 126, 234, 0.15) !important;
+    box-shadow: 
+        0 8px 32px rgba(102, 126, 234, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-bubble-premium {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)) !important;
+    border-color: rgba(102, 126, 234, 0.25) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ✅ S'assurer que les textes restent colorés (pas en blanc) */
+.chat-message.own .shared-post-title-premium,
+.chat-message.own .shared-post-excerpt,
+.chat-message.own .shared-post-author-name,
+.chat-message.own .shared-post-date,
+.chat-message.own .shared-post-stats,
+.chat-message.own .shared-post-badge,
+.chat-message.own .shared-post-channel-badge {
+    color: inherit !important;
+}
+
+/* ✅ Titre toujours sombre */
+.chat-message.own .shared-post-title-premium {
+    color: #1e293b !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-title-premium {
+    color: #f1f5f9 !important;
+}
+
+/* ✅ Extrait et date toujours gris */
+.chat-message.own .shared-post-excerpt,
+.chat-message.own .shared-post-date {
+    color: #64748b !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-excerpt,
+body.dark-mode .chat-message.own .shared-post-date {
+    color: #94a3b8 !important;
+}
+
+/* ✅ Nom auteur toujours sombre */
+.chat-message.own .shared-post-author-name {
+    color: #1e293b !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-author-name {
+    color: #f1f5f9 !important;
+}
+
+/* ✅ Statistiques toujours grises */
+.chat-message.own .shared-post-stats {
+    color: #64748b !important;
+}
+
+body.dark-mode .chat-message.own .shared-post-stats {
+    color: #94a3b8 !important;
+}
+
+/* ✅ Badge "Shared Post" toujours violet */
+.chat-message.own .shared-post-badge {
+    color: #667eea !important;
+}
+
+/* ✅ Bouton "View Full Post" TOUJOURS violet (même pour messages own) */
+.chat-message.own .shared-post-view-btn-premium {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+}
+
+.chat-message.own .shared-post-view-btn-premium:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea) !important;
+}
+
+/* ============================================
+   FIN DE LA CORRECTION
+   ============================================ */
+
 console.log('✅ messages-hub.css loaded (v3.4 - Complete Premium Edition)');
