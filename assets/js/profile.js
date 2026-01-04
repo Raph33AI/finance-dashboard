@@ -327,11 +327,33 @@ function addCustomScrollbarStyles() {
 // 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE)
 // ============================================
 
+// ============================================
+// 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE UNIQUEMENT SUR MOBILE)
+// ============================================
+
 function addResponsiveStyles() {
     const style = document.createElement('style');
     style.id = 'profile-responsive-styles';
     style.textContent = `
-        /* ===== RESPONSIVE MOBILE ===== */
+        /* ===== DESKTOP : PAS DE CENTRAGE (Layout horizontal normal) ===== */
+        @media (min-width: 769px) {
+            .following-item,
+            .follower-item,
+            .saved-post-item {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                text-align: left !important;
+            }
+            
+            .following-item > div,
+            .follower-item > div,
+            .saved-post-item > div {
+                text-align: left !important;
+            }
+        }
+        
+        /* ===== MOBILE : CENTRAGE ACTIVÉ ===== */
         @media (max-width: 768px) {
             /* ✅ CENTRAGE DES WRAPPERS */
             .following-item-wrapper,
