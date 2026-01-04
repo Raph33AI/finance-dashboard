@@ -246,6 +246,8 @@
                 console.log('🚀 Investment Analytics - Initializing (Ultra-Advanced Version)...');
                 
                 this.detectDarkMode();
+                this.companyDomains = this.buildCompleteDomainMapping();
+                console.log('✅ Company domains mapping initialized');
                 await this.waitForAuth();
                 await this.loadAllocations();
                 await this.loadFinancialData();
