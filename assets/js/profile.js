@@ -44,6 +44,9 @@ window.addEventListener('userDataLoaded', (e) => {
 
     // ✅ Charger la liste des followers
     loadFollowersList();
+
+    // ✅ Charger les posts sauvegardés
+    loadSavedPosts();
 });
 
 // ============================================
