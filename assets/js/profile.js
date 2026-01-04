@@ -1,8 +1,8 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.1
-   ✅ INFINITE SCROLL CORRIGÉ (sans duplication)
+   PROFILE.JS - Gestion de la page profil v4.2
+   ✅ INFINITE SCROLL avec hauteur fixe par section
+   ✅ Scroll vertical interne (max 4 éléments visibles)
    ✅ Chargement progressif (4 items par batch)
-   ✅ Loader contrôlé
    ============================================ */
 
 // Variables globales
@@ -10,7 +10,7 @@ let currentUserData = null;
 let isEditingPersonalInfo = false;
 
 // ============================================
-// 🆕 SYSTÈME D'INFINITE SCROLL CORRIGÉ
+// 🆕 SYSTÈME D'INFINITE SCROLL AVEC SCROLL INTERNE
 // ============================================
 
 class InfiniteScrollManager {
@@ -21,7 +21,7 @@ class InfiniteScrollManager {
         this.lastVisible = null;
         this.isLoading = false;
         this.hasMore = true;
-        this.loadedIds = new Set(); // ✅ Éviter les doublons
+        this.loadedIds = new Set();
         this.observer = null;
         this.container = null;
         this.sentinel = null;
@@ -34,6 +34,13 @@ class InfiniteScrollManager {
             return;
         }
 
+        // ✅ APPLIQUER LES STYLES POUR SCROLL INTERNE
+        this.container.style.maxHeight = '600px'; // Hauteur pour ~4 éléments
+        this.container.style.overflowY = 'auto';
+        this.container.style.overflowX = 'hidden';
+        this.container.style.position = 'relative';
+        this.container.style.paddingRight = '8px'; // Espace pour scrollbar
+        
         // Vider le container
         this.container.innerHTML = '';
 
@@ -43,7 +50,7 @@ class InfiniteScrollManager {
         this.sentinel.style.cssText = 'height: 1px; width: 100%; pointer-events: none;';
         this.container.appendChild(this.sentinel);
 
-        // Observer le sentinel
+        // ✅ Observer le sentinel DANS le conteneur scrollable
         this.observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
@@ -53,14 +60,15 @@ class InfiniteScrollManager {
                 });
             },
             { 
+                root: this.container, // ✅ Observer le scroll INTERNE
                 threshold: 0,
-                rootMargin: '100px' // Charger un peu avant d'atteindre le bas
+                rootMargin: '50px'
             }
         );
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId}`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (internal scroll)`);
     }
 
     async loadMore() {
@@ -111,7 +119,7 @@ class InfiniteScrollManager {
 
     showLoader() {
         const existingLoader = document.getElementById(`${this.listId}-loader`);
-        if (existingLoader) return; // Déjà affiché
+        if (existingLoader) return;
 
         const loader = document.createElement('div');
         loader.id = `${this.listId}-loader`;
@@ -154,7 +162,6 @@ class InfiniteScrollManager {
     }
 
     render(newItems) {
-        // Cette méthode sera surchargée par chaque instance
         console.warn('⚠ render() should be overridden');
     }
 
@@ -208,6 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
+    // ✅ Ajouter les styles pour scrollbar personnalisée
+    addCustomScrollbarStyles();
+    
     initializeEventListeners();
     
     console.log('✅ Page profil initialisée');
@@ -222,6 +232,58 @@ window.addEventListener('userDataLoaded', (e) => {
     // ✅ Initialiser les gestionnaires de scroll infini
     initInfiniteScroll();
 });
+
+// ============================================
+// 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE
+// ============================================
+
+function addCustomScrollbarStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Scrollbar pour les sections */
+        #followingList::-webkit-scrollbar,
+        #followersList::-webkit-scrollbar,
+        #savedPostsList::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #followingList::-webkit-scrollbar-track,
+        #followersList::-webkit-scrollbar-track,
+        #savedPostsList::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        
+        #followingList::-webkit-scrollbar-thumb,
+        #followersList::-webkit-scrollbar-thumb,
+        #savedPostsList::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        #followingList::-webkit-scrollbar-thumb:hover,
+        #followersList::-webkit-scrollbar-thumb:hover,
+        #savedPostsList::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+        
+        /* Pour Firefox */
+        #followingList,
+        #followersList,
+        #savedPostsList {
+            scrollbar-width: thin;
+            scrollbar-color: #667eea rgba(0, 0, 0, 0.05);
+        }
+        
+        body.dark-mode #followingList::-webkit-scrollbar-track,
+        body.dark-mode #followersList::-webkit-scrollbar-track,
+        body.dark-mode #savedPostsList::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    `;
+    document.head.appendChild(style);
+}
 
 // ============================================
 // 🆕 INITIALISATION INFINITE SCROLL
@@ -279,7 +341,6 @@ async function loadFollowingBatch(lastVisible, limit) {
 
     console.log(`✅ Following snapshot size: ${snapshot.size}`);
 
-    // Charger les données des utilisateurs
     const items = await Promise.all(
         snapshot.docs.map(async (doc) => {
             const followedUserId = doc.id;
@@ -307,7 +368,6 @@ async function loadFollowingBatch(lastVisible, limit) {
 
     const validItems = items.filter(item => item !== null);
 
-    // Mettre à jour le compteur (une seule fois au premier chargement)
     if (!lastVisible) {
         const totalSnapshot = await firebase.firestore()
             .collection('users')
@@ -339,6 +399,7 @@ function renderFollowingItems(newItems) {
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'following-item-wrapper';
+        itemDiv.style.marginBottom = '16px';
         itemDiv.innerHTML = `
             <div class="following-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -369,15 +430,11 @@ function renderFollowingItems(newItems) {
                     Unfollow
                 </button>
             </div>
-            ${index < newItems.length - 1 ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
-            ` : ''}
         `;
 
         followingScrollManager.container.insertBefore(itemDiv, followingScrollManager.sentinel);
     });
 
-    // Message si aucun résultat
     if (followingScrollManager.loadedIds.size === 0 && !followingScrollManager.hasMore) {
         followingScrollManager.container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -477,6 +534,7 @@ function renderFollowersItems(newItems) {
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'follower-item-wrapper';
+        itemDiv.style.marginBottom = '16px';
         itemDiv.innerHTML = `
             <div class="follower-item" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease;">
                 <img 
@@ -507,9 +565,6 @@ function renderFollowersItems(newItems) {
                     Remove
                 </button>
             </div>
-            ${index < newItems.length - 1 ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
-            ` : ''}
         `;
 
         followersScrollManager.container.insertBefore(itemDiv, followersScrollManager.sentinel);
@@ -602,6 +657,7 @@ function renderSavedPostsItems(newItems) {
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'saved-post-item-wrapper';
+        itemDiv.style.marginBottom = '16px';
         itemDiv.innerHTML = `
             <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
                 <img 
@@ -640,9 +696,6 @@ function renderSavedPostsItems(newItems) {
                     Remove
                 </button>
             </div>
-            ${index < newItems.length - 1 ? `
-                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 16px 0;"></div>
-            ` : ''}
         `;
 
         savedPostsScrollManager.container.insertBefore(itemDiv, savedPostsScrollManager.sentinel);
@@ -698,7 +751,6 @@ async function unfollowUser(userId) {
         
         showToast('success', 'Success', 'User unfollowed successfully');
         
-        // Réinitialiser et recharger
         followingScrollManager.reset();
         followingScrollManager.loadMore();
         
@@ -1363,9 +1415,9 @@ async function logout() {
     }
 }
 
-// Animation de sortie pour les toasts
-const style = document.createElement('style');
-style.textContent = `
+// Animation de sortie pour les toast
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
     @keyframes slideOutRight {
         from {
             transform: translateX(0);
@@ -1377,6 +1429,6 @@ style.textContent = `
         }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(toastStyle);
 
-console.log('✅ Script de profil chargé (v4.1 - Infinite Scroll CORRIGÉ)');
+console.log('✅ Script de profil chargé (v4.2 - Scroll interne par section)');
