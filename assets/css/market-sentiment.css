@@ -132,13 +132,13 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SENTIMENT MAIN CARD - VERSION RESPONSIVE OPTIMISÉE
+   SENTIMENT MAIN CARD - VERSION RESPONSIVE OPTIMISÉE (CORRIGÉE)
    ═══════════════════════════════════════════════════════════════ */
 
 .sentiment-main-card {
     background: var(--card-bg);
     border-radius: 24px;
-    padding: 40px;
+    padding: 32px 40px; /* ✅ Padding réduit en haut pour remonter le doughnut */
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--glass-border);
     position: relative;
@@ -152,8 +152,8 @@
     background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 32px;
-    text-align: center; /* ✅ Centré */
+    margin-bottom: 24px; /* ✅ Réduit de 32px à 24px */
+    text-align: center;
     width: 100%;
 }
 
@@ -197,13 +197,13 @@
 }
 
 .gauge-value {
-    font-size: 5rem;
+    font-size: 4rem; /* ✅ Réduit de 5rem à 4rem pour meilleure lisibilité */
     font-weight: 900;
     background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1;
-    margin-bottom: 12px;
+    margin-bottom: 8px; /* ✅ Réduit de 12px à 8px */
     filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
     animation: pulseGlow 3s ease-in-out infinite;
 }
@@ -218,11 +218,11 @@
 }
 
 .gauge-label {
-    font-size: 1.3rem;
+    font-size: 1.1rem; /* ✅ Réduit de 1.3rem à 1.1rem */
     font-weight: 800;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px; /* ✅ Réduit de 2px à 1.5px */
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -368,21 +368,21 @@
     }
     
     .gauge-wrapper {
-        width: 280px;
-        height: 280px;
+        width: 260px; /* ✅ Réduit de 280px */
+        height: 260px;
     }
     
     .gauge-value {
-        font-size: 4rem;
+        font-size: 3rem; /* ✅ Réduit de 4rem */
     }
     
     .gauge-label {
-        font-size: 1.1rem;
+        font-size: 0.95rem; /* ✅ Réduit de 1.1rem */
     }
     
     .breakdown-title {
         font-size: 1.3rem;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
     }
 }
 
@@ -396,27 +396,23 @@
     }
     
     .sentiment-visual-wrapper {
-        gap: 24px;
+        gap: 20px; /* ✅ Réduit de 24px */
     }
     
     .gauge-wrapper {
-        width: 240px;
-        height: 240px;
+        width: 180px; /* ✅ Fortement réduit de 240px à 180px */
+        height: 180px;
         margin: 0 auto;
     }
     
-    .gauge-value {
-        font-size: 3.5rem;
-    }
-    
-    .gauge-label {
-        font-size: 1rem;
-        letter-spacing: 1px;
+    /* ✅ TEXTE CENTRAL MASQUÉ SUR MOBILE (illisible) */
+    .gauge-center {
+        display: none; /* ✅ Complètement masqué sur mobile */
     }
     
     .breakdown-title {
         font-size: 1.2rem;
-        margin-bottom: 20px;
+        margin-bottom: 16px; /* ✅ Réduit de 20px */
     }
     
     .breakdown-item {
@@ -463,21 +459,18 @@
     }
     
     .gauge-wrapper {
-        width: 200px;
-        height: 200px;
+        width: 160px; /* ✅ Encore plus petit */
+        height: 160px;
     }
     
-    .gauge-value {
-        font-size: 3rem;
-    }
-    
-    .gauge-label {
-        font-size: 0.9rem;
+    /* ✅ Texte central toujours masqué */
+    .gauge-center {
+        display: none;
     }
     
     .breakdown-title {
         font-size: 1.1rem;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
     
     .breakdown-item {
@@ -509,7 +502,7 @@
     }
     
     .breakdown-item:hover {
-        transform: translateX(4px); /* Moins d'effet sur mobile */
+        transform: translateX(4px);
     }
 }
 
