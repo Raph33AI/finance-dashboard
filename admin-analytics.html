@@ -2242,6 +2242,18 @@
                                     </div>
                                 </div>
                                 
+                                <!-- 🆕 NOUVELLE CARD POUR RAPHAEL.NARDONE -->
+                                <div class="signature-card" data-email="raphael.nardone@alphavault-ai.com">
+                                    <div class="signature-header">
+                                        <i class="fas fa-user-tie"></i>
+                                        <strong>Raphaël Nardone</strong>
+                                        <span class="signature-email">raphael.nardone@alphavault-ai.com</span>
+                                    </div>
+                                    <div class="signature-preview" id="signature-preview-raphael">
+                                        <em style="color: #64748b;">No signature defined</em>
+                                    </div>
+                                </div>
+                                
                                 <div class="signature-card" data-email="contact@alphavault-ai.com">
                                     <div class="signature-header">
                                         <i class="fas fa-envelope"></i>
@@ -2335,7 +2347,6 @@
                 <!-- ========================================
                     MODALS: COMPOSE, REPLY, FORWARD, VIEW EMAIL, SIGNATURE EDITOR
                     ======================================== -->
-
                 <!-- MODAL: COMPOSE EMAIL -->
                 <div id="compose-email-modal" class="gmail-modal">
                     <div class="gmail-modal-content">
@@ -2347,15 +2358,16 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- SÉLECTEUR FROM -->
+                            <!-- 🆕 SÉLECTEUR FROM AVEC RAPHAEL.NARDONE -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="compose-from" class="form-input">
+                                    <option value="raphael.nardone@alphavault-ai.com">Raphaël Nardone (raphael.nardone@alphavault-ai.com) ⭐ Default</option>
                                     <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
                                     <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
                                     <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
                                     <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
-                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal Gmail (raphnardone@gmail.com)</option>
                                 </select>
                             </div>
                             
@@ -2425,15 +2437,16 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- SÉLECTEUR FROM -->
+                            <!-- 🆕 SÉLECTEUR FROM AVEC RAPHAEL.NARDONE -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="reply-from" class="form-input">
+                                    <option value="raphael.nardone@alphavault-ai.com">Raphaël Nardone (raphael.nardone@alphavault-ai.com) ⭐ Default</option>
                                     <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
                                     <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
                                     <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
                                     <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
-                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal Gmail (raphnardone@gmail.com)</option>
                                 </select>
                             </div>
                             
@@ -2480,15 +2493,16 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- SÉLECTEUR FROM -->
+                            <!-- 🆕 SÉLECTEUR FROM AVEC RAPHAEL.NARDONE -->
                             <div class="form-group">
                                 <label>From:</label>
                                 <select id="forward-from" class="form-input">
+                                    <option value="raphael.nardone@alphavault-ai.com">Raphaël Nardone (raphael.nardone@alphavault-ai.com) ⭐ Default</option>
                                     <option value="newsletter@alphavault-ai.com">Newsletter (newsletter@alphavault-ai.com)</option>
                                     <option value="contact@alphavault-ai.com">Contact (contact@alphavault-ai.com)</option>
                                     <option value="info@alphavault-ai.com">Info (info@alphavault-ai.com)</option>
                                     <option value="support@alphavault-ai.com">Support (support@alphavault-ai.com)</option>
-                                    <option value="raphnardone@gmail.com">Personal (raphnardone@gmail.com)</option>
+                                    <option value="raphnardone@gmail.com">Personal Gmail (raphnardone@gmail.com)</option>
                                 </select>
                             </div>
                             
@@ -2523,58 +2537,6 @@
                     </div>
                 </div>
 
-                <!-- MODAL: VIEW EMAIL -->
-                <div id="view-email-modal" class="gmail-modal">
-                    <div class="gmail-modal-content gmail-modal-large">
-                        <div class="gmail-modal-header">
-                            <h3><i class="fas fa-envelope-open"></i> Email Details</h3>
-                            <button class="btn-close-modal" onclick="adminAnalytics.closeViewEmailModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="gmail-modal-body">
-                            <div class="email-details-header">
-                                <div class="detail-row">
-                                    <strong>From:</strong>
-                                    <span id="view-email-from"></span>
-                                </div>
-                                <div class="detail-row">
-                                    <strong>To:</strong>
-                                    <span id="view-email-to"></span>
-                                </div>
-                                <div class="detail-row">
-                                    <strong>Subject:</strong>
-                                    <span id="view-email-subject"></span>
-                                </div>
-                                <div class="detail-row">
-                                    <strong>Date:</strong>
-                                    <span id="view-email-date"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="email-body-content" id="view-email-body"></div>
-                            
-                            <div class="email-attachments-section">
-                                <h4>Attachments:</h4>
-                                <div id="view-email-attachments"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="gmail-modal-footer">
-                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id, false)">
-                                <i class="fas fa-reply"></i> Reply
-                            </button>
-                            <button class="btn-secondary" onclick="adminAnalytics.openReplyModal(adminAnalytics.currentEmail.id, true)">
-                                <i class="fas fa-reply-all"></i> Reply All
-                            </button>
-                            <button class="btn-secondary" onclick="adminAnalytics.openForwardModal(adminAnalytics.currentEmail.id)">
-                                <i class="fas fa-share"></i> Forward
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- MODAL: SIGNATURE EDITOR -->
                 <div id="signature-editor-modal" class="gmail-modal">
                     <div class="gmail-modal-content gmail-modal-large">
@@ -2586,9 +2548,12 @@
                         </div>
                         
                         <div class="gmail-modal-body">
-                            <!-- Tabs pour chaque adresse -->
+                            <!-- 🆕 TABS AVEC RAPHAEL.NARDONE -->
                             <div class="signature-tabs">
-                                <button class="signature-tab active" data-email="newsletter@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('newsletter@alphavault-ai.com')">
+                                <button class="signature-tab active" data-email="raphael.nardone@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('raphael.nardone@alphavault-ai.com')">
+                                    <i class="fas fa-user-tie"></i> Raphaël
+                                </button>
+                                <button class="signature-tab" data-email="newsletter@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('newsletter@alphavault-ai.com')">
                                     <i class="fas fa-newspaper"></i> Newsletter
                                 </button>
                                 <button class="signature-tab" data-email="contact@alphavault-ai.com" onclick="adminAnalytics.switchSignatureTab('contact@alphavault-ai.com')">
@@ -2608,7 +2573,7 @@
                             <!-- Éditeur WYSIWYG pour la signature -->
                             <div class="signature-editor-container">
                                 <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #1e293b;">
-                                    Signature for: <span id="current-signature-email" style="color: #667eea;">newsletter@alphavault-ai.com</span>
+                                    Signature for: <span id="current-signature-email" style="color: #667eea;">raphael.nardone@alphavault-ai.com</span>
                                 </label>
                                 <div id="signature-wysiwyg-editor" class="email-editor" style="min-height: 250px;"></div>
                             </div>

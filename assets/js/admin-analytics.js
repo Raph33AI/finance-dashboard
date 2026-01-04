@@ -5642,7 +5642,8 @@ class AdminAnalyticsPro {
             return;
         }
         
-        document.getElementById('compose-from').value = 'newsletter@alphavault-ai.com';
+        // 🆕 DÉFINIR LA NOUVELLE ADRESSE PAR DÉFAUT
+        document.getElementById('compose-from').value = 'raphael.nardone@alphavault-ai.com';
         document.getElementById('compose-to').value = '';
         document.getElementById('compose-cc').value = '';
         document.getElementById('compose-bcc').value = '';
@@ -6517,6 +6518,10 @@ class AdminAnalyticsPro {
         }
     }
 
+    // ========================================
+    // ✍ SIGNATURE MANAGEMENT - FIRESTORE (SECTION CORRIGÉE)
+    // ========================================
+
     getDefaultSignatures() {
         const baseSignature = `
             <br><br>
@@ -6538,6 +6543,24 @@ class AdminAnalyticsPro {
         
         return {
             'newsletter@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'newsletter@alphavault-ai.com'),
+            'raphael.nardone@alphavault-ai.com': `
+                <br><br>
+                <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 22px;">RN</div>
+                        <div>
+                            <strong style="color: #667eea; font-size: 17px;">Raphaël Nardone</strong><br>
+                            <span style="color: #64748b; font-size: 13px;">Founder & CEO - AlphaVault AI</span>
+                        </div>
+                    </div>
+                    <div style="color: #64748b; font-size: 13px; line-height: 1.8;">
+                        📧 raphael.nardone@alphavault-ai.com<br>
+                        📱 +33 (0)X XX XX XX XX<br>
+                        🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                        💼 Leading the future of AI-powered financial intelligence
+                    </div>
+                </div>
+            `,
             'contact@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'contact@alphavault-ai.com'),
             'info@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'info@alphavault-ai.com'),
             'support@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'support@alphavault-ai.com'),
@@ -6545,7 +6568,7 @@ class AdminAnalyticsPro {
                 <br><br>
                 <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px;">
                     <strong>Raphaël Nardone</strong><br>
-                    <span style="color: #64748b;">Founder & CEO - AlphaVault AI</span><br>
+                    <span style="color: #64748b;">AlphaVault AI</span><br>
                     📧 raphnardone@gmail.com<br>
                     🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a>
                 </div>
@@ -6604,6 +6627,7 @@ class AdminAnalyticsPro {
         
         const emailKeyMap = {
             'newsletter@alphavault-ai.com': 'newsletter',
+            'raphael.nardone@alphavault-ai.com': 'raphael', // 🆕
             'contact@alphavault-ai.com': 'contact',
             'info@alphavault-ai.com': 'info',
             'support@alphavault-ai.com': 'support',
@@ -6630,7 +6654,8 @@ class AdminAnalyticsPro {
             return;
         }
         
-        this.currentSignatureEmail = 'newsletter@alphavault-ai.com';
+        // 🆕 DÉFINIR LA NOUVELLE ADRESSE PAR DÉFAUT
+        this.currentSignatureEmail = 'raphael.nardone@alphavault-ai.com';
         
         if (!this.signatureEditor) {
             this.signatureEditor = new Quill('#signature-wysiwyg-editor', {
@@ -6647,11 +6672,11 @@ class AdminAnalyticsPro {
                 placeholder: 'Create your email signature...'
             });
             
-            // 🆕 AJOUTER LE LISTENER POUR SÉLECTION D'IMAGE
             this.setupImageResizer();
         }
         
-        this.loadSignatureForEmail('newsletter@alphavault-ai.com');
+        // 🆕 CHARGER LA SIGNATURE DE RAPHAEL PAR DÉFAUT
+        this.loadSignatureForEmail('raphael.nardone@alphavault-ai.com');
         
         modal.style.display = 'flex';
         
