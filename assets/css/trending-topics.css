@@ -165,7 +165,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FEAR & GREED INDEX - GAUGE REDESSINÉE ULTRA MODERNE
+   FEAR & GREED INDEX - DOUGHNUT MODERNE & ULTRA RESPONSIVE
    ═══════════════════════════════════════════════════════════════ */
 
 .fear-greed-wrapper {
@@ -227,53 +227,67 @@
     color: var(--text-secondary);
 }
 
-/* ✅ NOUVELLE GAUGE MODERNE - RESPONSIVE */
+/* ✅ STRUCTURE PRINCIPALE */
 .fear-greed-main {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 32px;
     background: var(--card-bg);
     border-radius: 20px;
-    padding: clamp(24px, 4vw, 40px);
+    padding: clamp(24px, 4vw, 32px); /* ✅ Padding réduit */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--glass-border);
     position: relative;
     z-index: 1;
 }
 
+/* ✅ TITRE CENTRÉ */
+.breakdown-title {
+    font-size: clamp(1.1rem, 3vw, 1.3rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 24px; /* ✅ Réduit pour remonter le doughnut */
+    text-align: center;
+    width: 100%;
+}
+
+/* ✅ GRID LAYOUT RESPONSIVE */
+.fear-visual-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: center;
+}
+
 @media (min-width: 900px) {
-    .fear-greed-main {
+    .fear-visual-wrapper {
         grid-template-columns: minmax(320px, 400px) 1fr;
     }
 }
 
-/* ✅ GAUGE CONTAINER - HAUTEUR ADAPTATIVE */
+/* ✅ GAUGE CONTAINER */
 .fear-greed-gauge {
     position: relative;
     width: 100%;
-    max-width: 360px;
+    max-width: 320px;
     height: auto;
-    aspect-ratio: 2 / 1.2;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    filter: drop-shadow(0 8px 24px rgba(239, 68, 68, 0.3));
 }
 
-/* ✅ CANVAS RESPONSIVE */
-.fear-greed-gauge canvas {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 180px !important;
+#fearGreedGauge {
+    transition: transform 0.3s ease;
 }
 
-/* ✅ TEXTE CENTRÉ SOUS LA GAUGE */
+#fearGreedGauge:hover {
+    transform: scale(1.05);
+}
+
+/* ✅ TEXTE CENTRAL (MASQUÉ SUR MOBILE) */
 .gauge-center-fear {
     position: absolute;
-    bottom: 0;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     text-align: center;
     z-index: 10;
     pointer-events: none;
@@ -281,55 +295,27 @@
 }
 
 .fear-value {
-    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-size: clamp(2.5rem, 8vw, 4rem); /* ✅ Réduit de 3.5rem à 4rem max */
     font-weight: 900;
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 16px rgba(239, 68, 68, 0.5));
+    animation: pulseGlow 3s ease-in-out infinite;
 }
 
 .fear-label {
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-size: clamp(1rem, 2.5vw, 1.1rem); /* ✅ Réduit */
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
     white-space: nowrap;
 }
 
-/* ✅ GRADUATIONS GAUGE (NOUVEAU) */
-.gauge-markers {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    height: 90%;
-    pointer-events: none;
-}
-
-.gauge-marker {
-    position: absolute;
-    width: 2px;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    transform-origin: center bottom;
-}
-
-body.dark-mode .gauge-marker {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* ✅ BREAKDOWN RESPONSIVE */
+/* ✅ BREAKDOWN (BARRES) */
 .fear-breakdown {
     display: flex;
     flex-direction: column;
     gap: 16px;
-}
-
-.breakdown-title {
-    font-size: clamp(1.1rem, 3vw, 1.3rem);
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 8px;
 }
 
 .fear-stat {
@@ -390,7 +376,7 @@ body.dark-mode .gauge-marker {
     color: var(--text-primary);
 }
 
-/* ✅ TIMELINE CHART RESPONSIVE */
+/* ✅ TIMELINE CHART */
 .fear-timeline {
     margin-top: 24px;
     background: var(--card-bg);
@@ -414,6 +400,128 @@ body.dark-mode .gauge-marker {
 .fear-chart-wrapper {
     height: clamp(200px, 40vw, 300px);
     position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE TABLETTE (< 1200px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+    .fear-greed-gauge {
+        max-width: 260px; /* ✅ Réduit */
+    }
+    
+    .fear-value {
+        font-size: 3rem;
+    }
+    
+    .fear-label {
+        font-size: 0.95rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE (< 768px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .fear-greed-main {
+        padding: 24px 16px;
+    }
+    
+    .fear-visual-wrapper {
+        gap: 20px;
+    }
+    
+    .fear-greed-gauge {
+        max-width: 180px; /* ✅ Fortement réduit */
+    }
+    
+    /* ✅ TEXTE CENTRAL MASQUÉ SUR MOBILE */
+    .gauge-center-fear {
+        display: none; /* ✅ Complètement masqué */
+    }
+    
+    .breakdown-title {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+    
+    .fear-stat {
+        padding: 14px;
+    }
+    
+    .fear-stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE PETIT MOBILE (< 480px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .fear-greed-main {
+        padding: 20px 12px;
+        border-radius: 16px;
+    }
+    
+    .fear-greed-gauge {
+        max-width: 160px; /* ✅ Encore plus petit */
+    }
+    
+    /* ✅ Texte central toujours masqué */
+    .gauge-center-fear {
+        display: none;
+    }
+    
+    .breakdown-title {
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+    }
+    
+    .fear-stat {
+        padding: 12px;
+    }
+    
+    .fear-stat-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .fear-stat:hover {
+        transform: translateX(4px);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════ */
+
+body.dark-mode .fear-greed-wrapper {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(16, 185, 129, 0.12));
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+body.dark-mode .fear-greed-main {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .fear-stat {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+@media (hover: hover) {
+    body.dark-mode .fear-stat:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+}
+
+body.dark-mode .fear-greed-gauge {
+    filter: drop-shadow(0 8px 24px rgba(239, 68, 68, 0.5));
 }
 
 /* ═══════════════════════════════════════════════════════════════

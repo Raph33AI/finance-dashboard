@@ -400,45 +400,58 @@
                     </div>
                     
                     <div class='fear-greed-main'>
-                        <div class='fear-greed-gauge'>
-                            <canvas id='fearGreedGauge'></canvas>
-                            <div class='gauge-center-fear'>
-                                <div class='fear-value' id='fearValue'>0</div>
-                                <div class='fear-label' id='fearLabel'>Neutral</div>
-                            </div>
-                        </div>
+                        <!-- ✅ TITRE CENTRÉ EN HAUT -->
+                        <div class='breakdown-title'>Market Psychology Breakdown</div>
                         
-                        <div class='fear-breakdown'>
-                            <div class='breakdown-title'>Sentiment Breakdown</div>
+                        <!-- ✅ WRAPPER POUR GRID LAYOUT -->
+                        <div class='fear-visual-wrapper'>
                             
-                            <div class='fear-stat'>
-                                <div class='fear-stat-header'>
-                                    <div class='fear-stat-icon fear-icon'>
-                                        <i class='fas fa-frown'></i>
-                                    </div>
-                                    <div class='fear-stat-label'>Fear Keywords</div>
-                                    <div class='fear-stat-value' id='fearCountValue'>0</div>
+                            <!-- ═══════════════════════════════════════════════════════════
+                                DOUGHNUT GAUGE (GAUCHE SUR DESKTOP)
+                                ═══════════════════════════════════════════════════════════ -->
+                            <div class='fear-greed-gauge'>
+                                <canvas id='fearGreedGauge'></canvas>
+                                <div class='gauge-center-fear'>
+                                    <div class='fear-value' id='fearValue'>0</div>
+                                    <div class='fear-label' id='fearLabel'>Neutral</div>
                                 </div>
                             </div>
                             
-                            <div class='fear-stat'>
-                                <div class='fear-stat-header'>
-                                    <div class='fear-stat-icon greed-icon'>
-                                        <i class='fas fa-smile'></i>
+                            <!-- ═══════════════════════════════════════════════════════════
+                                BARRES DE STATISTIQUES (DROITE SUR DESKTOP)
+                                ═══════════════════════════════════════════════════════════ -->
+                            <div class='fear-breakdown'>
+                                
+                                <div class='fear-stat'>
+                                    <div class='fear-stat-header'>
+                                        <div class='fear-stat-icon fear-icon'>
+                                            <i class='fas fa-frown'></i>
+                                        </div>
+                                        <div class='fear-stat-label'>Fear Keywords</div>
+                                        <div class='fear-stat-value' id='fearCountValue'>0</div>
                                     </div>
-                                    <div class='fear-stat-label'>Greed Keywords</div>
-                                    <div class='fear-stat-value' id='greedCountValue'>0</div>
                                 </div>
-                            </div>
-                            
-                            <div class='fear-stat'>
-                                <div class='fear-stat-header'>
-                                    <div class='fear-stat-icon neutral-icon'>
-                                        <i class='fas fa-balance-scale'></i>
+                                
+                                <div class='fear-stat'>
+                                    <div class='fear-stat-header'>
+                                        <div class='fear-stat-icon greed-icon'>
+                                            <i class='fas fa-smile'></i>
+                                        </div>
+                                        <div class='fear-stat-label'>Greed Keywords</div>
+                                        <div class='fear-stat-value' id='greedCountValue'>0</div>
                                     </div>
-                                    <div class='fear-stat-label'>Market Sentiment</div>
-                                    <div class='fear-stat-value' id='marketSentiment'>Analyzing...</div>
                                 </div>
+                                
+                                <div class='fear-stat'>
+                                    <div class='fear-stat-header'>
+                                        <div class='fear-stat-icon neutral-icon'>
+                                            <i class='fas fa-balance-scale'></i>
+                                        </div>
+                                        <div class='fear-stat-label'>Market Sentiment</div>
+                                        <div class='fear-stat-value' id='marketSentiment'>Analyzing...</div>
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>

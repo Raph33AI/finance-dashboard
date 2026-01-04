@@ -406,7 +406,10 @@ class TrendingTopicsDashboard {
 
     createFearGreedGauge(index) {
         const canvas = document.getElementById('fearGreedGauge');
-        if (!canvas) return;
+        if (!canvas) {
+            console.error('❌ Canvas fearGreedGauge not found!');
+            return;
+        }
         
         const ctx = canvas.getContext('2d');
         
@@ -414,10 +417,26 @@ class TrendingTopicsDashboard {
             this.charts.fearGauge.destroy();
         }
         
+        // ✅ Convertir le score (-100 à +100) en pourcentage (0 à 100)
         const percentage = ((index + 100) / 200) * 100;
-        const colors = this.fearGreedCalculator.getIndexColor(index);
         
-        // ✅ CONFIGURATION AMÉLIORÉE AVEC RESPONSIVE
+        // ✅ Couleurs adaptatives selon le Fear & Greed
+        const getGradientColors = (index) => {
+            if (index > 50) return ['#10b981', '#059669', '#047857'];       // Extreme Greed (Vert)
+            if (index > 0) return ['#3b82f6', '#2563eb', '#1d4ed8'];        // Greed (Bleu)
+            if (index > -50) return ['#f59e0b', '#ea580c', '#dc2626'];      // Fear (Orange/Rouge)
+            return ['#ef4444', '#dc2626', '#b91c1c'];                       // Extreme Fear (Rouge)
+        };
+        
+        const colors = getGradientColors(index);
+        
+        // ✅ Créer gradient radial pour effet 3D
+        const gradient = ctx.createLinearGradient(0, 0, 400, 400);
+        gradient.addColorStop(0, colors[0]);
+        gradient.addColorStop(0.5, colors[1]);
+        gradient.addColorStop(1, colors[2]);
+        
+        // ✅ Configuration responsive
         const isMobile = window.innerWidth < 768;
         
         this.charts.fearGauge = new Chart(ctx, {
@@ -426,27 +445,48 @@ class TrendingTopicsDashboard {
                 datasets: [{
                     data: [percentage, 100 - percentage],
                     backgroundColor: [
-                        this.createGradient(ctx, colors),
-                        'rgba(200, 200, 200, 0.12)'
+                        gradient,
+                        'rgba(200, 200, 200, 0.1)'
                     ],
                     borderWidth: 0,
-                    circumference: 180,
-                    rotation: 270
+                    borderRadius: 10,
+                    spacing: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                aspectRatio: isMobile ? 2.2 : 2, // ✅ Ratio adaptatif
-                cutout: isMobile ? '65%' : '70%', // ✅ Cutout adaptatif
+                aspectRatio: isMobile ? 2.2 : 2,
+                cutout: isMobile ? '65%' : '70%',
+                rotation: -90, // ✅ Commence en haut
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: false }
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataIndex === 0) {
+                                    const label = this.fearGreedCalculator ? 
+                                        this.fearGreedCalculator.getIndexLabel(index) : 
+                                        'Market Sentiment';
+                                    return `${label}: ${index}`;
+                                }
+                                return null;
+                            }.bind(this)
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        borderColor: colors[0],
+                        borderWidth: 2,
+                        displayColors: false
+                    }
                 },
                 animation: {
                     animateRotate: true,
                     animateScale: true,
-                    duration: 1500,
+                    duration: 1800,
                     easing: 'easeInOutQuart'
                 }
             }
@@ -457,16 +497,13 @@ class TrendingTopicsDashboard {
         const fearLabelEl = document.getElementById('fearLabel');
         
         if (fearValueEl && fearLabelEl) {
-            const gradient = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
-            fearValueEl.style.background = gradient;
+            const gradientStyle = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
+            fearValueEl.style.background = gradientStyle;
             fearValueEl.style.webkitBackgroundClip = 'text';
             fearValueEl.style.webkitTextFillColor = 'transparent';
             
             fearLabelEl.style.color = colors[0];
         }
-        
-        // ✅ AJOUTER DES GRADUATIONS VISUELLES (OPTIONNEL)
-        this.addGaugeMarkers();
     }
 
     // ✅ NOUVELLE MÉTHODE : AJOUTER DES MARQUEURS SUR LA GAUGE
