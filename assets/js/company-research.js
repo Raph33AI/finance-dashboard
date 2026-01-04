@@ -106,13 +106,11 @@ class YouTubeMarketIntelligence {
             this.renderGlobalStats();
             this.renderTopCompanies('week');
             this.renderSectorAnalysis();
-            this.renderSentimentTrends();
             
             this.hideSection('globalLoadingSection');
             this.showSection('globalDashboardSection');
             this.showSection('topCompaniesSection');
             this.showSection('sectorAnalysisSection');
-            this.showSection('sentimentTrendsSection');
             
             console.log('✅ Global Dashboard loaded successfully');
             
@@ -129,12 +127,10 @@ class YouTubeMarketIntelligence {
             this.renderGlobalStats();
             this.renderTopCompanies('week');
             this.renderSectorAnalysis();
-            this.renderSentimentTrends();
             
             this.showSection('globalDashboardSection');
             this.showSection('topCompaniesSection');
             this.showSection('sectorAnalysisSection');
-            this.showSection('sentimentTrendsSection');
             
             console.warn('⚠ Displaying mock data due to API error');
         }
@@ -613,18 +609,6 @@ class YouTubeMarketIntelligence {
         document.getElementById('sectorAnalysisGrid').innerHTML = html || '<p>No sector data available</p>';
     }
 
-    renderSentimentTrends() {
-        const html = `
-            <div class="empty-state">
-                <i class="fas fa-chart-area"></i>
-                <h3>Sentiment Trend Chart</h3>
-                <p>7-day, 30-day, 90-day, 365-day sentiment evolution</p>
-            </div>
-        `;
-        
-        document.getElementById('sentimentTrendsChart').innerHTML = html;
-    }
-
     // ========================================
     // SECTION 2: COMPANY-SPECIFIC SEARCH
     // ========================================
@@ -644,11 +628,16 @@ class YouTubeMarketIntelligence {
         
         this.currentCompany = query;
         
-        const periodSelector = document.getElementById('periodSelector');
+        // ✅ CORRECTION: Utiliser le bon ID 'periodSelectorSearch'
+        const periodSelector = document.getElementById('periodSelectorSearch');
         this.currentPeriod = periodSelector ? periodSelector.value : '1month';
         
         const sortSelector = document.getElementById('videoSortSelector');
         this.currentSort = sortSelector ? sortSelector.value : 'relevance';
+        
+        // ✅ AJOUT: Log pour debug
+        console.log(`🔍 Selected period: ${this.currentPeriod}`);
+        console.log(`🔍 Period selector value:`, periodSelector?.value);
         
         const loadingCompany = document.getElementById('loadingCompany');
         if (loadingCompany) {
@@ -673,7 +662,10 @@ class YouTubeMarketIntelligence {
                 dateFilter
             );
             
+            // ✅ IMPORTANT: Filtrer à nouveau côté client pour garantir la période exacte
             const filteredVideos = this.filterVideosByPeriod(videos, days);
+            
+            console.log(`📊 Videos fetched: ${videos.length}, After filtering: ${filteredVideos.length}`);
             
             this.videosData = filteredVideos;
             
