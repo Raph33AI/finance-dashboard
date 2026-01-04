@@ -35,13 +35,17 @@ class InfiniteScrollManager {
             return;
         }
 
-        // ✅ STYLES RESPONSIVES AVEC SCROLLBAR VISIBLE
+        // ✅ STYLES RESPONSIVES AVEC SCROLLBAR FORCÉE
         const isMobile = window.innerWidth <= 768;
-        this.container.style.maxHeight = isMobile ? '400px' : '600px';
-        this.container.style.overflowY = 'scroll'; // ✅ SCROLL TOUJOURS VISIBLE
-        this.container.style.overflowX = 'hidden';
-        this.container.style.position = 'relative';
-        this.container.style.paddingRight = '8px';
+        
+        // ✅ Appliquer les styles INLINE pour garantir leur application
+        this.container.style.cssText = `
+            max-height: ${isMobile ? '400px' : '600px'};
+            overflow-y: scroll !important;
+            overflow-x: hidden !important;
+            position: relative;
+            padding-right: 8px;
+        `;
         
         // Vider complètement le container
         this.container.innerHTML = '';
@@ -73,7 +77,7 @@ class InfiniteScrollManager {
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId} (responsive + scrollbar)`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (scrollbar forced)`);
     }
 
     async loadMore() {
@@ -265,15 +269,31 @@ window.addEventListener('resize', () => {
 // 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE
 // ============================================
 
+// ============================================
+// 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE (PC)
+// ============================================
+
 function addCustomScrollbarStyles() {
+    // Supprimer l'ancien style s'il existe
+    const oldStyle = document.getElementById('custom-scrollbar-styles');
+    if (oldStyle) oldStyle.remove();
+    
     const style = document.createElement('style');
     style.id = 'custom-scrollbar-styles';
     style.textContent = `
-        /* ✅ SCROLLBAR TOUJOURS VISIBLE SUR PC */
+        /* ✅ FORCER LA SCROLLBAR VISIBLE SUR PC */
+        #followingList,
+        #followersList,
+        #savedPostsList {
+            overflow-y: scroll !important; /* ✅ Force scroll visible */
+            overflow-x: hidden !important;
+        }
+        
+        /* Scrollbar Webkit (Chrome, Edge, Safari) */
         #followingList::-webkit-scrollbar,
         #followersList::-webkit-scrollbar,
         #savedPostsList::-webkit-scrollbar {
-            width: 10px; /* ✅ Augmenté pour meilleure visibilité */
+            width: 12px; /* ✅ Largeur visible */
         }
         
         #followingList::-webkit-scrollbar-track,
@@ -281,7 +301,7 @@ function addCustomScrollbarStyles() {
         #savedPostsList::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.08);
             border-radius: 10px;
-            margin: 4px;
+            margin: 4px 0;
         }
         
         #followingList::-webkit-scrollbar-thumb,
@@ -289,17 +309,27 @@ function addCustomScrollbarStyles() {
         #savedPostsList::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            min-height: 50px; /* ✅ Hauteur minimale pour faciliter le clic */
             transition: background 0.3s ease;
-            min-height: 40px; /* ✅ Hauteur minimale pour faciliter le clic */
         }
         
         #followingList::-webkit-scrollbar-thumb:hover,
         #followersList::-webkit-scrollbar-thumb:hover,
         #savedPostsList::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #764ba2, #667eea);
+            background-clip: padding-box;
         }
         
-        /* Pour Firefox */
+        #followingList::-webkit-scrollbar-thumb:active,
+        #followersList::-webkit-scrollbar-thumb:active,
+        #savedPostsList::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            background-clip: padding-box;
+        }
+        
+        /* Firefox */
         #followingList,
         #followersList,
         #savedPostsList {
@@ -321,6 +351,8 @@ function addCustomScrollbarStyles() {
         }
     `;
     document.head.appendChild(style);
+    
+    console.log('✅ Scrollbar styles applied');
 }
 
 // ============================================
