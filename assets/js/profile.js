@@ -450,7 +450,7 @@ async function loadFollowersList() {
 }
 
 // ============================================
-// ✅ GESTION DES POSTS SAUVEGARDÉS (VERSION FINALE)
+// ✅ GESTION DES POSTS SAUVEGARDÉS (VERSION FINALE COMPLÈTE)
 // ============================================
 
 async function loadSavedPosts() {
@@ -466,6 +466,7 @@ async function loadSavedPosts() {
     console.log('👤 User ID:', currentUserData.uid);
     
     try {
+        // ✅ ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
         firebase.firestore()
             .collection('users')
             .doc(currentUserData.uid)
@@ -497,7 +498,7 @@ async function loadSavedPosts() {
                 
                 console.log('🔄 Processing saved posts...');
                 
-                // Récupérer et trier manuellement
+                // ✅ RÉCUPÉRER ET TRIER MANUELLEMENT
                 const savedPosts = savedPostsSnapshot.docs
                     .map(doc => {
                         const data = doc.data();
@@ -508,6 +509,7 @@ async function loadSavedPosts() {
                         };
                     })
                     .sort((a, b) => {
+                        // Tri manuel par savedAt (desc)
                         if (!a.savedAt) return 1;
                         if (!b.savedAt) return -1;
                         return b.savedAt.toMillis() - a.savedAt.toMillis();
@@ -515,7 +517,7 @@ async function loadSavedPosts() {
                 
                 console.log('✅ Posts sorted:', savedPosts.length);
                 
-                // Afficher la liste
+                // ✅ AFFICHER LA LISTE AVEC SÉPARATEURS
                 const savedPostsHTML = savedPosts.map((post, index) => {
                     const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
                     
@@ -534,43 +536,53 @@ async function loadSavedPosts() {
                         console.warn('⚠ Error formatting date for post:', post.postId, dateError);
                     }
                     
+                    // ✅ Vérifier si c'est le dernier post (pas de séparateur)
+                    const isLastPost = index === savedPosts.length - 1;
+                    
                     return `
-                        <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
-                            <img 
-                                src="${coverImage}" 
-                                alt="${escapeHtml(post.title)}" 
-                                style="width: 120px; height: 120px; border-radius: 8px; object-fit: cover; flex-shrink: 0;"
-                                onerror="this.src='https://via.placeholder.com/120?text=No+Image'"
-                            >
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                    <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 8px;">
-                                        ${channelBadge}
-                                    </span>
-                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">
-                                        <i class="fas fa-clock"></i> Saved ${savedDate}
-                                    </span>
+                        <div style="margin-bottom: ${isLastPost ? '0' : '24px'};">
+                            <div class="saved-post-item" style="display: flex; gap: 16px; padding: 16px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='post.html?id=${post.postId}'">
+                                <img 
+                                    src="${coverImage}" 
+                                    alt="${escapeHtml(post.title)}" 
+                                    style="width: 120px; height: 120px; border-radius: 8px; object-fit: cover; flex-shrink: 0;"
+                                    onerror="this.src='https://via.placeholder.com/120?text=No+Image'"
+                                >
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                        <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 8px;">
+                                            ${channelBadge}
+                                        </span>
+                                        <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                                            <i class="fas fa-clock"></i> Saved ${savedDate}
+                                        </span>
+                                    </div>
+                                    <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        ${escapeHtml(post.title)}
+                                    </h4>
+                                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        ${cleanExcerpt}
+                                    </p>
+                                    <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+                                        <span><i class="fas fa-eye"></i> ${post.views || 0} views</span>
+                                        <span><i class="fas fa-heart"></i> ${post.likes || 0} likes</span>
+                                        <span><i class="fas fa-comments"></i> ${post.commentsCount || 0} comments</span>
+                                    </div>
                                 </div>
-                                <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                    ${escapeHtml(post.title)}
-                                </h4>
-                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                    ${cleanExcerpt}
-                                </p>
-                                <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                                    <span><i class="fas fa-eye"></i> ${post.views || 0} views</span>
-                                    <span><i class="fas fa-heart"></i> ${post.likes || 0} likes</span>
-                                    <span><i class="fas fa-comments"></i> ${post.commentsCount || 0} comments</span>
-                                </div>
+                                <button 
+                                    class="btn-danger" 
+                                    onclick="event.stopPropagation(); removeSavedPost('${post.postId}')"
+                                    style="padding: 10px 20px; height: fit-content; white-space: nowrap;"
+                                >
+                                    <i class="fas fa-trash-alt"></i>
+                                    Remove
+                                </button>
                             </div>
-                            <button 
-                                class="btn-danger" 
-                                onclick="event.stopPropagation(); removeSavedPost('${post.postId}')"
-                                style="padding: 10px 20px; height: fit-content; white-space: nowrap;"
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                                Remove
-                            </button>
+                            
+                            ${!isLastPost ? `
+                                <!-- ✅ TRAIT DE SÉPARATION -->
+                                <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(203, 213, 225, 0.5) 10%, rgba(203, 213, 225, 0.5) 90%, transparent 100%); margin: 12px 0;"></div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
@@ -602,6 +614,8 @@ async function loadSavedPosts() {
     } catch (error) {
         console.error('❌ ===== FATAL ERROR IN loadSavedPosts() =====');
         console.error('Error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         console.error('==============================================');
         
         savedPostsList.innerHTML = `
@@ -615,7 +629,7 @@ async function loadSavedPosts() {
 }
 
 /**
- * ✅ NOUVELLE FONCTION : Nettoyer le contenu HTML pour affichage texte
+ * ✅ FONCTION UTILITAIRE : Nettoyer le contenu HTML pour affichage texte
  */
 function cleanHtmlContent(htmlString) {
     if (!htmlString) return 'No preview available';
@@ -638,6 +652,9 @@ function cleanHtmlContent(htmlString) {
     return cleanText || 'No preview available';
 }
 
+/**
+ * ✅ FONCTION : Retirer un post sauvegardé
+ */
 async function removeSavedPost(postId) {
     if (!confirm('Remove this post from your saved posts?')) return;
     
@@ -655,10 +672,10 @@ async function removeSavedPost(postId) {
         
         showToast('success', 'Success', 'Post removed from saved');
         
-        console.log('✅ Post retiré des favoris');
+        console.log('✅ Post removed from favorites');
         
     } catch (error) {
-        console.error('❌ Erreur lors du retrait du post sauvegardé:', error);
+        console.error('❌ Error removing saved post:', error);
         showToast('error', 'Error', 'Failed to remove saved post');
     }
 }
