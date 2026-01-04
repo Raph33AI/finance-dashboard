@@ -446,7 +446,7 @@ class CommunityFirebaseService {
 
     /**
      * 📧 Envoyer une notification email à tous les utilisateurs lors d'une publication
-     * VERSION CORRIGÉE AVEC PAGINATION
+     * ✅ VERSION FINALE CORRIGÉE AVEC PAGINATION
      */
     async sendBlogPostNotification(postData, postId) {
         try {
@@ -511,7 +511,7 @@ class CommunityFirebaseService {
             const WORKER_URL = 'https://message-notification-sender.raphnardone.workers.dev/send-blog-post';
             
             console.log('📡 Calling notification worker:', WORKER_URL);
-            console.log(`📊 Payload size: ${recipients.length} recipients`);
+            console.log(`📊 Payload: ${recipients.length} recipients`);
             
             const response = await fetch(WORKER_URL, {
                 method: 'POST',
@@ -530,10 +530,15 @@ class CommunityFirebaseService {
             const result = await response.json();
             
             console.log('✅ Blog post notifications sent successfully!');
-            console.log(`   📧 Sent: ${result.sent || recipients.length}`);
-            console.log(`   ❌ Failed: ${result.failed || 0}`);
+            console.log(`   📧 Sent: ${result.successCount || 0}`);
+            console.log(`   ❌ Failed: ${result.failCount || 0}`);
             
-            return result;
+            return {
+                success: true,
+                sent: result.successCount || 0,
+                failed: result.failCount || 0,
+                total: result.total || recipients.length
+            };
 
         } catch (error) {
             console.error('❌ Error sending blog post notifications:', error);
