@@ -757,44 +757,24 @@ body.dark-mode .form-input:focus {
     transform: translateY(0);
 }
 
+/* ✅ VERSION SANS SPINNER */
 .btn-auth-primary.loading {
     pointer-events: none;
-}
-
-.btn-auth-primary.loading .btn-text {
-    opacity: 0;
-}
-
-.btn-auth-primary.loading .btn-loader {
-    opacity: 1;
+    opacity: 0.7; /* Optionnel : bouton légèrement transparent pendant le chargement */
+    cursor: not-allowed;
 }
 
 .btn-text {
     transition: opacity 0.3s ease;
 }
 
+/* Spinner désactivé */
 .btn-loader {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    display: none !important;
 }
 
 .spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    display: none !important;
 }
 
 .btn-auth-secondary {
