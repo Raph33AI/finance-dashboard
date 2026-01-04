@@ -1,6 +1,5 @@
 /* ============================================
-   ALPHAVAULT AI - COMMUNITY HUB
-   Compatible avec l'HTML existant
+   ALPHAVAULT AI - COMMUNITY HUB (CORRIGÉ)
    ============================================ */
 
 class CommunityHub {
@@ -16,27 +15,13 @@ class CommunityHub {
     async initialize() {
         try {
             console.log('🏠 Initializing Community Hub...');
-
-            // Attendre l'authentification
             await this.waitForAuth();
-
-            // Charger les channels
             await this.loadChannels();
-
-            // Charger les posts
             await this.loadPosts();
-
-            // Charger les stats
             await this.loadCommunityStats();
-
-            // Charger la sidebar
             await this.loadSidebarData();
-
-            // Setup event listeners
             this.setupEventListeners();
-
             console.log('✅ Community Hub initialized');
-
         } catch (error) {
             console.error('❌ Error initializing Community Hub:', error);
             this.showError('Failed to load community: ' + error.message);
@@ -97,7 +82,6 @@ class CommunityHub {
                 return;
             }
 
-            // Afficher le loading
             postsGrid.innerHTML = `
                 <div class="loading-spinner">
                     <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #3B82F6;"></i>
@@ -105,31 +89,24 @@ class CommunityHub {
                 </div>
             `;
 
-            // ✅ CORRECTION : Construire la requête Firestore directement
             let query = firebase.firestore().collection('posts');
 
-            // ✅ Filtre par channel (AVANT le tri pour éviter les erreurs d'index)
             if (this.currentChannel !== 'all') {
                 console.log('🔍 Filtering by channel:', this.currentChannel);
                 query = query.where('channelId', '==', this.currentChannel);
             }
 
-            // ✅ Filtre par tag
             if (this.currentTag) {
                 console.log('🏷 Filtering by tag:', this.currentTag);
                 query = query.where('tags', 'array-contains', this.currentTag);
             }
 
-            // ✅ Tri selon le filtre actif
             if (this.currentFilter === 'trending') {
                 query = query.orderBy('views', 'desc');
             } else if (this.currentFilter === 'latest') {
                 query = query.orderBy('createdAt', 'desc');
             } else if (this.currentFilter === 'top') {
-                // ⚠ NOTE : Firestore ne peut pas trier par array.length
-                // Solution : ajouter un champ "likesCount" dans vos posts
-                // OU trier côté client après récupération
-                query = query.orderBy('createdAt', 'desc'); // Fallback sur date
+                query = query.orderBy('createdAt', 'desc');
             }
 
             query = query.limit(50);
@@ -142,7 +119,6 @@ class CommunityHub {
                 ...doc.data()
             }));
 
-            // ✅ Si filtre "top", trier côté client par nombre de likes
             if (this.currentFilter === 'top') {
                 this.posts.sort((a, b) => {
                     const likesA = (a.likes && Array.isArray(a.likes)) ? a.likes.length : 0;
@@ -152,20 +128,10 @@ class CommunityHub {
             }
 
             console.log(`✅ Posts loaded: ${this.posts.length}`);
-            console.log('📊 Posts data:', this.posts.map(p => ({ id: p.id, title: p.title, channelId: p.channelId })));
-
             this.renderPosts();
 
         } catch (error) {
             console.error('❌ Error loading posts:', error);
-            console.error('❌ Error details:', {
-                code: error.code,
-                message: error.message,
-                currentChannel: this.currentChannel,
-                currentFilter: this.currentFilter,
-                currentTag: this.currentTag
-            });
-
             const postsGrid = document.getElementById('postsGrid');
             if (postsGrid) {
                 postsGrid.innerHTML = `
@@ -215,13 +181,14 @@ class CommunityHub {
             : '';
 
         const imagePreview = post.images && post.images.length > 0
-            ? `<div class="post-image-preview" style="width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 16px 0;">
+            ? `<div class="post-image-preview" style="position: relative; width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 16px 0;">
                    <img src="${post.images[0]}" alt="Post preview" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
                    ${post.images.length > 1 ? `<div class="image-count" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700;">+${post.images.length - 1}</div>` : ''}
                </div>`
             : '';
 
-        const excerpt = post.content ? this.stripMarkdown(post.content).substring(0, 150) + '...' : '';
+        // ✅ CORRECTION : Extraire le texte proprement du HTML
+        const excerpt = post.content ? this.stripHtml(post.content).substring(0, 150) + '...' : '';
 
         return `
             <article class="post-card" onclick="window.location.href='post.html?id=${post.id}'" style="cursor: pointer; background: var(--card-background); border-radius: 16px; padding: 24px; transition: all 0.3s ease; border: 2px solid var(--glass-border);">
@@ -279,35 +246,23 @@ class CommunityHub {
     }
 
     renderCommunityStats(stats) {
-        // Total Posts
         const totalPostsEl = document.getElementById('totalPosts');
-        if (totalPostsEl) {
-            totalPostsEl.textContent = stats.totalPosts || 0;
-        }
+        if (totalPostsEl) totalPostsEl.textContent = stats.totalPosts || 0;
 
-        // Total Members
         const totalMembersEl = document.getElementById('totalMembers');
-        if (totalMembersEl) {
-            totalMembersEl.textContent = stats.totalMembers || 0;
-        }
+        if (totalMembersEl) totalMembersEl.textContent = stats.totalMembers || 0;
 
-        // Posts Today
         const postsTodayEl = document.getElementById('postsToday');
-        if (postsTodayEl) {
-            postsTodayEl.textContent = stats.activePosts || 0;
-        }
+        if (postsTodayEl) postsTodayEl.textContent = stats.activePosts || 0;
     }
 
     async loadSidebarData() {
         try {
-            // Featured Posts
             const featuredPosts = await window.communityService.getFeaturedPosts(5);
             this.renderFeaturedPosts(featuredPosts);
 
-            // ✅ AJOUT : Charger le Leaderboard
             await this.loadLeaderboard();
 
-            // Trending Tags
             const popularTags = await window.communityService.getPopularTags(10);
             this.renderTrendingTags(popularTags);
 
@@ -321,14 +276,12 @@ class CommunityHub {
             const container = document.getElementById('leaderboardList');
             if (!container) return;
 
-            // Loading state
             container.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
                     <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #3B82F6;"></i>
                 </div>
             `;
 
-            // ✅ Récupérer les top 5 utilisateurs triés par points
             const topUsers = await window.communityService.getTopContributors(5);
 
             if (!topUsers || topUsers.length === 0) {
@@ -436,7 +389,6 @@ class CommunityHub {
     }
 
     setupEventListeners() {
-        // Channel filters
         document.addEventListener('click', (e) => {
             const channelBtn = e.target.closest('[data-channel]');
             if (channelBtn) {
@@ -445,7 +397,6 @@ class CommunityHub {
             }
         });
 
-        // Filter buttons (trending, latest, top)
         document.addEventListener('click', (e) => {
             const filterBtn = e.target.closest('[data-filter]');
             if (filterBtn) {
@@ -472,7 +423,6 @@ class CommunityHub {
     filterBy(filter) {
         this.currentFilter = filter;
         
-        // Mettre à jour l'UI des boutons
         document.querySelectorAll('[data-filter]').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.filter === filter);
         });
@@ -480,11 +430,38 @@ class CommunityHub {
         this.loadPosts();
     }
 
+    // ✅ NOUVELLE FONCTION : Extrait le texte brut du HTML
+    stripHtml(html) {
+        if (!html) return '';
+        
+        // Créer un élément temporaire pour parser le HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        
+        // Récupérer le texte brut sans les balises
+        let text = temp.textContent || temp.innerText || '';
+        
+        // Nettoyer les espaces multiples et retours à la ligne
+        text = text.replace(/\s+/g, ' ').trim();
+        
+        return text;
+    }
+
+    // ✅ AMÉLIORATION : stripMarkdown pour gérer aussi le HTML
     stripMarkdown(text) {
+        if (!text) return '';
+        
+        // Si c'est du HTML, utiliser stripHtml
+        if (text.includes('<') && text.includes('>')) {
+            return this.stripHtml(text);
+        }
+        
+        // Sinon, traiter comme du Markdown
         return text
             .replace(/[#*_~`]/g, '')
             .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-            .replace(/\n/g, ' ');
+            .replace(/\n/g, ' ')
+            .trim();
     }
 
     formatDate(timestamp) {
@@ -509,13 +486,14 @@ class CommunityHub {
     }
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
     truncate(text, length) {
-        if (text.length <= length) return text;
+        if (!text || text.length <= length) return text;
         return text.substring(0, length) + '...';
     }
 
