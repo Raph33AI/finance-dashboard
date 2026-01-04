@@ -279,3 +279,39 @@ body.dark-mode .chat-input {
         max-width: 100% !important;
     }
 }
+
+/* ============================================
+   SAVED POSTS - SÉPARATEUR DISCRET
+   ============================================ */
+
+.saved-post-item {
+    position: relative;
+    margin-bottom: 20px; /* Espace entre les posts */
+}
+
+.saved-post-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(203, 213, 225, 0.4) 20%, 
+        rgba(203, 213, 225, 0.4) 80%, 
+        transparent 100%
+    );
+}
+
+/* Dark mode */
+body.dark-mode .saved-post-item:not(:last-child)::after {
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(100, 116, 139, 0.3) 20%, 
+        rgba(100, 116, 139, 0.3) 80%, 
+        transparent 100%
+    );
+}

@@ -450,7 +450,7 @@ async function loadFollowersList() {
 }
 
 // ============================================
-// ✅ GESTION DES POSTS SAUVEGARDÉS (VERSION DEBUG)
+// ✅ GESTION DES POSTS SAUVEGARDÉS (VERSION FINALE)
 // ============================================
 
 async function loadSavedPosts() {
@@ -462,15 +462,10 @@ async function loadSavedPosts() {
         return;
     }
     
-    console.log('🔄 Chargement des posts sauvegardés...');
+    console.log('🔄 Loading saved posts...');
     console.log('👤 User ID:', currentUserData.uid);
     
     try {
-        // ✅ PATH DE DEBUG
-        const savedPostsPath = `users/${currentUserData.uid}/savedPosts`;
-        console.log('📂 Firestore path:', savedPostsPath);
-        
-        // ✅ TESTER D'ABORD SANS ORDERBY (pour éviter erreur d'index)
         firebase.firestore()
             .collection('users')
             .doc(currentUserData.uid)
@@ -479,18 +474,6 @@ async function loadSavedPosts() {
                 
                 console.log('📊 Snapshot received!');
                 console.log('📊 Number of saved posts:', savedPostsSnapshot.size);
-                console.log('📊 Is empty:', savedPostsSnapshot.empty);
-                
-                // Log des documents reçus
-                if (!savedPostsSnapshot.empty) {
-                    savedPostsSnapshot.docs.forEach((doc, index) => {
-                        console.log(`   📄 Document ${index + 1}:`, {
-                            id: doc.id,
-                            savedAt: doc.data().savedAt,
-                            postTitle: doc.data().postData?.title
-                        });
-                    });
-                }
                 
                 if (savedPostsCountEl) {
                     savedPostsCountEl.textContent = savedPostsSnapshot.size;
@@ -514,7 +497,7 @@ async function loadSavedPosts() {
                 
                 console.log('🔄 Processing saved posts...');
                 
-                // ✅ RÉCUPÉRER ET TRIER MANUELLEMENT (évite problème d'index)
+                // Récupérer et trier manuellement
                 const savedPosts = savedPostsSnapshot.docs
                     .map(doc => {
                         const data = doc.data();
@@ -525,7 +508,6 @@ async function loadSavedPosts() {
                         };
                     })
                     .sort((a, b) => {
-                        // Tri manuel par savedAt (desc)
                         if (!a.savedAt) return 1;
                         if (!b.savedAt) return -1;
                         return b.savedAt.toMillis() - a.savedAt.toMillis();
@@ -535,13 +517,14 @@ async function loadSavedPosts() {
                 
                 // Afficher la liste
                 const savedPostsHTML = savedPosts.map((post, index) => {
-                    console.log(`   🎨 Rendering post ${index + 1}:`, post.title);
-                    
                     const channelBadge = post.channelIcon ? `${post.channelIcon} ${post.channelName}` : post.channelName || 'General';
-                    const excerpt = post.excerpt || 'No preview available';
+                    
+                    // ✅ NETTOYER LE HTML DE L'EXCERPT
+                    const cleanExcerpt = cleanHtmlContent(post.excerpt || post.content || 'No preview available');
+                    
                     const coverImage = post.coverImage || 'https://via.placeholder.com/400x200?text=No+Image';
                     
-                    // ✅ GESTION SÉCURISÉE DU TIMESTAMP
+                    // Gestion sécurisée du timestamp
                     let savedDate = 'Recently';
                     try {
                         if (post.savedAt && post.savedAt.toDate) {
@@ -572,7 +555,7 @@ async function loadSavedPosts() {
                                     ${escapeHtml(post.title)}
                                 </h4>
                                 <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                    ${escapeHtml(excerpt)}
+                                    ${cleanExcerpt}
                                 </p>
                                 <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
                                     <span><i class="fas fa-eye"></i> ${post.views || 0} views</span>
@@ -594,16 +577,14 @@ async function loadSavedPosts() {
                 
                 savedPostsList.innerHTML = savedPostsHTML;
                 
-                console.log(`✅ ${savedPosts.length} posts sauvegardés affichés (temps réel)`);
+                console.log(`✅ ${savedPosts.length} saved posts displayed (real-time)`);
                 
             }, (error) => {
                 console.error('❌ ===== FIRESTORE LISTENER ERROR =====');
                 console.error('Error code:', error.code);
                 console.error('Error message:', error.message);
-                console.error('Error stack:', error.stack);
                 console.error('=======================================');
                 
-                // ✅ AFFICHER L'ERREUR À L'UTILISATEUR
                 savedPostsList.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #EF4444;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 12px;"></i>
@@ -621,8 +602,6 @@ async function loadSavedPosts() {
     } catch (error) {
         console.error('❌ ===== FATAL ERROR IN loadSavedPosts() =====');
         console.error('Error:', error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
         console.error('==============================================');
         
         savedPostsList.innerHTML = `
@@ -633,6 +612,30 @@ async function loadSavedPosts() {
             </div>
         `;
     }
+}
+
+/**
+ * ✅ NOUVELLE FONCTION : Nettoyer le contenu HTML pour affichage texte
+ */
+function cleanHtmlContent(htmlString) {
+    if (!htmlString) return 'No preview available';
+    
+    // Créer un élément temporaire pour parser le HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    
+    // Extraire le texte uniquement (sans balises HTML)
+    let cleanText = tempDiv.textContent || tempDiv.innerText || '';
+    
+    // Nettoyer les espaces multiples et retours à la ligne
+    cleanText = cleanText.replace(/\s+/g, ' ').trim();
+    
+    // Limiter à 200 caractères
+    if (cleanText.length > 200) {
+        cleanText = cleanText.substring(0, 200) + '...';
+    }
+    
+    return cleanText || 'No preview available';
 }
 
 async function removeSavedPost(postId) {
