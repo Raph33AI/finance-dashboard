@@ -837,11 +837,19 @@ Object.assign(TrendPrediction, {
             activeBtn.classList.add('active');
             activeBtn.setAttribute('aria-pressed', 'true');
         }
+        
+        // ✅ METTRE À JOUR LE BADGE
+        this.updateAnalysisParameters();
+        
         if (this.currentSymbol && this.stockData) this.trainAllModels();
     },
-    
+
     changeTrainingPeriod(period) {
         this.trainingPeriod = period;
+        
+        // ✅ METTRE À JOUR LE BADGE
+        this.updateAnalysisParameters();
+        
         if (this.currentSymbol) this.loadSymbol(this.currentSymbol);
     },
     
@@ -1521,7 +1529,33 @@ Object.assign(TrendPrediction, {
         document.getElementById('priceChange').textContent = 'AlphaVault Score will be displayed below';
         document.getElementById('priceChange').className = 'change neutral';
         
+        // ✅ METTRE À JOUR LES PARAMÈTRES D'ANALYSE
+        this.updateAnalysisParameters();
+        
         document.getElementById('stockHeader').classList.remove('hidden');
+    },
+
+    // ✅ NOUVELLE MÉTHODE : Mettre à jour les badges de paramètres
+    updateAnalysisParameters() {
+        // Horizon de prévision
+        const horizonEl = document.getElementById('horizonValue');
+        if (horizonEl) {
+            const days = this.predictionHorizon;
+            horizonEl.textContent = `${days} day${days > 1 ? 's' : ''}`;
+        }
+        
+        // Période d'entraînement
+        const trainingEl = document.getElementById('trainingValue');
+        if (trainingEl) {
+            trainingEl.textContent = this.trainingPeriod;
+        }
+        
+        // Nombre de modèles actifs
+        const modelsEl = document.getElementById('modelsValue');
+        if (modelsEl) {
+            const activeModels = Object.values(this.models).filter(m => m !== null).length;
+            modelsEl.textContent = `${activeModels} Active`;
+        }
     },
     
     updateModelCard(modelName, modelResult) {

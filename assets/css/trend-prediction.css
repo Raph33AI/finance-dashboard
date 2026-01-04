@@ -2332,3 +2332,207 @@ body.dark-mode .stock-name {
         font-size: 0.85rem;
     }
 }
+
+/* ═══════════════════════════════════════════════════════
+   📊 ANALYSIS PARAMETERS BADGES
+   ═══════════════════════════════════════════════════════ */
+
+.analysis-parameters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ✅ Badge Individuel */
+.parameter-badge {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 14px 20px;
+    flex: 1;
+    min-width: 200px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.parameter-badge:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12));
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ✅ Icône du Badge */
+.parameter-badge > i {
+    font-size: 1.8rem;
+    color: white;
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.parameter-badge:hover > i {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+/* ✅ Couleurs spécifiques par badge */
+#horizonBadge > i {
+    color: #60a5fa; /* Bleu clair */
+}
+
+#trainingBadge > i {
+    color: #34d399; /* Vert */
+}
+
+#modelsBadge > i {
+    color: #a78bfa; /* Violet */
+}
+
+/* ✅ Informations du Badge */
+.parameter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.parameter-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.parameter-value {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    line-height: 1.2;
+}
+
+/* ✅ Animation d'apparition */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysis-parameters {
+    animation: fadeInUp 0.6s ease-out 0.3s backwards;
+}
+
+.parameter-badge:nth-child(1) {
+    animation: fadeInUp 0.5s ease-out 0.4s backwards;
+}
+
+.parameter-badge:nth-child(2) {
+    animation: fadeInUp 0.5s ease-out 0.5s backwards;
+}
+
+.parameter-badge:nth-child(3) {
+    animation: fadeInUp 0.5s ease-out 0.6s backwards;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🌙 DARK MODE
+   ═══════════════════════════════════════════════════════ */
+
+body.dark-mode .analysis-parameters {
+    border-top-color: rgba(71, 85, 105, 0.3);
+}
+
+body.dark-mode .parameter-badge {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.5));
+    border-color: rgba(71, 85, 105, 0.4);
+}
+
+body.dark-mode .parameter-badge:hover {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.7));
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+body.dark-mode .parameter-label {
+    color: rgba(241, 245, 249, 0.6);
+}
+
+body.dark-mode .parameter-value {
+    color: rgba(241, 245, 249, 0.95);
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 992px) {
+    .analysis-parameters {
+        gap: 12px;
+    }
+    
+    .parameter-badge {
+        min-width: 180px;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    
+    .parameter-badge > i {
+        font-size: 1.5rem;
+    }
+    
+    .parameter-label {
+        font-size: 0.7rem;
+    }
+    
+    .parameter-value {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .analysis-parameters {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+    
+    .parameter-badge {
+        min-width: unset;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .parameter-badge {
+        padding: 10px 14px;
+        gap: 10px;
+    }
+    
+    .parameter-badge > i {
+        font-size: 1.3rem;
+    }
+    
+    .parameter-label {
+        font-size: 0.65rem;
+    }
+    
+    .parameter-value {
+        font-size: 0.9rem;
+    }
+}
