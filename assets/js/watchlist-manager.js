@@ -37,7 +37,7 @@ const WatchlistManager = {
         }
     },
     
-    // ✅ AFFICHER LA WATCHLIST (SANS PRIX)
+    // ✅ AFFICHER LA WATCHLIST (AVEC LOGOS)
     renderWatchlist(watchlist) {
         const container = document.getElementById('watchlistContainer');
         if (!container) return;
@@ -47,22 +47,46 @@ const WatchlistManager = {
             return;
         }
         
-        // ✅ MODIFICATION : Supprimer l'affichage du prix
-        container.innerHTML = watchlist.map(symbol => `
-            <div class='watchlist-card' data-symbol='${symbol}' onclick='AdvancedAnalysis.loadSymbol("${symbol}")'>
-                <div class='watchlist-card-header'>
-                    <div class='watchlist-symbol'>${symbol}</div>
-                    <button class='watchlist-remove' onclick='event.stopPropagation(); WatchlistManager.removeStock("${symbol}")'>
+        // ✅ GÉNÉRATION DES CARTES AVEC LOGOS
+        container.innerHTML = watchlist.map(symbol => {
+            // Récupérer les URLs de logos et initiales via CompanyLogos
+            const logoData = window.CompanyLogos ? 
+                window.CompanyLogos.getLogoUrls(symbol, symbol) : 
+                { primary: '', fallbacks: [], initials: symbol.substring(0, 2).toUpperCase() };
+            
+            return `
+                <div class='watchlist-card' data-symbol='${symbol}'>
+                    <!-- ✅ LOGO CONTAINER -->
+                    <div class='watchlist-logo-container' 
+                        data-ticker='${symbol}' 
+                        data-fallbacks='${JSON.stringify(logoData.fallbacks)}'>
+                        ${logoData.primary ? `
+                            <img src='${logoData.primary}' 
+                                alt='${symbol}' 
+                                class='watchlist-logo-img'
+                                onerror='window.CompanyLogos.handleLogoError(this, null, "${logoData.initials}")'>
+                        ` : `
+                            <div class='watchlist-logo-initials'>${logoData.initials}</div>
+                        `}
+                    </div>
+                    
+                    <!-- ✅ CONTENU CLIQUABLE -->
+                    <div class='watchlist-content' onclick='AdvancedAnalysis.loadSymbol("${symbol}")'>
+                        <div class='watchlist-symbol'>${symbol}</div>
+                        <div class='watchlist-type'>Stock</div>
+                    </div>
+                    
+                    <!-- ✅ BOUTON SUPPRESSION -->
+                    <button class='watchlist-remove' 
+                            onclick='event.stopPropagation(); WatchlistManager.removeStock("${symbol}")' 
+                            title='Remove from watchlist'>
                         <i class='fas fa-trash'></i>
                     </button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         
-        // ❌ SUPPRIMER : Plus besoin de charger les prix
-        // this.loadPrices(watchlist);
-        
-        console.log('✅ Watchlist rendered (symbols only, no prices)');
+        console.log(`✅ Watchlist rendered with ${watchlist.length} items (with logos)`);
     },
     
     // ❌ FONCTION loadPrices() SUPPRIMÉE (plus nécessaire)
