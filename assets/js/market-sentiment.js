@@ -184,37 +184,105 @@ class MarketSentimentDashboard {
             this.charts.gauge.destroy();
         }
         
-        const percentage = ((score + 100) / 200) * 100;
+        // ✅ Utiliser les vraies données de sentiment
+        const { positiveCount, neutralCount, negativeCount } = this.analyzedData;
+        const total = positiveCount + neutralCount + negativeCount || 1;
         
-        const getColor = (score) => {
-            if (score > 20) return ['#10b981', '#059669'];
-            if (score < -20) return ['#ef4444', '#dc2626'];
-            return ['#6b7280', '#4b5563'];
+        // Calculer les pourcentages
+        const positivePercent = (positiveCount / total) * 100;
+        const neutralPercent = (neutralCount / total) * 100;
+        const negativePercent = (negativeCount / total) * 100;
+        
+        // ✨ Gradients premium pour chaque segment
+        const createSegmentGradient = (ctx, color1, color2) => {
+            const gradient = ctx.createLinearGradient(0, 0, 400, 400);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+            return gradient;
         };
-        
-        const colors = getColor(score);
         
         this.charts.gauge = new Chart(ctx, {
             type: 'doughnut',
             data: {
+                labels: ['Bullish', 'Neutral', 'Bearish'],
                 datasets: [{
-                    data: [percentage, 100 - percentage],
+                    data: [positivePercent, neutralPercent, negativePercent],
                     backgroundColor: [
-                        this.createGradient(ctx, colors),
-                        'rgba(200, 200, 200, 0.15)'
+                        createSegmentGradient(ctx, '#10b981', '#059669'), // Vert
+                        createSegmentGradient(ctx, '#6b7280', '#4b5563'), // Gris
+                        createSegmentGradient(ctx, '#ef4444', '#dc2626')  // Rouge
                     ],
-                    borderWidth: 0,
-                    circumference: 180,
-                    rotation: 270
+                    borderWidth: 4, // ✨ Bordure blanche entre segments
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    hoverBorderColor: '#ffffff',
+                    hoverBorderWidth: 6,
+                    borderRadius: 8, // ✨ Coins arrondis
+                    spacing: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                cutout: '80%',
+                cutout: '70%', // ✅ Cercle épais et moderne
+                rotation: -90, // ✅ Commence en haut
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: 'var(--text-primary)',
+                            font: {
+                                size: 13,
+                                weight: '700'
+                            },
+                            padding: 16,
+                            usePointStyle: true, // ✨ Petits cercles au lieu de carrés
+                            pointStyle: 'circle',
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const icons = ['📈', '➡', '📉'];
+                                    return {
+                                        text: `${icons[i]} ${label}: ${value.toFixed(1)}%`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 16,
+                        borderColor: 'rgba(102, 126, 234, 0.5)',
+                        borderWidth: 2,
+                        displayColors: true,
+                        titleFont: { size: 15, weight: 'bold' },
+                        bodyFont: { size: 14 },
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const count = [positiveCount, neutralCount, negativeCount][context.dataIndex];
+                                return `${label}: ${value.toFixed(1)}% (${count} articles)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1800, // ✨ Animation fluide
+                    easing: 'easeInOutQuart'
+                },
+                // ✨ Effet hover ultra-smooth
+                onHover: (event, activeElements) => {
+                    event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                 }
             }
         });

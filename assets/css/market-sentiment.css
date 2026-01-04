@@ -753,3 +753,67 @@ body.dark-mode .breakdown-item:hover {
     gap: 6px;
     margin-top: 12px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DOUGHNUT CHART - EFFET GLOW PREMIUM
+   ═══════════════════════════════════════════════════════════════ */
+
+.gauge-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.3)); /* ✨ Ombre portée */
+}
+
+#sentimentGauge {
+    transition: transform 0.3s ease;
+}
+
+#sentimentGauge:hover {
+    transform: scale(1.05); /* ✨ Zoom léger au survol */
+}
+
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none; /* ✅ Permet le clic sur le chart en dessous */
+}
+
+.gauge-value {
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 12px;
+    /* ✨ Effet glow sur le texte */
+    filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        filter: drop-shadow(0 4px 16px rgba(102, 126, 234, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 6px 24px rgba(102, 126, 234, 0.8));
+    }
+}
+
+.gauge-label {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* ✨ Mode sombre */
+body.dark-mode .gauge-wrapper {
+    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.5));
+}
