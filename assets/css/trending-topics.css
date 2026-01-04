@@ -295,19 +295,19 @@
 }
 
 .fear-value {
-    font-size: clamp(2.5rem, 8vw, 4rem); /* ✅ Réduit de 3.5rem à 4rem max */
+    font-size: clamp(2rem, 5vw, 2.5rem); /* ✅ FORTEMENT RÉDUIT : 3rem → 2.5rem sur PC */
     font-weight: 900;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 4px; /* ✅ RÉDUIT : 6px → 4px */
     filter: drop-shadow(0 4px 16px rgba(239, 68, 68, 0.5));
     animation: pulseGlow 3s ease-in-out infinite;
 }
 
 .fear-label {
-    font-size: clamp(1rem, 2.5vw, 1.1rem); /* ✅ Réduit */
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem); /* ✅ FORTEMENT RÉDUIT : 0.95rem → 0.85rem sur PC */
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1.2px;
+    letter-spacing: 0.8px; /* ✅ RÉDUIT : 1px → 0.8px */
     white-space: nowrap;
 }
 
