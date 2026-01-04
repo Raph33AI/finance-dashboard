@@ -7247,6 +7247,496 @@ class AdminAnalyticsPro {
             element.textContent = value;
         }
     }
+
+    // ========================================
+    // 🖼 PROFILE PICTURES MANAGEMENT - FIRESTORE
+    // ========================================
+
+    async loadProfilePictures() {
+        try {
+            console.log('📸 Loading profile pictures from Firestore...');
+            
+            const loadingIndicator = document.getElementById('profile-pictures-loading');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
+            
+            const picturesSnapshot = await this.db.collection('email_profile_pictures').get();
+            
+            if (picturesSnapshot.empty) {
+                console.warn('⚠ No profile pictures found, creating defaults...');
+                this.emailProfilePictures = this.getDefaultProfilePictures();
+                await this.saveAllProfilePicturesToFirestore();
+            } else {
+                this.emailProfilePictures = {};
+                
+                picturesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.emailProfilePictures[data.email] = {
+                        url: data.url || '',
+                        type: data.type || 'initials', // 'initials', 'upload', 'url'
+                        initials: data.initials || 'AV',
+                        bgColor: data.bgColor || '#667eea',
+                        updatedAt: data.updatedAt
+                    };
+                });
+                
+                console.log(`✅ ${picturesSnapshot.size} profile pictures loaded from Firestore`);
+            }
+            
+            this.displayProfilePicturesManager();
+            this.updateAllSignaturesWithPictures();
+            
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            
+        } catch (error) {
+            console.error('❌ Error loading profile pictures:', error);
+            this.emailProfilePictures = this.getDefaultProfilePictures();
+            this.displayProfilePicturesManager();
+        }
+    }
+
+    getDefaultProfilePictures() {
+        return {
+            'raphael.nardone@alphavault-ai.com': {
+                url: '', // Vide = utilise les initiales
+                type: 'initials',
+                initials: 'RN',
+                bgColor: 'linear-gradient(135deg, #667eea, #764ba2)',
+                name: 'Raphaël Nardone',
+                title: 'Founder & CEO'
+            },
+            'newsletter@alphavault-ai.com': {
+                url: '',
+                type: 'initials',
+                initials: 'AV',
+                bgColor: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                name: 'AlphaVault AI',
+                title: 'Newsletter Team'
+            },
+            'contact@alphavault-ai.com': {
+                url: '',
+                type: 'initials',
+                initials: 'AV',
+                bgColor: 'linear-gradient(135deg, #10b981, #059669)',
+                name: 'AlphaVault AI',
+                title: 'Contact Team'
+            },
+            'info@alphavault-ai.com': {
+                url: '',
+                type: 'initials',
+                initials: 'AV',
+                bgColor: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                name: 'AlphaVault AI',
+                title: 'Information Team'
+            },
+            'support@alphavault-ai.com': {
+                url: '',
+                type: 'initials',
+                initials: 'AV',
+                bgColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                name: 'AlphaVault AI',
+                title: 'Support Team'
+            },
+            'raphnardone@gmail.com': {
+                url: '',
+                type: 'initials',
+                initials: 'RN',
+                bgColor: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                name: 'Raphaël Nardone',
+                title: 'Personal'
+            }
+        };
+    }
+
+    async saveAllProfilePicturesToFirestore() {
+        try {
+            console.log('💾 Saving profile pictures to Firestore...');
+            
+            const batch = this.db.batch();
+            
+            Object.entries(this.emailProfilePictures).forEach(([email, data]) => {
+                const docRef = this.db.collection('email_profile_pictures').doc(email);
+                
+                batch.set(docRef, {
+                    email: email,
+                    url: data.url || '',
+                    type: data.type || 'initials',
+                    initials: data.initials || 'AV',
+                    bgColor: data.bgColor || '#667eea',
+                    name: data.name || '',
+                    title: data.title || '',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: ADMIN_EMAIL || 'admin'
+                });
+            });
+            
+            await batch.commit();
+            
+            console.log('✅ All profile pictures saved to Firestore');
+            
+        } catch (error) {
+            console.error('❌ Error saving profile pictures:', error);
+            throw error;
+        }
+    }
+
+    async saveProfilePictureToFirestore(email, pictureData) {
+        try {
+            console.log(`💾 Saving profile picture for: ${email}`);
+            
+            await this.db.collection('email_profile_pictures').doc(email).set({
+                email: email,
+                url: pictureData.url || '',
+                type: pictureData.type || 'initials',
+                initials: pictureData.initials || 'AV',
+                bgColor: pictureData.bgColor || '#667eea',
+                name: pictureData.name || '',
+                title: pictureData.title || '',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: ADMIN_EMAIL || 'admin'
+            });
+            
+            console.log('✅ Profile picture saved to Firestore');
+            
+        } catch (error) {
+            console.error('❌ Error saving profile picture:', error);
+            throw error;
+        }
+    }
+
+    displayProfilePicturesManager() {
+        const container = document.getElementById('profile-pictures-grid');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        const emailOrder = [
+            'raphael.nardone@alphavault-ai.com',
+            'newsletter@alphavault-ai.com',
+            'contact@alphavault-ai.com',
+            'info@alphavault-ai.com',
+            'support@alphavault-ai.com',
+            'raphnardone@gmail.com'
+        ];
+        
+        emailOrder.forEach(email => {
+            if (!this.emailProfilePictures[email]) return;
+            
+            const data = this.emailProfilePictures[email];
+            
+            const card = document.createElement('div');
+            card.className = 'profile-picture-card';
+            card.innerHTML = `
+                <div class="profile-picture-preview">
+                    ${this.generateProfilePictureHTML(email, 80)}
+                </div>
+                <div class="profile-picture-info">
+                    <div class="profile-name">${data.name || email.split('@')[0]}</div>
+                    <div class="profile-email">${email}</div>
+                    <div class="profile-title">${data.title || ''}</div>
+                </div>
+                <div class="profile-picture-actions">
+                    <button class="btn-action btn-sm" onclick="adminAnalytics.openProfilePictureModal('${email}')" title="Edit Picture">
+                        <i class="fas fa-camera"></i> Change Photo
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+        
+        console.log('✅ Profile pictures manager displayed');
+    }
+
+    generateProfilePictureHTML(email, size = 50) {
+        const data = this.emailProfilePictures?.[email];
+        
+        if (!data) {
+            // Fallback : initiales par défaut
+            return `
+                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
+                    AV
+                </div>
+            `;
+        }
+        
+        if (data.type === 'upload' && data.url) {
+            // Photo uploadée
+            return `
+                <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+            `;
+        } else if (data.type === 'url' && data.url) {
+            // URL externe
+            return `
+                <img src="${data.url}" alt="${email}" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: none; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px;">
+                    ${data.initials}
+                </div>
+            `;
+        } else {
+            // Initiales
+            return `
+                <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${data.bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    ${data.initials}
+                </div>
+            `;
+        }
+    }
+
+    openProfilePictureModal(email) {
+        this.currentEditingEmail = email;
+        const data = this.emailProfilePictures[email];
+        
+        const modal = document.getElementById('profile-picture-modal');
+        if (!modal) {
+            console.error('❌ Profile picture modal not found');
+            return;
+        }
+        
+        document.getElementById('profile-picture-email').textContent = email;
+        document.getElementById('profile-picture-name').value = data.name || '';
+        document.getElementById('profile-picture-title').value = data.title || '';
+        document.getElementById('profile-picture-initials').value = data.initials || '';
+        document.getElementById('profile-picture-bg-color').value = data.bgColor || '#667eea';
+        document.getElementById('profile-picture-url').value = (data.type === 'url') ? data.url : '';
+        
+        // Radio buttons
+        if (data.type === 'upload' && data.url) {
+            document.getElementById('picture-type-upload').checked = true;
+        } else if (data.type === 'url' && data.url) {
+            document.getElementById('picture-type-url').checked = true;
+        } else {
+            document.getElementById('picture-type-initials').checked = true;
+        }
+        
+        this.updateProfilePicturePreview();
+        
+        modal.style.display = 'flex';
+        
+        console.log(`✅ Profile picture modal opened for: ${email}`);
+    }
+
+    closeProfilePictureModal() {
+        const modal = document.getElementById('profile-picture-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentEditingEmail = null;
+    }
+
+    handleProfilePictureUpload(event) {
+        const file = event.target.files[0];
+        
+        if (!file) return;
+        
+        // Vérifier le type
+        if (!file.type.startsWith('image/')) {
+            alert('⚠ Please upload an image file (JPG, PNG, GIF)');
+            return;
+        }
+        
+        // Vérifier la taille (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('⚠ Image is too large. Maximum size: 2MB');
+            return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const base64Data = e.target.result;
+            
+            // Stocker temporairement
+            this.currentUploadedImage = base64Data;
+            
+            // Sélectionner le radio "upload"
+            document.getElementById('picture-type-upload').checked = true;
+            
+            // Mettre à jour la prévisualisation
+            this.updateProfilePicturePreview();
+            
+            console.log('✅ Image uploaded successfully');
+        };
+        
+        reader.readAsDataURL(file);
+    }
+
+    updateProfilePicturePreview() {
+        const previewContainer = document.getElementById('profile-picture-preview-container');
+        if (!previewContainer) return;
+        
+        const selectedType = document.querySelector('input[name="picture-type"]:checked').value;
+        
+        const initials = document.getElementById('profile-picture-initials').value || 'AV';
+        const bgColor = document.getElementById('profile-picture-bg-color').value || '#667eea';
+        const urlValue = document.getElementById('profile-picture-url').value;
+        
+        let html = '';
+        
+        if (selectedType === 'initials') {
+            html = `
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: ${bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 40px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                    ${initials}
+                </div>
+            `;
+        } else if (selectedType === 'upload') {
+            if (this.currentUploadedImage) {
+                html = `
+                    <img src="${this.currentUploadedImage}" alt="Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" />
+                `;
+            } else if (this.emailProfilePictures[this.currentEditingEmail]?.url && this.emailProfilePictures[this.currentEditingEmail]?.type === 'upload') {
+                html = `
+                    <img src="${this.emailProfilePictures[this.currentEditingEmail].url}" alt="Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" />
+                `;
+            } else {
+                html = `
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 14px; text-align: center; padding: 10px;">
+                        No image<br>uploaded
+                    </div>
+                `;
+            }
+        } else if (selectedType === 'url') {
+            if (urlValue) {
+                html = `
+                    <img src="${urlValue}" alt="Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: #ef4444; display: none; align-items: center; justify-content: center; color: white; font-size: 14px; text-align: center; padding: 10px;">
+                        Invalid<br>URL
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 14px; text-align: center; padding: 10px;">
+                        Enter URL<br>below
+                    </div>
+                `;
+            }
+        }
+        
+        previewContainer.innerHTML = html;
+    }
+
+    async saveProfilePicture() {
+        if (!this.currentEditingEmail) {
+            alert('⚠ No email selected');
+            return;
+        }
+        
+        try {
+            const selectedType = document.querySelector('input[name="picture-type"]:checked').value;
+            
+            const pictureData = {
+                name: document.getElementById('profile-picture-name').value.trim(),
+                title: document.getElementById('profile-picture-title').value.trim(),
+                initials: document.getElementById('profile-picture-initials').value.trim() || 'AV',
+                bgColor: document.getElementById('profile-picture-bg-color').value,
+                type: selectedType,
+                url: ''
+            };
+            
+            if (selectedType === 'upload') {
+                if (this.currentUploadedImage) {
+                    pictureData.url = this.currentUploadedImage;
+                } else if (this.emailProfilePictures[this.currentEditingEmail]?.url && this.emailProfilePictures[this.currentEditingEmail]?.type === 'upload') {
+                    pictureData.url = this.emailProfilePictures[this.currentEditingEmail].url;
+                } else {
+                    alert('⚠ Please upload an image first');
+                    return;
+                }
+            } else if (selectedType === 'url') {
+                pictureData.url = document.getElementById('profile-picture-url').value.trim();
+                if (!pictureData.url) {
+                    alert('⚠ Please enter an image URL');
+                    return;
+                }
+            }
+            
+            // Sauvegarder localement
+            this.emailProfilePictures[this.currentEditingEmail] = pictureData;
+            
+            // Sauvegarder dans Firestore
+            await this.saveProfilePictureToFirestore(this.currentEditingEmail, pictureData);
+            
+            // Mettre à jour l'affichage
+            this.displayProfilePicturesManager();
+            this.updateAllSignaturesWithPictures();
+            
+            // Fermer le modal
+            this.closeProfilePictureModal();
+            
+            // Reset
+            this.currentUploadedImage = null;
+            
+            alert(`✅ Profile picture saved for ${this.currentEditingEmail}!`);
+            
+            console.log(`✅ Profile picture saved for: ${this.currentEditingEmail}`);
+            
+        } catch (error) {
+            console.error('❌ Error saving profile picture:', error);
+            alert('⚠ Error saving profile picture: ' + error.message);
+        }
+    }
+
+    updateAllSignaturesWithPictures() {
+        // Mettre à jour les signatures avec les photos de profil
+        Object.keys(this.emailSignatures).forEach(email => {
+            const signature = this.generateSignatureWithPicture(email);
+            if (signature) {
+                this.emailSignatures[email] = signature;
+            }
+        });
+        
+        this.displaySignaturePreviews();
+        
+        console.log('✅ All signatures updated with profile pictures');
+    }
+
+    generateSignatureWithPicture(email) {
+        const pictureData = this.emailProfilePictures?.[email];
+        
+        if (!pictureData) return null;
+        
+        const pictureHTML = this.generateProfilePictureHTML(email, 60);
+        
+        return `
+            <br><br>
+            <div style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; color: #1e293b; font-size: 14px; line-height: 1.8;">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                    ${pictureHTML}
+                    <div>
+                        <strong style="color: #667eea; font-size: 17px;">${pictureData.name || email.split('@')[0]}</strong><br>
+                        <span style="color: #64748b; font-size: 13px;">${pictureData.title || 'AlphaVault AI'}</span>
+                    </div>
+                </div>
+                <div style="color: #64748b; font-size: 13px;">
+                    📧 ${email}<br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                    💼 Real-time market analysis & AI-powered predictions
+                </div>
+            </div>
+        `;
+    }
+
+    deleteProfilePicture() {
+        if (!this.currentEditingEmail) return;
+        
+        if (!confirm(`Delete profile picture for ${this.currentEditingEmail}?`)) return;
+        
+        // Réinitialiser aux valeurs par défaut
+        const defaultData = this.getDefaultProfilePictures()[this.currentEditingEmail];
+        
+        if (defaultData) {
+            this.emailProfilePictures[this.currentEditingEmail] = defaultData;
+            this.saveProfilePictureToFirestore(this.currentEditingEmail, defaultData);
+            this.displayProfilePicturesManager();
+            this.updateAllSignaturesWithPictures();
+            this.closeProfilePictureModal();
+            
+            alert('✅ Profile picture reset to default!');
+        }
+    }
 }
 
 // ========================================

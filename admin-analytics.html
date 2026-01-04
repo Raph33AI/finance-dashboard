@@ -2299,6 +2299,30 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ========================================
+                            SECTION: PROFILE PICTURES MANAGEMENT
+                            ======================================== -->
+                        <div class="section" style="margin-top: 24px;">
+                            <div class="section-header-with-actions">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-user-circle"></i>
+                                    Profile Pictures Manager
+                                </h4>
+                                <button class="btn-primary" onclick="adminAnalytics.loadProfilePictures()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            
+                            <div id="profile-pictures-loading" style="display: none; text-align: center; padding: 20px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 8px;"></i>
+                                <p style="margin: 0;">Loading profile pictures from Firestore...</p>
+                            </div>
+                            
+                            <div id="profile-pictures-grid" class="profile-pictures-grid">
+                                <!-- Profile picture cards loaded dynamically -->
+                            </div>
+                        </div>
                         
                         <!-- Gmail Inbox Table -->
                         <div class="table-wrapper">
@@ -2610,6 +2634,175 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MODAL: PROFILE PICTURE EDITOR -->
+                <div id="profile-picture-modal" class="gmail-modal">
+                    <div class="gmail-modal-content">
+                        <div class="gmail-modal-header">
+                            <h3><i class="fas fa-user-circle"></i> Edit Profile Picture</h3>
+                            <button class="btn-close-modal" onclick="adminAnalytics.closeProfilePictureModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="gmail-modal-body">
+                            <div class="profile-picture-editor">
+                                <!-- Email affiché -->
+                                <div class="form-group">
+                                    <label style="font-weight: 600; color: #1e293b; font-size: 16px;">
+                                        <i class="fas fa-envelope"></i> Email Address:
+                                    </label>
+                                    <div id="profile-picture-email" style="font-size: 15px; color: #667eea; font-weight: 600; margin-top: 4px;">
+                                        <!-- Dynamically filled -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Informations du profil -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Name:</label>
+                                        <input type="text" id="profile-picture-name" class="form-input" placeholder="e.g., Raphaël Nardone">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Title:</label>
+                                        <input type="text" id="profile-picture-title" class="form-input" placeholder="e.g., Founder & CEO">
+                                    </div>
+                                </div>
+                                
+                                <!-- Type de photo -->
+                                <div class="form-group">
+                                    <label style="font-weight: 600; margin-bottom: 12px; display: block;">
+                                        <i class="fas fa-camera"></i> Picture Type:
+                                    </label>
+                                    
+                                    <div class="picture-type-options">
+                                        <label class="picture-type-option">
+                                            <input type="radio" name="picture-type" value="initials" id="picture-type-initials" checked onchange="adminAnalytics.updateProfilePicturePreview()">
+                                            <div class="option-content">
+                                                <i class="fas fa-font"></i>
+                                                <span>Initials</span>
+                                            </div>
+                                        </label>
+                                        
+                                        <label class="picture-type-option">
+                                            <input type="radio" name="picture-type" value="upload" id="picture-type-upload" onchange="adminAnalytics.updateProfilePicturePreview()">
+                                            <div class="option-content">
+                                                <i class="fas fa-upload"></i>
+                                                <span>Upload Photo</span>
+                                            </div>
+                                        </label>
+                                        
+                                        <label class="picture-type-option">
+                                            <input type="radio" name="picture-type" value="url" id="picture-type-url" onchange="adminAnalytics.updateProfilePicturePreview()">
+                                            <div class="option-content">
+                                                <i class="fas fa-link"></i>
+                                                <span>External URL</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview -->
+                                <div class="form-group">
+                                    <label style="font-weight: 600; margin-bottom: 12px; display: block;">
+                                        <i class="fas fa-eye"></i> Preview:
+                                    </label>
+                                    <div id="profile-picture-preview-container" style="display: flex; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 12px;">
+                                        <!-- Preview loaded dynamically -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Options selon le type -->
+                                <div id="initials-options" class="conditional-options">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Initials (2-3 letters):</label>
+                                            <input type="text" id="profile-picture-initials" class="form-input" placeholder="e.g., RN" maxlength="3" oninput="adminAnalytics.updateProfilePicturePreview()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Background Color:</label>
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <input type="color" id="profile-picture-bg-color" value="#667eea" style="width: 60px; height: 40px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;" onchange="adminAnalytics.updateProfilePicturePreview()">
+                                                <input type="text" class="form-input" style="flex: 1;" placeholder="#667eea" id="profile-picture-bg-color-text" oninput="document.getElementById('profile-picture-bg-color').value = this.value; adminAnalytics.updateProfilePicturePreview()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="upload-options" class="conditional-options" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Upload Image (JPG, PNG, GIF - Max 2MB):</label>
+                                        <input 
+                                            type="file" 
+                                            id="profile-picture-upload-input" 
+                                            accept="image/*" 
+                                            style="display: none;" 
+                                            onchange="adminAnalytics.handleProfilePictureUpload(event)"
+                                        >
+                                        <button class="btn-secondary" onclick="document.getElementById('profile-picture-upload-input').click()">
+                                            <i class="fas fa-upload"></i> Choose Image
+                                        </button>
+                                        <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px;">
+                                            💡 Tip: Use a square image (500x500px) for best results
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div id="url-options" class="conditional-options" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Image URL:</label>
+                                        <input type="url" id="profile-picture-url" class="form-input" placeholder="https://example.com/photo.jpg" oninput="adminAnalytics.updateProfilePicturePreview()">
+                                        <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px;">
+                                            💡 You can use: Imgur, Cloudinary, Google Drive public link, etc.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gmail-modal-footer">
+                            <button class="btn-secondary" onclick="adminAnalytics.deleteProfilePicture()">
+                                <i class="fas fa-trash"></i> Reset to Default
+                            </button>
+                            <button class="btn-primary" onclick="adminAnalytics.saveProfilePicture()">
+                                <i class="fas fa-save"></i> Save Picture
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                // Gestion de l'affichage conditionnel des options
+                document.addEventListener('DOMContentLoaded', function() {
+                    const pictureTypeRadios = document.querySelectorAll('input[name="picture-type"]');
+                    
+                    pictureTypeRadios.forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            // Masquer toutes les options
+                            document.querySelectorAll('.conditional-options').forEach(opt => {
+                                opt.style.display = 'none';
+                            });
+                            
+                            // Afficher l'option correspondante
+                            if (this.value === 'initials') {
+                                document.getElementById('initials-options').style.display = 'block';
+                            } else if (this.value === 'upload') {
+                                document.getElementById('upload-options').style.display = 'block';
+                            } else if (this.value === 'url') {
+                                document.getElementById('url-options').style.display = 'block';
+                            }
+                        });
+                    });
+                    
+                    // Initialiser avec "initials" sélectionné
+                    document.getElementById('initials-options').style.display = 'block';
+                    
+                    // Sync color input with text input
+                    document.getElementById('profile-picture-bg-color').addEventListener('change', function() {
+                        document.getElementById('profile-picture-bg-color-text').value = this.value;
+                    });
+                });
+                </script>
 
                 <!-- ========================================
                      SECTION: ML PREDICTIONS
