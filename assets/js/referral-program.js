@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   REFERRAL PROGRAM - CLIENT SIDE
-   AlphaVault AI v1.0
+   REFERRAL PROGRAM - CLIENT SIDE v2.0
+   AlphaVault AI
+   ✅ Authentification Firebase corrigée
    ═══════════════════════════════════════════════════════════════ */
 
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
@@ -38,21 +39,34 @@ async function loadReferralData() {
     try {
         console.log('📥 Loading referral data...');
         
+        // ✅ CORRECTION : Obtenir le token Firebase
         const token = await currentUser.getIdToken();
         
+        console.log('🔑 Firebase token obtained');
+        
         const response = await fetch(`${WORKER_URL}/api/referral/stats`, {
+            method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
         
+        console.log('📥 Response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ API Error:', errorText);
             throw new Error('Failed to load referral data');
         }
         
         const data = await response.json();
         
         console.log('✅ Referral data loaded:', data);
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Unknown error');
+        }
         
         referralData = {
             code: data.referralCode,
@@ -63,10 +77,15 @@ async function loadReferralData() {
             rewardActive: data.rewardActive || false
         };
         
+        console.log('✅ Referral data processed:', referralData);
+        
         updateUI();
         
     } catch (error) {
         console.error('❌ Error loading referral data:', error);
+        
+        // Afficher une erreur à l'utilisateur
+        showError('Failed to load referral data. Please refresh the page.');
     }
 }
 
@@ -75,20 +94,32 @@ async function loadReferralData() {
 // ═══════════════════════════════════════════════════════════════
 
 function updateUI() {
+    console.log('🎨 Updating UI...');
+    
     // Update stats
-    document.getElementById('totalReferrals').textContent = referralData.count;
-    document.getElementById('completedReferrals').textContent = referralData.completed;
-    document.getElementById('pendingReferrals').textContent = referralData.pending;
+    const totalElement = document.getElementById('totalReferrals');
+    const completedElement = document.getElementById('completedReferrals');
+    const pendingElement = document.getElementById('pendingReferrals');
+    
+    if (totalElement) totalElement.textContent = referralData.count;
+    if (completedElement) completedElement.textContent = referralData.completed;
+    if (pendingElement) pendingElement.textContent = referralData.pending;
     
     // Update progress
     updateProgress(referralData.completed);
     
     // Update referral link
     const referralLink = `https://alphavault-ai.com/register.html?ref=${referralData.code}`;
-    document.getElementById('referralLinkInput').value = referralLink;
+    const inputElement = document.getElementById('referralLinkInput');
+    
+    if (inputElement) {
+        inputElement.value = referralLink;
+    }
     
     // Update referrals list
     displayReferralsList();
+    
+    console.log('✅ UI updated successfully');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -102,39 +133,61 @@ function updateProgress(completedCount) {
     // Reset all
     steps.forEach(id => {
         const el = document.getElementById(id);
-        el.classList.remove('completed', 'active');
+        if (el) {
+            el.classList.remove('completed', 'active');
+        }
     });
     
     labels.forEach(id => {
         const el = document.getElementById(id);
-        el.classList.remove('completed', 'active');
+        if (el) {
+            el.classList.remove('completed', 'active');
+        }
     });
     
     // Mark completed steps
     for (let i = 0; i <= completedCount && i < steps.length; i++) {
-        document.getElementById(steps[i]).classList.add('completed');
+        const stepEl = document.getElementById(steps[i]);
+        if (stepEl) {
+            stepEl.classList.add('completed');
+        }
         
         if (i > 0 && i <= 3) {
-            document.getElementById(`label${i}`).classList.add('completed');
+            const labelEl = document.getElementById(`label${i}`);
+            if (labelEl) {
+                labelEl.classList.add('completed');
+            }
         }
     }
     
     // Mark active step
     if (completedCount < 3) {
         const nextStep = steps[completedCount + 1];
-        document.getElementById(nextStep).classList.add('active');
+        const nextStepEl = document.getElementById(nextStep);
+        if (nextStepEl) {
+            nextStepEl.classList.add('active');
+        }
         
         if (completedCount < 3) {
-            document.getElementById(`label${completedCount + 1}`).classList.add('active');
+            const nextLabelEl = document.getElementById(`label${completedCount + 1}`);
+            if (nextLabelEl) {
+                nextLabelEl.classList.add('active');
+            }
         }
     } else {
         // Reward unlocked
-        document.getElementById('stepReward').classList.add('completed');
+        const rewardEl = document.getElementById('stepReward');
+        if (rewardEl) {
+            rewardEl.classList.add('completed');
+        }
     }
     
     // Update progress line
     const progressPercentage = (completedCount / 3) * 100;
-    document.getElementById('progressLineFill').style.width = `${progressPercentage}%`;
+    const progressLineEl = document.getElementById('progressLineFill');
+    if (progressLineEl) {
+        progressLineEl.style.width = `${progressPercentage}%`;
+    }
     
     // Check if reward should be claimed
     if (completedCount >= 3 && !referralData.rewardActive) {
@@ -149,6 +202,11 @@ function updateProgress(completedCount) {
 function displayReferralsList() {
     const container = document.getElementById('referralsList');
     
+    if (!container) {
+        console.warn('⚠ Referrals list container not found');
+        return;
+    }
+    
     if (referralData.referrals.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -160,85 +218,106 @@ function displayReferralsList() {
         return;
     }
     
-    container.innerHTML = referralData.referrals.map(ref => `
-        <div class="referral-item">
-            <div>
-                <div class="referral-email">${ref.email}</div>
-                <div class="referral-date">${new Date(ref.createdAt).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                })}</div>
+    container.innerHTML = referralData.referrals.map(ref => {
+        const date = new Date(ref.createdAt);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        return `
+            <div class="referral-item">
+                <div>
+                    <div class="referral-email">${ref.email}</div>
+                    <div class="referral-date">${formattedDate}</div>
+                </div>
+                <div class="referral-status ${ref.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                    ${ref.status === 'completed' ? '✓ Completed' : '⏳ Pending'}
+                </div>
             </div>
-            <div class="referral-status ${ref.status === 'completed' ? 'status-completed' : 'status-pending'}">
-                ${ref.status === 'completed' ? '✓ Completed' : '⏳ Pending'}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
 // COPY REFERRAL LINK
 // ═══════════════════════════════════════════════════════════════
 
-document.getElementById('copyBtn').addEventListener('click', async () => {
-    const input = document.getElementById('referralLinkInput');
-    const btn = document.getElementById('copyBtn');
-    const btnText = document.getElementById('copyBtnText');
-    
-    try {
-        await navigator.clipboard.writeText(input.value);
+const copyBtn = document.getElementById('copyBtn');
+if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+        const input = document.getElementById('referralLinkInput');
+        const btn = document.getElementById('copyBtn');
+        const btnText = document.getElementById('copyBtnText');
         
-        btn.classList.add('copied');
-        btnText.textContent = '✓ Copied!';
+        if (!input || !btn || !btnText) return;
         
-        setTimeout(() => {
-            btn.classList.remove('copied');
-            btnText.textContent = '📋 Copy';
-        }, 2000);
-        
-    } catch (error) {
-        console.error('❌ Copy failed:', error);
-        
-        // Fallback
-        input.select();
-        document.execCommand('copy');
-        
-        btn.classList.add('copied');
-        btnText.textContent = '✓ Copied!';
-        
-        setTimeout(() => {
-            btn.classList.remove('copied');
-            btnText.textContent = '📋 Copy';
-        }, 2000);
-    }
-});
+        try {
+            await navigator.clipboard.writeText(input.value);
+            
+            btn.classList.add('copied');
+            btnText.textContent = '✓ Copied!';
+            
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btnText.textContent = '📋 Copy';
+            }, 2000);
+            
+        } catch (error) {
+            console.error('❌ Copy failed:', error);
+            
+            // Fallback
+            input.select();
+            document.execCommand('copy');
+            
+            btn.classList.add('copied');
+            btnText.textContent = '✓ Copied!';
+            
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btnText.textContent = '📋 Copy';
+            }, 2000);
+        }
+    });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // SHARE BUTTONS
 // ═══════════════════════════════════════════════════════════════
 
-document.getElementById('shareEmail').addEventListener('click', () => {
-    const link = document.getElementById('referralLinkInput').value;
-    const subject = encodeURIComponent('Join me on AlphaVault AI!');
-    const body = encodeURIComponent(`Hi!\n\nI've been using AlphaVault AI for my financial analysis and I think you'd love it too!\n\nSign up using my referral link and get access to premium financial tools:\n\n${link}\n\nBest,\n${currentUser.displayName || 'Your friend'}`);
-    
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-});
+const shareEmailBtn = document.getElementById('shareEmail');
+if (shareEmailBtn) {
+    shareEmailBtn.addEventListener('click', () => {
+        const link = document.getElementById('referralLinkInput')?.value || '';
+        const userName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Your friend';
+        
+        const subject = encodeURIComponent('Join me on AlphaVault AI!');
+        const body = encodeURIComponent(`Hi!\n\nI've been using AlphaVault AI for my financial analysis and I think you'd love it too!\n\nSign up using my referral link and get access to premium financial tools:\n\n${link}\n\nBest,\n${userName}`);
+        
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    });
+}
 
-document.getElementById('shareWhatsApp').addEventListener('click', () => {
-    const link = document.getElementById('referralLinkInput').value;
-    const text = encodeURIComponent(`🚀 Join me on AlphaVault AI!\n\nI've been using it for financial analysis and it's amazing!\n\nSign up here: ${link}`);
-    
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-});
+const shareWhatsAppBtn = document.getElementById('shareWhatsApp');
+if (shareWhatsAppBtn) {
+    shareWhatsAppBtn.addEventListener('click', () => {
+        const link = document.getElementById('referralLinkInput')?.value || '';
+        const text = encodeURIComponent(`🚀 Join me on AlphaVault AI!\n\nI've been using it for financial analysis and it's amazing!\n\nSign up here: ${link}`);
+        
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+}
 
-document.getElementById('shareTwitter').addEventListener('click', () => {
-    const link = document.getElementById('referralLinkInput').value;
-    const text = encodeURIComponent(`🚀 Just discovered @AlphaVaultAI - the best platform for financial analysis!\n\nJoin me:`);
-    
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${link}`, '_blank');
-});
+const shareTwitterBtn = document.getElementById('shareTwitter');
+if (shareTwitterBtn) {
+    shareTwitterBtn.addEventListener('click', () => {
+        const link = document.getElementById('referralLinkInput')?.value || '';
+        const text = encodeURIComponent(`🚀 Just discovered @AlphaVaultAI - the best platform for financial analysis!\n\nJoin me:`);
+        
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${link}`, '_blank');
+    });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // REWARD NOTIFICATION
@@ -254,6 +333,8 @@ async function showRewardNotification() {
 
 async function claimReward() {
     try {
+        console.log('🎁 Claiming reward...');
+        
         const token = await currentUser.getIdToken();
         
         const response = await fetch(`${WORKER_URL}/api/referral/claim-reward`, {
@@ -265,7 +346,8 @@ async function claimReward() {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to claim reward');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to claim reward');
         }
         
         const data = await response.json();
@@ -278,8 +360,70 @@ async function claimReward() {
         
     } catch (error) {
         console.error('❌ Error claiming reward:', error);
-        alert('❌ Error activating reward. Please contact support.');
+        alert(`❌ Error activating reward: ${error.message}\n\nPlease contact support.`);
     }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERROR DISPLAY
+// ═══════════════════════════════════════════════════════════════
+
+function showError(message) {
+    // Créer un élément d'erreur
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        font-weight: 600;
+        z-index: 9999;
+        animation: slideInRight 0.5s ease;
+    `;
+    errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    // Retirer après 5 secondes
+    setTimeout(() => {
+        errorDiv.style.animation = 'slideOutRight 0.5s ease';
+        setTimeout(() => {
+            document.body.removeChild(errorDiv);
+        }, 500);
+    }, 5000);
+    
+    // Ajouter les animations CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 console.log('✅ Referral Program loaded');
