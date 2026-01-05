@@ -5,40 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Successful - AlphaVault AI</title>
     
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
-    <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -195,6 +181,43 @@
             font-size: 0.95rem;
             line-height: 1.6;
         }
+        
+        .referral-cta {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin-top: 30px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+        
+        .referral-cta h3 {
+            font-size: 1.2rem;
+            margin: 0 0 10px 0;
+        }
+        
+        .referral-cta p {
+            font-size: 0.95rem;
+            margin: 0 0 15px 0;
+            opacity: 0.95;
+        }
+        
+        .btn-referral {
+            display: inline-block;
+            background: white;
+            color: #10b981;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-referral:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 
@@ -236,22 +259,38 @@
             Go to Dashboard
         </a>
         
+        <!-- ✅ CTA REFERRAL PROGRAM -->
+        <div class="referral-cta">
+            <h3>🎁 Earn Platinum for Free!</h3>
+            <p>Invite 3 friends and get <strong>Platinum free for 3 months</strong></p>
+            <a href="referral-program.html" class="btn-referral">
+                <i class="fas fa-gift"></i> Start Referring
+            </a>
+        </div>
+        
         <div class="thank-you-note">
             <p><strong>Thank you for choosing AlphaVault AI!</strong></p>
             <p>A confirmation email has been sent to your inbox.</p>
         </div>
     </div>
     
+    <!-- Firebase Config -->
+    <script src="assets/js/firebase-config.js"></script>
+    
     <script>
+        const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+        
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
         const isFree = urlParams.get('free') === 'true';
+        const isTrial = urlParams.get('trial') === 'true';
+        const trialDays = urlParams.get('days') || '14';
         const noConfetti = urlParams.get('noconfetti') === 'true';
         
         // Afficher le nom du plan
         if (plan) {
-            const planName = plan === 'pro' ? 'AlphaVault Pro' : 'AlphaVault Platinum';
+            const planName = plan === 'pro' ? 'AlphaVault Pro' : plan === 'platinum' ? 'AlphaVault Platinum' : 'AlphaVault Basic';
             document.getElementById('planInfo').textContent = planName;
         }
         
@@ -259,12 +298,74 @@
         if (isFree) {
             document.querySelector('.success-message').textContent = 'Your free lifetime access has been activated!';
             document.getElementById('trialRow').style.display = 'none';
+        } else if (isTrial) {
+            document.querySelector('.success-message').textContent = `Your ${trialDays}-day free trial has started!`;
+            document.getElementById('trialRow').style.display = 'flex';
+            document.getElementById('trialRow').querySelector('.detail-value').textContent = `${trialDays} days`;
         } else {
             document.getElementById('trialRow').style.display = 'flex';
         }
         
-        // ✅ CONFETTIS SUPPRIMÉS (code retiré)
-        console.log('✅ Success page loaded without confetti');
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function completeReferralAfterPayment() {
+            try {
+                // Vérifier si l'utilisateur est connecté
+                const user = firebase.auth().currentUser;
+                
+                if (!user) {
+                    console.log('⚠ No user authenticated - skipping referral completion');
+                    return;
+                }
+                
+                console.log('🎁 Checking for referral completion...');
+                console.log('   User ID:', user.uid);
+                console.log('   Plan:', plan);
+                console.log('   Is Free:', isFree);
+                console.log('   Is Trial:', isTrial);
+                
+                // Ne compléter le parrainage que si c'est un paiement réel (pas trial/free)
+                if (!isFree && !isTrial && plan !== 'basic') {
+                    console.log('✅ Valid paid subscription - completing referral...');
+                    
+                    const token = await user.getIdToken();
+                    
+                    const response = await fetch(`${WORKER_URL}/api/referral/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        console.log('✅ Referral completed successfully');
+                    } else {
+                        const errorData = await response.json();
+                        console.log('ℹ Referral completion response:', errorData);
+                    }
+                } else {
+                    console.log('ℹ Free/Trial subscription - referral will be completed after payment');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error completing referral:', error);
+            }
+        }
+        
+        // Attendre que Firebase soit initialisé
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log('✅ User authenticated:', user.email);
+                completeReferralAfterPayment();
+            } else {
+                console.log('⚠ No user authenticated');
+            }
+        });
+        
+        console.log('✅ Success page loaded');
     </script>
 </body>
 </html>
