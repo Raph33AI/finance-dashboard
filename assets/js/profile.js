@@ -1338,27 +1338,46 @@ async function handleAvatarChange(e) {
     try {
         showToast('info', 'Upload in progress...', 'Uploading your photo to Cloudflare R2');
         
-        if (!window.r2ProfileUpload) {
-            throw new Error('R2 Upload module not loaded. Make sure r2-profile-upload.js is included.');
+        // ✅ CORRECTION : Appel DIRECT au Worker R2 (bypass r2-profile-upload.js)
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            throw new Error('User not authenticated');
         }
         
-        const uploadResult = await window.r2ProfileUpload.uploadProfilePicture(file, currentUserData.uid);
+        const token = await user.getIdToken();
         
-        console.log('📤 Upload result:', uploadResult); // ✅ DEBUG
+        // Créer FormData
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('userId', currentUserData.uid);
         
-        if (!uploadResult || !uploadResult.success) {
-            throw new Error('Upload failed');
+        // Appel direct au Worker
+        const response = await fetch('https://images-api.alphavault-ai.com/upload', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Upload failed: ${response.status}`);
         }
         
-        // ✅ CORRECTION : Gestion de différents noms de propriétés
-        const downloadURL = uploadResult.url || uploadResult.imageUrl || uploadResult.photoURL;
+        const uploadResult = await response.json();
         
-        if (!downloadURL) {
-            console.error('❌ Upload result structure:', uploadResult);
+        console.log('📤 Upload result from Worker:', uploadResult);
+        
+        // ✅ Récupérer l'URL directement de la réponse du Worker
+        const downloadURL = uploadResult.url;
+        
+        if (!downloadURL || typeof downloadURL !== 'string' || downloadURL.trim() === '') {
+            console.error('❌ Invalid Worker response:', uploadResult);
             throw new Error('No valid image URL returned from upload');
         }
         
-        console.log('✅ Download URL:', downloadURL); // ✅ DEBUG
+        console.log('✅ Download URL:', downloadURL);
         
         // Supprimer l'ancienne photo si elle existe sur R2
         if (currentUserData.photoURL && 
@@ -1367,17 +1386,12 @@ async function handleAvatarChange(e) {
             
             try {
                 const oldFileName = currentUserData.photoURL.split('/images/')[1];
-                if (oldFileName) {
+                if (oldFileName && window.r2ProfileUpload) {
                     await window.r2ProfileUpload.deleteProfilePicture(oldFileName, currentUserData.uid);
                 }
             } catch (deleteError) {
                 console.warn('⚠ Could not delete old photo:', deleteError);
             }
-        }
-        
-        // ✅ VÉRIFICATION FINALE avant update Firestore
-        if (!downloadURL || typeof downloadURL !== 'string' || downloadURL.trim() === '') {
-            throw new Error('Invalid download URL');
         }
         
         // Update Firestore
@@ -1387,7 +1401,6 @@ async function handleAvatarChange(e) {
         });
         
         // Update Firebase Auth
-        const user = firebase.auth().currentUser;
         if (user) {
             await user.updateProfile({
                 photoURL: downloadURL
@@ -1414,9 +1427,7 @@ async function handleAvatarChange(e) {
         
         let errorMessage = 'Failed to upload photo';
         
-        if (error.message.includes('not loaded')) {
-            errorMessage = 'Upload service not available. Please refresh the page.';
-        } else if (error.message.includes('not authenticated')) {
+        if (error.message.includes('not authenticated')) {
             errorMessage = 'You must be logged in to upload a photo.';
         } else if (error.message.includes('File too large')) {
             errorMessage = 'Image too large. Maximum 5MB.';
