@@ -278,7 +278,7 @@
     <script src="assets/js/firebase-config.js"></script>
     
     <script>
-        // const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+        // WORKER_URL est déjà défini dans firebase-config.js
         
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -332,7 +332,7 @@
                     
                     const token = await user.getIdToken();
                     
-                    const response = await fetch(`${WORKER_URL}/api/referral/complete`, {
+                    const response = await fetch(`${window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev'}/api/referral/complete`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
