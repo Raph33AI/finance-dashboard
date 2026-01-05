@@ -7446,7 +7446,7 @@ class AdminAnalyticsPro {
         const data = this.emailProfilePictures?.[email];
         
         if (!data) {
-            // Fallback : logo AlphaVault par défaut
+            console.warn(`⚠ No profile data for ${email} - using default logo`);
             return `
                 <img src="https://Raph33AI.github.io/apple-touch-icon.png" 
                     alt="AlphaVault AI" 
@@ -7455,8 +7455,9 @@ class AdminAnalyticsPro {
             `;
         }
         
-        // 🔥 URL EXTERNE (GitHub Pages - Meilleure compatibilité)
-        if (data.type === 'url' && data.url && data.url.startsWith('http')) {
+        // 🔥 PRIORITÉ : URL EXTERNE (SEULE MÉTHODE COMPATIBLE EMAIL)
+        if (data.url && data.url.startsWith('http')) {
+            console.log(`✅ Using external URL for ${email}`);
             return `
                 <img src="${data.url}" 
                     alt="${data.name || email}" 
@@ -7465,19 +7466,18 @@ class AdminAnalyticsPro {
             `;
         }
         
-        // 🔥 IMAGE BASE64 (fallback)
-        if (data.type === 'upload' && data.url && data.url.startsWith('data:image')) {
-            return `
-                <img src="${data.url}" 
-                    alt="${data.name || email}" 
-                    style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block;" 
-                />
-            `;
+        // ⚠ BASE64 DÉTECTÉ - NE FONCTIONNE PAS DANS LES EMAILS
+        if (data.url && data.url.startsWith('data:image')) {
+            console.error(`❌ BASE64 detected for ${email} - NOT compatible with emails!`);
+            console.warn(`💡 Please run the migration script to fix this.`);
+            // Fallback vers initiales pour les emails
         }
         
-        // 🔥 INITIALES (fallback final)
+        // 🔥 FALLBACK : INITIALES
         const initials = data.initials || 'AV';
         const bgColor = data.bgColor || '#667eea';
+        
+        console.log(`⚠ Using initials for ${email}: ${initials}`);
         
         return `
             <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${bgColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: ${size * 0.4}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
@@ -7687,12 +7687,19 @@ class AdminAnalyticsPro {
     }
 
     generateSignatureWithPicture(email) {
+        console.log(`✍ Generating signature for: ${email}`);
+        
         const pictureData = this.emailProfilePictures?.[email];
         
-        if (!pictureData) return null;
+        if (!pictureData) {
+            console.warn(`⚠ No picture data for ${email}`);
+            return null;
+        }
         
         // Générer le HTML de la photo (60px pour la signature)
         const pictureHTML = this.generateProfilePictureHTML(email, 60);
+        
+        console.log(`✅ Signature generated for ${email}`);
         
         return `
             <br><br>
