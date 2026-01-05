@@ -1351,7 +1351,7 @@ async function handleAvatarChange(e) {
         }
         
         // ✅ CORRECTION : Gestion de différents noms de propriétés
-        const downloadURL = uploadResult.imageUrl || uploadResult.url || uploadResult.photoURL;
+        const downloadURL = uploadResult.url || uploadResult.imageUrl || uploadResult.photoURL;
         
         if (!downloadURL) {
             console.error('❌ Upload result structure:', uploadResult);
