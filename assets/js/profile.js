@@ -37,13 +37,15 @@ class InfiniteScrollManager {
 
         const isMobile = window.innerWidth <= 768;
         
-        // ✅ STYLES INLINE ULTRA-FORCÉS
-        this.container.style.setProperty('max-height', isMobile ? '400px' : '600px', 'important');
+        // ✅ CORRECTION : Hauteurs optimisées pour forcer le scroll avec 4 items
+        const maxHeight = isMobile ? '350px' : '400px'; // ✅ Réduit de 600px → 400px
+        
+        this.container.style.setProperty('max-height', maxHeight, 'important');
         this.container.style.setProperty('overflow-y', 'scroll', 'important');
         this.container.style.setProperty('overflow-x', 'hidden', 'important');
         this.container.style.setProperty('position', 'relative', 'important');
         this.container.style.setProperty('padding-right', '8px', 'important');
-        this.container.style.setProperty('scrollbar-gutter', 'stable', 'important'); // ✅ AJOUT
+        this.container.style.setProperty('scrollbar-gutter', 'stable', 'important');
         
         // Vider complètement le container
         this.container.innerHTML = '';
@@ -75,7 +77,7 @@ class InfiniteScrollManager {
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId} (scrollbar forced with scrollbar-gutter)`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (max-height: ${maxHeight})`);
     }
 
     async loadMore() {
