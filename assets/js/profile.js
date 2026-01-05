@@ -35,17 +35,15 @@ class InfiniteScrollManager {
             return;
         }
 
-        // ✅ STYLES RESPONSIVES AVEC SCROLLBAR FORCÉE
         const isMobile = window.innerWidth <= 768;
         
-        // ✅ Appliquer les styles INLINE pour garantir leur application
-        this.container.style.cssText = `
-            max-height: ${isMobile ? '400px' : '600px'};
-            overflow-y: scroll !important;
-            overflow-x: hidden !important;
-            position: relative;
-            padding-right: 8px;
-        `;
+        // ✅ STYLES INLINE ULTRA-FORCÉS
+        this.container.style.setProperty('max-height', isMobile ? '400px' : '600px', 'important');
+        this.container.style.setProperty('overflow-y', 'scroll', 'important');
+        this.container.style.setProperty('overflow-x', 'hidden', 'important');
+        this.container.style.setProperty('position', 'relative', 'important');
+        this.container.style.setProperty('padding-right', '8px', 'important');
+        this.container.style.setProperty('scrollbar-gutter', 'stable', 'important'); // ✅ AJOUT
         
         // Vider complètement le container
         this.container.innerHTML = '';
@@ -77,7 +75,7 @@ class InfiniteScrollManager {
 
         this.observer.observe(this.sentinel);
 
-        console.log(`✅ Infinite Scroll initialized for ${this.listId} (scrollbar forced)`);
+        console.log(`✅ Infinite Scroll initialized for ${this.listId} (scrollbar forced with scrollbar-gutter)`);
     }
 
     async loadMore() {
@@ -265,16 +263,7 @@ window.addEventListener('resize', () => {
     });
 });
 
-// ============================================
-// 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE
-// ============================================
-
-// ============================================
-// 🆕 STYLES POUR SCROLLBAR PERSONNALISÉE (PC)
-// ============================================
-
 function addCustomScrollbarStyles() {
-    // Supprimer l'ancien style s'il existe
     const oldStyle = document.getElementById('custom-scrollbar-styles');
     if (oldStyle) oldStyle.remove();
     
@@ -287,13 +276,15 @@ function addCustomScrollbarStyles() {
         #savedPostsList {
             overflow-y: scroll !important; /* ✅ Force scroll visible */
             overflow-x: hidden !important;
+            scrollbar-gutter: stable; /* ✅ Réserve l'espace pour la scrollbar */
         }
         
         /* Scrollbar Webkit (Chrome, Edge, Safari) */
         #followingList::-webkit-scrollbar,
         #followersList::-webkit-scrollbar,
         #savedPostsList::-webkit-scrollbar {
-            width: 12px; /* ✅ Largeur visible */
+            width: 14px !important; /* ✅ Largeur augmentée */
+            height: 14px !important;
         }
         
         #followingList::-webkit-scrollbar-track,
@@ -309,9 +300,9 @@ function addCustomScrollbarStyles() {
         #savedPostsList::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 10px;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
             background-clip: padding-box;
-            min-height: 50px; /* ✅ Hauteur minimale pour faciliter le clic */
+            min-height: 60px !important; /* ✅ Hauteur minimale augmentée */
             transition: background 0.3s ease;
         }
         
@@ -333,8 +324,8 @@ function addCustomScrollbarStyles() {
         #followingList,
         #followersList,
         #savedPostsList {
-            scrollbar-width: thin;
-            scrollbar-color: #667eea rgba(0, 0, 0, 0.08);
+            scrollbar-width: thin !important;
+            scrollbar-color: #667eea rgba(0, 0, 0, 0.08) !important;
         }
         
         /* Dark mode */
@@ -347,17 +338,13 @@ function addCustomScrollbarStyles() {
         body.dark-mode #followingList,
         body.dark-mode #followersList,
         body.dark-mode #savedPostsList {
-            scrollbar-color: #667eea rgba(255, 255, 255, 0.08);
+            scrollbar-color: #667eea rgba(255, 255, 255, 0.08) !important;
         }
     `;
     document.head.appendChild(style);
     
-    console.log('✅ Scrollbar styles applied');
+    console.log('✅ Scrollbar styles applied (forced visible)');
 }
-
-// ============================================
-// 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE)
-// ============================================
 
 // ============================================
 // 🆕 STYLES RESPONSIVE MOBILE (CENTRAGE UNIQUEMENT SUR MOBILE)
@@ -1355,12 +1342,23 @@ async function handleAvatarChange(e) {
         
         const uploadResult = await window.r2ProfileUpload.uploadProfilePicture(file, currentUserData.uid);
         
-        if (!uploadResult.success) {
+        console.log('📤 Upload result:', uploadResult); // ✅ DEBUG
+        
+        if (!uploadResult || !uploadResult.success) {
             throw new Error('Upload failed');
         }
         
-        const downloadURL = uploadResult.imageUrl;
+        // ✅ CORRECTION : Gestion de différents noms de propriétés
+        const downloadURL = uploadResult.imageUrl || uploadResult.url || uploadResult.photoURL;
         
+        if (!downloadURL) {
+            console.error('❌ Upload result structure:', uploadResult);
+            throw new Error('No valid image URL returned from upload');
+        }
+        
+        console.log('✅ Download URL:', downloadURL); // ✅ DEBUG
+        
+        // Supprimer l'ancienne photo si elle existe sur R2
         if (currentUserData.photoURL && 
             currentUserData.photoURL.includes('workers.dev') && 
             currentUserData.photoURL !== downloadURL) {
@@ -1375,11 +1373,18 @@ async function handleAvatarChange(e) {
             }
         }
         
+        // ✅ VÉRIFICATION FINALE avant update Firestore
+        if (!downloadURL || typeof downloadURL !== 'string' || downloadURL.trim() === '') {
+            throw new Error('Invalid download URL');
+        }
+        
+        // Update Firestore
         await firebase.firestore().collection('users').doc(currentUserData.uid).update({
             photoURL: downloadURL,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
+        // Update Firebase Auth
         const user = firebase.auth().currentUser;
         if (user) {
             await user.updateProfile({
@@ -1387,8 +1392,10 @@ async function handleAvatarChange(e) {
             });
         }
         
+        // Update local data
         currentUserData.photoURL = downloadURL;
         
+        // Update UI
         document.querySelectorAll('[data-user-photo]').forEach(img => {
             img.src = downloadURL;
         });
@@ -1413,6 +1420,10 @@ async function handleAvatarChange(e) {
             errorMessage = 'Image too large. Maximum 5MB.';
         } else if (error.message.includes('Invalid file type')) {
             errorMessage = 'Invalid file format. Use JPG, PNG, GIF or WebP.';
+        } else if (error.message.includes('No valid image URL')) {
+            errorMessage = 'Upload service returned an invalid response. Please try again.';
+        } else {
+            errorMessage = error.message || 'Failed to upload photo';
         }
         
         showToast('error', 'Error', errorMessage);
