@@ -109,7 +109,7 @@ function updateUI() {
     updateProgress(referralData.completed);
     
     // Update referral link
-    const referralLink = `https://alphavault-ai.com/register.html?ref=${referralData.code}`;
+    const referralLink = `https://alphavault-ai.com/auth.html?ref=${referralData.code}`;
     const inputElement = document.getElementById('referralLinkInput');
     
     if (inputElement) {
