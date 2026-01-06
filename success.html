@@ -279,8 +279,9 @@
     
     <script>
         // WORKER_URL est déjà défini dans firebase-config.js
+        const WORKER_URL = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
         
-        // Récupérer les paramètre URL
+        // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
         const isFree = urlParams.get('free') === 'true';
@@ -307,7 +308,7 @@
         }
         
         // ═══════════════════════════════════════════════════════════════
-        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT
+        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (CORRIGÉ)
         // ═══════════════════════════════════════════════════════════════
         
         async function completeReferralAfterPayment() {
@@ -326,13 +327,17 @@
                 console.log('   Is Free:', isFree);
                 console.log('   Is Trial:', isTrial);
                 
-                // Ne compléter le parrainage que si c'est un paiement réel (pas trial/free)
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                // ✅ CORRECTION : Compléter le parrainage SEULEMENT pour paiements réels
+                // (Pas trial, pas free, pas basic car déjà géré dans checkout.js)
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                
                 if (!isFree && !isTrial && plan !== 'basic') {
                     console.log('✅ Valid paid subscription - completing referral...');
                     
                     const token = await user.getIdToken();
                     
-                    const response = await fetch(`${window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev'}/api/referral/complete`, {
+                    const response = await fetch(`${WORKER_URL}/api/referral/complete`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -341,13 +346,16 @@
                     });
                     
                     if (response.ok) {
-                        console.log('✅ Referral completed successfully');
+                        const data = await response.json();
+                        console.log('✅ Referral completed successfully:', data);
                     } else {
                         const errorData = await response.json();
                         console.log('ℹ Referral completion response:', errorData);
                     }
                 } else {
-                    console.log('ℹ Free/Trial subscription - referral will be completed after payment');
+                    console.log('ℹ Free/Trial/Basic subscription - referral completion handled elsewhere');
+                    console.log('   → Basic: completed in checkout.js');
+                    console.log('   → Trial/Free: will be completed after payment');
                 }
                 
             } catch (error) {
@@ -365,7 +373,7 @@
             }
         });
         
-        console.log('✅ Success page loaded');
+        console.log('✅ Success page loaded - Referral completion optimized');
     </script>
 </body>
 </html>
