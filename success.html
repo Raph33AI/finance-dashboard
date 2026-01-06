@@ -277,11 +277,10 @@
     <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- ✅ Referral Firestore -->
-    <script src="assets/js/referral-firestore.js"></script>
-    
     <script>
-        // Récupérer les paramètres URL
+        // WORKER_URL est déjà défini dans firebase-config.js
+        
+        // Récupérer les paramètre URL
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
         const isFree = urlParams.get('free') === 'true';
@@ -308,11 +307,12 @@
         }
         
         // ═══════════════════════════════════════════════════════════════
-        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (FIRESTORE)
+        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT
         // ═══════════════════════════════════════════════════════════════
         
         async function completeReferralAfterPayment() {
             try {
+                // Vérifier si l'utilisateur est connecté
                 const user = firebase.auth().currentUser;
                 
                 if (!user) {
@@ -326,20 +326,28 @@
                 console.log('   Is Free:', isFree);
                 console.log('   Is Trial:', isTrial);
                 
-                // Compléter uniquement pour les paiements réels (pas free, pas trial, pas basic)
+                // Ne compléter le parrainage que si c'est un paiement réel (pas trial/free)
                 if (!isFree && !isTrial && plan !== 'basic') {
                     console.log('✅ Valid paid subscription - completing referral...');
                     
-                    if (typeof window.completeReferralFirestore === 'function') {
-                        await window.completeReferralFirestore(user.uid, plan);
+                    const token = await user.getIdToken();
+                    
+                    const response = await fetch(`${window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev'}/api/referral/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
                         console.log('✅ Referral completed successfully');
                     } else {
-                        console.warn('⚠ completeReferralFirestore non disponible');
+                        const errorData = await response.json();
+                        console.log('ℹ Referral completion response:', errorData);
                     }
                 } else {
-                    console.log('ℹ Free/Trial/Basic subscription - referral completion handled elsewhere');
-                    console.log('   → Basic: completed in checkout.js');
-                    console.log('   → Trial/Free: will be completed after actual payment');
+                    console.log('ℹ Free/Trial subscription - referral will be completed after payment');
                 }
                 
             } catch (error) {
@@ -357,7 +365,7 @@
             }
         });
         
-        console.log('✅ Success page loaded v3.0 (Firestore)');
+        console.log('✅ Success page loaded');
     </script>
 </body>
 </html>

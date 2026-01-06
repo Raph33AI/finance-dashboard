@@ -959,7 +959,7 @@ toastStyles.textContent = `
 document.head.appendChild(toastStyles);
 
 // ============================================
-// GLOBAL EVENT LISTENERS
+// GLOBAL EVENT LISTENER
 // ============================================
 
 // Detect logout
