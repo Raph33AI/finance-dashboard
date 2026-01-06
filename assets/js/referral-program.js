@@ -1,10 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
-   REFERRAL PROGRAM - CLIENT SIDE v2.0
+   REFERRAL PROGRAM - CLIENT SIDE v2.1
    AlphaVault AI
    ✅ Authentification Firebase corrigée
+   ✅ Utilisation de window.WORKER_URL (pas de redéclaration)
    ═══════════════════════════════════════════════════════════════ */
 
-const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+// ✅ CORRECTION : Utiliser window.WORKER_URL au lieu de redéclarer
+const WORKER_URL = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
 
 let currentUser = null;
 let referralData = {
@@ -426,4 +428,4 @@ function showError(message) {
     document.head.appendChild(style);
 }
 
-console.log('✅ Referral Program loaded');
+console.log('✅ Referral Program loaded (v2.1 - WORKER_URL corrigé)');
