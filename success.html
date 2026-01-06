@@ -31,7 +31,7 @@
     
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           SUCCESS PAGE - STYLE IDENTIQUE AU CHECKOUT
+           SUCCESS PAGE - STYLE IDENTIQUE AU CHECKOUT (SANS TRIAL)
            ═══════════════════════════════════════════════════════════════ */
         
         :root {
@@ -62,7 +62,6 @@
 
         body {
             min-height: 100vh;
-            /* ✅ FOND IDENTIQUE AU CHECKOUT (blanc cassé professionnel) */
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
             display: flex;
             align-items: center;
@@ -79,7 +78,6 @@
         .success-container {
             max-width: 600px;
             width: 100%;
-            /* ✅ Glassmorphism identique au checkout */
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(180%);
             border-radius: var(--border-radius-lg);
@@ -148,7 +146,6 @@
         
         .plan-info {
             display: inline-block;
-            /* ✅ Dégradé identique au checkout */
             background: var(--checkout-gradient);
             color: white;
             padding: 16px 32px;
@@ -160,7 +157,6 @@
         }
         
         .details-box {
-            /* ✅ Fond discret identique au checkout */
             background: var(--checkout-gradient-soft);
             backdrop-filter: blur(20px) saturate(180%);
             border-radius: var(--border-radius);
@@ -224,7 +220,6 @@
         
         .btn-dashboard {
             display: inline-block;
-            /* ✅ Style bouton identique au checkout */
             background: var(--checkout-gradient);
             color: white;
             padding: 20px 48px;
@@ -274,25 +269,6 @@
 
         body.dark-mode .thank-you-note strong {
             color: #f1f5f9;
-        }
-
-        /* ✅ Badge Trial - Style cohérent */
-        .trial-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 16px 24px;
-            border-radius: var(--border-radius);
-            margin: 24px 0;
-            font-size: 1rem;
-            font-weight: 800;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .trial-badge i {
-            font-size: 1.2rem;
         }
 
         /* ═══════════════════════════════════════════════════════════════
@@ -393,12 +369,6 @@
         <div class="plan-info" id="planInfo">
             AlphaVault Pro
         </div>
-
-        <!-- ✅ Badge Trial (affiché conditionnellement) -->
-        <div class="trial-badge" id="trialBadge" style="display: none;">
-            <i class="fas fa-clock"></i>
-            <span id="trialText">14-day free trial - No credit card required</span>
-        </div>
         
         <div class="details-box">
             <div class="detail-row">
@@ -406,10 +376,6 @@
                 <span class="detail-value status">
                     <i class="fas fa-check-circle"></i> Active
                 </span>
-            </div>
-            <div class="detail-row" id="trialRow" style="display: none;">
-                <span class="detail-label">Trial Period</span>
-                <span class="detail-value" id="trialDaysValue">14 days</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Access</span>
@@ -439,7 +405,7 @@
     <script src="assets/js/firebase-config.js"></script>
     
     <script>
-        console.log('✅ Success page loaded');
+        console.log('✅ Success page loaded (NO TRIAL VERSION)');
         
         // ═══════════════════════════════════════════════════════════════
         // RÉCUPÉRATION DES PARAMÈTRES URL
@@ -447,10 +413,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
         const isFree = urlParams.get('free') === 'true';
-        const isTrial = urlParams.get('trial') === 'true';
-        const trialDays = urlParams.get('days') || '14';
         
-        console.log('📊 URL Parameters:', { plan, isFree, isTrial, trialDays });
+        console.log('📊 URL Parameters:', { plan, isFree });
         
         // ═══════════════════════════════════════════════════════════════
         // AFFICHAGE DU NOM DU PLAN
@@ -472,32 +436,15 @@
         // ADAPTATION DU MESSAGE SELON LE TYPE D'ACCÈS
         // ═══════════════════════════════════════════════════════════════
         const successMessageEl = document.getElementById('successMessage');
-        const trialRowEl = document.getElementById('trialRow');
-        const trialDaysValueEl = document.getElementById('trialDaysValue');
-        const trialBadgeEl = document.getElementById('trialBadge');
-        const trialTextEl = document.getElementById('trialText');
         
         if (isFree) {
             // ✅ Accès gratuit à vie
             successMessageEl.textContent = 'Your free lifetime access has been activated!';
-            trialRowEl.style.display = 'none';
-            trialBadgeEl.style.display = 'none';
             console.log('🎁 Free lifetime access activated');
-            
-        } else if (isTrial) {
-            // ✅ Période d'essai
-            successMessageEl.textContent = `Your ${trialDays}-day free trial has started!`;
-            trialRowEl.style.display = 'flex';
-            trialDaysValueEl.textContent = `${trialDays} days`;
-            trialBadgeEl.style.display = 'inline-flex';
-            trialTextEl.textContent = `${trialDays}-day free trial - No credit card required`;
-            console.log(`⏱ Trial period activated: ${trialDays} days`);
-            
         } else {
-            // ✅ Abonnement standard (14 jours d'essai inclus)
-            trialRowEl.style.display = 'flex';
-            trialDaysValueEl.textContent = '14 days';
-            console.log('✅ Standard subscription activated');
+            // ✅ Abonnement standard (accès immédiat sans trial)
+            successMessageEl.textContent = 'Your subscription has been activated successfully.';
+            console.log('✅ Standard subscription activated - Immediate full access');
         }
         
         // ═══════════════════════════════════════════════════════════════
