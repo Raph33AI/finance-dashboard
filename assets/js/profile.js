@@ -1,8 +1,9 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil v4.4
+   PROFILE.JS - Gestion de la page profil v4.5
    ✅ SCROLLBAR VISIBLE SUR PC
    ✅ ÉLÉMENTS CENTRÉS SUR MOBILE
    ✅ SANS DUPLICATION
+   ✅ AUTO-CHARGEMENT SI PAS DE SCROLL
    ============================================ */
 
 // Variables globales
@@ -14,7 +15,7 @@ let isEditingPersonalInfo = false;
 // ============================================
 
 class InfiniteScrollManager {
-    constructor(listId, loadFunction, itemsPerPage = 4) {
+    constructor(listId, loadFunction, itemsPerPage = 10) {
         this.listId = listId;
         this.loadFunction = loadFunction;
         this.itemsPerPage = itemsPerPage;
@@ -37,8 +38,8 @@ class InfiniteScrollManager {
 
         const isMobile = window.innerWidth <= 768;
         
-        // ✅ CORRECTION : Hauteurs optimisées pour forcer le scroll avec 4 items
-        const maxHeight = isMobile ? '350px' : '400px'; // ✅ Réduit de 600px → 400px
+        // ✅ CORRECTION : Hauteurs optimisées pour forcer le scroll
+        const maxHeight = isMobile ? '280px' : '320px'; // ✅ Réduit pour forcer le scroll
         
         this.container.style.setProperty('max-height', maxHeight, 'important');
         this.container.style.setProperty('overflow-y', 'scroll', 'important');
@@ -80,6 +81,30 @@ class InfiniteScrollManager {
         console.log(`✅ Infinite Scroll initialized for ${this.listId} (max-height: ${maxHeight})`);
     }
 
+    // ✅ NOUVELLE MÉTHODE : Auto-chargement si pas de scroll
+    async checkAndLoadMore() {
+        if (!this.container) return;
+        
+        const hasScroll = this.container.scrollHeight > this.container.clientHeight;
+        
+        console.log(`📏 ${this.listId} - Scroll check:`, {
+            scrollHeight: this.container.scrollHeight,
+            clientHeight: this.container.clientHeight,
+            hasScroll: hasScroll,
+            loadedItems: this.loadedIds.size,
+            hasMore: this.hasMore
+        });
+        
+        // ✅ Si pas de scroll et qu'il reste des items, charger automatiquement
+        if (!hasScroll && this.hasMore && !this.isLoading) {
+            console.log(`🔄 ${this.listId} - No scroll detected, auto-loading more items...`);
+            await this.loadMore();
+            
+            // ✅ Re-vérifier après chargement
+            setTimeout(() => this.checkAndLoadMore(), 300);
+        }
+    }
+
     async loadMore() {
         if (this.isLoading || !this.hasMore) {
             console.log(`⏸ ${this.listId}: Skip loading (isLoading: ${this.isLoading}, hasMore: ${this.hasMore})`);
@@ -118,6 +143,9 @@ class InfiniteScrollManager {
 
             if (newItems.length > 0) {
                 this.render(newItems);
+                
+                // ✅ NOUVEAU : Vérifier si on doit charger plus d'items
+                setTimeout(() => this.checkAndLoadMore(), 200);
             }
 
             if (result.items.length < this.itemsPerPage) {
@@ -255,7 +283,7 @@ window.addEventListener('userDataLoaded', (e) => {
 
 window.addEventListener('resize', () => {
     const isMobile = window.innerWidth <= 768;
-    const maxHeight = isMobile ? '400px' : '600px';
+    const maxHeight = isMobile ? '280px' : '320px';
     
     ['followingList', 'followersList', 'savedPostsList'].forEach(listId => {
         const container = document.getElementById(listId);
@@ -472,7 +500,7 @@ function addResponsiveStyles() {
             #followingList,
             #followersList,
             #savedPostsList {
-                max-height: 350px !important;
+                max-height: 280px !important;
             }
             
             /* Avatars plus petits */
@@ -516,15 +544,16 @@ function initInfiniteScroll() {
     if (followersScrollManager) followersScrollManager.destroy();
     if (savedPostsScrollManager) savedPostsScrollManager.destroy();
 
-    followingScrollManager = new InfiniteScrollManager('followingList', loadFollowingBatch, 4);
+    // ✅ CORRECTION : itemsPerPage augmenté de 4 → 10
+    followingScrollManager = new InfiniteScrollManager('followingList', loadFollowingBatch, 10);
     followingScrollManager.render = renderFollowingItems;
     followingScrollManager.init();
 
-    followersScrollManager = new InfiniteScrollManager('followersList', loadFollowersBatch, 4);
+    followersScrollManager = new InfiniteScrollManager('followersList', loadFollowersBatch, 10);
     followersScrollManager.render = renderFollowersItems;
     followersScrollManager.init();
 
-    savedPostsScrollManager = new InfiniteScrollManager('savedPostsList', loadSavedPostsBatch, 4);
+    savedPostsScrollManager = new InfiniteScrollManager('savedPostsList', loadSavedPostsBatch, 10);
     savedPostsScrollManager.render = renderSavedPostsItems;
     savedPostsScrollManager.init();
 
@@ -556,6 +585,7 @@ async function loadFollowingBatch(lastVisible, limit) {
     const snapshot = await query.get();
 
     console.log(`✅ Following snapshot size: ${snapshot.size}`);
+    console.log(`📊 Total documents in query:`, snapshot.docs.map(d => d.id)); // ✅ DIAGNOSTIC
 
     const items = await Promise.all(
         snapshot.docs.map(async (doc) => {
@@ -692,6 +722,7 @@ async function loadFollowersBatch(lastVisible, limit) {
     const snapshot = await query.get();
 
     console.log(`✅ Followers snapshot size: ${snapshot.size}`);
+    console.log(`📊 Total documents in query:`, snapshot.docs.map(d => d.id)); // ✅ DIAGNOSTIC
 
     const items = await Promise.all(
         snapshot.docs.map(async (doc) => {
@@ -1691,4 +1722,4 @@ toastStyle.textContent = `
 `;
 document.head.appendChild(toastStyle);
 
-console.log('✅ Script de profil chargé (v4.4 - Scrollbar PC + Centrage Mobile)');
+console.log('✅ Script de profil chargé (v4.5 - Auto-chargement si pas de scroll)');
