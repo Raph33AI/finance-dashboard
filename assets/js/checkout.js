@@ -746,25 +746,23 @@
 
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE
-   AlphaVault AI v2.5
+   AlphaVault AI v2.6
    ✅ Support des codes promo TRIAL (14 jours gratuits sans CB)
    ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
    ✅ Plan Basic : 100% gratuit sans carte bancaire
-   ✅ REFERRAL PROGRAM : Complétion pour plan Basic ✨ CORRIGÉ
+   ✅ REFERRAL PROGRAM : Complétion pour plan Basic
+   ✅ UTILISE UNIQUEMENT window.WORKER_URL (pas de déclaration)
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙ CONFIGURATION
 const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
 
-// ✅ WORKER_URL est déjà défini dans firebase-config.js
-const WORKER_URL = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
-
 console.log('🔧 Checkout configuration:');
 console.log('   Stripe Public Key:', STRIPE_PUBLIC_KEY.substring(0, 20) + '...');
-console.log('   Worker URL:', WORKER_URL);
+console.log('   Worker URL:', window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev');
 
 // ═══════════════════════════════════════════════════════════════
-// 🎁 CODES PROMO DISPONIBLES (côté client pour validation immédiate)
+// 🎁 CODES PROMO DISPONIBLES
 // ═══════════════════════════════════════════════════════════════
 
 const PROMO_CODES = {
@@ -821,7 +819,7 @@ const PROMO_CODES = {
     }
 };
 
-// ✅ État de l'application étendu
+// ✅ État de l'application
 let selectedPlan = {
     name: 'basic',
     price: 0
@@ -1021,14 +1019,12 @@ planOptions.forEach(option => {
     });
 });
 
-// ✅ Plan par défaut : BASIC
 const defaultPlan = document.querySelector('[data-plan="basic"]');
 if (defaultPlan) {
     defaultPlan.classList.add('selected');
     console.log('✅ Default plan selected: Basic (Free)');
 }
 
-// ✅ Vérifier si un plan est passé en paramètre URL
 const urlParams = new URLSearchParams(window.location.search);
 const urlPlan = urlParams.get('plan');
 
@@ -1161,9 +1157,6 @@ function updatePriceSummary() {
     
     let buttonText = '';
     
-    // ═══════════════════════════════════════════════════════════════
-    // ✅ CAS SPÉCIAL : PLAN BASIC (GRATUIT)
-    // ═══════════════════════════════════════════════════════════════
     if (selectedPlan.name === 'basic') {
         document.getElementById('discountRow').classList.add('hidden');
         document.getElementById('originalPriceStriked').classList.add('hidden');
@@ -1189,10 +1182,6 @@ function updatePriceSummary() {
         document.getElementById('submitButtonText').textContent = buttonText;
         return;
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // PLANS PAYANTS (PRO ET PLATINUM)
-    // ═══════════════════════════════════════════════════════════════
     
     const promoSection = document.querySelector('.promo-section');
     if (promoSection) {
@@ -1274,7 +1263,6 @@ function updatePriceSummary() {
     document.getElementById('submitButtonText').textContent = buttonText;
 }
 
-// Mise à jour initiale du récapitulatif
 updatePriceSummary();
 
 // ═══════════════════════════════════════════════════════════════
@@ -1319,9 +1307,9 @@ form.addEventListener('submit', async (event) => {
         console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
         console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
         
-        // ═══════════════════════════════════════════════════════════════
-        // ✅ CAS SPÉCIAL : PLAN BASIC GRATUIT
-        // ═══════════════════════════════════════════════════════════════
+        // ✅ Utilisation de window.WORKER_URL
+        const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
+        
         if (selectedPlan.name === 'basic') {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
@@ -1330,15 +1318,12 @@ form.addEventListener('submit', async (event) => {
             console.log('   📧 Email:', email);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // ✅ NOUVEAU : COMPLÉTER LE PARRAINAGE POUR PLAN BASIC
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             try {
                 console.log('🎁 Tentative de complétion du parrainage pour plan Basic...');
                 
                 const token = await user.getIdToken();
                 
-                const response = await fetch(`${WORKER_URL}/api/referral/complete`, {
+                const response = await fetch(`${workerUrl}/api/referral/complete`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1356,9 +1341,7 @@ form.addEventListener('submit', async (event) => {
             } catch (error) {
                 console.warn('⚠ Erreur complétion parrainage (non-bloquant):', error.message);
             }
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             
-            // Mettre à jour Firestore
             await firebase.firestore().collection('users').doc(user.uid).set({
                 plan: 'basic',
                 subscriptionStatus: 'active',
@@ -1367,14 +1350,9 @@ form.addEventListener('submit', async (event) => {
             
             console.log('✅ Plan Basic activé dans Firestore');
             
-            // Redirection vers la page de succès
             window.location.href = 'success.html?plan=basic&free=true&noconfetti=true';
             return;
         }
-        
-        // ═══════════════════════════════════════════════════════════════
-        // PLANS PAYANTS (PRO ET PLATINUM)
-        // ═══════════════════════════════════════════════════════════════
         
         if (appliedPromo) {
             console.log('   🎁 Code promo appliqué:', appliedPromo.code);
@@ -1383,7 +1361,7 @@ form.addEventListener('submit', async (event) => {
         }
         
         console.log('3⃣ Appel du Cloudflare Worker...');
-        console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
+        console.log('   📡 URL:', `${workerUrl}/create-checkout-session`);
         
         const requestBody = {
             plan: selectedPlan.name,
@@ -1397,7 +1375,7 @@ form.addEventListener('submit', async (event) => {
         
         console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
+        const response = await fetch(`${workerUrl}/create-checkout-session`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1420,7 +1398,6 @@ form.addEventListener('submit', async (event) => {
             throw new Error(data.error);
         }
         
-        // ✅ Gestion de l'accès gratuit (FREE ou TRIAL)
         if (data.free === true) {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
@@ -1495,4 +1472,4 @@ firebase.auth().onAuthStateChanged(async (user) => {
     }
 });
 
-console.log('✅ Checkout script loaded - Plan Basic GRATUIT + Referral Completion');
+console.log('✅ Checkout script loaded (v2.6 - No WORKER_URL declaration)');
