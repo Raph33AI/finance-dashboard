@@ -1,279 +1,3 @@
-/* ============================================
-   FIREBASE-CONFIG.JS - FinancePro v2.3
-   Configuration Firebase & Gestion Utilisateur Complète
-   ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
-   ✅ MIGRATION AUTOMATIQUE DES COMPTES EXISTANTS
-   ✅ GESTION PHOTO GOOGLE + CLOUDFLARE R2
-   ✅ REFERRAL PROGRAM TRACKING ✨ CORRIGÉ
-   ============================================ */
-
-// ============================================
-// CONFIGURATION FIREBASE
-// ============================================
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD9kQ3nyYbYMU--_PsMOtuqtMKlt3gmjRM",
-  authDomain: "financepro-220ba.firebaseapp.com",
-  projectId: "financepro-220ba",
-  storageBucket: "financepro-220ba.firebasestorage.app",
-  messagingSenderId: "917725259549",
-  appId: "1:917725259549:web:5fd909bb04fcf1e4a763f4",
-  measurementId: "G-R9L8JPN5K4"
-};
-
-// ============================================
-// INITIALISATION FIREBASE
-// ============================================
-
-let app;
-let auth;
-let db;
-
-try {
-    // Initialiser Firebase
-    app = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    
-    console.log('✅ Firebase initialisé avec succès');
-} catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation Firebase:', error);
-}
-
-// ============================================
-// CONFIGURATION DE L'AUTHENTIFICATION
-// ============================================
-
-// Configurer la persistance de session
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-        console.log('✅ Persistance de session configurée');
-    })
-    .catch((error) => {
-        console.error('❌ Erreur de configuration de persistance:', error);
-    });
-
-// ============================================
-// PROVIDERS D'AUTHENTIFICATION
-// ============================================
-
-// Google Provider
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-googleProvider.addScope('profile');
-googleProvider.addScope('email');
-googleProvider.setCustomParameters({
-    prompt: 'select_account'
-});
-
-// Microsoft Provider
-const microsoftProvider = new firebase.auth.OAuthProvider('microsoft.com');
-microsoftProvider.setCustomParameters({
-    tenant: 'common',
-    prompt: 'select_account'
-});
-
-// Apple Provider
-const appleProvider = new firebase.auth.OAuthProvider('apple.com');
-appleProvider.addScope('email');
-appleProvider.addScope('name');
-
-// ============================================
-// VARIABLES GLOBALES
-// ============================================
-
-window.currentUserData = null;
-
-// ✅ URL du Worker pour le système de parrainage
-const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
-window.WORKER_URL = WORKER_URL; // Exporté pour les autres scripts
-
-// ============================================
-// ✅ REFERRAL PROGRAM - DETECTION & TRACKING
-// ============================================
-
-/**
- * Détecter et stocker le code de parrainage depuis l'URL
- */
-function detectAndStoreReferralCode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    
-    if (refCode) {
-        console.log('🎁 Code de parrainage détecté:', refCode);
-        sessionStorage.setItem('referralCode', refCode);
-        
-        // Stocker aussi dans localStorage pour persistance longue durée
-        localStorage.setItem('referralCode', refCode);
-        localStorage.setItem('referralCodeTimestamp', Date.now().toString());
-        
-        console.log('✅ Code de parrainage stocké dans sessionStorage + localStorage');
-    } else {
-        console.log('ℹ Aucun code de parrainage dans l\'URL');
-        
-        // Vérifier si un code existe dans localStorage (< 7 jours)
-        const storedCode = localStorage.getItem('referralCode');
-        const storedTimestamp = localStorage.getItem('referralCodeTimestamp');
-        
-        if (storedCode && storedTimestamp) {
-            const daysSinceStored = (Date.now() - parseInt(storedTimestamp)) / (1000 * 60 * 60 * 24);
-            
-            if (daysSinceStored < 7) {
-                console.log('🎁 Code de parrainage récupéré depuis localStorage:', storedCode);
-                sessionStorage.setItem('referralCode', storedCode);
-            } else {
-                console.log('ℹ Code de parrainage expiré (> 7 jours)');
-                localStorage.removeItem('referralCode');
-                localStorage.removeItem('referralCodeTimestamp');
-            }
-        }
-    }
-}
-
-async function trackReferralSignup(user) {
-    // ✅ NOUVEAU : Utiliser la version Firestore
-    if (typeof window.trackReferralSignupFirestore === 'function') {
-        await window.trackReferralSignupFirestore(user);
-    } else {
-        console.warn('⚠ trackReferralSignupFirestore non disponible');
-    }
-}
-
-// ✅ DÉTECTER LE CODE AU CHARGEMENT DE LA PAGE
-detectAndStoreReferralCode();
-
-// ============================================
-// ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
-// ============================================
-
-/**
- * Inscrire un utilisateur à la newsletter via le Worker Cloudflare
- */
-async function subscribeToNewsletter(email, userName = '') {
-    try {
-        console.log('📧 Inscription automatique à la newsletter pour:', email);
-        
-        const response = await fetch('https://newsletter-worker.raphnardone.workers.dev/subscribe', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                name: userName || email.split('@')[0],
-                source: 'auto_signup',
-                timestamp: new Date().toISOString()
-            })
-        });
-
-        if (!response.ok) {
-            console.warn('⚠ Réponse Worker non-OK:', response.status);
-            const errorText = await response.text();
-            console.warn('⚠ Erreur détaillée:', errorText);
-            return false;
-        }
-
-        const data = await response.json();
-        
-        if (data.success) {
-            console.log('✅ Inscription newsletter réussie dans le KV Cloudflare');
-            return true;
-        } else {
-            console.warn('⚠ Inscription newsletter échouée:', data.error || 'Erreur inconnue');
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur inscription newsletter:', error);
-        // Ne pas bloquer la création du compte si la newsletter échoue
-        return false;
-    }
-}
-
-// ============================================
-// ✅ MIGRATION AUTOMATIQUE DES COMPTES EXISTANTS
-// ============================================
-
-/**
- * Vérifier et migrer automatiquement les comptes sans champs newsletter
- */
-async function autoMigrateNewsletterFields(user) {
-    try {
-        if (!user) return;
-        
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
-        
-        if (!doc.exists) {
-            console.log('⚠ Document utilisateur inexistant, sera créé par loadAndSyncUserData');
-            return;
-        }
-        
-        const userData = doc.data();
-        
-        // Vérifier si les champs existent déjà
-        if (userData.weeklyNewsletter !== undefined) {
-            console.log('✅ Compte déjà configuré pour la newsletter');
-            return;
-        }
-        
-        console.log('🔧 Migration automatique détectée pour:', user.email);
-        console.log('⚙ Ajout des champs newsletter manquants...');
-        
-        // Ajouter les champs manquants
-        await userRef.update({
-            weeklyNewsletter: true,
-            newsletterSubscribedAt: new Date().toISOString()
-        });
-        
-        console.log('✅ Champs newsletter ajoutés à Firestore');
-        
-        // Inscrire à la newsletter dans Cloudflare KV
-        console.log('📧 Inscription à la newsletter Cloudflare...');
-        const subscribed = await subscribeToNewsletter(
-            user.email, 
-            userData.displayName || user.displayName || user.email.split('@')[0]
-        );
-        
-        if (subscribed) {
-            console.log('✅ Migration automatique réussie !');
-            console.log('📊 Nouveau statut: Abonné à la newsletter ✅');
-        } else {
-            console.warn('⚠ Champs ajoutés à Firestore mais erreur inscription Cloudflare');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de la migration automatique:', error);
-        // Ne pas bloquer l'expérience utilisateur
-    }
-}
-
-// ============================================
-// OBSERVATEUR D'ÉTAT D'AUTHENTIFICATION
-// ============================================
-
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        console.log('✅ Utilisateur connecté:', user.email);
-        console.log('🔑 UID:', user.uid);
-        
-        // ✅ MIGRATION AUTOMATIQUE POUR COMPTES EXISTANTS
-        await autoMigrateNewsletterFields(user);
-        
-        // ✅ CHARGER ET SYNCHRONISER LES DONNÉES FIRESTORE
-        await loadAndSyncUserData(user);
-        
-    } else {
-        console.log('ℹ Aucun utilisateur connecté');
-        
-        // Nettoyer les données
-        window.currentUserData = null;
-        localStorage.removeItem('financepro_user');
-        
-        // Déclencher un événement personnalisé
-        window.dispatchEvent(new CustomEvent('userLoggedOut'));
-    }
-});
-
 // ============================================
 // ✅ FONCTION PRINCIPALE : CHARGER ET SYNCHRONISER LES DONNÉES
 // ============================================
@@ -283,7 +7,7 @@ auth.onAuthStateChanged(async (user) => {
  * Créer le document s'il n'existe pas
  * Synchroniser avec Firebase Auth
  * ✅ GESTION INTELLIGENTE DE LA PHOTO (Google vs R2)
- * ⚠ LE TRACKING DU PARRAINAGE EST MAINTENANT GÉRÉ DANS AUTH.JS
+ * ✅ TRACKING DU PARRAINAGE POUR NOUVEAUX COMPTES
  */
 async function loadAndSyncUserData(user) {
     try {
@@ -387,8 +111,28 @@ async function loadAndSyncUserData(user) {
                 ...newUserData
             };
             
-            // ⚠ LE TRACKING DU PARRAINAGE EST MAINTENANT GÉRÉ DANS AUTH.JS
-            // (Appelé AVANT la redirection vers checkout.html)
+            // ═══════════════════════════════════════════════════════════════
+            // ✅✅✅ TRACKING DU PARRAINAGE (NOUVEAU COMPTE)
+            // ═══════════════════════════════════════════════════════════════
+            
+            console.log('🎁 Nouveau compte créé - Vérification du parrainage...');
+            
+            try {
+                if (typeof window.trackReferralSignupFirestore === 'function') {
+                    await window.trackReferralSignupFirestore(user);
+                    console.log('✅ Tracking du parrainage effectué');
+                } else {
+                    console.warn('⚠ trackReferralSignupFirestore non disponible - sera appelé plus tard');
+                    
+                    // Stocker un flag pour retenter plus tard
+                    sessionStorage.setItem('pendingReferralTracking', 'true');
+                }
+            } catch (trackingError) {
+                console.error('⚠ Erreur tracking parrainage (non-bloquant):', trackingError.message);
+                
+                // Stocker un flag pour retenter plus tard
+                sessionStorage.setItem('pendingReferralTracking', 'true');
+            }
             
             // ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
             console.log('📧 Inscription automatique à la newsletter pour nouveau compte...');
@@ -428,6 +172,27 @@ async function loadAndSyncUserData(user) {
             console.log('🎉 Processus de création de compte terminé !');
         }
         
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ RETRY TRACKING SI PENDING (pour les cas où le script n'était pas chargé)
+        // ═══════════════════════════════════════════════════════════════
+        
+        const pendingTracking = sessionStorage.getItem('pendingReferralTracking');
+        if (pendingTracking === 'true') {
+            console.log('🔄 Retry tracking du parrainage en attente...');
+            
+            try {
+                if (typeof window.trackReferralSignupFirestore === 'function') {
+                    await window.trackReferralSignupFirestore(user);
+                    console.log('✅ Retry tracking réussi');
+                    sessionStorage.removeItem('pendingReferralTracking');
+                } else {
+                    console.warn('⚠ trackReferralSignupFirestore toujours non disponible');
+                }
+            } catch (retryError) {
+                console.error('⚠ Erreur retry tracking:', retryError.message);
+            }
+        }
+        
     } catch (error) {
         console.error('❌ Erreur lors du chargement des données:', error);
         
@@ -457,230 +222,3 @@ async function loadAndSyncUserData(user) {
         console.warn('⚠ Données minimales chargées depuis Firebase Auth uniquement');
     }
 }
-
-// ============================================
-// ✅ MISE À JOUR GLOBALE DE L'INTERFACE
-// ============================================
-
-function updateGlobalUserInterface(userData) {
-    console.log('🎨 Mise à jour de l\'interface utilisateur globale');
-    
-    try {
-        // Nom d'utilisateur
-        document.querySelectorAll('[data-user-name]').forEach(el => {
-            const name = userData.displayName || 
-                         `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 
-                         userData.email?.split('@')[0] || 
-                         'User';
-            el.textContent = name;
-        });
-        
-        // Email
-        document.querySelectorAll('[data-user-email]').forEach(el => {
-            el.textContent = userData.email || 'email@example.com';
-        });
-        
-        // Photo de profil
-        document.querySelectorAll('[data-user-photo]').forEach(img => {
-            const photoURL = getUserPhotoURL(userData);
-            img.src = photoURL;
-            
-            img.onerror = function() {
-                const fallbackURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || userData.email || 'User')}&background=667eea&color=fff&size=256`;
-                if (this.src !== fallbackURL) {
-                    this.src = fallbackURL;
-                }
-            };
-        });
-        
-        // Plan d'abonnement
-        document.querySelectorAll('[data-user-plan]').forEach(el => {
-            const plan = userData.plan || 'basic';
-            el.textContent = capitalizeFirstLetter(plan);
-            
-            el.className = el.className.replace(/plan-\w+/g, '');
-            el.classList.add(`plan-${plan.toLowerCase()}`);
-        });
-        
-        console.log('✅ Interface globale mise à jour');
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de la mise à jour de l\'interface:', error);
-    }
-}
-
-// ============================================
-// ✅ GESTION DE LA PHOTO DE PROFIL
-// ============================================
-
-async function updateUserPhoto(photoURL) {
-    try {
-        const user = getCurrentUser();
-        if (!user) {
-            throw new Error('User not authenticated');
-        }
-        
-        console.log('📸 Mise à jour de la photo de profil:', photoURL);
-        
-        await db.collection('users').doc(user.uid).update({
-            photoURL: photoURL,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        await user.updateProfile({
-            photoURL: photoURL
-        });
-        
-        if (window.currentUserData) {
-            window.currentUserData.photoURL = photoURL;
-            localStorage.setItem('financepro_user', JSON.stringify(window.currentUserData));
-        }
-        
-        document.querySelectorAll('[data-user-photo]').forEach(img => {
-            img.src = photoURL;
-        });
-        
-        console.log('✅ Photo de profil mise à jour avec succès');
-        
-        return true;
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de la mise à jour de la photo:', error);
-        throw error;
-    }
-}
-
-function getUserPhotoURL(userData) {
-    if (!userData) {
-        userData = window.currentUserData;
-    }
-    
-    if (!userData) {
-        return 'https://ui-avatars.com/api/?name=User&background=667eea&color=fff&size=256';
-    }
-    
-    if (userData.photoURL && 
-        (userData.photoURL.includes('workers.dev') || 
-         userData.photoURL.includes('r2.dev'))) {
-        return userData.photoURL;
-    }
-    
-    if (userData.photoURL && 
-        userData.photoURL.includes('googleusercontent.com')) {
-        return userData.photoURL;
-    }
-    
-    if (userData.photoURL && 
-        !userData.photoURL.includes('ui-avatars.com')) {
-        return userData.photoURL;
-    }
-    
-    const name = userData.displayName || userData.email || 'User';
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=667eea&color=fff&size=256`;
-}
-
-// ============================================
-// FONCTIONS UTILITAIRES FIREBASE
-// ============================================
-
-function isFirebaseInitialized() {
-    return app && auth && db;
-}
-
-function getCurrentUser() {
-    return auth.currentUser;
-}
-
-function getCurrentUserData() {
-    return window.currentUserData;
-}
-
-async function getUserToken() {
-    const user = getCurrentUser();
-    if (user) {
-        try {
-            return await user.getIdToken();
-        } catch (error) {
-            console.error('Erreur lors de la récupération du token:', error);
-            return null;
-        }
-    }
-    return null;
-}
-
-async function refreshUserToken() {
-    const user = getCurrentUser();
-    if (user) {
-        try {
-            return await user.getIdToken(true);
-        } catch (error) {
-            console.error('Erreur lors du rafraîchissement du token:', error);
-            return null;
-        }
-    }
-    return null;
-}
-
-function capitalizeFirstLetter(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-}
-
-// ============================================
-// GESTION DES ERREURS FIREBASE
-// ============================================
-
-function getFirebaseErrorMessage(errorCode) {
-    const errorMessages = {
-        'auth/email-already-in-use': 'Cette adresse email est déjà utilisée.',
-        'auth/invalid-email': 'Adresse email invalide.',
-        'auth/operation-not-allowed': 'Opération non autorisée.',
-        'auth/weak-password': 'Le mot de passe doit contenir au moins 6 caractères.',
-        'auth/user-disabled': 'Ce compte a été désactivé.',
-        'auth/user-not-found': 'Aucun compte trouvé avec cet email.',
-        'auth/wrong-password': 'Mot de passe incorrect.',
-        'auth/invalid-credential': 'Identifiants invalides.',
-        'auth/account-exists-with-different-credential': 'Un compte existe déjà avec cette adresse email.',
-        'auth/credential-already-in-use': 'Ces identifiants sont déjà utilisés.',
-        'auth/timeout': 'Délai d\'attente dépassé. Veuillez réessayer.',
-        'auth/too-many-requests': 'Trop de tentatives. Réessayez plus tard.',
-        'auth/popup-blocked': 'La fenêtre popup a été bloquée par votre navigateur.',
-        'auth/popup-closed-by-user': 'La fenêtre popup a été fermée.',
-        'auth/cancelled-popup-request': 'Requête popup annulée.',
-        'auth/network-request-failed': 'Erreur de connexion réseau.',
-        'auth/requires-recent-login': 'Cette opération nécessite une connexion récente.',
-        'permission-denied': 'Permission refusée.',
-        'unavailable': 'Service temporairement indisponible.',
-        'unauthenticated': 'Authentification requise.',
-        'not-found': 'Document non trouvé.',
-        'default': 'Une erreur s\'est produite. Veuillez réessayer.'
-    };
-    
-    return errorMessages[errorCode] || errorMessages['default'];
-}
-
-// ============================================
-// EXPORT DES VARIABLES ET FONCTIONS
-// ============================================
-
-window.firebaseApp = app;
-window.firebaseAuth = auth;
-window.firebaseDb = db;
-window.googleProvider = googleProvider;
-window.microsoftProvider = microsoftProvider;
-window.appleProvider = appleProvider;
-window.getFirebaseErrorMessage = getFirebaseErrorMessage;
-window.isFirebaseInitialized = isFirebaseInitialized;
-window.getCurrentUser = getCurrentUser;
-window.getCurrentUserData = getCurrentUserData;
-window.getUserToken = getUserToken;
-window.refreshUserToken = refreshUserToken;
-window.loadAndSyncUserData = loadAndSyncUserData;
-window.subscribeToNewsletter = subscribeToNewsletter;
-window.autoMigrateNewsletterFields = autoMigrateNewsletterFields;
-window.updateUserPhoto = updateUserPhoto;
-window.getUserPhotoURL = getUserPhotoURL;
-window.detectAndStoreReferralCode = detectAndStoreReferralCode;
-window.trackReferralSignup = trackReferralSignup;
-
-console.log('✅ Configuration Firebase chargée (v2.3 - Referral Program Optimisé)');

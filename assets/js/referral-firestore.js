@@ -367,3 +367,29 @@ window.claimReferralRewardFirestore = claimReferralRewardFirestore;
 window.initializeReferralDocument = initializeReferralDocument;
 
 console.log('✅ Referral Firestore system loaded v1.0');
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ AUTO-RETRY TRACKING SI SCRIPT CHARGÉ APRÈS AUTHENTIFICATION
+// ═══════════════════════════════════════════════════════════════
+
+window.addEventListener('userDataLoaded', async (event) => {
+    const pendingTracking = sessionStorage.getItem('pendingReferralTracking');
+    
+    if (pendingTracking === 'true') {
+        console.log('🔄 [Referral Firestore] Retry tracking du parrainage détecté...');
+        
+        const user = firebase.auth().currentUser;
+        
+        if (user) {
+            try {
+                await trackReferralSignupFirestore(user);
+                console.log('✅ [Referral Firestore] Retry tracking réussi');
+                sessionStorage.removeItem('pendingReferralTracking');
+            } catch (error) {
+                console.error('⚠ [Referral Firestore] Erreur retry tracking:', error.message);
+            }
+        }
+    }
+});
+
+console.log('✅ Referral Firestore system loaded v1.1 (with auto-retry)');
