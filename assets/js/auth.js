@@ -997,17 +997,50 @@ let isProcessing = false;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initializing authentication system...');
     
-    // ✅ Détecter le code de parrainage (déjà fait par firebase-config.js, mais on force)
-    if (typeof detectAndStoreReferralCode === 'function') {
-        detectAndStoreReferralCode();
-    }
+    // ✅ Attendre que Firebase soit prêt
+    const initTimeout = setTimeout(() => {
+        console.error('❌ Firebase initialization timeout');
+        showToast('error', 'Error', 'Unable to connect to authentication service. Please refresh the page.');
+    }, 5000);
     
-    // Check if Firebase is initialized
-    if (!isFirebaseInitialized()) {
-        showToast('error', 'Error', 'Unable to connect to authentication service.');
-        return;
-    }
+    const checkFirebase = () => {
+        // Vérifier Firebase
+        if (typeof window.firebaseAuth === 'undefined' || 
+            typeof window.firebaseDb === 'undefined' ||
+            typeof window.isFirebaseInitialized !== 'function') {
+            console.log('⏳ Waiting for Firebase...');
+            return false;
+        }
+        
+        if (!window.isFirebaseInitialized()) {
+            console.log('⏳ Firebase not fully initialized...');
+            return false;
+        }
+        
+        return true;
+    };
     
+    // Retry toutes les 100ms pendant max 5 secondes
+    const retryInit = setInterval(() => {
+        if (checkFirebase()) {
+            clearInterval(retryInit);
+            clearTimeout(initTimeout);
+            
+            console.log('✅ Firebase ready - initializing auth...');
+            
+            // Détecter le code de parrainage
+            if (typeof window.detectAndStoreReferralCode === 'function') {
+                window.detectAndStoreReferralCode();
+            }
+            
+            // Initialiser l'authentification
+            initializeAuth();
+        }
+    }, 100);
+});
+
+// ✅ FONCTION D'INITIALISATION
+function initializeAuth() {
     // Initialize event listeners
     initializeEventListeners();
     
@@ -1015,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAuthState();
     
     console.log('✅ Authentication system initialized');
-});
+}
 
 // ============================================
 // EVENT LISTENERS
