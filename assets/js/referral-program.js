@@ -1,12 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
-   REFERRAL PROGRAM - CLIENT SIDE v2.1
+   REFERRAL PROGRAM - CLIENT SIDE v2.2
    AlphaVault AI
-   ✅ Authentification Firebase corrigée
-   ✅ Utilisation de window.WORKER_URL (pas de redéclaration)
+   ✅ Utilise UNIQUEMENT window.WORKER_URL (pas de déclaration locale)
    ═══════════════════════════════════════════════════════════════ */
-
-// ✅ CORRECTION : Utiliser window.WORKER_URL au lieu de redéclarer
-const WORKER_URL = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
 
 let currentUser = null;
 let referralData = {
@@ -41,12 +37,14 @@ async function loadReferralData() {
     try {
         console.log('📥 Loading referral data...');
         
-        // ✅ CORRECTION : Obtenir le token Firebase
         const token = await currentUser.getIdToken();
         
         console.log('🔑 Firebase token obtained');
         
-        const response = await fetch(`${WORKER_URL}/api/referral/stats`, {
+        // ✅ Utilisation directe de window.WORKER_URL
+        const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
+        
+        const response = await fetch(`${workerUrl}/api/referral/stats`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -85,8 +83,6 @@ async function loadReferralData() {
         
     } catch (error) {
         console.error('❌ Error loading referral data:', error);
-        
-        // Afficher une erreur à l'utilisateur
         showError('Failed to load referral data. Please refresh the page.');
     }
 }
@@ -98,7 +94,6 @@ async function loadReferralData() {
 function updateUI() {
     console.log('🎨 Updating UI...');
     
-    // Update stats
     const totalElement = document.getElementById('totalReferrals');
     const completedElement = document.getElementById('completedReferrals');
     const pendingElement = document.getElementById('pendingReferrals');
@@ -107,10 +102,8 @@ function updateUI() {
     if (completedElement) completedElement.textContent = referralData.completed;
     if (pendingElement) pendingElement.textContent = referralData.pending;
     
-    // Update progress
     updateProgress(referralData.completed);
     
-    // Update referral link
     const referralLink = `https://alphavault-ai.com/auth.html?ref=${referralData.code}`;
     const inputElement = document.getElementById('referralLinkInput');
     
@@ -118,7 +111,6 @@ function updateUI() {
         inputElement.value = referralLink;
     }
     
-    // Update referrals list
     displayReferralsList();
     
     console.log('✅ UI updated successfully');
@@ -132,7 +124,6 @@ function updateProgress(completedCount) {
     const steps = ['step0', 'step1', 'step2', 'step3', 'stepReward'];
     const labels = ['label1', 'label2', 'label3'];
     
-    // Reset all
     steps.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -147,7 +138,6 @@ function updateProgress(completedCount) {
         }
     });
     
-    // Mark completed steps
     for (let i = 0; i <= completedCount && i < steps.length; i++) {
         const stepEl = document.getElementById(steps[i]);
         if (stepEl) {
@@ -162,7 +152,6 @@ function updateProgress(completedCount) {
         }
     }
     
-    // Mark active step
     if (completedCount < 3) {
         const nextStep = steps[completedCount + 1];
         const nextStepEl = document.getElementById(nextStep);
@@ -177,21 +166,18 @@ function updateProgress(completedCount) {
             }
         }
     } else {
-        // Reward unlocked
         const rewardEl = document.getElementById('stepReward');
         if (rewardEl) {
             rewardEl.classList.add('completed');
         }
     }
     
-    // Update progress line
     const progressPercentage = (completedCount / 3) * 100;
     const progressLineEl = document.getElementById('progressLineFill');
     if (progressLineEl) {
         progressLineEl.style.width = `${progressPercentage}%`;
     }
     
-    // Check if reward should be claimed
     if (completedCount >= 3 && !referralData.rewardActive) {
         showRewardNotification();
     }
@@ -269,7 +255,6 @@ if (copyBtn) {
         } catch (error) {
             console.error('❌ Copy failed:', error);
             
-            // Fallback
             input.select();
             document.execCommand('copy');
             
@@ -338,8 +323,9 @@ async function claimReward() {
         console.log('🎁 Claiming reward...');
         
         const token = await currentUser.getIdToken();
+        const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
         
-        const response = await fetch(`${WORKER_URL}/api/referral/claim-reward`, {
+        const response = await fetch(`${workerUrl}/api/referral/claim-reward`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -371,7 +357,6 @@ async function claimReward() {
 // ═══════════════════════════════════════════════════════════════
 
 function showError(message) {
-    // Créer un élément d'erreur
     const errorDiv = document.createElement('div');
     errorDiv.style.cssText = `
         position: fixed;
@@ -393,7 +378,6 @@ function showError(message) {
     
     document.body.appendChild(errorDiv);
     
-    // Retirer après 5 secondes
     setTimeout(() => {
         errorDiv.style.animation = 'slideOutRight 0.5s ease';
         setTimeout(() => {
@@ -401,7 +385,6 @@ function showError(message) {
         }, 500);
     }, 5000);
     
-    // Ajouter les animations CSS
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideInRight {
@@ -428,4 +411,4 @@ function showError(message) {
     document.head.appendChild(style);
 }
 
-console.log('✅ Referral Program loaded (v2.1 - WORKER_URL corrigé)');
+console.log('✅ Referral Program loaded (v2.2 - No WORKER_URL declaration)');
