@@ -5,6 +5,7 @@
    ✅ MIGRATION AUTOMATIQUE DES COMPTES EXISTANTS
    ✅ GESTION PHOTO GOOGLE + CLOUDFLARE R2
    ✅ REFERRAL PROGRAM TRACKING ✨ NOUVEAU
+   ✅ FIX: Renommage WORKER_URL → REFERRAL_WORKER_URL (éviter conflit admin-analytics.js)
    ============================================ */
 
 // ============================================
@@ -84,7 +85,8 @@ appleProvider.addScope('name');
 window.currentUserData = null;
 
 // ✅ URL du Worker pour le système de parrainage
-const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+// ✅ FIX: Renommé de WORKER_URL → REFERRAL_WORKER_URL pour éviter conflit avec admin-analytics.js
+const REFERRAL_WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
 // ============================================
 // ✅ REFERRAL PROGRAM - DETECTION & TRACKING
@@ -124,7 +126,8 @@ async function trackReferralSignup(user) {
         console.log('   Nouvel utilisateur:', user.email);
         console.log('   UID:', user.uid);
         
-        const response = await fetch(`${WORKER_URL}/api/referral/track-signup`, {
+        // ✅ FIX: Utilisation de REFERRAL_WORKER_URL au lieu de WORKER_URL
+        const response = await fetch(`${REFERRAL_WORKER_URL}/api/referral/track-signup`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -777,4 +780,4 @@ window.getUserPhotoURL = getUserPhotoURL;
 window.detectAndStoreReferralCode = detectAndStoreReferralCode; // ✅ NOUVEAU
 window.trackReferralSignup = trackReferralSignup; // ✅ NOUVEAU
 
-console.log('✅ Configuration Firebase chargée (v2.2 - Photo Google + R2 Support + Referral Tracking)');
+console.log('✅ Configuration Firebase chargée (v2.2 - Photo Google + R2 Support + Referral Tracking + FIX Conflict)');
