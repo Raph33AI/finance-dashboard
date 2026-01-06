@@ -30,44 +30,71 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* ═══════════════════════════════════════════════════════════════
+           SUCCESS PAGE - STYLE IDENTIQUE AU CHECKOUT
+           ═══════════════════════════════════════════════════════════════ */
+        
+        :root {
+            --checkout-primary: #3b82f6;
+            --checkout-secondary: #8b5cf6;
+            --checkout-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --checkout-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            --checkout-success: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+        }
+
+        body.dark-mode {
+            --glass-bg: rgba(15, 23, 42, 0.95);
+            --glass-border: rgba(100, 116, 139, 0.3);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
+        }
+
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 400% 400%;
-            animation: gradientFlow 15s ease infinite;
+            /* ✅ FOND IDENTIQUE AU CHECKOUT (blanc cassé professionnel) */
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
         }
-        
-        @keyframes gradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         }
         
         .success-container {
             max-width: 600px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(40px);
-            border-radius: 32px;
+            /* ✅ Glassmorphism identique au checkout */
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--glass-border);
             padding: 60px 40px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
-            animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            z-index: 1;
+            transition: var(--transition-smooth);
         }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+
+        .success-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
         }
         
         .success-icon {
@@ -101,6 +128,11 @@
             font-weight: 900;
             color: #1e293b;
             margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        body.dark-mode h1 {
+            color: #f1f5f9;
         }
         
         .success-message {
@@ -109,33 +141,50 @@
             margin-bottom: 12px;
             font-weight: 500;
         }
+
+        body.dark-mode .success-message {
+            color: #94a3b8;
+        }
         
         .plan-info {
             display: inline-block;
-            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            /* ✅ Dégradé identique au checkout */
+            background: var(--checkout-gradient);
             color: white;
-            padding: 12px 28px;
+            padding: 16px 32px;
             border-radius: 20px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 800;
-            margin: 20px 0;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            margin: 24px 0;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
         }
         
         .details-box {
-            background: rgba(241, 245, 249, 0.8);
-            border-radius: 16px;
-            padding: 24px;
+            /* ✅ Fond discret identique au checkout */
+            background: var(--checkout-gradient-soft);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius);
+            padding: 28px;
             margin: 30px 0;
             text-align: left;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+        }
+
+        body.dark-mode .details-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-color: rgba(100, 116, 139, 0.3);
         }
         
         .detail-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(203, 213, 225, 0.5);
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+        }
+
+        body.dark-mode .detail-row {
+            border-bottom-color: rgba(100, 116, 139, 0.3);
         }
         
         .detail-row:last-child {
@@ -146,77 +195,185 @@
             font-weight: 700;
             color: #475569;
             font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        body.dark-mode .detail-label {
+            color: #cbd5e1;
         }
         
         .detail-value {
-            font-weight: 600;
+            font-weight: 700;
             color: #1e293b;
-            font-size: 1rem;
+            font-size: 1.05rem;
+        }
+
+        body.dark-mode .detail-value {
+            color: #f1f5f9;
+        }
+
+        .detail-value.status {
+            color: #10b981;
+            font-weight: 800;
+        }
+
+        .detail-value i {
+            margin-right: 6px;
         }
         
         .btn-dashboard {
             display: inline-block;
-            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            /* ✅ Style bouton identique au checkout */
+            background: var(--checkout-gradient);
             color: white;
-            padding: 18px 40px;
-            border-radius: 16px;
-            font-size: 1.1rem;
+            padding: 20px 48px;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
             font-weight: 800;
             text-decoration: none;
-            margin-top: 20px;
+            margin-top: 30px;
             box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .btn-dashboard:hover {
             transform: translateY(-4px);
             box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
         }
+
+        .btn-dashboard:active {
+            transform: translateY(-2px);
+        }
         
         .thank-you-note {
-            margin-top: 30px;
-            padding-top: 30px;
+            margin-top: 40px;
+            padding-top: 32px;
             border-top: 2px solid rgba(203, 213, 225, 0.3);
             color: #64748b;
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
-        
-        .referral-cta {
+
+        body.dark-mode .thank-you-note {
+            border-top-color: rgba(100, 116, 139, 0.3);
+            color: #94a3b8;
+        }
+
+        .thank-you-note p {
+            margin: 8px 0;
+        }
+
+        .thank-you-note strong {
+            color: #1e293b;
+            font-weight: 800;
+        }
+
+        body.dark-mode .thank-you-note strong {
+            color: #f1f5f9;
+        }
+
+        /* ✅ Badge Trial - Style cohérent */
+        .trial-badge {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
-            padding: 20px 24px;
-            border-radius: 16px;
-            margin-top: 30px;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-        }
-        
-        .referral-cta h3 {
-            font-size: 1.2rem;
-            margin: 0 0 10px 0;
-        }
-        
-        .referral-cta p {
-            font-size: 0.95rem;
-            margin: 0 0 15px 0;
-            opacity: 0.95;
-        }
-        
-        .btn-referral {
-            display: inline-block;
-            background: white;
-            color: #10b981;
-            padding: 12px 28px;
-            border-radius: 12px;
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            margin: 24px 0;
             font-size: 1rem;
             font-weight: 800;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .btn-referral:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+
+        .trial-badge i {
+            font-size: 1.2rem;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .success-container {
+                padding: 40px 24px;
+                border-radius: var(--border-radius);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .success-message {
+                font-size: 1.1rem;
+            }
+
+            .plan-info {
+                font-size: 1.1rem;
+                padding: 14px 28px;
+            }
+
+            .details-box {
+                padding: 20px;
+            }
+
+            .btn-dashboard {
+                width: 100%;
+                justify-content: center;
+                padding: 18px 32px;
+                font-size: 1.1rem;
+            }
+
+            .detail-label, .detail-value {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 30px 16px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .success-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+
+            .plan-info {
+                font-size: 1rem;
+                padding: 12px 24px;
+            }
+
+            .btn-dashboard {
+                font-size: 1rem;
+                padding: 16px 28px;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           ACCESSIBILITÉ
+           ═══════════════════════════════════════════════════════════════ */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
@@ -229,28 +386,40 @@
         
         <h1>Payment Successful!</h1>
         
-        <p class="success-message">
+        <p class="success-message" id="successMessage">
             Your subscription has been activated successfully.
         </p>
         
         <div class="plan-info" id="planInfo">
             AlphaVault Pro
         </div>
+
+        <!-- ✅ Badge Trial (affiché conditionnellement) -->
+        <div class="trial-badge" id="trialBadge" style="display: none;">
+            <i class="fas fa-clock"></i>
+            <span id="trialText">14-day free trial - No credit card required</span>
+        </div>
         
         <div class="details-box">
             <div class="detail-row">
                 <span class="detail-label">Status</span>
-                <span class="detail-value" style="color: #10b981;">
+                <span class="detail-value status">
                     <i class="fas fa-check-circle"></i> Active
                 </span>
             </div>
             <div class="detail-row" id="trialRow" style="display: none;">
                 <span class="detail-label">Trial Period</span>
-                <span class="detail-value">14 days</span>
+                <span class="detail-value" id="trialDaysValue">14 days</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Access</span>
                 <span class="detail-value">Immediate</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Next Step</span>
+                <span class="detail-value">
+                    <i class="fas fa-rocket"></i> Access Dashboard
+                </span>
             </div>
         </div>
         
@@ -259,18 +428,10 @@
             Go to Dashboard
         </a>
         
-        <!-- ✅ CTA REFERRAL PROGRAM -->
-        <div class="referral-cta">
-            <h3>🎁 Earn Platinum for Free!</h3>
-            <p>Invite 3 friends and get <strong>Platinum free for 3 months</strong></p>
-            <a href="referral-program.html" class="btn-referral">
-                <i class="fas fa-gift"></i> Start Referring
-            </a>
-        </div>
-        
         <div class="thank-you-note">
             <p><strong>Thank you for choosing AlphaVault AI!</strong></p>
             <p>A confirmation email has been sent to your inbox.</p>
+            <p>If you have any questions, contact us at <strong>info@alphavault-ai.com</strong></p>
         </div>
     </div>
     
@@ -278,94 +439,92 @@
     <script src="assets/js/firebase-config.js"></script>
     
     <script>
-        // WORKER_URL est déjà défini dans firebase-config.js
+        console.log('✅ Success page loaded');
         
-        // Récupérer les paramètre URL
+        // ═══════════════════════════════════════════════════════════════
+        // RÉCUPÉRATION DES PARAMÈTRES URL
+        // ═══════════════════════════════════════════════════════════════
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
         const isFree = urlParams.get('free') === 'true';
         const isTrial = urlParams.get('trial') === 'true';
         const trialDays = urlParams.get('days') || '14';
-        const noConfetti = urlParams.get('noconfetti') === 'true';
         
-        // Afficher le nom du plan
+        console.log('📊 URL Parameters:', { plan, isFree, isTrial, trialDays });
+        
+        // ═══════════════════════════════════════════════════════════════
+        // AFFICHAGE DU NOM DU PLAN
+        // ═══════════════════════════════════════════════════════════════
         if (plan) {
-            const planName = plan === 'pro' ? 'AlphaVault Pro' : plan === 'platinum' ? 'AlphaVault Platinum' : 'AlphaVault Basic';
+            let planName = 'AlphaVault Basic';
+            
+            if (plan.toLowerCase() === 'pro') {
+                planName = 'AlphaVault Pro';
+            } else if (plan.toLowerCase() === 'platinum') {
+                planName = 'AlphaVault Platinum';
+            }
+            
             document.getElementById('planInfo').textContent = planName;
+            console.log('✅ Plan displayed:', planName);
         }
         
-        // Adapter le message si accès gratuit
+        // ═══════════════════════════════════════════════════════════════
+        // ADAPTATION DU MESSAGE SELON LE TYPE D'ACCÈS
+        // ═══════════════════════════════════════════════════════════════
+        const successMessageEl = document.getElementById('successMessage');
+        const trialRowEl = document.getElementById('trialRow');
+        const trialDaysValueEl = document.getElementById('trialDaysValue');
+        const trialBadgeEl = document.getElementById('trialBadge');
+        const trialTextEl = document.getElementById('trialText');
+        
         if (isFree) {
-            document.querySelector('.success-message').textContent = 'Your free lifetime access has been activated!';
-            document.getElementById('trialRow').style.display = 'none';
+            // ✅ Accès gratuit à vie
+            successMessageEl.textContent = 'Your free lifetime access has been activated!';
+            trialRowEl.style.display = 'none';
+            trialBadgeEl.style.display = 'none';
+            console.log('🎁 Free lifetime access activated');
+            
         } else if (isTrial) {
-            document.querySelector('.success-message').textContent = `Your ${trialDays}-day free trial has started!`;
-            document.getElementById('trialRow').style.display = 'flex';
-            document.getElementById('trialRow').querySelector('.detail-value').textContent = `${trialDays} days`;
+            // ✅ Période d'essai
+            successMessageEl.textContent = `Your ${trialDays}-day free trial has started!`;
+            trialRowEl.style.display = 'flex';
+            trialDaysValueEl.textContent = `${trialDays} days`;
+            trialBadgeEl.style.display = 'inline-flex';
+            trialTextEl.textContent = `${trialDays}-day free trial - No credit card required`;
+            console.log(`⏱ Trial period activated: ${trialDays} days`);
+            
         } else {
-            document.getElementById('trialRow').style.display = 'flex';
+            // ✅ Abonnement standard (14 jours d'essai inclus)
+            trialRowEl.style.display = 'flex';
+            trialDaysValueEl.textContent = '14 days';
+            console.log('✅ Standard subscription activated');
         }
         
         // ═══════════════════════════════════════════════════════════════
-        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT
+        // DÉTECTION DU MODE SOMBRE
         // ═══════════════════════════════════════════════════════════════
-        
-        async function completeReferralAfterPayment() {
-            try {
-                // Vérifier si l'utilisateur est connecté
-                const user = firebase.auth().currentUser;
-                
-                if (!user) {
-                    console.log('⚠ No user authenticated - skipping referral completion');
-                    return;
-                }
-                
-                console.log('🎁 Checking for referral completion...');
-                console.log('   User ID:', user.uid);
-                console.log('   Plan:', plan);
-                console.log('   Is Free:', isFree);
-                console.log('   Is Trial:', isTrial);
-                
-                // Ne compléter le parrainage que si c'est un paiement réel (pas trial/free)
-                if (!isFree && !isTrial && plan !== 'basic') {
-                    console.log('✅ Valid paid subscription - completing referral...');
-                    
-                    const token = await user.getIdToken();
-                    
-                    const response = await fetch(`${window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev'}/api/referral/complete`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        console.log('✅ Referral completed successfully');
-                    } else {
-                        const errorData = await response.json();
-                        console.log('ℹ Referral completion response:', errorData);
-                    }
-                } else {
-                    console.log('ℹ Free/Trial subscription - referral will be completed after payment');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error completing referral:', error);
-            }
-        }
-        
-        // Attendre que Firebase soit initialisé
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log('✅ User authenticated:', user.email);
-                completeReferralAfterPayment();
+        function applyDarkMode() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
+                             document.body.classList.contains('dark-mode');
+            
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                console.log('🌙 Dark mode applied');
             } else {
-                console.log('⚠ No user authenticated');
+                document.body.classList.remove('dark-mode');
+                console.log('☀ Light mode applied');
             }
-        });
+        }
         
-        console.log('✅ Success page loaded');
+        // Appliquer le mode au chargement
+        applyDarkMode();
+        
+        // Observer les changements (si toggle depuis la page)
+        const observer = new MutationObserver(applyDarkMode);
+        observer.observe(document.body, { 
+            attributes: true, 
+            attributeFilter: ['class'] 
+        });
     </script>
 </body>
 </html>
