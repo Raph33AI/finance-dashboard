@@ -1786,33 +1786,46 @@ async function checkPageAccess(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DÉTERMINER LE NIVEAU REQUIS POUR UNE PAGE
+// DÉTERMINER LE NIVEAU REQUIS POUR UNE PAGE (VERSION CORRIGÉE)
 // ═══════════════════════════════════════════════════════════════
 
 function getPageRequiredLevel(pageName) {
+    // ✅ CORRECTION : Normaliser le nom de page (toujours avec .html)
+    if (pageName && !pageName.endsWith('.html')) {
+        pageName = pageName + '.html';
+        console.log('🔧 Page name normalized to: ' + pageName);
+    }
+    
     if (PAGE_CATEGORIES.public.includes(pageName) || 
         PAGE_CATEGORIES.authenticated_only.includes(pageName) || 
         PAGE_CATEGORIES.demo.includes(pageName)) {
+        console.log('📄 Page "' + pageName + '" is PUBLIC/AUTHENTICATED/DEMO (level -1)');
         return -1;
     }
     
     // Pages communes = niveau -1 (accessible à tous)
     if (PAGE_CATEGORIES.common.includes(pageName)) {
+        console.log('📄 Page "' + pageName + '" is COMMON (level -1)');
         return -1;
     }
     
     if (PAGE_CATEGORIES.basic.includes(pageName)) {
+        console.log('📄 Page "' + pageName + '" is BASIC (level 0)');
         return 0;
     }
     
     if (PAGE_CATEGORIES.pro.includes(pageName)) {
+        console.log('📄 Page "' + pageName + '" is PRO (level 1)');
         return 1;
     }
     
     if (PAGE_CATEGORIES.platinum.includes(pageName)) {
+        console.log('📄 Page "' + pageName + '" is PLATINUM (level 2)');
         return 2;
     }
     
+    // ✅ CORRECTION : Par défaut = niveau BASIC (0) mais avec warning
+    console.warn('⚠ Page "' + pageName + '" not found in any category - defaulting to BASIC (level 0)');
     return 0;
 }
 
