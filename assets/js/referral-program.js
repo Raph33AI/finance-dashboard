@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   REFERRAL PROGRAM - CLIENT SIDE v2.2
+   REFERRAL PROGRAM - PAGE UI v3.0
    AlphaVault AI
-   ✅ Utilise UNIQUEMENT window.WORKER_URL (pas de déclaration locale)
+   ✅ Utilise Firestore (pas de Worker)
    ═══════════════════════════════════════════════════════════════ */
 
 let currentUser = null;
@@ -35,46 +35,23 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 async function loadReferralData() {
     try {
-        console.log('📥 Loading referral data...');
+        console.log('📥 Loading referral data from Firestore...');
         
-        const token = await currentUser.getIdToken();
-        
-        console.log('🔑 Firebase token obtained');
-        
-        // ✅ Utilisation directe de window.WORKER_URL
-        const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
-        
-        const response = await fetch(`${workerUrl}/api/referral/stats`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('📥 Response status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ API Error:', errorText);
-            throw new Error('Failed to load referral data');
-        }
-        
-        const data = await response.json();
+        const data = await window.loadReferralStatsFirestore(currentUser.uid);
         
         console.log('✅ Referral data loaded:', data);
         
         if (!data.success) {
-            throw new Error(data.error || 'Unknown error');
+            throw new Error('Failed to load referral data');
         }
         
         referralData = {
             code: data.referralCode,
-            count: data.totalReferrals || 0,
-            completed: data.completedReferrals || 0,
-            pending: data.pendingReferrals || 0,
-            referrals: data.referrals || [],
-            rewardActive: data.rewardActive || false
+            count: data.totalReferrals,
+            completed: data.completedReferrals,
+            pending: data.pendingReferrals,
+            referrals: data.referrals,
+            rewardActive: data.rewardActive
         };
         
         console.log('✅ Referral data processed:', referralData);
@@ -322,25 +299,9 @@ async function claimReward() {
     try {
         console.log('🎁 Claiming reward...');
         
-        const token = await currentUser.getIdToken();
-        const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
+        const result = await window.claimReferralRewardFirestore(currentUser.uid);
         
-        const response = await fetch(`${workerUrl}/api/referral/claim-reward`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to claim reward');
-        }
-        
-        const data = await response.json();
-        
-        console.log('✅ Reward claimed:', data);
+        console.log('✅ Reward claimed:', result);
         
         alert('✅ SUCCESS!\n\nYour Platinum Plan (3 months free) has been activated!\n\nEnjoy premium access to all AlphaVault AI features!');
         
@@ -411,4 +372,4 @@ function showError(message) {
     document.head.appendChild(style);
 }
 
-console.log('✅ Referral Program loaded (v2.2 - No WORKER_URL declaration)');
+console.log('✅ Referral Program UI loaded v3.0 (Firestore)');

@@ -277,9 +277,10 @@
     <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
     
+    <!-- ✅ Referral Firestore -->
+    <script src="assets/js/referral-firestore.js"></script>
+    
     <script>
-        // ✅ PAS DE DÉCLARATION - Utilisation directe de window.WORKER_URL
-        
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const plan = urlParams.get('plan');
@@ -307,7 +308,7 @@
         }
         
         // ═══════════════════════════════════════════════════════════════
-        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (SANS DÉCLARATION)
+        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (FIRESTORE)
         // ═══════════════════════════════════════════════════════════════
         
         async function completeReferralAfterPayment() {
@@ -325,33 +326,20 @@
                 console.log('   Is Free:', isFree);
                 console.log('   Is Trial:', isTrial);
                 
+                // Compléter uniquement pour les paiements réels (pas free, pas trial, pas basic)
                 if (!isFree && !isTrial && plan !== 'basic') {
                     console.log('✅ Valid paid subscription - completing referral...');
                     
-                    const token = await user.getIdToken();
-                    
-                    // ✅ Utilisation directe de window.WORKER_URL (pas de déclaration)
-                    const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
-                    
-                    const response = await fetch(`${workerUrl}/api/referral/complete`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('✅ Referral completed successfully:', data);
+                    if (typeof window.completeReferralFirestore === 'function') {
+                        await window.completeReferralFirestore(user.uid, plan);
+                        console.log('✅ Referral completed successfully');
                     } else {
-                        const errorData = await response.json();
-                        console.log('ℹ Referral completion response:', errorData);
+                        console.warn('⚠ completeReferralFirestore non disponible');
                     }
                 } else {
                     console.log('ℹ Free/Trial/Basic subscription - referral completion handled elsewhere');
                     console.log('   → Basic: completed in checkout.js');
-                    console.log('   → Trial/Free: will be completed after payment');
+                    console.log('   → Trial/Free: will be completed after actual payment');
                 }
                 
             } catch (error) {
@@ -369,7 +357,7 @@
             }
         });
         
-        console.log('✅ Success page loaded (v2.3 - No WORKER_URL declaration)');
+        console.log('✅ Success page loaded v3.0 (Firestore)');
     </script>
 </body>
 </html>
