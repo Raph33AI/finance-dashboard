@@ -278,8 +278,7 @@
     <script src="assets/js/firebase-config.js"></script>
     
     <script>
-        // WORKER_URL est déjà défini dans firebase-config.js
-        const WORKER_URL = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
+        // ✅ PAS DE DÉCLARATION - Utilisation directe de window.WORKER_URL
         
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -308,12 +307,11 @@
         }
         
         // ═══════════════════════════════════════════════════════════════
-        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (CORRIGÉ)
+        // ✅ TRACKING DU PARRAINAGE APRÈS PAIEMENT (SANS DÉCLARATION)
         // ═══════════════════════════════════════════════════════════════
         
         async function completeReferralAfterPayment() {
             try {
-                // Vérifier si l'utilisateur est connecté
                 const user = firebase.auth().currentUser;
                 
                 if (!user) {
@@ -327,17 +325,15 @@
                 console.log('   Is Free:', isFree);
                 console.log('   Is Trial:', isTrial);
                 
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                // ✅ CORRECTION : Compléter le parrainage SEULEMENT pour paiements réels
-                // (Pas trial, pas free, pas basic car déjà géré dans checkout.js)
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                
                 if (!isFree && !isTrial && plan !== 'basic') {
                     console.log('✅ Valid paid subscription - completing referral...');
                     
                     const token = await user.getIdToken();
                     
-                    const response = await fetch(`${WORKER_URL}/api/referral/complete`, {
+                    // ✅ Utilisation directe de window.WORKER_URL (pas de déclaration)
+                    const workerUrl = window.WORKER_URL || 'https://finance-hub-api.raphnardone.workers.dev';
+                    
+                    const response = await fetch(`${workerUrl}/api/referral/complete`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -373,7 +369,7 @@
             }
         });
         
-        console.log('✅ Success page loaded - Referral completion optimized');
+        console.log('✅ Success page loaded (v2.3 - No WORKER_URL declaration)');
     </script>
 </body>
 </html>
