@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Workers Extractor - AlphaVault AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #f59e0b;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #334155;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        .btn {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+        }
+        #output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 600px;
+            overflow-y: auto;
+            display: none;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #f59e0b;
+            display: none;
+        }
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #f59e0b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #ea580c);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
+        .help {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .help-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        .help-text {
+            color: #78350f;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .help-link {
+            color: #f59e0b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .help-link:hover {
+            text-decoration: underline;
+        }
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .warning-title {
+            font-weight: 600;
+            color: #991b1b;
+            margin-bottom: 8px;
+        }
+        .warning-text {
+            color: #7f1d1d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .option-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .checkbox-label input {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☁ Cloudflare Workers Extractor</h1>
+        <p class="subtitle">Extract all Workers scripts, variables, and configurations from your Cloudflare account</p>
+
+        <div class="help">
+            <div class="help-title">📝 Comment obtenir vos identifiants Cloudflare :</div>
+            <div class="help-text">
+                <strong>1. Account ID :</strong><br>
+                • Allez sur <a href="https://dash.cloudflare.com" target="_blank" class="help-link">dash.cloudflare.com</a><br>
+                • Cliquez sur "Workers & Pages" dans le menu gauche<br>
+                • Votre Account ID est affiché en haut à droite<br><br>
+                
+                <strong>2. API Token :</strong><br>
+                • Allez sur <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" class="help-link">Profile → API Tokens</a><br>
+                • Cliquez sur "Create Token"<br>
+                • Utilisez le template "Edit Cloudflare Workers" ou créez un custom token avec :<br>
+                &nbsp;&nbsp;→ Permissions: Account / Workers Scripts / Read<br>
+                &nbsp;&nbsp;→ Permissions: Account / Workers KV Storage / Read<br>
+                &nbsp;&nbsp;→ Permissions: Account / Account Settings / Read<br>
+                • Copiez le token généré (vous ne pourrez le voir qu'une fois)
+            </div>
+        </div>
+
+        <div class="warning">
+            <div class="warning-title">🔒 Sécurité :</div>
+            <div class="warning-text">
+                Vos identifiants Cloudflare ne sont JAMAIS sauvegardés. Ils sont utilisés uniquement en mémoire pour l'extraction et supprimés immédiatement après.<br>
+                Le code s'exécute 100% dans votre navigateur (aucun serveur tiers).
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="accountId">Cloudflare Account ID:</label>
+            <input type="text" id="accountId" placeholder="ex: 1a2b3c4d5e6f7g8h9i0j">
+        </div>
+
+        <div class="input-group">
+            <label for="apiToken">Cloudflare API Token:</label>
+            <input type="password" id="apiToken" placeholder="ex: AbCdEf123456...">
+        </div>
+
+        <div class="option-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="extractCode" checked>
+                <span>Extract Workers Code</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="extractBindings" checked>
+                <span>Extract Bindings & Variables</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="extractRoutes" checked>
+                <span>Extract Routes</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="extractKV" checked>
+                <span>Extract KV Namespaces</span>
+            </label>
+        </div>
+
+        <button class="btn" onclick="extractCloudflare()" id="extractBtn">
+            ☁ Extract from Cloudflare
+        </button>
+        <button class="btn btn-secondary" onclick="downloadReport()" id="downloadBtn" style="display: none;">
+            📥 Download Report
+        </button>
+        <button class="btn" onclick="testConnection()" id="testBtn">
+            🔍 Test Connection
+        </button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing...</div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Connecting to Cloudflare...</div>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;"></div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        let reportData = '';
+        let workersData = [];
+        let kvNamespaces = [];
+        let accountInfo = {};
+
+        async function testConnection() {
+            const accountId = document.getElementById('accountId').value.trim();
+            const apiToken = document.getElementById('apiToken').value.trim();
+
+            if (!accountId || !apiToken) {
+                alert('⚠ Veuillez remplir Account ID et API Token');
+                return;
+            }
+
+            document.getElementById('testBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ Connexion réussie!\n\n${data.result.length} Workers trouvés dans votre compte.`);
+                } else {
+                    alert(`❌ Erreur de connexion:\n\n${data.errors.map(e => e.message).join('\n')}`);
+                }
+            } catch (error) {
+                alert(`❌ Erreur réseau:\n\n${error.message}`);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('testBtn').disabled = false;
+            }
+        }
+
+        async function extractCloudflare() {
+            const accountId = document.getElementById('accountId').value.trim();
+            const apiToken = document.getElementById('apiToken').value.trim();
+
+            if (!accountId || !apiToken) {
+                alert('⚠ Veuillez remplir Account ID et API Token');
+                return;
+            }
+
+            const extractCode = document.getElementById('extractCode').checked;
+            const extractBindings = document.getElementById('extractBindings').checked;
+            const extractRoutes = document.getElementById('extractRoutes').checked;
+            const extractKV = document.getElementById('extractKV').checked;
+
+            document.getElementById('extractBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+
+            try {
+                updateProgress(0, 'Fetching account information...');
+                
+                // Get account info
+                accountInfo = await getAccountInfo(accountId, apiToken);
+                
+                updateProgress(10, 'Listing Workers scripts...');
+                
+                // Get all workers
+                const workers = await listWorkers(accountId, apiToken);
+                workersData = [];
+
+                updateProgress(20, `Found ${workers.length} Workers. Analyzing...`);
+
+                // Analyze each worker
+                for (let i = 0; i < workers.length; i++) {
+                    const worker = workers[i];
+                    const progress = 20 + Math.round((i / workers.length) * 50);
+                    updateProgress(progress, `Analyzing Worker ${i + 1}/${workers.length}: ${worker.id}`);
+
+                    const workerData = {
+                        id: worker.id,
+                        script: null,
+                        bindings: null,
+                        routes: null,
+                        metadata: worker
+                    };
+
+                    if (extractCode) {
+                        workerData.script = await getWorkerScript(accountId, apiToken, worker.id);
+                    }
+
+                    if (extractBindings) {
+                        workerData.bindings = await getWorkerSettings(accountId, apiToken, worker.id);
+                    }
+
+                    if (extractRoutes) {
+                        workerData.routes = await getWorkerRoutes(accountId, apiToken, worker.id);
+                    }
+
+                    workersData.push(workerData);
+                }
+
+                updateProgress(70, 'Extracting KV Namespaces...');
+                
+                if (extractKV) {
+                    kvNamespaces = await listKVNamespaces(accountId, apiToken);
+                }
+
+                updateProgress(90, 'Generating report...');
+                generateReport();
+
+                updateProgress(100, 'Extraction complete! ✅');
+
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('progressContainer').style.display = 'none';
+                    document.getElementById('output').style.display = 'block';
+                    document.getElementById('stats').style.display = 'grid';
+                    document.getElementById('downloadBtn').style.display = 'inline-block';
+                    document.getElementById('extractBtn').disabled = false;
+                }, 500);
+
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('progressContainer').style.display = 'none';
+                document.getElementById('extractBtn').disabled = false;
+                alert(`❌ Error during extraction:\n\n${error.message}`);
+                console.error('Extraction error:', error);
+            }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        async function getAccountInfo(accountId, apiToken) {
+            const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}`, {
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.errors.map(e => e.message).join(', '));
+            }
+
+            return data.result;
+        }
+
+        async function listWorkers(accountId, apiToken) {
+            const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts`, {
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.errors.map(e => e.message).join(', '));
+            }
+
+            return data.result;
+        }
+
+        async function getWorkerScript(accountId, apiToken, scriptName) {
+            try {
+                const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${scriptName}`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Accept': 'application/javascript'
+                    }
+                });
+
+                if (!response.ok) {
+                    return { error: `HTTP ${response.status}` };
+                }
+
+                const code = await response.text();
+                
+                // Analyze code
+                const lines = code.split('\n').length;
+                const functions = (code.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []).length;
+                const eventListeners = (code.match(/addEventListener/g) || []).length;
+                const fetches = (code.match(/fetch\(/g) || []).length;
+                const hasKV = code.includes('KV');
+                const hasR2 = code.includes('R2');
+                const hasDO = code.includes('DurableObject');
+                const hasD1 = code.includes('D1');
+
+                return {
+                    code,
+                    analysis: {
+                        lines,
+                        functions,
+                        eventListeners,
+                        apiCalls: fetches,
+                        integrations: {
+                            kv: hasKV,
+                            r2: hasR2,
+                            durableObjects: hasDO,
+                            d1: hasD1
+                        }
+                    }
+                };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function getWorkerSettings(accountId, apiToken, scriptName) {
+            try {
+                const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${scriptName}/settings`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    return { error: data.errors.map(e => e.message).join(', ') };
+                }
+
+                return data.result;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function getWorkerRoutes(accountId, apiToken, scriptName) {
+            try {
+                // Get all zones first
+                const zonesResponse = await fetch(`https://api.cloudflare.com/client/v4/zones`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const zonesData = await zonesResponse.json();
+                if (!zonesData.success) {
+                    return { error: 'Cannot fetch zones' };
+                }
+
+                const routes = [];
+                
+                for (const zone of zonesData.result) {
+                    const routesResponse = await fetch(`https://api.cloudflare.com/client/v4/zones/${zone.id}/workers/routes`, {
+                        headers: {
+                            'Authorization': `Bearer ${apiToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const routesData = await routesResponse.json();
+                    if (routesData.success) {
+                        const workerRoutes = routesData.result.filter(r => r.script === scriptName);
+                        routes.push(...workerRoutes.map(r => ({ ...r, zone: zone.name })));
+                    }
+                }
+
+                return routes;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function listKVNamespaces(accountId, apiToken) {
+            try {
+                const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    return [];
+                }
+
+                return data.result;
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function generateReport() {
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${workersData.length}</div>
+                    <div class="stat-label">Workers Scripts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${kvNamespaces.length}</div>
+                    <div class="stat-label">KV Namespaces</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${workersData.filter(w => w.bindings && w.bindings.bindings).length}</div>
+                    <div class="stat-label">Workers with Bindings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${workersData.reduce((sum, w) => sum + (w.routes ? w.routes.length : 0), 0)}</div>
+                    <div class="stat-label">Total Routes</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+
+            reportData = `
+╔════════════════════════════════════════════════════════════════════╗
+║          CLOUDFLARE WORKERS - COMPLETE EXTRACTION                  ║
+║          Generated: ${new Date().toLocaleString()}                 ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📊 ACCOUNT INFORMATION
+═══════════════════════════════════════════════════════════════════
+
+Account Name: ${accountInfo.name || 'N/A'}
+Account ID: ${accountInfo.id}
+Account Type: ${accountInfo.type || 'N/A'}
+
+📊 GLOBAL STATISTICS
+═══════════════════════════════════════════════════════════════════
+
+• Workers Scripts: ${workersData.length}
+• KV Namespaces: ${kvNamespaces.length}
+• Workers with Bindings: ${workersData.filter(w => w.bindings && w.bindings.bindings).length}
+• Total Routes: ${workersData.reduce((sum, w) => sum + (w.routes ? w.routes.length : 0), 0)}
+• Total Lines of Code: ${workersData.reduce((sum, w) => sum + (w.script?.analysis?.lines || 0), 0)}
+
+${generateWorkersSection()}
+
+${generateKVSection()}
+
+═══════════════════════════════════════════════════════════════════
+End of Cloudflare Workers Report
+═══════════════════════════════════════════════════════════════════
+`;
+
+            document.getElementById('output').textContent = reportData;
+        }
+
+        function generateWorkersSection() {
+            if (workersData.length === 0) return '';
+
+            let section = `
+☁ CLOUDFLARE WORKERS (${workersData.length})
+═══════════════════════════════════════════════════════════════════
+
+`;
+
+            workersData.forEach((worker, index) => {
+                section += `${index + 1}. ${worker.id}\n`;
+                section += `   ────────────────────────────────────────────────────────────────\n`;
+                
+                // Metadata
+                if (worker.metadata) {
+                    section += `   Created: ${worker.metadata.created_on || 'N/A'}\n`;
+                    section += `   Modified: ${worker.metadata.modified_on || 'N/A'}\n`;
+                    if (worker.metadata.usage_model) {
+                        section += `   Usage Model: ${worker.metadata.usage_model}\n`;
+                    }
+                }
+
+                // Script Analysis
+                if (worker.script && worker.script.analysis) {
+                    const a = worker.script.analysis;
+                    section += `\n   📊 CODE ANALYSIS:\n`;
+                    section += `   Lines of Code: ${a.lines}\n`;
+                    section += `   Functions: ${a.functions}\n`;
+                    section += `   Event Listeners: ${a.eventListeners}\n`;
+                    section += `   API Calls (fetch): ${a.apiCalls}\n`;
+                    
+                    const integrations = [];
+                    if (a.integrations.kv) integrations.push('KV');
+                    if (a.integrations.r2) integrations.push('R2');
+                    if (a.integrations.durableObjects) integrations.push('Durable Objects');
+                    if (a.integrations.d1) integrations.push('D1');
+                    if (integrations.length) {
+                        section += `   Integrations: ${integrations.join(', ')}\n`;
+                    }
+                }
+
+                // Bindings
+                if (worker.bindings && worker.bindings.bindings) {
+                    section += `\n   🔗 BINDINGS & VARIABLES:\n`;
+                    worker.bindings.bindings.forEach(binding => {
+                        section += `   • ${binding.name} (${binding.type})\n`;
+                        if (binding.namespace_id) section += `     Namespace ID: ${binding.namespace_id}\n`;
+                        if (binding.bucket_name) section += `     Bucket: ${binding.bucket_name}\n`;
+                        if (binding.class_name) section += `     Class: ${binding.class_name}\n`;
+                        if (binding.database_id) section += `     Database ID: ${binding.database_id}\n`;
+                    });
+                }
+
+                // Environment Variables (Secrets)
+                if (worker.bindings && worker.bindings.compatibility_date) {
+                    section += `\n   ⚙ CONFIGURATION:\n`;
+                    section += `   Compatibility Date: ${worker.bindings.compatibility_date}\n`;
+                    if (worker.bindings.compatibility_flags) {
+                        section += `   Compatibility Flags: ${worker.bindings.compatibility_flags.join(', ')}\n`;
+                    }
+                }
+
+                // Routes
+                if (worker.routes && worker.routes.length > 0) {
+                    section += `\n   🌐 ROUTES (${worker.routes.length}):\n`;
+                    worker.routes.forEach(route => {
+                        section += `   • ${route.pattern}\n`;
+                        section += `     Zone: ${route.zone}\n`;
+                    });
+                }
+
+                // Full Code
+                if (worker.script && worker.script.code) {
+                    section += `\n   📝 WORKER CODE:\n`;
+                    section += `   ────────────────────────────────────────────────────────────────\n`;
+                    section += worker.script.code.split('\n').map(line => `   ${line}`).join('\n');
+                    section += `\n   ────────────────────────────────────────────────────────────────\n`;
+                }
+
+                section += `\n\n`;
+            });
+
+            return section;
+        }
+
+        function generateKVSection() {
+            if (kvNamespaces.length === 0) return '';
+
+            let section = `
+🗄 KV NAMESPACES (${kvNamespaces.length})
+═══════════════════════════════════════════════════════════════════
+
+`;
+
+            kvNamespaces.forEach((ns, index) => {
+                section += `${index + 1}. ${ns.title}\n`;
+                section += `   Namespace ID: ${ns.id}\n`;
+                if (ns.supports_url_encoding !== undefined) {
+                    section += `   URL Encoding: ${ns.supports_url_encoding ? 'Yes' : 'No'}\n`;
+                }
+                section += `\n`;
+            });
+
+            return section;
+        }
+
+        function downloadReport() {
+            const blob = new Blob([reportData], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cloudflare-workers-report-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert('✅ Cloudflare Workers report downloaded successfully!\n\nYou can now send this file.');
+        }
+    </script>
+</body>
+</html>
