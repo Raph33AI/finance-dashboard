@@ -1037,8 +1037,8 @@
                     </section>
 
                     <!-- ============================================
-                         SECTION 10: CODE EXTRACTOR
-                         ============================================ -->
+                        SECTION 10: CODE EXTRACTOR (AMÉLIORÉE)
+                        ============================================ -->
                     <section class="doc-section" id="extractor">
                         <h2 class="section-title">
                             <i class="fas fa-file-code"></i>
@@ -1051,7 +1051,7 @@
                             </h3>
                             <p style="color: var(--text-light); line-height: 1.8;">
                                 This tool automatically scans your GitHub repository and generates a comprehensive report 
-                                including all HTML, CSS, and JavaScript files with detailed analysis.
+                                including all HTML, CSS, and JavaScript files with detailed analysis of functions, scripts, and integrations.
                             </p>
                         </div>
 
@@ -1081,7 +1081,7 @@
                                 <select id="extractorLevel">
                                     <option value="basic">Basic (Structure + File sizes)</option>
                                     <option value="deep">Deep (+ Content analysis)</option>
-                                    <option value="ultra" selected>Ultra Deep (+ Detailed descriptions)</option>
+                                    <option value="ultra" selected>Ultra Deep (+ Detailed functions & scripts)</option>
                                 </select>
                             </div>
 
@@ -1126,8 +1126,8 @@
                     </section>
 
                     <!-- ============================================
-                         SECTION 11: CLOUDFLARE WORKERS
-                         ============================================ -->
+                        SECTION 11: CLOUDFLARE WORKERS (CORRIGÉE)
+                        ============================================ -->
                     <section class="doc-section" id="cloudflare">
                         <h2 class="section-title">
                             <i class="fas fa-cloud"></i>
@@ -1252,7 +1252,7 @@
         console.log('📚 Technical Documentation loaded successfully!');
     </script>
 
-    <!-- ⭐ GITHUB ARCHITECTURE EXTRACTOR SCRIPT -->
+    <!-- ⭐ GITHUB ARCHITECTURE EXTRACTOR SCRIPT (AMÉLIORÉ) -->
     <script>
         let extractorData = '';
         let extractorFiles = [];
@@ -1355,7 +1355,7 @@
             for (const file of filesToAnalyze) {
                 try {
                     const content = await fetchFileContent(file.download_url);
-                    file.analysis = analyzeContent(file, content, level);
+                    file.analysis = analyzeContentDetailed(file, content, level);
                 } catch (error) {
                     file.analysis = { error: 'Failed to analyze' };
                 }
@@ -1374,7 +1374,7 @@
             return await response.text();
         }
 
-        function analyzeContent(file, content, level) {
+        function analyzeContentDetailed(file, content, level) {
             const lines = content.split('\n').length;
             const size = (file.size / 1024).toFixed(2);
 
@@ -1384,15 +1384,36 @@
             };
 
             if (file.name.endsWith('.html')) {
+                // Titre
                 const titleMatch = content.match(/<title>(.*?)<\/title>/i);
                 analysis.title = titleMatch ? titleMatch[1] : 'No title';
                 
+                // Meta description
                 const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
-                analysis.description = metaDesc ? metaDesc[1].substring(0, 100) : '';
+                analysis.description = metaDesc ? metaDesc[1].substring(0, 150) : '';
                 
+                // SCRIPTS JS UTILISÉS (complet)
+                const scriptTags = content.match(/<script[^>]*src=["'](.*?)["']/gi) || [];
+                analysis.scripts = scriptTags.map(s => {
+                    const match = s.match(/src=["'](.*?)["']/i);
+                    return match ? match[1] : '';
+                }).filter(s => s);
+                
+                // STYLESHEETS UTILISÉES (complet)
+                const linkTags = content.match(/<link[^>]*href=["'](.*?)["']/gi) || [];
+                analysis.stylesheets = linkTags
+                    .map(l => {
+                        const match = l.match(/href=["'](.*?)["']/i);
+                        return match ? match[1] : '';
+                    })
+                    .filter(l => l.endsWith('.css'));
+                
+                // Composants
                 analysis.components = {
                     forms: (content.match(/<form/gi) || []).length,
-                    buttons: (content.match(/<button/gi) || []).length
+                    buttons: (content.match(/<button/gi) || []).length,
+                    inputs: (content.match(/<input/gi) || []).length,
+                    sections: (content.match(/<section/gi) || []).length
                 };
 
                 if (level === 'ultra') {
@@ -1401,6 +1422,8 @@
                     if (lower.includes('firebase')) analysis.integrations.push('Firebase');
                     if (lower.includes('stripe')) analysis.integrations.push('Stripe');
                     if (lower.includes('highcharts')) analysis.integrations.push('Highcharts');
+                    if (lower.includes('chart.js')) analysis.integrations.push('Chart.js');
+                    if (lower.includes('three.js')) analysis.integrations.push('Three.js');
                 }
             }
 
@@ -1408,11 +1431,48 @@
                 const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
                 analysis.classes = [...new Set(classes)].length;
                 analysis.mediaQueries = (content.match(/@media/g) || []).length;
+                analysis.keyframes = (content.match(/@keyframes/g) || []).length;
+                
+                if (level === 'ultra') {
+                    const topClasses = [...new Set(classes)].slice(0, 10);
+                    analysis.topClasses = topClasses;
+                }
             }
 
             if (file.name.endsWith('.js')) {
-                analysis.functions = (content.match(/function\s+/g) || []).length;
+                // FONCTIONS DÉTECTÉES (noms complets)
+                const functions = content.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || [];
+                const functionNames = functions.map(f => f.replace('function ', ''));
+                
+                const arrowFunctions = content.match(/(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/g) || [];
+                const arrowNames = arrowFunctions.map(f => {
+                    const match = f.match(/(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/);
+                    return match ? match[1] : '';
+                }).filter(n => n);
+                
+                const allFunctionNames = [...functionNames, ...arrowNames];
+                
+                analysis.functionsCount = allFunctionNames.length;
+                analysis.functionNames = allFunctionNames.slice(0, 15); // Top 15 functions
+                
+                // CLASSES DÉTECTÉES
+                const classes = content.match(/class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || [];
+                const classNames = classes.map(c => c.replace('class ', ''));
+                analysis.classNames = classNames;
+                
+                // AUTRES MÉTRIQUES
                 analysis.eventListeners = (content.match(/addEventListener/g) || []).length;
+                analysis.apiCalls = (content.match(/fetch\(/g) || []).length;
+                analysis.asyncFunctions = (content.match(/async\s+function/g) || []).length;
+                
+                // INTÉGRATIONS
+                if (level === 'ultra') {
+                    analysis.integrations = {
+                        firebase: content.includes('firebase'),
+                        stripe: content.includes('stripe') || content.includes('Stripe'),
+                        charts: content.includes('Chart') || content.includes('Highcharts')
+                    };
+                }
             }
 
             return analysis;
@@ -1452,23 +1512,24 @@
             document.getElementById('extractorStats').innerHTML = statsHtml;
 
             let report = `
-╔════════════════════════════════════════════════════════════════════╗
-║        ALPHAVAULT AI - COMPLETE ARCHITECTURE REPORT                ║
-║        Generated: ${new Date().toLocaleString()}                   ║
-╚════════════════════════════════════════════════════════════════════╝
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║        ALPHAVAULT AI - COMPLETE ARCHITECTURE REPORT                ║
+    ║        Generated: ${new Date().toLocaleString()}                   ║
+    ╚════════════════════════════════════════════════════════════════════╝
 
-📊 GLOBAL STATISTICS
-═══════════════════════════════════════════════════════════════════
+    📊 GLOBAL STATISTICS
+    ═══════════════════════════════════════════════════════════════════
 
-• HTML Pages: ${htmlFiles.length}
-• CSS Files: ${cssFiles.length}
-• JavaScript Files: ${jsFiles.length}
-• Total Files: ${files.length}
-• Total Lines of Code: ${totalLines.toLocaleString()}
-• Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
+    • HTML Pages: ${htmlFiles.length}
+    • CSS Files: ${cssFiles.length}
+    • JavaScript Files: ${jsFiles.length}
+    • Total Files: ${files.length}
+    • Total Lines of Code: ${totalLines.toLocaleString()}
+    • Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
 
-`;
+    `;
 
+            // HTML FILES
             if (htmlFiles.length > 0) {
                 report += `\n📄 HTML PAGES (${htmlFiles.length})\n`;
                 report += '═══════════════════════════════════════════════════════════════════\n\n';
@@ -1483,17 +1544,38 @@
                         const a = file.analysis;
                         if (a.title) report += `   Title: ${a.title}\n`;
                         if (a.description) report += `   Description: ${a.description}\n`;
-                        if (a.integrations && a.integrations.length) {
-                            report += `   Integrations: ${a.integrations.join(', ')}\n`;
+                        
+                        if (a.scripts && a.scripts.length) {
+                            report += `   \n   📜 JavaScript Files Used (${a.scripts.length}):\n`;
+                            a.scripts.forEach(script => {
+                                report += `      • ${script}\n`;
+                            });
                         }
+                        
+                        if (a.stylesheets && a.stylesheets.length) {
+                            report += `   \n   🎨 Stylesheets Used (${a.stylesheets.length}):\n`;
+                            a.stylesheets.forEach(css => {
+                                report += `      • ${css}\n`;
+                            });
+                        }
+                        
+                        if (a.integrations && a.integrations.length) {
+                            report += `   \n   🔗 Integrations: ${a.integrations.join(', ')}\n`;
+                        }
+                        
                         if (a.components) {
-                            report += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons\n`;
+                            report += `   \n   🧩 Components:\n`;
+                            report += `      • Forms: ${a.components.forms}\n`;
+                            report += `      • Buttons: ${a.components.buttons}\n`;
+                            report += `      • Inputs: ${a.components.inputs}\n`;
+                            report += `      • Sections: ${a.components.sections}\n`;
                         }
                     }
                     report += '\n';
                 });
             }
 
+            // CSS FILES
             if (cssFiles.length > 0) {
                 report += `\n🎨 CSS FILES (${cssFiles.length})\n`;
                 report += '═══════════════════════════════════════════════════════════════════\n\n';
@@ -1503,10 +1585,18 @@
                     report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
                     if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
                     if (file.analysis?.classes) report += ` | Classes: ${file.analysis.classes}`;
-                    report += `\n\n`;
+                    if (file.analysis?.mediaQueries) report += ` | Media Queries: ${file.analysis.mediaQueries}`;
+                    report += `\n`;
+                    
+                    if (file.analysis?.topClasses && file.analysis.topClasses.length) {
+                        report += `   Top Classes: ${file.analysis.topClasses.join(', ')}\n`;
+                    }
+                    
+                    report += '\n';
                 });
             }
 
+            // JS FILES
             if (jsFiles.length > 0) {
                 report += `\n📜 JAVASCRIPT FILES (${jsFiles.length})\n`;
                 report += '═══════════════════════════════════════════════════════════════════\n\n';
@@ -1515,8 +1605,48 @@
                     report += `${index + 1}. ${file.path}\n`;
                     report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
                     if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
-                    if (file.analysis?.functions) report += ` | Functions: ${file.analysis.functions}`;
-                    report += `\n\n`;
+                    report += `\n`;
+                    
+                    if (file.analysis) {
+                        const a = file.analysis;
+                        
+                        if (a.functionsCount) {
+                            report += `   Functions: ${a.functionsCount}\n`;
+                        }
+                        
+                        if (a.functionNames && a.functionNames.length) {
+                            report += `   \n   🔧 Main Functions:\n`;
+                            a.functionNames.forEach(fn => {
+                                report += `      • ${fn}()\n`;
+                            });
+                        }
+                        
+                        if (a.classNames && a.classNames.length) {
+                            report += `   \n   🏛 Classes:\n`;
+                            a.classNames.forEach(cn => {
+                                report += `      • class ${cn}\n`;
+                            });
+                        }
+                        
+                        if (a.eventListeners || a.apiCalls || a.asyncFunctions) {
+                            report += `   \n   📊 Metrics:\n`;
+                            if (a.eventListeners) report += `      • Event Listeners: ${a.eventListeners}\n`;
+                            if (a.apiCalls) report += `      • API Calls (fetch): ${a.apiCalls}\n`;
+                            if (a.asyncFunctions) report += `      • Async Functions: ${a.asyncFunctions}\n`;
+                        }
+                        
+                        if (a.integrations) {
+                            const integs = [];
+                            if (a.integrations.firebase) integs.push('Firebase');
+                            if (a.integrations.stripe) integs.push('Stripe');
+                            if (a.integrations.charts) integs.push('Charts');
+                            if (integs.length) {
+                                report += `   \n   🔗 Integrations: ${integs.join(', ')}\n`;
+                            }
+                        }
+                    }
+                    
+                    report += '\n';
                 });
             }
 
@@ -1543,7 +1673,7 @@
         }
     </script>
 
-    <!-- ⭐ CLOUDFLARE WORKERS EXTRACTOR SCRIPT -->
+    <!-- ⭐ CLOUDFLARE WORKERS EXTRACTOR SCRIPT (CORRIGÉ) -->
     <script>
         let cloudflareReportData = null;
         let cloudflareFormattedReport = '';
@@ -1612,51 +1742,51 @@
 
         function generateCloudflareReport() {
             cloudflareFormattedReport = `
-╔════════════════════════════════════════════════════════════════════╗
-║          CLOUDFLARE WORKERS - INFRASTRUCTURE REPORT                ║
-║          Generated: ${new Date(cloudflareReportData.generated).toLocaleString()}                 ║
-╚════════════════════════════════════════════════════════════════════╝
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║          CLOUDFLARE WORKERS - INFRASTRUCTURE REPORT                ║
+    ║          Generated: ${new Date(cloudflareReportData.generated).toLocaleString()}                 ║
+    ╚════════════════════════════════════════════════════════════════════╝
 
-📊 ACCOUNT INFORMATION
-═══════════════════════════════════════════════════════════════════
+    📊 ACCOUNT INFORMATION
+    ═══════════════════════════════════════════════════════════════════
 
-Account Name: ${cloudflareReportData.account.result?.name || 'N/A'}
-Account ID: ${cloudflareReportData.account.result?.id || 'N/A'}
-Account Type: ${cloudflareReportData.account.result?.type || 'N/A'}
+    Account Name: ${cloudflareReportData.account.result?.name || 'N/A'}
+    Account ID: ${cloudflareReportData.account.result?.id || 'N/A'}
+    Account Type: ${cloudflareReportData.account.result?.type || 'N/A'}
 
-📊 GLOBAL STATISTICS
-═══════════════════════════════════════════════════════════════════
+    📊 GLOBAL STATISTICS
+    ═══════════════════════════════════════════════════════════════════
 
-• Total Workers: ${cloudflareReportData.stats.totalWorkers}
-• KV Namespaces: ${cloudflareReportData.stats.totalKVNamespaces}
-• Active Routes: ${cloudflareReportData.stats.totalRoutes}
-• Total Lines of Code: ${cloudflareReportData.stats.totalLinesOfCode.toLocaleString()}
+    • Total Workers: ${cloudflareReportData.stats.totalWorkers}
+    • KV Namespaces: ${cloudflareReportData.stats.totalKVNamespaces}
+    • Active Routes: ${cloudflareReportData.stats.totalRoutes}
+    • Total Lines of Code: ${cloudflareReportData.stats.totalLinesOfCode.toLocaleString()}
 
-☁ CLOUDFLARE WORKERS INVENTORY (${cloudflareReportData.workers.length})
-═══════════════════════════════════════════════════════════════════
+    ☁ CLOUDFLARE WORKERS INVENTORY (${cloudflareReportData.workers.length})
+    ═══════════════════════════════════════════════════════════════════
 
-${cloudflareReportData.workers.map((worker, index) => generateCloudflareWorkerSummary(worker, index + 1)).join('\n')}
+    ${cloudflareReportData.workers.map((worker, index) => generateCloudflareWorkerSummary(worker, index + 1)).join('\n')}
 
-🗄 KV NAMESPACES (${cloudflareReportData.kvNamespaces.length})
-═══════════════════════════════════════════════════════════════════
+    🗄 KV NAMESPACES (${cloudflareReportData.kvNamespaces.length})
+    ═══════════════════════════════════════════════════════════════════
 
-${cloudflareReportData.kvNamespaces.map((ns, index) => generateKVNamespaceSummary(ns, index + 1)).join('\n')}
+    ${cloudflareReportData.kvNamespaces.map((ns, index) => generateKVNamespaceSummary(ns, index + 1)).join('\n')}
 
-═══════════════════════════════════════════════════════════════════
-End of Cloudflare Workers Infrastructure Report
-═══════════════════════════════════════════════════════════════════
-`;
+    ═══════════════════════════════════════════════════════════════════
+    End of Cloudflare Workers Infrastructure Report
+    ═══════════════════════════════════════════════════════════════════
+    `;
 
             document.getElementById('cloudflareOutput').textContent = cloudflareFormattedReport;
         }
 
         function generateCloudflareWorkerSummary(worker, index) {
-            let section = `${index}. ${worker.id}\n`;
+            let section = `${index}. ${worker.id || 'Unknown Worker'}\n`;
             section += `   ════════════════════════════════════════════════════════════════\n`;
             
             if (worker.metadata) {
-                section += `   📅 Created: ${new Date(worker.metadata.created_on).toLocaleDateString()}\n`;
-                section += `   📅 Last Modified: ${new Date(worker.metadata.modified_on).toLocaleDateString()}\n`;
+                section += `   📅 Created: ${worker.metadata.created_on ? new Date(worker.metadata.created_on).toLocaleDateString() : 'N/A'}\n`;
+                section += `   📅 Last Modified: ${worker.metadata.modified_on ? new Date(worker.metadata.modified_on).toLocaleDateString() : 'N/A'}\n`;
                 if (worker.metadata.usage_model) {
                     section += `   💼 Usage Model: ${worker.metadata.usage_model}\n`;
                 }
@@ -1665,36 +1795,38 @@ End of Cloudflare Workers Infrastructure Report
             if (worker.script && worker.script.analysis) {
                 const a = worker.script.analysis;
                 section += `\n   📊 CODE METRICS:\n`;
-                section += `   ├─ Lines of Code: ${a.lines}\n`;
-                section += `   ├─ Functions: ${a.functions}\n`;
-                section += `   ├─ Event Listeners: ${a.eventListeners}\n`;
-                section += `   └─ API Calls (fetch): ${a.apiCalls}\n`;
+                section += `   ├─ Lines of Code: ${a.lines || 0}\n`;
+                section += `   ├─ Functions: ${a.functions || 0}\n`;
+                section += `   ├─ Event Listeners: ${a.eventListeners || 0}\n`;
+                section += `   └─ API Calls (fetch): ${a.apiCalls || 0}\n`;
                 
                 const integrations = [];
                 const purposes = [];
                 
-                if (a.integrations.kv) {
-                    integrations.push('KV Storage');
-                    purposes.push('Data caching/storage');
-                }
-                if (a.integrations.r2) {
-                    integrations.push('R2 Object Storage');
-                    purposes.push('File storage');
-                }
-                if (a.integrations.durableObjects) {
-                    integrations.push('Durable Objects');
-                    purposes.push('Stateful coordination');
-                }
-                if (a.integrations.d1) {
-                    integrations.push('D1 Database');
-                    purposes.push('SQL database operations');
+                if (a.integrations) {
+                    if (a.integrations.kv) {
+                        integrations.push('KV Storage');
+                        purposes.push('Data caching/storage');
+                    }
+                    if (a.integrations.r2) {
+                        integrations.push('R2 Object Storage');
+                        purposes.push('File storage');
+                    }
+                    if (a.integrations.durableObjects) {
+                        integrations.push('Durable Objects');
+                        purposes.push('Stateful coordination');
+                    }
+                    if (a.integrations.d1) {
+                        integrations.push('D1 Database');
+                        purposes.push('SQL database operations');
+                    }
                 }
                 
                 if (integrations.length) {
                     section += `\n   🔗 INTEGRATIONS: ${integrations.join(', ')}\n`;
                 }
 
-                const workerName = worker.id.toLowerCase();
+                const workerName = (worker.id || '').toLowerCase();
                 let detectedPurpose = 'General serverless function';
                 
                 if (workerName.includes('api')) {
@@ -1740,16 +1872,16 @@ End of Cloudflare Workers Infrastructure Report
                             bindingDesc = `${binding.name} (Plain Text) - Configuration variable`;
                             break;
                         case 'kv_namespace':
-                            bindingDesc = `${binding.name} (KV) - Key-Value storage: ${binding.namespace_id}`;
+                            bindingDesc = `${binding.name} (KV) - Key-Value storage: ${binding.namespace_id || 'N/A'}`;
                             break;
                         case 'r2_bucket':
                             bindingDesc = `${binding.name} (R2) - Object storage bucket`;
                             break;
                         case 'd1':
-                            bindingDesc = `${binding.name} (D1) - SQL database: ${binding.database_id}`;
+                            bindingDesc = `${binding.name} (D1) - SQL database: ${binding.database_id || 'N/A'}`;
                             break;
                         case 'durable_object_namespace':
-                            bindingDesc = `${binding.name} (DO) - Durable Object: ${binding.class_name}`;
+                            bindingDesc = `${binding.name} (DO) - Durable Object: ${binding.class_name || 'N/A'}`;
                             break;
                         default:
                             bindingDesc = `${binding.name} (${binding.type})`;
@@ -1777,8 +1909,8 @@ End of Cloudflare Workers Infrastructure Report
                 worker.routes.forEach((route, idx) => {
                     const isLast = idx === worker.routes.length - 1;
                     const prefix = isLast ? '└─' : '├─';
-                    section += `   ${prefix} ${route.pattern}\n`;
-                    section += `   ${isLast ? '  ' : '│ '} └─ Zone: ${route.zone}\n`;
+                    section += `   ${prefix} ${route.pattern || 'N/A'}\n`;
+                    section += `   ${isLast ? '  ' : '│ '} └─ Zone: ${route.zone || 'N/A'}\n`;
                 });
             } else {
                 section += `\n   🌐 ROUTES: None (Not bound to any domain)\n`;
@@ -1789,14 +1921,19 @@ End of Cloudflare Workers Infrastructure Report
         }
 
         function generateKVNamespaceSummary(ns, index) {
-            let section = `${index}. ${ns.title}\n`;
-            section += `   ├─ Namespace ID: ${ns.id}\n`;
+            // ✅ FIX: Protection contre ns.title undefined
+            const title = ns.title || ns.id || 'Unknown Namespace';
+            const nsId = ns.id || 'N/A';
+            
+            let section = `${index}. ${title}\n`;
+            section += `   ├─ Namespace ID: ${nsId}\n`;
             
             if (ns.supports_url_encoding !== undefined) {
                 section += `   ├─ URL Encoding: ${ns.supports_url_encoding ? 'Supported' : 'Not supported'}\n`;
             }
             
-            const nameL = ns.title.toLowerCase();
+            // ✅ FIX: Protection contre toLowerCase() sur undefined
+            const nameL = (ns.title || '').toLowerCase();
             let purpose = 'General key-value storage';
             
             if (nameL.includes('cache')) {
