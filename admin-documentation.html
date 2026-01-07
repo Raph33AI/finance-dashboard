@@ -938,61 +938,1786 @@
                         </div>
                     </section>
                     
-                    <!-- SECTION 3: FRONTEND -->
+                    <!-- ============================================
+                        SECTION 3: FRONTEND
+                        ============================================ -->
                     <section class="doc-section" id="frontend">
                         <h2 class="section-title">
                             <i class="fas fa-desktop"></i>
                             Frontend - Structure & Organization
                         </h2>
-                        
-                        <p class="section-placeholder">
-                            <i class="fas fa-info-circle"></i>
-                            Detailed frontend architecture documentation including file structure, 
-                            HTML pages overview, CSS architecture, and essential JavaScript scripts.
-                        </p>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-folder-tree"></i> Project Structure
+                        </h3>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">Folder Structure</span>
+                            </div>
+                            <pre>
+                    alphavault-ai/
+                    ├── assets/
+                    │   ├── css/               (49 files - 1.8 MB)
+                    │   │   ├── common.css           (2,090 lines - Global styles)
+                    │   │   ├── landing.css          (5,886 lines - Homepage)
+                    │   │   ├── community.css        (6,890 lines - Community hub)
+                    │   │   ├── admin-analytics.css  (4,039 lines - Admin dashboard)
+                    │   │   ├── advanced-analysis.css (5,490 lines - Technical analysis)
+                    │   │   ├── sidebar.css          (1,101 lines - Navigation)
+                    │   │   ├── user-menu.css        (538 lines - User dropdown)
+                    │   │   ├── chatbot-futuristic.css (1,679 lines - AI chatbot)
+                    │   │   └── ... (41 other files)
+                    │   │
+                    │   ├── js/                (112 files - 8.5 MB)
+                    │   │   ├── admin-analytics.js   (7,846 lines - Admin backend)
+                    │   │   ├── investment-analytics.js (4,869 lines - Portfolio)
+                    │   │   ├── advanced-analysis.js (4,292 lines - 14 indicators)
+                    │   │   ├── trend-prediction.js  (2,485 lines - ML predictions)
+                    │   │   ├── insider-flow-tracker.js (2,554 lines - Form 4 analysis)
+                    │   │   ├── ma-predictor.js      (1,066 lines - M&A screening)
+                    │   │   ├── firebase-config.js   (783 lines - Auth & Firestore)
+                    │   │   ├── auth-guard.js        (287 lines - Page protection)
+                    │   │   ├── access-control.js    (2,660 lines - Plan-based access)
+                    │   │   └── ... (103 other files)
+                    │   │
+                    │   └── images/            (Logos, favicons, illustrations)
+                    │
+                    ├── index.html             (Homepage - 1,951 lines)
+                    ├── dashboard-financier.html (Budget dashboard - 828 lines)
+                    ├── advanced-analysis.html   (14 indicators + AI - 2,906 lines)
+                    ├── trend-prediction.html    (ML predictions - 1,565 lines)
+                    ├── community-hub.html       (Social features - 675 lines)
+                    ├── admin-analytics.html     (Admin backend - 2,989 lines)
+                    └── ... (59 other pages)
+                    </pre>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-file-code"></i> HTML Pages Overview (65 pages)
+                        </h3>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Page</th>
+                                    <th>Purpose</th>
+                                    <th>Lines</th>
+                                    <th>Plan Required</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>index.html</strong></td>
+                                    <td>Landing page with 3D elements</td>
+                                    <td>1,951</td>
+                                    <td><span class="badge">Public</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>auth.html</strong></td>
+                                    <td>Login & Registration</td>
+                                    <td>514</td>
+                                    <td><span class="badge">Public</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>dashboard-financier.html</strong></td>
+                                    <td>Budget dashboard with 8 Highcharts</td>
+                                    <td>828</td>
+                                    <td><span class="badge">Free+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>investment-analytics.html</strong></td>
+                                    <td>Multi-allocation portfolio analytics</td>
+                                    <td>1,103</td>
+                                    <td><span class="badge success">Pro+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>monte-carlo.html</strong></td>
+                                    <td>Probabilistic simulations (6 models)</td>
+                                    <td>2,160</td>
+                                    <td><span class="badge">Free+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>advanced-analysis.html</strong></td>
+                                    <td>14 Wall Street indicators + AI</td>
+                                    <td>2,906</td>
+                                    <td><span class="badge success">Pro+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>trend-prediction.html</strong></td>
+                                    <td>ML predictions (5 models) + backtesting</td>
+                                    <td>1,565</td>
+                                    <td><span class="badge warning">Platinum</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ipo-intelligence.html</strong></td>
+                                    <td>AI IPO scoring + SEC S-1 parsing</td>
+                                    <td>847</td>
+                                    <td><span class="badge warning">Platinum</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>insider-flow-tracker.html</strong></td>
+                                    <td>Form 4 insider trading (14 classes)</td>
+                                    <td>703</td>
+                                    <td><span class="badge warning">Platinum</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ma-predictor.html</strong></td>
+                                    <td>M&A screening (6 AI factors)</td>
+                                    <td>664</td>
+                                    <td><span class="badge warning">Platinum</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>forex-converter.html</strong></td>
+                                    <td>38 currencies + 14 indicators</td>
+                                    <td>1,848</td>
+                                    <td><span class="badge success">Pro+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>chatbot-fullpage.html</strong></td>
+                                    <td>FinanceGPT AI assistant (Gemini 2.5)</td>
+                                    <td>771</td>
+                                    <td><span class="badge">Free+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>community-hub.html</strong></td>
+                                    <td>Social features + posts + messages</td>
+                                    <td>675</td>
+                                    <td><span class="badge">Free+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>admin-analytics.html</strong></td>
+                                    <td>Admin dashboard (Stripe + Cloudflare)</td>
+                                    <td>2,989</td>
+                                    <td><span class="badge danger">Admin Only</span></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-style: italic; color: #64748b;">
+                                        + 51 additional pages (companies directory, economic data, news terminal, settings, etc.)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-palette"></i> CSS Architecture (49 files - 1.8 MB)
+                        </h3>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Lines</th>
+                                    <th>Size</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>common.css</code></td>
+                                    <td>2,090</td>
+                                    <td>47.57 KB</td>
+                                    <td>Global styles, variables, utilities</td>
+                                </tr>
+                                <tr>
+                                    <td><code>landing.css</code></td>
+                                    <td>5,886</td>
+                                    <td>142.24 KB</td>
+                                    <td>Homepage (hero, features, pricing, animations)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>community.css</code></td>
+                                    <td>6,890</td>
+                                    <td>179.70 KB</td>
+                                    <td>Social hub (posts, comments, likes, messages)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>admin-analytics.css</code></td>
+                                    <td>4,039</td>
+                                    <td>104.74 KB</td>
+                                    <td>Admin dashboard (Stripe analytics, Cloudflare metrics)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>advanced-analysis.css</code></td>
+                                    <td>5,490</td>
+                                    <td>132.89 KB</td>
+                                    <td>Technical analysis (14 indicators, AI recommendations)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>investment-analytics.css</code></td>
+                                    <td>3,748</td>
+                                    <td>81.76 KB</td>
+                                    <td>Portfolio analytics (multi-allocation system)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>trend-prediction.css</code></td>
+                                    <td>2,599</td>
+                                    <td>62.22 KB</td>
+                                    <td>ML predictions (5 models, backtesting, ensemble)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>sidebar.css</code></td>
+                                    <td>1,101</td>
+                                    <td>25.32 KB</td>
+                                    <td>Navigation sidebar (responsive, glassmorphism)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>chatbot-futuristic.css</code></td>
+                                    <td>1,679</td>
+                                    <td>37.60 KB</td>
+                                    <td>AI chatbot (3D robot, glassmorphism, particles)</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-style: italic; color: #64748b;">
+                                        + 40 additional CSS files (total: 1.8 MB)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="info-card" style="margin-top: 30px;">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem;">
+                                <i class="fas fa-paint-brush"></i> CSS Design System
+                            </h4>
+                            <ul style="color: var(--text-light); line-height: 1.8; margin: 0; padding-left: 20px;">
+                                <li><strong>Color Palette:</strong> Gradient-based (purple/blue theme) with dark mode support</li>
+                                <li><strong>Typography:</strong> Inter font family, 8-level hierarchy</li>
+                                <li><strong>Responsive:</strong> Mobile-first approach, 4 breakpoints (320px, 480px, 768px, 1024px)</li>
+                                <li><strong>Effects:</strong> Glassmorphism, neumorphism, 3D transforms, smooth transitions</li>
+                                <li><strong>Animations:</strong> 60fps GPU-accelerated (transform3d, will-change)</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-code"></i> Essential JavaScript Scripts (112 files - 8.5 MB)
+                        </h3>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Script</th>
+                                    <th>Lines</th>
+                                    <th>Purpose</th>
+                                    <th>Key Functions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>admin-analytics.js</code></td>
+                                    <td>7,846</td>
+                                    <td>Admin dashboard backend</td>
+                                    <td>Stripe analytics, Cloudflare metrics, user management, email campaigns</td>
+                                </tr>
+                                <tr>
+                                    <td><code>investment-analytics.js</code></td>
+                                    <td>4,869</td>
+                                    <td>Portfolio analytics</td>
+                                    <td>Multi-allocation, optimization, backtesting, risk metrics (VaR, Sharpe)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>advanced-analysis.js</code></td>
+                                    <td>4,292</td>
+                                    <td>Technical analysis</td>
+                                    <td>14 indicators (RSI, MACD, Bollinger, Fibonacci, Ichimoku, Pivot Points, ADX, Stochastic)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>trend-prediction.js</code></td>
+                                    <td>2,485</td>
+                                    <td>ML predictions</td>
+                                    <td>5 models (Linear Regression, Ridge, Lasso, Random Forest, LSTM), backtesting, ensemble</td>
+                                </tr>
+                                <tr>
+                                    <td><code>insider-flow-tracker.js</code></td>
+                                    <td>2,554</td>
+                                    <td>Insider trading analysis</td>
+                                    <td>Form 4 parsing, 14 transaction classes, pattern detection (momentum, acceleration, unusual)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>access-control.js</code></td>
+                                    <td>2,660</td>
+                                    <td>Plan-based page protection</td>
+                                    <td>Firebase JWT verification, plan level checks, upgrade modals, feature gates</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ipo-intelligence.js</code></td>
+                                    <td>2,429</td>
+                                    <td>IPO screening</td>
+                                    <td>S-1 parsing, AI scoring (6 factors), SEC API integration</td>
+                                </tr>
+                                <tr>
+                                    <td><code>monte-carlo.js</code></td>
+                                    <td>2,086</td>
+                                    <td>Probabilistic simulations</td>
+                                    <td>6 models (Normal, Student-t, Log-Normal, Jump Diffusion, Regime Switching, GARCH)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>firebase-config.js</code></td>
+                                    <td>783</td>
+                                    <td>Firebase initialization</td>
+                                    <td>Authentication, Firestore, real-time listeners, user data sync</td>
+                                </tr>
+                                <tr>
+                                    <td><code>api-client.js</code></td>
+                                    <td>2,237</td>
+                                    <td>API client (Twelve Data)</td>
+                                    <td>Quote, time series, technical indicators, profile, statistics, search</td>
+                                </tr>
+                                <tr>
+                                    <td><code>auth-guard.js</code></td>
+                                    <td>287</td>
+                                    <td>Page authentication</td>
+                                    <td>Session verification, redirect to login, user data loading</td>
+                                </tr>
+                                <tr>
+                                    <td><code>chatbot-fullpage-ui.js</code></td>
+                                    <td>1,115</td>
+                                    <td>AI chatbot UI</td>
+                                    <td>Firebase conversations, 3D robot animation, real-time streaming, export/share</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-style: italic; color: #64748b;">
+                                        + 100 additional JavaScript files (total: 8.5 MB)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-puzzle-piece"></i> External Libraries & Integrations
+                        </h3>
+
+                        <div class="card-grid">
+                            <div class="service-card">
+                                <div class="service-icon" style="background: linear-gradient(135deg, #f06529, #e44d26);">
+                                    <i class="fab fa-html5"></i>
+                                </div>
+                                <div class="service-name">Highcharts</div>
+                                <div class="service-desc">
+                                    Advanced charting (stock, candlestick, heatmap, 3D, gauges)
+                                </div>
+                            </div>
+
+                            <div class="service-card">
+                                <div class="service-icon" style="background: linear-gradient(135deg, #ff6384, #ff9f40);">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="service-name">Chart.js</div>
+                                <div class="service-desc">
+                                    Chatbot charts, quick visualizations, responsive graphs
+                                </div>
+                            </div>
+
+                            <div class="service-card">
+                                <div class="service-icon" style="background: linear-gradient(135deg, #049EF4, #0278D4);">
+                                    <i class="fab fa-react"></i>
+                                </div>
+                                <div class="service-name">Three.js</div>
+                                <div class="service-desc">
+                                    3D robot chatbot, landing page animations, WebGL effects
+                                </div>
+                            </div>
+
+                            <div class="service-card">
+                                <div class="service-icon firebase">
+                                    <i class="fab fa-google"></i>
+                                </div>
+                                <div class="service-name">Firebase SDK</div>
+                                <div class="service-desc">
+                                    Authentication, Firestore, Storage, real-time database
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card" style="margin-top: 30px;">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem;">
+                                <i class="fas fa-code-branch"></i> Code Statistics
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">274,011</div>
+                                    <div class="stat-label">Total Lines of Code</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">10.53 MB</div>
+                                    <div class="stat-label">Total Size</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">226</div>
+                                    <div class="stat-label">Total Files (HTML+CSS+JS)</div>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <div class="stat-value">100%</div>
+                                    <div class="stat-label">TypeScript-Free (Vanilla JS)</div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
-                    <!-- SECTION 4: BACKEND -->
+                    <!-- ============================================
+                        SECTION 4: BACKEND
+                        ============================================ -->
                     <section class="doc-section" id="backend">
                         <h2 class="section-title">
                             <i class="fas fa-server"></i>
                             Backend - Services & Infrastructure
                         </h2>
-                        
-                        <p class="section-placeholder">
-                            <i class="fas fa-info-circle"></i>
-                            Comprehensive backend documentation covering Firebase configuration, 
-                            Cloudflare Workers, Stripe integration, and Resend email service.
-                        </p>
+
+                        <h3 class="subsection-title">
+                            <i class="fab fa-google"></i> Firebase Configuration
+                        </h3>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">firebase-config.js</span>
+                            </div>
+                            <pre>
+                    const firebaseConfig = {
+                        apiKey: "YOUR_FIREBASE_API_KEY",
+                        authDomain: "alphavault-ai.firebaseapp.com",
+                        projectId: "alphavault-ai",
+                        storageBucket: "alphavault-ai.appspot.com",
+                        messagingSenderId: "YOUR_SENDER_ID",
+                        appId: "YOUR_APP_ID"
+                    };
+
+                    firebase.initializeApp(firebaseConfig);
+
+                    const auth = firebase.auth();
+                    const db = firebase.firestore();
+                    const storage = firebase.storage();
+                    </pre>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Purpose</th>
+                                    <th>Collections/Features</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Firebase Authentication</strong></td>
+                                    <td>User authentication & session management</td>
+                                    <td>
+                                        • Email/Password authentication<br>
+                                        • Google OAuth 2.0<br>
+                                        • JWT token-based sessions<br>
+                                        • Password reset workflows
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Firestore Database</strong></td>
+                                    <td>NoSQL real-time database</td>
+                                    <td>
+                                        • <code>/users</code> - User profiles & plans<br>
+                                        • <code>/posts</code> - Community posts<br>
+                                        • <code>/messages</code> - Private messages<br>
+                                        • <code>/conversations</code> - Chat threads<br>
+                                        • <code>/simulations</code> - Monte Carlo data<br>
+                                        • <code>/portfolios</code> - Watchlists & allocations<br>
+                                        • <code>/analytics</code> - User activity logs
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Firebase Storage</strong></td>
+                                    <td>File uploads & CDN</td>
+                                    <td>
+                                        • User profile pictures<br>
+                                        • Post attachments (images, PDFs)<br>
+                                        • Message attachments<br>
+                                        • Export files (JSON, CSV)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-cloud"></i> Cloudflare Workers (10+ Serverless APIs)
+                        </h3>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Worker Name</th>
+                                    <th>Lines</th>
+                                    <th>Purpose</th>
+                                    <th>Key Endpoints</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>finance-hub-api</strong></td>
+                                    <td>2,885</td>
+                                    <td>Main backend API (Twelve Data + FinnHub + Stripe + Resend)</td>
+                                    <td>
+                                        <code>/api/quote</code><br>
+                                        <code>/api/time-series</code><br>
+                                        <code>/api/technical-indicators</code><br>
+                                        <code>/api/finnhub/company-news</code><br>
+                                        <code>/create-checkout-session</code><br>
+                                        <code>/webhook</code> (Stripe)<br>
+                                        <code>/api/simulations</code> (CRUD)<br>
+                                        <code>/api/portfolios</code> (CRUD)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>economic-data-worker</strong></td>
+                                    <td>656</td>
+                                    <td>ECB Forex (XML) + FRED economic data</td>
+                                    <td>
+                                        <code>/ecb/rates</code> (30+ currencies)<br>
+                                        <code>/ecb/historical</code> (6 months data)<br>
+                                        <code>/series/observations</code> (FRED)<br>
+                                        <code>/multiple</code> (Batch FRED)<br>
+                                        <code>/latest</code> (Real-time values)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>gmail-api</strong></td>
+                                    <td>2,417</td>
+                                    <td>Hybrid email system (Gmail API + Resend API)</td>
+                                    <td>
+                                        <strong>Read (Gmail):</strong><br>
+                                        <code>/gmail-inbox</code>, <code>/gmail-message</code>, <code>/gmail-sent</code>, <code>/gmail-thread</code><br>
+                                        <strong>Send (Resend):</strong><br>
+                                        <code>/gmail-send</code>, <code>/gmail-reply</code>, <code>/gmail-forward</code><br>
+                                        <strong>Drafts (Gmail):</strong><br>
+                                        <code>/gmail-drafts</code>, <code>/gmail-save-draft</code><br>
+                                        <strong>Actions (Gmail):</strong><br>
+                                        <code>/gmail-action</code>, <code>/gmail-bulk-action</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>gemini-ai-proxy</strong></td>
+                                    <td>175</td>
+                                    <td>Secure proxy for Gemini 2.5 Flash API</td>
+                                    <td>
+                                        <code>POST /api/gemini</code><br>
+                                        Model: <code>gemini-2.5-flash</code><br>
+                                        Max tokens: 8,192<br>
+                                        Temperature: 0.9
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>google-apis-proxy</strong></td>
+                                    <td>432</td>
+                                    <td>YouTube Data API v3 with quota management</td>
+                                    <td>
+                                        <code>/youtube/search</code> (100 units)<br>
+                                        <code>/youtube/video</code> (1 unit)<br>
+                                        <code>/youtube/channel</code> (1 unit)<br>
+                                        <code>/quotas</code> (Status)<br>
+                                        Daily limit: 10,000 units (80 searches max)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>google-knowledge-api</strong></td>
+                                    <td>710</td>
+                                    <td>Google Knowledge Graph + Wikidata enrichment</td>
+                                    <td>
+                                        <code>/company-info?query=Apple</code><br>
+                                        <code>/batch-companies</code> (POST, max 50)<br>
+                                        Data sources: Google KG + Wikidata (16 properties)<br>
+                                        Batch label resolution (50 IDs/request)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-style: italic; color: #64748b;">
+                                        + 4 additional workers (admin-analytics-api, sec-edgar-api, payment-flow-manager, newsletter-automation)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="info-card" style="margin-top: 30px;">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem;">
+                                <i class="fas fa-database"></i> Cloudflare KV Storage
+                            </h4>
+                            <table class="data-table" style="margin-top: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th>Namespace</th>
+                                        <th>Purpose</th>
+                                        <th>TTL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>CACHE</code></td>
+                                        <td>API response caching (Twelve Data, FinnHub)</td>
+                                        <td>60s - 3600s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>SIMULATIONS_KV</code></td>
+                                        <td>User simulations & portfolios storage</td>
+                                        <td>Persistent</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>QUOTA_KV</code></td>
+                                        <td>YouTube API quota tracking (daily/hourly limits)</td>
+                                        <td>24h reset</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fab fa-stripe"></i> Stripe Integration
+                        </h3>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Price ID</th>
+                                    <th>Price</th>
+                                    <th>Features</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Free</strong></td>
+                                    <td><code>N/A</code></td>
+                                    <td>$0/month</td>
+                                    <td>Dashboard Budget, Community, Monte Carlo, Real Estate Simulator, Portfolio Optimizer, Economic Dashboard, Companies Directory, Settings</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Basic</strong></td>
+                                    <td><code>price_basic</code></td>
+                                    <td>$5/month</td>
+                                    <td>Everything in Free + 9 pages total</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pro</strong></td>
+                                    <td><code>STRIPE_PRICE_PRO</code></td>
+                                    <td>$10/month</td>
+                                    <td>Everything in Basic + Investment Analytics, Risk Parity, Scenario Analysis, Advanced Analysis (14 indicators), Forex Converter (38 currencies), Inflation Calculator, Interest Rate Tracker, News Terminal (17 pages total)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Platinum</strong></td>
+                                    <td><code>STRIPE_PRICE_PLATINUM</code></td>
+                                    <td>$20/month</td>
+                                    <td>Everything in Pro + IPO Intelligence (AI Scoring), Insider Flow Tracker (14 classes), M&A Predictor (6 AI factors), Trend Prediction ML, Market Sentiment, Trending Topics, YouTube Intelligence, Recession Indicators (25 pages total)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 style="margin-top: 30px; font-size: 1.1rem; color: var(--text-primary);">
+                            <i class="fas fa-ticket-alt"></i> Promo Codes Configuration
+                        </h4>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Value</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>LAUNCH15</code></td>
+                                    <td>percentage</td>
+                                    <td>15%</td>
+                                    <td>15% discount forever (all plans)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>WELCOME15</code></td>
+                                    <td>percentage</td>
+                                    <td>15%</td>
+                                    <td>Welcome discount (all plans)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>SAVE15</code></td>
+                                    <td>percentage</td>
+                                    <td>15%</td>
+                                    <td>General 15% discount</td>
+                                </tr>
+                                <tr>
+                                    <td><code>FREEPRO</code></td>
+                                    <td>free</td>
+                                    <td>Lifetime</td>
+                                    <td>Free lifetime access to Pro plan</td>
+                                </tr>
+                                <tr>
+                                    <td><code>FREEPLATINUM</code></td>
+                                    <td>free</td>
+                                    <td>Lifetime</td>
+                                    <td>Free lifetime access to Platinum plan</td>
+                                </tr>
+                                <tr>
+                                    <td><code>VIPACCESS</code></td>
+                                    <td>free</td>
+                                    <td>Lifetime</td>
+                                    <td>Free lifetime access to Pro or Platinum</td>
+                                </tr>
+                                <tr>
+                                    <td><code>FREE14DAYS</code></td>
+                                    <td>trial</td>
+                                    <td>14 days</td>
+                                    <td>14-day free trial (no credit card required)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>TRIAL14</code></td>
+                                    <td>trial</td>
+                                    <td>14 days</td>
+                                    <td>14-day trial period</td>
+                                </tr>
+                                <tr>
+                                    <td><code>TRYITFREE</code></td>
+                                    <td>trial</td>
+                                    <td>14 days</td>
+                                    <td>Try it free for 14 days</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 style="margin-top: 30px; font-size: 1.1rem; color: var(--text-primary);">
+                            <i class="fas fa-bell"></i> Stripe Webhook Events
+                        </h4>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Handler Function</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>checkout.session.completed</code></td>
+                                    <td><code>handleCheckoutSessionCompleted()</code></td>
+                                    <td>
+                                        • Update Firebase user plan<br>
+                                        • Store Stripe customer ID<br>
+                                        • Send confirmation email (Resend)<br>
+                                        • Generate invoice HTML
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>customer.subscription.updated</code></td>
+                                    <td><code>handleSubscriptionUpdated()</code></td>
+                                    <td>
+                                        • Update subscription status in Firestore<br>
+                                        • Sync plan changes
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>customer.subscription.deleted</code></td>
+                                    <td><code>handleSubscriptionDeleted()</code></td>
+                                    <td>
+                                        • Downgrade user to Basic plan<br>
+                                        • Set subscriptionStatus to 'cancelled'<br>
+                                        • Log cancellation date
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>invoice.payment_failed</code></td>
+                                    <td><code>handlePaymentFailed()</code></td>
+                                    <td>
+                                        • Log payment failure<br>
+                                        • Send notification email
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-envelope"></i> Resend Email Service
+                        </h3>
+
+                        <div class="info-card">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem;">
+                                <i class="fas fa-paper-plane"></i> Email Templates (HTML with Glassmorphism Design)
+                            </h4>
+                            <ul style="color: var(--text-light); line-height: 1.8; margin: 0; padding-left: 20px;">
+                                <li><strong>Payment Confirmation:</strong> Glassmorphism design with embedded PNG logo (192x192)</li>
+                                <li><strong>Plan Display:</strong> Shows accessible pages per plan (Basic: 9 pages, Pro: 17 pages, Platinum: 25 pages)</li>
+                                <li><strong>Trial Activation:</strong> 14-day free trial badge (no credit card required)</li>
+                                <li><strong>Free Access:</strong> Lifetime access confirmation</li>
+                                <li><strong>Invoice Attachment:</strong> HTML invoice with SVG logo (attached as .html file)</li>
+                                <li><strong>Multi-Sender Support:</strong> Authorized email addresses with fallback to <code>raphael.nardone@alphavault-ai.com</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="code-block" style="margin-top: 20px;">
+                            <div class="code-header">
+                                <span class="code-lang">Email Template Example (Payment Confirmation)</span>
+                            </div>
+                            <pre style="max-height: 400px; overflow-y: auto;">
+                    📧 Payment Confirmation Email Structure:
+
+                    ┌─────────────────────────────────────────────┐
+                    │ Header (Gradient Background)               │
+                    │  • PNG Logo (192x192)                       │
+                    │  • Platform Name: AlphaVault AI             │
+                    │  • Tagline: Premium Financial Intelligence  │
+                    ├─────────────────────────────────────────────┤
+                    │ Success Icon (✓ Green Circle)              │
+                    ├─────────────────────────────────────────────┤
+                    │ Title: ✅ Payment Confirmed!                │
+                    │ Description: Your subscription is active    │
+                    ├─────────────────────────────────────────────┤
+                    │ Plan Badge (Gradient Button)               │
+                    │  • 👑 AlphaVault Pro                        │
+                    │  • 💎 AlphaVault Platinum                   │
+                    ├─────────────────────────────────────────────┤
+                    │ Transaction Details (Table)                 │
+                    │  • Customer Name                            │
+                    │  • Email                                    │
+                    │  • Plan                                     │
+                    │  • Amount                                   │
+                    │  • Invoice Number                           │
+                    │  • Date                                     │
+                    │  • Status: ✓ Active                         │
+                    ├─────────────────────────────────────────────┤
+                    │ 📊 Pages You Can Access                    │
+                    │  • ✓ Dashboard Budget                       │
+                    │  • ✓ Investment Analytics                   │
+                    │  • ✓ Advanced Analysis (14 indicators)      │
+                    │  • ✓ Forex Converter (38 currencies)        │
+                    │  • ✓ [... complete list per plan]           │
+                    │  • Total: 9/17/25 pages unlocked            │
+                    ├─────────────────────────────────────────────┤
+                    │ CTA Button                                  │
+                    │  → Access Your Dashboard                    │
+                    ├─────────────────────────────────────────────┤
+                    │ Footer                                      │
+                    │  • Thank you message                        │
+                    │  • Trial/Free access info                   │
+                    │  • Links: Dashboard, Website, Support       │
+                    │  • Copyright © 2026 AlphaVault AI           │
+                    └─────────────────────────────────────────────┘
+
+                    Attachment: AlphaVault_Invoice_AV-202601-XXXXXX.html
+                    </pre>
+                        </div>
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-project-diagram"></i> Backend Architecture Summary
+                        </h3>
+
+                        <div class="architecture-diagram">
+                            <div class="diagram-layer">
+                                <div class="layer-title">API Gateway Layer</div>
+                                <div class="layer-boxes">
+                                    <div class="diagram-box">
+                                        <i class="fas fa-cloud"></i><br>10+ Cloudflare Workers<br>
+                                        <small>Serverless Edge Functions</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="diagram-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+
+                            <div class="diagram-layer">
+                                <div class="layer-title">Data Storage Layer</div>
+                                <div class="layer-boxes">
+                                    <div class="diagram-box warning">
+                                        <i class="fab fa-google"></i><br>Firebase<br>
+                                        <small>Auth + Firestore + Storage</small>
+                                    </div>
+                                    <div class="diagram-box warning">
+                                        <i class="fas fa-database"></i><br>Cloudflare KV<br>
+                                        <small>Cache + Simulations + Quotas</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="diagram-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+
+                            <div class="diagram-layer">
+                                <div class="layer-title">External Services Layer</div>
+                                <div class="layer-boxes">
+                                    <div class="diagram-box secondary">
+                                        <i class="fab fa-stripe"></i><br>Stripe<br>
+                                        <small>Payments + Webhooks</small>
+                                    </div>
+                                    <div class="diagram-box secondary">
+                                        <i class="fas fa-envelope"></i><br>Resend<br>
+                                        <small>Email Delivery</small>
+                                    </div>
+                                    <div class="diagram-box secondary">
+                                        <i class="fas fa-brain"></i><br>Gemini AI<br>
+                                        <small>Chatbot Intelligence</small>
+                                    </div>
+                                    <div class="diagram-box secondary">
+                                        <i class="fab fa-youtube"></i><br>YouTube API<br>
+                                        <small>Market Videos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid" style="margin-top: 30px;">
+                            <div class="stat-card">
+                                <div class="stat-value">10+</div>
+                                <div class="stat-label">Cloudflare Workers</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">~7,500</div>
+                                <div class="stat-label">Lines of Backend Code</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">30+</div>
+                                <div class="stat-label">API Endpoints</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <div class="stat-value">99.9%</div>
+                                <div class="stat-label">Uptime (Cloudflare Edge)</div>
+                            </div>
+                        </div>
                     </section>
 
-                    <!-- SECTION 5: DATA FLOWS -->
+                    <!-- ============================================
+                        SECTION 5: DATA FLOWS
+                        ============================================ -->
                     <section class="doc-section" id="flows">
                         <h2 class="section-title">
                             <i class="fas fa-stream"></i>
                             Data Flows & Processes
                         </h2>
-                        
-                        <p class="section-placeholder">
-                            <i class="fas fa-info-circle"></i>
-                            Complete data flow documentation including user registration flow, 
-                            Stripe payment flow, and market data retrieval flow.
-                        </p>
+
+                        <div class="info-card">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-info-circle"></i> About Data Flows
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                This section documents the three main data flows in AlphaVault AI:
+                                user registration, payment processing, and market data retrieval.
+                                Each flow shows the complete journey from user action to final result.
+                            </p>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- FLOW 1: USER REGISTRATION -->
+                        <!-- ========================================== -->
+
+                        <h3 class="subsection-title">
+                            <i class="fas fa-user-plus"></i> 1. User Registration Flow
+                        </h3>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">User Registration Flow - Complete Journey</span>
+                            </div>
+                            <pre>
+                    ┌─────────────────────────────────────────────────────────────────────────────────┐
+                    │                          USER REGISTRATION FLOW                                  │
+                    │                     (auth.html → Firebase → Firestore → Resend)                  │
+                    └─────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────┐
+                    │   1. USER        │  User submits registration form
+                    │   (Browser)      │  • Email: user@example.com
+                    │   auth.html      │  • Password: ************
+                    │                  │  • Name: John Doe
+                    └────────┬─────────┘
+                            │
+                            │ POST form submission
+                            │ Function: handleEmailSignup()
+                            │ File: assets/js/auth.js
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   2. FIREBASE AUTHENTICATION                                                   │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Function: firebase.auth().createUserWithEmailAndPassword(email, password)   │
+                    │   SDK: Firebase Auth v10.7.1                                                   │
+                    │                                                                                 │
+                    │   Process:                                                                      │
+                    │   ✓ Validate email format                                                      │
+                    │   ✓ Check password strength (min 6 chars)                                      │
+                    │   ✓ Verify email not already registered                                        │
+                    │   ✓ Create Firebase Auth user                                                  │
+                    │   ✓ Generate unique UID: "abc123xyz456"                                        │
+                    │   ✓ Issue JWT token (expires in 1 hour)                                        │
+                    │                                                                                 │
+                    │   Success Response:                                                             │
+                    │   {                                                                             │
+                    │     uid: "abc123xyz456",                                                        │
+                    │     email: "user@example.com",                                                  │
+                    │     emailVerified: false,                                                       │
+                    │     token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."                            │
+                    │   }                                                                             │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ UID + User Data
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   3. FIRESTORE USER DOCUMENT CREATION                                          │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Collection: /users/{uid}                                                     │
+                    │   Function: createUserProfile()                                                │
+                    │   File: assets/js/auth.js                                                      │
+                    │                                                                                 │
+                    │   Document Structure:                                                           │
+                    │   {                                                                             │
+                    │     uid: "abc123xyz456",                                                        │
+                    │     email: "user@example.com",                                                  │
+                    │     name: "John Doe",                                                           │
+                    │     plan: "basic",                           // Default plan                    │
+                    │     subscriptionStatus: "inactive",                                             │
+                    │     createdAt: "2026-01-07T14:30:00.000Z",                                      │
+                    │     updatedAt: "2026-01-07T14:30:00.000Z",                                      │
+                    │     lastLogin: "2026-01-07T14:30:00.000Z",                                      │
+                    │     photoURL: "https://ui-avatars.com/api/?name=John+Doe",                     │
+                    │     emailVerified: false,                                                       │
+                    │     onboardingCompleted: false,                                                 │
+                    │     preferences: {                                                              │
+                    │       theme: "light",                                                           │
+                    │       language: "en",                                                           │
+                    │       notifications: true,                                                      │
+                    │       newsletter: false                                                         │
+                    │     },                                                                          │
+                    │     usage: {                                                                    │
+                    │       apiCalls: 0,                                                              │
+                    │       chatbotMessages: 0,                                                       │
+                    │       simulationsCreated: 0                                                     │
+                    │     }                                                                           │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Document written successfully                                              │
+                    │   ✓ User profile created in Firestore                                          │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Trigger: User created event
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   4. WELCOME EMAIL (Cloudflare Worker → Resend API)                            │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Worker: finance-hub-api                                                      │
+                    │   Function: sendPaymentConfirmationEmail()                                     │
+                    │   Email Service: Resend API                                                    │
+                    │   Sender: info@alphavault-ai.com                                               │
+                    │                                                                                 │
+                    │   Email Template:                                                               │
+                    │   ┌─────────────────────────────────────────────────────────────────────────┐ │
+                    │   │ 🎉 Welcome to AlphaVault AI!                                            │ │
+                    │   │ ────────────────────────────────────────────────────────────────────    │ │
+                    │   │ Hi John Doe,                                                            │ │
+                    │   │                                                                         │ │
+                    │   │ Your account has been created successfully!                            │ │
+                    │   │                                                                         │ │
+                    │   │ Plan: AlphaVault Basic (9 pages unlocked)                              │ │
+                    │   │                                                                         │ │
+                    │   │ 📊 Pages You Can Access:                                               │ │
+                    │   │ ✓ Dashboard Budget                                                     │ │
+                    │   │ ✓ Community Hub                                                        │ │
+                    │   │ ✓ Monte Carlo Simulations                                              │ │
+                    │   │ ✓ Real Estate Tax Simulator                                            │ │
+                    │   │ ✓ Portfolio Optimizer (Markowitz)                                      │ │
+                    │   │ ✓ Economic Dashboard                                                   │ │
+                    │   │ ✓ Companies Directory                                                  │ │
+                    │   │ ✓ Settings & User Profile                                              │ │
+                    │   │ ✓ Create Posts & Messages                                              │ │
+                    │   │                                                                         │ │
+                    │   │ [Access Your Dashboard →]                                              │ │
+                    │   │                                                                         │ │
+                    │   │ Need more features? Upgrade to Pro or Platinum!                        │ │
+                    │   └─────────────────────────────────────────────────────────────────────────┘ │
+                    │                                                                                 │
+                    │   Resend API Call:                                                              │
+                    │   POST https://api.resend.com/emails                                           │
+                    │   {                                                                             │
+                    │     from: "AlphaVault AI <info@alphavault-ai.com>",                            │
+                    │     to: ["user@example.com"],                                                  │
+                    │     subject: "🎉 Welcome to AlphaVault AI",                                    │
+                    │     html: "<html>...</html>",                                                  │
+                    │     tags: [{ name: "category", value: "welcome" }]                             │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Email sent successfully (ID: email_abc123)                                 │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   5. ANALYTICS TRACKING                                                        │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Worker: admin-analytics-api                                                  │
+                    │   Collection: /analytics/users                                                 │
+                    │   KV Namespace: USER_SESSIONS                                                  │
+                    │                                                                                 │
+                    │   Analytics Data Stored:                                                       │
+                    │   {                                                                             │
+                    │     eventType: "user_registered",                                              │
+                    │     userId: "abc123xyz456",                                                     │
+                    │     email: "user@example.com",                                                  │
+                    │     plan: "basic",                                                              │
+                    │     timestamp: "2026-01-07T14:30:00.000Z",                                      │
+                    │     source: "organic",                                                          │
+                    │     referrer: null,                                                             │
+                    │     userAgent: "Mozilla/5.0...",                                                │
+                    │     device: "desktop",                                                          │
+                    │     location: {                                                                 │
+                    │       country: "US",                                                            │
+                    │       city: "New York"                                                          │
+                    │     }                                                                           │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Analytics logged successfully                                              │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Session initialized
+                            │
+                            ▼
+                    ┌──────────────────┐
+                    │   6. REDIRECT    │  User redirected to dashboard
+                    │   TO DASHBOARD   │  URL: /dashboard-financier.html
+                    │                  │  Session: Active (JWT token stored)
+                    │   ✅ COMPLETE    │  Plan: Basic (9 pages unlocked)
+                    └──────────────────┘
+
+                    ═══════════════════════════════════════════════════════════════════════════════
+                    KEY FILES INVOLVED:
+                    ═══════════════════════════════════════════════════════════════════════════════
+
+                    Frontend:
+                    • auth.html                           (Registration form UI)
+                    • assets/js/auth.js                   (Form handling + Firebase calls)
+                    • assets/js/firebase-config.js        (Firebase initialization)
+
+                    Backend:
+                    • Firebase Authentication             (User creation + JWT)
+                    • Firestore Database                  (/users collection)
+                    • Cloudflare Worker: finance-hub-api  (Email sending)
+                    • Resend API                           (Email delivery)
+
+                    Analytics:
+                    • Cloudflare Worker: admin-analytics-api
+                    • Firestore: /analytics/users
+                    • KV Storage: USER_SESSIONS
+                    </pre>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- FLOW 2: STRIPE PAYMENT -->
+                        <!-- ========================================== -->
+
+                        <h3 class="subsection-title" style="margin-top: 50px;">
+                            <i class="fas fa-credit-card"></i> 2. Stripe Payment Flow
+                        </h3>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">Stripe Payment Flow - End-to-End Process</span>
+                            </div>
+                            <pre>
+                    ┌─────────────────────────────────────────────────────────────────────────────────┐
+                    │                          STRIPE PAYMENT FLOW                                     │
+                    │              (checkout → Stripe → webhook → Firebase → email → invoice)          │
+                    └─────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────┐
+                    │   1. USER        │  User selects plan and clicks "Subscribe"
+                    │   (Browser)      │  • Plan: Pro ($10/month)
+                    │   checkout.html  │  • Promo Code: LAUNCH15 (15% off)
+                    │                  │  • Email: user@example.com
+                    └────────┬─────────┘
+                            │
+                            │ POST /create-checkout-session
+                            │ Body: { plan: "pro", email: "user@example.com", 
+                            │         userId: "abc123xyz456", promoCode: "LAUNCH15" }
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   2. CLOUDFLARE WORKER: finance-hub-api                                        │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Function: handleStripeCheckout()                                             │
+                    │   File: finance-hub-api worker (line 1200-1500)                                │
+                    │                                                                                 │
+                    │   Process:                                                                      │
+                    │   ✓ Validate input (plan, email, userId)                                       │
+                    │   ✓ Verify promo code: LAUNCH15                                                │
+                    │     → Type: percentage (15%)                                                    │
+                    │     → Valid: true                                                               │
+                    │   ✓ Create Stripe coupon (15% off forever)                                     │
+                    │     → Coupon ID: "coupon_abc123"                                                │
+                    │   ✓ Get Stripe Price ID for Pro plan                                           │
+                    │     → Price ID: env.STRIPE_PRICE_PRO                                            │
+                    │   ✓ Create Stripe Checkout Session                                             │
+                    │                                                                                 │
+                    │   Stripe API Call:                                                              │
+                    │   POST https://api.stripe.com/v1/checkout/sessions                             │
+                    │   {                                                                             │
+                    │     mode: "subscription",                                                       │
+                    │     customer_email: "user@example.com",                                         │
+                    │     client_reference_id: "abc123xyz456",                                        │
+                    │     line_items: [{                                                              │
+                    │       price: "price_pro_id",                                                    │
+                    │       quantity: 1                                                               │
+                    │     }],                                                                         │
+                    │     discounts: [{ coupon: "coupon_abc123" }],                                  │
+                    │     subscription_data: {                                                        │
+                    │       trial_period_days: 14,                                                    │
+                    │       metadata: {                                                               │
+                    │         userId: "abc123xyz456",                                                 │
+                    │         plan: "pro",                                                            │
+                    │         promoCode: "LAUNCH15"                                                   │
+                    │       }                                                                         │
+                    │     },                                                                          │
+                    │     success_url: "https://alphavault-ai.com/success.html",                     │
+                    │     cancel_url: "https://alphavault-ai.com/checkout.html"                      │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   Stripe Response:                                                              │
+                    │   {                                                                             │
+                    │     id: "cs_test_abc123",                                                       │
+                    │     url: "https://checkout.stripe.com/c/pay/cs_test_abc123"                    │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Session created successfully                                               │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Return: { sessionId: "cs_test_abc123", url: "https://..." }
+                            │
+                            ▼
+                    ┌──────────────────┐
+                    │   3. REDIRECT    │  Browser redirects to Stripe Checkout
+                    │   TO STRIPE      │  URL: https://checkout.stripe.com/c/pay/cs_test_abc123
+                    │   CHECKOUT       │
+                    └────────┬─────────┘
+                            │
+                            │ User enters payment details
+                            │ • Card: 4242 4242 4242 4242
+                            │ • Expiry: 12/28
+                            │ • CVC: 123
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   4. STRIPE PROCESSES PAYMENT                                                  │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Stripe Internal Processing:                                                  │
+                    │   ✓ Validate payment method                                                    │
+                    │   ✓ Charge card (trial period: $0.00, future: $8.50/month after 15% discount) │
+                    │   ✓ Create customer: cus_abc123                                                │
+                    │   ✓ Create subscription: sub_xyz789                                            │
+                    │   ✓ Schedule invoice for end of trial (14 days)                                │
+                    │                                                                                 │
+                    │   Subscription Created:                                                         │
+                    │   {                                                                             │
+                    │     id: "sub_xyz789",                                                           │
+                    │     customer: "cus_abc123",                                                     │
+                    │     status: "trialing",                                                         │
+                    │     trial_end: "2026-01-21T14:30:00.000Z",                                      │
+                    │     current_period_start: "2026-01-07T14:30:00.000Z",                           │
+                    │     current_period_end: "2026-02-07T14:30:00.000Z",                             │
+                    │     plan: {                                                                     │
+                    │       amount: 1000,           // $10.00 in cents                                │
+                    │       currency: "usd",                                                          │
+                    │       interval: "month"                                                         │
+                    │     },                                                                          │
+                    │     discount: {                                                                 │
+                    │       coupon: {                                                                 │
+                    │         percent_off: 15,                                                        │
+                    │         duration: "forever"                                                     │
+                    │       }                                                                         │
+                    │     },                                                                          │
+                    │     metadata: {                                                                 │
+                    │       userId: "abc123xyz456",                                                   │
+                    │       plan: "pro",                                                              │
+                    │       promoCode: "LAUNCH15"                                                     │
+                    │     }                                                                           │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Payment successful                                                         │
+                    │   ✓ Redirect to success URL                                                    │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Event: checkout.session.completed
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   5. STRIPE WEBHOOK (Triggered by Stripe)                                      │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Endpoint: POST /webhook                                                      │
+                    │   Worker: finance-hub-api                                                      │
+                    │   Function: handleStripeWebhook()                                              │
+                    │                                                                                 │
+                    │   Webhook Payload (checkout.session.completed):                                │
+                    │   {                                                                             │
+                    │     type: "checkout.session.completed",                                        │
+                    │     data: {                                                                     │
+                    │       object: {                                                                 │
+                    │         id: "cs_test_abc123",                                                   │
+                    │         customer: "cus_abc123",                                                 │
+                    │         subscription: "sub_xyz789",                                             │
+                    │         client_reference_id: "abc123xyz456",                                    │
+                    │         customer_email: "user@example.com",                                     │
+                    │         customer_details: {                                                     │
+                    │           name: "John Doe"                                                      │
+                    │         },                                                                      │
+                    │         metadata: {                                                             │
+                    │           plan: "pro",                                                          │
+                    │           promoCode: "LAUNCH15"                                                 │
+                    │         }                                                                       │
+                    │       }                                                                         │
+                    │     }                                                                           │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   Handler: handleCheckoutSessionCompleted()                                    │
+                    │   ✓ Extract user data from webhook                                             │
+                    │   ✓ Prepare Firebase update                                                    │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Update Firebase
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   6. FIREBASE UPDATE                                                           │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Function: updateFirebaseUser()                                               │
+                    │   Collection: /users/{abc123xyz456}                                            │
+                    │                                                                                 │
+                    │   Document Update:                                                              │
+                    │   {                                                                             │
+                    │     plan: "pro",                          // Upgraded from "basic"             │
+                    │     stripeCustomerId: "cus_abc123",                                             │
+                    │     stripeSubscriptionId: "sub_xyz789",                                         │
+                    │     subscriptionStatus: "active",                                               │
+                    │     promoCode: "LAUNCH15",                                                      │
+                    │     subscriptionStart: "2026-01-07T14:30:00.000Z",                              │
+                    │     trialEnd: "2026-01-21T14:30:00.000Z",                                       │
+                    │     updatedAt: "2026-01-07T14:30:00.000Z"                                       │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ User plan upgraded to Pro                                                  │
+                    │   ✓ Subscription activated                                                     │
+                    │   ✓ User now has access to 17 pages                                            │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Trigger email
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   7. CONFIRMATION EMAIL (Resend API)                                           │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Function: sendPaymentConfirmationEmail()                                     │
+                    │   Service: Resend API                                                          │
+                    │                                                                                 │
+                    │   Email Template (HTML + Glassmorphism):                                       │
+                    │   ┌─────────────────────────────────────────────────────────────────────────┐ │
+                    │   │ ✅ Payment Confirmed!                                                   │ │
+                    │   │ ────────────────────────────────────────────────────────────────────    │ │
+                    │   │ Hi John Doe,                                                            │ │
+                    │   │                                                                         │ │
+                    │   │ Your subscription has been successfully processed.                     │ │
+                    │   │                                                                         │ │
+                    │   │ 👑 AlphaVault Pro                                                       │ │
+                    │   │ ⏱ 14-Day Free Trial - No charges until Jan 21, 2026                   │ │
+                    │   │                                                                         │ │
+                    │   │ Transaction Details:                                                   │ │
+                    │   │ • Customer: John Doe                                                   │ │
+                    │   │ • Email: user@example.com                                              │ │
+                    │   │ • Plan: AlphaVault Pro                                                 │ │
+                    │   │ • Amount: $8.50/month (15% discount applied)                           │ │
+                    │   │ • Invoice: #AV-202601-147820                                           │ │
+                    │   │ • Date: January 07, 2026                                               │ │
+                    │   │ • Status: ✓ Active                                                     │ │
+                    │   │                                                                         │ │
+                    │   │ 📊 Pages You Can Access (17 pages):                                    │ │
+                    │   │ ✓ Everything in Basic (9 pages)                                        │ │
+                    │   │ ✓ Investment Analytics                                                 │ │
+                    │   │ ✓ Risk Parity Optimization                                             │ │
+                    │   │ ✓ Scenario Analysis                                                    │ │
+                    │   │ ✓ Advanced Analysis (14 indicators)                                    │ │
+                    │   │ ✓ Forex Converter (38 currencies)                                      │ │
+                    │   │ ✓ Inflation Calculator                                                 │ │
+                    │   │ ✓ Interest Rate Tracker                                                │ │
+                    │   │ ✓ News Terminal                                                        │ │
+                    │   │                                                                         │ │
+                    │   │ [Access Your Dashboard →]                                              │ │
+                    │   │                                                                         │ │
+                    │   │ Attachment: AlphaVault_Invoice_AV-202601-147820.html                   │ │
+                    │   └─────────────────────────────────────────────────────────────────────────┘ │
+                    │                                                                                 │
+                    │   Resend API Call:                                                              │
+                    │   POST https://api.resend.com/emails                                           │
+                    │   {                                                                             │
+                    │     from: "AlphaVault AI <info@alphavault-ai.com>",                            │
+                    │     to: ["user@example.com"],                                                  │
+                    │     subject: "✅ Payment Confirmed - AlphaVault AI",                           │
+                    │     html: "<html>...</html>",                                                  │
+                    │     attachments: [{                                                             │
+                    │       filename: "AlphaVault_Invoice_AV-202601-147820.html",                    │
+                    │       content: "base64_encoded_invoice"                                        │
+                    │     }]                                                                          │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Email sent successfully                                                    │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │
+                            ▼
+                    ┌──────────────────┐
+                    │   8. USER        │  User receives email with invoice
+                    │   SUCCESS PAGE   │  Pro plan activated (17 pages unlocked)
+                    │                  │  Trial period: 14 days
+                    │   ✅ COMPLETE    │  Next charge: Jan 21, 2026 ($8.50)
+                    └──────────────────┘
+
+                    ═══════════════════════════════════════════════════════════════════════════════
+                    STRIPE WEBHOOK EVENTS HANDLED:
+                    ═══════════════════════════════════════════════════════════════════════════════
+
+                    • checkout.session.completed    → Update Firebase, send email
+                    • customer.subscription.updated  → Sync subscription status
+                    • customer.subscription.deleted  → Downgrade to Basic, cancel subscription
+                    • invoice.payment_failed         → Log failure, send notification
+
+                    ═══════════════════════════════════════════════════════════════════════════════
+                    KEY FILES INVOLVED:
+                    ═══════════════════════════════════════════════════════════════════════════════
+
+                    Frontend:
+                    • checkout.html                       (Payment form)
+                    • assets/js/checkout.js               (Checkout handling)
+                    • success.html                         (Success page)
+
+                    Backend:
+                    • Cloudflare Worker: finance-hub-api  (Stripe integration)
+                    • Stripe API                           (Payment processing)
+                    • Resend API                           (Email delivery)
+                    • Firebase Firestore                   (/users collection)
+                    </pre>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- FLOW 3: MARKET DATA RETRIEVAL -->
+                        <!-- ========================================== -->
+
+                        <h3 class="subsection-title" style="margin-top: 50px;">
+                            <i class="fas fa-chart-line"></i> 3. Market Data Retrieval Flow
+                        </h3>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">Market Data Retrieval Flow - API Chain</span>
+                            </div>
+                            <pre>
+                    ┌─────────────────────────────────────────────────────────────────────────────────┐
+                    │                      MARKET DATA RETRIEVAL FLOW                                  │
+                    │            (api-client.js → Cloudflare Worker → Twelve Data / FinnHub)           │
+                    └─────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────┐
+                    │   1. USER        │  User searches for a stock symbol
+                    │   (Browser)      │  • Input: "AAPL"
+                    │   advanced-      │  • Page: advanced-analysis.html
+                    │   analysis.html  │  • Action: Click "Analyze"
+                    └────────┬─────────┘
+                            │
+                            │ JavaScript Call
+                            │ Function: analyzeSymbol('AAPL')
+                            │ File: assets/js/advanced-analysis.js
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   2. API CLIENT (Frontend)                                                     │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   File: assets/js/api-client.js                                                │
+                    │   Class: FinanceAPIClient                                                      │
+                    │                                                                                 │
+                    │   Method Calls (Parallel Execution):                                           │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Call 1: getQuote('AAPL')                                             │    │
+                    │   │ ✓ Real-time price data                                               │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Call 2: getTimeSeries('AAPL', '1day', 365)                           │    │
+                    │   │ ✓ Historical daily prices (1 year)                                   │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Call 3: getTechnicalIndicator('AAPL', 'rsi')                         │    │
+                    │   │ ✓ RSI indicator (14 periods)                                         │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Call 4: getProfile('AAPL')                                            │    │
+                    │   │ ✓ Company profile & fundamentals                                     │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   All calls routed through: WORKER_URL/api/[endpoint]                          │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ HTTP Requests (4 parallel)
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   3. CLOUDFLARE WORKER: finance-hub-api                                        │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Base URL: https://finance-hub-api.[account].workers.dev                     │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Request 1: GET /api/quote?symbol=AAPL                                │    │
+                    │   │ ─────────────────────────────────────────────────────────────────    │    │
+                    │   │ Cache Check:                                                          │    │
+                    │   │ ✓ KV Key: "quote:AAPL"                                               │    │
+                    │   │ ✓ Cache Miss (expired or not found)                                  │    │
+                    │   │                                                                       │    │
+                    │   │ Proxy to Twelve Data API:                                            │    │
+                    │   │ → GET https://api.twelvedata.com/quote?symbol=AAPL&apikey=***       │    │
+                    │   │                                                                       │    │
+                    │   │ Response:                                                             │    │
+                    │   │ {                                                                     │    │
+                    │   │   symbol: "AAPL",                                                     │    │
+                    │   │   name: "Apple Inc",                                                  │    │
+                    │   │   exchange: "NASDAQ",                                                 │    │
+                    │   │   currency: "USD",                                                    │    │
+                    │   │   open: 185.50,                                                       │    │
+                    │   │   high: 187.20,                                                       │    │
+                    │   │   low: 184.80,                                                        │    │
+                    │   │   close: 186.95,                                                      │    │
+                    │   │   volume: 52847300,                                                   │    │
+                    │   │   previous_close: 184.25,                                             │    │
+                    │   │   change: 2.70,                                                       │    │
+                    │   │   percent_change: 1.47                                                │    │
+                    │   │ }                                                                     │    │
+                    │   │                                                                       │    │
+                    │   │ ✓ Store in KV Cache (TTL: 60 seconds)                                │    │
+                    │   │ ✓ Return to frontend                                                 │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Request 2: GET /api/time-series?symbol=AAPL&interval=1day&size=365   │    │
+                    │   │ ─────────────────────────────────────────────────────────────────    │    │
+                    │   │ Cache Check:                                                          │    │
+                    │   │ ✓ KV Key: "timeseries:AAPL:1day:365"                                 │    │
+                    │   │ ✓ Cache Hit! (cached 15 minutes ago)                                 │    │
+                    │   │                                                                       │    │
+                    │   │ Response (from cache):                                                │    │
+                    │   │ {                                                                     │    │
+                    │   │   symbol: "AAPL",                                                     │    │
+                    │   │   interval: "1day",                                                   │    │
+                    │   │   currency: "USD",                                                    │    │
+                    │   │   data: [                                                             │    │
+                    │   │     { datetime: "2025-01-07", open: 185.50, high: 187.20, ... },    │    │
+                    │   │     { datetime: "2025-01-06", open: 182.30, high: 184.50, ... },    │    │
+                    │   │     ... (365 data points)                                             │    │
+                    │   │   ]                                                                   │    │
+                    │   │ }                                                                     │    │
+                    │   │                                                                       │    │
+                    │   │ ✓ Return cached data (no API call needed)                            │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Request 3: GET /api/technical-indicators?symbol=AAPL&indicator=rsi   │    │
+                    │   │ ─────────────────────────────────────────────────────────────────    │    │
+                    │   │ Cache Check:                                                          │    │
+                    │   │ ✓ KV Key: "indicator:AAPL:rsi:1day:14"                               │    │
+                    │   │ ✓ Cache Miss                                                          │    │
+                    │   │                                                                       │    │
+                    │   │ Proxy to Twelve Data API:                                            │    │
+                    │   │ → GET https://api.twelvedata.com/rsi?symbol=AAPL&interval=1day...   │    │
+                    │   │                                                                       │    │
+                    │   │ Response:                                                             │    │
+                    │   │ {                                                                     │    │
+                    │   │   symbol: "AAPL",                                                     │    │
+                    │   │   indicator: "RSI",                                                   │    │
+                    │   │   values: [                                                           │    │
+                    │   │     { datetime: "2025-01-07", rsi: 62.45 },                          │    │
+                    │   │     { datetime: "2025-01-06", rsi: 58.32 },                          │    │
+                    │   │     ... (100 data points)                                             │    │
+                    │   │   ]                                                                   │    │
+                    │   │ }                                                                     │    │
+                    │   │                                                                       │    │
+                    │   │ ✓ Store in KV Cache (TTL: 1800 seconds)                              │    │
+                    │   │ ✓ Return to frontend                                                 │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   ┌──────────────────────────────────────────────────────────────────────┐    │
+                    │   │ Request 4: GET /api/profile?symbol=AAPL                              │    │
+                    │   │ ─────────────────────────────────────────────────────────────────    │    │
+                    │   │ Cache Check:                                                          │    │
+                    │   │ ✓ KV Key: "profile:AAPL"                                             │    │
+                    │   │ ✓ Cache Hit! (cached 2 hours ago)                                    │    │
+                    │   │                                                                       │    │
+                    │   │ Response (from cache):                                                │    │
+                    │   │ {                                                                     │    │
+                    │   │   symbol: "AAPL",                                                     │    │
+                    │   │   name: "Apple Inc",                                                  │    │
+                    │   │   sector: "Technology",                                               │    │
+                    │   │   industry: "Consumer Electronics",                                  │    │
+                    │   │   market_cap: 2800000000000,                                          │    │
+                    │   │   pe_ratio: 28.5,                                                     │    │
+                    │   │   eps: 6.55,                                                          │    │
+                    │   │   dividend_yield: 0.52,                                               │    │
+                    │   │   beta: 1.24                                                          │    │
+                    │   │ }                                                                     │    │
+                    │   │                                                                       │    │
+                    │   │ ✓ Return cached data                                                 │    │
+                    │   └──────────────────────────────────────────────────────────────────────┘    │
+                    │                                                                                 │
+                    │   Cache Statistics for this request:                                           │
+                    │   • Total API Calls: 4                                                         │
+                    │   • Cache Hits: 2 (50% cache efficiency)                                       │
+                    │   • External API Calls: 2 (quote + RSI)                                        │
+                    │   • Response Time: ~180ms (avg)                                                │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ JSON Responses (4x)
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   4. DATA PROCESSING (Frontend)                                                │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   File: assets/js/advanced-analysis.js                                         │
+                    │   Function: processAnalysisData()                                              │
+                    │                                                                                 │
+                    │   Processing Steps:                                                             │
+                    │   ✓ Merge all API responses                                                    │
+                    │   ✓ Calculate 14 technical indicators locally:                                 │
+                    │     → RSI (from API)                                                            │
+                    │     → MACD (calculate from time series)                                         │
+                    │     → Bollinger Bands (calculate from time series)                             │
+                    │     → Fibonacci Retracements (calculate from highs/lows)                       │
+                    │     → Moving Averages (SMA 20/50/100/200, EMA 20/50)                           │
+                    │     → Ichimoku Cloud (Tenkan, Kijun, Senkou A/B, Chikou)                       │
+                    │     → Pivot Points (Standard, Fibonacci, Camarilla)                            │
+                    │     → ADX + DMI (trend strength)                                                │
+                    │     → Stochastic Oscillator                                                    │
+                    │     → Support/Resistance Levels                                                │
+                    │     → Volume Analysis                                                           │
+                    │   ✓ Generate AI recommendations (3 horizons: Short, Medium, Long)              │
+                    │   ✓ Calculate composite score (0-100)                                          │
+                    │   ✓ Generate risk metrics (VaR, Sharpe, Beta)                                  │
+                    │                                                                                 │
+                    │   Processed Data Structure:                                                     │
+                    │   {                                                                             │
+                    │     symbol: "AAPL",                                                             │
+                    │     quote: { ... },                                                             │
+                    │     timeSeries: [ ... ],                                                        │
+                    │     indicators: {                                                               │
+                    │       rsi: { value: 62.45, signal: "Neutral" },                                │
+                    │       macd: { value: 2.15, signal: "Buy", histogram: [...] },                  │
+                    │       bollingerBands: { upper: 188.50, middle: 185.00, lower: 181.50 },       │
+                    │       // ... 11 more indicators                                                │
+                    │     },                                                                          │
+                    │     aiRecommendations: {                                                        │
+                    │       shortTerm: { signal: "BUY", confidence: 78%, target: 195, stop: 180 },  │
+                    │       mediumTerm: { signal: "HOLD", confidence: 65%, target: 205, stop: 175 },│
+                    │       longTerm: { signal: "BUY", confidence: 82%, target: 230, stop: 165 }    │
+                    │     },                                                                          │
+                    │     compositeScore: 72.5,                                                       │
+                    │     riskMetrics: {                                                              │
+                    │       var95: -3.2%,                                                             │
+                    │       sharpeRatio: 1.85,                                                        │
+                    │       beta: 1.24,                                                               │
+                    │       volatility: 22.3%                                                         │
+                    │     }                                                                           │
+                    │   }                                                                             │
+                    │                                                                                 │
+                    │   ✓ Data processing complete                                                   │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Render UI
+                            │
+                            ▼
+                    ┌────────────────────────────────────────────────────────────────────────────────┐
+                    │   5. UI RENDERING (Highcharts)                                                 │
+                    │   ──────────────────────────────────────────────────────────────────────────   │
+                    │   Charts Generated (14 total):                                                 │
+                    │                                                                                 │
+                    │   ✓ Candlestick Chart (time series)                                            │
+                    │   ✓ RSI Chart (with overbought/oversold zones)                                 │
+                    │   ✓ MACD Chart (histogram + signal line)                                       │
+                    │   ✓ Bollinger Bands Chart (upper/middle/lower)                                 │
+                    │   ✓ Moving Averages Chart (SMA 20/50/100/200)                                  │
+                    │   ✓ Fibonacci Retracements (levels overlay)                                    │
+                    │   ✓ Ichimoku Cloud (full cloud visualization)                                  │
+                    │   ✓ Pivot Points Chart (R1/R2/R3, S1/S2/S3)                                    │
+                    │   ✓ ADX + DMI Chart (trend strength)                                           │
+                    │   ✓ Stochastic Oscillator (%K/%D)                                              │
+                    │   ✓ Volume Chart (with moving average)                                         │
+                    │   ✓ Support/Resistance Levels                                                  │
+                    │   ✓ AI Recommendations Cards (3 horizons)                                      │
+                    │   ✓ Risk Metrics Dashboard                                                     │
+                    │                                                                                 │
+                    │   Total Rendering Time: ~450ms                                                 │
+                    └────────┬───────────────────────────────────────────────────────────────────────┘
+                            │
+                            │
+                            ▼
+                    ┌──────────────────┐
+                    │   6. USER SEES   │  Complete analysis displayed
+                    │   FINAL RESULT   │  • 14 interactive charts
+                    │                  │  • AI recommendations (3 horizons)
+                    │   ✅ COMPLETE    │  • Risk metrics dashboard
+                    │                  │  • Total time: ~630ms (fetch + process + render)
+                    └──────────────────┘
+
+                    ═══════════════════════════════════════════════════════════════════════════════
+                    CACHE EFFICIENCY:
+                    ═══════════════════════════════════════════════════════════════════════════════
+
+                    Cache TTL Configuration (seconds):
+                    • quote: 60                    (1 minute - real-time data)
+                    • timeSeries: 1800              (30 minutes - historical data)
+                    • indicators: 1800              (30 minutes - technical data)
+                    • profile: 86400                (24 hours - company fundamentals)
+                    • search: 86400                 (24 hours - symbol search)
+                    • statistics: 3600              (1 hour - company statistics)
+
+                    Cache Hit Rate: ~70% average
+                    API Cost Reduction: ~85% (compared to no caching)
+
+                    ═══════════════════════════════════════════════════════════════════════════════
+                    KEY FILES INVOLVED:
+                    ═══════════════════════════════════════════════════════════════════════════════
+
+                    Frontend:
+                    • advanced-analysis.html              (UI page)
+                    • assets/js/advanced-analysis.js      (Analysis logic - 4,292 lines)
+                    • assets/js/api-client.js             (API client - 2,237 lines)
+                    • assets/js/alphavault-scoring.js     (Scoring engine - 704 lines)
+
+                    Backend:
+                    • Cloudflare Worker: finance-hub-api (Main API proxy)
+                    • KV Storage: CACHE                   (Response caching)
+                    • Twelve Data API                      (Market data provider)
+                    • FinnHub API                          (Company news & fundamentals)
+                    </pre>
+                        </div>
+
+                        <div class="info-card" style="margin-top: 30px;">
+                            <h4 style="margin-bottom: 12px; font-size: 1.1rem;">
+                                <i class="fas fa-rocket"></i> Performance Metrics
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">~630ms</div>
+                                    <div class="stat-label">Average Total Response Time</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">70%</div>
+                                    <div class="stat-label">Cache Hit Rate</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">85%</div>
+                                    <div class="stat-label">API Cost Reduction</div>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <div class="stat-value">4-6</div>
+                                    <div class="stat-label">Parallel API Calls per Analysis</div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
-                    <!-- SECTION 6: PAYMENTS -->
-                    <section class="doc-section" id="payments">
-                        <h2 class="section-title">
-                            <i class="fas fa-credit-card"></i>
-                            Payment System & Subscriptions
-                        </h2>
-                        
-                        <p class="section-placeholder">
-                            <i class="fas fa-info-circle"></i>
-                            Detailed payment system documentation including pricing plans, 
-                            Stripe integration, and webhook configuration.
-                        </p>
-                    </section>
+                    
 
                     <!-- SECTION 7: SECURITY -->
                     <section class="doc-section" id="security">
