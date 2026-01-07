@@ -259,7 +259,6 @@
     <script>
         let architectureData = '';
         let statsData = {};
-        let analyzedFiles = [];
 
         async function extractArchitecture() {
             const username = document.getElementById('username').value.trim();
@@ -280,6 +279,8 @@
             try {
                 updateProgress(0, 'Scanning repository structure...');
                 const files = await scanRepository(username, repo);
+                
+                console.log(`Found ${files.length} files`);
                 
                 updateProgress(30, 'Repository scanned. Starting analysis...');
                 
@@ -302,6 +303,7 @@
                 }, 500);
                 
             } catch (error) {
+                console.error('Extraction error:', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('progressContainer').style.display = 'none';
                 document.getElementById('extractBtn').disabled = false;
@@ -352,6 +354,8 @@
                 return false;
             });
 
+            console.log(`Analyzing ${filesToAnalyze.length} files...`);
+
             const total = filesToAnalyze.length;
             let analyzed = 0;
 
@@ -359,10 +363,12 @@
                 try {
                     const content = await fetchFileContent(file.download_url);
                     const analysis = analyzeFileContent(file, content, analysisLevel);
-                    file.analysis = analysis;
-                    analyzedFiles.push({ ...file, analysis });
+                    file.analysis = analysis; // ← IMPORTANT: Modifier le fichier directement
+                    
+                    console.log(`Analyzed: ${file.path}`);
                 } catch (error) {
-                    file.analysis = { error: 'Failed to analyze' };
+                    console.error(`Failed to analyze ${file.path}:`, error);
+                    file.analysis = { error: 'Failed to analyze: ' + error.message };
                 }
                 
                 analyzed++;
@@ -378,407 +384,175 @@
         }
 
         function analyzeFileContent(file, content, analysisLevel) {
-            const ext = file.name.split('.').pop();
-            const lines = content.split('\n').length;
-            const size = (file.size / 1024).toFixed(2);
+            try {
+                const ext = file.name.split('.').pop();
+                const lines = content.split('\n').length;
+                const size = (file.size / 1024).toFixed(2);
 
-            if (ext === 'html') {
-                return analyzeHTML(content, lines, size, analysisLevel);
-            } else if (ext === 'css') {
-                return analyzeCSS(content, lines, size);
-            } else if (ext === 'js') {
-                return analyzeJS(content, lines, size);
+                if (ext === 'html') {
+                    return analyzeHTML(content, lines, size, analysisLevel);
+                } else if (ext === 'css') {
+                    return analyzeCSS(content, lines, size);
+                } else if (ext === 'js') {
+                    return analyzeJS(content, lines, size);
+                }
+
+                return { lines, size: size + ' KB' };
+            } catch (error) {
+                console.error('Analysis error:', error);
+                return { error: error.message };
             }
-
-            return { lines, size };
         }
 
         function analyzeHTML(content, lines, size, analysisLevel) {
-            // Titre
-            const titleMatch = content.match(/<title>(.*?)<\/title>/i);
-            const title = titleMatch ? titleMatch[1] : 'No title';
+            try {
+                const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+                const title = titleMatch ? titleMatch[1] : 'No title';
 
-            // Meta description
-            const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
-            let description = metaDesc ? metaDesc[1] : '';
+                const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+                let description = metaDesc ? metaDesc[1] : '';
 
-            // Si pas de meta description, chercher le premier paragraphe ou h1
-            if (!description || description === 'No description') {
-                const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
-                if (h1Match) {
-                    description = h1Match[1].replace(/<[^>]+>/g, '').trim();
-                }
-                
                 if (!description) {
-                    const pMatch = content.match(/<p[^>]*>(.*?)<\/p>/i);
-                    if (pMatch) {
-                        description = pMatch[1].replace(/<[^>]+>/g, '').trim();
+                    const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                    if (h1Match) {
+                        description = h1Match[1].replace(/<[^>]+>/g, '').trim();
                     }
                 }
-            }
 
-            // ULTRA DEEP ANALYSIS
-            let pageType = 'Unknown';
-            let mainFeatures = [];
-            let sections = [];
-            let integrations = [];
-            let userInteractions = [];
-            
-            if (analysisLevel === 'ultra') {
-                // Déterminer le type de page
-                pageType = detectPageType(content, file.name);
-                
-                // Détecter les fonctionnalités principales
-                mainFeatures = detectMainFeatures(content);
-                
-                // Extraire les sections principales
-                sections = extractMainSections(content);
-                
-                // Détecter les intégrations
-                integrations = detectIntegrations(content);
-                
-                // Détecter les interactions utilisateur
-                userInteractions = detectUserInteractions(content);
-                
-                // Générer une description intelligente si manquante
-                if (!description || description.length < 20) {
-                    description = generateSmartDescription(pageType, title, mainFeatures, sections);
-                }
-            }
-
-            // Scripts et stylesheets
-            const scriptTags = (content.match(/<script[^>]*src=["'](.*?)["']/gi) || []);
-            const scripts = scriptTags.map(s => {
-                const match = s.match(/src=["'](.*?)["']/i);
-                return match ? match[1].split('/').pop() : '';
-            }).filter(s => s);
-
-            const linkTags = (content.match(/<link[^>]*href=["'](.*?)["']/gi) || []);
-            const stylesheets = linkTags
-                .map(l => {
-                    const match = l.match(/href=["'](.*?)["']/i);
+                const scriptTags = (content.match(/<script[^>]*src=["'](.*?)["']/gi) || []);
+                const scripts = scriptTags.map(s => {
+                    const match = s.match(/src=["'](.*?)["']/i);
                     return match ? match[1].split('/').pop() : '';
-                })
-                .filter(l => l.endsWith('.css'));
+                }).filter(s => s);
 
-            // Composants
-            const forms = (content.match(/<form/gi) || []).length;
-            const buttons = (content.match(/<button/gi) || []).length;
-            const sectionsCount = (content.match(/<section/gi) || []).length;
-            const inputs = (content.match(/<input/gi) || []).length;
-            const tables = (content.match(/<table/gi) || []).length;
-            const charts = (content.match(/id=["'][^"']*chart[^"']*["']/gi) || []).length;
+                const linkTags = (content.match(/<link[^>]*href=["'](.*?)["']/gi) || []);
+                const stylesheets = linkTags
+                    .map(l => {
+                        const match = l.match(/href=["'](.*?)["']/i);
+                        return match ? match[1].split('/').pop() : '';
+                    })
+                    .filter(l => l.endsWith('.css'));
 
-            return {
-                lines,
-                size: size + ' KB',
-                title,
-                description: description.substring(0, 200) + (description.length > 200 ? '...' : ''),
-                pageType,
-                mainFeatures,
-                sections: sections.slice(0, 8),
-                integrations,
-                userInteractions,
-                scripts: scripts.slice(0, 8),
-                stylesheets: stylesheets.slice(0, 8),
-                components: { 
-                    forms, 
-                    buttons, 
-                    sections: sectionsCount,
-                    inputs,
-                    tables,
-                    charts
-                }
-            };
-        }
+                const forms = (content.match(/<form/gi) || []).length;
+                const buttons = (content.match(/<button/gi) || []).length;
+                const sectionsCount = (content.match(/<section/gi) || []).length;
 
-        function detectPageType(content, filename) {
-            const lower = content.toLowerCase();
-            const name = filename.toLowerCase();
-            
-            if (name.includes('landing') || name === 'index.html' || name.includes('about')) {
-                return 'Landing Page';
-            }
-            if (name.includes('admin') || lower.includes('admin dashboard')) {
-                return 'Admin Dashboard';
-            }
-            if (name.includes('dashboard') || lower.includes('dashboard')) {
-                return 'User Dashboard';
-            }
-            if (name.includes('auth') || name.includes('login') || name.includes('signup')) {
-                return 'Authentication Page';
-            }
-            if (name.includes('profile') || name.includes('settings')) {
-                return 'User Profile/Settings';
-            }
-            if (name.includes('checkout') || name.includes('payment')) {
-                return 'Payment/Checkout Page';
-            }
-            if (name.includes('chat') || name.includes('message')) {
-                return 'Chat/Messaging Page';
-            }
-            if (name.includes('community') || name.includes('post')) {
-                return 'Community/Social Page';
-            }
-            if (name.includes('help') || name.includes('documentation')) {
-                return 'Help/Documentation Page';
-            }
-            if (lower.includes('highcharts') || lower.includes('chart.js')) {
-                return 'Analytics/Charts Page';
-            }
-            if (name.includes('calculator') || name.includes('simulator')) {
-                return 'Financial Calculator/Simulator';
-            }
-            if (name.includes('news') || name.includes('sentiment') || name.includes('trending')) {
-                return 'News/Market Data Page';
-            }
-            if (name.includes('real-estate')) {
-                return 'Real Estate Analysis Tool';
-            }
-            if (name.includes('monte-carlo') || name.includes('risk-parity') || name.includes('optimizer')) {
-                return 'Quantitative Finance Tool';
-            }
-            if (name.includes('ipo') || name.includes('insider') || name.includes('m&a') || name.includes('ma-')) {
-                return 'Corporate Finance Analysis';
-            }
-            
-            return 'Application Page';
-        }
-
-        function detectMainFeatures(content) {
-            const features = [];
-            const lower = content.toLowerCase();
-            
-            // Fonctionnalités de base
-            if (lower.includes('firebase') && lower.includes('auth')) features.push('User Authentication (Firebase)');
-            if (lower.includes('stripe')) features.push('Payment Processing (Stripe)');
-            if (lower.includes('highcharts') || lower.includes('chart.js')) features.push('Interactive Charts & Visualization');
-            if (lower.includes('search')) features.push('Search Functionality');
-            if (lower.includes('filter')) features.push('Advanced Filtering');
-            if (lower.includes('export')) features.push('Data Export');
-            if (lower.includes('download')) features.push('File Download');
-            if (lower.includes('upload')) features.push('File Upload');
-            
-            // Fonctionnalités financières
-            if (lower.includes('portfolio')) features.push('Portfolio Management');
-            if (lower.includes('watchlist')) features.push('Watchlist System');
-            if (lower.includes('simulation')) features.push('Financial Simulation');
-            if (lower.includes('prediction') || lower.includes('forecast')) features.push('Predictive Analytics');
-            if (lower.includes('monte carlo')) features.push('Monte Carlo Simulation');
-            if (lower.includes('risk parity')) features.push('Risk Parity Optimization');
-            if (lower.includes('sentiment')) features.push('Sentiment Analysis');
-            if (lower.includes('insider')) features.push('Insider Trading Tracking');
-            if (lower.includes('ipo')) features.push('IPO Analysis');
-            if (lower.includes('m&a') || lower.includes('merger')) features.push('M&A Screening');
-            
-            // Fonctionnalités sociales
-            if (lower.includes('comment')) features.push('Comment System');
-            if (lower.includes('like') || lower.includes('upvote')) features.push('Like/Upvote System');
-            if (lower.includes('follow')) features.push('Follow System');
-            if (lower.includes('chat') || lower.includes('message')) features.push('Messaging System');
-            if (lower.includes('notification')) features.push('Notifications');
-            
-            // Fonctionnalités de données
-            if (lower.includes('real-time') || lower.includes('websocket')) features.push('Real-time Data Updates');
-            if (lower.includes('api')) features.push('External API Integration');
-            if (lower.includes('cache')) features.push('Data Caching');
-            
-            // Dark mode
-            if (lower.includes('dark-mode') || lower.includes('darkmode')) features.push('Dark Mode Support');
-            
-            // Responsive
-            if (lower.includes('mobile') || lower.includes('responsive')) features.push('Mobile Responsive Design');
-            
-            return features;
-        }
-
-        function extractMainSections(content) {
-            const sections = [];
-            
-            // Chercher les sections avec titre
-            const sectionMatches = content.matchAll(/<section[^>]*>([\s\S]*?)<\/section>/gi);
-            for (const match of sectionMatches) {
-                const sectionContent = match[1];
-                const h2Match = sectionContent.match(/<h2[^>]*>(.*?)<\/h2>/i);
-                const h3Match = sectionContent.match(/<h3[^>]*>(.*?)<\/h3>/i);
-                const title = h2Match ? h2Match[1].replace(/<[^>]+>/g, '').trim() : 
-                             h3Match ? h3Match[1].replace(/<[^>]+>/g, '').trim() : null;
-                if (title && title.length < 100) {
-                    sections.push(title);
-                }
-            }
-            
-            // Si pas de sections, chercher les h2/h3 principaux
-            if (sections.length === 0) {
-                const h2Matches = content.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi);
-                for (const match of h2Matches) {
-                    const title = match[1].replace(/<[^>]+>/g, '').trim();
-                    if (title && title.length < 100 && !title.includes('�')) {
-                        sections.push(title);
+                const result = {
+                    lines,
+                    size: size + ' KB',
+                    title,
+                    description: description.substring(0, 200) + (description.length > 200 ? '...' : ''),
+                    scripts: scripts.slice(0, 8),
+                    stylesheets: stylesheets.slice(0, 8),
+                    components: { 
+                        forms, 
+                        buttons, 
+                        sections: sectionsCount
                     }
+                };
+
+                if (analysisLevel === 'ultra') {
+                    const lower = content.toLowerCase();
+                    const features = [];
+                    
+                    if (lower.includes('firebase')) features.push('Firebase');
+                    if (lower.includes('stripe')) features.push('Stripe');
+                    if (lower.includes('highcharts')) features.push('Highcharts');
+                    if (lower.includes('chart.js')) features.push('Chart.js');
+                    
+                    result.integrations = features;
                 }
-            }
-            
-            return sections;
-        }
 
-        function detectIntegrations(content) {
-            const integrations = [];
-            const lower = content.toLowerCase();
-            
-            if (lower.includes('firebase')) integrations.push('Firebase');
-            if (lower.includes('stripe')) integrations.push('Stripe');
-            if (lower.includes('highcharts')) integrations.push('Highcharts');
-            if (lower.includes('chart.js')) integrations.push('Chart.js');
-            if (lower.includes('gemini') || lower.includes('google ai')) integrations.push('Google Gemini AI');
-            if (lower.includes('twelve data') || lower.includes('twelvedata')) integrations.push('Twelve Data API');
-            if (lower.includes('finnhub')) integrations.push('Finnhub API');
-            if (lower.includes('sec edgar') || lower.includes('sec-edgar')) integrations.push('SEC EDGAR');
-            if (lower.includes('cloudflare')) integrations.push('Cloudflare');
-            if (lower.includes('resend')) integrations.push('Resend Email');
-            if (lower.includes('three.js') || lower.includes('threejs')) integrations.push('Three.js (3D Graphics)');
-            
-            return integrations;
-        }
-
-        function detectUserInteractions(content) {
-            const interactions = [];
-            const lower = content.toLowerCase();
-            
-            if ((content.match(/<button/gi) || []).length > 5) interactions.push('Multiple Interactive Buttons');
-            if ((content.match(/<form/gi) || []).length > 0) interactions.push('Form Submission');
-            if (lower.includes('click') || lower.includes('onclick')) interactions.push('Click Events');
-            if (lower.includes('drag') || lower.includes('drop')) interactions.push('Drag & Drop');
-            if (lower.includes('modal')) interactions.push('Modal Dialogs');
-            if (lower.includes('dropdown')) interactions.push('Dropdown Menus');
-            if (lower.includes('tooltip')) interactions.push('Tooltips');
-            if (lower.includes('pagination')) interactions.push('Pagination');
-            if (lower.includes('tab')) interactions.push('Tabbed Navigation');
-            if (lower.includes('accordion')) interactions.push('Accordion Panels');
-            if (lower.includes('slider')) interactions.push('Range Sliders');
-            
-            return interactions;
-        }
-
-        function generateSmartDescription(pageType, title, features, sections) {
-            let desc = `${pageType}`;
-            
-            if (features.length > 0) {
-                desc += ` featuring ${features.slice(0, 3).join(', ')}`;
+                return result;
+            } catch (error) {
+                console.error('HTML analysis error:', error);
+                return { error: error.message, lines, size: size + ' KB' };
             }
-            
-            if (sections.length > 0) {
-                desc += `. Main sections: ${sections.slice(0, 3).join(', ')}`;
-            }
-            
-            return desc;
         }
 
         function analyzeCSS(content, lines, size) {
-            const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
-            const uniqueClasses = [...new Set(classes)].slice(0, 10);
+            try {
+                const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+                const uniqueClasses = [...new Set(classes)];
 
-            const variables = (content.match(/--[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
-            const uniqueVars = [...new Set(variables)].slice(0, 10);
+                const variables = (content.match(/--[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+                const uniqueVars = [...new Set(variables)];
 
-            const mediaQueries = (content.match(/@media/g) || []).length;
-            const keyframes = (content.match(/@keyframes/g) || []).length;
-            const imports = (content.match(/@import/g) || []).length;
+                const mediaQueries = (content.match(/@media/g) || []).length;
+                const keyframes = (content.match(/@keyframes/g) || []).length;
 
-            const colors = (content.match(/#[0-9a-fA-F]{3,6}\b/g) || []);
-            const uniqueColors = [...new Set(colors)].slice(0, 8);
-
-            return {
-                lines,
-                size: size + ' KB',
-                classes: uniqueClasses.length,
-                variables: uniqueVars.length,
-                mediaQueries,
-                keyframes,
-                imports,
-                topClasses: uniqueClasses.slice(0, 5),
-                topVariables: uniqueVars.slice(0, 5),
-                colorPalette: uniqueColors
-            };
+                return {
+                    lines,
+                    size: size + ' KB',
+                    classes: uniqueClasses.length,
+                    variables: uniqueVars.length,
+                    mediaQueries,
+                    keyframes,
+                    topClasses: uniqueClasses.slice(0, 5),
+                    topVariables: uniqueVars.slice(0, 5)
+                };
+            } catch (error) {
+                console.error('CSS analysis error:', error);
+                return { error: error.message, lines, size: size + ' KB' };
+            }
         }
 
         function analyzeJS(content, lines, size) {
-            const functions = (content.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
-            const functionNames = functions.map(f => f.replace('function ', '')).slice(0, 10);
+            try {
+                const functions = (content.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
+                const functionNames = functions.map(f => f.replace('function ', ''));
 
-            const arrowFunctions = (content.match(/const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g) || []);
-            const constNames = arrowFunctions.map(f => f.replace(/const\s+/, '').replace(/\s*=$/, '')).slice(0, 10);
+                const eventListeners = (content.match(/addEventListener/g) || []).length;
+                const fetches = (content.match(/fetch\(/g) || []).length;
 
-            const classes = (content.match(/class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
-            const classNames = classes.map(c => c.replace('class ', ''));
-
-            const imports = (content.match(/import\s+.*?from\s+['"].*?['"]/g) || []).length;
-            const exports = (content.match(/export\s+(default\s+)?(class|function|const)/g) || []).length;
-
-            const eventListeners = (content.match(/addEventListener/g) || []).length;
-            const fetches = (content.match(/fetch\(/g) || []).length;
-            const asyncFunctions = (content.match(/async\s+function/g) || []).length;
-
-            const hasFirebase = content.includes('firebase');
-            const hasStripe = content.includes('stripe') || content.includes('Stripe');
-            const hasCharts = content.includes('Chart') || content.includes('Highcharts');
-
-            return {
-                lines,
-                size: size + ' KB',
-                functions: functionNames.length + constNames.length,
-                classes: classNames.length,
-                imports,
-                exports,
-                eventListeners,
-                apiCalls: fetches,
-                asyncFunctions,
-                topFunctions: [...functionNames, ...constNames].slice(0, 8),
-                topClasses: classNames,
-                integrations: {
-                    firebase: hasFirebase,
-                    stripe: hasStripe,
-                    charts: hasCharts
-                }
-            };
+                return {
+                    lines,
+                    size: size + ' KB',
+                    functions: functionNames.length,
+                    eventListeners,
+                    apiCalls: fetches,
+                    topFunctions: functionNames.slice(0, 8)
+                };
+            } catch (error) {
+                console.error('JS analysis error:', error);
+                return { error: error.message, lines, size: size + ' KB' };
+            }
         }
 
         function generateArchitecture(files) {
-            const htmlFiles = files.filter(f => f.name.endsWith('.html'));
-            const cssFiles = files.filter(f => f.name.endsWith('.css'));
-            const jsFiles = files.filter(f => f.name.endsWith('.js'));
-            const otherFiles = files.filter(f => !f.name.match(/\.(html|css|js)$/));
+            try {
+                console.log('Generating architecture report...');
+                
+                const htmlFiles = files.filter(f => f.name.endsWith('.html'));
+                const cssFiles = files.filter(f => f.name.endsWith('.css'));
+                const jsFiles = files.filter(f => f.name.endsWith('.js'));
+                const otherFiles = files.filter(f => !f.name.match(/\.(html|css|js)$/));
 
-            statsData = {
-                html: htmlFiles.length,
-                css: cssFiles.length,
-                js: jsFiles.length,
-                total: files.length
-            };
+                console.log(`HTML: ${htmlFiles.length}, CSS: ${cssFiles.length}, JS: ${jsFiles.length}`);
 
-            // Statistiques
-            const statsHtml = `
-                <div class="stat-card">
-                    <div class="stat-value">${htmlFiles.length}</div>
-                    <div class="stat-label">HTML Pages</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${cssFiles.length}</div>
-                    <div class="stat-label">CSS Files</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${jsFiles.length}</div>
-                    <div class="stat-label">JavaScript Files</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${files.length}</div>
-                    <div class="stat-label">Total Files</div>
-                </div>
-            `;
-            document.getElementById('stats').innerHTML = statsHtml;
+                // Statistiques
+                const statsHtml = `
+                    <div class="stat-card">
+                        <div class="stat-value">${htmlFiles.length}</div>
+                        <div class="stat-label">HTML Pages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${cssFiles.length}</div>
+                        <div class="stat-label">CSS Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${jsFiles.length}</div>
+                        <div class="stat-label">JavaScript Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${files.length}</div>
+                        <div class="stat-label">Total Files</div>
+                    </div>
+                `;
+                document.getElementById('stats').innerHTML = statsHtml;
 
-            // Rapport complet
-            architectureData = `
+                // Génération du rapport
+                let report = `
 ╔════════════════════════════════════════════════════════════════════╗
 ║     ALPHAVAULT AI - ULTRA-DETAILED ARCHITECTURE ANALYSIS           ║
 ║     Generated: ${new Date().toLocaleString()}                      ║
@@ -794,144 +568,89 @@
 • Total Files: ${files.length}
 • Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
 
-📁 PROJECT STRUCTURE
-═══════════════════════════════════════════════════════════════════
-
-${generateTree(files)}
-
-${generateDetailedSection('HTML PAGES', htmlFiles)}
-
-${generateDetailedSection('CSS FILES', cssFiles)}
-
-${generateDetailedSection('JAVASCRIPT FILES', jsFiles)}
-
-${otherFiles.length > 0 ? `
-📦 OTHER FILES (${otherFiles.length})
-═══════════════════════════════════════════════════════════════════
-
-${otherFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed(2)} KB`).join('\n\n')}
-` : ''}
-
-═══════════════════════════════════════════════════════════════════
-End of Ultra-Detailed Report
-═══════════════════════════════════════════════════════════════════
 `;
 
-            document.getElementById('output').textContent = architectureData;
-        }
-
-        function generateDetailedSection(title, files) {
-            if (files.length === 0) return '';
-
-            let section = `\n📄 ${title} (${files.length})\n`;
-            section += '═══════════════════════════════════════════════════════════════════\n\n';
-
-            files.forEach((file, index) => {
-                section += `${index + 1}. ${file.path}\n`;
-                section += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
-
-                if (file.analysis) {
-                    const a = file.analysis;
-
-                    if (file.name.endsWith('.html')) {
-                        section += `   Title: ${a.title}\n`;
-                        section += `   Lines: ${a.lines}\n`;
-                        if (a.pageType) section += `   Type: ${a.pageType}\n`;
-                        if (a.description) section += `   Description: ${a.description}\n`;
+                // HTML Files
+                if (htmlFiles.length > 0) {
+                    report += `\n📄 HTML PAGES (${htmlFiles.length})\n`;
+                    report += '═══════════════════════════════════════════════════════════════════\n\n';
+                    
+                    htmlFiles.forEach((file, index) => {
+                        report += `${index + 1}. ${file.path}\n`;
+                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
                         
-                        if (a.mainFeatures && a.mainFeatures.length) {
-                            section += `   Main Features:\n`;
-                            a.mainFeatures.slice(0, 5).forEach(f => section += `      • ${f}\n`);
+                        if (file.analysis) {
+                            const a = file.analysis;
+                            if (a.title) report += `   Title: ${a.title}\n`;
+                            if (a.lines) report += `   Lines: ${a.lines}\n`;
+                            if (a.description) report += `   Description: ${a.description}\n`;
+                            if (a.integrations && a.integrations.length) {
+                                report += `   Integrations: ${a.integrations.join(', ')}\n`;
+                            }
+                            if (a.scripts && a.scripts.length) {
+                                report += `   Scripts: ${a.scripts.slice(0, 5).join(', ')}\n`;
+                            }
+                            if (a.components) {
+                                report += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections\n`;
+                            }
                         }
                         
-                        if (a.sections && a.sections.length) {
-                            section += `   Sections: ${a.sections.join(', ')}\n`;
-                        }
-                        
-                        if (a.integrations && a.integrations.length) {
-                            section += `   Integrations: ${a.integrations.join(', ')}\n`;
-                        }
-                        
-                        if (a.userInteractions && a.userInteractions.length) {
-                            section += `   User Interactions: ${a.userInteractions.slice(0, 4).join(', ')}\n`;
-                        }
-                        
-                        if (a.scripts && a.scripts.length) section += `   Scripts: ${a.scripts.slice(0, 5).join(', ')}\n`;
-                        if (a.stylesheets && a.stylesheets.length) section += `   Stylesheets: ${a.stylesheets.slice(0, 5).join(', ')}\n`;
-                        if (a.components) {
-                            section += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections`;
-                            if (a.components.charts) section += `, ${a.components.charts} charts`;
-                            if (a.components.tables) section += `, ${a.components.tables} tables`;
-                            section += `\n`;
-                        }
-                    }
-
-                    if (file.name.endsWith('.css')) {
-                        section += `   Lines: ${a.lines}\n`;
-                        section += `   Classes: ${a.classes} | Variables: ${a.variables}\n`;
-                        section += `   Media Queries: ${a.mediaQueries} | Keyframes: ${a.keyframes}\n`;
-                        if (a.topClasses && a.topClasses.length) section += `   Top Classes: ${a.topClasses.join(', ')}\n`;
-                        if (a.colorPalette && a.colorPalette.length) section += `   Color Palette: ${a.colorPalette.join(', ')}\n`;
-                    }
-
-                    if (file.name.endsWith('.js')) {
-                        section += `   Lines: ${a.lines}\n`;
-                        section += `   Functions: ${a.functions} | Classes: ${a.classes}\n`;
-                        section += `   Event Listeners: ${a.eventListeners} | API Calls: ${a.apiCalls} | Async: ${a.asyncFunctions}\n`;
-                        if (a.topFunctions && a.topFunctions.length) section += `   Top Functions: ${a.topFunctions.join(', ')}\n`;
-                        if (a.integrations) {
-                            const integs = [];
-                            if (a.integrations.firebase) integs.push('Firebase');
-                            if (a.integrations.stripe) integs.push('Stripe');
-                            if (a.integrations.charts) integs.push('Charts');
-                            if (integs.length) section += `   Integrations: ${integs.join(', ')}\n`;
-                        }
-                    }
+                        report += '\n';
+                    });
                 }
 
-                section += '\n';
-            });
-
-            return section;
-        }
-
-        function generateTree(files) {
-            const tree = {};
-            
-            files.forEach(file => {
-                const parts = file.path.split('/');
-                let current = tree;
-                
-                parts.forEach((part, index) => {
-                    if (!current[part]) {
-                        current[part] = index === parts.length - 1 ? null : {};
-                    }
-                    if (current[part] !== null) {
-                        current = current[part];
-                    }
-                });
-            });
-
-            function printTree(obj, prefix = '', isLast = true) {
-                let result = '';
-                const entries = Object.entries(obj);
-                
-                entries.forEach(([key, value], index) => {
-                    const isLastEntry = index === entries.length - 1;
-                    const connector = isLastEntry ? '└── ' : '├── ';
-                    const extension = isLastEntry ? '    ' : '│   ';
+                // CSS Files
+                if (cssFiles.length > 0) {
+                    report += `\n🎨 CSS FILES (${cssFiles.length})\n`;
+                    report += '═══════════════════════════════════════════════════════════════════\n\n';
                     
-                    result += prefix + connector + key + '\n';
+                    cssFiles.forEach((file, index) => {
+                        report += `${index + 1}. ${file.path}\n`;
+                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
+                        
+                        if (file.analysis) {
+                            const a = file.analysis;
+                            if (a.lines) report += `   Lines: ${a.lines}\n`;
+                            if (a.classes) report += `   Classes: ${a.classes} | Variables: ${a.variables}\n`;
+                            if (a.mediaQueries !== undefined) report += `   Media Queries: ${a.mediaQueries} | Keyframes: ${a.keyframes}\n`;
+                        }
+                        
+                        report += '\n';
+                    });
+                }
+
+                // JS Files
+                if (jsFiles.length > 0) {
+                    report += `\n📜 JAVASCRIPT FILES (${jsFiles.length})\n`;
+                    report += '═══════════════════════════════════════════════════════════════════\n\n';
                     
-                    if (value !== null) {
-                        result += printTree(value, prefix + extension, isLastEntry);
-                    }
-                });
+                    jsFiles.forEach((file, index) => {
+                        report += `${index + 1}. ${file.path}\n`;
+                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
+                        
+                        if (file.analysis) {
+                            const a = file.analysis;
+                            if (a.lines) report += `   Lines: ${a.lines}\n`;
+                            if (a.functions !== undefined) report += `   Functions: ${a.functions}\n`;
+                            if (a.eventListeners !== undefined) report += `   Event Listeners: ${a.eventListeners} | API Calls: ${a.apiCalls}\n`;
+                        }
+                        
+                        report += '\n';
+                    });
+                }
+
+                report += `\n═══════════════════════════════════════════════════════════════════\n`;
+                report += `End of Architecture Report\n`;
+                report += `═══════════════════════════════════════════════════════════════════\n`;
+
+                architectureData = report;
+                document.getElementById('output').textContent = architectureData;
                 
-                return result;
+                console.log('Report generated successfully!');
+            } catch (error) {
+                console.error('Report generation error:', error);
+                alert('Error generating report: ' + error.message);
             }
-
-            return printTree(tree);
         }
 
         function downloadArchitecture() {
@@ -939,13 +658,13 @@ End of Ultra-Detailed Report
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `alphavault-architecture-ultra-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `alphavault-architecture-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            alert('✅ Ultra-detailed architecture report downloaded!\n\nYou can now send this file to HTML Pro.');
+            alert('✅ Architecture report downloaded successfully!');
         }
     </script>
 </body>
