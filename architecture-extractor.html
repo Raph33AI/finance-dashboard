@@ -1,56 +1,87 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Extractor Ultra - AlphaVault AI</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Technical Documentation - AlphaVault AI Admin</title>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/admin-documentation.css'>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-TileColor" content="#667eea">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration Firebase -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+
+    <!-- Analytics Tracker -->
+    <script src="assets/js/analytics-tracker.js"></script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
+        /* Styles spécifiques pour l'extracteur */
+        .extractor-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-        .subtitle {
-            color: #64748b;
-            margin-bottom: 30px;
-        }
-        .input-group {
+        
+        .extractor-input-group {
             margin-bottom: 20px;
         }
-        label {
+        
+        .extractor-input-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #334155;
+            color: var(--text-primary);
         }
-        input, select {
+        
+        .extractor-input-group input,
+        .extractor-input-group select {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
-        input:focus, select:focus {
+        
+        .extractor-input-group input:focus,
+        .extractor-input-group select:focus {
             outline: none;
             border-color: #667eea;
         }
-        .btn {
+        
+        .extractor-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
@@ -62,55 +93,72 @@
             transition: transform 0.2s;
             margin-right: 10px;
         }
-        .btn:hover {
+        
+        .extractor-btn:hover {
             transform: translateY(-2px);
         }
-        .btn:disabled {
+        
+        .extractor-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        #output {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            max-height: 600px;
-            overflow-y: auto;
-            display: none;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        
+        .extractor-options {
+            display: flex;
             gap: 15px;
-            margin-top: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+        
+        .extractor-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .extractor-checkbox input {
+            width: auto;
+        }
+        
+        .extractor-progress {
+            display: none;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
             padding: 20px;
-            border-radius: 12px;
+        }
+        
+        .extractor-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .extractor-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .extractor-progress-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             text-align: center;
         }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-        .stat-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-        .loading {
+        
+        .extractor-loading {
             text-align: center;
             padding: 20px;
             color: #667eea;
             display: none;
         }
-        .spinner {
+        
+        .extractor-spinner {
             border: 3px solid #f3f4f6;
             border-top: 3px solid #667eea;
             border-radius: 50%;
@@ -119,204 +167,681 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 10px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .progress-container {
-            display: none;
-            margin-top: 20px;
-            background: #f1f5f9;
-            border-radius: 8px;
+        
+        .extractor-output {
+            margin-top: 30px;
             padding: 20px;
+            background: var(--code-bg);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 600px;
+            overflow-y: auto;
+            display: none;
+            color: var(--text-primary);
         }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
+        
+        .extractor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            display: none;
         }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        .progress-text {
-            font-size: 0.9rem;
-            color: #64748b;
+        
+        .extractor-stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
         }
-        .help {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        
+        .extractor-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
         }
-        .help-title {
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 8px;
-        }
-        .help-text {
-            color: #78350f;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-        .option-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .checkbox-label input {
-            width: auto;
+        
+        .extractor-stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏗 Architecture Extractor Ultra</h1>
-        <p class="subtitle">Extract & analyze your AlphaVault AI project with ultra-detailed descriptions</p>
 
-        <div class="help">
-            <div class="help-title">📝 Instructions :</div>
-            <div class="help-text">
-                1. Entrez votre nom d'utilisateur GitHub (ex: raphnardone)<br>
-                2. Entrez le nom de votre repository (ex: alphavault-ai)<br>
-                3. Choisissez "Ultra Deep" analysis pour descriptions maximales<br>
-                4. Cliquez sur "Extract & Analyze"<br>
-                5. Téléchargez le fichier généré et envoyez-le moi
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <!-- Admin Dashboard -->
+    <div class='layout-wrapper'>
+        
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Header avec Logo 3D -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                        <a href='real-estate-tax-simulator.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Real Estate Simulator</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='companies-directory.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Companies Directory & Earnings</span>
+                        </a>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor.html' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                        <a href='company-research.html' class='nav-link'>
+                            <i class='fab fa-youtube'></i>
+                            <span>YouTube Intelligence</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Community">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='community-hub.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Community Hub</span>
+                        </a>
+                        <a href='create-post.html' class='nav-link'>
+                            <i class='fas fa-pen-fancy'></i>
+                            <span>Create Post</span>
+                        </a>
+                        <a href='messages.html' class='nav-link'>
+                            <i class='fas fa-envelope'></i>
+                            <span>Messages</span>
+                            <span class="nav-badge" id="unreadMessagesBadge" style="display: none;">0</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Section Admin -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
+                    <button class="nav-folder" data-tooltip="Admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Analytics Dashboard</span>
+                        </a>
+                        <a href='admin-documentation.html' class='nav-link'>
+                            <i class='fas fa-book-open'></i>
+                            <span>Documentation</span>
+                        </a>
+                        <a href='admin-business-plan.html' class='nav-link active'>
+                            <i class='fas fa-briefcase'></i>
+                            <span>Business Plan</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help.html" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+
+        <!-- Main Content -->
+        <div class='main-content'>
+            <!-- Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class="page-title">
+                        Technical Documentation
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' onclick="window.print()">
+                        <i class='fas fa-print'></i>
+                        <span class='btn-text'>Print</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+
+                <!-- Documentation Header -->
+                <div class="doc-header">
+                    <div class="doc-header-content">
+                        <h1 class="doc-title">
+                            <i class="fas fa-book"></i>
+                            Technical Documentation
+                        </h1>
+                        <p class="doc-subtitle">Complete AlphaVault AI Platform Architecture</p>
+                        
+                        <div class="doc-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span id="currentDate"></span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-code-branch"></i>
+                                <span>Version 2.0.0</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-server"></i>
+                                <span>Production</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="doc-nav">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" data-section="overview">
+                            <i class="fas fa-home"></i> Overview
+                        </button>
+                        <button class="nav-tab" data-section="architecture">
+                            <i class="fas fa-sitemap"></i> Architecture
+                        </button>
+                        <button class="nav-tab" data-section="frontend">
+                            <i class="fas fa-desktop"></i> Frontend
+                        </button>
+                        <button class="nav-tab" data-section="backend">
+                            <i class="fas fa-server"></i> Backend
+                        </button>
+                        <button class="nav-tab" data-section="flows">
+                            <i class="fas fa-stream"></i> Data Flows
+                        </button>
+                        <button class="nav-tab" data-section="payments">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </button>
+                        <button class="nav-tab" data-section="security">
+                            <i class="fas fa-shield-alt"></i> Security
+                        </button>
+                        <button class="nav-tab" data-section="apis">
+                            <i class="fas fa-plug"></i> APIs & Workers
+                        </button>
+                        <button class="nav-tab" data-section="calculations">
+                            <i class="fas fa-calculator"></i> Calculations
+                        </button>
+                        <!-- ⭐ NOUVELLE TAB -->
+                        <button class="nav-tab" data-section="extractor">
+                            <i class="fas fa-file-code"></i> Code Extractor
+                        </button>
+                    </div>
+                </nav>
+
+                <!-- Documentation Content -->
+                <div class="doc-content">
+
+                    <!-- ============================================
+                         SECTION 1: OVERVIEW (Votre code original)
+                         ============================================ -->
+                    <section class="doc-section active" id="overview">
+                        <!-- ... Votre section overview complète ... -->
+                    </section>
+
+                    <!-- Autres sections (architecture, frontend, backend, etc.) -->
+                    <!-- ... -->
+
+                    <!-- ============================================
+                         ⭐ NOUVELLE SECTION: CODE EXTRACTOR
+                         ============================================ -->
+                    <section class="doc-section" id="extractor">
+                        <h2 class="section-title">
+                            <i class="fas fa-file-code"></i>
+                            Architecture Code Extractor
+                        </h2>
+
+                        <div class="info-card">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-info-circle"></i> Extract Your Complete Codebase
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                This tool automatically scans your GitHub repository and generates a comprehensive report 
+                                including all HTML, CSS, and JavaScript files with detailed analysis.
+                            </p>
+                        </div>
+
+                        <div class="extractor-container">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">
+                                <i class="fas fa-cog"></i> Configuration
+                            </h3>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorUsername">
+                                    <i class="fab fa-github"></i> GitHub Username:
+                                </label>
+                                <input type="text" id="extractorUsername" placeholder="ex: raphnardone" value="">
+                            </div>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorRepo">
+                                    <i class="fas fa-code-branch"></i> Repository Name:
+                                </label>
+                                <input type="text" id="extractorRepo" placeholder="ex: alphavault-ai" value="">
+                            </div>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorLevel">
+                                    <i class="fas fa-layer-group"></i> Analysis Level:
+                                </label>
+                                <select id="extractorLevel">
+                                    <option value="basic">Basic (Structure + File sizes)</option>
+                                    <option value="deep">Deep (+ Content analysis)</option>
+                                    <option value="ultra" selected>Ultra Deep (+ Detailed descriptions)</option>
+                                </select>
+                            </div>
+
+                            <div class="extractor-options">
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorHTML" checked>
+                                    <span>Analyze HTML files</span>
+                                </label>
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorCSS" checked>
+                                    <span>Analyze CSS files</span>
+                                </label>
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorJS" checked>
+                                    <span>Analyze JS files</span>
+                                </label>
+                            </div>
+
+                            <button class="extractor-btn" onclick="startExtraction()" id="extractorBtn">
+                                <i class="fas fa-play"></i> Start Extraction
+                            </button>
+                            <button class="extractor-btn" onclick="downloadExtraction()" id="extractorDownloadBtn" style="display: none;">
+                                <i class="fas fa-download"></i> Download Report
+                            </button>
+
+                            <div class="extractor-progress" id="extractorProgress">
+                                <div class="extractor-progress-bar">
+                                    <div class="extractor-progress-fill" id="extractorProgressFill"></div>
+                                </div>
+                                <div class="extractor-progress-text" id="extractorProgressText">Initializing...</div>
+                            </div>
+
+                            <div class="extractor-loading" id="extractorLoading">
+                                <div class="extractor-spinner"></div>
+                                <div>Scanning repository...</div>
+                            </div>
+
+                            <div class="extractor-stats" id="extractorStats"></div>
+
+                            <div class="extractor-output" id="extractorOutput"></div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Footer -->
+                <footer style="margin-top: 40px; padding: 24px; text-align: center; color: #64748b; font-size: 0.9rem;">
+                    <p>
+                        <i class='fas fa-shield-alt'></i> Admin Technical Documentation
+                    </p>
+                </footer>
+
             </div>
         </div>
-
-        <div class="input-group">
-            <label for="username">GitHub Username:</label>
-            <input type="text" id="username" placeholder="ex: raphnardone" value="">
-        </div>
-
-        <div class="input-group">
-            <label for="repo">Repository Name:</label>
-            <input type="text" id="repo" placeholder="ex: alphavault-ai" value="">
-        </div>
-
-        <div class="input-group">
-            <label for="analysisLevel">Analysis Level:</label>
-            <select id="analysisLevel">
-                <option value="basic">Basic (Structure + File sizes)</option>
-                <option value="deep">Deep (+ Content analysis)</option>
-                <option value="ultra" selected>Ultra Deep (+ Detailed descriptions)</option>
-            </select>
-        </div>
-
-        <div class="option-group">
-            <label class="checkbox-label">
-                <input type="checkbox" id="analyzeHTML" checked>
-                <span>Analyze HTML files</span>
-            </label>
-            <label class="checkbox-label">
-                <input type="checkbox" id="analyzeCSS" checked>
-                <span>Analyze CSS files</span>
-            </label>
-            <label class="checkbox-label">
-                <input type="checkbox" id="analyzeJS" checked>
-                <span>Analyze JS files</span>
-            </label>
-        </div>
-
-        <button class="btn" onclick="extractArchitecture()" id="extractBtn">
-            🚀 Extract & Analyze
-        </button>
-        <button class="btn" onclick="downloadArchitecture()" id="downloadBtn" style="display: none;">
-            📥 Download Full Report
-        </button>
-
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="progress-text" id="progressText">Initializing...</div>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <div>Scanning your repository...</div>
-        </div>
-
-        <div class="stats" id="stats" style="display: none;"></div>
-
-        <div id="output"></div>
     </div>
 
+    <!-- Scripts -->
+    <script src='assets/js/dark-mode.js'></script>
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    <script src='assets/js/admin-analytics.js'></script>
+    
+    <!-- Documentation Scripts -->
     <script>
-        let architectureData = '';
-        let statsData = {};
+        // Current Date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
 
-        async function extractArchitecture() {
-            const username = document.getElementById('username').value.trim();
-            const repo = document.getElementById('repo').value.trim();
-            const analysisLevel = document.getElementById('analysisLevel').value;
+        // Navigation between sections
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.doc-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                const sectionId = this.dataset.section;
+                document.getElementById(sectionId).classList.add('active');
+                document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+            
+            if (e.key === 'ArrowRight') {
+                const activeTab = document.querySelector('.nav-tab.active');
+                const nextTab = activeTab.nextElementSibling;
+                if (nextTab && nextTab.classList.contains('nav-tab')) {
+                    nextTab.click();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                const activeTab = document.querySelector('.nav-tab.active');
+                const prevTab = activeTab.previousElementSibling;
+                if (prevTab && prevTab.classList.contains('nav-tab')) {
+                    prevTab.click();
+                }
+            }
+        });
+
+        console.log('📚 Technical Documentation loaded successfully!');
+    </script>
+
+    <!-- ⭐ ARCHITECTURE EXTRACTOR SCRIPT -->
+    <script>
+        let extractorData = '';
+        let extractorFiles = [];
+
+        async function startExtraction() {
+            const username = document.getElementById('extractorUsername').value.trim();
+            const repo = document.getElementById('extractorRepo').value.trim();
+            const level = document.getElementById('extractorLevel').value;
 
             if (!username || !repo) {
                 alert('⚠ Please enter both username and repository name');
                 return;
             }
 
-            document.getElementById('extractBtn').disabled = true;
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('progressContainer').style.display = 'block';
-            document.getElementById('output').style.display = 'none';
-            document.getElementById('stats').style.display = 'none';
+            document.getElementById('extractorBtn').disabled = true;
+            document.getElementById('extractorLoading').style.display = 'block';
+            document.getElementById('extractorProgress').style.display = 'block';
+            document.getElementById('extractorOutput').style.display = 'none';
+            document.getElementById('extractorStats').style.display = 'none';
 
             try {
-                updateProgress(0, 'Scanning repository structure...');
-                const files = await scanRepository(username, repo);
+                updateExtractorProgress(0, 'Scanning repository...');
+                const files = await scanGitHubRepo(username, repo);
                 
-                console.log(`Found ${files.length} files`);
+                updateExtractorProgress(30, 'Analyzing files...');
                 
-                updateProgress(30, 'Repository scanned. Starting analysis...');
-                
-                if (analysisLevel === 'deep' || analysisLevel === 'ultra') {
-                    await analyzeFiles(username, repo, files, analysisLevel);
+                if (level === 'deep' || level === 'ultra') {
+                    await analyzeRepoFiles(username, repo, files, level);
                 }
                 
-                updateProgress(90, 'Generating final report...');
-                generateArchitecture(files);
+                updateExtractorProgress(90, 'Generating report...');
+                generateExtractorReport(files);
                 
-                updateProgress(100, 'Complete! ✅');
+                updateExtractorProgress(100, 'Complete! ✅');
                 
                 setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('progressContainer').style.display = 'none';
-                    document.getElementById('output').style.display = 'block';
-                    document.getElementById('stats').style.display = 'grid';
-                    document.getElementById('downloadBtn').style.display = 'inline-block';
-                    document.getElementById('extractBtn').disabled = false;
+                    document.getElementById('extractorLoading').style.display = 'none';
+                    document.getElementById('extractorProgress').style.display = 'none';
+                    document.getElementById('extractorOutput').style.display = 'block';
+                    document.getElementById('extractorStats').style.display = 'grid';
+                    document.getElementById('extractorDownloadBtn').style.display = 'inline-block';
+                    document.getElementById('extractorBtn').disabled = false;
                 }, 500);
                 
             } catch (error) {
                 console.error('Extraction error:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('progressContainer').style.display = 'none';
-                document.getElementById('extractBtn').disabled = false;
+                document.getElementById('extractorLoading').style.display = 'none';
+                document.getElementById('extractorProgress').style.display = 'none';
+                document.getElementById('extractorBtn').disabled = false;
                 alert('❌ Error: ' + error.message);
             }
         }
 
-        function updateProgress(percent, text) {
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('progressText').textContent = text;
+        function updateExtractorProgress(percent, text) {
+            document.getElementById('extractorProgressFill').style.width = percent + '%';
+            document.getElementById('extractorProgressText').textContent = text;
         }
 
-        async function scanRepository(username, repo, path = '') {
+        async function scanGitHubRepo(username, repo, path = '') {
             const url = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
             const response = await fetch(url);
             
@@ -329,10 +854,10 @@
 
             for (const item of items) {
                 if (item.type === 'dir') {
-                    if (['node_modules', '.git', 'dist', 'build', '.vscode', '.github'].includes(item.name)) {
+                    if (['node_modules', '.git', 'dist', 'build', '.vscode'].includes(item.name)) {
                         continue;
                     }
-                    const subFiles = await scanRepository(username, repo, item.path);
+                    const subFiles = await scanGitHubRepo(username, repo, item.path);
                     allFiles = allFiles.concat(subFiles);
                 } else {
                     allFiles.push(item);
@@ -342,10 +867,10 @@
             return allFiles;
         }
 
-        async function analyzeFiles(username, repo, files, analysisLevel) {
-            const analyzeHTML = document.getElementById('analyzeHTML').checked;
-            const analyzeCSS = document.getElementById('analyzeCSS').checked;
-            const analyzeJS = document.getElementById('analyzeJS').checked;
+        async function analyzeRepoFiles(username, repo, files, level) {
+            const analyzeHTML = document.getElementById('extractorHTML').checked;
+            const analyzeCSS = document.getElementById('extractorCSS').checked;
+            const analyzeJS = document.getElementById('extractorJS').checked;
 
             const filesToAnalyze = files.filter(f => {
                 if (analyzeHTML && f.name.endsWith('.html')) return true;
@@ -354,27 +879,23 @@
                 return false;
             });
 
-            console.log(`Analyzing ${filesToAnalyze.length} files...`);
-
             const total = filesToAnalyze.length;
             let analyzed = 0;
 
             for (const file of filesToAnalyze) {
                 try {
                     const content = await fetchFileContent(file.download_url);
-                    const analysis = analyzeFileContent(file, content, analysisLevel);
-                    file.analysis = analysis; // ← IMPORTANT: Modifier le fichier directement
-                    
-                    console.log(`Analyzed: ${file.path}`);
+                    file.analysis = analyzeContent(file, content, level);
                 } catch (error) {
-                    console.error(`Failed to analyze ${file.path}:`, error);
-                    file.analysis = { error: 'Failed to analyze: ' + error.message };
+                    file.analysis = { error: 'Failed to analyze' };
                 }
                 
                 analyzed++;
                 const progress = 30 + Math.round((analyzed / total) * 60);
-                updateProgress(progress, `Analyzing files... ${analyzed}/${total}`);
+                updateExtractorProgress(progress, `Analyzing ${analyzed}/${total} files...`);
             }
+
+            extractorFiles = files;
         }
 
         async function fetchFileContent(url) {
@@ -383,179 +904,90 @@
             return await response.text();
         }
 
-        function analyzeFileContent(file, content, analysisLevel) {
-            try {
-                const ext = file.name.split('.').pop();
-                const lines = content.split('\n').length;
-                const size = (file.size / 1024).toFixed(2);
+        function analyzeContent(file, content, level) {
+            const lines = content.split('\n').length;
+            const size = (file.size / 1024).toFixed(2);
 
-                if (ext === 'html') {
-                    return analyzeHTML(content, lines, size, analysisLevel);
-                } else if (ext === 'css') {
-                    return analyzeCSS(content, lines, size);
-                } else if (ext === 'js') {
-                    return analyzeJS(content, lines, size);
-                }
+            const analysis = {
+                lines,
+                size: size + ' KB'
+            };
 
-                return { lines, size: size + ' KB' };
-            } catch (error) {
-                console.error('Analysis error:', error);
-                return { error: error.message };
-            }
-        }
-
-        function analyzeHTML(content, lines, size, analysisLevel) {
-            try {
+            if (file.name.endsWith('.html')) {
                 const titleMatch = content.match(/<title>(.*?)<\/title>/i);
-                const title = titleMatch ? titleMatch[1] : 'No title';
-
-                const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
-                let description = metaDesc ? metaDesc[1] : '';
-
-                if (!description) {
-                    const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
-                    if (h1Match) {
-                        description = h1Match[1].replace(/<[^>]+>/g, '').trim();
-                    }
-                }
-
-                const scriptTags = (content.match(/<script[^>]*src=["'](.*?)["']/gi) || []);
-                const scripts = scriptTags.map(s => {
-                    const match = s.match(/src=["'](.*?)["']/i);
-                    return match ? match[1].split('/').pop() : '';
-                }).filter(s => s);
-
-                const linkTags = (content.match(/<link[^>]*href=["'](.*?)["']/gi) || []);
-                const stylesheets = linkTags
-                    .map(l => {
-                        const match = l.match(/href=["'](.*?)["']/i);
-                        return match ? match[1].split('/').pop() : '';
-                    })
-                    .filter(l => l.endsWith('.css'));
-
-                const forms = (content.match(/<form/gi) || []).length;
-                const buttons = (content.match(/<button/gi) || []).length;
-                const sectionsCount = (content.match(/<section/gi) || []).length;
-
-                const result = {
-                    lines,
-                    size: size + ' KB',
-                    title,
-                    description: description.substring(0, 200) + (description.length > 200 ? '...' : ''),
-                    scripts: scripts.slice(0, 8),
-                    stylesheets: stylesheets.slice(0, 8),
-                    components: { 
-                        forms, 
-                        buttons, 
-                        sections: sectionsCount
-                    }
-                };
-
-                if (analysisLevel === 'ultra') {
-                    const lower = content.toLowerCase();
-                    const features = [];
-                    
-                    if (lower.includes('firebase')) features.push('Firebase');
-                    if (lower.includes('stripe')) features.push('Stripe');
-                    if (lower.includes('highcharts')) features.push('Highcharts');
-                    if (lower.includes('chart.js')) features.push('Chart.js');
-                    
-                    result.integrations = features;
-                }
-
-                return result;
-            } catch (error) {
-                console.error('HTML analysis error:', error);
-                return { error: error.message, lines, size: size + ' KB' };
-            }
-        }
-
-        function analyzeCSS(content, lines, size) {
-            try {
-                const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
-                const uniqueClasses = [...new Set(classes)];
-
-                const variables = (content.match(/--[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
-                const uniqueVars = [...new Set(variables)];
-
-                const mediaQueries = (content.match(/@media/g) || []).length;
-                const keyframes = (content.match(/@keyframes/g) || []).length;
-
-                return {
-                    lines,
-                    size: size + ' KB',
-                    classes: uniqueClasses.length,
-                    variables: uniqueVars.length,
-                    mediaQueries,
-                    keyframes,
-                    topClasses: uniqueClasses.slice(0, 5),
-                    topVariables: uniqueVars.slice(0, 5)
-                };
-            } catch (error) {
-                console.error('CSS analysis error:', error);
-                return { error: error.message, lines, size: size + ' KB' };
-            }
-        }
-
-        function analyzeJS(content, lines, size) {
-            try {
-                const functions = (content.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
-                const functionNames = functions.map(f => f.replace('function ', ''));
-
-                const eventListeners = (content.match(/addEventListener/g) || []).length;
-                const fetches = (content.match(/fetch\(/g) || []).length;
-
-                return {
-                    lines,
-                    size: size + ' KB',
-                    functions: functionNames.length,
-                    eventListeners,
-                    apiCalls: fetches,
-                    topFunctions: functionNames.slice(0, 8)
-                };
-            } catch (error) {
-                console.error('JS analysis error:', error);
-                return { error: error.message, lines, size: size + ' KB' };
-            }
-        }
-
-        function generateArchitecture(files) {
-            try {
-                console.log('Generating architecture report...');
+                analysis.title = titleMatch ? titleMatch[1] : 'No title';
                 
-                const htmlFiles = files.filter(f => f.name.endsWith('.html'));
-                const cssFiles = files.filter(f => f.name.endsWith('.css'));
-                const jsFiles = files.filter(f => f.name.endsWith('.js'));
-                const otherFiles = files.filter(f => !f.name.match(/\.(html|css|js)$/));
+                const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+                analysis.description = metaDesc ? metaDesc[1].substring(0, 100) : '';
+                
+                analysis.components = {
+                    forms: (content.match(/<form/gi) || []).length,
+                    buttons: (content.match(/<button/gi) || []).length
+                };
 
-                console.log(`HTML: ${htmlFiles.length}, CSS: ${cssFiles.length}, JS: ${jsFiles.length}`);
+                if (level === 'ultra') {
+                    const lower = content.toLowerCase();
+                    analysis.integrations = [];
+                    if (lower.includes('firebase')) analysis.integrations.push('Firebase');
+                    if (lower.includes('stripe')) analysis.integrations.push('Stripe');
+                    if (lower.includes('highcharts')) analysis.integrations.push('Highcharts');
+                }
+            }
 
-                // Statistiques
-                const statsHtml = `
-                    <div class="stat-card">
-                        <div class="stat-value">${htmlFiles.length}</div>
-                        <div class="stat-label">HTML Pages</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${cssFiles.length}</div>
-                        <div class="stat-label">CSS Files</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${jsFiles.length}</div>
-                        <div class="stat-label">JavaScript Files</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${files.length}</div>
-                        <div class="stat-label">Total Files</div>
-                    </div>
-                `;
-                document.getElementById('stats').innerHTML = statsHtml;
+            if (file.name.endsWith('.css')) {
+                const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+                analysis.classes = [...new Set(classes)].length;
+                analysis.mediaQueries = (content.match(/@media/g) || []).length;
+            }
 
-                // Génération du rapport
-                let report = `
+            if (file.name.endsWith('.js')) {
+                analysis.functions = (content.match(/function\s+/g) || []).length;
+                analysis.eventListeners = (content.match(/addEventListener/g) || []).length;
+            }
+
+            return analysis;
+        }
+
+        function generateExtractorReport(files) {
+            const htmlFiles = files.filter(f => f.name.endsWith('.html'));
+            const cssFiles = files.filter(f => f.name.endsWith('.css'));
+            const jsFiles = files.filter(f => f.name.endsWith('.js'));
+
+            // ⭐ CALCUL DU TOTAL DE LIGNES
+            const totalLines = files
+                .filter(f => f.name.match(/\.(html|css|js)$/))
+                .reduce((sum, f) => sum + (f.analysis?.lines || 0), 0);
+
+            // Statistiques avec carte Total Lines
+            const statsHtml = `
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${htmlFiles.length}</div>
+                    <div class="extractor-stat-label">HTML Pages</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${cssFiles.length}</div>
+                    <div class="extractor-stat-label">CSS Files</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${jsFiles.length}</div>
+                    <div class="extractor-stat-label">JS Files</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${files.length}</div>
+                    <div class="extractor-stat-label">Total Files</div>
+                </div>
+                <div class="extractor-stat-card" style="background: linear-gradient(135deg, #f59e0b, #ea580c);">
+                    <div class="extractor-stat-value">${totalLines.toLocaleString()}</div>
+                    <div class="extractor-stat-label">Total Lines of Code</div>
+                </div>
+            `;
+            document.getElementById('extractorStats').innerHTML = statsHtml;
+
+            // Génération du rapport
+            let report = `
 ╔════════════════════════════════════════════════════════════════════╗
-║     ALPHAVAULT AI - ULTRA-DETAILED ARCHITECTURE ANALYSIS           ║
-║     Generated: ${new Date().toLocaleString()}                      ║
+║        ALPHAVAULT AI - COMPLETE ARCHITECTURE REPORT                ║
+║        Generated: ${new Date().toLocaleString()}                   ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 📊 GLOBAL STATISTICS
@@ -564,97 +996,76 @@
 • HTML Pages: ${htmlFiles.length}
 • CSS Files: ${cssFiles.length}
 • JavaScript Files: ${jsFiles.length}
-• Other Files: ${otherFiles.length}
 • Total Files: ${files.length}
+• Total Lines of Code: ${totalLines.toLocaleString()}
 • Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
 
 `;
 
-                // HTML Files
-                if (htmlFiles.length > 0) {
-                    report += `\n📄 HTML PAGES (${htmlFiles.length})\n`;
-                    report += '═══════════════════════════════════════════════════════════════════\n\n';
-                    
-                    htmlFiles.forEach((file, index) => {
-                        report += `${index + 1}. ${file.path}\n`;
-                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
-                        
-                        if (file.analysis) {
-                            const a = file.analysis;
-                            if (a.title) report += `   Title: ${a.title}\n`;
-                            if (a.lines) report += `   Lines: ${a.lines}\n`;
-                            if (a.description) report += `   Description: ${a.description}\n`;
-                            if (a.integrations && a.integrations.length) {
-                                report += `   Integrations: ${a.integrations.join(', ')}\n`;
-                            }
-                            if (a.scripts && a.scripts.length) {
-                                report += `   Scripts: ${a.scripts.slice(0, 5).join(', ')}\n`;
-                            }
-                            if (a.components) {
-                                report += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections\n`;
-                            }
-                        }
-                        
-                        report += '\n';
-                    });
-                }
-
-                // CSS Files
-                if (cssFiles.length > 0) {
-                    report += `\n🎨 CSS FILES (${cssFiles.length})\n`;
-                    report += '═══════════════════════════════════════════════════════════════════\n\n';
-                    
-                    cssFiles.forEach((file, index) => {
-                        report += `${index + 1}. ${file.path}\n`;
-                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
-                        
-                        if (file.analysis) {
-                            const a = file.analysis;
-                            if (a.lines) report += `   Lines: ${a.lines}\n`;
-                            if (a.classes) report += `   Classes: ${a.classes} | Variables: ${a.variables}\n`;
-                            if (a.mediaQueries !== undefined) report += `   Media Queries: ${a.mediaQueries} | Keyframes: ${a.keyframes}\n`;
-                        }
-                        
-                        report += '\n';
-                    });
-                }
-
-                // JS Files
-                if (jsFiles.length > 0) {
-                    report += `\n📜 JAVASCRIPT FILES (${jsFiles.length})\n`;
-                    report += '═══════════════════════════════════════════════════════════════════\n\n';
-                    
-                    jsFiles.forEach((file, index) => {
-                        report += `${index + 1}. ${file.path}\n`;
-                        report += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
-                        
-                        if (file.analysis) {
-                            const a = file.analysis;
-                            if (a.lines) report += `   Lines: ${a.lines}\n`;
-                            if (a.functions !== undefined) report += `   Functions: ${a.functions}\n`;
-                            if (a.eventListeners !== undefined) report += `   Event Listeners: ${a.eventListeners} | API Calls: ${a.apiCalls}\n`;
-                        }
-                        
-                        report += '\n';
-                    });
-                }
-
-                report += `\n═══════════════════════════════════════════════════════════════════\n`;
-                report += `End of Architecture Report\n`;
-                report += `═══════════════════════════════════════════════════════════════════\n`;
-
-                architectureData = report;
-                document.getElementById('output').textContent = architectureData;
+            // HTML Files
+            if (htmlFiles.length > 0) {
+                report += `\n📄 HTML PAGES (${htmlFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
                 
-                console.log('Report generated successfully!');
-            } catch (error) {
-                console.error('Report generation error:', error);
-                alert('Error generating report: ' + error.message);
+                htmlFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    report += `\n`;
+                    
+                    if (file.analysis) {
+                        const a = file.analysis;
+                        if (a.title) report += `   Title: ${a.title}\n`;
+                        if (a.description) report += `   Description: ${a.description}\n`;
+                        if (a.integrations && a.integrations.length) {
+                            report += `   Integrations: ${a.integrations.join(', ')}\n`;
+                        }
+                        if (a.components) {
+                            report += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons\n`;
+                        }
+                    }
+                    report += '\n';
+                });
             }
+
+            // CSS Files
+            if (cssFiles.length > 0) {
+                report += `\n🎨 CSS FILES (${cssFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
+                
+                cssFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    if (file.analysis?.classes) report += ` | Classes: ${file.analysis.classes}`;
+                    report += `\n\n`;
+                });
+            }
+
+            // JS Files
+            if (jsFiles.length > 0) {
+                report += `\n📜 JAVASCRIPT FILES (${jsFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
+                
+                jsFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    if (file.analysis?.functions) report += ` | Functions: ${file.analysis.functions}`;
+                    report += `\n\n`;
+                });
+            }
+
+            report += `\n═══════════════════════════════════════════════════════════════════\n`;
+            report += `End of Architecture Report\n`;
+            report += `═══════════════════════════════════════════════════════════════════\n`;
+
+            extractorData = report;
+            document.getElementById('extractorOutput').textContent = extractorData;
         }
 
-        function downloadArchitecture() {
-            const blob = new Blob([architectureData], { type: 'text/plain;charset=utf-8' });
+        function downloadExtraction() {
+            const blob = new Blob([extractorData], { type: 'text/plain;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -665,6 +1076,40 @@
             window.URL.revokeObjectURL(url);
 
             alert('✅ Architecture report downloaded successfully!');
+        }
+    </script>
+
+    <!-- User Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            });
         }
     </script>
 </body>
