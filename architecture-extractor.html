@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Extractor Pro - AlphaVault AI</title>
+    <title>Architecture Extractor Ultra - AlphaVault AI</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -184,15 +184,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏗 Architecture Extractor Pro</h1>
-        <p class="subtitle">Extract & analyze your AlphaVault AI project structure with content analysis</p>
+        <h1>🏗 Architecture Extractor Ultra</h1>
+        <p class="subtitle">Extract & analyze your AlphaVault AI project with ultra-detailed descriptions</p>
 
         <div class="help">
             <div class="help-title">📝 Instructions :</div>
             <div class="help-text">
                 1. Entrez votre nom d'utilisateur GitHub (ex: raphnardone)<br>
                 2. Entrez le nom de votre repository (ex: alphavault-ai)<br>
-                3. Choisissez le niveau d'analyse (Basic ou Deep)<br>
+                3. Choisissez "Ultra Deep" analysis pour descriptions maximales<br>
                 4. Cliquez sur "Extract & Analyze"<br>
                 5. Téléchargez le fichier généré et envoyez-le moi
             </div>
@@ -212,7 +212,8 @@
             <label for="analysisLevel">Analysis Level:</label>
             <select id="analysisLevel">
                 <option value="basic">Basic (Structure + File sizes)</option>
-                <option value="deep" selected>Deep (+ Content analysis & summaries)</option>
+                <option value="deep">Deep (+ Content analysis)</option>
+                <option value="ultra" selected>Ultra Deep (+ Detailed descriptions)</option>
             </select>
         </div>
 
@@ -282,8 +283,8 @@
                 
                 updateProgress(30, 'Repository scanned. Starting analysis...');
                 
-                if (analysisLevel === 'deep') {
-                    await analyzeFiles(username, repo, files);
+                if (analysisLevel === 'deep' || analysisLevel === 'ultra') {
+                    await analyzeFiles(username, repo, files, analysisLevel);
                 }
                 
                 updateProgress(90, 'Generating final report...');
@@ -339,7 +340,7 @@
             return allFiles;
         }
 
-        async function analyzeFiles(username, repo, files) {
+        async function analyzeFiles(username, repo, files, analysisLevel) {
             const analyzeHTML = document.getElementById('analyzeHTML').checked;
             const analyzeCSS = document.getElementById('analyzeCSS').checked;
             const analyzeJS = document.getElementById('analyzeJS').checked;
@@ -357,7 +358,7 @@
             for (const file of filesToAnalyze) {
                 try {
                     const content = await fetchFileContent(file.download_url);
-                    const analysis = analyzeFileContent(file, content);
+                    const analysis = analyzeFileContent(file, content, analysisLevel);
                     file.analysis = analysis;
                     analyzedFiles.push({ ...file, analysis });
                 } catch (error) {
@@ -376,13 +377,13 @@
             return await response.text();
         }
 
-        function analyzeFileContent(file, content) {
+        function analyzeFileContent(file, content, analysisLevel) {
             const ext = file.name.split('.').pop();
             const lines = content.split('\n').length;
             const size = (file.size / 1024).toFixed(2);
 
             if (ext === 'html') {
-                return analyzeHTML(content, lines, size);
+                return analyzeHTML(content, lines, size, analysisLevel);
             } else if (ext === 'css') {
                 return analyzeCSS(content, lines, size);
             } else if (ext === 'js') {
@@ -392,13 +393,60 @@
             return { lines, size };
         }
 
-        function analyzeHTML(content, lines, size) {
+        function analyzeHTML(content, lines, size, analysisLevel) {
+            // Titre
             const titleMatch = content.match(/<title>(.*?)<\/title>/i);
             const title = titleMatch ? titleMatch[1] : 'No title';
 
+            // Meta description
             const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
-            const description = metaDesc ? metaDesc[1] : 'No description';
+            let description = metaDesc ? metaDesc[1] : '';
 
+            // Si pas de meta description, chercher le premier paragraphe ou h1
+            if (!description || description === 'No description') {
+                const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                if (h1Match) {
+                    description = h1Match[1].replace(/<[^>]+>/g, '').trim();
+                }
+                
+                if (!description) {
+                    const pMatch = content.match(/<p[^>]*>(.*?)<\/p>/i);
+                    if (pMatch) {
+                        description = pMatch[1].replace(/<[^>]+>/g, '').trim();
+                    }
+                }
+            }
+
+            // ULTRA DEEP ANALYSIS
+            let pageType = 'Unknown';
+            let mainFeatures = [];
+            let sections = [];
+            let integrations = [];
+            let userInteractions = [];
+            
+            if (analysisLevel === 'ultra') {
+                // Déterminer le type de page
+                pageType = detectPageType(content, file.name);
+                
+                // Détecter les fonctionnalités principales
+                mainFeatures = detectMainFeatures(content);
+                
+                // Extraire les sections principales
+                sections = extractMainSections(content);
+                
+                // Détecter les intégrations
+                integrations = detectIntegrations(content);
+                
+                // Détecter les interactions utilisateur
+                userInteractions = detectUserInteractions(content);
+                
+                // Générer une description intelligente si manquante
+                if (!description || description.length < 20) {
+                    description = generateSmartDescription(pageType, title, mainFeatures, sections);
+                }
+            }
+
+            // Scripts et stylesheets
             const scriptTags = (content.match(/<script[^>]*src=["'](.*?)["']/gi) || []);
             const scripts = scriptTags.map(s => {
                 const match = s.match(/src=["'](.*?)["']/i);
@@ -413,19 +461,217 @@
                 })
                 .filter(l => l.endsWith('.css'));
 
+            // Composants
             const forms = (content.match(/<form/gi) || []).length;
             const buttons = (content.match(/<button/gi) || []).length;
-            const sections = (content.match(/<section/gi) || []).length;
+            const sectionsCount = (content.match(/<section/gi) || []).length;
+            const inputs = (content.match(/<input/gi) || []).length;
+            const tables = (content.match(/<table/gi) || []).length;
+            const charts = (content.match(/id=["'][^"']*chart[^"']*["']/gi) || []).length;
 
             return {
                 lines,
                 size: size + ' KB',
                 title,
-                description: description.substring(0, 100) + (description.length > 100 ? '...' : ''),
-                scripts: scripts.slice(0, 5),
-                stylesheets: stylesheets.slice(0, 5),
-                components: { forms, buttons, sections }
+                description: description.substring(0, 200) + (description.length > 200 ? '...' : ''),
+                pageType,
+                mainFeatures,
+                sections: sections.slice(0, 8),
+                integrations,
+                userInteractions,
+                scripts: scripts.slice(0, 8),
+                stylesheets: stylesheets.slice(0, 8),
+                components: { 
+                    forms, 
+                    buttons, 
+                    sections: sectionsCount,
+                    inputs,
+                    tables,
+                    charts
+                }
             };
+        }
+
+        function detectPageType(content, filename) {
+            const lower = content.toLowerCase();
+            const name = filename.toLowerCase();
+            
+            if (name.includes('landing') || name === 'index.html' || name.includes('about')) {
+                return 'Landing Page';
+            }
+            if (name.includes('admin') || lower.includes('admin dashboard')) {
+                return 'Admin Dashboard';
+            }
+            if (name.includes('dashboard') || lower.includes('dashboard')) {
+                return 'User Dashboard';
+            }
+            if (name.includes('auth') || name.includes('login') || name.includes('signup')) {
+                return 'Authentication Page';
+            }
+            if (name.includes('profile') || name.includes('settings')) {
+                return 'User Profile/Settings';
+            }
+            if (name.includes('checkout') || name.includes('payment')) {
+                return 'Payment/Checkout Page';
+            }
+            if (name.includes('chat') || name.includes('message')) {
+                return 'Chat/Messaging Page';
+            }
+            if (name.includes('community') || name.includes('post')) {
+                return 'Community/Social Page';
+            }
+            if (name.includes('help') || name.includes('documentation')) {
+                return 'Help/Documentation Page';
+            }
+            if (lower.includes('highcharts') || lower.includes('chart.js')) {
+                return 'Analytics/Charts Page';
+            }
+            if (name.includes('calculator') || name.includes('simulator')) {
+                return 'Financial Calculator/Simulator';
+            }
+            if (name.includes('news') || name.includes('sentiment') || name.includes('trending')) {
+                return 'News/Market Data Page';
+            }
+            if (name.includes('real-estate')) {
+                return 'Real Estate Analysis Tool';
+            }
+            if (name.includes('monte-carlo') || name.includes('risk-parity') || name.includes('optimizer')) {
+                return 'Quantitative Finance Tool';
+            }
+            if (name.includes('ipo') || name.includes('insider') || name.includes('m&a') || name.includes('ma-')) {
+                return 'Corporate Finance Analysis';
+            }
+            
+            return 'Application Page';
+        }
+
+        function detectMainFeatures(content) {
+            const features = [];
+            const lower = content.toLowerCase();
+            
+            // Fonctionnalités de base
+            if (lower.includes('firebase') && lower.includes('auth')) features.push('User Authentication (Firebase)');
+            if (lower.includes('stripe')) features.push('Payment Processing (Stripe)');
+            if (lower.includes('highcharts') || lower.includes('chart.js')) features.push('Interactive Charts & Visualization');
+            if (lower.includes('search')) features.push('Search Functionality');
+            if (lower.includes('filter')) features.push('Advanced Filtering');
+            if (lower.includes('export')) features.push('Data Export');
+            if (lower.includes('download')) features.push('File Download');
+            if (lower.includes('upload')) features.push('File Upload');
+            
+            // Fonctionnalités financières
+            if (lower.includes('portfolio')) features.push('Portfolio Management');
+            if (lower.includes('watchlist')) features.push('Watchlist System');
+            if (lower.includes('simulation')) features.push('Financial Simulation');
+            if (lower.includes('prediction') || lower.includes('forecast')) features.push('Predictive Analytics');
+            if (lower.includes('monte carlo')) features.push('Monte Carlo Simulation');
+            if (lower.includes('risk parity')) features.push('Risk Parity Optimization');
+            if (lower.includes('sentiment')) features.push('Sentiment Analysis');
+            if (lower.includes('insider')) features.push('Insider Trading Tracking');
+            if (lower.includes('ipo')) features.push('IPO Analysis');
+            if (lower.includes('m&a') || lower.includes('merger')) features.push('M&A Screening');
+            
+            // Fonctionnalités sociales
+            if (lower.includes('comment')) features.push('Comment System');
+            if (lower.includes('like') || lower.includes('upvote')) features.push('Like/Upvote System');
+            if (lower.includes('follow')) features.push('Follow System');
+            if (lower.includes('chat') || lower.includes('message')) features.push('Messaging System');
+            if (lower.includes('notification')) features.push('Notifications');
+            
+            // Fonctionnalités de données
+            if (lower.includes('real-time') || lower.includes('websocket')) features.push('Real-time Data Updates');
+            if (lower.includes('api')) features.push('External API Integration');
+            if (lower.includes('cache')) features.push('Data Caching');
+            
+            // Dark mode
+            if (lower.includes('dark-mode') || lower.includes('darkmode')) features.push('Dark Mode Support');
+            
+            // Responsive
+            if (lower.includes('mobile') || lower.includes('responsive')) features.push('Mobile Responsive Design');
+            
+            return features;
+        }
+
+        function extractMainSections(content) {
+            const sections = [];
+            
+            // Chercher les sections avec titre
+            const sectionMatches = content.matchAll(/<section[^>]*>([\s\S]*?)<\/section>/gi);
+            for (const match of sectionMatches) {
+                const sectionContent = match[1];
+                const h2Match = sectionContent.match(/<h2[^>]*>(.*?)<\/h2>/i);
+                const h3Match = sectionContent.match(/<h3[^>]*>(.*?)<\/h3>/i);
+                const title = h2Match ? h2Match[1].replace(/<[^>]+>/g, '').trim() : 
+                             h3Match ? h3Match[1].replace(/<[^>]+>/g, '').trim() : null;
+                if (title && title.length < 100) {
+                    sections.push(title);
+                }
+            }
+            
+            // Si pas de sections, chercher les h2/h3 principaux
+            if (sections.length === 0) {
+                const h2Matches = content.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi);
+                for (const match of h2Matches) {
+                    const title = match[1].replace(/<[^>]+>/g, '').trim();
+                    if (title && title.length < 100 && !title.includes('�')) {
+                        sections.push(title);
+                    }
+                }
+            }
+            
+            return sections;
+        }
+
+        function detectIntegrations(content) {
+            const integrations = [];
+            const lower = content.toLowerCase();
+            
+            if (lower.includes('firebase')) integrations.push('Firebase');
+            if (lower.includes('stripe')) integrations.push('Stripe');
+            if (lower.includes('highcharts')) integrations.push('Highcharts');
+            if (lower.includes('chart.js')) integrations.push('Chart.js');
+            if (lower.includes('gemini') || lower.includes('google ai')) integrations.push('Google Gemini AI');
+            if (lower.includes('twelve data') || lower.includes('twelvedata')) integrations.push('Twelve Data API');
+            if (lower.includes('finnhub')) integrations.push('Finnhub API');
+            if (lower.includes('sec edgar') || lower.includes('sec-edgar')) integrations.push('SEC EDGAR');
+            if (lower.includes('cloudflare')) integrations.push('Cloudflare');
+            if (lower.includes('resend')) integrations.push('Resend Email');
+            if (lower.includes('three.js') || lower.includes('threejs')) integrations.push('Three.js (3D Graphics)');
+            
+            return integrations;
+        }
+
+        function detectUserInteractions(content) {
+            const interactions = [];
+            const lower = content.toLowerCase();
+            
+            if ((content.match(/<button/gi) || []).length > 5) interactions.push('Multiple Interactive Buttons');
+            if ((content.match(/<form/gi) || []).length > 0) interactions.push('Form Submission');
+            if (lower.includes('click') || lower.includes('onclick')) interactions.push('Click Events');
+            if (lower.includes('drag') || lower.includes('drop')) interactions.push('Drag & Drop');
+            if (lower.includes('modal')) interactions.push('Modal Dialogs');
+            if (lower.includes('dropdown')) interactions.push('Dropdown Menus');
+            if (lower.includes('tooltip')) interactions.push('Tooltips');
+            if (lower.includes('pagination')) interactions.push('Pagination');
+            if (lower.includes('tab')) interactions.push('Tabbed Navigation');
+            if (lower.includes('accordion')) interactions.push('Accordion Panels');
+            if (lower.includes('slider')) interactions.push('Range Sliders');
+            
+            return interactions;
+        }
+
+        function generateSmartDescription(pageType, title, features, sections) {
+            let desc = `${pageType}`;
+            
+            if (features.length > 0) {
+                desc += ` featuring ${features.slice(0, 3).join(', ')}`;
+            }
+            
+            if (sections.length > 0) {
+                desc += `. Main sections: ${sections.slice(0, 3).join(', ')}`;
+            }
+            
+            return desc;
         }
 
         function analyzeCSS(content, lines, size) {
@@ -534,8 +780,8 @@
             // Rapport complet
             architectureData = `
 ╔════════════════════════════════════════════════════════════════════╗
-║        ALPHAVAULT AI - COMPLETE ARCHITECTURE ANALYSIS              ║
-║        Generated: ${new Date().toLocaleString()}                   ║
+║     ALPHAVAULT AI - ULTRA-DETAILED ARCHITECTURE ANALYSIS           ║
+║     Generated: ${new Date().toLocaleString()}                      ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 📊 GLOBAL STATISTICS
@@ -567,7 +813,7 @@ ${otherFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFi
 ` : ''}
 
 ═══════════════════════════════════════════════════════════════════
-End of Report
+End of Ultra-Detailed Report
 ═══════════════════════════════════════════════════════════════════
 `;
 
@@ -590,10 +836,34 @@ End of Report
                     if (file.name.endsWith('.html')) {
                         section += `   Title: ${a.title}\n`;
                         section += `   Lines: ${a.lines}\n`;
+                        if (a.pageType) section += `   Type: ${a.pageType}\n`;
                         if (a.description) section += `   Description: ${a.description}\n`;
-                        if (a.scripts && a.scripts.length) section += `   Scripts: ${a.scripts.join(', ')}\n`;
-                        if (a.stylesheets && a.stylesheets.length) section += `   Stylesheets: ${a.stylesheets.join(', ')}\n`;
-                        if (a.components) section += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections\n`;
+                        
+                        if (a.mainFeatures && a.mainFeatures.length) {
+                            section += `   Main Features:\n`;
+                            a.mainFeatures.slice(0, 5).forEach(f => section += `      • ${f}\n`);
+                        }
+                        
+                        if (a.sections && a.sections.length) {
+                            section += `   Sections: ${a.sections.join(', ')}\n`;
+                        }
+                        
+                        if (a.integrations && a.integrations.length) {
+                            section += `   Integrations: ${a.integrations.join(', ')}\n`;
+                        }
+                        
+                        if (a.userInteractions && a.userInteractions.length) {
+                            section += `   User Interactions: ${a.userInteractions.slice(0, 4).join(', ')}\n`;
+                        }
+                        
+                        if (a.scripts && a.scripts.length) section += `   Scripts: ${a.scripts.slice(0, 5).join(', ')}\n`;
+                        if (a.stylesheets && a.stylesheets.length) section += `   Stylesheets: ${a.stylesheets.slice(0, 5).join(', ')}\n`;
+                        if (a.components) {
+                            section += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections`;
+                            if (a.components.charts) section += `, ${a.components.charts} charts`;
+                            if (a.components.tables) section += `, ${a.components.tables} tables`;
+                            section += `\n`;
+                        }
                     }
 
                     if (file.name.endsWith('.css')) {
@@ -669,13 +939,13 @@ End of Report
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `alphavault-architecture-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `alphavault-architecture-ultra-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            alert('✅ Architecture report downloaded successfully!\n\nYou can now send this file to HTML Pro.');
+            alert('✅ Ultra-detailed architecture report downloaded!\n\nYou can now send this file to HTML Pro.');
         }
     </script>
 </body>
