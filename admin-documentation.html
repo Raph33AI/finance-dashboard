@@ -41,6 +41,188 @@
 
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
+
+    <style>
+        /* Styles spécifiques pour les extracteurs */
+        .extractor-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .extractor-input-group {
+            margin-bottom: 20px;
+        }
+        
+        .extractor-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .extractor-input-group input,
+        .extractor-input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+        
+        .extractor-input-group input:focus,
+        .extractor-input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .extractor-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+        }
+        
+        .extractor-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .extractor-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .extractor-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .extractor-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .extractor-checkbox input {
+            width: auto;
+        }
+        
+        .extractor-progress {
+            display: none;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .extractor-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .extractor-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .extractor-progress-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        
+        .extractor-loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            display: none;
+        }
+        
+        .extractor-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .extractor-output {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--code-bg);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 600px;
+            overflow-y: auto;
+            display: none;
+            color: var(--text-primary);
+        }
+        
+        .extractor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .extractor-stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .extractor-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .extractor-stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .help {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -284,7 +466,7 @@
                             <i class='fas fa-chart-line'></i>
                             <span>Analytics Dashboard</span>
                         </a>
-                        <a href='admin-documentation.html' class='nav-link active active'>
+                        <a href='admin-documentation.html' class='nav-link active'>
                             <i class='fas fa-book-open'></i>
                             <span>Documentation</span>
                         </a>
@@ -430,6 +612,12 @@
                         </button>
                         <button class="nav-tab" data-section="calculations">
                             <i class="fas fa-calculator"></i> Calculations
+                        </button>
+                        <button class="nav-tab" data-section="extractor">
+                            <i class="fas fa-file-code"></i> Code Extractor
+                        </button>
+                        <button class="nav-tab" data-section="cloudflare">
+                            <i class="fas fa-cloud"></i> CF Workers
                         </button>
                     </div>
                 </nav>
@@ -749,9 +937,6 @@
 </pre>
                         </div>
                     </section>
-
-                    <!-- Continue with remaining sections... -->
-                    <!-- Due to character limit, I'll provide the structure for remaining sections -->
                     
                     <!-- SECTION 3: FRONTEND -->
                     <section class="doc-section" id="frontend">
@@ -851,6 +1036,154 @@
                         </p>
                     </section>
 
+                    <!-- ============================================
+                         SECTION 10: CODE EXTRACTOR
+                         ============================================ -->
+                    <section class="doc-section" id="extractor">
+                        <h2 class="section-title">
+                            <i class="fas fa-file-code"></i>
+                            Architecture Code Extractor
+                        </h2>
+
+                        <div class="info-card">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-info-circle"></i> Extract Your Complete Codebase
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                This tool automatically scans your GitHub repository and generates a comprehensive report 
+                                including all HTML, CSS, and JavaScript files with detailed analysis.
+                            </p>
+                        </div>
+
+                        <div class="extractor-container">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">
+                                <i class="fas fa-cog"></i> Configuration
+                            </h3>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorUsername">
+                                    <i class="fab fa-github"></i> GitHub Username:
+                                </label>
+                                <input type="text" id="extractorUsername" placeholder="ex: raphnardone" value="">
+                            </div>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorRepo">
+                                    <i class="fas fa-code-branch"></i> Repository Name:
+                                </label>
+                                <input type="text" id="extractorRepo" placeholder="ex: alphavault-ai" value="">
+                            </div>
+
+                            <div class="extractor-input-group">
+                                <label for="extractorLevel">
+                                    <i class="fas fa-layer-group"></i> Analysis Level:
+                                </label>
+                                <select id="extractorLevel">
+                                    <option value="basic">Basic (Structure + File sizes)</option>
+                                    <option value="deep">Deep (+ Content analysis)</option>
+                                    <option value="ultra" selected>Ultra Deep (+ Detailed descriptions)</option>
+                                </select>
+                            </div>
+
+                            <div class="extractor-options">
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorHTML" checked>
+                                    <span>Analyze HTML files</span>
+                                </label>
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorCSS" checked>
+                                    <span>Analyze CSS files</span>
+                                </label>
+                                <label class="extractor-checkbox">
+                                    <input type="checkbox" id="extractorJS" checked>
+                                    <span>Analyze JS files</span>
+                                </label>
+                            </div>
+
+                            <button class="extractor-btn" onclick="startExtraction()" id="extractorBtn">
+                                <i class="fas fa-play"></i> Start Extraction
+                            </button>
+                            <button class="extractor-btn" onclick="downloadExtraction()" id="extractorDownloadBtn" style="display: none;">
+                                <i class="fas fa-download"></i> Download Report
+                            </button>
+
+                            <div class="extractor-progress" id="extractorProgress">
+                                <div class="extractor-progress-bar">
+                                    <div class="extractor-progress-fill" id="extractorProgressFill"></div>
+                                </div>
+                                <div class="extractor-progress-text" id="extractorProgressText">Initializing...</div>
+                            </div>
+
+                            <div class="extractor-loading" id="extractorLoading">
+                                <div class="extractor-spinner"></div>
+                                <div>Scanning repository...</div>
+                            </div>
+
+                            <div class="extractor-stats" id="extractorStats"></div>
+
+                            <div class="extractor-output" id="extractorOutput"></div>
+                        </div>
+                    </section>
+
+                    <!-- ============================================
+                         SECTION 11: CLOUDFLARE WORKERS
+                         ============================================ -->
+                    <section class="doc-section" id="cloudflare">
+                        <h2 class="section-title">
+                            <i class="fas fa-cloud"></i>
+                            Cloudflare Workers Analyzer
+                        </h2>
+
+                        <div class="info-card">
+                            <h3 style="margin-bottom: 12px; font-size: 1.3rem;">
+                                <i class="fas fa-info-circle"></i> Extract Workers Configuration
+                            </h3>
+                            <p style="color: var(--text-light); line-height: 1.8;">
+                                This tool connects to your Cloudflare account via a temporary worker proxy 
+                                and extracts all workers scripts, bindings, routes, and KV namespaces with detailed analysis.
+                            </p>
+                        </div>
+
+                        <div class="extractor-container">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">
+                                <i class="fas fa-cog"></i> Worker Proxy Configuration
+                            </h3>
+
+                            <div class="help">
+                                <strong style="color: #92400e;">📝 Setup Instructions:</strong><br>
+                                <span style="color: #78350f; font-size: 0.9rem; line-height: 1.6;">
+                                    1. Deploy the temporary worker "workers-extractor-temp" on your Cloudflare account<br>
+                                    2. Copy the worker URL (format: <code>https://workers-extractor-temp.your-account.workers.dev</code>)<br>
+                                    3. Paste it below and click "Extract Workers Data"<br>
+                                    4. <strong>Important:</strong> Delete the worker immediately after extraction for security
+                                </span>
+                            </div>
+
+                            <div class="extractor-input-group">
+                                <label for="cloudflareWorkerUrl">
+                                    <i class="fas fa-link"></i> Worker Extractor URL:
+                                </label>
+                                <input type="text" id="cloudflareWorkerUrl" placeholder="https://workers-extractor-temp.your-account.workers.dev">
+                            </div>
+
+                            <button class="extractor-btn" onclick="extractCloudflareData()" id="cloudflareExtractBtn">
+                                <i class="fas fa-cloud-download-alt"></i> Extract Workers Data
+                            </button>
+                            <button class="extractor-btn" onclick="downloadCloudflareReport()" id="cloudflareDownloadBtn" style="display: none;">
+                                <i class="fas fa-download"></i> Download Report
+                            </button>
+
+                            <div class="extractor-loading" id="cloudflareLoading">
+                                <div class="extractor-spinner"></div>
+                                <div>Extracting data from Cloudflare... This may take 30-60 seconds</div>
+                            </div>
+
+                            <div class="extractor-stats" id="cloudflareStats"></div>
+
+                            <div class="extractor-output" id="cloudflareOutput"></div>
+                        </div>
+                    </section>
+
                 </div>
 
                 <!-- Footer -->
@@ -883,44 +1216,14 @@
         // Navigation between sections
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', function() {
-                // Remove active class from all tabs
                 document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                
-                // Add active class to clicked tab
                 this.classList.add('active');
-                
-                // Hide all sections
                 document.querySelectorAll('.doc-section').forEach(section => {
                     section.classList.remove('active');
                 });
-                
-                // Show selected section
                 const sectionId = this.dataset.section;
                 document.getElementById(sectionId).classList.add('active');
-                
-                // Scroll to top of main content
                 document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        });
-
-        // Copy code blocks functionality
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const codeBlock = this.closest('.code-block').querySelector('pre');
-                const textToCopy = codeBlock.textContent;
-                
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    const originalHTML = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    this.style.background = 'var(--success)';
-                    this.style.color = 'white';
-                    
-                    setTimeout(() => {
-                        this.innerHTML = originalHTML;
-                        this.style.background = '';
-                        this.style.color = '';
-                    }, 2000);
-                });
             });
         });
 
@@ -947,10 +1250,589 @@
         });
 
         console.log('📚 Technical Documentation loaded successfully!');
-        console.log('🎯 Version 2.0.0 - Production');
-        console.log('⌨ Keyboard shortcuts:');
-        console.log('   - Ctrl/Cmd + P: Print');
-        console.log('   - Arrow ← →: Navigate between sections');
+    </script>
+
+    <!-- ⭐ GITHUB ARCHITECTURE EXTRACTOR SCRIPT -->
+    <script>
+        let extractorData = '';
+        let extractorFiles = [];
+
+        async function startExtraction() {
+            const username = document.getElementById('extractorUsername').value.trim();
+            const repo = document.getElementById('extractorRepo').value.trim();
+            const level = document.getElementById('extractorLevel').value;
+
+            if (!username || !repo) {
+                alert('⚠ Please enter both username and repository name');
+                return;
+            }
+
+            document.getElementById('extractorBtn').disabled = true;
+            document.getElementById('extractorLoading').style.display = 'block';
+            document.getElementById('extractorProgress').style.display = 'block';
+            document.getElementById('extractorOutput').style.display = 'none';
+            document.getElementById('extractorStats').style.display = 'none';
+
+            try {
+                updateExtractorProgress(0, 'Scanning repository...');
+                const files = await scanGitHubRepo(username, repo);
+                
+                updateExtractorProgress(30, 'Analyzing files...');
+                
+                if (level === 'deep' || level === 'ultra') {
+                    await analyzeRepoFiles(username, repo, files, level);
+                }
+                
+                updateExtractorProgress(90, 'Generating report...');
+                generateExtractorReport(files);
+                
+                updateExtractorProgress(100, 'Complete! ✅');
+                
+                setTimeout(() => {
+                    document.getElementById('extractorLoading').style.display = 'none';
+                    document.getElementById('extractorProgress').style.display = 'none';
+                    document.getElementById('extractorOutput').style.display = 'block';
+                    document.getElementById('extractorStats').style.display = 'grid';
+                    document.getElementById('extractorDownloadBtn').style.display = 'inline-block';
+                    document.getElementById('extractorBtn').disabled = false;
+                }, 500);
+                
+            } catch (error) {
+                console.error('Extraction error:', error);
+                document.getElementById('extractorLoading').style.display = 'none';
+                document.getElementById('extractorProgress').style.display = 'none';
+                document.getElementById('extractorBtn').disabled = false;
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function updateExtractorProgress(percent, text) {
+            document.getElementById('extractorProgressFill').style.width = percent + '%';
+            document.getElementById('extractorProgressText').textContent = text;
+        }
+
+        async function scanGitHubRepo(username, repo, path = '') {
+            const url = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Repository not found or API rate limit exceeded');
+            }
+
+            const items = await response.json();
+            let allFiles = [];
+
+            for (const item of items) {
+                if (item.type === 'dir') {
+                    if (['node_modules', '.git', 'dist', 'build', '.vscode'].includes(item.name)) {
+                        continue;
+                    }
+                    const subFiles = await scanGitHubRepo(username, repo, item.path);
+                    allFiles = allFiles.concat(subFiles);
+                } else {
+                    allFiles.push(item);
+                }
+            }
+
+            return allFiles;
+        }
+
+        async function analyzeRepoFiles(username, repo, files, level) {
+            const analyzeHTML = document.getElementById('extractorHTML').checked;
+            const analyzeCSS = document.getElementById('extractorCSS').checked;
+            const analyzeJS = document.getElementById('extractorJS').checked;
+
+            const filesToAnalyze = files.filter(f => {
+                if (analyzeHTML && f.name.endsWith('.html')) return true;
+                if (analyzeCSS && f.name.endsWith('.css')) return true;
+                if (analyzeJS && f.name.endsWith('.js')) return true;
+                return false;
+            });
+
+            const total = filesToAnalyze.length;
+            let analyzed = 0;
+
+            for (const file of filesToAnalyze) {
+                try {
+                    const content = await fetchFileContent(file.download_url);
+                    file.analysis = analyzeContent(file, content, level);
+                } catch (error) {
+                    file.analysis = { error: 'Failed to analyze' };
+                }
+                
+                analyzed++;
+                const progress = 30 + Math.round((analyzed / total) * 60);
+                updateExtractorProgress(progress, `Analyzing ${analyzed}/${total} files...`);
+            }
+
+            extractorFiles = files;
+        }
+
+        async function fetchFileContent(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch file');
+            return await response.text();
+        }
+
+        function analyzeContent(file, content, level) {
+            const lines = content.split('\n').length;
+            const size = (file.size / 1024).toFixed(2);
+
+            const analysis = {
+                lines,
+                size: size + ' KB'
+            };
+
+            if (file.name.endsWith('.html')) {
+                const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+                analysis.title = titleMatch ? titleMatch[1] : 'No title';
+                
+                const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+                analysis.description = metaDesc ? metaDesc[1].substring(0, 100) : '';
+                
+                analysis.components = {
+                    forms: (content.match(/<form/gi) || []).length,
+                    buttons: (content.match(/<button/gi) || []).length
+                };
+
+                if (level === 'ultra') {
+                    const lower = content.toLowerCase();
+                    analysis.integrations = [];
+                    if (lower.includes('firebase')) analysis.integrations.push('Firebase');
+                    if (lower.includes('stripe')) analysis.integrations.push('Stripe');
+                    if (lower.includes('highcharts')) analysis.integrations.push('Highcharts');
+                }
+            }
+
+            if (file.name.endsWith('.css')) {
+                const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+                analysis.classes = [...new Set(classes)].length;
+                analysis.mediaQueries = (content.match(/@media/g) || []).length;
+            }
+
+            if (file.name.endsWith('.js')) {
+                analysis.functions = (content.match(/function\s+/g) || []).length;
+                analysis.eventListeners = (content.match(/addEventListener/g) || []).length;
+            }
+
+            return analysis;
+        }
+
+        function generateExtractorReport(files) {
+            const htmlFiles = files.filter(f => f.name.endsWith('.html'));
+            const cssFiles = files.filter(f => f.name.endsWith('.css'));
+            const jsFiles = files.filter(f => f.name.endsWith('.js'));
+
+            const totalLines = files
+                .filter(f => f.name.match(/\.(html|css|js)$/))
+                .reduce((sum, f) => sum + (f.analysis?.lines || 0), 0);
+
+            const statsHtml = `
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${htmlFiles.length}</div>
+                    <div class="extractor-stat-label">HTML Pages</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${cssFiles.length}</div>
+                    <div class="extractor-stat-label">CSS Files</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${jsFiles.length}</div>
+                    <div class="extractor-stat-label">JS Files</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${files.length}</div>
+                    <div class="extractor-stat-label">Total Files</div>
+                </div>
+                <div class="extractor-stat-card" style="background: linear-gradient(135deg, #f59e0b, #ea580c);">
+                    <div class="extractor-stat-value">${totalLines.toLocaleString()}</div>
+                    <div class="extractor-stat-label">Total Lines of Code</div>
+                </div>
+            `;
+            document.getElementById('extractorStats').innerHTML = statsHtml;
+
+            let report = `
+╔════════════════════════════════════════════════════════════════════╗
+║        ALPHAVAULT AI - COMPLETE ARCHITECTURE REPORT                ║
+║        Generated: ${new Date().toLocaleString()}                   ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📊 GLOBAL STATISTICS
+═══════════════════════════════════════════════════════════════════
+
+• HTML Pages: ${htmlFiles.length}
+• CSS Files: ${cssFiles.length}
+• JavaScript Files: ${jsFiles.length}
+• Total Files: ${files.length}
+• Total Lines of Code: ${totalLines.toLocaleString()}
+• Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
+
+`;
+
+            if (htmlFiles.length > 0) {
+                report += `\n📄 HTML PAGES (${htmlFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
+                
+                htmlFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    report += `\n`;
+                    
+                    if (file.analysis) {
+                        const a = file.analysis;
+                        if (a.title) report += `   Title: ${a.title}\n`;
+                        if (a.description) report += `   Description: ${a.description}\n`;
+                        if (a.integrations && a.integrations.length) {
+                            report += `   Integrations: ${a.integrations.join(', ')}\n`;
+                        }
+                        if (a.components) {
+                            report += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons\n`;
+                        }
+                    }
+                    report += '\n';
+                });
+            }
+
+            if (cssFiles.length > 0) {
+                report += `\n🎨 CSS FILES (${cssFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
+                
+                cssFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    if (file.analysis?.classes) report += ` | Classes: ${file.analysis.classes}`;
+                    report += `\n\n`;
+                });
+            }
+
+            if (jsFiles.length > 0) {
+                report += `\n📜 JAVASCRIPT FILES (${jsFiles.length})\n`;
+                report += '═══════════════════════════════════════════════════════════════════\n\n';
+                
+                jsFiles.forEach((file, index) => {
+                    report += `${index + 1}. ${file.path}\n`;
+                    report += `   Size: ${(file.size / 1024).toFixed(2)} KB`;
+                    if (file.analysis?.lines) report += ` | Lines: ${file.analysis.lines}`;
+                    if (file.analysis?.functions) report += ` | Functions: ${file.analysis.functions}`;
+                    report += `\n\n`;
+                });
+            }
+
+            report += `\n═══════════════════════════════════════════════════════════════════\n`;
+            report += `End of Architecture Report\n`;
+            report += `═══════════════════════════════════════════════════════════════════\n`;
+
+            extractorData = report;
+            document.getElementById('extractorOutput').textContent = extractorData;
+        }
+
+        function downloadExtraction() {
+            const blob = new Blob([extractorData], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alphavault-architecture-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert('✅ Architecture report downloaded successfully!');
+        }
+    </script>
+
+    <!-- ⭐ CLOUDFLARE WORKERS EXTRACTOR SCRIPT -->
+    <script>
+        let cloudflareReportData = null;
+        let cloudflareFormattedReport = '';
+
+        async function extractCloudflareData() {
+            const workerUrl = document.getElementById('cloudflareWorkerUrl').value.trim();
+
+            if (!workerUrl) {
+                alert('⚠ Please enter the Worker Extractor URL');
+                return;
+            }
+
+            document.getElementById('cloudflareExtractBtn').disabled = true;
+            document.getElementById('cloudflareLoading').style.display = 'block';
+            document.getElementById('cloudflareOutput').style.display = 'none';
+            document.getElementById('cloudflareStats').style.display = 'none';
+
+            try {
+                const response = await fetch(`${workerUrl}?action=extract`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} - Check if worker is correctly deployed`);
+                }
+
+                cloudflareReportData = await response.json();
+                
+                displayCloudflareStats();
+                generateCloudflareReport();
+
+                document.getElementById('cloudflareLoading').style.display = 'none';
+                document.getElementById('cloudflareOutput').style.display = 'block';
+                document.getElementById('cloudflareStats').style.display = 'grid';
+                document.getElementById('cloudflareDownloadBtn').style.display = 'inline-block';
+                document.getElementById('cloudflareExtractBtn').disabled = false;
+
+            } catch (error) {
+                console.error('Cloudflare extraction error:', error);
+                document.getElementById('cloudflareLoading').style.display = 'none';
+                document.getElementById('cloudflareExtractBtn').disabled = false;
+                alert(`❌ Error: ${error.message}\n\nMake sure:\n1. Worker is deployed\n2. URL is correct\n3. Worker has proper CORS headers`);
+            }
+        }
+
+        function displayCloudflareStats() {
+            const stats = cloudflareReportData.stats;
+            const statsHtml = `
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${stats.totalWorkers}</div>
+                    <div class="extractor-stat-label">Workers Scripts</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${stats.totalKVNamespaces}</div>
+                    <div class="extractor-stat-label">KV Namespaces</div>
+                </div>
+                <div class="extractor-stat-card">
+                    <div class="extractor-stat-value">${stats.totalRoutes}</div>
+                    <div class="extractor-stat-label">Routes</div>
+                </div>
+                <div class="extractor-stat-card" style="background: linear-gradient(135deg, #f59e0b, #ea580c);">
+                    <div class="extractor-stat-value">${stats.totalLinesOfCode.toLocaleString()}</div>
+                    <div class="extractor-stat-label">Total Lines</div>
+                </div>
+            `;
+            document.getElementById('cloudflareStats').innerHTML = statsHtml;
+        }
+
+        function generateCloudflareReport() {
+            cloudflareFormattedReport = `
+╔════════════════════════════════════════════════════════════════════╗
+║          CLOUDFLARE WORKERS - INFRASTRUCTURE REPORT                ║
+║          Generated: ${new Date(cloudflareReportData.generated).toLocaleString()}                 ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📊 ACCOUNT INFORMATION
+═══════════════════════════════════════════════════════════════════
+
+Account Name: ${cloudflareReportData.account.result?.name || 'N/A'}
+Account ID: ${cloudflareReportData.account.result?.id || 'N/A'}
+Account Type: ${cloudflareReportData.account.result?.type || 'N/A'}
+
+📊 GLOBAL STATISTICS
+═══════════════════════════════════════════════════════════════════
+
+• Total Workers: ${cloudflareReportData.stats.totalWorkers}
+• KV Namespaces: ${cloudflareReportData.stats.totalKVNamespaces}
+• Active Routes: ${cloudflareReportData.stats.totalRoutes}
+• Total Lines of Code: ${cloudflareReportData.stats.totalLinesOfCode.toLocaleString()}
+
+☁ CLOUDFLARE WORKERS INVENTORY (${cloudflareReportData.workers.length})
+═══════════════════════════════════════════════════════════════════
+
+${cloudflareReportData.workers.map((worker, index) => generateCloudflareWorkerSummary(worker, index + 1)).join('\n')}
+
+🗄 KV NAMESPACES (${cloudflareReportData.kvNamespaces.length})
+═══════════════════════════════════════════════════════════════════
+
+${cloudflareReportData.kvNamespaces.map((ns, index) => generateKVNamespaceSummary(ns, index + 1)).join('\n')}
+
+═══════════════════════════════════════════════════════════════════
+End of Cloudflare Workers Infrastructure Report
+═══════════════════════════════════════════════════════════════════
+`;
+
+            document.getElementById('cloudflareOutput').textContent = cloudflareFormattedReport;
+        }
+
+        function generateCloudflareWorkerSummary(worker, index) {
+            let section = `${index}. ${worker.id}\n`;
+            section += `   ════════════════════════════════════════════════════════════════\n`;
+            
+            if (worker.metadata) {
+                section += `   📅 Created: ${new Date(worker.metadata.created_on).toLocaleDateString()}\n`;
+                section += `   📅 Last Modified: ${new Date(worker.metadata.modified_on).toLocaleDateString()}\n`;
+                if (worker.metadata.usage_model) {
+                    section += `   💼 Usage Model: ${worker.metadata.usage_model}\n`;
+                }
+            }
+
+            if (worker.script && worker.script.analysis) {
+                const a = worker.script.analysis;
+                section += `\n   📊 CODE METRICS:\n`;
+                section += `   ├─ Lines of Code: ${a.lines}\n`;
+                section += `   ├─ Functions: ${a.functions}\n`;
+                section += `   ├─ Event Listeners: ${a.eventListeners}\n`;
+                section += `   └─ API Calls (fetch): ${a.apiCalls}\n`;
+                
+                const integrations = [];
+                const purposes = [];
+                
+                if (a.integrations.kv) {
+                    integrations.push('KV Storage');
+                    purposes.push('Data caching/storage');
+                }
+                if (a.integrations.r2) {
+                    integrations.push('R2 Object Storage');
+                    purposes.push('File storage');
+                }
+                if (a.integrations.durableObjects) {
+                    integrations.push('Durable Objects');
+                    purposes.push('Stateful coordination');
+                }
+                if (a.integrations.d1) {
+                    integrations.push('D1 Database');
+                    purposes.push('SQL database operations');
+                }
+                
+                if (integrations.length) {
+                    section += `\n   🔗 INTEGRATIONS: ${integrations.join(', ')}\n`;
+                }
+
+                const workerName = worker.id.toLowerCase();
+                let detectedPurpose = 'General serverless function';
+                
+                if (workerName.includes('api')) {
+                    detectedPurpose = 'API endpoint / Backend service';
+                } else if (workerName.includes('auth')) {
+                    detectedPurpose = 'Authentication & authorization';
+                } else if (workerName.includes('payment') || workerName.includes('stripe')) {
+                    detectedPurpose = 'Payment processing & webhooks';
+                } else if (workerName.includes('email') || workerName.includes('resend')) {
+                    detectedPurpose = 'Email delivery service';
+                } else if (workerName.includes('analytics')) {
+                    detectedPurpose = 'Analytics data aggregation';
+                } else if (workerName.includes('proxy')) {
+                    detectedPurpose = 'Proxy/Gateway for external APIs';
+                } else if (workerName.includes('newsletter')) {
+                    detectedPurpose = 'Newsletter automation';
+                } else if (workerName.includes('admin')) {
+                    detectedPurpose = 'Admin dashboard backend';
+                } else if (workerName.includes('sec') || workerName.includes('edgar')) {
+                    detectedPurpose = 'SEC EDGAR data proxy';
+                } else if (a.apiCalls > 5) {
+                    detectedPurpose = 'API aggregation / Data fetching service';
+                }
+
+                section += `\n   🎯 DETECTED PURPOSE: ${detectedPurpose}\n`;
+                if (purposes.length) {
+                    section += `   💡 CAPABILITIES: ${purposes.join(', ')}\n`;
+                }
+            }
+
+            if (worker.bindings && worker.bindings.result && worker.bindings.result.bindings) {
+                const bindings = worker.bindings.result.bindings;
+                section += `\n   🔐 BINDINGS & ENVIRONMENT (${bindings.length}):\n`;
+                
+                bindings.forEach(binding => {
+                    let bindingDesc = '';
+                    
+                    switch(binding.type) {
+                        case 'secret_text':
+                            bindingDesc = `${binding.name} (Secret) - Encrypted API key/token`;
+                            break;
+                        case 'plain_text':
+                            bindingDesc = `${binding.name} (Plain Text) - Configuration variable`;
+                            break;
+                        case 'kv_namespace':
+                            bindingDesc = `${binding.name} (KV) - Key-Value storage: ${binding.namespace_id}`;
+                            break;
+                        case 'r2_bucket':
+                            bindingDesc = `${binding.name} (R2) - Object storage bucket`;
+                            break;
+                        case 'd1':
+                            bindingDesc = `${binding.name} (D1) - SQL database: ${binding.database_id}`;
+                            break;
+                        case 'durable_object_namespace':
+                            bindingDesc = `${binding.name} (DO) - Durable Object: ${binding.class_name}`;
+                            break;
+                        default:
+                            bindingDesc = `${binding.name} (${binding.type})`;
+                    }
+                    
+                    section += `   ├─ ${bindingDesc}\n`;
+                });
+            }
+
+            if (worker.bindings && worker.bindings.result) {
+                const config = worker.bindings.result;
+                if (config.compatibility_date || config.compatibility_flags) {
+                    section += `\n   ⚙ CONFIGURATION:\n`;
+                    if (config.compatibility_date) {
+                        section += `   ├─ Compatibility Date: ${config.compatibility_date}\n`;
+                    }
+                    if (config.compatibility_flags && config.compatibility_flags.length) {
+                        section += `   └─ Flags: ${config.compatibility_flags.join(', ')}\n`;
+                    }
+                }
+            }
+
+            if (worker.routes && Array.isArray(worker.routes) && worker.routes.length > 0) {
+                section += `\n   🌐 ACTIVE ROUTES (${worker.routes.length}):\n`;
+                worker.routes.forEach((route, idx) => {
+                    const isLast = idx === worker.routes.length - 1;
+                    const prefix = isLast ? '└─' : '├─';
+                    section += `   ${prefix} ${route.pattern}\n`;
+                    section += `   ${isLast ? '  ' : '│ '} └─ Zone: ${route.zone}\n`;
+                });
+            } else {
+                section += `\n   🌐 ROUTES: None (Not bound to any domain)\n`;
+            }
+
+            section += `\n`;
+            return section;
+        }
+
+        function generateKVNamespaceSummary(ns, index) {
+            let section = `${index}. ${ns.title}\n`;
+            section += `   ├─ Namespace ID: ${ns.id}\n`;
+            
+            if (ns.supports_url_encoding !== undefined) {
+                section += `   ├─ URL Encoding: ${ns.supports_url_encoding ? 'Supported' : 'Not supported'}\n`;
+            }
+            
+            const nameL = ns.title.toLowerCase();
+            let purpose = 'General key-value storage';
+            
+            if (nameL.includes('cache')) {
+                purpose = 'Response/data caching';
+            } else if (nameL.includes('session')) {
+                purpose = 'User session storage';
+            } else if (nameL.includes('analytics') || nameL.includes('stats')) {
+                purpose = 'Analytics data aggregation';
+            } else if (nameL.includes('config')) {
+                purpose = 'Configuration storage';
+            } else if (nameL.includes('rate') || nameL.includes('limit')) {
+                purpose = 'Rate limiting data';
+            } else if (nameL.includes('user')) {
+                purpose = 'User data storage';
+            } else if (nameL.includes('temp') || nameL.includes('tmp')) {
+                purpose = 'Temporary data storage';
+            }
+            
+            section += `   └─ Purpose: ${purpose}\n\n`;
+            
+            return section;
+        }
+
+        function downloadCloudflareReport() {
+            const blob = new Blob([cloudflareFormattedReport], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cloudflare-workers-report-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert('✅ Cloudflare Workers report downloaded successfully!\n\n⚠ Remember to delete the temporary worker for security.');
+        }
     </script>
 
     <!-- User Menu Script -->
