@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Extractor - AlphaVault AI</title>
+    <title>Architecture Extractor Pro - AlphaVault AI</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,7 +13,7 @@
             padding: 40px 20px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -38,7 +38,7 @@
             font-weight: 600;
             color: #334155;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e2e8f0;
@@ -46,7 +46,7 @@
             font-size: 1rem;
             transition: all 0.3s;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -77,7 +77,7 @@
             border-left: 4px solid #667eea;
             white-space: pre-wrap;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             max-height: 600px;
             overflow-y: auto;
             display: none;
@@ -123,6 +123,32 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
         .help {
             background: #fef3c7;
             border-left: 4px solid #f59e0b;
@@ -140,20 +166,35 @@
             font-size: 0.9rem;
             line-height: 1.6;
         }
+        .option-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .checkbox-label input {
+            width: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏗 Architecture Extractor</h1>
-        <p class="subtitle">Extract your AlphaVault AI project structure automatically</p>
+        <h1>🏗 Architecture Extractor Pro</h1>
+        <p class="subtitle">Extract & analyze your AlphaVault AI project structure with content analysis</p>
 
         <div class="help">
             <div class="help-title">📝 Instructions :</div>
             <div class="help-text">
                 1. Entrez votre nom d'utilisateur GitHub (ex: raphnardone)<br>
                 2. Entrez le nom de votre repository (ex: alphavault-ai)<br>
-                3. Cliquez sur "Extract Architecture"<br>
-                4. Téléchargez le fichier généré et envoyez-le moi
+                3. Choisissez le niveau d'analyse (Basic ou Deep)<br>
+                4. Cliquez sur "Extract & Analyze"<br>
+                5. Téléchargez le fichier généré et envoyez-le moi
             </div>
         </div>
 
@@ -167,12 +208,42 @@
             <input type="text" id="repo" placeholder="ex: alphavault-ai" value="">
         </div>
 
-        <button class="btn" onclick="extractArchitecture()">
-            <i class="fas fa-download"></i> Extract Architecture
+        <div class="input-group">
+            <label for="analysisLevel">Analysis Level:</label>
+            <select id="analysisLevel">
+                <option value="basic">Basic (Structure + File sizes)</option>
+                <option value="deep" selected>Deep (+ Content analysis & summaries)</option>
+            </select>
+        </div>
+
+        <div class="option-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="analyzeHTML" checked>
+                <span>Analyze HTML files</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="analyzeCSS" checked>
+                <span>Analyze CSS files</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="analyzeJS" checked>
+                <span>Analyze JS files</span>
+            </label>
+        </div>
+
+        <button class="btn" onclick="extractArchitecture()" id="extractBtn">
+            🚀 Extract & Analyze
         </button>
         <button class="btn" onclick="downloadArchitecture()" id="downloadBtn" style="display: none;">
-            <i class="fas fa-file-download"></i> Download TXT
+            📥 Download Full Report
         </button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing...</div>
+        </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
@@ -187,32 +258,59 @@
     <script>
         let architectureData = '';
         let statsData = {};
+        let analyzedFiles = [];
 
         async function extractArchitecture() {
             const username = document.getElementById('username').value.trim();
             const repo = document.getElementById('repo').value.trim();
+            const analysisLevel = document.getElementById('analysisLevel').value;
 
             if (!username || !repo) {
                 alert('⚠ Please enter both username and repository name');
                 return;
             }
 
+            document.getElementById('extractBtn').disabled = true;
             document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
             document.getElementById('output').style.display = 'none';
             document.getElementById('stats').style.display = 'none';
 
             try {
+                updateProgress(0, 'Scanning repository structure...');
                 const files = await scanRepository(username, repo);
+                
+                updateProgress(30, 'Repository scanned. Starting analysis...');
+                
+                if (analysisLevel === 'deep') {
+                    await analyzeFiles(username, repo, files);
+                }
+                
+                updateProgress(90, 'Generating final report...');
                 generateArchitecture(files);
                 
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('output').style.display = 'block';
-                document.getElementById('stats').style.display = 'grid';
-                document.getElementById('downloadBtn').style.display = 'inline-block';
+                updateProgress(100, 'Complete! ✅');
+                
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('progressContainer').style.display = 'none';
+                    document.getElementById('output').style.display = 'block';
+                    document.getElementById('stats').style.display = 'grid';
+                    document.getElementById('downloadBtn').style.display = 'inline-block';
+                    document.getElementById('extractBtn').disabled = false;
+                }, 500);
+                
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('progressContainer').style.display = 'none';
+                document.getElementById('extractBtn').disabled = false;
                 alert('❌ Error: ' + error.message);
             }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
         }
 
         async function scanRepository(username, repo, path = '') {
@@ -227,12 +325,10 @@
             let allFiles = [];
 
             for (const item of items) {
-                // Ignorer certains dossiers
                 if (item.type === 'dir') {
-                    if (['node_modules', '.git', 'dist', 'build', '.vscode'].includes(item.name)) {
+                    if (['node_modules', '.git', 'dist', 'build', '.vscode', '.github'].includes(item.name)) {
                         continue;
                     }
-                    // Récursion pour les sous-dossiers
                     const subFiles = await scanRepository(username, repo, item.path);
                     allFiles = allFiles.concat(subFiles);
                 } else {
@@ -243,10 +339,169 @@
             return allFiles;
         }
 
+        async function analyzeFiles(username, repo, files) {
+            const analyzeHTML = document.getElementById('analyzeHTML').checked;
+            const analyzeCSS = document.getElementById('analyzeCSS').checked;
+            const analyzeJS = document.getElementById('analyzeJS').checked;
+
+            const filesToAnalyze = files.filter(f => {
+                if (analyzeHTML && f.name.endsWith('.html')) return true;
+                if (analyzeCSS && f.name.endsWith('.css')) return true;
+                if (analyzeJS && f.name.endsWith('.js')) return true;
+                return false;
+            });
+
+            const total = filesToAnalyze.length;
+            let analyzed = 0;
+
+            for (const file of filesToAnalyze) {
+                try {
+                    const content = await fetchFileContent(file.download_url);
+                    const analysis = analyzeFileContent(file, content);
+                    file.analysis = analysis;
+                    analyzedFiles.push({ ...file, analysis });
+                } catch (error) {
+                    file.analysis = { error: 'Failed to analyze' };
+                }
+                
+                analyzed++;
+                const progress = 30 + Math.round((analyzed / total) * 60);
+                updateProgress(progress, `Analyzing files... ${analyzed}/${total}`);
+            }
+        }
+
+        async function fetchFileContent(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch file');
+            return await response.text();
+        }
+
+        function analyzeFileContent(file, content) {
+            const ext = file.name.split('.').pop();
+            const lines = content.split('\n').length;
+            const size = (file.size / 1024).toFixed(2);
+
+            if (ext === 'html') {
+                return analyzeHTML(content, lines, size);
+            } else if (ext === 'css') {
+                return analyzeCSS(content, lines, size);
+            } else if (ext === 'js') {
+                return analyzeJS(content, lines, size);
+            }
+
+            return { lines, size };
+        }
+
+        function analyzeHTML(content, lines, size) {
+            const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+            const title = titleMatch ? titleMatch[1] : 'No title';
+
+            const metaDesc = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+            const description = metaDesc ? metaDesc[1] : 'No description';
+
+            const scriptTags = (content.match(/<script[^>]*src=["'](.*?)["']/gi) || []);
+            const scripts = scriptTags.map(s => {
+                const match = s.match(/src=["'](.*?)["']/i);
+                return match ? match[1].split('/').pop() : '';
+            }).filter(s => s);
+
+            const linkTags = (content.match(/<link[^>]*href=["'](.*?)["']/gi) || []);
+            const stylesheets = linkTags
+                .map(l => {
+                    const match = l.match(/href=["'](.*?)["']/i);
+                    return match ? match[1].split('/').pop() : '';
+                })
+                .filter(l => l.endsWith('.css'));
+
+            const forms = (content.match(/<form/gi) || []).length;
+            const buttons = (content.match(/<button/gi) || []).length;
+            const sections = (content.match(/<section/gi) || []).length;
+
+            return {
+                lines,
+                size: size + ' KB',
+                title,
+                description: description.substring(0, 100) + (description.length > 100 ? '...' : ''),
+                scripts: scripts.slice(0, 5),
+                stylesheets: stylesheets.slice(0, 5),
+                components: { forms, buttons, sections }
+            };
+        }
+
+        function analyzeCSS(content, lines, size) {
+            const classes = (content.match(/\.[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+            const uniqueClasses = [...new Set(classes)].slice(0, 10);
+
+            const variables = (content.match(/--[a-zA-Z_-][a-zA-Z0-9_-]*/g) || []);
+            const uniqueVars = [...new Set(variables)].slice(0, 10);
+
+            const mediaQueries = (content.match(/@media/g) || []).length;
+            const keyframes = (content.match(/@keyframes/g) || []).length;
+            const imports = (content.match(/@import/g) || []).length;
+
+            const colors = (content.match(/#[0-9a-fA-F]{3,6}\b/g) || []);
+            const uniqueColors = [...new Set(colors)].slice(0, 8);
+
+            return {
+                lines,
+                size: size + ' KB',
+                classes: uniqueClasses.length,
+                variables: uniqueVars.length,
+                mediaQueries,
+                keyframes,
+                imports,
+                topClasses: uniqueClasses.slice(0, 5),
+                topVariables: uniqueVars.slice(0, 5),
+                colorPalette: uniqueColors
+            };
+        }
+
+        function analyzeJS(content, lines, size) {
+            const functions = (content.match(/function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
+            const functionNames = functions.map(f => f.replace('function ', '')).slice(0, 10);
+
+            const arrowFunctions = (content.match(/const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g) || []);
+            const constNames = arrowFunctions.map(f => f.replace(/const\s+/, '').replace(/\s*=$/, '')).slice(0, 10);
+
+            const classes = (content.match(/class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || []);
+            const classNames = classes.map(c => c.replace('class ', ''));
+
+            const imports = (content.match(/import\s+.*?from\s+['"].*?['"]/g) || []).length;
+            const exports = (content.match(/export\s+(default\s+)?(class|function|const)/g) || []).length;
+
+            const eventListeners = (content.match(/addEventListener/g) || []).length;
+            const fetches = (content.match(/fetch\(/g) || []).length;
+            const asyncFunctions = (content.match(/async\s+function/g) || []).length;
+
+            const hasFirebase = content.includes('firebase');
+            const hasStripe = content.includes('stripe') || content.includes('Stripe');
+            const hasCharts = content.includes('Chart') || content.includes('Highcharts');
+
+            return {
+                lines,
+                size: size + ' KB',
+                functions: functionNames.length + constNames.length,
+                classes: classNames.length,
+                imports,
+                exports,
+                eventListeners,
+                apiCalls: fetches,
+                asyncFunctions,
+                topFunctions: [...functionNames, ...constNames].slice(0, 8),
+                topClasses: classNames,
+                integrations: {
+                    firebase: hasFirebase,
+                    stripe: hasStripe,
+                    charts: hasCharts
+                }
+            };
+        }
+
         function generateArchitecture(files) {
             const htmlFiles = files.filter(f => f.name.endsWith('.html'));
             const cssFiles = files.filter(f => f.name.endsWith('.css'));
             const jsFiles = files.filter(f => f.name.endsWith('.js'));
+            const otherFiles = files.filter(f => !f.name.match(/\.(html|css|js)$/));
 
             statsData = {
                 html: htmlFiles.length,
@@ -255,7 +510,7 @@
                 total: files.length
             };
 
-            // Générer les statistiques
+            // Statistiques
             const statsHtml = `
                 <div class="stat-card">
                     <div class="stat-value">${htmlFiles.length}</div>
@@ -276,11 +531,11 @@
             `;
             document.getElementById('stats').innerHTML = statsHtml;
 
-            // Générer le texte d'architecture
+            // Rapport complet
             architectureData = `
 ╔════════════════════════════════════════════════════════════════════╗
-║           ALPHAVAULT AI - ARCHITECTURE EXPORT                      ║
-║           Generated: ${new Date().toLocaleString()}                ║
+║        ALPHAVAULT AI - COMPLETE ARCHITECTURE ANALYSIS              ║
+║        Generated: ${new Date().toLocaleString()}                   ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 📊 GLOBAL STATISTICS
@@ -289,31 +544,85 @@
 • HTML Pages: ${htmlFiles.length}
 • CSS Files: ${cssFiles.length}
 • JavaScript Files: ${jsFiles.length}
+• Other Files: ${otherFiles.length}
 • Total Files: ${files.length}
+• Total Size: ${(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB
 
 📁 PROJECT STRUCTURE
 ═══════════════════════════════════════════════════════════════════
 
 ${generateTree(files)}
 
-📄 HTML PAGES (${htmlFiles.length})
+${generateDetailedSection('HTML PAGES', htmlFiles)}
+
+${generateDetailedSection('CSS FILES', cssFiles)}
+
+${generateDetailedSection('JAVASCRIPT FILES', jsFiles)}
+
+${otherFiles.length > 0 ? `
+📦 OTHER FILES (${otherFiles.length})
 ═══════════════════════════════════════════════════════════════════
 
-${htmlFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed(2)} KB`).join('\n\n')}
+${otherFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed(2)} KB`).join('\n\n')}
+` : ''}
 
-🎨 CSS FILES (${cssFiles.length})
 ═══════════════════════════════════════════════════════════════════
-
-${cssFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed(2)} KB`).join('\n\n')}
-
-📜 JAVASCRIPT FILES (${jsFiles.length})
+End of Report
 ═══════════════════════════════════════════════════════════════════
-
-${jsFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed(2)} KB`).join('\n\n')}
-
 `;
 
             document.getElementById('output').textContent = architectureData;
+        }
+
+        function generateDetailedSection(title, files) {
+            if (files.length === 0) return '';
+
+            let section = `\n📄 ${title} (${files.length})\n`;
+            section += '═══════════════════════════════════════════════════════════════════\n\n';
+
+            files.forEach((file, index) => {
+                section += `${index + 1}. ${file.path}\n`;
+                section += `   Size: ${(file.size / 1024).toFixed(2)} KB\n`;
+
+                if (file.analysis) {
+                    const a = file.analysis;
+
+                    if (file.name.endsWith('.html')) {
+                        section += `   Title: ${a.title}\n`;
+                        section += `   Lines: ${a.lines}\n`;
+                        if (a.description) section += `   Description: ${a.description}\n`;
+                        if (a.scripts && a.scripts.length) section += `   Scripts: ${a.scripts.join(', ')}\n`;
+                        if (a.stylesheets && a.stylesheets.length) section += `   Stylesheets: ${a.stylesheets.join(', ')}\n`;
+                        if (a.components) section += `   Components: ${a.components.forms} forms, ${a.components.buttons} buttons, ${a.components.sections} sections\n`;
+                    }
+
+                    if (file.name.endsWith('.css')) {
+                        section += `   Lines: ${a.lines}\n`;
+                        section += `   Classes: ${a.classes} | Variables: ${a.variables}\n`;
+                        section += `   Media Queries: ${a.mediaQueries} | Keyframes: ${a.keyframes}\n`;
+                        if (a.topClasses && a.topClasses.length) section += `   Top Classes: ${a.topClasses.join(', ')}\n`;
+                        if (a.colorPalette && a.colorPalette.length) section += `   Color Palette: ${a.colorPalette.join(', ')}\n`;
+                    }
+
+                    if (file.name.endsWith('.js')) {
+                        section += `   Lines: ${a.lines}\n`;
+                        section += `   Functions: ${a.functions} | Classes: ${a.classes}\n`;
+                        section += `   Event Listeners: ${a.eventListeners} | API Calls: ${a.apiCalls} | Async: ${a.asyncFunctions}\n`;
+                        if (a.topFunctions && a.topFunctions.length) section += `   Top Functions: ${a.topFunctions.join(', ')}\n`;
+                        if (a.integrations) {
+                            const integs = [];
+                            if (a.integrations.firebase) integs.push('Firebase');
+                            if (a.integrations.stripe) integs.push('Stripe');
+                            if (a.integrations.charts) integs.push('Charts');
+                            if (integs.length) section += `   Integrations: ${integs.join(', ')}\n`;
+                        }
+                    }
+                }
+
+                section += '\n';
+            });
+
+            return section;
         }
 
         function generateTree(files) {
@@ -356,15 +665,17 @@ ${jsFiles.map((f, i) => `${i + 1}. ${f.path}\n   Size: ${(f.size / 1024).toFixed
         }
 
         function downloadArchitecture() {
-            const blob = new Blob([architectureData], { type: 'text/plain' });
+            const blob = new Blob([architectureData], { type: 'text/plain;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'alphavault-architecture.txt';
+            a.download = `alphavault-architecture-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+
+            alert('✅ Architecture report downloaded successfully!\n\nYou can now send this file to HTML Pro.');
         }
     </script>
 </body>
