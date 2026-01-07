@@ -1673,7 +1673,7 @@
         }
     </script>
 
-    <!-- ⭐ CLOUDFLARE WORKERS EXTRACTOR SCRIPT (CORRIGÉ) -->
+    <!-- ⭐ CLOUDFLARE WORKERS EXTRACTOR SCRIPT (AVEC CODE SOURCE COMPLET) -->
     <script>
         let cloudflareReportData = null;
         let cloudflareFormattedReport = '';
@@ -1743,7 +1743,7 @@
         function generateCloudflareReport() {
             cloudflareFormattedReport = `
     ╔════════════════════════════════════════════════════════════════════╗
-    ║          CLOUDFLARE WORKERS - INFRASTRUCTURE REPORT                ║
+    ║          CLOUDFLARE WORKERS - COMPLETE CODE EXTRACTION             ║
     ║          Generated: ${new Date(cloudflareReportData.generated).toLocaleString()}                 ║
     ╚════════════════════════════════════════════════════════════════════╝
 
@@ -1762,10 +1762,10 @@
     • Active Routes: ${cloudflareReportData.stats.totalRoutes}
     • Total Lines of Code: ${cloudflareReportData.stats.totalLinesOfCode.toLocaleString()}
 
-    ☁ CLOUDFLARE WORKERS INVENTORY (${cloudflareReportData.workers.length})
+    ☁ CLOUDFLARE WORKERS - COMPLETE SOURCE CODE (${cloudflareReportData.workers.length})
     ═══════════════════════════════════════════════════════════════════
 
-    ${cloudflareReportData.workers.map((worker, index) => generateCloudflareWorkerSummary(worker, index + 1)).join('\n')}
+    ${cloudflareReportData.workers.map((worker, index) => generateCloudflareWorkerSummary(worker, index + 1)).join('\n\n')}
 
     🗄 KV NAMESPACES (${cloudflareReportData.kvNamespaces.length})
     ═══════════════════════════════════════════════════════════════════
@@ -1773,7 +1773,7 @@
     ${cloudflareReportData.kvNamespaces.map((ns, index) => generateKVNamespaceSummary(ns, index + 1)).join('\n')}
 
     ═══════════════════════════════════════════════════════════════════
-    End of Cloudflare Workers Infrastructure Report
+    End of Cloudflare Workers Complete Extraction Report
     ═══════════════════════════════════════════════════════════════════
     `;
 
@@ -1784,6 +1784,7 @@
             let section = `${index}. ${worker.id || 'Unknown Worker'}\n`;
             section += `   ════════════════════════════════════════════════════════════════\n`;
             
+            // METADATA
             if (worker.metadata) {
                 section += `   📅 Created: ${worker.metadata.created_on ? new Date(worker.metadata.created_on).toLocaleDateString() : 'N/A'}\n`;
                 section += `   📅 Last Modified: ${worker.metadata.modified_on ? new Date(worker.metadata.modified_on).toLocaleDateString() : 'N/A'}\n`;
@@ -1792,6 +1793,7 @@
                 }
             }
 
+            // CODE METRICS
             if (worker.script && worker.script.analysis) {
                 const a = worker.script.analysis;
                 section += `\n   📊 CODE METRICS:\n`;
@@ -1826,6 +1828,7 @@
                     section += `\n   🔗 INTEGRATIONS: ${integrations.join(', ')}\n`;
                 }
 
+                // DETECTED PURPOSE
                 const workerName = (worker.id || '').toLowerCase();
                 let detectedPurpose = 'General serverless function';
                 
@@ -1857,6 +1860,7 @@
                 }
             }
 
+            // BINDINGS & ENVIRONMENT
             if (worker.bindings && worker.bindings.result && worker.bindings.result.bindings) {
                 const bindings = worker.bindings.result.bindings;
                 section += `\n   🔐 BINDINGS & ENVIRONMENT (${bindings.length}):\n`;
@@ -1891,6 +1895,7 @@
                 });
             }
 
+            // CONFIGURATION
             if (worker.bindings && worker.bindings.result) {
                 const config = worker.bindings.result;
                 if (config.compatibility_date || config.compatibility_flags) {
@@ -1904,6 +1909,7 @@
                 }
             }
 
+            // ROUTES
             if (worker.routes && Array.isArray(worker.routes) && worker.routes.length > 0) {
                 section += `\n   🌐 ACTIVE ROUTES (${worker.routes.length}):\n`;
                 worker.routes.forEach((route, idx) => {
@@ -1916,12 +1922,31 @@
                 section += `\n   🌐 ROUTES: None (Not bound to any domain)\n`;
             }
 
-            section += `\n`;
+            // ✅ FULL SOURCE CODE (NOUVELLE SECTION)
+            if (worker.script && worker.script.code) {
+                section += `\n   ═══════════════════════════════════════════════════════════════\n`;
+                section += `   📝 FULL WORKER SOURCE CODE\n`;
+                section += `   ═══════════════════════════════════════════════════════════════\n\n`;
+                
+                // Format the code with proper indentation for readability
+                const codeLines = worker.script.code.split('\n');
+                codeLines.forEach(line => {
+                    section += `   ${line}\n`;
+                });
+                
+                section += `\n   ═══════════════════════════════════════════════════════════════\n`;
+                section += `   END OF ${worker.id} SOURCE CODE\n`;
+                section += `   ═══════════════════════════════════════════════════════════════\n`;
+            } else if (worker.script && worker.script.error) {
+                section += `\n   ⚠ CODE EXTRACTION ERROR: ${worker.script.error}\n`;
+            } else {
+                section += `\n   ⚠ NO SOURCE CODE AVAILABLE (Worker may be Service Worker or Module Worker)\n`;
+            }
+
             return section;
         }
 
         function generateKVNamespaceSummary(ns, index) {
-            // ✅ FIX: Protection contre ns.title undefined
             const title = ns.title || ns.id || 'Unknown Namespace';
             const nsId = ns.id || 'N/A';
             
@@ -1932,7 +1957,6 @@
                 section += `   ├─ URL Encoding: ${ns.supports_url_encoding ? 'Supported' : 'Not supported'}\n`;
             }
             
-            // ✅ FIX: Protection contre toLowerCase() sur undefined
             const nameL = (ns.title || '').toLowerCase();
             let purpose = 'General key-value storage';
             
@@ -1962,13 +1986,13 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `cloudflare-workers-report-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `cloudflare-workers-complete-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            alert('✅ Cloudflare Workers report downloaded successfully!\n\n⚠ Remember to delete the temporary worker for security.');
+            alert('✅ Cloudflare Workers complete report downloaded!\n\n📝 This report includes:\n• All worker source code\n• Bindings & environment variables\n• Routes & configurations\n• KV namespaces\n\n⚠ Remember to delete the temporary worker for security.');
         }
     </script>
 
