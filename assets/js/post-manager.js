@@ -850,7 +850,6 @@ class PostManager {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('Target user ID:', userId);
             console.log('Current user ID:', this.currentUser?.uid);
-            console.log('Current user email:', this.currentUser?.email);
             
             this.closeShareMessageModal();
 
@@ -892,67 +891,50 @@ class PostManager {
             console.log('📋 Conversation ID:', conversationId);
             console.log('📋 Participants:', participants);
             
-            // ✅ VÉRIFIER SI LA CONVERSATION EXISTE
-            console.log('🔍 Checking if conversation exists...');
-            const conversationDoc = await conversationRef.get();
-            console.log('✅ Check complete. Exists:', conversationDoc.exists);
+            // ✅ CRÉER OU METTRE À JOUR LA CONVERSATION (sans vérifier l'existence)
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🔄 CREATING/UPDATING CONVERSATION');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            const currentUserData = {
+                displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
+                photoURL: this.currentUser.photoURL || null,
+                email: this.currentUser.email || null,
+                plan: window.currentUserData?.plan || 'free'
+            };
 
-            if (!conversationDoc.exists) {
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                console.log('🆕 CREATING NEW CONVERSATION');
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                
-                const currentUserData = {
-                    displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
-                    photoURL: this.currentUser.photoURL || null,
-                    email: this.currentUser.email || null,
-                    plan: window.currentUserData?.plan || 'free'
-                };
+            const conversationData = {
+                type: 'private',
+                participants: participants,
+                participantsData: {
+                    [this.currentUser.uid]: currentUserData,
+                    [userId]: {
+                        displayName: userData.displayName || 'User',
+                        photoURL: userData.photoURL || null,
+                        email: userData.email || null,
+                        plan: userData.plan || 'free'
+                    }
+                },
+                lastMessage: { 
+                    text: `📌 Shared: "${postData.title}"`, 
+                    senderId: this.currentUser.uid 
+                },
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
+            };
 
-                const conversationData = {
-                    type: 'private',
-                    participants: participants,
-                    participantsData: {
-                        [this.currentUser.uid]: currentUserData,
-                        [userId]: {
-                            displayName: userData.displayName || 'User',
-                            photoURL: userData.photoURL || null,
-                            email: userData.email || null,
-                            plan: userData.plan || 'free'
-                        }
-                    },
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastMessage: { 
-                        text: `📌 Shared: "${postData.title}"`, 
-                        senderId: this.currentUser.uid 
-                    },
-                    unreadCount: { 
-                        [this.currentUser.uid]: 0, 
-                        [userId]: 1 
-                    },
-                    deletedBy: []
-                };
-
-                console.log('📦 Conversation data:', JSON.stringify(conversationData, null, 2));
-                console.log('🔄 Attempting to create conversation...');
-
-                try {
-                    await conversationRef.set(conversationData);
-                    console.log('✅ CONVERSATION CREATED SUCCESSFULLY');
-                } catch (convError) {
-                    console.error('❌ CONVERSATION CREATION FAILED');
-                    console.error('Error code:', convError.code);
-                    console.error('Error message:', convError.message);
-                    console.error('Full error:', convError);
-                    throw convError;
-                }
-                
-                console.log('⏳ Waiting 200ms for indexing...');
-                await new Promise(resolve => setTimeout(resolve, 200));
-            } else {
-                console.log('ℹ Conversation already exists, skipping creation');
+            // ✅ UTILISER set() AVEC merge: true (crée si n'existe pas, met à jour sinon)
+            try {
+                await conversationRef.set(conversationData, { merge: true });
+                console.log('✅ CONVERSATION CREATED/UPDATED');
+            } catch (convError) {
+                console.error('❌ CONVERSATION OPERATION FAILED');
+                console.error('Error:', convError.code, convError.message);
+                throw convError;
             }
+
+            // ⏳ Attendre un peu pour l'indexation
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             // ✅ CRÉER LE MESSAGE
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -968,45 +950,13 @@ class PostManager {
                 attachments: []
             };
 
-            console.log('📦 Message data:', JSON.stringify({
-                type: messageData.type,
-                text: messageData.text,
-                senderId: messageData.senderId
-            }, null, 2));
-            console.log('🔄 Attempting to create message...');
-
             try {
                 await conversationRef.collection('messages').add(messageData);
                 console.log('✅ MESSAGE CREATED SUCCESSFULLY');
             } catch (msgError) {
                 console.error('❌ MESSAGE CREATION FAILED');
-                console.error('Error code:', msgError.code);
-                console.error('Error message:', msgError.message);
-                console.error('Full error:', msgError);
+                console.error('Error:', msgError.code, msgError.message);
                 throw msgError;
-            }
-
-            // ✅ METTRE À JOUR LA CONVERSATION
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🔄 UPDATING CONVERSATION');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-            try {
-                await conversationRef.update({
-                    lastMessage: { 
-                        text: `📌 Shared: "${postData.title}"`, 
-                        senderId: this.currentUser.uid 
-                    },
-                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
-                });
-                console.log('✅ CONVERSATION UPDATED SUCCESSFULLY');
-            } catch (updateError) {
-                console.error('❌ CONVERSATION UPDATE FAILED');
-                console.error('Error code:', updateError.code);
-                console.error('Error message:', updateError.message);
-                console.error('Full error:', updateError);
-                // Ne pas throw ici car le message est déjà créé
             }
 
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -1030,11 +980,7 @@ class PostManager {
             console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.error('❌ CRITICAL ERROR IN POST SHARE');
             console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.error('Error name:', error.name);
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
-            console.error('Full error object:', error);
-            console.error('Stack trace:', error.stack);
+            console.error('Error:', error.code, error.message);
             alert('Failed to send post: ' + (error.message || 'Unknown error'));
         }
     }
