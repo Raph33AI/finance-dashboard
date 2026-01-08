@@ -878,13 +878,19 @@ class PostManager {
                 url: window.location.href
             };
 
+            const db = firebase.firestore();
             const participants = [this.currentUser.uid, userId].sort();
             const conversationId = participants.join('_');
-            const db = firebase.firestore();
             const conversationRef = db.collection('conversations').doc(conversationId);
+            
+            // ✅ VÉRIFIER SI LA CONVERSATION EXISTE
             const conversationDoc = await conversationRef.get();
 
             if (!conversationDoc.exists) {
+                // ✅ NOUVELLE CONVERSATION : UTILISER UN BATCH WRITE
+                console.log('🆕 Creating new conversation with batch write...');
+                
+                const batch = db.batch();
                 const currentUserData = {
                     displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
                     photoURL: this.currentUser.photoURL || null,
@@ -892,7 +898,8 @@ class PostManager {
                     plan: window.currentUserData?.plan || 'free'
                 };
 
-                await conversationRef.set({
+                // 1⃣ Créer la conversation
+                batch.set(conversationRef, {
                     type: 'private',
                     participants: participants,
                     participantsData: {
@@ -906,39 +913,75 @@ class PostManager {
                     },
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastMessage: { text: `📌 Shared: "${postData.title}"`, senderId: this.currentUser.uid },
-                    unreadCount: { [this.currentUser.uid]: 0, [userId]: 1 },
+                    lastMessage: { 
+                        text: `📌 Shared: "${postData.title}"`, 
+                        senderId: this.currentUser.uid 
+                    },
+                    unreadCount: { 
+                        [this.currentUser.uid]: 0, 
+                        [userId]: 1 
+                    },
                     deletedBy: []
                 });
+
+                // 2⃣ Créer le message (utiliser un ID généré pour le batch)
+                const messageRef = conversationRef.collection('messages').doc();
+                batch.set(messageRef, {
+                    type: 'shared_post',
+                    text: `📌 Shared a post: "${postData.title}"`,
+                    senderId: this.currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sharedPost: postData,
+                    attachments: []
+                });
+
+                // ✅ EXÉCUTER LE BATCH
+                await batch.commit();
+                console.log('✅ Conversation and message created successfully (batch)');
+
+            } else {
+                // ✅ CONVERSATION EXISTANTE : AJOUTER LE MESSAGE NORMALEMENT
+                console.log('📝 Adding message to existing conversation...');
+                
+                const messageData = {
+                    type: 'shared_post',
+                    text: `📌 Shared a post: "${postData.title}"`,
+                    senderId: this.currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sharedPost: postData,
+                    attachments: []
+                };
+
+                await conversationRef.collection('messages').add(messageData);
+                
+                await conversationRef.update({
+                    lastMessage: { 
+                        text: `📌 Shared: "${postData.title}"`, 
+                        senderId: this.currentUser.uid 
+                    },
+                    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
+                });
+                
+                console.log('✅ Message added to existing conversation');
             }
-
-            const messageData = {
-                type: 'shared_post',
-                text: `📌 Shared a post: "${postData.title}"`,
-                senderId: this.currentUser.uid,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                sharedPost: postData,
-                attachments: []
-            };
-
-            await conversationRef.collection('messages').add(messageData);
-            await conversationRef.update({
-                lastMessage: { text: `📌 Shared: "${postData.title}"`, senderId: this.currentUser.uid },
-                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-                [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
-            });
 
             this.showSuccessNotification(`Post shared with ${userData.displayName || 'user'}!`);
 
             setTimeout(() => {
                 if (confirm('Post sent successfully! Go to messages?')) {
-                    sessionStorage.setItem('openChat', JSON.stringify({ userId, userData, timestamp: Date.now() }));
+                    sessionStorage.setItem('openChat', JSON.stringify({ 
+                        userId, 
+                        userData, 
+                        timestamp: Date.now() 
+                    }));
                     window.location.href = 'messages.html';
                 }
             }, 1500);
 
         } catch (error) {
             console.error('❌ Error sending post:', error);
+            console.error('Error details:', error.code, error.message);
             alert('Failed to send post: ' + (error.message || 'Unknown error'));
         }
     }
@@ -981,6 +1024,20 @@ class PostManager {
             const db = firebase.firestore();
             const groupRef = db.collection('conversations').doc(groupId);
 
+            // ✅ VÉRIFIER QUE L'UTILISATEUR EST BIEN PARTICIPANT
+            const groupDoc = await groupRef.get();
+            
+            if (!groupDoc.exists) {
+                throw new Error('Group not found');
+            }
+
+            const groupParticipants = groupDoc.data().participants || [];
+            
+            if (!groupParticipants.includes(this.currentUser.uid)) {
+                throw new Error('You are not a member of this group');
+            }
+
+            // ✅ CRÉER LE MESSAGE
             const messageData = {
                 type: 'shared_post',
                 text: `📌 Shared a post: "${postData.title}"`,
@@ -992,18 +1049,24 @@ class PostManager {
 
             await groupRef.collection('messages').add(messageData);
 
+            // ✅ METTRE À JOUR LA CONVERSATION
             const updateData = {
-                lastMessage: { text: `📌 Shared: "${postData.title}"`, senderId: this.currentUser.uid },
+                lastMessage: { 
+                    text: `📌 Shared: "${postData.title}"`, 
+                    senderId: this.currentUser.uid 
+                },
                 lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            groupData.participants.forEach(userId => {
+            groupParticipants.forEach(userId => {
                 if (userId !== this.currentUser.uid) {
                     updateData[`unreadCount.${userId}`] = firebase.firestore.FieldValue.increment(1);
                 }
             });
 
             await groupRef.update(updateData);
+
+            console.log('✅ Post shared to group successfully');
 
             this.showSuccessNotification(`Post shared to ${groupData.name || 'group'}!`);
 
@@ -1015,6 +1078,7 @@ class PostManager {
 
         } catch (error) {
             console.error('❌ Error sending post to group:', error);
+            console.error('Error details:', error.code, error.message);
             alert('Failed to send post to group: ' + (error.message || 'Unknown error'));
         }
     }
