@@ -11,7 +11,7 @@ const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0
 
 console.log('🔧 Checkout configuration:');
 console.log('   Stripe Public Key:', STRIPE_PUBLIC_KEY.substring(0, 20) + '...');
-console.log('   Worker URL:', WORKER_URL);
+// console.log('   Worker URL:', WORKER_URL);
 
 // ═══════════════════════════════════════════════════════════════
 // 🎁 CODES PROMO DISPONIBLES (côté client pour validation immédiate)
@@ -630,7 +630,7 @@ form.addEventListener('submit', async (event) => {
         }
         
         console.log('3⃣ Appel du Cloudflare Worker...');
-        console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
+        // console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
         
         const requestBody = {
             plan: selectedPlan.name,
@@ -644,13 +644,13 @@ form.addEventListener('submit', async (event) => {
         
         console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-        });
+        // const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(requestBody),
+        // });
         
         console.log('   📥 Réponse reçue - Status:', response.status);
         
