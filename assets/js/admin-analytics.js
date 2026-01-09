@@ -7451,6 +7451,44 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
+    // 🔄 FORCE UPDATE SIGNATURES (À APPELER UNE FOIS)
+    // ========================================
+
+    async forceUpdateSignatures() {
+        try {
+            console.log('🔄 FORCING signature update...');
+            
+            // 1. Récupérer les nouvelles signatures
+            const newSignatures = this.getDefaultSignatures();
+            
+            // 2. Supprimer toutes les anciennes signatures
+            const oldSignaturesSnapshot = await this.db.collection('email_signatures').get();
+            const batch = this.db.batch();
+            
+            oldSignaturesSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            await batch.commit();
+            console.log('✅ Old signatures deleted');
+            
+            // 3. Sauvegarder les nouvelles signatures
+            this.emailSignatures = newSignatures;
+            await this.saveAllSignaturesToFirestore();
+            
+            // 4. Rafraîchir l'affichage
+            this.displaySignaturePreviews();
+            
+            console.log('🎉 Signatures successfully updated!');
+            alert('✅ Signatures mises à jour avec succès !');
+            
+        } catch (error) {
+            console.error('❌ Error forcing signature update:', error);
+            alert('⚠ Erreur lors de la mise à jour : ' + error.message);
+        }
+    }
+
+    // ========================================
     // 🖼 IMAGE RESIZER FOR SIGNATURE EDITOR
     // ========================================
 
