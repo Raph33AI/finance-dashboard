@@ -6683,7 +6683,7 @@ class AdminAnalyticsPro {
     }
 
     // ========================================
-    // ✍ SIGNATURE MANAGEMENT - FIRESTORE
+    // ✍ SIGNATURE MANAGEMENT - FIRESTORE (ULTRA PRO EDITION)
     // ========================================
 
     async loadSignatures() {
@@ -6731,59 +6731,385 @@ class AdminAnalyticsPro {
         }
     }
 
+    // ========================================
+    // 🎨 DEFAULT SIGNATURES (ULTRA PREMIUM)
+    // ========================================
+
     getDefaultSignatures() {
-        const baseSignature = `
+        return {
+            'newsletter@alphavault-ai.com': this.getNewsletterSignature('newsletter@alphavault-ai.com'),
+            'raphael.nardone@alphavault-ai.com': this.getRaphaelSignature(),
+            'contact@alphavault-ai.com': this.getContactSignature('contact@alphavault-ai.com'),
+            'info@alphavault-ai.com': this.getInfoSignature('info@alphavault-ai.com'),
+            'support@alphavault-ai.com': this.getSupportSignature('support@alphavault-ai.com'),
+            'raphnardone@gmail.com': this.getPersonalSignature('raphnardone@gmail.com')
+        };
+    }
+
+    // ========================================
+    // 🌟 SIGNATURE 1: EXECUTIVE PREMIUM (Raphaël)
+    // ========================================
+
+    getRaphaelSignature() {
+        return `
             <br><br>
-            <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px; line-height: 1.8;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">AV</div>
-                    <div>
-                        <strong style="color: #667eea; font-size: 16px;">AlphaVault AI</strong><br>
-                        <span style="color: #64748b; font-size: 13px;">Premium Financial Intelligence</span>
-                    </div>
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; line-height: 1.6; max-width: 600px;">
+                <tr>
+                    <td style="padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <!-- Photo Profile -->
+                                <td style="width: 90px; vertical-align: top; padding-right: 20px;">
+                                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 3px solid rgba(255,255,255,0.9);">
+                                        <span style="font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">RN</span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Infos -->
+                                <td style="vertical-align: top; color: #ffffff;">
+                                    <div style="margin-bottom: 8px;">
+                                        <strong style="font-size: 20px; font-weight: 700; letter-spacing: 0.5px; color: #ffffff;">Raphaël Nardone</strong>
+                                    </div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.9); margin-bottom: 14px; font-weight: 600;">
+                                        Founder & CEO | AlphaVault AI
+                                    </div>
+                                    
+                                    <!-- Contact Info avec icônes -->
+                                    <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: rgba(255,255,255,0.95);">
+                                        <tr>
+                                            <td style="padding: 3px 0;">
+                                                <span style="display: inline-block; width: 18px;">📧</span>
+                                                <a href="mailto:raphael.nardone@alphavault-ai.com" style="color: #ffffff; text-decoration: none; font-weight: 500;">raphael.nardone@alphavault-ai.com</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;">
+                                                <span style="display: inline-block; width: 18px;">📱</span>
+                                                <span style="font-weight: 500;">+33 (0)X XX XX XX XX</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;">
+                                                <span style="display: inline-block; width: 18px;">🌐</span>
+                                                <a href="https://alphavault-ai.com" style="color: #ffffff; text-decoration: none; font-weight: 600;">alphavault-ai.com</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <!-- Social Links -->
+                                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.3);">
+                                        <table cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <!-- LinkedIn -->
+                                                <td style="padding-right: 12px;">
+                                                    <a href="https://linkedin.com/in/raphael-nardone" style="display: inline-block; text-decoration: none;">
+                                                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; text-align: center; line-height: 32px; backdrop-filter: blur(10px);">
+                                                            <span style="color: #ffffff; font-weight: 700; font-size: 14px;">in</span>
+                                                        </div>
+                                                    </a>
+                                                </td>
+                                                <!-- Twitter/X -->
+                                                <td style="padding-right: 12px;">
+                                                    <a href="https://twitter.com/alphavault_ai" style="display: inline-block; text-decoration: none;">
+                                                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; text-align: center; line-height: 32px; backdrop-filter: blur(10px);">
+                                                            <span style="color: #ffffff; font-weight: 700; font-size: 14px;">𝕏</span>
+                                                        </div>
+                                                    </a>
+                                                </td>
+                                                <!-- GitHub -->
+                                                <td>
+                                                    <a href="https://github.com/alphavault-ai" style="display: inline-block; text-decoration: none;">
+                                                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; text-align: center; line-height: 32px; backdrop-filter: blur(10px);">
+                                                            <span style="color: #ffffff; font-weight: 700; font-size: 16px;">⚡</span>
+                                                        </div>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Tagline -->
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); text-align: center; color: rgba(255,255,255,0.95); font-size: 12px; font-style: italic; font-weight: 500;">
+                            🚀 Leading the future of AI-powered financial intelligence
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    // ========================================
+    // 💼 SIGNATURE 2: CORPORATE CLEAN (Newsletter)
+    // ========================================
+
+    getNewsletterSignature(email) {
+        return `
+            <br><br>
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px;">
+                <tr>
+                    <td style="padding: 20px; background: linear-gradient(to right, #f8fafc 0%, #ffffff 100%); border-left: 5px solid; border-image: linear-gradient(135deg, #667eea, #764ba2) 1; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <!-- Logo -->
+                                <td style="width: 70px; vertical-align: middle; padding-right: 18px;">
+                                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                                        <span style="color: #ffffff; font-weight: 900; font-size: 26px; letter-spacing: -1px;">AV</span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Content -->
+                                <td style="vertical-align: middle;">
+                                    <div style="margin-bottom: 6px;">
+                                        <strong style="font-size: 18px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800;">AlphaVault AI</strong>
+                                    </div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 10px; font-weight: 600;">
+                                        Premium Financial Intelligence Platform
+                                    </div>
+                                    
+                                    <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: #475569;">
+                                        <tr>
+                                            <td style="padding: 2px 0;">
+                                                <span style="color: #667eea;">📧</span> <a href="mailto:${email}" style="color: #1e293b; text-decoration: none; font-weight: 500;">${email}</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 2px 0;">
+                                                <span style="color: #667eea;">🌐</span> <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 2px 0;">
+                                                <span style="color: #667eea;">💎</span> <span style="font-size: 12px; color: #64748b;">Real-time Analysis | AI Predictions | Market Intelligence</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Social Footer -->
+                        <div style="margin-top: 16px; padding-top: 14px; border-top: 2px solid #e2e8f0; text-align: center;">
+                            <a href="https://linkedin.com/company/alphavault-ai" style="display: inline-block; margin: 0 6px; text-decoration: none;">
+                                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #0077b5, #00a0dc); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,119,181,0.3);">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 14px;">in</span>
+                                </div>
+                            </a>
+                            <a href="https://twitter.com/alphavault_ai" style="display: inline-block; margin: 0 6px; text-decoration: none;">
+                                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #1da1f2, #0d8bd9); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(29,161,242,0.3);">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 14px;">𝕏</span>
+                                </div>
+                            </a>
+                            <a href="https://github.com/alphavault-ai" style="display: inline-block; margin: 0 6px; text-decoration: none;">
+                                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #333333, #24292e); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(36,41,46,0.3);">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 16px;">⚡</span>
+                                </div>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    // ========================================
+    // 🎯 SIGNATURE 3: MINIMAL MODERN (Support)
+    // ========================================
+
+    getSupportSignature(email) {
+        return `
+            <br><br>
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px;">
+                <tr>
+                    <td>
+                        <div style="padding: 18px 24px; background: #ffffff; border: 2px solid transparent; background-clip: padding-box; position: relative; border-radius: 12px; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.12);">
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="margin-bottom: 12px;">
+                                            <span style="font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AlphaVault AI</span>
+                                            <span style="display: block; font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600;">Customer Support Team</span>
+                                        </div>
+                                        
+                                        <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: #1e293b; line-height: 1.8;">
+                                            <tr>
+                                                <td style="padding: 4px 0;">
+                                                    <span style="display: inline-block; width: 24px; text-align: center;">💬</span>
+                                                    <a href="mailto:${email}" style="color: #667eea; text-decoration: none; font-weight: 600;">${email}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 4px 0;">
+                                                    <span style="display: inline-block; width: 24px; text-align: center;">🌐</span>
+                                                    <a href="https://alphavault-ai.com/support" style="color: #667eea; text-decoration: none; font-weight: 600;">Help Center</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 4px 0;">
+                                                    <span style="display: inline-block; width: 24px; text-align: center;">⏱</span>
+                                                    <span style="color: #64748b; font-size: 12px;">24/7 Support Available</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center;">
+                                            <em>🚀 We're here to help you succeed with AlphaVault AI</em>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    // ========================================
+    // 📊 SIGNATURE 4: TECH GLASSMORPHISM (Info)
+    // ========================================
+
+    getInfoSignature(email) {
+        return `
+            <br><br>
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 560px;">
+                <tr>
+                    <td style="padding: 22px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%); border-radius: 16px; border: 1px solid rgba(102, 126, 234, 0.2); backdrop-filter: blur(10px);">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td style="vertical-align: top; width: 80px; padding-right: 20px;">
+                                    <!-- Animated Badge -->
+                                    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); background-size: 200% 200%; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 0 0 40px rgba(118, 75, 162, 0.2);">
+                                        <span style="color: #ffffff; font-weight: 900; font-size: 28px;">AV</span>
+                                    </div>
+                                </td>
+                                
+                                <td style="vertical-align: top;">
+                                    <div style="margin-bottom: 8px;">
+                                        <strong style="font-size: 20px; color: #1e293b; font-weight: 800;">AlphaVault AI</strong>
+                                        <div style="display: inline-block; margin-left: 8px; padding: 3px 10px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 20px; font-size: 10px; color: #ffffff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Premium</div>
+                                    </div>
+                                    
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 12px; font-weight: 600;">
+                                        AI-Powered Financial Intelligence
+                                    </div>
+                                    
+                                    <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: #475569;">
+                                        <tr>
+                                            <td style="padding: 3px 0;">
+                                                <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; text-align: center; line-height: 20px; margin-right: 8px;">📧</span>
+                                                <a href="mailto:${email}" style="color: #1e293b; text-decoration: none; font-weight: 600;">${email}</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;">
+                                                <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; text-align: center; line-height: 20px; margin-right: 8px;">🌐</span>
+                                                <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 700;">alphavault-ai.com</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <!-- Features Pills -->
+                                    <div style="margin-top: 12px;">
+                                        <span style="display: inline-block; padding: 4px 10px; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 20px; font-size: 11px; color: #667eea; font-weight: 600; margin-right: 6px; margin-bottom: 4px;">📊 Real-Time Data</span>
+                                        <span style="display: inline-block; padding: 4px 10px; background: rgba(118, 75, 162, 0.1); border: 1px solid rgba(118, 75, 162, 0.3); border-radius: 20px; font-size: 11px; color: #764ba2; font-weight: 600; margin-right: 6px; margin-bottom: 4px;">🤖 AI Predictions</span>
+                                        <span style="display: inline-block; padding: 4px 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; font-size: 11px; color: #10b981; font-weight: 600; margin-bottom: 4px;">💎 Premium Insights</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    // ========================================
+    // 🔥 SIGNATURE 5: COMPACT GRADIENT (Contact)
+    // ========================================
+
+    getContactSignature(email) {
+        return `
+            <br><br>
+            <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 480px;">
+                <tr>
+                    <td>
+                        <div style="padding: 16px 20px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);">
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td style="color: #ffffff;">
+                                        <div style="margin-bottom: 10px;">
+                                            <strong style="font-size: 19px; font-weight: 800; color: #ffffff; letter-spacing: 0.3px;">AlphaVault AI</strong>
+                                            <div style="font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 3px; font-weight: 500;">Contact & Business Inquiries</div>
+                                        </div>
+                                        
+                                        <table cellpadding="0" cellspacing="0" border="0" style="font-size: 13px; color: rgba(255,255,255,0.95); line-height: 1.7;">
+                                            <tr>
+                                                <td style="padding: 3px 0;">
+                                                    📧 <a href="mailto:${email}" style="color: #ffffff; text-decoration: none; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.5);">${email}</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 3px 0;">
+                                                    🌐 <a href="https://alphavault-ai.com" style="color: #ffffff; text-decoration: none; font-weight: 700;">alphavault-ai.com</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 3px 0;">
+                                                    💼 <span style="font-size: 12px; color: rgba(255,255,255,0.9);">Premium Financial Intelligence Platform</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Social Icons Inline -->
+                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.25);">
+                                            <a href="https://linkedin.com/company/alphavault-ai" style="display: inline-block; margin-right: 8px; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px);">
+                                                🔗 LinkedIn
+                                            </a>
+                                            <a href="https://twitter.com/alphavault_ai" style="display: inline-block; margin-right: 8px; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 8px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px);">
+                                                𝕏 Twitter
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    // ========================================
+    // 👤 SIGNATURE 6: PERSONAL MINIMAL (Gmail)
+    // ========================================
+
+    getPersonalSignature(email) {
+        return `
+            <br><br>
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #1e293b; max-width: 400px; padding: 16px; border-left: 4px solid; border-image: linear-gradient(to bottom, #667eea, #764ba2) 1;">
+                <div style="margin-bottom: 10px;">
+                    <strong style="font-size: 17px; color: #1e293b;">Raphaël Nardone</strong>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 3px;">AlphaVault AI</div>
                 </div>
-                <div style="color: #64748b; font-size: 13px;">
-                    📧 EMAIL_ADDRESS<br>
-                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a><br>
-                    💼 Real-time market analysis & AI-powered predictions
+                
+                <div style="font-size: 13px; color: #475569; line-height: 1.7;">
+                    📧 <a href="mailto:${email}" style="color: #667eea; text-decoration: none; font-weight: 600;">${email}</a><br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a>
+                </div>
+                
+                <div style="margin-top: 12px; font-size: 11px; color: #94a3b8; font-style: italic;">
+                    💡 Financial Intelligence Powered by AI
                 </div>
             </div>
         `;
-        
-        return {
-            'newsletter@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'newsletter@alphavault-ai.com'),
-            'raphael.nardone@alphavault-ai.com': `
-                <br><br>
-                <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 22px;">RN</div>
-                        <div>
-                            <strong style="color: #667eea; font-size: 17px;">Raphaël Nardone</strong><br>
-                            <span style="color: #64748b; font-size: 13px;">Founder & CEO - AlphaVault AI</span>
-                        </div>
-                    </div>
-                    <div style="color: #64748b; font-size: 13px; line-height: 1.8;">
-                        📧 raphael.nardone@alphavault-ai.com<br>
-                        📱 +33 (0)X XX XX XX XX<br>
-                        🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
-                        💼 Leading the future of AI-powered financial intelligence
-                    </div>
-                </div>
-            `,
-            'contact@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'contact@alphavault-ai.com'),
-            'info@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'info@alphavault-ai.com'),
-            'support@alphavault-ai.com': baseSignature.replace('EMAIL_ADDRESS', 'support@alphavault-ai.com'),
-            'raphnardone@gmail.com': `
-                <br><br>
-                <div style="border-top: 2px solid #667eea; padding-top: 12px; margin-top: 20px; color: #1e293b; font-size: 14px;">
-                    <strong>Raphaël Nardone</strong><br>
-                    <span style="color: #64748b;">AlphaVault AI</span><br>
-                    📧 raphnardone@gmail.com<br>
-                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a>
-                </div>
-            `
-        };
     }
+
+    // ========================================
+    // 💾 SAVE ALL SIGNATURES TO FIRESTORE
+    // ========================================
 
     async saveAllSignaturesToFirestore() {
         try {
@@ -6812,6 +7138,10 @@ class AdminAnalyticsPro {
         }
     }
 
+    // ========================================
+    // 💾 SAVE SINGLE SIGNATURE TO FIRESTORE
+    // ========================================
+
     async saveSignatureToFirestore(email, signatureHTML) {
         try {
             console.log(`💾 Saving signature to Firestore for: ${email}`);
@@ -6830,6 +7160,10 @@ class AdminAnalyticsPro {
             throw error;
         }
     }
+
+    // ========================================
+    // 👁 DISPLAY SIGNATURE PREVIEWS
+    // ========================================
 
     displaySignaturePreviews() {
         if (!this.emailSignatures) return;
@@ -6855,6 +7189,10 @@ class AdminAnalyticsPro {
         
         console.log('✅ Signature previews updated');
     }
+
+    // ========================================
+    // 🔓 OPEN SIGNATURE MODAL
+    // ========================================
 
     openSignatureModal() {
         const modal = document.getElementById('signature-editor-modal');
@@ -6890,6 +7228,10 @@ class AdminAnalyticsPro {
         console.log('✅ Signature modal opened');
     }
 
+    // ========================================
+    // 🔒 CLOSE SIGNATURE MODAL
+    // ========================================
+
     closeSignatureModal() {
         const modal = document.getElementById('signature-editor-modal');
         if (modal) {
@@ -6900,6 +7242,10 @@ class AdminAnalyticsPro {
             this.removeImageControls();
         }
     }
+
+    // ========================================
+    // 🔄 SWITCH SIGNATURE TAB
+    // ========================================
 
     switchSignatureTab(email) {
         this.currentSignatureEmail = email;
@@ -6919,6 +7265,10 @@ class AdminAnalyticsPro {
         console.log(`✅ Switched to signature: ${email}`);
     }
 
+    // ========================================
+    // 📥 LOAD SIGNATURE FOR EMAIL
+    // ========================================
+
     loadSignatureForEmail(email) {
         if (!this.signatureEditor || !this.emailSignatures) return;
         
@@ -6928,6 +7278,10 @@ class AdminAnalyticsPro {
         
         console.log(`✅ Signature loaded for: ${email}`);
     }
+
+    // ========================================
+    // 💾 SAVE CURRENT SIGNATURE
+    // ========================================
 
     async saveCurrentSignature() {
         if (!this.signatureEditor || !this.currentSignatureEmail) {
@@ -6954,6 +7308,10 @@ class AdminAnalyticsPro {
         }
     }
 
+    // ========================================
+    // 🗑 CLEAR CURRENT SIGNATURE
+    // ========================================
+
     clearCurrentSignature() {
         if (!this.signatureEditor) return;
         
@@ -6962,60 +7320,47 @@ class AdminAnalyticsPro {
         }
     }
 
+    // ========================================
+    // 🎨 APPLY SIGNATURE TEMPLATE
+    // ========================================
+
     applySignatureTemplate(templateName) {
         if (!this.signatureEditor || !this.currentSignatureEmail) return;
         
         const templates = {
-            minimal: `
+            minimal: this.getPersonalSignature(this.currentSignatureEmail),
+            
+            professional: this.getNewsletterSignature(this.currentSignatureEmail),
+            
+            corporate: this.getContactSignature(this.currentSignatureEmail),
+            
+            modern: this.getInfoSignature(this.currentSignatureEmail),
+            
+            executive: this.currentSignatureEmail.includes('raphael') ? 
+                this.getRaphaelSignature() : 
+                this.getNewsletterSignature(this.currentSignatureEmail),
+            
+            support: this.getSupportSignature(this.currentSignatureEmail),
+            
+            glassmorphism: `
                 <br><br>
-                <div style="color: #64748b; font-size: 14px;">
-                    <strong>AlphaVault AI</strong><br>
-                    ${this.currentSignatureEmail}<br>
-                    <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a>
-                </div>
-            `,
-            professional: `
-                <br><br>
-                <div style="border-left: 4px solid #667eea; padding-left: 12px; color: #1e293b; font-size: 14px;">
-                    <strong style="font-size: 16px;">AlphaVault AI</strong><br>
-                    <span style="color: #64748b;">Premium Financial Intelligence</span><br><br>
-                    📧 ${this.currentSignatureEmail}<br>
-                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a><br>
-                    📊 Real-time Market Analysis
-                </div>
-            `,
-            corporate: `
-                <br><br>
-                <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 14px; color: #1e293b;">
+                <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', sans-serif; max-width: 540px;">
                     <tr>
-                        <td style="padding-right: 20px; border-right: 2px solid #667eea;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 24px;">AV</div>
-                        </td>
-                        <td style="padding-left: 20px;">
-                            <strong style="font-size: 16px; color: #667eea;">AlphaVault AI</strong><br>
-                            <span style="color: #64748b; font-size: 13px;">Premium Financial Intelligence Platform</span><br><br>
-                            <span style="color: #64748b;">📧 ${this.currentSignatureEmail}</span><br>
-                            <span style="color: #64748b;">🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none;">alphavault-ai.com</a></span>
+                        <td style="padding: 24px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12)); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                            <div style="text-align: center; margin-bottom: 16px;">
+                                <div style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50px; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);">
+                                    <span style="color: #ffffff; font-weight: 900; font-size: 24px; letter-spacing: 1px;">AlphaVault AI</span>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; color: #1e293b; font-size: 14px; line-height: 2;">
+                                <strong style="font-size: 16px; color: #667eea;">${this.currentSignatureEmail}</strong><br>
+                                <a href="https://alphavault-ai.com" style="color: #764ba2; text-decoration: none; font-weight: 700;">alphavault-ai.com</a><br>
+                                <span style="font-size: 12px; color: #64748b;">🚀 AI Financial Intelligence • 📊 Real-Time Analysis • 💎 Premium Insights</span>
+                            </div>
                         </td>
                     </tr>
                 </table>
-            `,
-            modern: `
-                <br><br>
-                <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px;">AV</div>
-                        <div>
-                            <strong style="color: #667eea; font-size: 18px;">AlphaVault AI</strong><br>
-                            <span style="color: #64748b; font-size: 12px;">Financial Intelligence Redefined</span>
-                        </div>
-                    </div>
-                    <div style="color: #64748b; font-size: 13px; line-height: 1.8;">
-                        📧 ${this.currentSignatureEmail}<br>
-                        🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
-                        🚀 AI-Powered Market Predictions | 📊 Real-Time Analysis | 💎 Premium Insights
-                    </div>
-                </div>
             `
         };
         
@@ -7026,6 +7371,10 @@ class AdminAnalyticsPro {
             alert(`✅ Template "${templateName}" applied!`);
         }
     }
+
+    // ========================================
+    // 💉 INJECT SIGNATURE INTO EDITOR
+    // ========================================
 
     injectSignature(context = 'compose') {
         const fromSelect = document.getElementById(`${context}-from`);
@@ -7061,6 +7410,10 @@ class AdminAnalyticsPro {
         
         console.log(`✅ Signature injected for: ${fromEmail}`);
     }
+
+    // ========================================
+    // 🔄 SETUP FROM CHANGE LISTENERS
+    // ========================================
 
     setupFromChangeListeners() {
         const composeFrom = document.getElementById('compose-from');
