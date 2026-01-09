@@ -6696,7 +6696,7 @@ class AdminAnalyticsPro {
             }
             
             // ✨ AJOUT TEMPORAIRE : Force l'update (supprimer après)
-            const FORCE_UPDATE = true; // ⚠ Mettre à FALSE après la première exécution
+            const FORCE_UPDATE = false; // ⚠ Mettre à FALSE après la première exécution
             
             if (FORCE_UPDATE) {
                 console.warn('⚠ FORCE UPDATE MODE ENABLED - Updating all signatures...');
