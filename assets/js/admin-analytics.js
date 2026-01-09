@@ -6695,6 +6695,24 @@ class AdminAnalyticsPro {
                 loadingIndicator.style.display = 'block';
             }
             
+            // ✨ AJOUT TEMPORAIRE : Force l'update (supprimer après)
+            const FORCE_UPDATE = true; // ⚠ Mettre à FALSE après la première exécution
+            
+            if (FORCE_UPDATE) {
+                console.warn('⚠ FORCE UPDATE MODE ENABLED - Updating all signatures...');
+                this.emailSignatures = this.getDefaultSignatures();
+                await this.saveAllSignaturesToFirestore();
+                this.displaySignaturePreviews();
+                
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+                
+                alert('✅ Signatures forcées à jour ! Change FORCE_UPDATE à false maintenant.');
+                return;
+            }
+            // ✨ FIN AJOUT TEMPORAIRE
+            
             const signaturesSnapshot = await this.db.collection('email_signatures').get();
             
             if (signaturesSnapshot.empty) {
@@ -7448,44 +7466,6 @@ class AdminAnalyticsPro {
         }
         
         console.log('✅ FROM change listeners setup');
-    }
-
-    // ========================================
-    // 🔄 FORCE UPDATE SIGNATURES (À APPELER UNE FOIS)
-    // ========================================
-
-    async forceUpdateSignatures() {
-        try {
-            console.log('🔄 FORCING signature update...');
-            
-            // 1. Récupérer les nouvelles signatures
-            const newSignatures = this.getDefaultSignatures();
-            
-            // 2. Supprimer toutes les anciennes signatures
-            const oldSignaturesSnapshot = await this.db.collection('email_signatures').get();
-            const batch = this.db.batch();
-            
-            oldSignaturesSnapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            
-            await batch.commit();
-            console.log('✅ Old signatures deleted');
-            
-            // 3. Sauvegarder les nouvelles signatures
-            this.emailSignatures = newSignatures;
-            await this.saveAllSignaturesToFirestore();
-            
-            // 4. Rafraîchir l'affichage
-            this.displaySignaturePreviews();
-            
-            console.log('🎉 Signatures successfully updated!');
-            alert('✅ Signatures mises à jour avec succès !');
-            
-        } catch (error) {
-            console.error('❌ Error forcing signature update:', error);
-            alert('⚠ Erreur lors de la mise à jour : ' + error.message);
-        }
     }
 
     // ========================================
