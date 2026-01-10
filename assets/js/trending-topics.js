@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * TRENDING TOPICS DASHBOARD - Avec Tracking Entreprises/Pays
+ * TRENDING TOPICS DASHBOARD V2.0 - Avec Modal Détaillé
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -22,7 +22,7 @@ class TrendingTopicsDashboard {
     }
 
     async init() {
-        console.log('🔥 Initializing Trending Topics Dashboard...');
+        console.log('🔥 Initializing Trending Topics Dashboard V2.0...');
         
         if (document.readyState === 'loading') {
             await new Promise(resolve => {
@@ -30,6 +30,7 @@ class TrendingTopicsDashboard {
             });
         }
         
+        this.createModal();
         this.showLoadingState();
         
         await this.loadData();
@@ -37,6 +38,324 @@ class TrendingTopicsDashboard {
         this.hideLoadingState();
         
         this.renderDashboard();
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * CRÉATION DU MODAL
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    createModal() {
+        if (document.getElementById('companyModal')) return;
+        
+        const modal = document.createElement('div');
+        modal.id = 'companyModal';
+        modal.className = 'company-modal';
+        modal.innerHTML = `
+            <div class='modal-overlay'></div>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <div class='modal-title-wrapper'>
+                        <div class='modal-company-icon'>
+                            <i class='fas fa-building'></i>
+                        </div>
+                        <div>
+                            <h2 class='modal-company-name' id='modalCompanyName'></h2>
+                            <p class='modal-company-ticker' id='modalCompanyTicker'></p>
+                        </div>
+                    </div>
+                    <button class='modal-close' onclick='trendingDashboard.closeModal()'>
+                        <i class='fas fa-times'></i>
+                    </button>
+                </div>
+                
+                <div class='modal-sentiment-badge' id='modalSentimentBadge'></div>
+                
+                <div class='modal-actions'>
+                    <button class='modal-action-btn analyze' id='modalAnalyzeBtn'>
+                        <i class='fas fa-brain'></i>
+                        <span>Advanced Analysis</span>
+                    </button>
+                    <button class='modal-action-btn predict' id='modalPredictBtn'>
+                        <i class='fas fa-chart-line'></i>
+                        <span>Predict Trends</span>
+                    </button>
+                    <button class='modal-action-btn watchlist' id='modalWatchlistBtn'>
+                        <i class='fas fa-star'></i>
+                        <span>Add to Watchlist</span>
+                    </button>
+                </div>
+                
+                <div class='modal-stats'>
+                    <div class='modal-stat'>
+                        <i class='fas fa-newspaper'></i>
+                        <div>
+                            <span class='stat-label'>Mentions</span>
+                            <span class='stat-value' id='modalMentions'>0</span>
+                        </div>
+                    </div>
+                    <div class='modal-stat'>
+                        <i class='fas fa-smile'></i>
+                        <div>
+                            <span class='stat-label'>Positive</span>
+                            <span class='stat-value' id='modalPositive'>0</span>
+                        </div>
+                    </div>
+                    <div class='modal-stat'>
+                        <i class='fas fa-frown'></i>
+                        <div>
+                            <span class='stat-label'>Negative</span>
+                            <span class='stat-value' id='modalNegative'>0</span>
+                        </div>
+                    </div>
+                    <div class='modal-stat'>
+                        <i class='fas fa-chart-bar'></i>
+                        <div>
+                            <span class='stat-label'>Sentiment</span>
+                            <span class='stat-value' id='modalAvgSentiment'>0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='modal-section'>
+                    <h3 class='modal-section-title'>
+                        <i class='fas fa-list'></i> Recent Mentions
+                    </h3>
+                    <div class='modal-articles-list' id='modalArticlesList'></div>
+                </div>
+                
+                <div class='modal-footer'>
+                    <button class='modal-export-btn' onclick='trendingDashboard.exportCompanyData()'>
+                        <i class='fas fa-download'></i>
+                        Export as CSV
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close on overlay click
+        modal.querySelector('.modal-overlay').addEventListener('click', () => {
+            this.closeModal();
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                this.closeModal();
+            }
+        });
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * OUVRIR LE MODAL
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    openModal(companyData) {
+        console.log('🔍 Opening modal for:', companyData.name);
+        
+        const modal = document.getElementById('companyModal');
+        if (!modal) return;
+        
+        // Store current company data
+        this.currentCompany = companyData;
+        
+        // Populate modal
+        document.getElementById('modalCompanyName').textContent = companyData.name;
+        document.getElementById('modalCompanyTicker').textContent = `(${companyData.ticker})`;
+        document.getElementById('modalMentions').textContent = companyData.articles.length;
+        document.getElementById('modalPositive').textContent = companyData.positiveCount;
+        document.getElementById('modalNegative').textContent = companyData.negativeCount;
+        document.getElementById('modalAvgSentiment').textContent = companyData.avgSentiment > 0 ? `+${companyData.avgSentiment}` : companyData.avgSentiment;
+        
+        // Sentiment badge
+        const sentimentBadge = document.getElementById('modalSentimentBadge');
+        if (companyData.avgSentiment > 20) {
+            sentimentBadge.innerHTML = `<i class='fas fa-arrow-up'></i> <strong>High Opportunity</strong> - Strong positive sentiment detected`;
+            sentimentBadge.className = 'modal-sentiment-badge opportunity';
+        } else if (companyData.avgSentiment < -20) {
+            sentimentBadge.innerHTML = `<i class='fas fa-arrow-down'></i> <strong>High Risk</strong> - Strong negative sentiment detected`;
+            sentimentBadge.className = 'modal-sentiment-badge risk';
+        } else {
+            sentimentBadge.innerHTML = `<i class='fas fa-minus'></i> <strong>Neutral</strong> - Mixed sentiment`;
+            sentimentBadge.className = 'modal-sentiment-badge neutral';
+        }
+        
+        // Render articles
+        this.renderModalArticles(companyData.articles);
+        
+        // Setup action buttons
+        this.setupModalActions(companyData.ticker);
+        
+        // Show modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * AFFICHER LES ARTICLES DANS LE MODAL
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    renderModalArticles(articles) {
+        const container = document.getElementById('modalArticlesList');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Sort by timestamp (most recent first)
+        const sortedArticles = [...articles].sort((a, b) => b.timestamp - a.timestamp);
+        
+        sortedArticles.forEach(article => {
+            const sentiment = this.sentimentAnalyzer.analyze(article.title);
+            
+            const articleCard = document.createElement('div');
+            articleCard.className = 'modal-article-card';
+            
+            const sentimentClass = sentiment.sentiment === 'positive' ? 'positive' : 
+                                   sentiment.sentiment === 'negative' ? 'negative' : 'neutral';
+            
+            articleCard.innerHTML = `
+                <div class='article-sentiment-indicator ${sentimentClass}'></div>
+                <div class='article-content'>
+                    <div class='article-header'>
+                        <span class='article-source'>${article.source || 'Unknown Source'}</span>
+                        <span class='article-time'>${this.getTimeAgo(article.timestamp)}</span>
+                    </div>
+                    <h4 class='article-title'>${article.title}</h4>
+                    <div class='article-footer'>
+                        <div class='article-sentiment'>
+                            <i class='fas ${sentiment.sentiment === 'positive' ? 'fa-smile' : sentiment.sentiment === 'negative' ? 'fa-frown' : 'fa-meh'}'></i>
+                            <span>${sentiment.sentiment}</span>
+                            <span class='sentiment-score'>${sentiment.score > 0 ? '+' : ''}${sentiment.score}</span>
+                        </div>
+                        ${article.link ? `<a href='${article.link}' target='_blank' class='article-link'>
+                            <i class='fas fa-external-link-alt'></i> Read More
+                        </a>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(articleCard);
+        });
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * CONFIGURER LES BOUTONS D'ACTION
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    setupModalActions(ticker) {
+        // Analyze button
+        const analyzeBtn = document.getElementById('modalAnalyzeBtn');
+        analyzeBtn.onclick = () => {
+            window.location.href = `advanced-analysis.html?symbol=${ticker}`;
+        };
+        
+        // Predict button
+        const predictBtn = document.getElementById('modalPredictBtn');
+        predictBtn.onclick = () => {
+            window.location.href = `trend-prediction.html?symbol=${ticker}`;
+        };
+        
+        // Watchlist button
+        const watchlistBtn = document.getElementById('modalWatchlistBtn');
+        watchlistBtn.onclick = () => {
+            this.addToWatchlist(ticker);
+        };
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * AJOUTER À LA WATCHLIST (FIREBASE)
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    async addToWatchlist(ticker) {
+        try {
+            if (!firebase.auth().currentUser) {
+                this.showNotification('Please log in to use watchlist', 'warning');
+                return;
+            }
+            
+            const userId = firebase.auth().currentUser.uid;
+            const watchlistRef = firebase.firestore()
+                .collection('users')
+                .doc(userId)
+                .collection('watchlist')
+                .doc(ticker);
+            
+            await watchlistRef.set({
+                ticker: ticker,
+                name: this.currentCompany.name,
+                addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                source: 'trending-topics'
+            });
+            
+            this.showNotification(`${ticker} added to watchlist!`, 'success');
+            
+            // Update button
+            const btn = document.getElementById('modalWatchlistBtn');
+            btn.innerHTML = `<i class='fas fa-check'></i> <span>Added to Watchlist</span>`;
+            btn.disabled = true;
+            
+        } catch (error) {
+            console.error('Error adding to watchlist:', error);
+            this.showNotification('Failed to add to watchlist', 'error');
+        }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * EXPORT CSV
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    exportCompanyData() {
+        if (!this.currentCompany) return;
+        
+        const company = this.currentCompany;
+        
+        let csv = 'Date,Source,Title,Sentiment,Score\n';
+        
+        company.articles.forEach(article => {
+            const sentiment = this.sentimentAnalyzer.analyze(article.title);
+            const date = new Date(article.timestamp).toLocaleString();
+            const source = article.source || 'Unknown';
+            const title = `"${article.title.replace(/"/g, '""')}"`;
+            
+            csv += `${date},${source},${title},${sentiment.sentiment},${sentiment.score}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${company.ticker}_trending_analysis_${Date.now()}.csv`;
+        a.click();
+        
+        this.showNotification('CSV exported successfully!', 'success');
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * FERMER LE MODAL
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    closeModal() {
+        const modal = document.getElementById('companyModal');
+        if (!modal) return;
+        
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        this.currentCompany = null;
     }
 
     /**
@@ -402,8 +721,6 @@ class TrendingTopicsDashboard {
         this.createFearGreedTimeline(timeline);
     }
 
-    // ✅ AJOUTER CETTE MÉTHODE DANS LA CLASSE TrendingTopicsDashboard
-
     createFearGreedGauge(index) {
         const canvas = document.getElementById('fearGreedGauge');
         if (!canvas) {
@@ -417,26 +734,22 @@ class TrendingTopicsDashboard {
             this.charts.fearGauge.destroy();
         }
         
-        // ✅ Convertir le score (-100 à +100) en pourcentage (0 à 100)
         const percentage = ((index + 100) / 200) * 100;
         
-        // ✅ Couleurs adaptatives selon le Fear & Greed
         const getGradientColors = (index) => {
-            if (index > 50) return ['#10b981', '#059669', '#047857'];       // Extreme Greed (Vert)
-            if (index > 0) return ['#3b82f6', '#2563eb', '#1d4ed8'];        // Greed (Bleu)
-            if (index > -50) return ['#f59e0b', '#ea580c', '#dc2626'];      // Fear (Orange/Rouge)
-            return ['#ef4444', '#dc2626', '#b91c1c'];                       // Extreme Fear (Rouge)
+            if (index > 50) return ['#10b981', '#059669', '#047857'];
+            if (index > 0) return ['#3b82f6', '#2563eb', '#1d4ed8'];
+            if (index > -50) return ['#f59e0b', '#ea580c', '#dc2626'];
+            return ['#ef4444', '#dc2626', '#b91c1c'];
         };
         
         const colors = getGradientColors(index);
         
-        // ✅ Créer gradient radial pour effet 3D
         const gradient = ctx.createLinearGradient(0, 0, 400, 400);
         gradient.addColorStop(0, colors[0]);
         gradient.addColorStop(0.5, colors[1]);
         gradient.addColorStop(1, colors[2]);
         
-        // ✅ Configuration responsive
         const isMobile = window.innerWidth < 768;
         
         this.charts.fearGauge = new Chart(ctx, {
@@ -458,7 +771,7 @@ class TrendingTopicsDashboard {
                 maintainAspectRatio: true,
                 aspectRatio: isMobile ? 2.2 : 2,
                 cutout: isMobile ? '65%' : '70%',
-                rotation: -90, // ✅ Commence en haut
+                rotation: -90,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -492,7 +805,6 @@ class TrendingTopicsDashboard {
             }
         });
         
-        // ✅ STYLISER LES VALEURS AVEC GRADIENT
         const fearValueEl = document.getElementById('fearValue');
         const fearLabelEl = document.getElementById('fearLabel');
         
@@ -504,54 +816,6 @@ class TrendingTopicsDashboard {
             
             fearLabelEl.style.color = colors[0];
         }
-    }
-
-    // ✅ NOUVELLE MÉTHODE : AJOUTER DES MARQUEURS SUR LA GAUGE
-    addGaugeMarkers() {
-        const gaugeContainer = document.querySelector('.fear-greed-gauge');
-        if (!gaugeContainer) return;
-        
-        // Supprimer les anciens marqueurs
-        const existingMarkers = gaugeContainer.querySelector('.gauge-markers');
-        if (existingMarkers) existingMarkers.remove();
-        
-        // Créer le conteneur de marqueurs
-        const markersDiv = document.createElement('div');
-        markersDiv.className = 'gauge-markers';
-        markersDiv.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        `;
-        
-        // Ajouter 5 marqueurs (Extreme Fear, Fear, Neutral, Greed, Extreme Greed)
-        const markers = [
-            { angle: 0, label: 'Extreme Fear' },
-            { angle: 45, label: 'Fear' },
-            { angle: 90, label: 'Neutral' },
-            { angle: 135, label: 'Greed' },
-            { angle: 180, label: 'Extreme Greed' }
-        ];
-        
-        markers.forEach(marker => {
-            const line = document.createElement('div');
-            line.style.cssText = `
-                position: absolute;
-                bottom: 50%;
-                left: 50%;
-                width: 2px;
-                height: 8px;
-                background: rgba(0, 0, 0, 0.2);
-                transform-origin: bottom center;
-                transform: translateX(-50%) rotate(${marker.angle}deg);
-            `;
-            markersDiv.appendChild(line);
-        });
-        
-        gaugeContainer.appendChild(markersDiv);
     }
 
     createFearGreedTimeline(timeline) {
@@ -640,13 +904,6 @@ class TrendingTopicsDashboard {
         });
     }
 
-    createGradient(ctx, colors) {
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, colors[0]);
-        gradient.addColorStop(1, colors[1]);
-        return gradient;
-    }
-
     /**
      * ═══════════════════════════════════════════════════════════
      * 3. RISQUES & OPPORTUNITÉS
@@ -711,6 +968,7 @@ class TrendingTopicsDashboard {
             
             item.onclick = () => {
                 console.log(`💰 Clicked on opportunity: ${opportunity.name}`);
+                this.openModal(opportunity);
             };
             
             container.appendChild(item);
@@ -768,6 +1026,7 @@ class TrendingTopicsDashboard {
             
             item.onclick = () => {
                 console.log(`⚠ Clicked on risk: ${risk.name}`);
+                this.openModal(risk);
             };
             
             container.appendChild(item);
@@ -846,7 +1105,7 @@ class TrendingTopicsDashboard {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed; top: 20px; right: 20px;
-            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #667eea, #764ba2)'};
+            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : type === 'warning' ? 'linear-gradient(135deg, #f59e0b, #ea580c)' : 'linear-gradient(135deg, #667eea, #764ba2)'};
             color: white; padding: 16px 24px; border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); z-index: 10000; font-weight: 600;
             animation: slideIn 0.3s ease;
