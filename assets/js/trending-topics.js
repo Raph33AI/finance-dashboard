@@ -438,13 +438,13 @@ class TrendingTopicsDashboard {
             container.appendChild(articleCard);
         });
         
-        // ✅ AJOUT CRITIQUE : SPACER POUR GARANTIR LA VISIBILITÉ DU DERNIER ARTICLE
+        // ✅ SPACER CRITIQUE : Garantit 80px d'espace en bas
         const spacer = document.createElement('div');
         spacer.className = 'modal-articles-spacer';
-        spacer.style.cssText = 'height: 60px; flex-shrink: 0; pointer-events: none;';
+        spacer.style.cssText = 'min-height: 80px; height: 80px; flex-shrink: 0; pointer-events: none;';
         container.appendChild(spacer);
         
-        console.log(`✅ Rendered ${sortedArticles.length} articles with spacer`);
+        console.log(`✅ ${sortedArticles.length} articles + spacer (80px) rendered`);
     }
 
     /**

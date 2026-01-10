@@ -1208,11 +1208,11 @@ body.dark-mode .fear-stat {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ARTICLES SECTION - FIX DÉFINITIF POUR VISIBILITÉ COMPLÈTE
+   ARTICLES SECTION - FIX SCROLL & SPACER
    ═══════════════════════════════════════════════════════════════ */
 
 .modal-section {
-    padding: 28px 32px 32px 32px; /* ✅ Padding-bottom augmenté */
+    padding: 28px 32px 16px 32px; /* ✅ Padding-bottom réduit (le spacer JS gère l'espace) */
 }
 
 .modal-section-title {
@@ -1225,31 +1225,33 @@ body.dark-mode .fear-stat {
     gap: 10px;
 }
 
-/* ✅ FIX CRITIQUE : PADDING-BOTTOM AUGMENTÉ */
+/* ✅ CONTAINER AVEC SCROLL OPTIMISÉ */
 .modal-articles-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
     max-height: 500px;
     overflow-y: auto;
-    padding-right: 12px;
-    padding-bottom: 40px; /* ✅ AUGMENTÉ : 20px → 40px */
+    overflow-x: hidden;
+    padding-right: 14px; /* ✅ Augmenté pour compenser la scrollbar */
+    padding-bottom: 0; /* ✅ Géré par le spacer JS */
+    scroll-padding-bottom: 80px; /* ✅ Scroll intelligent */
 }
 
-/* ✅ SCROLLBAR PREMIUM */
+/* ✅ SCROLLBAR OPTIMISÉE */
 .modal-articles-list::-webkit-scrollbar {
-    width: 10px;
+    width: 8px; /* ✅ Réduit : 10px → 8px */
 }
 
 .modal-articles-list::-webkit-scrollbar-track {
     background: var(--glass-bg);
-    border-radius: 10px;
+    border-radius: 8px;
     margin: 4px 0;
 }
 
 .modal-articles-list::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 10px;
+    border-radius: 8px;
     border: 2px solid var(--card-bg);
 }
 
@@ -1257,7 +1259,7 @@ body.dark-mode .fear-stat {
     background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
-/* ✅ CARTE ARTICLE AMÉLIORÉE */
+/* ✅ CARTE ARTICLE - TAILLE FIXE */
 .modal-article-card {
     background: var(--glass-bg);
     border-radius: 14px;
@@ -1266,12 +1268,9 @@ body.dark-mode .fear-stat {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
-    min-height: 120px;
-}
-
-/* ✅ AJOUT : MARGE POUR LE DERNIER ARTICLE */
-.modal-article-card:last-child {
-    margin-bottom: 8px; /* ✅ ESPACE SUPPLÉMENTAIRE POUR LE DERNIER */
+    min-height: 130px; /* ✅ Hauteur minimum garantie */
+    flex-shrink: 0; /* ✅ CRITIQUE : Empêche la compression */
+    width: 100%; /* ✅ Largeur complète */
 }
 
 .modal-article-card:hover {
@@ -1305,6 +1304,7 @@ body.dark-mode .fear-stat {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-height: 100%; /* ✅ Prend toute la hauteur */
 }
 
 .article-header {
@@ -1329,7 +1329,7 @@ body.dark-mode .fear-stat {
     font-weight: 600;
 }
 
-/* ✅ TITRE ARTICLE PLUS LISIBLE */
+/* ✅ TITRE ARTICLE */
 .article-title {
     font-size: clamp(0.95rem, 2vw, 1.05rem);
     font-weight: 700;
@@ -1340,16 +1340,17 @@ body.dark-mode .fear-stat {
     overflow-wrap: break-word;
 }
 
-/* ✅ FOOTER TOUJOURS VISIBLE (CRITIQUE) */
+/* ✅ FOOTER TOUJOURS VISIBLE */
 .article-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-    padding-top: 12px;
+    padding-top: 14px;
     border-top: 1px solid var(--glass-border);
-    margin-top: auto;
+    margin-top: auto; /* ✅ Pousse en bas */
+    min-height: 46px; /* ✅ Hauteur minimum garantie */
 }
 
 .article-sentiment {
@@ -1373,7 +1374,7 @@ body.dark-mode .fear-stat {
     border: 1px solid var(--glass-border);
 }
 
-/* ✅ BOUTON "READ MORE" AMÉLIORÉ - TOUJOURS VISIBLE */
+/* ✅ BOUTON "READ MORE" - TOUJOURS VISIBLE */
 .article-link {
     display: inline-flex;
     align-items: center;
@@ -1382,7 +1383,7 @@ body.dark-mode .fear-stat {
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 700;
-    padding: 6px 14px;
+    padding: 8px 16px; /* ✅ Padding augmenté */
     border-radius: 8px;
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.2);
