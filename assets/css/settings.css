@@ -1299,10 +1299,35 @@ body.dark-mode .comparison-icon-box {
     margin: 0 0 8px 0;
 }
 
+/* ✅ CORRECTION : Prix dans les cards de comparaison - EN NOIR */
 .comparison-price {
     font-size: 1.125rem;
     margin: 0;
-    color: var(--text-secondary);
+}
+
+.comparison-price .price-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b !important;
+}
+
+body.dark-mode .comparison-price .price-value {
+    color: #f1f5f9 !important;
+}
+
+.comparison-price .price-period {
+    font-size: 1rem;
+    color: #64748b;
+}
+
+body.dark-mode .comparison-price .price-period {
+    color: #94a3b8;
+}
+
+.comparison-price .price-free {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #10b981;
 }
 
 .comparison-features {
