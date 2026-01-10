@@ -958,7 +958,7 @@ body.dark-mode .ensemble-card {
 
 /* ═══════════════════════════════════════════════════════════════
    ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (100% RESPONSIVE)
-   ✅ FIX PC : Score parfaitement centré verticalement
+   ✅✅ FIX PC : Score VRAIMENT centré verticalement (CORRECTION RADICALE)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ✅ CORRECTION CONTENEUR : Dimensions fixes avec centrage parfait */
@@ -1020,35 +1020,37 @@ body.dark-mode .ensemble-card {
     }
 }
 
-/* ✅✅ SCORE CENTRAL : Centrage vertical parfait (remonté de 3%) */
+/* ✅✅✅ SCORE CENTRAL : CORRECTION RADICALE - Remonté de 10% */
 .gauge-score-display {
     position: absolute;
-    top: 47%;  /* ✅ CORRECTION : Remonté de 50% → 47% */
+    top: 43%;  /* ✅✅ CORRECTION RADICALE : 50% → 43% (remonté de 7%) */
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
     z-index: 10;
     pointer-events: none;
     width: auto;
-    max-width: 80%;
+    max-width: 85%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0;  /* ✅ Suppression de tout gap par défaut */
 }
 
-/* ✅ Valeur du score (plus grande et bien visible) */
+/* ✅✅ Valeur du score (chiffre principal) - ESPACE RÉDUIT */
 .gauge-score-value {
-    font-size: clamp(2.5rem, 7vw, 4rem);  /* ✅ Augmenté de 3.5rem → 4rem */
+    font-size: clamp(2.5rem, 7vw, 4rem);
     font-weight: 900;
-    line-height: 1;
+    line-height: 0.95;  /* ✅ Réduit de 1 → 0.95 */
     background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 4px;  /* ✅ Réduit de 8px → 4px */
+    margin-bottom: 0px;  /* ✅ SUPPRIMÉ : 4px → 0px */
     animation: shimmer 3s ease-in-out infinite;
     letter-spacing: -1px;
+    padding: 0;
 }
 
 @keyframes shimmer {
@@ -1056,22 +1058,27 @@ body.dark-mode .ensemble-card {
     50% { opacity: 0.85; }
 }
 
-/* ✅ Label "SCORE" (bien espacé) */
+/* ✅✅ Label "SCORE" - COLLÉ AU CHIFFRE */
 .gauge-score-label {
-    font-size: clamp(0.75rem, 1.6vw, 0.95rem);  /* ✅ Légèrement augmenté */
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem);  /* ✅ Légèrement réduit */
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1.5px;  /* ✅ Augmenté de 1px → 1.5px */
-    margin-top: 2px;  /* ✅ Ajouté pour séparer de la valeur */
+    letter-spacing: 1.5px;
+    margin-top: -2px;  /* ✅ NÉGATIF pour coller au chiffre */
+    margin-bottom: 0px;  /* ✅ Aucun espace en bas */
+    line-height: 1;
+    padding: 0;
 }
 
-/* ✅ Sous-label (% change, etc.) */
+/* ✅✅ Sous-label (% change) - COLLÉ AU LABEL */
 .gauge-score-sublabel {
-    font-size: clamp(0.7rem, 1.3vw, 0.85rem);  /* ✅ Légèrement augmenté */
+    font-size: clamp(0.65rem, 1.2vw, 0.8rem);  /* ✅ Légèrement réduit */
     color: var(--text-tertiary);
-    margin-top: 6px;  /* ✅ Augmenté de 4px → 6px */
+    margin-top: 2px;  /* ✅ Réduit de 6px → 2px */
     font-weight: 600;
+    line-height: 1;
+    padding: 0;
 }
 
 /* Indicateurs de zones */
@@ -1167,42 +1174,52 @@ body.dark-mode .gauge-zone-marker {
     min-height: 280px;
 }
 
+.consensus-gauge .gauge-score-display {
+    top: 44%;  /* ✅ Ajusté aussi pour consensus */
+}
+
 /* ✅ Amélioration lisibilité mobile */
 @media (max-width: 768px) {
     .gauge-score-display {
-        top: 48%;  /* ✅ Légèrement ajusté pour mobile */
+        top: 44%;  /* ✅ Même valeur pour mobile */
     }
     
     .gauge-score-value {
         font-size: 2.5rem;
         letter-spacing: -0.5px;
+        line-height: 0.95;
     }
     
     .gauge-score-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         letter-spacing: 1px;
+        margin-top: -1px;
     }
     
     .gauge-score-sublabel {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        margin-top: 2px;
     }
 }
 
 @media (max-width: 480px) {
     .gauge-score-display {
-        top: 48%;
+        top: 45%;  /* ✅ Légèrement ajusté pour très petits écrans */
     }
     
     .gauge-score-value {
         font-size: 2rem;
+        line-height: 0.95;
     }
     
     .gauge-score-label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        margin-top: 0px;
     }
     
     .gauge-score-sublabel {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        margin-top: 1px;
     }
 }
 
