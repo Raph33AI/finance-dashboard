@@ -404,13 +404,18 @@ class ForexConverter {
 
     /**
      * ✅ COMPLETE TECHNICAL ANALYSIS FOR A CURRENCY PAIR
+     * ⚠ FIX: Utilise TOUTES les données disponibles au lieu de filtrer par timeframe
      */
     analyzeCompleteTechnicals(currency) {
-        const data = this.getHistoricalTimeSeriesData('1M'); // 1 month analysis
+        // ✅ CORRECTION : Utiliser TOUTES les données historiques (pas de filtrage par timeframe)
+        const data = this.historicalData[currency];
         
         if (!data || data.length < 50) {
+            console.warn(`⚠ Not enough historical data for EUR/${currency}: ${data?.length || 0} points (need 50+)`);
             return this.getFallbackAnalysis(currency);
         }
+        
+        console.log(`📊 Analyzing EUR/${currency} with ${data.length} data points`);
         
         const currentPrice = data[data.length - 1][1];
         
@@ -436,6 +441,15 @@ class ForexConverter {
         const latestADX = adx.adx.length > 0 ? adx.adx[adx.adx.length - 1][1] : 25;
         const latestPlusDI = adx.plusDI.length > 0 ? adx.plusDI[adx.plusDI.length - 1][1] : 25;
         const latestMinusDI = adx.minusDI.length > 0 ? adx.minusDI[adx.minusDI.length - 1][1] : 25;
+        
+        console.log(`📊 EUR/${currency} Indicators:`, {
+            RSI: latestRSI.toFixed(1),
+            MACD: latestHistogram.toFixed(4),
+            Price: currentPrice.toFixed(4),
+            SMA20: latestSMA20.toFixed(4),
+            SMA50: latestSMA50.toFixed(4),
+            ADX: latestADX.toFixed(1)
+        });
         
         // ✅ SCORING SYSTEM (0-100)
         let bullishScore = 0;
@@ -522,8 +536,8 @@ class ForexConverter {
         
         // ✅ DETERMINE SIGNAL & CONFIDENCE
         const totalScore = bullishScore + bearishScore;
-        const bullishPercentage = (bullishScore / totalScore) * 100;
-        const bearishPercentage = (bearishScore / totalScore) * 100;
+        const bullishPercentage = totalScore > 0 ? (bullishScore / totalScore) * 100 : 50;
+        const bearishPercentage = totalScore > 0 ? (bearishScore / totalScore) * 100 : 50;
         
         let signal, confidence, description, risk, timeframe;
         
@@ -560,6 +574,8 @@ class ForexConverter {
             : signal === 'SELL'
                 ? (currentPrice + atr * 1.5).toFixed(4)
                 : currentPrice.toFixed(4);
+        
+        console.log(`✅ EUR/${currency} Analysis:`, { signal, confidence, bullishScore, bearishScore });
         
         return {
             signal,
