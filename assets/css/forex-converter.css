@@ -1868,3 +1868,349 @@ select:focus-visible {
         border: 1px solid #ccc;
     }
 }
+
+/* ========================================
+   AI RECOMMENDATIONS - TECHNICAL SIGNALS
+   (NOUVEAU - Affichage des signaux techniques réels)
+   ======================================== */
+
+.rec-technicals {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border-color);
+}
+
+.rec-technicals h4 {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rec-technicals h4 i {
+    color: var(--primary);
+}
+
+.tech-signals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tech-signal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.tech-signal i {
+    font-size: 16px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.tech-signal span {
+    flex: 1;
+}
+
+.tech-signal strong {
+    font-weight: 800;
+}
+
+/* ✅ Signaux Bullish (Haussiers) */
+.tech-signal-bullish {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-left: 4px solid #10b981;
+}
+
+.tech-signal-bullish i {
+    color: #10b981;
+}
+
+body.dark-mode .tech-signal-bullish {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+/* ❌ Signaux Bearish (Baissiers) */
+.tech-signal-bearish {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+}
+
+.tech-signal-bearish i {
+    color: #ef4444;
+}
+
+body.dark-mode .tech-signal-bearish {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+/* ⚪ Signaux Neutral */
+.tech-signal-neutral {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+    border-left: 4px solid #6b7280;
+}
+
+.tech-signal-neutral i {
+    color: #6b7280;
+}
+
+body.dark-mode .tech-signal-neutral {
+    background: rgba(107, 114, 128, 0.15);
+    color: #9ca3af;
+}
+
+/* Effet hover sur les signaux */
+.tech-signal:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .tech-signal:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   CURRENCY STRENGTH METER - AMÉLIORATIONS
+   ======================================== */
+
+/* Ajout d'un badge de rank sur le radar */
+#currencyStrengthChart .highcharts-point {
+    cursor: pointer;
+}
+
+#currencyStrengthChart .highcharts-tooltip {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode #currencyStrengthChart .highcharts-tooltip {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+/* Animation des zones du radar */
+@keyframes pulse-zone {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+}
+
+/* ========================================
+   AI RECOMMENDATIONS - AMÉLIORATIONS GLOBALES
+   ======================================== */
+
+/* Ajustement de la hauteur des cartes de recommandations */
+.ai-recommendation-card {
+    min-height: 500px; /* Augmenté pour accommoder les signaux techniques */
+    display: flex;
+    flex-direction: column;
+}
+
+.rec-header {
+    margin-bottom: 16px;
+}
+
+.rec-description {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+}
+
+.rec-metrics {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+}
+
+.rec-technicals {
+    flex: 1 1 auto; /* Prend l'espace restant */
+}
+
+.rec-footer {
+    flex: 0 0 auto;
+    margin-top: auto;
+}
+
+/* Badge de confidence amélioré */
+.rec-confidence {
+    position: relative;
+}
+
+.confidence-bar {
+    height: 8px;
+    background: rgba(100, 116, 139, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.confidence-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: confidence-shine 2s infinite;
+}
+
+@keyframes confidence-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.confidence-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+/* Badge BUY/SELL/NEUTRAL amélioré */
+.rec-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.rec-badge::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.rec-badge:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.rec-badge-buy {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.rec-badge-sell {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.rec-badge-neutral {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+}
+
+/* Métriques (Target, Stop, Risk) améliorées */
+.rec-metric {
+    background: rgba(100, 116, 139, 0.05);
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.rec-metric:hover {
+    background: rgba(100, 116, 139, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rec-metric i {
+    color: var(--primary);
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.rec-metric span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .ai-recommendation-card {
+        min-height: 550px; /* Plus d'espace sur tablettes */
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-recommendation-card {
+        min-height: auto; /* Hauteur automatique sur mobile */
+    }
+    
+    .tech-signal {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .tech-signal i {
+        font-size: 14px;
+    }
+    
+    .rec-technicals h4 {
+        font-size: 13px;
+    }
+}
+
+/* ========================================
+   DARK MODE OPTIMIZATIONS
+   ======================================== */
+
+body.dark-mode .rec-metric {
+    background: rgba(148, 163, 184, 0.05);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+body.dark-mode .rec-metric:hover {
+    background: rgba(148, 163, 184, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .confidence-bar {
+    background: rgba(148, 163, 184, 0.1);
+}
