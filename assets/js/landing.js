@@ -975,7 +975,7 @@ class NumberCounterManager {
     }
 
     animateNumbers() {
-        const targets = [10000, 1000000, 500000];
+        const targets = [100, 5000, 1000];
         this.numbers.forEach((element, index) => {
             if (targets[index]) {
                 element.textContent = '0';
