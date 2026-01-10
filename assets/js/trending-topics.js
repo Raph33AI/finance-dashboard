@@ -389,13 +389,13 @@ class TrendingTopicsDashboard {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
-
+    
     /**
      * ═══════════════════════════════════════════════════════════
-     * AFFICHER LES ARTICLES DANS LE MODAL
+     * AFFICHER LES ARTICLES DANS LE MODAL (AVEC SPACER)
      * ═══════════════════════════════════════════════════════════
      */
-    
+
     renderModalArticles(articles) {
         const container = document.getElementById('modalArticlesList');
         if (!container) return;
@@ -412,7 +412,7 @@ class TrendingTopicsDashboard {
             articleCard.className = 'modal-article-card';
             
             const sentimentClass = sentiment.sentiment === 'positive' ? 'positive' : 
-                                   sentiment.sentiment === 'negative' ? 'negative' : 'neutral';
+                                sentiment.sentiment === 'negative' ? 'negative' : 'neutral';
             
             articleCard.innerHTML = `
                 <div class='article-sentiment-indicator ${sentimentClass}'></div>
@@ -437,6 +437,14 @@ class TrendingTopicsDashboard {
             
             container.appendChild(articleCard);
         });
+        
+        // ✅ AJOUT CRITIQUE : SPACER POUR GARANTIR LA VISIBILITÉ DU DERNIER ARTICLE
+        const spacer = document.createElement('div');
+        spacer.className = 'modal-articles-spacer';
+        spacer.style.cssText = 'height: 60px; flex-shrink: 0; pointer-events: none;';
+        container.appendChild(spacer);
+        
+        console.log(`✅ Rendered ${sortedArticles.length} articles with spacer`);
     }
 
     /**
