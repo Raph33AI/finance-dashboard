@@ -1035,7 +1035,8 @@ body.dark-mode .toast-message {
 }
 
 /* ============================================
-   PLAN & SUBSCRIPTION STYLES
+   PLAN & SUBSCRIPTION STYLES - VERSION 4.0
+   SANS EMOJIS + DOWNGRADE ACTIVÉ
    ============================================ */
 
 .plan-card {
@@ -1055,8 +1056,16 @@ body.dark-mode .toast-message {
     flex-wrap: wrap;
 }
 
-.plan-icon {
-    font-size: 3rem;
+.plan-icon-box {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    backdrop-filter: blur(10px);
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
 }
 
@@ -1253,9 +1262,21 @@ body.dark-mode .comparison-header {
     border-color: #334155;
 }
 
-.comparison-icon {
-    font-size: 2.5rem;
-    margin-bottom: 8px;
+.comparison-icon-box {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #3B82F6;
+}
+
+body.dark-mode .comparison-icon-box {
+    background: rgba(59, 130, 246, 0.15);
 }
 
 .comparison-name {
@@ -1325,7 +1346,7 @@ body.dark-mode .comparison-divider {
     margin-top: auto;
 }
 
-.btn-upgrade, .btn-current, .btn-downgrade {
+.btn-upgrade, .btn-current, .btn-downgrade-active, .btn-downgrade-to-basic {
     width: 100%;
     padding: 14px 24px;
     border: none;
@@ -1362,15 +1383,15 @@ body.dark-mode .btn-current {
     color: #94a3b8;
 }
 
-.btn-downgrade {
-    background: #f1f5f9;
-    color: #94a3b8;
-    cursor: not-allowed;
+.btn-downgrade-active, .btn-downgrade-to-basic {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
-body.dark-mode .btn-downgrade {
-    background: #1e293b;
-    color: #64748b;
+.btn-downgrade-active:hover, .btn-downgrade-to-basic:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
 }
 
 .billing-history, .subscription-management {
@@ -1420,7 +1441,7 @@ body.dark-mode .billing-icon {
 
 .management-info, .management-warning {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     padding: 16px;
     border-radius: 12px;
@@ -1435,6 +1456,27 @@ body.dark-mode .billing-icon {
 
 body.dark-mode .management-info {
     background: rgba(16, 185, 129, 0.1);
+}
+
+.management-info i {
+    font-size: 1.5rem;
+    margin-top: 2px;
+}
+
+.management-info div {
+    flex: 1;
+}
+
+.management-info p {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.management-info p strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #10b981;
 }
 
 .management-warning {

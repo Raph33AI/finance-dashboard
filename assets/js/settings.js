@@ -662,8 +662,10 @@
 
 /* ============================================
    SETTINGS.JS - Gestion des paramètres utilisateur
+   VERSION 4.0 - SANS EMOJIS + DOWNGRADE ACTIVÉ
    ✅ PLAN & SUBSCRIPTION MANAGEMENT
-   ✅ SYNCHRONISATION NEWSLETTER
+   ✅ DOWNGRADE/UPGRADE POUR TOUS LES PLANS
+   ✅ GESTION FREE LIFETIME ACCESS
    ✅ STRIPE INTEGRATION
    ============================================ */
 
@@ -671,7 +673,7 @@
 const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
-// ✅ Configuration des plans (synchronisé avec access-control.js)
+// Configuration des plans (synchronisé avec access-control.js)
 const PLAN_CONFIG = {
     basic: {
         name: 'Basic',
@@ -682,7 +684,7 @@ const PLAN_CONFIG = {
         totalPages: 9,
         color: '#06b6d4',
         gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-        icon: '📊',
+        icon: 'fas fa-chart-bar',
         features: [
             'Dashboard Budget',
             'Community Hub',
@@ -704,7 +706,7 @@ const PLAN_CONFIG = {
         totalPages: 17,
         color: '#3B82F6',
         gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-        icon: '👑',
+        icon: 'fas fa-crown',
         features: [
             'Everything in Basic (9 pages)',
             'Investment Analytics',
@@ -726,7 +728,7 @@ const PLAN_CONFIG = {
         totalPages: 25,
         color: '#8B5CF6',
         gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
-        icon: '💎',
+        icon: 'fas fa-gem',
         features: [
             'Everything in Pro (17 pages)',
             'IPO Intelligence (AI Scoring)',
@@ -754,20 +756,20 @@ let currentSettings = {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initialisation de la page paramètres...');
+    console.log('Initialisation de la page parametres...');
     
     if (!isFirebaseInitialized()) {
-        showToast('error', 'Erreur', 'Impossible de charger les paramètres');
+        showToast('error', 'Erreur', 'Impossible de charger les parametres');
         return;
     }
     
     initializeEventListeners();
-    console.log('✅ Page paramètres initialisée');
+    console.log('Page parametres initialisee');
 });
 
 window.addEventListener('userDataLoaded', function(e) {
     currentUserData = e.detail;
-    console.log('✅ Données utilisateur reçues:', currentUserData);
+    console.log('Donnees utilisateur recues:', currentUserData);
     loadSettings();
     loadSubscriptionInfo();
 });
@@ -778,10 +780,10 @@ window.addEventListener('userDataLoaded', function(e) {
 
 async function loadSettings() {
     try {
-        console.log('📥 Chargement des paramètres...');
+        console.log('Chargement des parametres...');
         
         if (!currentUserData) {
-            console.warn('⚠ Pas de données utilisateur disponibles');
+            console.warn('Pas de donnees utilisateur disponibles');
             loadDefaultSettings();
             return;
         }
@@ -795,13 +797,13 @@ async function loadSettings() {
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
+            console.log('Parametres inexistants, creation avec valeurs par defaut...');
             await settingsRef.set(currentSettings);
-            console.log('✅ Paramètres créés avec succès');
+            console.log('Parametres crees avec succes');
         } else {
             const data = settingsDoc.data();
             currentSettings = { ...currentSettings, ...data };
-            console.log('✅ Paramètres chargés:', currentSettings);
+            console.log('Parametres charges:', currentSettings);
         }
         
         await synchronizeNewsletterSubscription();
@@ -809,27 +811,27 @@ async function loadSettings() {
         applySettingsToUI();
         
     } catch (error) {
-        console.error('❌ Erreur lors du chargement des paramètres:', error);
+        console.error('Erreur lors du chargement des parametres:', error);
         
         if (error.code === 'permission-denied') {
-            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
+            console.log('Permissions refusees, utilisation des valeurs par defaut');
             loadDefaultSettings();
         } else {
-            showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
+            showToast('error', 'Erreur', 'Impossible de charger vos parametres');
         }
     }
 }
 
 function loadDefaultSettings() {
-    console.log('📥 Chargement des paramètres par défaut');
+    console.log('Chargement des parametres par defaut');
     
     const savedSettings = localStorage.getItem('financepro_settings');
     if (savedSettings) {
         try {
             currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
-            console.log('✅ Paramètres chargés depuis localStorage');
+            console.log('Parametres charges depuis localStorage');
         } catch (e) {
-            console.warn('⚠ Erreur lors du parsing localStorage');
+            console.warn('Erreur lors du parsing localStorage');
         }
     }
     
@@ -841,21 +843,21 @@ function applySettingsToUI() {
     document.getElementById('featureUpdates').checked = currentSettings.featureUpdates !== false;
     document.getElementById('analytics').checked = currentSettings.analytics !== false;
     
-    console.log('✅ Interface mise à jour avec les paramètres');
+    console.log('Interface mise a jour avec les parametres');
 }
 
 // ============================================
-// 🆕 PLAN & SUBSCRIPTION MANAGEMENT
+// PLAN & SUBSCRIPTION MANAGEMENT
 // ============================================
 
 async function loadSubscriptionInfo() {
     try {
         if (!currentUserData) {
-            console.warn('⚠ Aucun utilisateur connecté');
+            console.warn('Aucun utilisateur connecte');
             return;
         }
         
-        console.log('📊 Chargement des informations d\'abonnement...');
+        console.log('Chargement des informations d\'abonnement...');
         
         const plan = currentUserData.plan || 'basic';
         const status = currentUserData.subscriptionStatus || 'inactive';
@@ -870,22 +872,20 @@ async function loadSubscriptionInfo() {
         displayPlanFeatures(plan);
         
         // Générer le tableau de comparaison
-        generatePlanComparison(plan);
+        generatePlanComparison(plan, status);
         
-        // Charger l'historique de facturation (si plan payant)
+        // Charger l'historique de facturation (si plan payant actif)
         if (['pro', 'platinum'].includes(plan) && status === 'active') {
             await loadBillingHistory();
         }
         
-        // Afficher les options de gestion (si plan payant)
-        if (['pro', 'platinum'].includes(plan) && status === 'active') {
-            displaySubscriptionManagement(plan, status);
-        }
+        // Afficher les options de gestion
+        displaySubscriptionManagement(plan, status);
         
-        console.log('✅ Informations d\'abonnement chargées');
+        console.log('Informations d\'abonnement chargees');
         
     } catch (error) {
-        console.error('❌ Erreur lors du chargement des infos d\'abonnement:', error);
+        console.error('Erreur lors du chargement des infos d\'abonnement:', error);
         showToast('error', 'Erreur', 'Impossible de charger vos informations d\'abonnement');
     }
 }
@@ -908,7 +908,7 @@ function displayCurrentPlanBadge(plan, status) {
         statusText = 'Your subscription has been cancelled and will end at the end of the billing period.';
     } else if (status === 'active_free') {
         statusBadge = '<span class="status-badge status-free"><i class="fas fa-gift"></i> Free Lifetime</span>';
-        statusText = 'You have free lifetime access to this plan.';
+        statusText = 'You have free lifetime access to this plan. You can downgrade to Basic at any time.';
     } else {
         statusBadge = '<span class="status-badge status-inactive"><i class="fas fa-pause-circle"></i> Inactive</span>';
         statusText = 'Your subscription is inactive.';
@@ -917,7 +917,9 @@ function displayCurrentPlanBadge(plan, status) {
     container.innerHTML = `
         <div class="plan-card" style="background: ${planConfig.gradient};">
             <div class="plan-card-header">
-                <div class="plan-icon">${planConfig.icon}</div>
+                <div class="plan-icon-box">
+                    <i class="${planConfig.icon}"></i>
+                </div>
                 <div class="plan-info">
                     <h3 class="plan-name">${planConfig.displayName}</h3>
                     <p class="plan-price">
@@ -966,7 +968,7 @@ function displayPlanFeatures(plan) {
     `;
 }
 
-function generatePlanComparison(currentPlan) {
+function generatePlanComparison(currentPlan, currentStatus) {
     const container = document.getElementById('planComparisonTable');
     
     const plans = ['basic', 'pro', 'platinum'];
@@ -977,13 +979,16 @@ function generatePlanComparison(currentPlan) {
                 const planConfig = PLAN_CONFIG[planKey];
                 const isCurrent = planKey === currentPlan;
                 const canUpgrade = PLAN_CONFIG[currentPlan].level < planConfig.level;
+                const canDowngrade = PLAN_CONFIG[currentPlan].level > planConfig.level;
                 
                 return `
                     <div class="comparison-card ${isCurrent ? 'current-plan' : ''}" style="border-color: ${planConfig.color};">
                         ${isCurrent ? '<div class="current-badge"><i class="fas fa-star"></i> Current Plan</div>' : ''}
                         
                         <div class="comparison-header">
-                            <div class="comparison-icon">${planConfig.icon}</div>
+                            <div class="comparison-icon-box">
+                                <i class="${planConfig.icon}"></i>
+                            </div>
                             <h4 class="comparison-name">${planConfig.name}</h4>
                             <p class="comparison-price">
                                 ${planConfig.price === 0 
@@ -1017,8 +1022,10 @@ function generatePlanComparison(currentPlan) {
                             ${isCurrent 
                                 ? '<button class="btn-current" disabled><i class="fas fa-check"></i> Current Plan</button>' 
                                 : canUpgrade 
-                                    ? `<button class="btn-upgrade" onclick="upgradeToPlan('${planKey}')"><i class="fas fa-arrow-up"></i> Upgrade to ${planConfig.name}</button>`
-                                    : '<button class="btn-downgrade" disabled><i class="fas fa-arrow-down"></i> Lower Plan</button>'
+                                    ? `<button class="btn-upgrade" onclick="changePlan('${planKey}', 'upgrade')"><i class="fas fa-arrow-up"></i> Upgrade to ${planConfig.name}</button>`
+                                    : canDowngrade
+                                        ? `<button class="btn-downgrade-active" onclick="changePlan('${planKey}', 'downgrade')"><i class="fas fa-arrow-down"></i> Downgrade to ${planConfig.name}</button>`
+                                        : ''
                             }
                         </div>
                     </div>
@@ -1032,15 +1039,12 @@ function generatePlanComparison(currentPlan) {
 
 async function loadBillingHistory() {
     try {
-        console.log('📄 Chargement de l\'historique de facturation...');
+        console.log('Chargement de l\'historique de facturation...');
         
         if (!currentUserData.stripeCustomerId) {
-            console.warn('⚠ Pas de Stripe Customer ID');
+            console.warn('Pas de Stripe Customer ID');
             return;
         }
-        
-        // Note: L'API Stripe nécessite une clé secrète, donc cette requête doit passer par le Worker
-        // Pour l'instant, on affiche un placeholder
         
         const section = document.getElementById('billingHistorySection');
         const container = document.getElementById('billingHistoryContainer');
@@ -1052,7 +1056,7 @@ async function loadBillingHistory() {
                 <p class="billing-info">
                     <i class="fas fa-info-circle"></i>
                     Your billing history is managed by Stripe. 
-                    <a href="https://billing.stripe.com/p/login/test_xxxx" target="_blank" class="stripe-portal-link">
+                    <a href="https://billing.stripe.com" target="_blank" class="stripe-portal-link">
                         View detailed invoices <i class="fas fa-external-link-alt"></i>
                     </a>
                 </p>
@@ -1064,7 +1068,7 @@ async function loadBillingHistory() {
         `;
         
     } catch (error) {
-        console.error('❌ Erreur lors du chargement de l\'historique:', error);
+        console.error('Erreur lors du chargement de l\'historique:', error);
     }
 }
 
@@ -1074,18 +1078,35 @@ function displaySubscriptionManagement(plan, status) {
     
     section.style.display = 'block';
     
+    // FREE LIFETIME ACCESS - Permettre le downgrade vers Basic
     if (status === 'active_free') {
         container.innerHTML = `
             <div class="subscription-management">
                 <div class="management-info">
                     <i class="fas fa-gift"></i>
-                    <p>You have free lifetime access to this plan. No subscription management needed!</p>
+                    <div>
+                        <p><strong>Free Lifetime Access</strong></p>
+                        <p>You have free lifetime access to the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan.</p>
+                    </div>
                 </div>
+                ${plan !== 'basic' ? `
+                    <div class="management-actions">
+                        <button class="btn-downgrade-to-basic" onclick="changePlan('basic', 'downgrade')">
+                            <i class="fas fa-arrow-down"></i>
+                            Downgrade to Basic (Free)
+                        </button>
+                        <p class="management-note">
+                            <i class="fas fa-info-circle"></i>
+                            You can downgrade to the free Basic plan at any time.
+                        </p>
+                    </div>
+                ` : ''}
             </div>
         `;
         return;
     }
     
+    // CANCELLED SUBSCRIPTION
     if (status === 'cancelled') {
         container.innerHTML = `
             <div class="subscription-management">
@@ -1102,39 +1123,111 @@ function displaySubscriptionManagement(plan, status) {
         return;
     }
     
-    container.innerHTML = `
-        <div class="subscription-management">
-            <div class="management-actions">
-                <button class="btn-cancel-subscription" onclick="confirmCancelSubscription()">
-                    <i class="fas fa-times-circle"></i>
-                    Cancel Subscription
-                </button>
-                <p class="management-note">
-                    <i class="fas fa-info-circle"></i>
-                    You can cancel your subscription at any time. You'll keep access until the end of your billing period.
-                </p>
+    // ACTIVE PAID SUBSCRIPTION
+    if (status === 'active' && ['pro', 'platinum'].includes(plan)) {
+        container.innerHTML = `
+            <div class="subscription-management">
+                <div class="management-actions">
+                    <button class="btn-cancel-subscription" onclick="confirmCancelSubscription()">
+                        <i class="fas fa-times-circle"></i>
+                        Cancel Subscription
+                    </button>
+                    <p class="management-note">
+                        <i class="fas fa-info-circle"></i>
+                        You can cancel your subscription at any time. You'll keep access until the end of your billing period.
+                    </p>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+        return;
+    }
+    
+    // BASIC PLAN
+    if (plan === 'basic') {
+        container.innerHTML = `
+            <div class="subscription-management">
+                <div class="management-info">
+                    <i class="fas fa-check-circle"></i>
+                    <p>You are on the free Basic plan. Upgrade anytime to access more features!</p>
+                </div>
+            </div>
+        `;
+    }
 }
 
 // ============================================
 // ACTIONS ABONNEMENT
 // ============================================
 
-function upgradeToPlan(plan) {
-    console.log('📈 Upgrade vers le plan:', plan);
+function changePlan(targetPlan, action) {
+    const actionText = action === 'upgrade' ? 'Upgrade' : 'Downgrade';
+    const planName = PLAN_CONFIG[targetPlan].name;
     
-    showToast('info', 'Redirection', 'Vous allez être redirigé vers la page de paiement...');
+    console.log(`${actionText} vers le plan:`, targetPlan);
     
-    setTimeout(() => {
-        window.location.href = `checkout.html?plan=${plan}`;
-    }, 1500);
+    if (action === 'downgrade') {
+        const confirmed = confirm(
+            `Are you sure you want to ${action} to ${planName}?\n\n` +
+            `You will lose access to features from your current plan.`
+        );
+        
+        if (!confirmed) return;
+        
+        if (targetPlan === 'basic') {
+            // Downgrade vers Basic (gratuit)
+            performDowngradeToBasic();
+        } else {
+            // Downgrade vers Pro (payant)
+            showToast('info', 'Redirection', 'You will be redirected to the payment page...');
+            setTimeout(() => {
+                window.location.href = `checkout.html?plan=${targetPlan}`;
+            }, 1500);
+        }
+    } else {
+        // Upgrade
+        showToast('info', 'Redirection', 'You will be redirected to the payment page...');
+        setTimeout(() => {
+            window.location.href = `checkout.html?plan=${targetPlan}`;
+        }, 1500);
+    }
+}
+
+async function performDowngradeToBasic() {
+    try {
+        if (!currentUserData) {
+            showToast('error', 'Error', 'User not authenticated');
+            return;
+        }
+        
+        console.log('Downgrade vers Basic en cours...');
+        
+        showToast('info', 'Processing', 'Downgrading to Basic plan...');
+        
+        // Mettre à jour Firestore
+        const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
+        await userRef.update({
+            plan: 'basic',
+            subscriptionStatus: 'active',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('Downgrade reussi');
+        showToast('success', 'Success', 'You have been downgraded to the Basic plan');
+        
+        // Rafraîchir la page
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erreur downgrade:', error);
+        showToast('error', 'Error', error.message || 'Failed to downgrade plan');
+    }
 }
 
 async function confirmCancelSubscription() {
     const confirmed = confirm(
-        '⚠ Are you sure you want to cancel your subscription?\n\n' +
+        'Are you sure you want to cancel your subscription?\n\n' +
         'You will keep access until the end of your current billing period.\n' +
         'This action can be reversed by reactivating your subscription.'
     );
@@ -1147,11 +1240,11 @@ async function confirmCancelSubscription() {
 async function cancelSubscription() {
     try {
         if (!currentUserData.stripeSubscriptionId) {
-            showToast('error', 'Erreur', 'No active subscription found');
+            showToast('error', 'Error', 'No active subscription found');
             return;
         }
         
-        console.log('🗑 Annulation de l\'abonnement...');
+        console.log('Annulation de l\'abonnement...');
         
         showToast('info', 'Processing', 'Cancelling your subscription...');
         
@@ -1168,10 +1261,9 @@ async function cancelSubscription() {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Abonnement annulé avec succès');
+            console.log('Abonnement annule avec succes');
             showToast('success', 'Success', 'Your subscription has been cancelled');
             
-            // Rafraîchir les données
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -1181,42 +1273,40 @@ async function cancelSubscription() {
         }
         
     } catch (error) {
-        console.error('❌ Erreur annulation:', error);
+        console.error('Erreur annulation:', error);
         showToast('error', 'Error', error.message || 'Failed to cancel subscription');
     }
 }
 
 async function reactivateSubscription() {
     showToast('info', 'Reactivation', 'Please contact support to reactivate your subscription');
-    
-    // TODO: Implémenter la réactivation via Stripe API
 }
 
 // ============================================
-// 🆕 SYNCHRONISATION NEWSLETTER
+// SYNCHRONISATION NEWSLETTER
 // ============================================
 
 async function synchronizeNewsletterSubscription() {
     if (!currentUserData || !currentUserData.uid) {
-        console.warn('⚠ Aucun utilisateur connecté pour la synchronisation');
+        console.warn('Aucun utilisateur connecte pour la synchronisation');
         return;
     }
 
     try {
-        console.log('🔄 Synchronisation newsletter avec Firestore...');
+        console.log('Synchronisation newsletter avec Firestore...');
         
         const userRef = db.collection('users').doc(currentUserData.uid);
         const doc = await userRef.get();
         
         if (!doc.exists) {
-            console.warn('⚠ Document utilisateur introuvable');
+            console.warn('Document utilisateur introuvable');
             return;
         }
         
         const userData = doc.data();
         const isSubscribed = userData.weeklyNewsletter === true;
         
-        console.log('📊 Statut newsletter (Firestore):', isSubscribed ? 'Abonné ✅' : 'Non abonné ❌');
+        console.log('Statut newsletter (Firestore):', isSubscribed ? 'Abonne' : 'Non abonne');
         
         const newsletterToggle = document.getElementById('weeklyNewsletter');
         if (newsletterToggle) {
@@ -1224,7 +1314,7 @@ async function synchronizeNewsletterSubscription() {
         }
         
         if (isSubscribed && !userData.newsletterSubscribedAt) {
-            console.log('⚠ Inscription manquante détectée - envoi au Worker...');
+            console.log('Inscription manquante detectee - envoi au Worker...');
             
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
             
@@ -1233,20 +1323,20 @@ async function synchronizeNewsletterSubscription() {
                     newsletterSubscribedAt: new Date().toISOString()
                 });
                 
-                console.log('✅ Inscription newsletter rattrapée');
+                console.log('Inscription newsletter rattrapee');
             }
         } else if (isSubscribed && userData.newsletterSubscribedAt) {
-            console.log('✅ Utilisateur déjà abonné (depuis', userData.newsletterSubscribedAt, ')');
+            console.log('Utilisateur deja abonne (depuis', userData.newsletterSubscribedAt, ')');
         }
         
     } catch (error) {
-        console.error('❌ Erreur synchronisation newsletter:', error);
+        console.error('Erreur synchronisation newsletter:', error);
     }
 }
 
 async function subscribeToNewsletter(email, name) {
     try {
-        console.log('📧 Inscription à la newsletter:', email);
+        console.log('Inscription a la newsletter:', email);
         
         const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
             method: 'POST',
@@ -1263,25 +1353,25 @@ async function subscribeToNewsletter(email, name) {
         
         if (!response.ok) {
             const errorData = await response.json();
-            console.warn('⚠ Erreur Worker:', errorData);
+            console.warn('Erreur Worker:', errorData);
             return false;
         }
         
         const data = await response.json();
-        console.log('✅ Inscription newsletter réussie:', data);
-        showToast('success', 'Succès !', 'Vous êtes maintenant inscrit à la newsletter hebdomadaire');
+        console.log('Inscription newsletter reussie:', data);
+        showToast('success', 'Success', 'You are now subscribed to the weekly newsletter');
         
         return true;
         
     } catch (error) {
-        console.error('❌ Erreur inscription newsletter:', error);
+        console.error('Erreur inscription newsletter:', error);
         return false;
     }
 }
 
 async function unsubscribeFromNewsletter(email) {
     try {
-        console.log('📧 Désinscription de la newsletter:', email);
+        console.log('Desinscription de la newsletter:', email);
         
         try {
             const img = new Image();
@@ -1289,11 +1379,11 @@ async function unsubscribeFromNewsletter(email) {
             
             await new Promise((resolve, reject) => {
                 img.onload = () => {
-                    console.log('✅ Requête GET envoyée avec succès');
+                    console.log('Requete GET envoyee avec succes');
                     resolve();
                 };
                 img.onerror = () => {
-                    console.warn('⚠ Méthode 1 échouée');
+                    console.warn('Methode 1 echouee');
                     reject();
                 };
                 
@@ -1302,12 +1392,12 @@ async function unsubscribeFromNewsletter(email) {
                 img.src = unsubscribeUrl;
             });
             
-            console.log('✅ Désinscription newsletter réussie');
-            showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+            console.log('Desinscription newsletter reussie');
+            showToast('info', 'Unsubscribed', 'You will no longer receive the weekly newsletter');
             return true;
             
         } catch (error1) {
-            console.log('⚠ Méthode GET échouée, tentative fetch...');
+            console.log('Methode GET echouee, tentative fetch...');
         }
         
         await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe`, {
@@ -1321,14 +1411,14 @@ async function unsubscribeFromNewsletter(email) {
             mode: 'no-cors'
         });
         
-        console.log('✅ Requête désinscription envoyée');
-        showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+        console.log('Requete desinscription envoyee');
+        showToast('info', 'Unsubscribed', 'You will no longer receive the weekly newsletter');
         return true;
         
     } catch (error) {
-        console.error('❌ Erreur désinscription newsletter:', error);
+        console.error('Erreur desinscription newsletter:', error);
         
-        showToast('warning', 'Désinscription enregistrée', 'Votre préférence est sauvegardée dans votre compte');
+        showToast('warning', 'Preference saved', 'Your preference has been saved in your account');
         return true;
     }
 }
@@ -1398,7 +1488,7 @@ function switchTab(tabName) {
         activeTab.classList.add('active');
     }
     
-    console.log('📑 Onglet changé:', tabName);
+    console.log('Onglet change:', tabName);
 }
 
 // ============================================
@@ -1414,7 +1504,7 @@ async function saveNotificationSettings() {
     await saveSettings();
     
     if (currentSettings.weeklyNewsletter !== previousNewsletterState) {
-        console.log('📧 Changement préférence newsletter détecté, synchronisation...');
+        console.log('Changement preference newsletter detecte, synchronisation...');
         
         if (currentSettings.weeklyNewsletter) {
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
@@ -1435,14 +1525,14 @@ async function saveNotificationSettings() {
         }
     }
     
-    showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
+    showToast('success', 'Success', 'Notification preferences saved');
 }
 
 async function savePrivacySettings() {
     currentSettings.analytics = document.getElementById('analytics').checked;
     
     await saveSettings();
-    showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
+    showToast('success', 'Success', 'Privacy settings saved');
 }
 
 async function saveSettings() {
@@ -1463,12 +1553,12 @@ async function saveSettings() {
                 weeklyNewsletter: currentSettings.weeklyNewsletter
             });
             
-            console.log('✅ Paramètres sauvegardés dans Firestore');
+            console.log('Parametres sauvegardes dans Firestore');
         }
         
     } catch (error) {
-        console.error('❌ Erreur lors de la sauvegarde:', error);
-        showToast('error', 'Erreur', 'Impossible de sauvegarder vos paramètres');
+        console.error('Erreur lors de la sauvegarde:', error);
+        showToast('error', 'Error', 'Unable to save your settings');
     }
 }
 
@@ -1478,12 +1568,12 @@ async function saveSettings() {
 
 async function exportUserData() {
     if (!currentUserData) {
-        showToast('error', 'Erreur', 'Vous devez être connecté');
+        showToast('error', 'Error', 'You must be logged in');
         return;
     }
     
     try {
-        showToast('info', 'Export en cours...', 'Préparation de vos données');
+        showToast('info', 'Exporting', 'Preparing your data');
         
         const exportData = {
             user: currentUserData,
@@ -1500,18 +1590,18 @@ async function exportUserData() {
         link.download = 'alphavault-export-' + Date.now() + '.json';
         link.click();
         
-        showToast('success', 'Succès !', 'Vos données ont été exportées');
+        showToast('success', 'Success', 'Your data has been exported');
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'export:', error);
-        showToast('error', 'Erreur', 'Impossible d\'exporter vos données');
+        console.error('Erreur lors de l\'export:', error);
+        showToast('error', 'Error', 'Unable to export your data');
     }
 }
 
 function clearCache() {
     const confirmed = confirm(
-        'Êtes-vous sûr de vouloir vider le cache ?\n\n' +
-        'Cette action supprimera toutes les données temporaires.'
+        'Are you sure you want to clear the cache?\n\n' +
+        'This will delete all temporary data.'
     );
     
     if (!confirmed) return;
@@ -1526,49 +1616,49 @@ function clearCache() {
             }
         });
         
-        showToast('success', 'Succès !', 'Cache vidé avec succès');
+        showToast('success', 'Success', 'Cache cleared successfully');
         
     } catch (error) {
-        console.error('❌ Erreur lors du vidage du cache:', error);
-        showToast('error', 'Erreur', 'Impossible de vider le cache');
+        console.error('Erreur lors du vidage du cache:', error);
+        showToast('error', 'Error', 'Unable to clear cache');
     }
 }
 
 async function deleteAllAnalyses() {
     const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
-        'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
+        'WARNING\n\n' +
+        'Are you sure you want to delete ALL your analyses?\n\n' +
+        'This action is IRREVERSIBLE!'
     );
     
     if (!confirmed) return;
     
-    showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
+    showToast('info', 'Deleting', 'Deleting your analyses');
     
     try {
-        showToast('success', 'Succès !', 'Analyses supprimées');
+        showToast('success', 'Success', 'Analyses deleted');
     } catch (error) {
-        console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Impossible de supprimer les analyses');
+        console.error('Erreur:', error);
+        showToast('error', 'Error', 'Unable to delete analyses');
     }
 }
 
 async function deleteAllPortfolios() {
     const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
-        'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
+        'WARNING\n\n' +
+        'Are you sure you want to delete ALL your portfolios?\n\n' +
+        'This action is IRREVERSIBLE!'
     );
     
     if (!confirmed) return;
     
-    showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
+    showToast('info', 'Deleting', 'Deleting your portfolios');
     
     try {
-        showToast('success', 'Succès !', 'Portfolios supprimés');
+        showToast('success', 'Success', 'Portfolios deleted');
     } catch (error) {
-        console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Impossible de supprimer les portfolios');
+        console.error('Erreur:', error);
+        showToast('error', 'Error', 'Unable to delete portfolios');
     }
 }
 
@@ -1583,13 +1673,13 @@ function showToast(type, title, message) {
         console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
         
         if (type === 'error') {
-            console.error(`❌ ${title}: ${message}`);
+            console.error(`${title}: ${message}`);
         } else if (type === 'success') {
-            console.log(`✅ ${title}: ${message}`);
+            console.log(`${title}: ${message}`);
         } else if (type === 'warning') {
-            console.warn(`⚠ ${title}: ${message}`);
+            console.warn(`${title}: ${message}`);
         } else if (type === 'info') {
-            console.info(`ℹ ${title}: ${message}`);
+            console.info(`${title}: ${message}`);
         }
         return;
     }
@@ -1656,4 +1746,4 @@ function isFirebaseInitialized() {
            typeof firebaseDb !== 'undefined';
 }
 
-console.log('✅ Script de paramètres chargé avec gestion d\'abonnement - Version 3.0');
+console.log('Script de parametres charge avec gestion d\'abonnement - Version 4.0 (Sans emojis + Downgrade active)');
