@@ -61,6 +61,424 @@
 
     <!-- Analytics Tracker -->
     <script src="assets/js/analytics-tracker.js"></script>
+    
+    <!-- ✅ STYLES ADDITIONNELS POUR PLAN & SUBSCRIPTION -->
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           PLAN & SUBSCRIPTION - STYLES PREMIUM
+           ═══════════════════════════════════════════════════════════ */
+        
+        .current-plan-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-mode .current-plan-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .current-plan-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            animation: planCardPulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes planCardPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+        }
+        
+        .plan-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .plan-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .plan-icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+        
+        .plan-details h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 0 4px 0;
+            color: var(--text-primary);
+        }
+        
+        .plan-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .basic-badge {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+        
+        .pro-badge {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        
+        .platinum-badge {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        
+        .plan-price {
+            text-align: right;
+        }
+        
+        .plan-price-currency {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            vertical-align: super;
+        }
+        
+        .plan-price-amount {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        
+        .plan-price-period {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .page-access-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-access-info i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .page-access-info strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        
+        .plan-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .plan-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .plan-feature {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        .plan-feature:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .plan-feature i {
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+        
+        .plan-feature span {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .upgrade-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px dashed rgba(59, 130, 246, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upgrade-cta {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+        
+        .upgrade-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+        }
+        
+        .upgrade-cta i {
+            font-size: 1.2rem;
+        }
+        
+        .plans-comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 32px;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        
+        .plans-comparison-table thead th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            border: none;
+        }
+        
+        .plans-comparison-table thead th:first-child {
+            text-align: left;
+            border-top-left-radius: 16px;
+        }
+        
+        .plans-comparison-table thead th:last-child {
+            border-top-right-radius: 16px;
+        }
+        
+        .plans-comparison-table tbody tr {
+            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+        }
+        
+        body.dark-mode .plans-comparison-table tbody tr {
+            border-bottom-color: rgba(71, 85, 105, 0.3);
+        }
+        
+        .plans-comparison-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .plans-comparison-table tbody td {
+            padding: 16px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .plans-comparison-table tbody td {
+            background: var(--card-bg);
+        }
+        
+        .plans-comparison-table tbody tr:hover td {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .feature-name {
+            text-align: left !important;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .current-plan-column {
+            background: rgba(59, 130, 246, 0.1) !important;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .current-plan-column::before {
+            content: '★';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .text-success {
+            color: var(--success-color);
+        }
+        
+        .text-muted {
+            color: var(--text-tertiary);
+        }
+        
+        .feature-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .subscription-management {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        
+        .subscription-card {
+            background: white;
+            border: 2px solid rgba(203, 213, 225, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .subscription-card {
+            background: var(--card-bg);
+            border-color: rgba(71, 85, 105, 0.3);
+        }
+        
+        .subscription-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+        
+        .subscription-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .subscription-card h4 i {
+            color: var(--primary-color);
+        }
+        
+        .subscription-card p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+        
+        .billing-history-empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+        
+        .billing-history-empty i {
+            font-size: 3rem;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .billing-history-empty p {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+        }
+        
+        .renewal-info {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success-color);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .renewal-info p {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .renewal-info p i {
+            color: var(--success-color);
+            margin-right: 8px;
+        }
+    </style>
 </head>
 <body>
     
@@ -194,7 +612,7 @@
                             <i class='fas fa-chart-line'></i>
                             <span>Trend Prediction</span>
                         </a>
-                        <a href='forex-converter.html' class='nav-link active'>
+                        <a href='forex-converter.html' class='nav-link'>
                             <i class='fas fa-exchange-alt'></i>
                             <span>Forex Converter</span>
                         </a>
@@ -265,7 +683,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -319,7 +736,7 @@
                         <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
-                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                            <span data-user-plan class="sidebar-user-plan">Basic Plan</span>
                         </div>
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
@@ -386,7 +803,11 @@
                     
                     <!-- Settings Navigation -->
                     <div class="settings-nav glass-nav">
-                        <button class="settings-nav-item active" data-tab="notifications">
+                        <button class="settings-nav-item active" data-tab="plan">
+                            <i class="fas fa-crown"></i>
+                            <span>Plan & Subscription</span>
+                        </button>
+                        <button class="settings-nav-item" data-tab="notifications">
                             <i class="fas fa-bell"></i>
                             <span>Notifications</span>
                         </button>
@@ -403,8 +824,157 @@
                     <!-- Settings Content -->
                     <div class="settings-content glass-card">
                         
-                        <!-- TAB: Notifications -->
-                        <div class="settings-tab active" id="tab-notifications">
+                        <!-- ═══════════════════════════════════════════════════════════
+                             TAB: PLAN & SUBSCRIPTION
+                             ═══════════════════════════════════════════════════════════ -->
+                        <div class="settings-tab active" id="tab-plan">
+                            <h2>
+                                <i class="fas fa-crown section-icon-glow"></i>
+                                Plan & Subscription
+                            </h2>
+                            
+                            <!-- ✅ CURRENT PLAN CARD -->
+                            <div class="current-plan-card">
+                                <div class="plan-header">
+                                    <div class="plan-info">
+                                        <div class="plan-icon-circle" id="planIconCircle">
+                                            <i class="fas fa-star" id="currentPlanIcon"></i>
+                                        </div>
+                                        <div class="plan-details">
+                                            <h3 id="currentPlanName">Basic Plan</h3>
+                                            <span class="plan-badge basic-badge" id="currentPlanBadge">Basic</span>
+                                        </div>
+                                    </div>
+                                    <div class="plan-price" id="currentPlanPrice">
+                                        <span class="plan-price-currency">$</span>
+                                        <span class="plan-price-amount">29</span>
+                                        <span class="plan-price-period">/month</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- ✅ PAGE ACCESS INFO -->
+                                <div class="page-access-info" id="pageAccessInfo">
+                                    <i class="fas fa-check-circle"></i> Access to <strong>9 pages</strong>
+                                </div>
+                                
+                                <!-- ✅ PLAN FEATURES -->
+                                <div class="settings-section">
+                                    <h3>Included Features</h3>
+                                    <ul class="plan-features-grid" id="currentPlanFeatures">
+                                        <!-- Features dynamically loaded by JavaScript -->
+                                        <li class="plan-feature">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Loading...</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- ✅ UPGRADE SECTION -->
+                                <div class="upgrade-section" id="upgradeSection">
+                                    <p style="margin-bottom: 16px; color: var(--text-secondary); font-weight: 600;">
+                                        <i class="fas fa-arrow-up" style="color: var(--primary-color);"></i>
+                                        Unlock more features with a premium plan
+                                    </p>
+                                    <button class="upgrade-cta" id="upgradePlanBtn">
+                                        <i class="fas fa-rocket"></i>
+                                        Upgrade to Pro
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- ✅ PLANS COMPARISON TABLE -->
+                            <div class="settings-section">
+                                <h3>Compare Plans</h3>
+                                <div style="overflow-x: auto;">
+                                    <table class="plans-comparison-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Feature</th>
+                                                <th>Basic</th>
+                                                <th>Pro</th>
+                                                <th>Platinum</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plansComparisonBody">
+                                            <!-- Dynamically loaded by JavaScript -->
+                                            <tr>
+                                                <td class="feature-name">Loading...</td>
+                                                <td colspan="3" style="text-align: center;">Please wait...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- ✅ SUBSCRIPTION MANAGEMENT (only for active subscriptions) -->
+                            <div class="settings-section" id="managePlanSection" style="display: none;">
+                                <h3>Subscription Management</h3>
+                                
+                                <!-- Renewal Info -->
+                                <div class="renewal-info">
+                                    <p>
+                                        <i class="fas fa-calendar-check"></i>
+                                        Your subscription renews on <strong id="renewalDate">Loading...</strong>
+                                    </p>
+                                </div>
+                                
+                                <!-- Management Actions -->
+                                <div class="subscription-management">
+                                    <div class="subscription-card">
+                                        <h4>
+                                            <i class="fas fa-credit-card"></i>
+                                            Manage Payment
+                                        </h4>
+                                        <p>Update your payment method, billing address, and view invoices</p>
+                                        <button class="btn-secondary" id="openCustomerPortalBtn">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            Open Billing Portal
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="subscription-card">
+                                        <h4>
+                                            <i class="fas fa-pause-circle"></i>
+                                            Cancel Subscription
+                                        </h4>
+                                        <p>You will keep access until the end of your billing period</p>
+                                        <button class="btn-danger" id="cancelSubscriptionBtn">
+                                            <i class="fas fa-times-circle"></i>
+                                            Cancel Subscription
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="subscription-card" id="reactivateCard" style="display: none;">
+                                        <h4>
+                                            <i class="fas fa-play-circle"></i>
+                                            Reactivate Subscription
+                                        </h4>
+                                        <p>Resume your subscription before the end of the current period</p>
+                                        <button class="btn-success" id="reactivateSubscriptionBtn">
+                                            <i class="fas fa-check-circle"></i>
+                                            Reactivate Subscription
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ✅ BILLING HISTORY (only for paid plans) -->
+                            <div class="settings-section" id="billingHistorySection" style="display: none;">
+                                <h3>Billing History</h3>
+                                <div id="billingHistoryList">
+                                    <!-- Dynamically loaded by JavaScript -->
+                                    <div class="billing-history-empty">
+                                        <i class="fas fa-receipt"></i>
+                                        <p>Loading billing history...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ═══════════════════════════════════════════════════════════
+                             TAB: NOTIFICATIONS
+                             ═══════════════════════════════════════════════════════════ -->
+                        <div class="settings-tab" id="tab-notifications">
                             <h2>
                                 <i class="fas fa-bell section-icon-glow"></i>
                                 Notifications
@@ -454,7 +1024,9 @@
                             </div>
                         </div>
                         
-                        <!-- TAB: Privacy -->
+                        <!-- ═══════════════════════════════════════════════════════════
+                             TAB: PRIVACY
+                             ═══════════════════════════════════════════════════════════ -->
                         <div class="settings-tab" id="tab-privacy">
                             <h2>
                                 <i class="fas fa-shield-alt section-icon-glow"></i>
@@ -483,7 +1055,9 @@
                             </div>
                         </div>
                         
-                        <!-- TAB: Data -->
+                        <!-- ═══════════════════════════════════════════════════════════
+                             TAB: DATA
+                             ═══════════════════════════════════════════════════════════ -->
                         <div class="settings-tab" id="tab-data">
                             <h2>
                                 <i class="fas fa-database section-icon-glow"></i>
