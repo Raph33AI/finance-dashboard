@@ -384,71 +384,54 @@ body.dark-mode .search-suggestions {
     opacity: 0.8;
 }
 
-/* ============================================
-   💡 SEARCH SUGGESTIONS - HIGHLIGHT ULTRA-VISIBLE
-   ============================================ */
-
-/* ✅ VERSION FINALE : CONTRASTE MAXIMUM */
+/* ✅ CORRECTION FINALE : HIGHLIGHT BLEU/VIOLET DÉGRADÉ */
 .suggestion-match {
     background: linear-gradient(135deg, 
-        rgba(102, 126, 234, 1) 0%,      /* ✅ 100% opaque (était 0.95) */
-        rgba(118, 75, 162, 1) 100%);    /* ✅ 100% opaque (était 0.9) */
-    border: 2px solid rgba(255, 255, 255, 0.4); /* ✅ Bordure blanche pour séparation */
-    color: #ffffff !important; /* ✅ Blanc pur forcé */
-    padding: 6px 14px; /* ✅ Padding augmenté */
-    border-radius: 12px;
-    font-weight: 900; /* ✅ Extra-bold (était 800) */
-    font-size: 1.05em; /* ✅ Légèrement plus grand */
+        rgba(102, 126, 234, 0.95) 0%,    /* Bleu primaire */
+        rgba(118, 75, 162, 0.9) 100%);   /* Violet secondaire */
+    border: 2px solid rgba(102, 126, 234, 0.8);
+    color: #ffffff; /* ✅ Blanc pur = lisibilité maximale */
+    padding: 5px 12px;
+    border-radius: 10px;
+    font-weight: 800;
     box-shadow: 
-        0 4px 16px rgba(102, 126, 234, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-    text-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.5),   /* ✅ Ombre noire forte */
-        0 0 12px rgba(255, 255, 255, 0.4); /* ✅ Glow blanc */
-    letter-spacing: 0.5px;
+        0 3px 12px rgba(102, 126, 234, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* ✅ Ombre légère pour relief */
+    letter-spacing: 0.3px;
     transition: all 0.3s ease;
 }
 
 .suggestion-match:hover {
     background: linear-gradient(135deg, 
         rgba(102, 126, 234, 1) 0%, 
-        rgba(118, 75, 162, 1) 50%,
-        rgba(240, 147, 251, 1) 100%); /* ✅ Ajout couleur accent au hover */
+        rgba(118, 75, 162, 0.95) 100%);
     box-shadow: 
-        0 6px 24px rgba(102, 126, 234, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    transform: scale(1.08);
-    text-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.6),
-        0 0 16px rgba(255, 255, 255, 0.6);
+        0 4px 16px rgba(102, 126, 234, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
 }
 
-/* ✅ DARK MODE : Dégradé encore plus lumineux */
+/* ✅ DARK MODE : Dégradé plus vif */
 body.dark-mode .suggestion-match {
     background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 1) 0%,      /* ✅ Bleu très clair */
-        rgba(167, 139, 250, 1) 100%);   /* ✅ Violet très clair */
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    color: #ffffff !important;
+        rgba(129, 140, 248, 0.95) 0%,    /* Bleu plus clair */
+        rgba(167, 139, 250, 0.9) 100%);  /* Violet plus clair */
+    border: 2px solid rgba(129, 140, 248, 0.9);
+    color: #ffffff;
     box-shadow: 
-        0 4px 20px rgba(129, 140, 248, 0.7),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5),
-        0 0 24px rgba(129, 140, 248, 0.4); /* ✅ Glow externe */
-    text-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.7),
-        0 0 16px rgba(255, 255, 255, 0.5);
+        0 3px 16px rgba(129, 140, 248, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 body.dark-mode .suggestion-match:hover {
     background: linear-gradient(135deg, 
         rgba(129, 140, 248, 1) 0%, 
-        rgba(167, 139, 250, 1) 50%,
-        rgba(192, 132, 252, 1) 100%);
+        rgba(167, 139, 250, 0.95) 100%);
     box-shadow: 
-        0 6px 28px rgba(129, 140, 248, 0.9),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-        0 0 32px rgba(129, 140, 248, 0.6);
+        0 4px 20px rgba(129, 140, 248, 0.7),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .suggestion-exchange {
@@ -5545,5 +5528,424 @@ body.dark-mode .watchlist-empty {
         height: 36px;
         min-width: 36px;
         min-height: 36px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   💡 SEARCH SUGGESTIONS DROPDOWN - IDENTIQUE AU HIGHLIGHT
+   ═══════════════════════════════════════════════════════════════ */
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 16px;
+    box-shadow: 
+        0 12px 40px rgba(102, 126, 234, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-suggestions.active {
+    display: block;
+}
+
+body.dark-mode .search-suggestions {
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 
+        0 12px 40px rgba(129, 140, 248, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ✅ SUGGESTION ITEM - BORDURE GAUCHE GRADIENT AU HOVER */
+.suggestion-item {
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .suggestion-item {
+    border-bottom-color: rgba(129, 140, 248, 0.1);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.suggestion-item:hover::before {
+    transform: scaleY(1);
+}
+
+.suggestion-item:hover {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.08) 0%, 
+        rgba(118, 75, 162, 0.05) 100%);
+    padding-left: 24px;
+    box-shadow: inset 0 1px 2px rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .suggestion-item:hover {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.12) 0%, 
+        rgba(167, 139, 250, 0.08) 100%);
+}
+
+.suggestion-item.selected {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.12) 0%, 
+        rgba(118, 75, 162, 0.08) 100%);
+    border-left: 4px solid rgba(102, 126, 234, 0.8);
+    padding-left: 24px;
+}
+
+body.dark-mode .suggestion-item.selected {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.15) 0%, 
+        rgba(167, 139, 250, 0.1) 100%);
+    border-left-color: rgba(129, 140, 248, 0.9);
+}
+
+/* ✅ SUGGESTION SYMBOL - STYLE 100% IDENTIQUE AU HIGHLIGHT */
+.suggestion-symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.95) 0%, 
+        rgba(118, 75, 162, 0.9) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.8);
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 
+        0 3px 12px rgba(102, 126, 234, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.suggestion-item:hover .suggestion-symbol {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 1) 0%, 
+        rgba(118, 75, 162, 0.95) 100%);
+    box-shadow: 
+        0 4px 16px rgba(102, 126, 234, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+body.dark-mode .suggestion-symbol {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.95) 0%, 
+        rgba(167, 139, 250, 0.9) 100%);
+    border: 2px solid rgba(129, 140, 248, 0.9);
+    color: #ffffff;
+    box-shadow: 
+        0 3px 16px rgba(129, 140, 248, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .suggestion-item:hover .suggestion-symbol {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 1) 0%, 
+        rgba(167, 139, 250, 0.95) 100%);
+    box-shadow: 
+        0 4px 20px rgba(129, 140, 248, 0.7),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* ✅ SUGGESTION MATCH (texte surligné dans recherche) */
+.suggestion-match {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.95) 0%, 
+        rgba(118, 75, 162, 0.9) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.8);
+    color: #ffffff;
+    padding: 5px 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    box-shadow: 
+        0 3px 12px rgba(102, 126, 234, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.suggestion-match:hover {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 1) 0%, 
+        rgba(118, 75, 162, 0.95) 100%);
+    box-shadow: 
+        0 4px 16px rgba(102, 126, 234, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+body.dark-mode .suggestion-match {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.95) 0%, 
+        rgba(167, 139, 250, 0.9) 100%);
+    border: 2px solid rgba(129, 140, 248, 0.9);
+    color: #ffffff;
+    box-shadow: 
+        0 3px 16px rgba(129, 140, 248, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .suggestion-match:hover {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 1) 0%, 
+        rgba(167, 139, 250, 0.95) 100%);
+    box-shadow: 
+        0 4px 20px rgba(129, 140, 248, 0.7),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* ✅ SUGGESTION INFO (nom + ticker) */
+.suggestion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.suggestion-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.suggestion-ticker {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+body.dark-mode .suggestion-ticker {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ✅ SUGGESTION EXCHANGE BADGE */
+.suggestion-exchange {
+    display: inline-block;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.15) 0%, 
+        rgba(118, 75, 162, 0.1) 100%);
+    border: 1.5px solid rgba(102, 126, 234, 0.3);
+    color: var(--ml-primary);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.suggestion-item:hover .suggestion-exchange {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.2) 0%, 
+        rgba(118, 75, 162, 0.15) 100%);
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .suggestion-exchange {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.2) 0%, 
+        rgba(167, 139, 250, 0.15) 100%);
+    border-color: rgba(129, 140, 248, 0.4);
+    color: #818cf8;
+}
+
+body.dark-mode .suggestion-item:hover .suggestion-exchange {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.25) 0%, 
+        rgba(167, 139, 250, 0.2) 100%);
+    border-color: rgba(129, 140, 248, 0.6);
+}
+
+/* ✅ SUGGESTION EMPTY/LOADING STATES */
+.suggestion-empty {
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.suggestion-empty i {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.5;
+}
+
+body.dark-mode .suggestion-empty i {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.suggestion-loading {
+    padding: 24px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.suggestion-loading i {
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: spin 1s linear infinite;
+}
+
+body.dark-mode .suggestion-loading i {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ✅ SCROLLBAR PERSONNALISÉE */
+.search-suggestions::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-suggestions::-webkit-scrollbar-track {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 4px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: var(--transition-smooth);
+}
+
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+body.dark-mode .search-suggestions::-webkit-scrollbar-track {
+    background: rgba(129, 140, 248, 0.08);
+}
+
+body.dark-mode .search-suggestions::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+}
+
+body.dark-mode .search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6366f1, #9333ea);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   📱 RESPONSIVE - SEARCH ZONE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .form-input {
+        font-size: 16px !important;
+        padding: 14px 16px;
+    }
+    
+    .form-input:focus {
+        font-size: 16px !important;
+    }
+    
+    .search-suggestions {
+        max-height: 300px;
+    }
+    
+    .suggestion-item {
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    
+    .suggestion-symbol {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .suggestion-exchange {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .suggestion-name {
+        font-size: 0.9rem;
+    }
+    
+    .suggestion-ticker {
+        font-size: 0.8rem;
     }
 }
