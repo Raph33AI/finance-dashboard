@@ -746,11 +746,10 @@
 
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + APPLE PAY/GOOGLE PAY
-   AlphaVault AI v3.0 - OPTIMISÉ MOBILE
+   AlphaVault AI v3.1 - DIAGNOSTIC AVANCÉ MOBILE
    ✅ Support Apple Pay / Google Pay (Mobile + Desktop)
-   ✅ Support codes promo TRIAL (14 jours gratuits sans CB)
-   ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
-   ✅ Plan Basic : 100% gratuit sans carte bancaire
+   ✅ Diagnostic avancé pour détecter les problèmes
+   ✅ Fallback intelligent si Apple Pay/Google Pay indisponible
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙ CONFIGURATION
@@ -760,6 +759,33 @@ const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 console.log('🔧 Checkout configuration:');
 console.log('   Stripe Public Key:', STRIPE_PUBLIC_KEY.substring(0, 20) + '...');
 console.log('   Worker URL:', WORKER_URL);
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 DÉTECTION DE L'ENVIRONNEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function detectEnvironment() {
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+    const isChrome = /Chrome/.test(ua);
+    const isHTTPS = window.location.protocol === 'https:';
+    
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔍 DIAGNOSTIC ENVIRONNEMENT');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('   OS:', isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop');
+    console.log('   Navigateur:', isSafari ? 'Safari' : isChrome ? 'Chrome' : 'Autre');
+    console.log('   HTTPS:', isHTTPS ? '✅' : '❌ REQUIS POUR APPLE PAY');
+    console.log('   User Agent:', ua);
+    console.log('   URL:', window.location.href);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    return { isIOS, isAndroid, isSafari, isChrome, isHTTPS };
+}
+
+const env = detectEnvironment();
 
 // ═══════════════════════════════════════════════════════════════
 // 🎁 CODES PROMO DISPONIBLES
@@ -852,6 +878,13 @@ function createPaymentRequest() {
     
     console.log('   💰 Montant initial:', initialAmount, 'centimes');
     
+    // ⚠ IMPORTANT : Apple Pay/Google Pay nécessitent un montant > 0
+    if (initialAmount === 0) {
+        console.warn('⚠ Montant = 0, Payment Request non créé');
+        hidePaymentRequest();
+        return;
+    }
+    
     // Créer le Payment Request avec le bon montant
     paymentRequest = stripe.paymentRequest({
         country: 'US',
@@ -862,7 +895,7 @@ function createPaymentRequest() {
         },
         requestPayerName: true,
         requestPayerEmail: true,
-        disableWallets: ['link', 'browserCard'], // ✅ DÉSACTIVER LINK ET BROWSER CARD
+        disableWallets: ['link', 'browserCard'], // ✅ DÉSACTIVER LINK
     });
 
     // Créer le bouton Payment Request
@@ -870,24 +903,61 @@ function createPaymentRequest() {
         paymentRequest: paymentRequest,
         style: {
             paymentRequestButton: {
-                type: 'default', // 'buy' | 'donate' | 'default'
-                theme: 'dark', // 'dark' | 'light' | 'light-outline'
+                type: 'default',
+                theme: 'dark',
                 height: '56px',
             },
         },
     });
 
     // Vérifier la disponibilité d'Apple Pay / Google Pay
-    paymentRequest.canMakePayment().then(function(result) {
-        console.log('📱 Résultat canMakePayment:', result);
-        
-        if (result) {
+    paymentRequest.canMakePayment()
+        .then(function(result) {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('📱 RÉSULTAT canMakePayment()');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('   Résultat brut:', result);
+            
+            if (result === null) {
+                console.error('❌ canMakePayment() a retourné NULL');
+                console.error('   Causes possibles:');
+                console.error('   1. Domaine Apple Pay NON vérifié dans Stripe Dashboard');
+                console.error('   2. Site non en HTTPS (requis pour Apple Pay)');
+                console.error('   3. Navigateur incompatible (iOS = Safari uniquement)');
+                console.error('   4. Utilisateur sans wallet configuré');
+                console.error('');
+                console.error('🔧 ACTIONS REQUISES:');
+                console.error('   → Aller sur https://dashboard.stripe.com/settings/payments');
+                console.error('   → Section "Apple Pay" → Vérifier votre domaine');
+                console.error('   → Télécharger le fichier de vérification');
+                console.error('   → Placer à: .well-known/apple-developer-merchantid-domain-association');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                hidePaymentRequest();
+                showPaymentRequestError();
+                return;
+            }
+            
             // Vérifier si c'est vraiment Apple Pay ou Google Pay (pas Link)
             const isAppleOrGooglePay = result.applePay || result.googlePay;
             
-            console.log('   Apple Pay:', result.applePay ? '✅' : '❌');
-            console.log('   Google Pay:', result.googlePay ? '✅' : '❌');
-            console.log('   Link:', result.link ? '✅ (désactivé)' : '❌');
+            console.log('   Apple Pay:', result.applePay ? '✅ DISPONIBLE' : '❌ Non disponible');
+            console.log('   Google Pay:', result.googlePay ? '✅ DISPONIBLE' : '❌ Non disponible');
+            console.log('   Link:', result.link ? '⚠ Disponible (désactivé)' : '❌ Non disponible');
+            
+            if (env.isIOS && !result.applePay) {
+                console.warn('⚠ iOS détecté mais Apple Pay non disponible');
+                console.warn('   → Vérifier que le domaine est enregistré dans Stripe');
+                console.warn('   → Vérifier que l\'utilisateur a une carte dans Wallet');
+            }
+            
+            if (env.isAndroid && !result.googlePay) {
+                console.warn('⚠ Android détecté mais Google Pay non disponible');
+                console.warn('   → Vérifier que Google Pay est configuré dans Stripe');
+                console.warn('   → Vérifier que l\'utilisateur a Google Pay installé');
+            }
+            
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             if (isAppleOrGooglePay) {
                 console.log('✅ Apple Pay / Google Pay disponible - Montage du bouton');
@@ -897,17 +967,21 @@ function createPaymentRequest() {
                 // Afficher le container uniquement si un plan payant est sélectionné
                 updatePaymentRequestVisibility();
             } else {
-                console.log('ℹ Seulement Link disponible - Bouton masqué');
+                console.log('ℹ Seulement Link disponible (désactivé) - Bouton masqué');
                 hidePaymentRequest();
             }
-        } else {
-            console.log('ℹ Apple Pay / Google Pay non disponible sur cet appareil');
+        })
+        .catch(function(error) {
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('❌ ERREUR canMakePayment()');
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('   Erreur:', error);
+            console.error('   Message:', error.message);
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
             hidePaymentRequest();
-        }
-    }).catch(function(error) {
-        console.error('❌ Erreur canMakePayment:', error);
-        hidePaymentRequest();
-    });
+            showPaymentRequestError();
+        });
 
     // Gérer l'événement de paiement
     paymentRequest.on('paymentmethod', async (ev) => {
@@ -1061,6 +1135,42 @@ function hidePaymentRequest() {
     
     if (container) container.style.display = 'none';
     if (divider) divider.style.display = 'none';
+}
+
+// Afficher un message d'erreur si Apple Pay/Google Pay n'est pas disponible
+function showPaymentRequestError() {
+    const container = document.getElementById('payment-request-container');
+    
+    if (!container) return;
+    
+    // Créer un message d'info pour l'utilisateur
+    const infoMessage = document.createElement('div');
+    infoMessage.style.cssText = `
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border: 2px solid #fbbf24;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.9rem;
+        color: #92400e;
+        font-weight: 600;
+    `;
+    infoMessage.innerHTML = `
+        <i class="fas fa-info-circle" style="font-size: 1.2rem; color: #f59e0b;"></i>
+        <div>
+            <strong>Apple Pay/Google Pay non disponible</strong><br>
+            <span style="font-size: 0.85rem; font-weight: 500;">Veuillez utiliser une carte bancaire ci-dessous</span>
+        </div>
+    `;
+    
+    // Insérer avant le séparateur
+    const divider = document.getElementById('payment-divider');
+    if (divider && divider.parentNode) {
+        divider.parentNode.insertBefore(infoMessage, divider);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1718,4 +1828,4 @@ firebase.auth().onAuthStateChanged(async (user) => {
     }
 });
 
-console.log('✅ Checkout script loaded successfully - Apple Pay + Google Pay enabled (Mobile optimized)');
+console.log('✅ Checkout script loaded successfully - Apple Pay + Google Pay enabled (v3.1 - Diagnostic avancé)');
