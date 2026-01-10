@@ -2668,3 +2668,129 @@ body.dark-mode #modelsBadge > i {
         font-size: 0.9rem;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   🔥 FIX URGENT : CENTRAGE DOUGHNUT CHARTS - ULTRA PRIORITAIRE
+   À AJOUTER TOUT À LA FIN DU FICHIER CSS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ✅ Forcer le conteneur à la bonne taille */
+.model-card .model-chart,
+.model-card .gauge-container,
+.consensus-gauge .model-chart,
+.consensus-gauge .gauge-container,
+.model-chart,
+.gauge-container {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 300px !important;
+    height: 300px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+/* ✅✅ SCORE DISPLAY - REMONTÉ DE FORCE */
+.model-card .gauge-score-display,
+.consensus-gauge .gauge-score-display,
+.gauge-score-display {
+    position: absolute !important;
+    top: 40% !important;  /* 🔥 FORCÉ À 40% */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    text-align: center !important;
+    z-index: 10 !important;
+    width: auto !important;
+    max-width: 85% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ✅✅ CHIFFRE DU SCORE - ESPACE RÉDUIT */
+.model-card .gauge-score-value,
+.consensus-gauge .gauge-score-value,
+.gauge-score-value {
+    font-size: clamp(2.5rem, 7vw, 4rem) !important;
+    font-weight: 900 !important;
+    line-height: 0.9 !important;  /* 🔥 ULTRA COMPACT */
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-bottom: -4px !important;  /* 🔥 NÉGATIF pour coller */
+}
+
+/* ✅✅ LABEL "SCORE" - COLLÉ AU CHIFFRE */
+.model-card .gauge-score-label,
+.consensus-gauge .gauge-score-label,
+.gauge-score-label {
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-top: -2px !important;  /* 🔥 NÉGATIF pour coller */
+    line-height: 1 !important;
+}
+
+/* ✅✅ SOUS-LABEL (% change) - COLLÉ */
+.model-card .gauge-score-sublabel,
+.consensus-gauge .gauge-score-sublabel,
+.gauge-score-sublabel {
+    font-size: clamp(0.65rem, 1.2vw, 0.75rem) !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-top: 0px !important;  /* 🔥 COLLÉ au label */
+    line-height: 1 !important;
+}
+
+/* ✅ Mobile responsive */
+@media (max-width: 768px) {
+    .gauge-score-display {
+        top: 42% !important;  /* Légèrement ajusté pour mobile */
+    }
+    
+    .gauge-score-value {
+        font-size: 2.5rem !important;
+        line-height: 0.9 !important;
+        margin-bottom: -3px !important;
+    }
+    
+    .gauge-score-label {
+        font-size: 0.75rem !important;
+        margin-top: -1px !important;
+    }
+    
+    .gauge-score-sublabel {
+        font-size: 0.7rem !important;
+        margin-top: 0px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .gauge-score-display {
+        top: 43% !important;
+    }
+    
+    .gauge-score-value {
+        font-size: 2rem !important;
+        margin-bottom: -2px !important;
+    }
+    
+    .gauge-score-label {
+        font-size: 0.65rem !important;
+    }
+}
+
+/* 🔥 FIX HOVER - Ne pas casser le centrage */
+.model-chart:hover .gauge-score-display,
+.gauge-container:hover .gauge-score-display {
+    transform: translate(-50%, -50%) scale(1.05) !important;
+}
