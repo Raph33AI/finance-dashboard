@@ -384,28 +384,54 @@ body.dark-mode .search-suggestions {
     opacity: 0.8;
 }
 
+/* ✅ CORRECTION FINALE : HIGHLIGHT BLEU/VIOLET DÉGRADÉ */
 .suggestion-match {
-    background: rgba(255, 215, 0, 0.9); /* ✅ Opacité augmentée à 90% */
-    border: 2px solid rgba(255, 193, 7, 0.95);
-    color: #000000; /* Noir pur pour contraste maximal */
-    padding: 4px 10px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.95) 0%,    /* Bleu primaire */
+        rgba(118, 75, 162, 0.9) 100%);   /* Violet secondaire */
+    border: 2px solid rgba(102, 126, 234, 0.8);
+    color: #ffffff; /* ✅ Blanc pur = lisibilité maximale */
+    padding: 5px 12px;
+    border-radius: 10px;
     font-weight: 800;
     box-shadow: 
-        0 2px 8px rgba(255, 215, 0, 0.5),
-        inset 0 1px 2px rgba(255, 255, 255, 0.7);
-    /* ❌ backdrop-filter supprimé pour éviter le flou */
-    text-shadow: none; /* Pas de shadow = texte net */
+        0 3px 12px rgba(102, 126, 234, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* ✅ Ombre légère pour relief */
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
 }
 
-body.dark-mode .suggestion-match {
-    background: rgba(255, 235, 59, 0.95); /* ✅ Jaune vif en dark mode */
-    border-color: rgba(255, 235, 59, 1);
-    color: #1a1a1a; /* ✅ Noir légèrement plus doux */
+.suggestion-match:hover {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 1) 0%, 
+        rgba(118, 75, 162, 0.95) 100%);
     box-shadow: 
-        0 2px 12px rgba(255, 235, 59, 0.7),
+        0 4px 16px rgba(102, 126, 234, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+/* ✅ DARK MODE : Dégradé plus vif */
+body.dark-mode .suggestion-match {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 0.95) 0%,    /* Bleu plus clair */
+        rgba(167, 139, 250, 0.9) 100%);  /* Violet plus clair */
+    border: 2px solid rgba(129, 140, 248, 0.9);
+    color: #ffffff;
+    box-shadow: 
+        0 3px 16px rgba(129, 140, 248, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .suggestion-match:hover {
+    background: linear-gradient(135deg, 
+        rgba(129, 140, 248, 1) 0%, 
+        rgba(167, 139, 250, 0.95) 100%);
+    box-shadow: 
+        0 4px 20px rgba(129, 140, 248, 0.7),
         inset 0 1px 2px rgba(255, 255, 255, 0.5);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); /* Léger glow pour lisibilité */
 }
 
 .suggestion-exchange {
