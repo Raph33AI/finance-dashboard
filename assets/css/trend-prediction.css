@@ -958,7 +958,7 @@ body.dark-mode .ensemble-card {
 
 /* ═══════════════════════════════════════════════════════════════
    ✨ MODERN GAUGE STYLES - DOUGHNUT ANIMATED (100% RESPONSIVE)
-   ✅ FIX PC : Titre non rogné + Score parfaitement centré
+   ✅ FIX PC : Score parfaitement centré verticalement
    ═══════════════════════════════════════════════════════════════ */
 
 /* ✅ CORRECTION CONTENEUR : Dimensions fixes avec centrage parfait */
@@ -1020,10 +1020,10 @@ body.dark-mode .ensemble-card {
     }
 }
 
-/* ✅ SCORE CENTRAL : Positionnement absolu centré */
+/* ✅✅ SCORE CENTRAL : Centrage vertical parfait (remonté de 3%) */
 .gauge-score-display {
     position: absolute;
-    top: 50%;
+    top: 47%;  /* ✅ CORRECTION : Remonté de 50% → 47% */
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -1031,18 +1031,24 @@ body.dark-mode .ensemble-card {
     pointer-events: none;
     width: auto;
     max-width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
+/* ✅ Valeur du score (plus grande et bien visible) */
 .gauge-score-value {
-    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-size: clamp(2.5rem, 7vw, 4rem);  /* ✅ Augmenté de 3.5rem → 4rem */
     font-weight: 900;
     line-height: 1;
     background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 8px;
+    margin-bottom: 4px;  /* ✅ Réduit de 8px → 4px */
     animation: shimmer 3s ease-in-out infinite;
+    letter-spacing: -1px;
 }
 
 @keyframes shimmer {
@@ -1050,18 +1056,22 @@ body.dark-mode .ensemble-card {
     50% { opacity: 0.85; }
 }
 
+/* ✅ Label "SCORE" (bien espacé) */
 .gauge-score-label {
-    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+    font-size: clamp(0.75rem, 1.6vw, 0.95rem);  /* ✅ Légèrement augmenté */
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;  /* ✅ Augmenté de 1px → 1.5px */
+    margin-top: 2px;  /* ✅ Ajouté pour séparer de la valeur */
 }
 
+/* ✅ Sous-label (% change, etc.) */
 .gauge-score-sublabel {
-    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+    font-size: clamp(0.7rem, 1.3vw, 0.85rem);  /* ✅ Légèrement augmenté */
     color: var(--text-tertiary);
-    margin-top: 4px;
+    margin-top: 6px;  /* ✅ Augmenté de 4px → 6px */
+    font-weight: 600;
 }
 
 /* Indicateurs de zones */
@@ -1105,6 +1115,11 @@ body.dark-mode .gauge-zone-marker {
 @media (hover: hover) {
     .model-chart:hover .gauge-wrapper::before {
         animation: pulseGlowHover 2s ease-in-out infinite;
+    }
+    
+    .model-chart:hover .gauge-score-display {
+        transform: translate(-50%, -50%) scale(1.05);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
 
@@ -1150,6 +1165,45 @@ body.dark-mode .gauge-zone-marker {
     max-width: 100%;
     height: auto;
     min-height: 280px;
+}
+
+/* ✅ Amélioration lisibilité mobile */
+@media (max-width: 768px) {
+    .gauge-score-display {
+        top: 48%;  /* ✅ Légèrement ajusté pour mobile */
+    }
+    
+    .gauge-score-value {
+        font-size: 2.5rem;
+        letter-spacing: -0.5px;
+    }
+    
+    .gauge-score-label {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .gauge-score-sublabel {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .gauge-score-display {
+        top: 48%;
+    }
+    
+    .gauge-score-value {
+        font-size: 2rem;
+    }
+    
+    .gauge-score-label {
+        font-size: 0.7rem;
+    }
+    
+    .gauge-score-sublabel {
+        font-size: 0.7rem;
+    }
 }
 
 /* ========================================
