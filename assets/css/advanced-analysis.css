@@ -384,54 +384,71 @@ body.dark-mode .search-suggestions {
     opacity: 0.8;
 }
 
-/* ✅ CORRECTION FINALE : HIGHLIGHT BLEU/VIOLET DÉGRADÉ */
+/* ============================================
+   💡 SEARCH SUGGESTIONS - HIGHLIGHT ULTRA-VISIBLE
+   ============================================ */
+
+/* ✅ VERSION FINALE : CONTRASTE MAXIMUM */
 .suggestion-match {
     background: linear-gradient(135deg, 
-        rgba(102, 126, 234, 0.95) 0%,    /* Bleu primaire */
-        rgba(118, 75, 162, 0.9) 100%);   /* Violet secondaire */
-    border: 2px solid rgba(102, 126, 234, 0.8);
-    color: #ffffff; /* ✅ Blanc pur = lisibilité maximale */
-    padding: 5px 12px;
-    border-radius: 10px;
-    font-weight: 800;
+        rgba(102, 126, 234, 1) 0%,      /* ✅ 100% opaque (était 0.95) */
+        rgba(118, 75, 162, 1) 100%);    /* ✅ 100% opaque (était 0.9) */
+    border: 2px solid rgba(255, 255, 255, 0.4); /* ✅ Bordure blanche pour séparation */
+    color: #ffffff !important; /* ✅ Blanc pur forcé */
+    padding: 6px 14px; /* ✅ Padding augmenté */
+    border-radius: 12px;
+    font-weight: 900; /* ✅ Extra-bold (était 800) */
+    font-size: 1.05em; /* ✅ Légèrement plus grand */
     box-shadow: 
-        0 3px 12px rgba(102, 126, 234, 0.4),
-        inset 0 1px 2px rgba(255, 255, 255, 0.3);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* ✅ Ombre légère pour relief */
-    letter-spacing: 0.3px;
+        0 4px 16px rgba(102, 126, 234, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.5),   /* ✅ Ombre noire forte */
+        0 0 12px rgba(255, 255, 255, 0.4); /* ✅ Glow blanc */
+    letter-spacing: 0.5px;
     transition: all 0.3s ease;
 }
 
 .suggestion-match:hover {
     background: linear-gradient(135deg, 
         rgba(102, 126, 234, 1) 0%, 
-        rgba(118, 75, 162, 0.95) 100%);
+        rgba(118, 75, 162, 1) 50%,
+        rgba(240, 147, 251, 1) 100%); /* ✅ Ajout couleur accent au hover */
     box-shadow: 
-        0 4px 16px rgba(102, 126, 234, 0.6),
-        inset 0 1px 2px rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
+        0 6px 24px rgba(102, 126, 234, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: scale(1.08);
+    text-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.6),
+        0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* ✅ DARK MODE : Dégradé plus vif */
+/* ✅ DARK MODE : Dégradé encore plus lumineux */
 body.dark-mode .suggestion-match {
     background: linear-gradient(135deg, 
-        rgba(129, 140, 248, 0.95) 0%,    /* Bleu plus clair */
-        rgba(167, 139, 250, 0.9) 100%);  /* Violet plus clair */
-    border: 2px solid rgba(129, 140, 248, 0.9);
-    color: #ffffff;
+        rgba(129, 140, 248, 1) 0%,      /* ✅ Bleu très clair */
+        rgba(167, 139, 250, 1) 100%);   /* ✅ Violet très clair */
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #ffffff !important;
     box-shadow: 
-        0 3px 16px rgba(129, 140, 248, 0.5),
-        inset 0 1px 2px rgba(255, 255, 255, 0.4);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        0 4px 20px rgba(129, 140, 248, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 24px rgba(129, 140, 248, 0.4); /* ✅ Glow externe */
+    text-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.7),
+        0 0 16px rgba(255, 255, 255, 0.5);
 }
 
 body.dark-mode .suggestion-match:hover {
     background: linear-gradient(135deg, 
         rgba(129, 140, 248, 1) 0%, 
-        rgba(167, 139, 250, 0.95) 100%);
+        rgba(167, 139, 250, 1) 50%,
+        rgba(192, 132, 252, 1) 100%);
     box-shadow: 
-        0 4px 20px rgba(129, 140, 248, 0.7),
-        inset 0 1px 2px rgba(255, 255, 255, 0.5);
+        0 6px 28px rgba(129, 140, 248, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 0 32px rgba(129, 140, 248, 0.6);
 }
 
 .suggestion-exchange {
