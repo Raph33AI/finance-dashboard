@@ -1203,14 +1203,11 @@ async function performDowngradeToBasic() {
         
         showToast('info', 'Processing', 'Downgrading to Basic plan...');
         
-        // ✅ MISE À JOUR MINIMALE - Seulement les champs d'abonnement
+        // ✅ UTILISER .update() POUR MISE À JOUR PARTIELLE
         const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
         await userRef.update({
             plan: 'basic',
             subscriptionStatus: 'active',
-            // ✅ NE PAS RÉINITIALISER LES AUTRES CHAMPS
-            // On garde : photoURL, displayName, firstName, lastName, bio, company, phone, etc.
-            // On met à jour UNIQUEMENT le plan et le statut
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
