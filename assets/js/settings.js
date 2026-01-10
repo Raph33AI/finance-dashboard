@@ -3,6 +3,7 @@
    ✅ SYNCHRONISATION NEWSLETTER SIMPLIFIÉE (Firestore = Source de vérité)
    ✅ CORRECTION CORS avec MULTIPLES TENTATIVES
    ✅ TOAST CORRIGÉ
+   ✅ NETTOYAGE : General Settings retiré, Notifications et Privacy simplifiés
    ============================================ */
 
 // Configuration
@@ -11,19 +12,11 @@ const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev
 // Variables globales
 let currentUserData = null;
 let currentSettings = {
-    // General
-    language: 'en',
-    timezone: 'America/New_York',
-    currency: 'USD',
-    
     // Notifications
     weeklyNewsletter: true,  // ✅ ACTIVÉ PAR DÉFAUT
-    priceAlerts: true,
     featureUpdates: true,
     
     // Privacy
-    publicProfile: false,
-    publicAnalyses: false,
     analytics: true
 };
 
@@ -115,19 +108,11 @@ function loadDefaultSettings() {
 }
 
 function applySettingsToUI() {
-    // General
-    document.getElementById('language').value = currentSettings.language || 'en';
-    document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
-    document.getElementById('currency').value = currentSettings.currency || 'USD';
-    
     // Notifications
     document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
-    document.getElementById('priceAlerts').checked = currentSettings.priceAlerts !== false;
     document.getElementById('featureUpdates').checked = currentSettings.featureUpdates !== false;
     
     // Privacy
-    document.getElementById('publicProfile').checked = currentSettings.publicProfile === true;
-    document.getElementById('publicAnalyses').checked = currentSettings.publicAnalyses === true;
     document.getElementById('analytics').checked = currentSettings.analytics !== false;
     
     console.log('✅ Interface mise à jour avec les paramètres');
@@ -349,11 +334,6 @@ function initializeEventListeners() {
     });
     
     // Boutons de sauvegarde
-    const saveGeneralBtn = document.getElementById('saveGeneralSettings');
-    if (saveGeneralBtn) {
-        saveGeneralBtn.addEventListener('click', saveGeneralSettings);
-    }
-    
     const saveNotifBtn = document.getElementById('saveNotificationSettings');
     if (saveNotifBtn) {
         saveNotifBtn.addEventListener('click', saveNotificationSettings);
@@ -415,20 +395,10 @@ function switchTab(tabName) {
 // SAUVEGARDE DES PARAMÈTRES
 // ============================================
 
-async function saveGeneralSettings() {
-    currentSettings.language = document.getElementById('language').value;
-    currentSettings.timezone = document.getElementById('timezone').value;
-    currentSettings.currency = document.getElementById('currency').value;
-    
-    await saveSettings();
-    showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
-}
-
 async function saveNotificationSettings() {
     const previousNewsletterState = currentSettings.weeklyNewsletter;
     
     currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
-    currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
     currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
     
     await saveSettings();
@@ -464,8 +434,6 @@ async function saveNotificationSettings() {
 }
 
 async function savePrivacySettings() {
-    currentSettings.publicProfile = document.getElementById('publicProfile').checked;
-    currentSettings.publicAnalyses = document.getElementById('publicAnalyses').checked;
     currentSettings.analytics = document.getElementById('analytics').checked;
     
     await saveSettings();
@@ -648,16 +616,16 @@ function showToast(type, title, message) {
     }
     
     toast.innerHTML = `
-        
-            <i></i>
-        
-        
-            ${title}
-            ${message}
-        
-        
-            <i></i>
-        
+        <div class="toast-icon">
+            <i class="fas ${iconClass}"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
     `;
     
     toastContainer.appendChild(toast);
@@ -690,4 +658,4 @@ function isFirebaseInitialized() {
            typeof firebaseDb !== 'undefined';
 }
 
-console.log('✅ Script de paramètres chargé avec synchronisation newsletter (Firestore = vérité)');
+console.log('✅ Script de paramètres chargé avec synchronisation newsletter (Firestore = vérité) - Version simplifiée');

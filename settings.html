@@ -13,8 +13,7 @@
     <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/settings.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
+
     <!-- ═══════════════════════════════════════════════════════════
         FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
         Compatible: Google, Apple, Android, Firefox, Safari, Edge
@@ -387,11 +386,7 @@
                     
                     <!-- Settings Navigation -->
                     <div class="settings-nav glass-nav">
-                        <button class="settings-nav-item active" data-tab="general">
-                            <i class="fas fa-sliders-h"></i>
-                            <span>General</span>
-                        </button>
-                        <button class="settings-nav-item" data-tab="notifications">
+                        <button class="settings-nav-item active" data-tab="notifications">
                             <i class="fas fa-bell"></i>
                             <span>Notifications</span>
                         </button>
@@ -408,65 +403,8 @@
                     <!-- Settings Content -->
                     <div class="settings-content glass-card">
                         
-                        <!-- TAB: General -->
-                        <div class="settings-tab active" id="tab-general">
-                            <h2>
-                                <i class="fas fa-sliders-h section-icon-glow"></i>
-                                General Settings
-                            </h2>
-                            
-                            <div class="settings-section">
-                                <h3>Language & Region</h3>
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label for="language">Interface language</label>
-                                        <p>Choose the application display language</p>
-                                    </div>
-                                    <select id="language" class="setting-select">
-                                        <option value="en" selected>English</option>
-                                        <option value="fr">Français</option>
-                                        <option value="es">Español</option>
-                                        <option value="de">Deutsch</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label for="timezone">Timezone</label>
-                                        <p>Defines how dates and times are displayed</p>
-                                    </div>
-                                    <select id="timezone" class="setting-select">
-                                        <option value="America/New_York" selected>New York (GMT-5)</option>
-                                        <option value="Europe/London">London (GMT+0)</option>
-                                        <option value="Europe/Paris">Paris (GMT+1)</option>
-                                        <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label for="currency">Default currency</label>
-                                        <p>Currency used for financial analysis</p>
-                                    </div>
-                                    <select id="currency" class="setting-select">
-                                        <option value="USD" selected>US Dollar ($)</option>
-                                        <option value="EUR">Euro (€)</option>
-                                        <option value="GBP">Pound Sterling (£)</option>
-                                        <option value="JPY">Yen (¥)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="settings-actions">
-                                <button class="btn-save" id="saveGeneralSettings">
-                                    <i class="fas fa-save"></i>
-                                    Save changes
-                                </button>
-                            </div>
-                        </div>
-                        
                         <!-- TAB: Notifications -->
-                        <div class="settings-tab" id="tab-notifications">
+                        <div class="settings-tab active" id="tab-notifications">
                             <h2>
                                 <i class="fas fa-bell section-icon-glow"></i>
                                 Notifications
@@ -481,17 +419,6 @@
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="weeklyNewsletter" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label>Price alerts</label>
-                                        <p>Receive alerts when your thresholds are reached</p>
-                                    </div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="priceAlerts" checked>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </div>
@@ -533,31 +460,6 @@
                                 <i class="fas fa-shield-alt section-icon-glow"></i>
                                 Privacy & Security
                             </h2>
-                            
-                            <div class="settings-section">
-                                <h3>Personal Data</h3>
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label>Public profile</label>
-                                        <p>Allow other users to view your profile</p>
-                                    </div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="publicProfile">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <label>Public analyses</label>
-                                        <p>Share your analyses with the community</p>
-                                    </div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="publicAnalyses">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
                             
                             <div class="settings-section">
                                 <h3>Data Collection</h3>
