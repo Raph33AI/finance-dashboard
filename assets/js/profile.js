@@ -6,6 +6,10 @@
    ✅ AUTO-CHARGEMENT SI PAS DE SCROLL
    ============================================ */
 
+
+// Configuration
+const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+
 // Variables globales
 let currentUserData = null;
 let isEditingPersonalInfo = false;
@@ -1520,18 +1524,30 @@ async function handlePasswordChange(e) {
 async function handleDeleteAccount() {
     const confirmed = confirm(
         '⚠ CAREFUL ⚠\n\n' +
-        'Are you sure you want to delete your account?\n\n' +
-        'This action is irreversible.'
+        'Are you sure you want to PERMANENTLY delete your account?\n\n' +
+        'This will:\n' +
+        '• Cancel all active subscriptions\n' +
+        '• Delete all your data (posts, analyses, portfolios)\n' +
+        '• Delete your profile picture\n' +
+        '• Permanently close your account\n\n' +
+        'THIS ACTION CANNOT BE UNDONE!'
     );
     
     if (!confirmed) return;
     
     const doubleConfirmed = confirm(
-        '🔴 LAST CONFIRMATION 🔴\n\n' +
-        'Do you REALLY want to delete your account?'
+        '🔴 FINAL CONFIRMATION 🔴\n\n' +
+        'Type "DELETE" in the next prompt to confirm account deletion.'
     );
     
     if (!doubleConfirmed) return;
+    
+    const userInput = prompt('Type DELETE (in capital letters) to confirm:');
+    
+    if (userInput !== 'DELETE') {
+        showToast('info', 'Cancelled', 'Account deletion cancelled');
+        return;
+    }
     
     try {
         const user = firebase.auth().currentUser;
@@ -1541,10 +1557,141 @@ async function handleDeleteAccount() {
             return;
         }
         
-        showToast('info', 'Deletion in progress...', 'Please wait');
+        showToast('info', 'Deletion in progress...', 'Step 1/5: Cancelling subscriptions...');
         
-        await firebase.firestore().collection('users').doc(user.uid).delete();
+        // ============================================
+        // ÉTAPE 1: ANNULER L'ABONNEMENT STRIPE
+        // ============================================
+        
+        if (currentUserData.stripeSubscriptionId) {
+            console.log('🗑 Step 1: Cancelling Stripe subscription...');
+            
+            try {
+                const cancelResponse = await fetch(`${WORKER_URL}/cancel-subscription`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subscriptionId: currentUserData.stripeSubscriptionId
+                    })
+                });
+                
+                if (cancelResponse.ok) {
+                    console.log('✅ Stripe subscription cancelled');
+                } else {
+                    console.warn('⚠ Could not cancel Stripe subscription, continuing...');
+                }
+            } catch (stripeError) {
+                console.warn('⚠ Stripe cancellation error:', stripeError);
+                // Continue anyway
+            }
+        }
+        
+        showToast('info', 'Deletion in progress...', 'Step 2/5: Deleting posts and comments...');
+        
+        // ============================================
+        // ÉTAPE 2: SUPPRIMER LES POSTS & COMMENTAIRES
+        // ============================================
+        
+        console.log('🗑 Step 2: Deleting posts...');
+        
+        const postsSnapshot = await firebase.firestore()
+            .collection('posts')
+            .where('authorId', '==', user.uid)
+            .get();
+        
+        const batch1 = firebase.firestore().batch();
+        postsSnapshot.docs.forEach(doc => {
+            batch1.delete(doc.ref);
+        });
+        await batch1.commit();
+        console.log(`✅ ${postsSnapshot.size} posts deleted`);
+        
+        showToast('info', 'Deletion in progress...', 'Step 3/5: Deleting analyses and portfolios...');
+        
+        // ============================================
+        // ÉTAPE 3: SUPPRIMER LES SOUS-COLLECTIONS
+        // ============================================
+        
+        console.log('🗑 Step 3: Deleting subcollections...');
+        
+        const subcollections = [
+            'analyses',
+            'portfolios',
+            'following',
+            'followers',
+            'savedPosts',
+            'settings'
+        ];
+        
+        for (const subcoll of subcollections) {
+            const snapshot = await firebase.firestore()
+                .collection('users')
+                .doc(user.uid)
+                .collection(subcoll)
+                .get();
+            
+            const batch = firebase.firestore().batch();
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            
+            console.log(`✅ ${snapshot.size} documents deleted from ${subcoll}`);
+        }
+        
+        showToast('info', 'Deletion in progress...', 'Step 4/5: Deleting profile picture...');
+        
+        // ============================================
+        // ÉTAPE 4: SUPPRIMER LA PHOTO DE PROFIL R2
+        // ============================================
+        
+        if (currentUserData.photoURL && 
+            (currentUserData.photoURL.includes('workers.dev') || 
+             currentUserData.photoURL.includes('r2.dev'))) {
+            
+            console.log('🗑 Step 4: Deleting profile picture from R2...');
+            
+            try {
+                const fileName = currentUserData.photoURL.split('/images/')[1];
+                if (fileName && window.r2ProfileUpload) {
+                    await window.r2ProfileUpload.deleteProfilePicture(fileName, user.uid);
+                    console.log('✅ Profile picture deleted from R2');
+                }
+            } catch (r2Error) {
+                console.warn('⚠ Could not delete R2 photo:', r2Error);
+            }
+        }
+        
+        showToast('info', 'Deletion in progress...', 'Step 5/5: Deleting account...');
+        
+        // ============================================
+        // ÉTAPE 5: SUPPRIMER LE DOCUMENT UTILISATEUR
+        // ============================================
+        
+        console.log('🗑 Step 5: Deleting user document...');
+        
+        await firebase.firestore()
+            .collection('users')
+            .doc(user.uid)
+            .delete();
+        
+        console.log('✅ User document deleted');
+        
+        // ============================================
+        // ÉTAPE 6: SUPPRIMER LE COMPTE FIREBASE AUTH
+        // ============================================
+        
+        console.log('🗑 Step 6: Deleting Firebase Auth account...');
+        
         await user.delete();
+        
+        console.log('✅ Firebase Auth account deleted');
+        
+        // ============================================
+        // REDIRECTION
+        // ============================================
         
         showToast('success', 'Account deleted', 'Your account has been permanently deleted');
         
@@ -1560,7 +1707,7 @@ async function handleDeleteAccount() {
             setTimeout(() => logout(), 2000);
         } else {
             const errorMessage = getFirebaseErrorMessage(error.code);
-            showToast('error', 'Error', errorMessage);
+            showToast('error', 'Error', `Deletion failed: ${errorMessage}`);
         }
     }
 }

@@ -669,7 +669,7 @@
                     </div>
                     
                     <!-- Danger Zone Section -->
-                    <div class="profile-section danger-section glass-card">
+                    <div class="profile-section danger-section glass-card" id="delete-account">
                         <div class="section-header">
                             <h3>
                                 <i class="fas fa-exclamation-triangle section-icon-danger"></i> 
@@ -680,17 +680,26 @@
                         <div class="danger-items">
                             <div class="danger-item">
                                 <div class="danger-item-info">
-                                    <h4>Delete my account</h4>
-                                    <p>This action is irreversible. All your data will be permanently deleted.</p>
+                                    <h4>Permanently delete my account</h4>
+                                    <p>
+                                        <strong>This action is irreversible.</strong><br>
+                                        This will:
+                                    </p>
+                                    <ul style="margin: 12px 0 0 20px; line-height: 1.8; color: var(--text-secondary); font-size: 0.9rem;">
+                                        <li>Cancel all active subscriptions and stop billing</li>
+                                        <li>Delete all your posts, comments, and saved content</li>
+                                        <li>Delete all your analyses and portfolios</li>
+                                        <li>Remove all your followers and following connections</li>
+                                        <li>Permanently delete your profile and photo</li>
+                                    </ul>
                                 </div>
                                 <button class="btn-danger" id="deleteAccountBtn">
-                                    <i class="fas fa-trash"></i>
+                                    <i class="fas fa-trash-alt"></i>
                                     Delete my account
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    
+                    </div>  
                 </div>
             </div>
             

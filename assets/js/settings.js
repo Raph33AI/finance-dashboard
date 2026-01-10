@@ -1064,6 +1064,18 @@ async function loadBillingHistory() {
                     <i class="fas fa-receipt billing-icon"></i>
                     <p>Full billing history coming soon</p>
                 </div>
+                
+                <!-- Lien vers suppression complète du compte -->
+                <div class="billing-danger-zone">
+                    <p class="billing-danger-text">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Want to completely delete your account and cancel all subscriptions?
+                    </p>
+                    <a href="user-profile.html#delete-account" class="billing-delete-link">
+                        <i class="fas fa-trash-alt"></i>
+                        Permanently delete my account
+                    </a>
+                </div>
             </div>
         `;
         
