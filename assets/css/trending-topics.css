@@ -1477,3 +1477,85 @@ body.dark-mode .article-link:hover {
         display: none;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGOS D'ENTREPRISES - CARTES & MODAL
+   ═══════════════════════════════════════════════════════════════ */
+
+.company-logo-mini {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.company-logo-mini img.company-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+}
+
+.logo-initials {
+    font-size: 0.75rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.item-name {
+    display: flex;
+    align-items: center;
+}
+
+.item-name span {
+    flex: 1;
+}
+
+/* ✅ LOGO MODAL HEADER */
+.modal-company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--glass-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid var(--glass-border);
+    overflow: hidden;
+}
+
+.modal-company-logo img.company-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+}
+
+.modal-company-logo .logo-initials {
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+/* ✅ RESPONSIVE */
+@media (max-width: 480px) {
+    .company-logo-mini {
+        width: 32px;
+        height: 32px;
+        margin-right: 8px;
+    }
+    
+    .modal-company-logo {
+        width: 48px;
+        height: 48px;
+    }
+}

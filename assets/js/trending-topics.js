@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * TRENDING TOPICS DASHBOARD V2.0 - Avec Modal Détaillé
+ * TRENDING TOPICS DASHBOARD V2.0 - Avec Logos & Modal Détaillé
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -57,7 +57,7 @@ class TrendingTopicsDashboard {
             <div class='modal-content'>
                 <div class='modal-header'>
                     <div class='modal-title-wrapper'>
-                        <div class='modal-company-icon'>
+                        <div class='modal-company-logo' id='modalCompanyLogo'>
                             <i class='fas fa-building'></i>
                         </div>
                         <div>
@@ -161,6 +161,9 @@ class TrendingTopicsDashboard {
         document.getElementById('modalNegative').textContent = companyData.negativeCount;
         document.getElementById('modalAvgSentiment').textContent = companyData.avgSentiment > 0 ? `+${companyData.avgSentiment}` : companyData.avgSentiment;
         
+        // ✅ AJOUTER LE LOGO DANS LE MODAL
+        this.injectCompanyLogo('modalCompanyLogo', companyData.ticker, companyData.name);
+        
         // Sentiment badge
         const sentimentBadge = document.getElementById('modalSentimentBadge');
         if (companyData.avgSentiment > 20) {
@@ -183,6 +186,43 @@ class TrendingTopicsDashboard {
         // Show modal
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * INJECTION DU LOGO (SYSTÈME IDENTIQUE À ALPHAVAULT-SCORING)
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    injectCompanyLogo(containerId, ticker, companyName) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // Vérifier si CompanyLogos est disponible
+        if (!window.CompanyLogos) {
+            console.warn('⚠ CompanyLogos not available');
+            container.innerHTML = `<div class="logo-initials">${ticker.substring(0, 2).toUpperCase()}</div>`;
+            return;
+        }
+        
+        // Récupérer les URLs de logos
+        const logoData = window.CompanyLogos.getLogoUrls(ticker, companyName);
+        
+        // Supprimer le contenu existant
+        container.innerHTML = '';
+        
+        // Injecter le logo avec fallbacks
+        if (logoData.primary) {
+            container.dataset.fallbacks = JSON.stringify(logoData.fallbacks);
+            container.innerHTML = `
+                <img src="${logoData.primary}" 
+                    alt="${companyName}" 
+                    class="company-logo"
+                    onerror="window.CompanyLogos && window.CompanyLogos.handleLogoError(this, null, '${logoData.initials}')">
+            `;
+        } else {
+            container.innerHTML = `<div class="logo-initials">${logoData.initials}</div>`;
+        }
     }
 
     /**
@@ -817,7 +857,7 @@ class TrendingTopicsDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * 3. RISQUES & OPPORTUNITÉS
+     * 3. RISQUES & OPPORTUNITÉS (AVEC LOGOS)
      * ═══════════════════════════════════════════════════════════
      */
     
@@ -848,11 +888,14 @@ class TrendingTopicsDashboard {
             const item = document.createElement('div');
             item.className = 'risk-opportunity-item';
             
+            // ✅ GÉNÉRATION DU LOGO
+            const logoHTML = this.generateLogoHTML(opportunity.ticker, opportunity.name);
+            
             item.innerHTML = `
                 <div class='item-header'>
                     <div class='item-name'>
-                        <i class='fas fa-building'></i>
-                        ${opportunity.name} (${opportunity.ticker})
+                        ${logoHTML}
+                        <span>${opportunity.name} (${opportunity.ticker})</span>
                     </div>
                     <div class='item-badge high-opportunity'>
                         ${opportunity.level} Opportunity
@@ -906,11 +949,14 @@ class TrendingTopicsDashboard {
             const item = document.createElement('div');
             item.className = 'risk-opportunity-item';
             
+            // ✅ GÉNÉRATION DU LOGO
+            const logoHTML = this.generateLogoHTML(risk.ticker, risk.name);
+            
             item.innerHTML = `
                 <div class='item-header'>
                     <div class='item-name'>
-                        <i class='fas fa-building'></i>
-                        ${risk.name} (${risk.ticker})
+                        ${logoHTML}
+                        <span>${risk.name} (${risk.ticker})</span>
                     </div>
                     <div class='item-badge high-risk'>
                         ${risk.level} Risk
@@ -946,7 +992,37 @@ class TrendingTopicsDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * UTILITAIRES
+     * GÉNÉRATION HTML DU LOGO (SYSTÈME IDENTIQUE)
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    generateLogoHTML(ticker, companyName) {
+        if (!window.CompanyLogos) {
+            const initials = ticker.substring(0, 2).toUpperCase();
+            return `<div class="company-logo-mini"><div class="logo-initials">${initials}</div></div>`;
+        }
+        
+        const logoData = window.CompanyLogos.getLogoUrls(ticker, companyName);
+        
+        if (logoData.primary) {
+            return `
+                <div class="company-logo-mini" 
+                    data-ticker="${ticker}" 
+                    data-fallbacks='${JSON.stringify(logoData.fallbacks)}'>
+                    <img src="${logoData.primary}" 
+                        alt="${companyName}" 
+                        class="company-logo"
+                        onerror="window.CompanyLogos && window.CompanyLogos.handleLogoError(this, null, '${logoData.initials}')">
+                </div>
+            `;
+        } else {
+            return `<div class="company-logo-mini"><div class="logo-initials">${logoData.initials}</div></div>`;
+        }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * UTILITAIRESS
      * ═══════════════════════════════════════════════════════════
      */
     
