@@ -81,10 +81,6 @@ class TrendingTopicsDashboard {
                         <i class='fas fa-chart-line'></i>
                         <span>Predict Trends</span>
                     </button>
-                    <button class='modal-action-btn watchlist' id='modalWatchlistBtn'>
-                        <i class='fas fa-star'></i>
-                        <span>Add to Watchlist</span>
-                    </button>
                 </div>
                 
                 <div class='modal-stats'>
@@ -123,13 +119,6 @@ class TrendingTopicsDashboard {
                         <i class='fas fa-list'></i> Recent Mentions
                     </h3>
                     <div class='modal-articles-list' id='modalArticlesList'></div>
-                </div>
-                
-                <div class='modal-footer'>
-                    <button class='modal-export-btn' onclick='trendingDashboard.exportCompanyData()'>
-                        <i class='fas fa-download'></i>
-                        Export as CSV
-                    </button>
                 </div>
             </div>
         `;
@@ -263,84 +252,6 @@ class TrendingTopicsDashboard {
         predictBtn.onclick = () => {
             window.location.href = `trend-prediction.html?symbol=${ticker}`;
         };
-        
-        // Watchlist button
-        const watchlistBtn = document.getElementById('modalWatchlistBtn');
-        watchlistBtn.onclick = () => {
-            this.addToWatchlist(ticker);
-        };
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * AJOUTER À LA WATCHLIST (FIREBASE)
-     * ═══════════════════════════════════════════════════════════
-     */
-    
-    async addToWatchlist(ticker) {
-        try {
-            if (!firebase.auth().currentUser) {
-                this.showNotification('Please log in to use watchlist', 'warning');
-                return;
-            }
-            
-            const userId = firebase.auth().currentUser.uid;
-            const watchlistRef = firebase.firestore()
-                .collection('users')
-                .doc(userId)
-                .collection('watchlist')
-                .doc(ticker);
-            
-            await watchlistRef.set({
-                ticker: ticker,
-                name: this.currentCompany.name,
-                addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                source: 'trending-topics'
-            });
-            
-            this.showNotification(`${ticker} added to watchlist!`, 'success');
-            
-            // Update button
-            const btn = document.getElementById('modalWatchlistBtn');
-            btn.innerHTML = `<i class='fas fa-check'></i> <span>Added to Watchlist</span>`;
-            btn.disabled = true;
-            
-        } catch (error) {
-            console.error('Error adding to watchlist:', error);
-            this.showNotification('Failed to add to watchlist', 'error');
-        }
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * EXPORT CSV
-     * ═══════════════════════════════════════════════════════════
-     */
-    
-    exportCompanyData() {
-        if (!this.currentCompany) return;
-        
-        const company = this.currentCompany;
-        
-        let csv = 'Date,Source,Title,Sentiment,Score\n';
-        
-        company.articles.forEach(article => {
-            const sentiment = this.sentimentAnalyzer.analyze(article.title);
-            const date = new Date(article.timestamp).toLocaleString();
-            const source = article.source || 'Unknown';
-            const title = `"${article.title.replace(/"/g, '""')}"`;
-            
-            csv += `${date},${source},${title},${sentiment.sentiment},${sentiment.score}\n`;
-        });
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${company.ticker}_trending_analysis_${Date.now()}.csv`;
-        a.click();
-        
-        this.showNotification('CSV exported successfully!', 'success');
     }
 
     /**
