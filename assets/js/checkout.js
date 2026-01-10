@@ -745,19 +745,21 @@
 // console.log('✅ Checkout script loaded successfully - Plan Basic GRATUIT + Pro + Platinum');
 
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE + APPLE PAY
-   AlphaVault AI v2.5
-   ✅ Support Apple Pay / Google Pay
-   ✅ Support des codes promo TRIAL (14 jours gratuits sans CB)
+   CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + APPLE PAY/GOOGLE PAY
+   AlphaVault AI v3.0 - OPTIMISÉ MOBILE
+   ✅ Support Apple Pay / Google Pay (Mobile + Desktop)
+   ✅ Support codes promo TRIAL (14 jours gratuits sans CB)
    ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
    ✅ Plan Basic : 100% gratuit sans carte bancaire
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙ CONFIGURATION
 const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
+const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
 console.log('🔧 Checkout configuration:');
 console.log('   Stripe Public Key:', STRIPE_PUBLIC_KEY.substring(0, 20) + '...');
+console.log('   Worker URL:', WORKER_URL);
 
 // ═══════════════════════════════════════════════════════════════
 // 🎁 CODES PROMO DISPONIBLES
@@ -836,25 +838,31 @@ const stripe = Stripe(STRIPE_PUBLIC_KEY);
 const elements = stripe.elements();
 
 // ═══════════════════════════════════════════════════════════════
-// 📱 APPLE PAY / GOOGLE PAY - PAYMENT REQUEST
+// 📱 APPLE PAY / GOOGLE PAY - PAYMENT REQUEST (OPTIMISÉ MOBILE)
 // ═══════════════════════════════════════════════════════════════
 
 let paymentRequest = null;
 let prButton = null;
 
-function initializePaymentRequest() {
-    console.log('📱 Initialisation Apple Pay / Google Pay...');
+function createPaymentRequest() {
+    console.log('📱 Création du Payment Request...');
     
-    // Créer le Payment Request
+    // Calculer le montant initial
+    let initialAmount = calculateFinalAmount();
+    
+    console.log('   💰 Montant initial:', initialAmount, 'centimes');
+    
+    // Créer le Payment Request avec le bon montant
     paymentRequest = stripe.paymentRequest({
         country: 'US',
         currency: 'usd',
         total: {
-            label: 'AlphaVault AI',
-            amount: 0, // Sera mis à jour dynamiquement
+            label: `AlphaVault AI - ${selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)}`,
+            amount: initialAmount,
         },
         requestPayerName: true,
         requestPayerEmail: true,
+        disableWallets: ['link', 'browserCard'], // ✅ DÉSACTIVER LINK ET BROWSER CARD
     });
 
     // Créer le bouton Payment Request
@@ -862,8 +870,8 @@ function initializePaymentRequest() {
         paymentRequest: paymentRequest,
         style: {
             paymentRequestButton: {
-                type: 'default', // 'default', 'buy', 'donate', 'book'
-                theme: 'dark', // 'dark', 'light', 'light-outline'
+                type: 'default', // 'buy' | 'donate' | 'default'
+                theme: 'dark', // 'dark' | 'light' | 'light-outline'
                 height: '56px',
             },
         },
@@ -871,22 +879,34 @@ function initializePaymentRequest() {
 
     // Vérifier la disponibilité d'Apple Pay / Google Pay
     paymentRequest.canMakePayment().then(function(result) {
+        console.log('📱 Résultat canMakePayment:', result);
+        
         if (result) {
-            console.log('✅ Apple Pay / Google Pay disponible');
-            console.log('   Type:', result.applePay ? 'Apple Pay' : result.googlePay ? 'Google Pay' : 'Autre');
+            // Vérifier si c'est vraiment Apple Pay ou Google Pay (pas Link)
+            const isAppleOrGooglePay = result.applePay || result.googlePay;
             
-            prButton.mount('#payment-request-button');
+            console.log('   Apple Pay:', result.applePay ? '✅' : '❌');
+            console.log('   Google Pay:', result.googlePay ? '✅' : '❌');
+            console.log('   Link:', result.link ? '✅ (désactivé)' : '❌');
             
-            // Afficher le container
-            document.getElementById('payment-request-container').style.display = 'block';
-            
-            // Ajouter le séparateur "OU"
-            document.getElementById('payment-divider').style.display = 'flex';
+            if (isAppleOrGooglePay) {
+                console.log('✅ Apple Pay / Google Pay disponible - Montage du bouton');
+                
+                prButton.mount('#payment-request-button');
+                
+                // Afficher le container uniquement si un plan payant est sélectionné
+                updatePaymentRequestVisibility();
+            } else {
+                console.log('ℹ Seulement Link disponible - Bouton masqué');
+                hidePaymentRequest();
+            }
         } else {
             console.log('ℹ Apple Pay / Google Pay non disponible sur cet appareil');
-            document.getElementById('payment-request-container').style.display = 'none';
-            document.getElementById('payment-divider').style.display = 'none';
+            hidePaymentRequest();
         }
+    }).catch(function(error) {
+        console.error('❌ Erreur canMakePayment:', error);
+        hidePaymentRequest();
     });
 
     // Gérer l'événement de paiement
@@ -935,9 +955,9 @@ function initializePaymentRequest() {
                 appleGooglePay: true // Indicateur pour le Worker
             };
             
-            console.log('   📡 Appel Worker...');
+            console.log('   📡 Appel Worker:', WORKER_URL);
             
-            const response = await fetch(`https://votre-worker.workers.dev/create-checkout-session`, {
+            const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -976,9 +996,71 @@ function initializePaymentRequest() {
             ev.complete('fail');
             
             const errorDisplay = document.getElementById('card-errors');
-            errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            if (errorDisplay) {
+                errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            }
         }
     });
+}
+
+// Calculer le montant final en centimes
+function calculateFinalAmount() {
+    let finalPrice = selectedPlan.price;
+    
+    // Appliquer la réduction si code promo
+    if (appliedPromo && appliedPromo.type === 'percentage') {
+        const discountAmount = (finalPrice * appliedPromo.value) / 100;
+        finalPrice = finalPrice - discountAmount;
+    }
+    
+    // Convertir en centimes pour Stripe
+    return Math.round(finalPrice * 100);
+}
+
+// Mettre à jour le montant du Payment Request
+function updatePaymentRequestAmount() {
+    if (!paymentRequest) return;
+    
+    const amountInCents = calculateFinalAmount();
+    
+    console.log('📱 Mise à jour montant Payment Request:', amountInCents, 'centimes');
+    
+    paymentRequest.update({
+        total: {
+            label: `AlphaVault AI - ${selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)}`,
+            amount: amountInCents,
+        },
+    });
+}
+
+// Afficher/masquer le Payment Request selon le plan
+function updatePaymentRequestVisibility() {
+    const container = document.getElementById('payment-request-container');
+    const divider = document.getElementById('payment-divider');
+    
+    if (!container || !divider) return;
+    
+    // Masquer pour Basic ou codes promo gratuits/trial
+    const shouldHide = selectedPlan.name === 'basic' || 
+                       (appliedPromo && (appliedPromo.type === 'free' || appliedPromo.type === 'trial'));
+    
+    if (shouldHide) {
+        container.style.display = 'none';
+        divider.style.display = 'none';
+        console.log('📱 Payment Request masqué (plan gratuit ou trial)');
+    } else {
+        container.style.display = 'block';
+        divider.style.display = 'flex';
+        console.log('📱 Payment Request affiché');
+    }
+}
+
+function hidePaymentRequest() {
+    const container = document.getElementById('payment-request-container');
+    const divider = document.getElementById('payment-divider');
+    
+    if (container) container.style.display = 'none';
+    if (divider) divider.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1007,9 +1089,6 @@ const cardElement = elements.create('card', { style: cardStyle });
 cardElement.mount('#card-element');
 
 console.log('✅ Stripe card element mounted');
-
-// Initialiser Apple Pay après le montage de la carte
-initializePaymentRequest();
 
 // ═══════════════════════════════════════════════════════════════
 // GESTION DES ERREURS DE CARTE
@@ -1166,6 +1245,7 @@ planOptions.forEach(option => {
         
         updatePriceSummary();
         updatePaymentRequestAmount();
+        updatePaymentRequestVisibility();
     });
 });
 
@@ -1207,57 +1287,62 @@ const promoMessage = document.getElementById('promoMessage');
 const promoApplied = document.getElementById('promoApplied');
 const removePromoBtn = document.getElementById('removePromoBtn');
 
-applyPromoBtn.addEventListener('click', function() {
-    const code = promoInput.value.trim().toUpperCase();
-    
-    if (!code) {
-        showPromoMessage('Please enter a promo code', 'error');
-        return;
-    }
-    
-    if (selectedPlan.name === 'basic') {
-        showPromoMessage('Promo codes are not applicable to the free Basic plan', 'error');
-        console.warn('❌ Code promo non applicable au plan Basic gratuit');
-        return;
-    }
-    
-    console.log('🎁 Tentative d\'application du code:', code);
-    
-    const promo = PROMO_CODES[code];
-    
-    if (!promo) {
-        showPromoMessage('Invalid promo code', 'error');
-        console.warn('❌ Code invalide:', code);
-        return;
-    }
-    
-    if (!promo.plans.includes(selectedPlan.name)) {
-        showPromoMessage(`This code is only valid for ${promo.plans.join(' or ')} plan`, 'error');
-        console.warn('❌ Code non applicable à ce plan');
-        return;
-    }
-    
-    appliedPromo = {
-        code: code,
-        ...promo
-    };
-    
-    console.log('✅ Code promo appliqué:', appliedPromo);
-    
-    document.getElementById('promoCodeName').textContent = code;
-    promoApplied.classList.remove('hidden');
-    promoInput.value = '';
-    promoInput.disabled = true;
-    applyPromoBtn.disabled = true;
-    
-    showPromoMessage(`${promo.description}`, 'success');
-    updatePriceSummary();
-    updatePaymentRequestAmount();
-});
+if (applyPromoBtn) {
+    applyPromoBtn.addEventListener('click', function() {
+        const code = promoInput.value.trim().toUpperCase();
+        
+        if (!code) {
+            showPromoMessage('Please enter a promo code', 'error');
+            return;
+        }
+        
+        if (selectedPlan.name === 'basic') {
+            showPromoMessage('Promo codes are not applicable to the free Basic plan', 'error');
+            console.warn('❌ Code promo non applicable au plan Basic gratuit');
+            return;
+        }
+        
+        console.log('🎁 Tentative d\'application du code:', code);
+        
+        const promo = PROMO_CODES[code];
+        
+        if (!promo) {
+            showPromoMessage('Invalid promo code', 'error');
+            console.warn('❌ Code invalide:', code);
+            return;
+        }
+        
+        if (!promo.plans.includes(selectedPlan.name)) {
+            showPromoMessage(`This code is only valid for ${promo.plans.join(' or ')} plan`, 'error');
+            console.warn('❌ Code non applicable à ce plan');
+            return;
+        }
+        
+        appliedPromo = {
+            code: code,
+            ...promo
+        };
+        
+        console.log('✅ Code promo appliqué:', appliedPromo);
+        
+        document.getElementById('promoCodeName').textContent = code;
+        promoApplied.classList.remove('hidden');
+        promoInput.value = '';
+        promoInput.disabled = true;
+        applyPromoBtn.disabled = true;
+        
+        showPromoMessage(`${promo.description}`, 'success');
+        updatePriceSummary();
+        updatePaymentRequestAmount();
+        updatePaymentRequestVisibility();
+    });
+}
 
-removePromoBtn.addEventListener('click', function() {
-    removePromoCode();
-});
+if (removePromoBtn) {
+    removePromoBtn.addEventListener('click', function() {
+        removePromoCode();
+    });
+}
 
 function removePromoCode() {
     console.log('🗑 Suppression du code promo');
@@ -1270,6 +1355,7 @@ function removePromoCode() {
     
     updatePriceSummary();
     updatePaymentRequestAmount();
+    updatePaymentRequestVisibility();
 }
 
 function showPromoMessage(message, type) {
@@ -1279,34 +1365,6 @@ function showPromoMessage(message, type) {
     `;
     promoMessage.className = `promo-message ${type}`;
     promoMessage.classList.remove('hidden');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 📱 METTRE À JOUR LE MONTANT APPLE PAY / GOOGLE PAY
-// ═══════════════════════════════════════════════════════════════
-
-function updatePaymentRequestAmount() {
-    if (!paymentRequest) return;
-    
-    let finalPrice = selectedPlan.price;
-    
-    // Appliquer la réduction si code promo
-    if (appliedPromo && appliedPromo.type === 'percentage') {
-        const discountAmount = (finalPrice * appliedPromo.value) / 100;
-        finalPrice = finalPrice - discountAmount;
-    }
-    
-    // Convertir en centimes pour Stripe
-    const amountInCents = Math.round(finalPrice * 100);
-    
-    console.log('📱 Mise à jour montant Payment Request:', amountInCents, 'centimes');
-    
-    paymentRequest.update({
-        total: {
-            label: `AlphaVault AI - ${selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)}`,
-            amount: amountInCents,
-        },
-    });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1350,10 +1408,7 @@ function updatePriceSummary() {
         document.getElementById('cardDetailsGroup').classList.add('hidden');
         
         // Masquer Apple Pay pour le plan Basic
-        if (document.getElementById('payment-request-container')) {
-            document.getElementById('payment-request-container').style.display = 'none';
-            document.getElementById('payment-divider').style.display = 'none';
-        }
+        hidePaymentRequest();
         
         const promoSection = document.querySelector('.promo-section');
         if (promoSection) {
@@ -1406,15 +1461,8 @@ function updatePriceSummary() {
             
             document.getElementById('cardDetailsGroup').classList.remove('hidden');
             
-            // Afficher Apple Pay
-            if (document.getElementById('payment-request-container') && prButton) {
-                paymentRequest.canMakePayment().then(function(result) {
-                    if (result) {
-                        document.getElementById('payment-request-container').style.display = 'block';
-                        document.getElementById('payment-divider').style.display = 'flex';
-                    }
-                });
-            }
+            // Afficher Apple Pay pour les plans payants
+            updatePaymentRequestVisibility();
             
         } else if (appliedPromo.type === 'free') {
             document.getElementById('discountRow').classList.add('hidden');
@@ -1430,11 +1478,8 @@ function updatePriceSummary() {
             
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             
-            // Masquer Apple Pay
-            if (document.getElementById('payment-request-container')) {
-                document.getElementById('payment-request-container').style.display = 'none';
-                document.getElementById('payment-divider').style.display = 'none';
-            }
+            // Masquer Apple Pay pour accès gratuit
+            hidePaymentRequest();
             
         } else if (appliedPromo.type === 'trial') {
             document.getElementById('discountRow').classList.add('hidden');
@@ -1453,11 +1498,8 @@ function updatePriceSummary() {
             
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             
-            // Masquer Apple Pay
-            if (document.getElementById('payment-request-container')) {
-                document.getElementById('payment-request-container').style.display = 'none';
-                document.getElementById('payment-divider').style.display = 'none';
-            }
+            // Masquer Apple Pay pour trial sans CB
+            hidePaymentRequest();
         }
     } else {
         document.getElementById('discountRow').classList.add('hidden');
@@ -1474,21 +1516,12 @@ function updatePriceSummary() {
         
         document.getElementById('cardDetailsGroup').classList.remove('hidden');
         
-        // Afficher Apple Pay
-        if (document.getElementById('payment-request-container') && prButton) {
-            paymentRequest.canMakePayment().then(function(result) {
-                if (result) {
-                    document.getElementById('payment-request-container').style.display = 'block';
-                    document.getElementById('payment-divider').style.display = 'flex';
-                }
-            });
-        }
+        // Afficher Apple Pay pour les plans payants
+        updatePaymentRequestVisibility();
     }
     
     document.getElementById('submitButtonText').textContent = buttonText;
 }
-
-updatePriceSummary();
 
 // ═══════════════════════════════════════════════════════════════
 // ✅ SOUMISSION DU FORMULAIRE
@@ -1497,169 +1530,173 @@ updatePriceSummary();
 const form = document.getElementById('payment-form');
 const submitButton = document.getElementById('submit-button');
 
-form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🚀 DÉBUT DU PROCESSUS DE PAIEMENT');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-    submitButton.disabled = true;
-    submitButton.classList.add('loading');
-    submitButton.style.transform = 'none';
-    submitButton.style.animation = 'none';
-    
-    try {
-        console.log('1⃣ Vérification de l\'authentification...');
+if (form) {
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
         
-        const user = firebase.auth().currentUser;
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🚀 DÉBUT DU PROCESSUS DE PAIEMENT');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
-        if (!user) {
-            throw new Error('Vous devez être connecté pour procéder au paiement');
-        }
+        submitButton.disabled = true;
+        submitButton.classList.add('loading');
+        submitButton.style.transform = 'none';
+        submitButton.style.animation = 'none';
         
-        console.log('   ✅ Utilisateur authentifié:', user.email);
-        console.log('   📧 User ID:', user.uid);
-        
-        console.log('2⃣ Récupération des données...');
-        
-        const email = document.getElementById('email').value;
-        const name = document.getElementById('name').value;
-        
-        console.log('   ✅ Email:', email);
-        console.log('   ✅ Nom:', name);
-        console.log('   ✅ Plan sélectionné:', selectedPlan.name);
-        console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
-        console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
-        
-        // ═══════════════════════════════════════════════════════════════
-        // ✅ CAS SPÉCIAL : PLAN BASIC GRATUIT
-        // ═══════════════════════════════════════════════════════════════
-        if (selectedPlan.name === 'basic') {
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
-            console.log('   👤 User ID:', user.uid);
-            console.log('   💎 Plan: Basic (FREE)');
-            console.log('   📧 Email:', email);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        try {
+            console.log('1⃣ Vérification de l\'authentification...');
             
-            await firebase.firestore().collection('users').doc(user.uid).set({
-                plan: 'basic',
-                subscriptionStatus: 'active',
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            const user = firebase.auth().currentUser;
             
-            console.log('✅ Plan Basic activé dans Firestore');
-            
-            window.location.href = 'success.html?plan=basic&free=true&noconfetti=true';
-            return;
-        }
-        
-        // ═══════════════════════════════════════════════════════════════
-        // PLANS PAYANTS (PRO ET PLATINUM)
-        // ═══════════════════════════════════════════════════════════════
-        
-        if (appliedPromo) {
-            console.log('   🎁 Code promo appliqué:', appliedPromo.code);
-            console.log('   🎁 Type:', appliedPromo.type);
-            console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'FREE');
-        }
-        
-        console.log('3⃣ Appel du Cloudflare Worker...');
-        
-        const requestBody = {
-            plan: selectedPlan.name,
-            email: email,
-            name: name,
-            userId: user.uid,
-            promoCode: appliedPromo ? appliedPromo.code : null,
-            promoType: appliedPromo ? appliedPromo.type : null,
-            promoDuration: appliedPromo?.duration || null
-        };
-        
-        console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
-        
-        const response = await fetch(`https://votre-worker.workers.dev/create-checkout-session`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-        });
-        
-        console.log('   📥 Réponse reçue - Status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('   ❌ Erreur HTTP:', errorText);
-            throw new Error(`Erreur serveur (${response.status}): ${errorText}`);
-        }
-        
-        const data = await response.json();
-        console.log('   ✅ Données reçues:', data);
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        if (data.free === true) {
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            
-            if (data.trial === true) {
-                console.log('🎉 ACCÈS GRATUIT 14 JOURS ACTIVÉ (SANS CB)');
-                console.log('   👤 User ID:', user.uid);
-                console.log('   💎 Plan:', selectedPlan.name);
-                console.log('   🎁 Code promo:', appliedPromo.code);
-                console.log('   ⏱ Durée:', appliedPromo.duration, 'jours');
-                console.log('   📅 Expire le:', data.expiresAt || 'N/A');
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                
-                window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
-            } else {
-                console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ');
-                console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
-                console.log('   💎 Plan:', selectedPlan.name);
-                console.log('   🎁 Code promo:', appliedPromo.code);
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                
-                window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
+            if (!user) {
+                throw new Error('Vous devez être connecté pour procéder au paiement');
             }
             
-            return;
+            console.log('   ✅ Utilisateur authentifié:', user.email);
+            console.log('   📧 User ID:', user.uid);
+            
+            console.log('2⃣ Récupération des données...');
+            
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('name').value;
+            
+            console.log('   ✅ Email:', email);
+            console.log('   ✅ Nom:', name);
+            console.log('   ✅ Plan sélectionné:', selectedPlan.name);
+            console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
+            console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
+            
+            // ═══════════════════════════════════════════════════════════════
+            // ✅ CAS SPÉCIAL : PLAN BASIC GRATUIT
+            // ═══════════════════════════════════════════════════════════════
+            if (selectedPlan.name === 'basic') {
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
+                console.log('   👤 User ID:', user.uid);
+                console.log('   💎 Plan: Basic (FREE)');
+                console.log('   📧 Email:', email);
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                await firebase.firestore().collection('users').doc(user.uid).set({
+                    plan: 'basic',
+                    subscriptionStatus: 'active',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                console.log('✅ Plan Basic activé dans Firestore');
+                
+                window.location.href = 'success.html?plan=basic&free=true&noconfetti=true';
+                return;
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // PLANS PAYANTS (PRO ET PLATINUM)
+            // ═══════════════════════════════════════════════════════════════
+            
+            if (appliedPromo) {
+                console.log('   🎁 Code promo appliqué:', appliedPromo.code);
+                console.log('   🎁 Type:', appliedPromo.type);
+                console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'FREE');
+            }
+            
+            console.log('3⃣ Appel du Cloudflare Worker...');
+            
+            const requestBody = {
+                plan: selectedPlan.name,
+                email: email,
+                name: name,
+                userId: user.uid,
+                promoCode: appliedPromo ? appliedPromo.code : null,
+                promoType: appliedPromo ? appliedPromo.type : null,
+                promoDuration: appliedPromo?.duration || null
+            };
+            
+            console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
+            
+            const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+            
+            console.log('   📥 Réponse reçue - Status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('   ❌ Erreur HTTP:', errorText);
+                throw new Error(`Erreur serveur (${response.status}): ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('   ✅ Données reçues:', data);
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            if (data.free === true) {
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                if (data.trial === true) {
+                    console.log('🎉 ACCÈS GRATUIT 14 JOURS ACTIVÉ (SANS CB)');
+                    console.log('   👤 User ID:', user.uid);
+                    console.log('   💎 Plan:', selectedPlan.name);
+                    console.log('   🎁 Code promo:', appliedPromo.code);
+                    console.log('   ⏱ Durée:', appliedPromo.duration, 'jours');
+                    console.log('   📅 Expire le:', data.expiresAt || 'N/A');
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    
+                    window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
+                } else {
+                    console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ');
+                    console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
+                    console.log('   💎 Plan:', selectedPlan.name);
+                    console.log('   🎁 Code promo:', appliedPromo.code);
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    
+                    window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
+                }
+                
+                return;
+            }
+            
+            if (!data.sessionId) {
+                throw new Error('Session ID manquant dans la réponse');
+            }
+            
+            console.log('   ✅ Session Stripe créée:', data.sessionId);
+            console.log('5⃣ Redirection vers Stripe Checkout...');
+            
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: data.sessionId,
+            });
+            
+            if (error) {
+                throw error;
+            }
+            
+            console.log('✅ Redirection réussie vers Stripe!');
+            
+        } catch (error) {
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('❌ ERREUR DE PAIEMENT');
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('Type:', error.name);
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+            
+            const errorDisplay = document.getElementById('card-errors');
+            if (errorDisplay) {
+                errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            }
+            
+            submitButton.disabled = false;
+            submitButton.classList.remove('loading');
         }
-        
-        if (!data.sessionId) {
-            throw new Error('Session ID manquant dans la réponse');
-        }
-        
-        console.log('   ✅ Session Stripe créée:', data.sessionId);
-        console.log('5⃣ Redirection vers Stripe Checkout...');
-        
-        const { error } = await stripe.redirectToCheckout({
-            sessionId: data.sessionId,
-        });
-        
-        if (error) {
-            throw error;
-        }
-        
-        console.log('✅ Redirection réussie vers Stripe!');
-        
-    } catch (error) {
-        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.error('❌ ERREUR DE PAIEMENT');
-        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.error('Type:', error.name);
-        console.error('Message:', error.message);
-        console.error('Stack:', error.stack);
-        
-        const errorDisplay = document.getElementById('card-errors');
-        errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
-        
-        submitButton.disabled = false;
-        submitButton.classList.remove('loading');
-    }
-});
+    });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // ✅ PRÉ-REMPLIR L'EMAIL ET VÉRIFIER LE PLAN EXISTANT
@@ -1672,11 +1709,13 @@ firebase.auth().onAuthStateChanged(async (user) => {
         
         await checkExistingPlan(user);
         
-        // Mettre à jour le montant Apple Pay après avoir chargé le plan
-        updatePaymentRequestAmount();
+        // ✅ INITIALISER LE PAYMENT REQUEST APRÈS AVOIR CHARGÉ LE PLAN
+        createPaymentRequest();
+        
+        updatePriceSummary();
     } else {
         console.warn('⚠ Aucun utilisateur connecté');
     }
 });
 
-console.log('✅ Checkout script loaded successfully - Apple Pay + Google Pay enabled');
+console.log('✅ Checkout script loaded successfully - Apple Pay + Google Pay enabled (Mobile optimized)');

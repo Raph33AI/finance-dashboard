@@ -983,27 +983,24 @@ select:focus-visible {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📱 APPLE PAY / GOOGLE PAY BUTTON
+   📱 APPLE PAY / GOOGLE PAY BUTTON - VERSION MOBILE OPTIMISÉE
    ═══════════════════════════════════════════════════════════════ */
 
 .payment-request-container {
-    /* Par défaut masqué, sera affiché par JavaScript si Apple/Google Pay disponible */
-    display: none;
+    display: none; /* Masqué par défaut */
     margin-bottom: 24px;
     animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #payment-request-button {
-    /* Container du bouton Stripe */
     border-radius: 16px;
     overflow: hidden;
-    /* Ombre cohérente avec ton design */
     box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-    transition: var(--transition-smooth);
-    /* Effet glassmorphism léger autour du bouton */
-    background: var(--checkout-gradient-soft);
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
     padding: 4px;
     border: 2px solid rgba(59, 130, 246, 0.15);
+    min-height: 56px; /* Hauteur minimale pour mobile */
 }
 
 body.dark-mode #payment-request-button {
@@ -1017,16 +1014,9 @@ body.dark-mode #payment-request-button {
     border-color: rgba(59, 130, 246, 0.3);
 }
 
-/* Animation d'apparition */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1034,7 +1024,6 @@ body.dark-mode #payment-request-button {
    ═══════════════════════════════════════════════════════════════ */
 
 .payment-divider {
-    /* Par défaut masqué */
     display: none;
     align-items: center;
     justify-content: center;
@@ -1046,23 +1035,8 @@ body.dark-mode #payment-request-button {
 .divider-line {
     height: 2px;
     flex: 1;
-    /* Dégradé cohérent avec ton design */
-    background: linear-gradient(
-        to right, 
-        transparent, 
-        rgba(102, 126, 234, 0.3), 
-        transparent
-    );
+    background: linear-gradient(to right, transparent, rgba(102, 126, 234, 0.3), transparent);
     border-radius: 2px;
-}
-
-body.dark-mode .divider-line {
-    background: linear-gradient(
-        to right, 
-        transparent, 
-        rgba(100, 116, 139, 0.4), 
-        transparent
-    );
 }
 
 .divider-text {
@@ -1071,9 +1045,8 @@ body.dark-mode .divider-line {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    /* Effet glassmorphism sur le texte */
     padding: 8px 20px;
-    background: var(--checkout-gradient-soft);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
     border-radius: 20px;
     border: 1px solid rgba(102, 126, 234, 0.2);
     white-space: nowrap;
@@ -1085,46 +1058,46 @@ body.dark-mode .divider-text {
     border-color: rgba(100, 116, 139, 0.3);
 }
 
+body.dark-mode .divider-line {
+    background: linear-gradient(to right, transparent, rgba(100, 116, 139, 0.4), transparent);
+}
+
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE APPLE PAY
+   RESPONSIVE MOBILE
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+    #payment-request-button {
+        border-radius: 12px;
+        min-height: 48px;
+    }
+    
     .payment-divider {
         gap: 12px;
         margin-bottom: 20px;
     }
-
+    
     .divider-text {
         font-size: 0.75rem;
         padding: 6px 16px;
-        letter-spacing: 0.8px;
-    }
-
-    #payment-request-button {
-        border-radius: 12px;
     }
 }
 
 @media (max-width: 480px) {
-    .payment-divider {
-        margin-bottom: 16px;
+    #payment-request-button {
+        min-height: 44px; /* iOS minimum touch target */
     }
-
+    
     .divider-text {
         font-size: 0.7rem;
         padding: 5px 12px;
     }
-
+    
     .divider-line {
         height: 1.5px;
     }
