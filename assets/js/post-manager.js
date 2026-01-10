@@ -728,10 +728,7 @@ class PostManager {
                             <i class="fas fa-circle-user" style="font-size: 0.75rem; color: #3B82F6; margin-right: 6px; opacity: 0.7;"></i>
                             ${this.escapeHtml(displayName)} ${planBadge}
                         </div>
-                        <div class="user-select-email">
-                            <i class="fas fa-envelope" style="font-size: 0.7rem; margin-right: 4px; opacity: 0.5;"></i>
-                            ${this.escapeHtml(user.email || 'No email')}
-                        </div>
+                        <!-- ✅ EMAIL SUPPRIMÉ - NE PLUS AFFICHER -->
                     </div>
                     <button class="user-select-send-btn individual-btn"><i class="fas fa-paper-plane"></i><span>Send</span></button>
                 </div>
@@ -891,7 +888,6 @@ class PostManager {
             console.log('📋 Conversation ID:', conversationId);
             console.log('📋 Participants:', participants);
             
-            // ✅ CRÉER OU METTRE À JOUR LA CONVERSATION (sans vérifier l'existence)
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('🔄 CREATING/UPDATING CONVERSATION');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -899,7 +895,7 @@ class PostManager {
             const currentUserData = {
                 displayName: this.currentUser.displayName || this.currentUser.email?.split('@')[0] || 'User',
                 photoURL: this.currentUser.photoURL || null,
-                email: this.currentUser.email || null,
+                // ✅ EMAIL RETIRÉ - NE PAS STOCKER
                 plan: window.currentUserData?.plan || 'free'
             };
 
@@ -911,7 +907,7 @@ class PostManager {
                     [userId]: {
                         displayName: userData.displayName || 'User',
                         photoURL: userData.photoURL || null,
-                        email: userData.email || null,
+                        // ✅ EMAIL RETIRÉ - NE PAS STOCKER
                         plan: userData.plan || 'free'
                     }
                 },
@@ -923,7 +919,6 @@ class PostManager {
                 [`unreadCount.${userId}`]: firebase.firestore.FieldValue.increment(1)
             };
 
-            // ✅ UTILISER set() AVEC merge: true (crée si n'existe pas, met à jour sinon)
             try {
                 await conversationRef.set(conversationData, { merge: true });
                 console.log('✅ CONVERSATION CREATED/UPDATED');
@@ -933,10 +928,8 @@ class PostManager {
                 throw convError;
             }
 
-            // ⏳ Attendre un peu pour l'indexation
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // ✅ CRÉER LE MESSAGE
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('📝 CREATING MESSAGE');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
