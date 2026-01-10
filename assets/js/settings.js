@@ -1203,15 +1203,18 @@ async function performDowngradeToBasic() {
         
         showToast('info', 'Processing', 'Downgrading to Basic plan...');
         
-        // Mettre à jour Firestore
+        // ✅ MISE À JOUR MINIMALE - Seulement les champs d'abonnement
         const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
         await userRef.update({
             plan: 'basic',
             subscriptionStatus: 'active',
+            // ✅ NE PAS RÉINITIALISER LES AUTRES CHAMPS
+            // On garde : photoURL, displayName, firstName, lastName, bio, company, phone, etc.
+            // On met à jour UNIQUEMENT le plan et le statut
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        console.log('Downgrade reussi');
+        console.log('Downgrade reussi - Profil utilisateur preserve');
         showToast('success', 'Success', 'You have been downgraded to the Basic plan');
         
         // Rafraîchir la page

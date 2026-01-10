@@ -1035,8 +1035,10 @@ body.dark-mode .toast-message {
 }
 
 /* ============================================
-   PLAN & SUBSCRIPTION STYLES - VERSION 4.0
-   SANS EMOJIS + DOWNGRADE ACTIVÉ
+   PLAN & SUBSCRIPTION STYLES - VERSION 5.0
+   ✅ Texte blanc lisible sur fond coloré
+   ✅ Badge Current Plan centré
+   ✅ Préservation des données utilisateur
    ============================================ */
 
 .plan-card {
@@ -1065,6 +1067,7 @@ body.dark-mode .toast-message {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
+    color: white;
     backdrop-filter: blur(10px);
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
 }
@@ -1077,22 +1080,24 @@ body.dark-mode .toast-message {
     font-size: 1.75rem;
     font-weight: 900;
     margin: 0 0 8px 0;
+    color: white;
 }
 
 .plan-price {
     font-size: 1.25rem;
     margin: 0;
-    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .price-value {
     font-size: 2rem;
     font-weight: 800;
+    color: white;
 }
 
 .price-period {
     font-size: 1rem;
-    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .price-free {
@@ -1133,9 +1138,9 @@ body.dark-mode .toast-message {
 }
 
 .status-free {
-    background: rgba(139, 92, 246, 0.2);
-    color: #8b5cf6;
-    border: 2px solid rgba(139, 92, 246, 0.4);
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .status-inactive {
@@ -1146,7 +1151,7 @@ body.dark-mode .toast-message {
 
 .plan-description {
     margin: 0 0 20px 0;
-    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.95);
     line-height: 1.6;
 }
 
@@ -1162,6 +1167,11 @@ body.dark-mode .toast-message {
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    color: white;
+}
+
+.plan-stat i {
+    color: white;
 }
 
 .features-list {
@@ -1235,10 +1245,12 @@ body.dark-mode .comparison-card {
     box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
 }
 
+/* ✅ CORRECTION : Badge Current Plan centré */
 .current-badge {
     position: absolute;
     top: -12px;
-    right: 16px;
+    left: 50%;
+    transform: translateX(-50%);
     background: linear-gradient(135deg, #3B82F6, #2563EB);
     color: white;
     padding: 6px 16px;
@@ -1249,6 +1261,7 @@ body.dark-mode .comparison-card {
     align-items: center;
     gap: 6px;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    white-space: nowrap;
 }
 
 .comparison-header {
@@ -1256,6 +1269,7 @@ body.dark-mode .comparison-card {
     padding-bottom: 16px;
     border-bottom: 2px solid #e2e8f0;
     margin-bottom: 16px;
+    padding-top: 8px;
 }
 
 body.dark-mode .comparison-header {
@@ -1542,4 +1556,41 @@ body.dark-mode .management-warning {
 
 .management-note i {
     margin-top: 2px;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .plan-comparison {
+        grid-template-columns: 1fr;
+    }
+    
+    .plan-card {
+        padding: 24px;
+    }
+    
+    .plan-card-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .plan-icon-box {
+        margin: 0 auto;
+    }
+    
+    .plan-info {
+        text-align: center;
+    }
+    
+    .plan-stats {
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .plan-stat {
+        justify-content: center;
+    }
 }
