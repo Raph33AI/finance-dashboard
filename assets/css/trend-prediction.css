@@ -1023,7 +1023,7 @@ body.dark-mode .ensemble-card {
 /* ✅✅✅ SCORE CENTRAL : CORRECTION RADICALE - Remonté de 10% */
 .gauge-score-display {
     position: absolute;
-    top: 43%;  /* ✅✅ CORRECTION RADICALE : 50% → 43% (remonté de 7%) */
+    top: 30%;  /* ✅✅ CORRECTION RADICALE : 50% → 43% (remonté de 7%) */
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
