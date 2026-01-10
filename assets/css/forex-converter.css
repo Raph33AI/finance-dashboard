@@ -72,11 +72,11 @@ body.dark-mode .confidence-bar {
 
 .confidence-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
     border-radius: 10px;
     transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .confidence-fill::after {
