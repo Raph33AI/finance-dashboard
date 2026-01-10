@@ -563,17 +563,20 @@ class ForexConverter {
         
         // ✅ CALCULATE REAL TARGET & STOP-LOSS (Based on ATR & Support/Resistance)
         const atr = this.calculateATR(data, 14);
-        const target = signal === 'BUY' 
-            ? (currentPrice + atr * 2).toFixed(4) 
-            : signal === 'SELL'
-                ? (currentPrice - atr * 2).toFixed(4)
-                : currentPrice.toFixed(4);
-        
-        const stopLoss = signal === 'BUY'
-            ? (currentPrice - atr * 1.5).toFixed(4)
-            : signal === 'SELL'
-                ? (currentPrice + atr * 1.5).toFixed(4)
-                : currentPrice.toFixed(4);
+
+        let target, stopLoss;
+
+        if (signal === 'BUY') {
+            target = (currentPrice + atr * 2).toFixed(4);
+            stopLoss = (currentPrice - atr * 1.5).toFixed(4);
+        } else if (signal === 'SELL') {
+            target = (currentPrice - atr * 2).toFixed(4);
+            stopLoss = (currentPrice + atr * 1.5).toFixed(4);
+        } else {
+            // ✅ NEUTRAL : Afficher résistance/support basés sur Bollinger Bands
+            target = latestUpper.toFixed(4);  // Résistance (upper band)
+            stopLoss = latestLower.toFixed(4); // Support (lower band)
+        }
         
         console.log(`✅ EUR/${currency} Analysis:`, { signal, confidence, bullishScore, bearishScore });
         

@@ -43,6 +43,95 @@ body.dark-mode {
 /* ========================================
    GRADIENT TITLES
    ======================================== */
+
+/* ========================================
+   AI RECOMMENDATIONS - CONFIDENCE BAR (FIX)
+   ======================================== */
+
+.rec-confidence {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.confidence-bar {
+    height: 10px;
+    background: rgba(100, 116, 139, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .confidence-bar {
+    background: rgba(148, 163, 184, 0.2);
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.confidence-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: confidence-shine 2.5s infinite;
+}
+
+@keyframes confidence-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.confidence-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+body.dark-mode .confidence-text {
+    color: var(--text-primary);
+}
+
+/* Structure de la carte améliorée */
+.rec-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.rec-pair {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rec-pair h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
 .gradient-title {
     background: var(--forex-gradient);
     -webkit-background-clip: text;
