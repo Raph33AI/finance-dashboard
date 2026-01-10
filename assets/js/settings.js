@@ -662,169 +662,91 @@
 
 /* ============================================
    SETTINGS.JS - Gestion des paramètres utilisateur
-   ✅ VERSION ULTRA-PREMIUM avec Plan & Subscription
-   ✅ PLANS: BASIC, PRO, PLATINUM uniquement
-   ✅ INTÉGRATION ACCESS CONTROL SYSTEM v6.0
-   ✅ SYNCHRONISATION NEWSLETTER SIMPLIFIÉE (Firestore = Source de vérité)
-   ✅ CORRECTION CORS avec MULTIPLES TENTATIVES
-   ✅ TOAST CORRIGÉ
+   ✅ PLAN & SUBSCRIPTION MANAGEMENT
+   ✅ SYNCHRONISATION NEWSLETTER
+   ✅ STRIPE INTEGRATION
    ============================================ */
 
 // Configuration
 const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
-const CHECKOUT_URL = 'checkout.html';
-const STRIPE_CUSTOMER_PORTAL_URL = 'https://billing.stripe.com/p/login/test_XXXXX'; // ✅ À REMPLACER PAR VOTRE URL
+const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
-// ✅ Configuration des plans (BASIC, PRO, PLATINUM UNIQUEMENT)
-const PLANS_CONFIG = {
+// ✅ Configuration des plans (synchronisé avec access-control.js)
+const PLAN_CONFIG = {
     basic: {
-        name: 'basic',
-        displayName: 'Basic',
-        badge: 'basic-badge',
+        name: 'Basic',
+        displayName: 'AlphaVault Basic',
+        price: 0,
+        currency: '$',
+        level: 0,
+        totalPages: 9,
         color: '#06b6d4',
         gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-        icon: 'fa-star',
-        level: 0,
-        requiresActiveSubscription: true,
-        pages: [
-            'dashboard-financier.html',
-            'community-hub.html',
-            'create-post.html',
-            'messages.html',
-            'monte-carlo.html',
-            'real-estate-tax-simulator.html',
-            'portfolio-optimizer.html',
-            'economic-dashboard.html',
-            'companies-directory.html'
-        ],
-        pageCount: 9,
+        icon: '📊',
         features: [
-            'Access to 9 pages',
-            'Real-time market data',
-            'Advanced charts',
-            'Email support',
-            'Priority updates',
-            'Export analyses',
-            'Community access',
-            'Monte Carlo simulations',
-            'Portfolio optimization (basic)',
-            'Economic dashboard',
-            'Companies directory'
-        ],
-        price: 29,
-        currency: '$',
-        billingPeriod: 'month'
+            'Dashboard Budget',
+            'Community Hub',
+            'Create Posts & Messages',
+            'Monte Carlo Simulations',
+            'Real Estate Tax Simulator',
+            'Portfolio Optimizer (Markowitz)',
+            'Economic Dashboard',
+            'Companies Directory',
+            'Settings & User Profile'
+        ]
     },
-    
     pro: {
-        name: 'pro',
-        displayName: 'Pro',
-        badge: 'pro-badge',
-        color: '#3b82f6',
-        gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-        icon: 'fa-rocket',
+        name: 'Pro',
+        displayName: 'AlphaVault Pro',
+        price: 10,
+        currency: '$',
         level: 1,
-        requiresActiveSubscription: true,
-        pages: [
-            // Common pages
-            'dashboard-financier.html',
-            'community-hub.html',
-            'create-post.html',
-            'messages.html',
-            'monte-carlo.html',
-            // Basic pages
-            'real-estate-tax-simulator.html',
-            'portfolio-optimizer.html',
-            'economic-dashboard.html',
-            'companies-directory.html',
-            // Pro specific pages
-            'investment-analytics.html',
-            'risk-parity.html',
-            'scenario-analysis.html',
-            'advanced-analysis.html',
-            'forex-converter.html',
-            'inflation-calculator.html',
-            'interest-rate-tracker.html',
-            'news-terminal.html'
-        ],
-        pageCount: 17,
+        totalPages: 17,
+        color: '#3B82F6',
+        gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+        icon: '👑',
         features: [
-            'Access to 17 pages',
-            'Everything in Basic',
-            'Real-time data + AI insights',
-            'Advanced technical analysis',
-            'Portfolio optimization (advanced)',
-            'Risk Parity',
-            'Scenario Analysis',
-            'Forex Converter (38+ currencies)',
-            'Monte Carlo simulations (advanced)',
+            'Everything in Basic (9 pages)',
             'Investment Analytics',
+            'Risk Parity Optimization',
+            'Scenario Analysis',
+            'Advanced Analysis (14 indicators)',
+            'Forex Converter (38 currencies)',
             'Inflation Calculator',
             'Interest Rate Tracker',
-            'News Terminal',
-            'Priority support',
-            'API access (limited)'
-        ],
-        price: 79,
-        currency: '$',
-        billingPeriod: 'month',
-        popular: true
+            'News Terminal'
+        ]
     },
-    
     platinum: {
-        name: 'platinum',
-        displayName: 'Platinum',
-        badge: 'platinum-badge',
-        color: '#8b5cf6',
-        gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-        icon: 'fa-crown',
-        level: 2,
-        requiresActiveSubscription: true,
-        pages: ['all'],
-        pageCount: 25,
-        features: [
-            'Access to ALL 25 pages',
-            'Everything in Pro',
-            'IPO Intelligence',
-            'Insider Flow Tracker',
-            'M&A Predictor',
-            'Trend Prediction (AI)',
-            'Market Sentiment Analysis',
-            'Trending Topics',
-            'YouTube Intelligence',
-            'Recession Indicators',
-            'Advanced AI recommendations',
-            'White-glove support',
-            'Custom integrations',
-            'Full API access',
-            'Dedicated account manager',
-            'Early access to new features'
-        ],
-        price: 149,
+        name: 'Platinum',
+        displayName: 'AlphaVault Platinum',
+        price: 20,
         currency: '$',
-        billingPeriod: 'month',
-        premium: true
+        level: 2,
+        totalPages: 25,
+        color: '#8B5CF6',
+        gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+        icon: '💎',
+        features: [
+            'Everything in Pro (17 pages)',
+            'IPO Intelligence (AI Scoring)',
+            'Insider Flow Tracker (14 classes)',
+            'M&A Predictor (6 AI factors)',
+            'Trend Prediction ML',
+            'Market Sentiment Analysis',
+            'Trending Topics (AI-powered)',
+            'YouTube Market Intelligence',
+            'Recession Indicators'
+        ]
     }
 };
 
 // Variables globales
 let currentUserData = null;
 let currentSettings = {
-    // Notifications
     weeklyNewsletter: true,
     featureUpdates: true,
-    
-    // Privacy
     analytics: true
-};
-
-// Variables pour le plan utilisateur
-let userPlan = {
-    plan: 'basic',
-    subscriptionStatus: 'inactive',
-    customerId: null,
-    subscriptionId: null,
-    currentPeriodEnd: null
 };
 
 // ============================================
@@ -847,338 +769,8 @@ window.addEventListener('userDataLoaded', function(e) {
     currentUserData = e.detail;
     console.log('✅ Données utilisateur reçues:', currentUserData);
     loadSettings();
-    loadUserPlan();
+    loadSubscriptionInfo();
 });
-
-// ============================================
-// 🆕 CHARGEMENT DU PLAN UTILISATEUR
-// ============================================
-
-async function loadUserPlan() {
-    if (!currentUserData || !currentUserData.uid) {
-        console.warn('⚠ Pas de données utilisateur pour charger le plan');
-        return;
-    }
-    
-    try {
-        console.log('📊 Chargement du plan utilisateur...');
-        
-        const userDoc = await firebaseDb.collection('users').doc(currentUserData.uid).get();
-        
-        if (!userDoc.exists) {
-            console.warn('⚠ Document utilisateur introuvable');
-            displayUserPlan('basic');
-            return;
-        }
-        
-        const userData = userDoc.data();
-        
-        let planName = (userData.plan || 'basic').toLowerCase();
-        
-        // ✅ Assurer que le plan est valide (basic, pro, ou platinum)
-        if (!['basic', 'pro', 'platinum'].includes(planName)) {
-            console.warn('⚠ Plan invalide détecté:', planName, '- Utilisation de "basic" par défaut');
-            planName = 'basic';
-        }
-        
-        userPlan = {
-            plan: planName,
-            subscriptionStatus: userData.subscriptionStatus || 'inactive',
-            customerId: userData.stripeCustomerId || null,
-            subscriptionId: userData.stripeSubscriptionId || null,
-            currentPeriodEnd: userData.subscriptionCurrentPeriodEnd || null,
-            trialEnd: userData.trialEnd || null
-        };
-        
-        console.log('✅ Plan utilisateur chargé:', userPlan);
-        
-        displayUserPlan(userPlan.plan);
-        displayBillingHistory();
-        
-    } catch (error) {
-        console.error('❌ Erreur chargement plan:', error);
-        displayUserPlan('basic');
-    }
-}
-
-// ============================================
-// 🆕 AFFICHAGE DU PLAN UTILISATEUR
-// ============================================
-
-function displayUserPlan(planName) {
-    const planConfig = PLANS_CONFIG[planName] || PLANS_CONFIG.basic;
-    
-    console.log('📊 Affichage du plan:', planName);
-    
-    // ✅ Badge du plan actuel
-    const currentPlanBadge = document.getElementById('currentPlanBadge');
-    if (currentPlanBadge) {
-        currentPlanBadge.textContent = planConfig.displayName;
-        currentPlanBadge.className = `plan-badge ${planConfig.badge}`;
-        currentPlanBadge.style.background = planConfig.gradient;
-    }
-    
-    // ✅ Icône du plan
-    const planIcon = document.getElementById('currentPlanIcon');
-    if (planIcon) {
-        planIcon.className = `fas ${planConfig.icon}`;
-    }
-    
-    // ✅ Couleur de l'icône
-    const planIconCircle = document.getElementById('planIconCircle');
-    if (planIconCircle) {
-        planIconCircle.style.background = planConfig.gradient;
-    }
-    
-    // ✅ Nom du plan
-    const currentPlanName = document.getElementById('currentPlanName');
-    if (currentPlanName) {
-        currentPlanName.textContent = planConfig.displayName + ' Plan';
-    }
-    
-    // ✅ Prix du plan
-    const currentPlanPrice = document.getElementById('currentPlanPrice');
-    if (currentPlanPrice) {
-        currentPlanPrice.innerHTML = `
-            <span class="plan-price-currency">${planConfig.currency}</span>
-            <span class="plan-price-amount">${planConfig.price}</span>
-            <span class="plan-price-period">/${planConfig.billingPeriod}</span>
-        `;
-    }
-    
-    // ✅ Nombre de pages accessibles
-    const pageAccessInfo = document.getElementById('pageAccessInfo');
-    if (pageAccessInfo) {
-        if (planConfig.pageCount === 25) {
-            pageAccessInfo.innerHTML = '<i class="fas fa-infinity"></i> Access to <strong>ALL pages</strong>';
-        } else {
-            pageAccessInfo.innerHTML = `<i class="fas fa-check-circle"></i> Access to <strong>${planConfig.pageCount} pages</strong>`;
-        }
-    }
-    
-    // ✅ Features du plan
-    const featuresList = document.getElementById('currentPlanFeatures');
-    if (featuresList) {
-        featuresList.innerHTML = planConfig.features.map(feature => `
-            <li class="plan-feature">
-                <i class="fas fa-check-circle"></i>
-                <span>${feature}</span>
-            </li>
-        `).join('');
-    }
-    
-    // ✅ Afficher/Masquer le bouton Upgrade
-    const upgradeSection = document.getElementById('upgradeSection');
-    
-    if (planName === 'platinum') {
-        // Plan maximum - Pas de upgrade possible
-        if (upgradeSection) upgradeSection.style.display = 'none';
-    } else {
-        // Afficher le bouton Upgrade
-        if (upgradeSection) upgradeSection.style.display = 'block';
-        
-        // Définir le plan cible
-        let targetPlan = 'pro';
-        let targetPlanName = 'Pro';
-        
-        if (planName === 'basic') {
-            targetPlan = 'pro';
-            targetPlanName = 'Pro';
-        } else if (planName === 'pro') {
-            targetPlan = 'platinum';
-            targetPlanName = 'Platinum';
-        }
-        
-        const upgradeBtn = document.getElementById('upgradePlanBtn');
-        if (upgradeBtn) {
-            upgradeBtn.innerHTML = `
-                <i class="fas fa-arrow-up"></i>
-                Upgrade to ${targetPlanName}
-            `;
-            upgradeBtn.onclick = function() {
-                window.location.href = `${CHECKOUT_URL}?plan=${targetPlan}`;
-            };
-        }
-    }
-    
-    // ✅ Afficher/Masquer la gestion d'abonnement
-    const managePlanSection = document.getElementById('managePlanSection');
-    
-    if (managePlanSection) {
-        if (userPlan.subscriptionStatus === 'active' || userPlan.subscriptionStatus === 'trialing') {
-            managePlanSection.style.display = 'block';
-            
-            // Mettre à jour la date de renouvellement
-            const renewalDate = document.getElementById('renewalDate');
-            if (renewalDate && userPlan.currentPeriodEnd) {
-                const date = new Date(userPlan.currentPeriodEnd);
-                renewalDate.textContent = date.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-            } else if (renewalDate) {
-                renewalDate.textContent = 'Not available';
-            }
-            
-            // ✅ Afficher/Masquer le bouton de réactivation
-            const reactivateCard = document.getElementById('reactivateCard');
-            if (reactivateCard) {
-                if (userPlan.subscriptionStatus === 'canceled' || userPlan.subscriptionStatus === 'cancelled') {
-                    reactivateCard.style.display = 'block';
-                } else {
-                    reactivateCard.style.display = 'none';
-                }
-            }
-        } else {
-            managePlanSection.style.display = 'none';
-        }
-    }
-    
-    // ✅ Remplir le tableau de comparaison
-    displayPlansComparison(planName);
-}
-
-// ============================================
-// 🆕 TABLEAU DE COMPARAISON DES PLANS
-// ============================================
-
-function displayPlansComparison(currentPlan) {
-    const comparisonBody = document.getElementById('plansComparisonBody');
-    if (!comparisonBody) return;
-    
-    // Créer les lignes du tableau
-    const allFeatures = [
-        { name: 'Pages Access', values: { basic: '9 pages', pro: '17 pages', platinum: 'All 25 pages' } },
-        { name: 'Market Data', values: { basic: 'Real-time', pro: 'Real-time + AI', platinum: 'Real-time + AI' } },
-        { name: 'Technical Analysis', values: { basic: true, pro: 'Advanced', platinum: 'Advanced' } },
-        { name: 'Portfolio Optimization', values: { basic: 'Basic', pro: 'Advanced', platinum: 'Advanced' } },
-        { name: 'Monte Carlo Simulations', values: { basic: 'Basic', pro: 'Advanced', platinum: 'Advanced' } },
-        { name: 'Risk Parity', values: { basic: false, pro: true, platinum: true } },
-        { name: 'Scenario Analysis', values: { basic: false, pro: true, platinum: true } },
-        { name: 'Forex Converter', values: { basic: false, pro: '38+ currencies', platinum: '38+ currencies' } },
-        { name: 'IPO Intelligence', values: { basic: false, pro: false, platinum: true } },
-        { name: 'Insider Flow Tracker', values: { basic: false, pro: false, platinum: true } },
-        { name: 'M&A Predictor', values: { basic: false, pro: false, platinum: true } },
-        { name: 'Trend Prediction (AI)', values: { basic: false, pro: false, platinum: true } },
-        { name: 'API Access', values: { basic: false, pro: 'Limited', platinum: 'Full' } },
-        { name: 'Support', values: { basic: 'Email', pro: 'Priority', platinum: 'White-glove' } },
-        { name: 'Chatbot', values: { basic: '5 msgs/day', pro: 'Unlimited', platinum: 'Unlimited' } }
-    ];
-    
-    comparisonBody.innerHTML = allFeatures.map(feature => `
-        <tr>
-            <td class="feature-name">${feature.name}</td>
-            ${Object.keys(PLANS_CONFIG).map(plan => {
-                const value = feature.values[plan];
-                let cellContent = '';
-                
-                if (value === true) {
-                    cellContent = '<i class="fas fa-check-circle text-success"></i>';
-                } else if (value === false) {
-                    cellContent = '<i class="fas fa-times-circle text-muted"></i>';
-                } else {
-                    cellContent = `<span class="feature-value">${value}</span>`;
-                }
-                
-                const isCurrentPlan = plan === currentPlan;
-                
-                return `<td class="${isCurrentPlan ? 'current-plan-column' : ''}">${cellContent}</td>`;
-            }).join('')}
-        </tr>
-    `).join('');
-}
-
-// ============================================
-// 🆕 HISTORIQUE DE FACTURATION
-// ============================================
-
-function displayBillingHistory() {
-    const billingHistorySection = document.getElementById('billingHistorySection');
-    const billingHistoryList = document.getElementById('billingHistoryList');
-    
-    if (!billingHistorySection || !billingHistoryList) return;
-    
-    // Afficher uniquement si l'utilisateur a un abonnement actif
-    if (!userPlan.customerId || userPlan.subscriptionStatus === 'inactive') {
-        billingHistorySection.style.display = 'none';
-        return;
-    }
-    
-    billingHistorySection.style.display = 'block';
-    
-    // TODO: Récupérer l'historique réel depuis Stripe via Worker
-    billingHistoryList.innerHTML = `
-        <div class="billing-history-empty">
-            <i class="fas fa-receipt"></i>
-            <p>Your billing history will appear here</p>
-            <a href="${STRIPE_CUSTOMER_PORTAL_URL}" target="_blank" class="btn-secondary">
-                <i class="fas fa-external-link-alt"></i>
-                View in Stripe Portal
-            </a>
-        </div>
-    `;
-}
-
-// ============================================
-// 🆕 GESTION DE L'ABONNEMENT
-// ============================================
-
-async function cancelSubscription() {
-    const confirmed = confirm(
-        '⚠ Cancel Subscription\n\n' +
-        'Are you sure you want to cancel your subscription?\n\n' +
-        'You will keep access until the end of your billing period.\n' +
-        'You can reactivate anytime before the end date.'
-    );
-    
-    if (!confirmed) return;
-    
-    try {
-        showToast('info', 'Processing...', 'Canceling your subscription');
-        
-        // TODO: Appeler le Worker pour annuler l'abonnement Stripe
-        // const response = await fetch(`${WORKER_URL}/cancel-subscription`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ userId: currentUserData.uid })
-        // });
-        
-        // Simulation pour l'instant
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        showToast('success', 'Subscription Canceled', 'Your subscription will remain active until the end of the current billing period');
-        
-        // Recharger les données
-        await loadUserPlan();
-        
-    } catch (error) {
-        console.error('❌ Erreur annulation:', error);
-        showToast('error', 'Error', 'Unable to cancel your subscription. Please try again.');
-    }
-}
-
-async function reactivateSubscription() {
-    try {
-        showToast('info', 'Processing...', 'Reactivating your subscription');
-        
-        // TODO: Appeler le Worker pour réactiver l'abonnement Stripe
-        
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        showToast('success', 'Subscription Reactivated', 'Your subscription has been reactivated successfully');
-        
-        await loadUserPlan();
-        
-    } catch (error) {
-        console.error('❌ Erreur réactivation:', error);
-        showToast('error', 'Error', 'Unable to reactivate your subscription. Please try again.');
-    }
-}
-
-function openCustomerPortal() {
-    window.open(STRIPE_CUSTOMER_PORTAL_URL, '_blank');
-}
 
 // ============================================
 // CHARGEMENT DES PARAMÈTRES
@@ -1212,7 +804,6 @@ async function loadSettings() {
             console.log('✅ Paramètres chargés:', currentSettings);
         }
         
-        // ✅ SYNCHRONISER AVEC CLOUDFLARE KV (Firestore = source de vérité)
         await synchronizeNewsletterSubscription();
         
         applySettingsToUI();
@@ -1246,20 +837,363 @@ function loadDefaultSettings() {
 }
 
 function applySettingsToUI() {
-    // Notifications
-    const newsletterToggle = document.getElementById('weeklyNewsletter');
-    const featuresToggle = document.getElementById('featureUpdates');
-    const analyticsToggle = document.getElementById('analytics');
-    
-    if (newsletterToggle) newsletterToggle.checked = currentSettings.weeklyNewsletter !== false;
-    if (featuresToggle) featuresToggle.checked = currentSettings.featureUpdates !== false;
-    if (analyticsToggle) analyticsToggle.checked = currentSettings.analytics !== false;
+    document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
+    document.getElementById('featureUpdates').checked = currentSettings.featureUpdates !== false;
+    document.getElementById('analytics').checked = currentSettings.analytics !== false;
     
     console.log('✅ Interface mise à jour avec les paramètres');
 }
 
 // ============================================
-// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE
+// 🆕 PLAN & SUBSCRIPTION MANAGEMENT
+// ============================================
+
+async function loadSubscriptionInfo() {
+    try {
+        if (!currentUserData) {
+            console.warn('⚠ Aucun utilisateur connecté');
+            return;
+        }
+        
+        console.log('📊 Chargement des informations d\'abonnement...');
+        
+        const plan = currentUserData.plan || 'basic';
+        const status = currentUserData.subscriptionStatus || 'inactive';
+        
+        console.log('   Plan actuel:', plan);
+        console.log('   Statut:', status);
+        
+        // Afficher le badge du plan actuel
+        displayCurrentPlanBadge(plan, status);
+        
+        // Afficher les features du plan
+        displayPlanFeatures(plan);
+        
+        // Générer le tableau de comparaison
+        generatePlanComparison(plan);
+        
+        // Charger l'historique de facturation (si plan payant)
+        if (['pro', 'platinum'].includes(plan) && status === 'active') {
+            await loadBillingHistory();
+        }
+        
+        // Afficher les options de gestion (si plan payant)
+        if (['pro', 'platinum'].includes(plan) && status === 'active') {
+            displaySubscriptionManagement(plan, status);
+        }
+        
+        console.log('✅ Informations d\'abonnement chargées');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des infos d\'abonnement:', error);
+        showToast('error', 'Erreur', 'Impossible de charger vos informations d\'abonnement');
+    }
+}
+
+function displayCurrentPlanBadge(plan, status) {
+    const planConfig = PLAN_CONFIG[plan] || PLAN_CONFIG.basic;
+    const container = document.getElementById('currentPlanBadge');
+    
+    let statusBadge = '';
+    let statusText = '';
+    
+    if (status === 'active') {
+        statusBadge = '<span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span>';
+        statusText = 'Your subscription is active and in good standing.';
+    } else if (status === 'trial') {
+        statusBadge = '<span class="status-badge status-trial"><i class="fas fa-clock"></i> Free Trial</span>';
+        statusText = 'You are currently on a free trial period.';
+    } else if (status === 'cancelled') {
+        statusBadge = '<span class="status-badge status-cancelled"><i class="fas fa-times-circle"></i> Cancelled</span>';
+        statusText = 'Your subscription has been cancelled and will end at the end of the billing period.';
+    } else if (status === 'active_free') {
+        statusBadge = '<span class="status-badge status-free"><i class="fas fa-gift"></i> Free Lifetime</span>';
+        statusText = 'You have free lifetime access to this plan.';
+    } else {
+        statusBadge = '<span class="status-badge status-inactive"><i class="fas fa-pause-circle"></i> Inactive</span>';
+        statusText = 'Your subscription is inactive.';
+    }
+    
+    container.innerHTML = `
+        <div class="plan-card" style="background: ${planConfig.gradient};">
+            <div class="plan-card-header">
+                <div class="plan-icon">${planConfig.icon}</div>
+                <div class="plan-info">
+                    <h3 class="plan-name">${planConfig.displayName}</h3>
+                    <p class="plan-price">
+                        ${planConfig.price === 0 
+                            ? '<span class="price-free">FREE</span>' 
+                            : `<span class="price-value">${planConfig.currency}${planConfig.price}</span><span class="price-period">/month</span>`
+                        }
+                    </p>
+                </div>
+                ${statusBadge}
+            </div>
+            <p class="plan-description">${statusText}</p>
+            <div class="plan-stats">
+                <div class="plan-stat">
+                    <i class="fas fa-file-alt"></i>
+                    <span>${planConfig.totalPages} Pages</span>
+                </div>
+                <div class="plan-stat">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Level ${planConfig.level}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayPlanFeatures(plan) {
+    const planConfig = PLAN_CONFIG[plan] || PLAN_CONFIG.basic;
+    const container = document.getElementById('currentPlanFeatures');
+    
+    const featuresHTML = planConfig.features.map(feature => `
+        <div class="feature-item">
+            <i class="fas fa-check-circle feature-icon"></i>
+            <span>${feature}</span>
+        </div>
+    `).join('');
+    
+    container.innerHTML = `
+        <div class="features-list">
+            <h4 class="features-title">
+                <i class="fas fa-sparkles"></i> 
+                Features Included
+            </h4>
+            ${featuresHTML}
+        </div>
+    `;
+}
+
+function generatePlanComparison(currentPlan) {
+    const container = document.getElementById('planComparisonTable');
+    
+    const plans = ['basic', 'pro', 'platinum'];
+    
+    const comparisonHTML = `
+        <div class="plan-comparison">
+            ${plans.map(planKey => {
+                const planConfig = PLAN_CONFIG[planKey];
+                const isCurrent = planKey === currentPlan;
+                const canUpgrade = PLAN_CONFIG[currentPlan].level < planConfig.level;
+                
+                return `
+                    <div class="comparison-card ${isCurrent ? 'current-plan' : ''}" style="border-color: ${planConfig.color};">
+                        ${isCurrent ? '<div class="current-badge"><i class="fas fa-star"></i> Current Plan</div>' : ''}
+                        
+                        <div class="comparison-header">
+                            <div class="comparison-icon">${planConfig.icon}</div>
+                            <h4 class="comparison-name">${planConfig.name}</h4>
+                            <p class="comparison-price">
+                                ${planConfig.price === 0 
+                                    ? '<span class="price-free">FREE</span>' 
+                                    : `<span class="price-value">${planConfig.currency}${planConfig.price}</span><span class="price-period">/mo</span>`
+                                }
+                            </p>
+                        </div>
+                        
+                        <div class="comparison-features">
+                            <div class="comparison-stat">
+                                <i class="fas fa-file-alt"></i>
+                                <strong>${planConfig.totalPages}</strong> Pages
+                            </div>
+                            <div class="comparison-divider"></div>
+                            ${planConfig.features.slice(0, 3).map(feature => `
+                                <div class="comparison-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>${feature}</span>
+                                </div>
+                            `).join('')}
+                            ${planConfig.features.length > 3 ? `
+                                <div class="comparison-feature-more">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>+${planConfig.features.length - 3} more features</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="comparison-action">
+                            ${isCurrent 
+                                ? '<button class="btn-current" disabled><i class="fas fa-check"></i> Current Plan</button>' 
+                                : canUpgrade 
+                                    ? `<button class="btn-upgrade" onclick="upgradeToPlan('${planKey}')"><i class="fas fa-arrow-up"></i> Upgrade to ${planConfig.name}</button>`
+                                    : '<button class="btn-downgrade" disabled><i class="fas fa-arrow-down"></i> Lower Plan</button>'
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+    
+    container.innerHTML = comparisonHTML;
+}
+
+async function loadBillingHistory() {
+    try {
+        console.log('📄 Chargement de l\'historique de facturation...');
+        
+        if (!currentUserData.stripeCustomerId) {
+            console.warn('⚠ Pas de Stripe Customer ID');
+            return;
+        }
+        
+        // Note: L'API Stripe nécessite une clé secrète, donc cette requête doit passer par le Worker
+        // Pour l'instant, on affiche un placeholder
+        
+        const section = document.getElementById('billingHistorySection');
+        const container = document.getElementById('billingHistoryContainer');
+        
+        section.style.display = 'block';
+        
+        container.innerHTML = `
+            <div class="billing-history">
+                <p class="billing-info">
+                    <i class="fas fa-info-circle"></i>
+                    Your billing history is managed by Stripe. 
+                    <a href="https://billing.stripe.com/p/login/test_xxxx" target="_blank" class="stripe-portal-link">
+                        View detailed invoices <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </p>
+                <div class="billing-placeholder">
+                    <i class="fas fa-receipt billing-icon"></i>
+                    <p>Full billing history coming soon</p>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement de l\'historique:', error);
+    }
+}
+
+function displaySubscriptionManagement(plan, status) {
+    const section = document.getElementById('subscriptionManagementSection');
+    const container = document.getElementById('subscriptionManagementContainer');
+    
+    section.style.display = 'block';
+    
+    if (status === 'active_free') {
+        container.innerHTML = `
+            <div class="subscription-management">
+                <div class="management-info">
+                    <i class="fas fa-gift"></i>
+                    <p>You have free lifetime access to this plan. No subscription management needed!</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    if (status === 'cancelled') {
+        container.innerHTML = `
+            <div class="subscription-management">
+                <div class="management-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Your subscription is cancelled and will end at the end of the current billing period.</p>
+                </div>
+                <button class="btn-reactivate" onclick="reactivateSubscription()">
+                    <i class="fas fa-redo"></i>
+                    Reactivate Subscription
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="subscription-management">
+            <div class="management-actions">
+                <button class="btn-cancel-subscription" onclick="confirmCancelSubscription()">
+                    <i class="fas fa-times-circle"></i>
+                    Cancel Subscription
+                </button>
+                <p class="management-note">
+                    <i class="fas fa-info-circle"></i>
+                    You can cancel your subscription at any time. You'll keep access until the end of your billing period.
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
+// ACTIONS ABONNEMENT
+// ============================================
+
+function upgradeToPlan(plan) {
+    console.log('📈 Upgrade vers le plan:', plan);
+    
+    showToast('info', 'Redirection', 'Vous allez être redirigé vers la page de paiement...');
+    
+    setTimeout(() => {
+        window.location.href = `checkout.html?plan=${plan}`;
+    }, 1500);
+}
+
+async function confirmCancelSubscription() {
+    const confirmed = confirm(
+        '⚠ Are you sure you want to cancel your subscription?\n\n' +
+        'You will keep access until the end of your current billing period.\n' +
+        'This action can be reversed by reactivating your subscription.'
+    );
+    
+    if (!confirmed) return;
+    
+    await cancelSubscription();
+}
+
+async function cancelSubscription() {
+    try {
+        if (!currentUserData.stripeSubscriptionId) {
+            showToast('error', 'Erreur', 'No active subscription found');
+            return;
+        }
+        
+        console.log('🗑 Annulation de l\'abonnement...');
+        
+        showToast('info', 'Processing', 'Cancelling your subscription...');
+        
+        const response = await fetch(`${WORKER_URL}/cancel-subscription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                subscriptionId: currentUserData.stripeSubscriptionId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Abonnement annulé avec succès');
+            showToast('success', 'Success', 'Your subscription has been cancelled');
+            
+            // Rafraîchir les données
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+            
+        } else {
+            throw new Error(data.error || 'Failed to cancel subscription');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur annulation:', error);
+        showToast('error', 'Error', error.message || 'Failed to cancel subscription');
+    }
+}
+
+async function reactivateSubscription() {
+    showToast('info', 'Reactivation', 'Please contact support to reactivate your subscription');
+    
+    // TODO: Implémenter la réactivation via Stripe API
+}
+
+// ============================================
+// 🆕 SYNCHRONISATION NEWSLETTER
 // ============================================
 
 async function synchronizeNewsletterSubscription() {
@@ -1271,7 +1205,7 @@ async function synchronizeNewsletterSubscription() {
     try {
         console.log('🔄 Synchronisation newsletter avec Firestore...');
         
-        const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
+        const userRef = db.collection('users').doc(currentUserData.uid);
         const doc = await userRef.get();
         
         if (!doc.exists) {
@@ -1284,13 +1218,11 @@ async function synchronizeNewsletterSubscription() {
         
         console.log('📊 Statut newsletter (Firestore):', isSubscribed ? 'Abonné ✅' : 'Non abonné ❌');
         
-        // Mettre à jour le toggle sur la page
         const newsletterToggle = document.getElementById('weeklyNewsletter');
         if (newsletterToggle) {
             newsletterToggle.checked = isSubscribed;
         }
         
-        // ✅ INSCRIPTION MANQUANTE - RATTRAPAGE
         if (isSubscribed && !userData.newsletterSubscribedAt) {
             console.log('⚠ Inscription manquante détectée - envoi au Worker...');
             
@@ -1351,14 +1283,13 @@ async function unsubscribeFromNewsletter(email) {
     try {
         console.log('📧 Désinscription de la newsletter:', email);
         
-        // ✅ MÉTHODE 1 : Essayer GET avec paramètre URL
         try {
             const img = new Image();
             const unsubscribeUrl = `${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
             
             await new Promise((resolve, reject) => {
                 img.onload = () => {
-                    console.log('✅ Requête GET envoyée avec succès (méthode 1)');
+                    console.log('✅ Requête GET envoyée avec succès');
                     resolve();
                 };
                 img.onerror = () => {
@@ -1367,50 +1298,36 @@ async function unsubscribeFromNewsletter(email) {
                 };
                 
                 setTimeout(() => reject(), 3000);
+                
                 img.src = unsubscribeUrl;
             });
             
+            console.log('✅ Désinscription newsletter réussie');
             showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
             return true;
             
         } catch (error1) {
-            console.log('⚠ Méthode 1 (GET Image) échouée');
+            console.log('⚠ Méthode GET échouée, tentative fetch...');
         }
         
-        // ✅ MÉTHODE 2 : sendBeacon
-        try {
-            const beaconUrl = `${NEWSLETTER_WORKER_URL}/unsubscribe`;
-            const data = new Blob([JSON.stringify({ email: email })], { type: 'application/json' });
-            
-            if (navigator.sendBeacon && navigator.sendBeacon(beaconUrl, data)) {
-                showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
-                return true;
-            }
-        } catch (error2) {
-            console.log('⚠ Méthode 2 (sendBeacon) échouée');
-        }
+        await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email
+            }),
+            mode: 'no-cors'
+        });
         
-        // ✅ MÉTHODE 3 : fetch POST no-cors
-        try {
-            await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }),
-                mode: 'no-cors'
-            });
-            
-            showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
-            return true;
-            
-        } catch (error3) {
-            console.log('⚠ Méthode 3 (Fetch POST) échouée');
-        }
-        
-        showToast('warning', 'Désinscription enregistrée', 'Votre préférence est sauvegardée');
+        console.log('✅ Requête désinscription envoyée');
+        showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
         return true;
         
     } catch (error) {
         console.error('❌ Erreur désinscription newsletter:', error);
+        
         showToast('warning', 'Désinscription enregistrée', 'Votre préférence est sauvegardée dans votre compte');
         return true;
     }
@@ -1421,7 +1338,6 @@ async function unsubscribeFromNewsletter(email) {
 // ============================================
 
 function initializeEventListeners() {
-    // Navigation entre tabs
     const tabButtons = document.querySelectorAll('.settings-nav-item');
     tabButtons.forEach(function(button) {
         button.addEventListener('click', function() {
@@ -1429,7 +1345,6 @@ function initializeEventListeners() {
         });
     });
     
-    // Boutons de sauvegarde
     const saveNotifBtn = document.getElementById('saveNotificationSettings');
     if (saveNotifBtn) {
         saveNotifBtn.addEventListener('click', saveNotificationSettings);
@@ -1440,7 +1355,6 @@ function initializeEventListeners() {
         savePrivacyBtn.addEventListener('click', savePrivacySettings);
     }
     
-    // Boutons d'action data
     const exportBtn = document.getElementById('exportDataBtn');
     if (exportBtn) {
         exportBtn.addEventListener('click', exportUserData);
@@ -1459,22 +1373,6 @@ function initializeEventListeners() {
     const deletePortfoliosBtn = document.getElementById('deleteAllPortfolios');
     if (deletePortfoliosBtn) {
         deletePortfoliosBtn.addEventListener('click', deleteAllPortfolios);
-    }
-    
-    // ✅ Boutons de gestion d'abonnement
-    const cancelBtn = document.getElementById('cancelSubscriptionBtn');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', cancelSubscription);
-    }
-    
-    const reactivateBtn = document.getElementById('reactivateSubscriptionBtn');
-    if (reactivateBtn) {
-        reactivateBtn.addEventListener('click', reactivateSubscription);
-    }
-    
-    const portalBtn = document.getElementById('openCustomerPortalBtn');
-    if (portalBtn) {
-        portalBtn.addEventListener('click', openCustomerPortal);
     }
 }
 
@@ -1515,7 +1413,6 @@ async function saveNotificationSettings() {
     
     await saveSettings();
     
-    // ✅ SYNCHRONISER AVEC CLOUDFLARE SI CHANGEMENT
     if (currentSettings.weeklyNewsletter !== previousNewsletterState) {
         console.log('📧 Changement préférence newsletter détecté, synchronisation...');
         
@@ -1523,7 +1420,7 @@ async function saveNotificationSettings() {
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
             
             if (subscribed) {
-                const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
+                const userRef = db.collection('users').doc(currentUserData.uid);
                 await userRef.update({
                     newsletterSubscribedAt: new Date().toISOString()
                 });
@@ -1531,7 +1428,7 @@ async function saveNotificationSettings() {
         } else {
             await unsubscribeFromNewsletter(currentUserData.email);
             
-            const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
+            const userRef = db.collection('users').doc(currentUserData.uid);
             await userRef.update({
                 newsletterSubscribedAt: firebase.firestore.FieldValue.delete()
             });
@@ -1591,7 +1488,6 @@ async function exportUserData() {
         const exportData = {
             user: currentUserData,
             settings: currentSettings,
-            plan: userPlan,
             exportDate: new Date().toISOString()
         };
         
@@ -1650,7 +1546,6 @@ async function deleteAllAnalyses() {
     showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
     
     try {
-        // TODO: Implémenter la suppression réelle
         showToast('success', 'Succès !', 'Analyses supprimées');
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -1670,7 +1565,6 @@ async function deleteAllPortfolios() {
     showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
     
     try {
-        // TODO: Implémenter la suppression réelle
         showToast('success', 'Succès !', 'Portfolios supprimés');
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -1679,7 +1573,7 @@ async function deleteAllPortfolios() {
 }
 
 // ============================================
-// ✅ UTILITAIRES - TOAST CORRIGÉ
+// UTILITAIRES - TOAST
 // ============================================
 
 function showToast(type, title, message) {
@@ -1762,6 +1656,4 @@ function isFirebaseInitialized() {
            typeof firebaseDb !== 'undefined';
 }
 
-console.log('✅ Script de paramètres chargé avec Plan & Subscription (BASIC, PRO, PLATINUM)');
-console.log('📊 Plans disponibles:', Object.keys(PLANS_CONFIG));
-console.log('💎 Basic: 9 pages | Pro: 17 pages | Platinum: 25 pages');
+console.log('✅ Script de paramètres chargé avec gestion d\'abonnement - Version 3.0');
