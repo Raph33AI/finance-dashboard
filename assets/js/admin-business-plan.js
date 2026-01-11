@@ -2319,7 +2319,7 @@ window.addEventListener('load', function() {
 });
 
 // ════════════════════════════════════════════════════════════════
-// VALUATION & FUNDING - EDITABLE WITH FIRESTORE SYNC (ARR EDITABLE)
+// VALUATION & FUNDING - EDITABLE WITH FIRESTORE SYNC (FIXED)
 // ════════════════════════════════════════════════════════════════
 
 // ⚡ EXTEND FINANCIAL_DATA WITH VALUATION DATA
@@ -2337,14 +2337,14 @@ if (!FINANCIAL_DATA.valuation) {
         rounds: {
             year0: { 
                 name: 'Pre-Seed',
-                amount: 0,          // No investment yet
-                preMoney: 450000,   // Current valuation
+                amount: 0,
+                preMoney: 450000,
                 timing: 'Current Stage',
                 raised: false
             },
             year1: { 
                 name: 'Seed',
-                amount: 55000,      // €50K = ~$55K
+                amount: 55000,
                 timing: 'Year 1',
                 raised: false
             },
@@ -2398,7 +2398,6 @@ function calculateValuation(year) {
     const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
     const yearData = year === 0 ? null : FINANCIAL_DATA.projections[yearKey];
     
-    // Year 0 (Pre-Seed)
     if (year === 0) {
         return {
             year: 0,
@@ -2418,7 +2417,6 @@ function calculateValuation(year) {
         return null;
     }
     
-    // ARR = Subscription Revenue
     const arr = yearData.revenue.subscription * 1000;
     const multiple = FINANCIAL_DATA.valuation.arrMultiples[yearKey] || 5;
     const preMoney = arr * multiple;
@@ -2445,7 +2443,6 @@ function renderCurrentValuation() {
     if (!container) return;
     
     const currentVal = FINANCIAL_DATA.valuation.preSeedValuation;
-    const preSeed = FINANCIAL_DATA.valuation.rounds.year0;
     
     const html = `
         <div class="current-valuation-banner">
@@ -2494,7 +2491,6 @@ function renderValuationSummaryCards() {
     if (!container) return;
     
     const y0 = calculateValuation(0);
-    const y1 = calculateValuation(1);
     const y5 = calculateValuation(5);
     
     const totalInvestment = [0, 1, 2, 3, 4, 5].reduce((sum, year) => {
@@ -2534,7 +2530,7 @@ function renderValuationSummaryCards() {
                     <div class="val-summary-label">Total Investment</div>
                 </div>
                 <div class="val-summary-value">${formatCurrency(totalInvestment)}</div>
-                <div class="val-summary-subtitle">Across all rounds (editable)</div>
+                <div class="val-summary-subtitle">Across all rounds</div>
             </div>
             
             <div class="val-summary-card">
@@ -2588,7 +2584,7 @@ function renderValuationTable() {
             html += `<td style="color: var(--text-light); font-style: italic;">Pre-revenue</td>`;
         } else {
             const yearKey = `year${year}`;
-            html += `<td class="editable highlight" contenteditable="true" data-year="${yearKey}" data-field="projections.${yearKey}.revenue.subscription" data-type="arr">${formatCurrency(val.arr)}</td>`;
+            html += `<td class="editable highlight" contenteditable="true" data-year="${yearKey}" data-field="revenue.subscription" data-type="arr">${formatCurrency(val.arr)}</td>`;
         }
     });
     
@@ -2604,7 +2600,7 @@ function renderValuationTable() {
         if (year === 0) {
             html += `<td>—</td>`;
         } else {
-            html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.arrMultiples.${yearKey}" data-type="number">${multiple}x</td>`;
+            html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="arrMultiples.${yearKey}" data-type="multiple">${multiple}x</td>`;
         }
     });
     
@@ -2634,7 +2630,7 @@ function renderValuationTable() {
     years.forEach(year => {
         const yearKey = `year${year}`;
         const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
-        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.rounds.${yearKey}.name" data-type="text">${roundData.name || '—'}</td>`;
+        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="rounds.${yearKey}.name" data-type="text">${roundData.name || '—'}</td>`;
     });
     
     html += `
@@ -2646,7 +2642,7 @@ function renderValuationTable() {
     years.forEach(year => {
         const yearKey = `year${year}`;
         const val = calculateValuation(year);
-        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.rounds.${yearKey}.amount" data-type="currency">${formatCurrency(val.investmentAmount)}</td>`;
+        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="rounds.${yearKey}.amount" data-type="currency">${formatCurrency(val.investmentAmount)}</td>`;
     });
     
     html += `
@@ -2693,10 +2689,8 @@ function renderValuationTable() {
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
                 <i class="fas fa-info-circle"></i> <strong>How to use:</strong> 
-                Click on any cell in the "ARR", "ARR Multiple", "Round Name", or "Investment Amount" rows to edit values. 
-                All calculations (pre-money, post-money, dilution) update automatically. 
-                <strong>Editing ARR here will also update Financial Projections.</strong>
-                Changes are auto-saved to the cloud after 2 seconds.
+                Click on any cell to edit values. ARR changes sync with Financial Projections. 
+                All calculations update automatically and save to cloud after 2 seconds.
             </p>
         </div>
     `;
@@ -2705,7 +2699,7 @@ function renderValuationTable() {
     attachValuationEditableListeners();
 }
 
-// ⚡ ATTACH EDITABLE LISTENERS TO VALUATION TABLE
+// ⚡ ATTACH EDITABLE LISTENERS (SAME LOGIC AS FINANCIAL PROJECTIONS)
 function attachValuationEditableListeners() {
     const editableCells = document.querySelectorAll('#valuationTable .editable[contenteditable="true"]');
     
@@ -2725,6 +2719,7 @@ function attachValuationEditableListeners() {
             this.classList.remove('editing');
             
             const newValueRaw = this.textContent.trim();
+            const year = this.dataset.year;
             const field = this.dataset.field;
             const dataType = this.dataset.type;
             
@@ -2732,19 +2727,20 @@ function attachValuationEditableListeners() {
             
             if (dataType === 'text') {
                 newValue = newValueRaw;
-            } else if (dataType === 'currency' || dataType === 'arr') {
+            } else if (dataType === 'arr' || dataType === 'currency') {
                 newValue = parseEditableValue(newValueRaw);
-            } else if (dataType === 'number') {
+            } else if (dataType === 'multiple') {
                 newValue = parseFloat(newValueRaw.replace(/[^0-9.]/g, ''));
             }
             
             const originalValue = dataType === 'text' ? this.dataset.original : parseEditableValue(this.dataset.original);
             
             if (dataType === 'text' ? newValue === originalValue : Math.abs(newValue - originalValue) < 0.01) {
-                console.log('🔄 No change detected');
-                if (dataType === 'currency' || dataType === 'arr') {
+                console.log('🔄 No change detected, skipping update');
+                
+                if (dataType === 'arr' || dataType === 'currency') {
                     this.textContent = formatCurrency(newValue);
-                } else if (dataType === 'number') {
+                } else if (dataType === 'multiple') {
                     this.textContent = newValue + 'x';
                 } else {
                     this.textContent = newValue || '—';
@@ -2752,24 +2748,32 @@ function attachValuationEditableListeners() {
                 return;
             }
             
-            console.log(`✏ Updating ${field}: ${originalValue} → ${newValue}`);
+            console.log(`✏ Updating ${year}.${field}: ${originalValue} → ${newValue}`);
             
-            // ✅ SPECIAL HANDLING FOR ARR CHANGES
+            // ✅ HANDLE DIFFERENT FIELD TYPES
             if (dataType === 'arr') {
-                // Convert back to K (since stored as K in projections)
+                // ARR: Update Financial Projections (convert to K)
                 const arrInK = newValue / 1000;
-                updateFinancialDataField(field, arrInK);
+                updateFinancialDataField(year, field, arrInK);
+                recalculateFinancialProjections();
                 
-                // Recalculate dependent financial data
-                const yearKey = this.dataset.year;
-                recalculateYearFinancials(yearKey);
-            } else {
-                updateValuationDataField(field, newValue);
+            } else if (field.startsWith('arrMultiples.')) {
+                // ARR Multiple: Update Valuation data
+                const keys = field.split('.');
+                FINANCIAL_DATA.valuation.arrMultiples[keys[1]] = newValue;
+                
+            } else if (field.startsWith('rounds.')) {
+                // Round data: Update Valuation data
+                const keys = field.split('.');
+                const roundYear = keys[1];
+                const roundField = keys[2];
+                FINANCIAL_DATA.valuation.rounds[roundYear][roundField] = newValue;
             }
             
-            if (dataType === 'currency' || dataType === 'arr') {
+            // Format display
+            if (dataType === 'arr' || dataType === 'currency') {
                 this.textContent = formatCurrency(newValue);
-            } else if (dataType === 'number') {
+            } else if (dataType === 'multiple') {
                 this.textContent = newValue + 'x';
             } else {
                 this.textContent = newValue || '—';
@@ -2799,56 +2803,6 @@ function attachValuationEditableListeners() {
     });
     
     console.log(`✅ Attached listeners to ${editableCells.length} valuation cells`);
-}
-
-// ⚡ UPDATE VALUATION DATA FIELD
-function updateValuationDataField(field, value) {
-    const keys = field.split('.');
-    let ref = FINANCIAL_DATA;
-    
-    for (let i = 0; i < keys.length - 1; i++) {
-        ref = ref[keys[i]];
-    }
-    
-    ref[keys[keys.length - 1]] = value;
-    console.log(`✏ Updated ${field} = ${value}`);
-}
-
-// ⚡ RECALCULATE YEAR FINANCIALS (when ARR is changed from Valuation section)
-function recalculateYearFinancials(yearKey) {
-    console.log(`🔄 Recalculating financials for ${yearKey} after ARR change...`);
-    
-    const data = FINANCIAL_DATA.projections[yearKey];
-    
-    // Recalculate affiliate revenue (10% of subscription)
-    data.revenue.affiliate = data.revenue.subscription * 0.10;
-    
-    // Recalculate total revenue
-    data.revenue.total = data.revenue.subscription + data.revenue.affiliate;
-    
-    // Recalculate EBITDA
-    data.metrics.ebitda = data.revenue.total - data.expenses.total;
-    data.metrics.ebitdaMargin = data.revenue.total > 0 ? (data.metrics.ebitda / data.revenue.total) * 100 : 0;
-    
-    // Recalculate MRR and ARR
-    data.metrics.arr = data.revenue.subscription;
-    data.metrics.mrr = data.revenue.subscription / 12;
-    
-    // Recalculate ARPU
-    data.metrics.arpu = data.users.paid > 0 ? (data.revenue.subscription * 1000) / data.users.paid / 12 : 0;
-    
-    // Recalculate LTV
-    const customerLifespan = 100 / data.metrics.churn;
-    data.metrics.ltv = data.metrics.arpu * customerLifespan;
-    
-    console.log(`✅ ${yearKey} financials recalculated`);
-    
-    // Update Financial Projections table
-    renderFinancialProjectionsTable();
-    renderMetricsTable();
-    updateProjectionSummaryCards();
-    renderUnitEconomics();
-    updateAllCharts();
 }
 
 // ⚡ RECALCULATE VALUATION
@@ -2949,8 +2903,7 @@ function renderMultipleSensitivityTable() {
         
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
-                <i class="fas fa-chart-line"></i> <strong>Current Year 5 ARR:</strong> ${formatCurrency(year5ARR)} 
-                (from Financial Projections, automatically synchronized).
+                <i class="fas fa-chart-line"></i> <strong>Current Year 5 ARR:</strong> ${formatCurrency(year5ARR)}
             </p>
         </div>
     `;
@@ -2967,14 +2920,7 @@ function renderFundingRoadmap() {
     const rounds = years.map(y => calculateValuation(y)).filter(v => v && (v.investmentAmount > 0 || v.year === 0));
     
     if (rounds.length === 0) {
-        container.innerHTML = `
-            <div class="info-card">
-                <p style="color: var(--text-light);">
-                    <i class="fas fa-info-circle"></i> No funding rounds configured. 
-                    Edit investment amounts in the table above to model funding scenarios.
-                </p>
-            </div>
-        `;
+        container.innerHTML = `<div class="info-card"><p><i class="fas fa-info-circle"></i> No funding rounds configured.</p></div>`;
         return;
     }
     
@@ -2985,8 +2931,7 @@ function renderFundingRoadmap() {
         const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
         const color = val.year === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 
                       val.year === 1 ? 'linear-gradient(135deg, #10b981, #059669)' :
-                      val.year === 2 ? 'linear-gradient(135deg, #3b82f6, #2563eb)' :
-                      'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+                      'linear-gradient(135deg, #3b82f6, #2563eb)';
         const icon = val.year === 0 ? 'fa-seedling' : val.year === 1 ? 'fa-rocket' : 'fa-chart-line';
         
         html += `
@@ -2996,7 +2941,7 @@ function renderFundingRoadmap() {
                 </div>
                 <div class="round-content">
                     <h4>${val.roundName || 'Round'} — ${roundData.timing}</h4>
-                    ${val.investmentAmount === 0 && val.year === 0 ? '<div style="display: inline-block; padding: 6px 16px; background: rgba(245, 158, 11, 0.1); border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; color: #f59e0b; font-weight: 700;">Bootstrap / No funding yet</div>' : ''}
+                    ${val.investmentAmount === 0 && val.year === 0 ? '<div style="display: inline-block; padding: 6px 16px; background: rgba(245, 158, 11, 0.1); border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; color: #f59e0b; font-weight: 700;">Bootstrap</div>' : ''}
                     
                     <div class="round-metrics">
                         ${val.arr > 0 ? `
@@ -3005,7 +2950,7 @@ function renderFundingRoadmap() {
                             <div class="round-metric-value">${formatCurrency(val.arr)}</div>
                         </div>
                         <div class="round-metric">
-                            <div class="round-metric-label">ARR Multiple</div>
+                            <div class="round-metric-label">Multiple</div>
                             <div class="round-metric-value">${val.multiple}x</div>
                         </div>
                         ` : ''}
@@ -3038,7 +2983,6 @@ function renderFundingRoadmap() {
     });
     
     html += '</div>';
-    
     container.innerHTML = html;
 }
 
@@ -3088,19 +3032,7 @@ function renderComparableCompanies() {
         `;
     });
     
-    html += `
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="info-card" style="margin-top: 20px;">
-            <p style="color: var(--text-light); line-height: 1.8;">
-                <i class="fas fa-balance-scale"></i> <strong>Note:</strong> 
-                AlphaVault AI's valuation is calculated dynamically based on your ARR projections and chosen multiple (both editable).
-            </p>
-        </div>
-    `;
-    
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
 }
 
@@ -3145,7 +3077,7 @@ function createValuationEvolutionChart() {
                 ...getResponsiveChartConfig('', '').plugins,
                 title: {
                     display: true,
-                    text: 'Company Valuation Growth (Pre-Money vs Post-Money)',
+                    text: 'Company Valuation Growth',
                     font: { size: isSmallMobile ? 13 : (isMobile ? 15 : 17), weight: 'bold' }
                 }
             }
@@ -3266,6 +3198,6 @@ function calculateTotalDilution() {
     return 100 - founderOwnership;
 }
 
-console.log('✅ Valuation & Funding Module Loaded (ARR Editable + Firestore Sync)');
+console.log('✅ Valuation & Funding Module Loaded (Fixed - Same Logic as Financial Projections)');
 
 console.log('🎉 Business Plan JavaScript v5.0 FIRESTORE ENABLED - Loaded Successfully');
