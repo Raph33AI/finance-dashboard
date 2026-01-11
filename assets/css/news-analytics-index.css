@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   INDEX PAGES - NEWS ANALYTICS & REAL ESTATE
-   Styles communs pour les pages d'index optimisées SEO
+   NEWS ANALYTICS INDEX - STYLES COMPLETS
+   CSS dédié pour index-news-analytics.html
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -16,8 +16,7 @@ html, body {
    ═══════════════════════════════════════════════════════════════ */
 
 /* Hero Container - Dégradé animé premium */
-.hero-news,
-.hero-realestate {
+.hero-news {
     position: relative;
     min-height: 100vh;
     display: flex;
@@ -42,8 +41,7 @@ html, body {
 }
 
 /* Hero Background - Multi-couches */
-.hero-news::before,
-.hero-realestate::before {
+.hero-news::before {
     content: '';
     position: absolute;
     top: 0;
@@ -67,8 +65,7 @@ html, body {
 }
 
 /* Gradient Orbs - Orbes lumineux animés */
-.hero-news::after,
-.hero-realestate::after {
+.hero-news::after {
     content: '';
     position: absolute;
     width: 600px;
@@ -107,8 +104,7 @@ html, body {
 }
 
 /* Second Orb */
-.hero-news .container-fluid::before,
-.hero-realestate .container-fluid::before {
+.hero-news .container-fluid::before {
     content: '';
     position: absolute;
     width: 550px;
@@ -148,8 +144,7 @@ html, body {
 }
 
 /* Container */
-.hero-news .container-fluid,
-.hero-realestate .container-fluid {
+.hero-news .container-fluid {
     position: relative;
     z-index: 1;
     width: 100%;
@@ -159,8 +154,7 @@ html, body {
     overflow: visible;
 }
 
-.hero-news-content,
-.hero-realestate-content {
+.hero-news-content {
     text-align: center;
     max-width: 900px;
     margin: 0 auto;
@@ -172,9 +166,8 @@ html, body {
     height: auto;
 }
 
-/* Badge - Style premium glassmorphism */
-.hero-news .news-badge,
-.hero-realestate .realestate-badge {
+/* News Badge - Style premium glassmorphism */
+.hero-news .news-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
@@ -196,8 +189,7 @@ html, body {
     overflow: hidden;
 }
 
-.hero-news .news-badge::before,
-.hero-realestate .realestate-badge::before {
+.hero-news .news-badge::before {
     content: '';
     position: absolute;
     top: 0;
@@ -211,13 +203,11 @@ html, body {
     transition: left 0.6s;
 }
 
-.hero-news .news-badge:hover::before,
-.hero-realestate .realestate-badge:hover::before {
+.hero-news .news-badge:hover::before {
     left: 100%;
 }
 
-.hero-news .news-badge:hover,
-.hero-realestate .realestate-badge:hover {
+.hero-news .news-badge:hover {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
@@ -226,8 +216,7 @@ html, body {
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.hero-news .news-badge i,
-.hero-realestate .realestate-badge i {
+.hero-news .news-badge i {
     font-size: 1.125rem;
     animation: sparkle 2s ease-in-out infinite;
 }
@@ -238,8 +227,7 @@ html, body {
 }
 
 /* Headline - Titre principal */
-.hero-news h1,
-.hero-realestate h1 {
+.hero-news h1 {
     font-size: clamp(2.75rem, 6vw, 5rem);
     font-weight: 900;
     line-height: 1.1;
@@ -265,8 +253,7 @@ html, body {
 }
 
 /* Gradient Text - Texte avec gradient animé */
-.hero-news .highlight-gradient,
-.hero-realestate .highlight-gradient {
+.hero-news .highlight-gradient {
     background: linear-gradient(135deg, 
         #60a5fa 0%, 
         #818cf8 25%, 
@@ -288,8 +275,7 @@ html, body {
 }
 
 /* Subheadline - Sous-titre */
-.hero-news p,
-.hero-realestate p {
+.hero-news p {
     font-size: clamp(1.125rem, 2vw, 1.375rem);
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.85);
@@ -301,8 +287,7 @@ html, body {
 }
 
 /* CTA Button - Bouton principal premium */
-.hero-news .btn-hero-primary,
-.hero-realestate .btn-hero-primary {
+.hero-news .btn-hero-primary {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
@@ -324,8 +309,7 @@ html, body {
     overflow: hidden;
 }
 
-.hero-news .btn-hero-primary::before,
-.hero-realestate .btn-hero-primary::before {
+.hero-news .btn-hero-primary::before {
     content: '';
     position: absolute;
     top: 0;
@@ -339,13 +323,11 @@ html, body {
     transition: left 0.5s;
 }
 
-.hero-news .btn-hero-primary:hover::before,
-.hero-realestate .btn-hero-primary:hover::before {
+.hero-news .btn-hero-primary:hover::before {
     left: 100%;
 }
 
-.hero-news .btn-hero-primary:hover,
-.hero-realestate .btn-hero-primary:hover {
+.hero-news .btn-hero-primary:hover {
     transform: translateY(-3px) scale(1.02);
     background-position: right center;
     box-shadow: 
@@ -354,19 +336,16 @@ html, body {
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.hero-news .btn-hero-primary:active,
-.hero-realestate .btn-hero-primary:active {
+.hero-news .btn-hero-primary:active {
     transform: translateY(-1px) scale(0.98);
 }
 
-.hero-news .btn-hero-primary i,
-.hero-realestate .btn-hero-primary i {
+.hero-news .btn-hero-primary i {
     transition: transform 0.3s;
     font-size: 1.25rem;
 }
 
-.hero-news .btn-hero-primary:hover i,
-.hero-realestate .btn-hero-primary:hover i {
+.hero-news .btn-hero-primary:hover i {
     transform: translateX(4px);
 }
 
@@ -541,13 +520,144 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   WORKFLOW GRID - HOW IT WORKS
+   ═══════════════════════════════════════════════════════════════ */
+
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.workflow-step {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.workflow-step::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.workflow-step:hover::before {
+    transform: scaleX(1);
+}
+
+.workflow-step:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
+}
+
+.workflow-number {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
+}
+
+.workflow-step h4 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.workflow-step p {
+    font-size: 0.9375rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DEMO SECTION ENHANCEMENT
+   ═══════════════════════════════════════════════════════════════ */
+
+.demo-news {
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.demo-news::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEY CAPABILITIES CARDS
+   ═══════════════════════════════════════════════════════════════ */
+
+.capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.capability-card {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05));
+    border-radius: 16px;
+    border-left: 4px solid #3b82f6;
+}
+
+.capability-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.capability-card strong {
+    color: #1e293b;
+    font-size: 1.125rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.capability-card p {
+    color: #64748b;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    SECTIONS - PADDING OPTIMISÉ
    ═══════════════════════════════════════════════════════════════ */
 
 .features-section,
 .analytics-section,
 .demo-news,
-.demo-realestate,
 .cta-final {
     padding: 3rem 1rem !important;
     margin: 0 !important;
@@ -559,65 +669,54 @@ html, body {
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-    .hero-news,
-    .hero-realestate {
+    .hero-news {
         padding: 120px 1.5rem 80px 1.5rem;
     }
 
-    .hero-news h1,
-    .hero-realestate h1 {
+    .hero-news h1 {
         font-size: clamp(2.25rem, 8vw, 3.5rem);
     }
 
     .hero-news .container-fluid::before,
-    .hero-news::after,
-    .hero-realestate .container-fluid::before,
-    .hero-realestate::after {
+    .hero-news::after {
         width: 400px;
         height: 400px;
     }
 }
 
 @media (max-width: 768px) {
-    .hero-news,
-    .hero-realestate {
+    .hero-news {
         min-height: 100vh;
         padding: 140px 1.5rem 100px 1.5rem;
         overflow: visible;
     }
 
-    .hero-news-content,
-    .hero-realestate-content {
+    .hero-news-content {
         gap: 1.75rem;
         overflow: visible;
     }
 
-    .hero-news .news-badge,
-    .hero-realestate .realestate-badge {
+    .hero-news .news-badge {
         padding: 0.625rem 1.25rem;
         font-size: 0.875rem;
         gap: 0.5rem;
     }
 
-    .hero-news h1,
-    .hero-realestate h1 {
+    .hero-news h1 {
         font-size: clamp(2rem, 9vw, 2.75rem);
         line-height: 1.15;
     }
 
-    .hero-news p,
-    .hero-realestate p {
+    .hero-news p {
         font-size: clamp(1rem, 4vw, 1.125rem);
         line-height: 1.6;
     }
 
-    .hero-news p br,
-    .hero-realestate p br {
+    .hero-news p br {
         display: none;
     }
 
-    .hero-news .btn-hero-primary,
-    .hero-realestate .btn-hero-primary {
+    .hero-news .btn-hero-primary {
         padding: 1.125rem 2rem;
         font-size: 1rem;
         width: 100%;
@@ -626,9 +725,7 @@ html, body {
     }
 
     .hero-news .container-fluid::before,
-    .hero-news::after,
-    .hero-realestate .container-fluid::before,
-    .hero-realestate::after {
+    .hero-news::after {
         width: 300px;
         height: 300px;
         filter: blur(80px);
@@ -637,7 +734,6 @@ html, body {
     .features-section,
     .analytics-section,
     .demo-news,
-    .demo-realestate,
     .cta-final {
         padding: 2.5rem 1rem !important;
     }
@@ -658,7 +754,8 @@ html, body {
 
     /* SCROLL HORIZONTAL POUR CARTES */
     .modules-grid,
-    .features-grid {
+    .features-grid,
+    .workflow-grid {
         display: flex !important;
         flex-direction: row !important;
         gap: 1rem !important;
@@ -673,18 +770,21 @@ html, body {
     }
 
     .modules-grid::-webkit-scrollbar,
-    .features-grid::-webkit-scrollbar {
+    .features-grid::-webkit-scrollbar,
+    .workflow-grid::-webkit-scrollbar {
         display: none;
     }
 
     .modules-grid,
-    .features-grid {
+    .features-grid,
+    .workflow-grid {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
 
     .module-card,
-    .feature-card {
+    .feature-card,
+    .workflow-step {
         flex: 0 0 85vw !important;
         min-width: 85vw !important;
         max-width: 85vw !important;
@@ -698,46 +798,59 @@ html, body {
     }
 
     .module-card:first-child,
-    .feature-card:first-child {
+    .feature-card:first-child,
+    .workflow-step:first-child {
         margin-left: 0.5rem !important;
     }
 
     .module-card:last-child,
-    .feature-card:last-child {
+    .feature-card:last-child,
+    .workflow-step:last-child {
         margin-right: 0.5rem !important;
+    }
+
+    /* Demo section responsive */
+    .demo-news .browser-chrome {
+        display: none;
+    }
+
+    .demo-news [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .demo-news [style*="padding: 2rem"] {
+        padding: 1.5rem 1rem !important;
+    }
+
+    .capabilities-grid {
+        grid-template-columns: 1fr !important;
     }
 }
 
 @media (max-width: 640px) {
-    .hero-news,
-    .hero-realestate {
+    .hero-news {
         min-height: 100vh;
         padding: 130px 1.25rem 90px 1.25rem;
     }
 
-    .hero-news-content,
-    .hero-realestate-content {
+    .hero-news-content {
         gap: 1.5rem;
     }
 
-    .hero-news .news-badge,
-    .hero-realestate .realestate-badge {
+    .hero-news .news-badge {
         padding: 0.5rem 1rem;
         font-size: 0.8125rem;
     }
 
-    .hero-news h1,
-    .hero-realestate h1 {
+    .hero-news h1 {
         font-size: clamp(1.875rem, 10vw, 2.5rem);
     }
 
-    .hero-news p,
-    .hero-realestate p {
+    .hero-news p {
         font-size: clamp(0.9375rem, 4.5vw, 1.0625rem);
     }
 
-    .hero-news .btn-hero-primary,
-    .hero-realestate .btn-hero-primary {
+    .hero-news .btn-hero-primary {
         padding: 1rem 1.75rem;
         font-size: 0.9375rem;
         max-width: 360px;
@@ -745,35 +858,29 @@ html, body {
 }
 
 @media (max-width: 480px) {
-    .hero-news,
-    .hero-realestate {
+    .hero-news {
         min-height: 100vh;
         padding: 120px 1rem 80px 1rem;
     }
 
-    .hero-news-content,
-    .hero-realestate-content {
+    .hero-news-content {
         gap: 1.5rem;
     }
 
-    .hero-news .news-badge,
-    .hero-realestate .realestate-badge {
+    .hero-news .news-badge {
         padding: 0.5rem 1rem;
         font-size: 0.8125rem;
     }
 
-    .hero-news h1,
-    .hero-realestate h1 {
+    .hero-news h1 {
         font-size: clamp(1.75rem, 11vw, 2.25rem);
     }
 
-    .hero-news p,
-    .hero-realestate p {
+    .hero-news p {
         font-size: clamp(0.875rem, 5vw, 1rem);
     }
 
-    .hero-news .btn-hero-primary,
-    .hero-realestate .btn-hero-primary {
+    .hero-news .btn-hero-primary {
         width: 100%;
         max-width: none;
         padding: 1rem 1.5rem;
@@ -781,7 +888,8 @@ html, body {
     }
 
     .module-card,
-    .feature-card {
+    .feature-card,
+    .workflow-step {
         flex: 0 0 90vw !important;
         min-width: 90vw !important;
         max-width: 90vw !important;
