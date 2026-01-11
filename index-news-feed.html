@@ -483,8 +483,637 @@
         </div>
     </section>
 
-    <!-- NOTE: Les sections TRENDING TOPICS, NEWS TERMINAL, MARKET SENTIMENT, HOW IT WORKS, DEPENDENCIES restent identiques au code original -->
-    <!-- Pour la concision, je les inclus telles quelles ci-dessous -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         TRENDING TOPICS - DETAILED FEATURES + VISUAL DEMO
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section" id="trending-topics">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Module 1: Trending Topics</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-fire"></i> <span class="gradient-text">Trending Topics Dashboard</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Detect hot market topics, track company mentions, and identify risks/opportunities
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-search-dollar"></i></div>
+                    <h4>Topic Detection Engine</h4>
+                    <p>
+                        Scans articles for 10 major topics (AI, Rate Cuts, Earnings, China, Oil, Crypto, Tech, Banking, Inflation, Recession) using keyword variations and pattern matching.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-building"></i></div>
+                    <h4>Entity Extraction</h4>
+                    <p>
+                        Automatically extracts company names, tickers, and countries from article titles using EntityDatabase with 300+ companies and 50+ countries.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-chart-area"></i></div>
+                    <h4>Trend Momentum</h4>
+                    <p>
+                        Compares last 7 days vs previous 7 days to calculate trend direction (Up/Down/Neutral) with percentage change indicators.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h4>Fear & Greed Index</h4>
+                    <p>
+                        Calculates market sentiment score (-100 to +100) based on positive/negative article classification with visual gauge chart.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-balance-scale"></i></div>
+                    <h4>Risks & Opportunities</h4>
+                    <p>
+                        Identifies top 5 companies with highest positive sentiment (opportunities) and top 5 with highest negative sentiment (risks).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>Sparkline Charts</h4>
+                    <p>
+                        Displays 14-day timeline for each trending topic using Chart.js mini-charts with smooth animations and hover tooltips.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visual Demo: Trending Topics Dashboard -->
+            <div style="max-width: 1200px; margin: 3rem auto;" data-aos="fade-up" data-aos-delay="300">
+                <div style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    <div class="browser-chrome">
+                        <div class="chrome-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="chrome-title">trending-topics.html - AlphaVault AI</div>
+                    </div>
+
+                    <div style="padding: 2rem; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+                        <!-- Trending Topics Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-left: 4px solid #3b82f6;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b;">
+                                        <i class="fas fa-robot" style="color: #3b82f6;"></i>
+                                        AI
+                                    </div>
+                                    <i class="fas fa-arrow-up" style="color: #10b981;"></i>
+                                </div>
+                                <div style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 0.25rem;">142</div>
+                                <div style="font-size: 0.875rem; color: #64748b;">mentions</div>
+                                <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; font-size: 0.8125rem; font-weight: 600; color: #10b981; text-align: center;">
+                                    <i class="fas fa-arrow-up"></i> +28% vs last week
+                                </div>
+                            </div>
+
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-left: 4px solid #8b5cf6;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b;">
+                                        <i class="fas fa-percent" style="color: #8b5cf6;"></i>
+                                        Rate Cuts
+                                    </div>
+                                    <i class="fas fa-arrow-up" style="color: #10b981;"></i>
+                                </div>
+                                <div style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 0.25rem;">98</div>
+                                <div style="font-size: 0.875rem; color: #64748b;">mentions</div>
+                                <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; font-size: 0.8125rem; font-weight: 600; color: #10b981; text-align: center;">
+                                    <i class="fas fa-arrow-up"></i> +15% vs last week
+                                </div>
+                            </div>
+
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-left: 4px solid #06b6d4;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b;">
+                                        <i class="fas fa-chart-line" style="color: #06b6d4;"></i>
+                                        Earnings
+                                    </div>
+                                    <i class="fas fa-minus" style="color: #6b7280;"></i>
+                                </div>
+                                <div style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 0.25rem;">76</div>
+                                <div style="font-size: 0.875rem; color: #64748b;">mentions</div>
+                                <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(107, 114, 128, 0.1); border-radius: 8px; font-size: 0.8125rem; font-weight: 600; color: #6b7280; text-align: center;">
+                                    <i class="fas fa-minus"></i> 0% vs last week
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fear & Greed Index -->
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 20px; padding: 2rem; color: white; margin-bottom: 2rem;">
+                            <div style="text-align: center; margin-bottom: 1.5rem;">
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Fear & Greed Index</div>
+                                <div style="font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem;">+42</div>
+                                <div style="font-size: 1.25rem; font-weight: 700;">MODERATE GREED</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-around; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Positive</div>
+                                    <div style="font-size: 1.5rem; font-weight: 800;">124</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Neutral</div>
+                                    <div style="font-size: 1.5rem; font-weight: 800;">86</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Negative</div>
+                                    <div style="font-size: 1.5rem; font-weight: 800;">52</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risks & Opportunities -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                                <div style="font-size: 1.125rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-arrow-up" style="color: #10b981;"></i>
+                                    Top Opportunities
+                                </div>
+                                <div style="padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border-left: 3px solid #10b981; margin-bottom: 0.75rem;">
+                                    <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">NVIDIA (NVDA)</div>
+                                    <div style="font-size: 0.875rem; color: #64748b;">18 positive articles • Sentiment: +65</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border-left: 3px solid #10b981;">
+                                    <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">Microsoft (MSFT)</div>
+                                    <div style="font-size: 0.875rem; color: #64748b;">14 positive articles • Sentiment: +58</div>
+                                </div>
+                            </div>
+
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                                <div style="font-size: 1.125rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-arrow-down" style="color: #ef4444;"></i>
+                                    Top Risks
+                                </div>
+                                <div style="padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 12px; border-left: 3px solid #ef4444; margin-bottom: 0.75rem;">
+                                    <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">Tesla (TSLA)</div>
+                                    <div style="font-size: 0.875rem; color: #64748b;">12 negative articles • Sentiment: -42</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 12px; border-left: 3px solid #ef4444;">
+                                    <div style="font-weight: 700; color: #1e293b; margin-bottom: 0.25rem;">Boeing (BA)</div>
+                                    <div style="font-size: 0.875rem; color: #64748b;">9 negative articles • Sentiment: -38</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         NEWS TERMINAL - DETAILED FEATURES + VISUAL DEMO
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="features-section" id="news-terminal">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Module 2: News Terminal</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-newspaper"></i> <span class="gradient-text">Professional News Aggregator</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Load, filter, and analyze 1000+ articles with entity extraction and smart filtering
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-rss"></i></div>
+                    <h4>Multi-Source RSS</h4>
+                    <p>
+                        Aggregates articles from CNBC (earnings, tech, realtime), MarketWatch, Financial Times, Bloomberg, and Reuters. Supports 100-200 articles per source.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                    <h4>Advanced Filtering</h4>
+                    <p>
+                        Filter by source, sector (Tech, Finance, Energy, Healthcare, Consumer), region (US, EU, Asia), and search by company names/tickers/countries.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-infinity"></i></div>
+                    <h4>Infinite Scroll</h4>
+                    <p>
+                        Auto-load more articles when scrolling to 80% of page height. Supports pagination with 50/100/250/500/ALL articles per page.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h4>MAX Load Mode</h4>
+                    <p>
+                        "Load MAX" button fetches up to 200 articles per source (approx. 1000 total) with progress indicator and entity extraction on all articles.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-tags"></i></div>
+                    <h4>Entity Badges</h4>
+                    <p>
+                        Displays company names and countries as clickable badges on each article card. Click to filter by that entity instantly.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-th-large"></i></div>
+                    <h4>Grid/List Views</h4>
+                    <p>
+                        Toggle between grid (card-based) and list (compact) views. Responsive design adapts to mobile/tablet/desktop screens.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visual Demo: News Terminal -->
+            <div style="max-width: 1200px; margin: 3rem auto;" data-aos="fade-up" data-aos-delay="300">
+                <div style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    <div class="browser-chrome">
+                        <div class="chrome-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="chrome-title">news-terminal.html - AlphaVault AI</div>
+                    </div>
+
+                    <div style="padding: 2rem; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+                        <!-- Stats Bar -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="padding: 1rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 12px; text-align: center; color: white;">
+                                <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Total Articles</div>
+                                <div style="font-size: 2rem; font-weight: 900;">1,247</div>
+                            </div>
+                            <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">Companies</div>
+                                <div style="font-size: 2rem; font-weight: 900; color: #1e293b;">342</div>
+                            </div>
+                            <div style="padding: 1rem; background: white; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+                                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">Sources</div>
+                                <div style="font-size: 2rem; font-weight: 900; color: #1e293b;">8</div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 2rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div>
+                                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Search</label>
+                                    <div style="padding: 0.75rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; font-size: 0.9375rem;">
+                                        <i class="fas fa-search" style="margin-right: 0.5rem;"></i>
+                                        Search articles...
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Source</label>
+                                    <div style="padding: 0.75rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; color: #1e293b; font-size: 0.9375rem; font-weight: 600;">
+                                        All Sources
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Sector</label>
+                                    <div style="padding: 0.75rem 1rem; background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 8px; color: #3b82f6; font-size: 0.9375rem; font-weight: 700;">
+                                        Technology
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Article Cards -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; border: 1px solid rgba(0, 0, 0, 0.05);">
+                                <div style="height: 160px; background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                                <div style="padding: 1.5rem;">
+                                    <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.75rem;">
+                                        <i class="fas fa-rss"></i> CNBC Tech • 2h ago
+                                    </div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; line-height: 1.5;">
+                                        NVIDIA Announces New AI Chip Breakthrough
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        <span style="padding: 0.375rem 0.75rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 20px; font-size: 0.8125rem; font-weight: 600;">
+                                            <i class="fas fa-building"></i> NVIDIA
+                                        </span>
+                                        <span style="padding: 0.375rem 0.75rem; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-radius: 20px; font-size: 0.8125rem; font-weight: 600;">
+                                            <i class="fas fa-globe-americas"></i> USA
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; border: 1px solid rgba(0, 0, 0, 0.05);">
+                                <div style="padding: 1.5rem;">
+                                    <div style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.75rem;">
+                                        <i class="fas fa-rss"></i> MarketWatch • 4h ago
+                                    </div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; line-height: 1.5;">
+                                        Microsoft Cloud Revenue Beats Analyst Expectations
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        <span style="padding: 0.375rem 0.75rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 20px; font-size: 0.8125rem; font-weight: 600;">
+                                            <i class="fas fa-building"></i> Microsoft
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Load More Info -->
+                        <div style="text-align: center; margin-top: 2rem; color: #64748b; font-weight: 600;">
+                            Showing 50 of 1,247 articles
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MARKET SENTIMENT - DETAILED FEATURES + VISUAL DEMO
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section" id="sentiment">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Module 3: Market Sentiment</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-chart-line"></i> <span class="gradient-text">AI Sentiment Analysis</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Bullish/Bearish classification with sector breakdown and sentiment scoring
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-aos="zoom-in">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <h4>AI Sentiment Engine</h4>
+                    <p>
+                        Analyzes article titles using SentimentAnalyzer with 100+ positive/negative keywords. Scores range from -100 (Extreme Bearish) to +100 (Extreme Bullish).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="50">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h4>Global Sentiment Gauge</h4>
+                    <p>
+                        Displays market-wide sentiment score with animated Chart.js doughnut gauge. Color-coded: Green (Bullish), Red (Bearish), Gray (Neutral).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-industry"></i></div>
+                    <h4>Sector Breakdown</h4>
+                    <p>
+                        Calculates sentiment for 6 sectors (Tech, Finance, Energy, Healthcare, Consumer, Other) with visual progress bars and article counts.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="feature-icon"><i class="fas fa-lightbulb"></i></div>
+                    <h4>AI Insights</h4>
+                    <p>
+                        Generates contextual market insights based on positive/negative percentages. Provides investment recommendations (Risk-off/Caution/Monitor).
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-chart-area"></i></div>
+                    <h4>Sentiment Timeline</h4>
+                    <p>
+                        Tracks sentiment evolution over 14 days with Chart.js line chart. Shows Fear/Neutral/Greed zones with horizontal gridlines.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="feature-icon"><i class="fas fa-list-alt"></i></div>
+                    <h4>Article Filtering</h4>
+                    <p>
+                        Filter articles by sentiment (All/Positive/Neutral/Negative) with tab-based navigation. Displays top 30 articles per category.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visual Demo: Market Sentiment -->
+            <div style="max-width: 1200px; margin: 3rem auto;" data-aos="fade-up" data-aos-delay="300">
+                <div style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    <div class="browser-chrome">
+                        <div class="chrome-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="chrome-title">market-sentiment.html - AlphaVault AI</div>
+                    </div>
+
+                    <div style="padding: 2rem; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+                        <!-- Global Sentiment Card -->
+                        <div style="background: linear-gradient(135deg, #10b981, #059669); border-radius: 20px; padding: 2rem; color: white; margin-bottom: 2rem; text-align: center;">
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Global Market Sentiment</div>
+                            <div style="font-size: 4rem; font-weight: 900; margin-bottom: 0.5rem;">+38</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">MODERATELY BULLISH</div>
+                            <div style="display: flex; justify-content: space-around; margin-top: 1.5rem; flex-wrap: wrap; gap: 1.5rem;">
+                                <div>
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Positive</div>
+                                    <div style="font-size: 2rem; font-weight: 800;">156</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Neutral</div>
+                                    <div style="font-size: 2rem; font-weight: 800;">94</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Negative</div>
+                                    <div style="font-size: 2rem; font-weight: 800;">68</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Distribution Bar -->
+                        <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 2rem;">
+                            <div style="font-size: 1.125rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem;">Sentiment Distribution</div>
+                            <div style="display: flex; height: 40px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                                <div style="width: 49%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9375rem;">49%</div>
+                                <div style="width: 29%; background: linear-gradient(135deg, #6b7280, #4b5563); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9375rem;">29%</div>
+                                <div style="width: 22%; background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9375rem;">22%</div>
+                            </div>
+                        </div>
+
+                        <!-- Sector Sentiment -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div style="width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-microchip" style="font-size: 1.5rem; background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 800; color: #1e293b;">Technology</div>
+                                            <div style="font-size: 0.875rem; color: #64748b;">62 articles</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 1.5rem; font-weight: 900; color: #10b981;">+52</div>
+                                </div>
+                                <div style="height: 8px; background: #f1f5f9; border-radius: 8px; overflow: hidden;">
+                                    <div style="width: 76%; height: 100%; background: linear-gradient(90deg, #10b981, #059669);"></div>
+                                </div>
+                            </div>
+
+                            <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div style="width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-chart-line" style="font-size: 1.5rem; background: linear-gradient(135deg, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 800; color: #1e293b;">Finance</div>
+                                            <div style="font-size: 0.875rem; color: #64748b;">48 articles</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 1.5rem; font-weight: 900; color: #3b82f6;">+28</div>
+                                </div>
+                                <div style="height: 8px; background: #f1f5f9; border-radius: 8px; overflow: hidden;">
+                                    <div style="width: 64%; height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Insight -->
+                        <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05)); border-radius: 16px; padding: 1.5rem; border: 2px solid rgba(59, 130, 246, 0.2);">
+                            <div style="font-size: 1.125rem; font-weight: 800; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-lightbulb" style="color: #3b82f6;"></i>
+                                AI Market Insight
+                            </div>
+                            <div style="color: #475569; line-height: 1.7; font-size: 0.9375rem;">
+                                <strong>Moderately Bullish Market:</strong> Sentiment leans positive with 49% positive coverage. 
+                                While optimism prevails, 94 neutral articles suggest some caution. Overall trend appears favorable with 
+                                Technology and Finance sectors leading the positive sentiment.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HOW IT WORKS - WORKFLOW
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="features-section" id="how-it-works">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">How It Works</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    <span class="gradient-text">Data Flow Architecture</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    From RSS feeds to AI-powered insights in 4 steps
+                </p>
+            </div>
+
+            <div class="workflow-grid">
+                <div class="workflow-step" data-aos="zoom-in">
+                    <div class="workflow-number">1</div>
+                    <h4>RSS Data Collection</h4>
+                    <p>
+                        <strong>RSSClient</strong> fetches articles from multiple financial news sources (CNBC, MarketWatch, Bloomberg, Reuters, FT). 
+                        Supports 100-200 articles per source with caching for performance.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="workflow-number">2</div>
+                    <h4>Entity Extraction</h4>
+                    <p>
+                        <strong>EntityDatabase</strong> extracts company names, tickers, and countries from article titles. 
+                        Database contains 300+ companies (AAPL, MSFT, NVDA...) and 50+ countries.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="workflow-number">3</div>
+                    <h4>Sentiment Analysis</h4>
+                    <p>
+                        <strong>SentimentAnalyzer</strong> classifies articles as Positive/Neutral/Negative using keyword matching. 
+                        Scores range from -100 to +100 with confidence levels.
+                    </p>
+                </div>
+
+                <div class="workflow-step" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="workflow-number">4</div>
+                    <h4>Dashboard Rendering</h4>
+                    <p>
+                        <strong>Chart.js</strong> visualizes data with gauges, timelines, sparklines, and bars. 
+                        Real-time updates with smooth animations and interactive tooltips.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         DEPENDENCIES & KEY CAPABILITIES
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="analytics-section" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Technical Stack</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">
+                    Dependencies & <span class="gradient-text">Key Capabilities</span>
+                </h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Required libraries and core features of the News Analytics Suite
+                </p>
+            </div>
+
+            <!-- Key Capabilities Summary -->
+            <div style="max-width: 1100px; margin: 3rem auto;" data-aos="fade-up">
+                <div style="background: white; border-radius: 24px; padding: 3rem; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);">
+                    <h3 style="font-size: 1.75rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem; text-align: center;">
+                        <i class="fas fa-star"></i> Core Capabilities
+                    </h3>
+                    <div class="capabilities-grid">
+                        <div class="capability-card">
+                            <div class="capability-icon">
+                                <i class="fas fa-fire" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            </div>
+                            <strong>10 Trending Topics</strong>
+                            <p>AI, Rate Cuts, Earnings, China, Oil, Crypto, Tech, Banking, Inflation, Recession</p>
+                        </div>
+                        <div class="capability-card" style="border-left-color: #8b5cf6;">
+                            <div class="capability-icon">
+                                <i class="fas fa-building" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            </div>
+                            <strong>300+ Companies</strong>
+                            <p>Automatic extraction of company names and ticker symbols from article text</p>
+                        </div>
+                        <div class="capability-card" style="border-left-color: #06b6d4;">
+                            <div class="capability-icon">
+                                <i class="fas fa-globe-americas" style="background: linear-gradient(135deg, #06b6d4, #0891b2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            </div>
+                            <strong>50+ Countries</strong>
+                            <p>Geographic entity extraction for global market coverage and region filtering</p>
+                        </div>
+                        <div class="capability-card" style="border-left-color: #10b981;">
+                            <div class="capability-icon">
+                                <i class="fas fa-newspaper" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            </div>
+                            <strong>1000+ Articles</strong>
+                            <p>Support for massive datasets with infinite scroll and auto-load functionality</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
          CTA FINAL
