@@ -1673,19 +1673,23 @@ async function saveNotificationSettings() {
         console.log('📰 Changement preference newsletter detecte, synchronisation...');
         
         if (currentSettings.weeklyNewsletter) {
+            // ✅ ABONNEMENT
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
             
             if (subscribed) {
                 const userRef = db.collection('users').doc(currentUserData.uid);
                 await userRef.update({
+                    weeklyNewsletter: true, // ✅ EXPLICITE
                     newsletterSubscribedAt: new Date().toISOString()
                 });
             }
         } else {
+            // ✅ DÉSINSCRIPTION
             await unsubscribeFromNewsletter(currentUserData.email);
             
             const userRef = db.collection('users').doc(currentUserData.uid);
             await userRef.update({
+                weeklyNewsletter: false, // ✅ EXPLICITE (IMPORTANT)
                 newsletterSubscribedAt: firebase.firestore.FieldValue.delete()
             });
         }
