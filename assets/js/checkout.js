@@ -865,14 +865,21 @@ function createPaymentRequest() {
         disableWallets: ['link', 'browserCard'], // ✅ DÉSACTIVER LINK ET BROWSER CARD
     });
 
-    // Créer le bouton Payment Request
+    // ✅ NOUVELLE LOGIQUE : Hauteur et largeur adaptatives selon la taille d'écran
+    const isMobile = window.innerWidth <= 768;
+    const isSmallMobile = window.innerWidth <= 480;
+    const buttonHeight = isMobile ? '48px' : '56px'; // 48px sur mobile, 56px sur desktop
+    
+    console.log(`📱 Device: ${isMobile ? 'Mobile' : 'Desktop'} - Button height: ${buttonHeight}`);
+
+    // Créer le bouton Payment Request avec hauteur adaptative
     prButton = elements.create('paymentRequestButton', {
         paymentRequest: paymentRequest,
         style: {
             paymentRequestButton: {
                 type: 'default', // 'buy' | 'donate' | 'default'
                 theme: 'dark', // 'dark' | 'light' | 'light-outline'
-                height: '56px',
+                height: buttonHeight, // ✅ Hauteur dynamique selon l'appareil
             },
         },
     });
@@ -893,6 +900,27 @@ function createPaymentRequest() {
                 console.log('✅ Apple Pay / Google Pay disponible - Montage du bouton');
                 
                 prButton.mount('#payment-request-button');
+                
+                // ✅ NOUVEAU : Ajuster la largeur directement via style inline selon l'appareil
+                const container = document.getElementById('payment-request-container');
+                if (container) {
+                    if (isSmallMobile) {
+                        // Petit mobile (≤480px) : 240px
+                        container.style.maxWidth = '240px';
+                        container.style.margin = '0 auto';
+                        console.log('📱 Largeur appliquée (petit mobile): 240px');
+                    } else if (isMobile) {
+                        // Mobile normal (≤768px) : 280px
+                        container.style.maxWidth = '280px';
+                        container.style.margin = '0 auto';
+                        console.log('📱 Largeur appliquée (mobile): 280px');
+                    } else {
+                        // Desktop : pleine largeur
+                        container.style.maxWidth = '100%';
+                        container.style.margin = '0';
+                        console.log('💻 Largeur appliquée (desktop): 100%');
+                    }
+                }
                 
                 // Afficher le container uniquement si un plan payant est sélectionné
                 updatePaymentRequestVisibility();
