@@ -662,17 +662,19 @@
 
 /* ============================================
    SETTINGS.JS - Gestion des paramètres utilisateur
-   VERSION 4.0 - SANS EMOJIS + DOWNGRADE ACTIVÉ
+   VERSION 5.0 - FIX RÉABONNEMENT AUTOMATIQUE
    ✅ PLAN & SUBSCRIPTION MANAGEMENT
-   ✅ DOWNGRADE/UPGRADE POUR TOUS LES PLANS
-   ✅ GESTION FREE LIFETIME ACCESS
-   ✅ STRIPE INTEGRATION
+   ✅ PROTECTION ANTI-RÉABONNEMENT
+   ✅ SYNCHRONISATION CORRECTE
    ============================================ */
 
 // Configuration
 const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
 const NOTIFICATION_WORKER_URL = 'https://notification-worker.raphnardone.workers.dev';
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
+
+// ✅ FLAG GLOBAL : Empêcher les appels redondants
+let isSynchronizing = false;
 
 // Configuration des plans (synchronisé avec access-control.js)
 const PLAN_CONFIG = {
@@ -807,7 +809,10 @@ async function loadSettings() {
             console.log('Parametres charges:', currentSettings);
         }
         
-        await synchronizeAllSubscriptions();
+        // ✅ SYNCHRONISATION UNIQUEMENT SI PAS DÉJÀ EN COURS
+        if (!isSynchronizing) {
+            await synchronizeAllSubscriptions();
+        }
         
         applySettingsToUI();
         
@@ -866,21 +871,14 @@ async function loadSubscriptionInfo() {
         console.log('   Plan actuel:', plan);
         console.log('   Statut:', status);
         
-        // Afficher le badge du plan actuel
         displayCurrentPlanBadge(plan, status);
-        
-        // Afficher les features du plan
         displayPlanFeatures(plan);
-        
-        // Générer le tableau de comparaison
         generatePlanComparison(plan, status);
         
-        // Charger l'historique de facturation (si plan payant actif)
         if (['pro', 'platinum'].includes(plan) && status === 'active') {
             await loadBillingHistory();
         }
         
-        // Afficher les options de gestion
         displaySubscriptionManagement(plan, status);
         
         console.log('Informations d\'abonnement chargees');
@@ -1066,7 +1064,6 @@ async function loadBillingHistory() {
                     <p>Full billing history coming soon</p>
                 </div>
                 
-                <!-- Lien vers suppression complète du compte -->
                 <div class="billing-danger-zone">
                     <p class="billing-danger-text">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -1091,7 +1088,6 @@ function displaySubscriptionManagement(plan, status) {
     
     section.style.display = 'block';
     
-    // FREE LIFETIME ACCESS - Permettre le downgrade vers Basic
     if (status === 'active_free') {
         container.innerHTML = `
             <div class="subscription-management">
@@ -1119,7 +1115,6 @@ function displaySubscriptionManagement(plan, status) {
         return;
     }
     
-    // CANCELLED SUBSCRIPTION
     if (status === 'cancelled') {
         container.innerHTML = `
             <div class="subscription-management">
@@ -1136,7 +1131,6 @@ function displaySubscriptionManagement(plan, status) {
         return;
     }
     
-    // ACTIVE PAID SUBSCRIPTION
     if (status === 'active' && ['pro', 'platinum'].includes(plan)) {
         container.innerHTML = `
             <div class="subscription-management">
@@ -1155,7 +1149,6 @@ function displaySubscriptionManagement(plan, status) {
         return;
     }
     
-    // BASIC PLAN
     if (plan === 'basic') {
         container.innerHTML = `
             <div class="subscription-management">
@@ -1187,17 +1180,14 @@ function changePlan(targetPlan, action) {
         if (!confirmed) return;
         
         if (targetPlan === 'basic') {
-            // Downgrade vers Basic (gratuit)
             performDowngradeToBasic();
         } else {
-            // Downgrade vers Pro (payant)
             showToast('info', 'Redirection', 'You will be redirected to the payment page...');
             setTimeout(() => {
                 window.location.href = `checkout.html?plan=${targetPlan}`;
             }, 1500);
         }
     } else {
-        // Upgrade
         showToast('info', 'Redirection', 'You will be redirected to the payment page...');
         setTimeout(() => {
             window.location.href = `checkout.html?plan=${targetPlan}`;
@@ -1216,7 +1206,6 @@ async function performDowngradeToBasic() {
         
         showToast('info', 'Processing', 'Downgrading to Basic plan...');
         
-        // ✅ UTILISER .update() POUR MISE À JOUR PARTIELLE
         const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
         await userRef.update({
             plan: 'basic',
@@ -1227,7 +1216,6 @@ async function performDowngradeToBasic() {
         console.log('Downgrade reussi - Profil utilisateur preserve');
         showToast('success', 'Success', 'You have been downgraded to the Basic plan');
         
-        // Rafraîchir la page
         setTimeout(() => {
             window.location.reload();
         }, 2000);
@@ -1296,16 +1284,25 @@ async function reactivateSubscription() {
 }
 
 // ============================================
-// SYNCHRONISATION NEWSLETTER
+// SYNCHRONISATION NEWSLETTER - VERSION CORRIGÉE
+// ✅ PROTECTION ANTI-RÉABONNEMENT
 // ============================================
 
 async function synchronizeAllSubscriptions() {
+    // ✅ PROTECTION : Si déjà en cours, ne rien faire
+    if (isSynchronizing) {
+        console.log('⏳ Synchronisation déjà en cours, skip...');
+        return;
+    }
+    
     if (!currentUserData || !currentUserData.uid) {
         console.warn('Aucun utilisateur connecte pour la synchronisation');
         return;
     }
 
     try {
+        isSynchronizing = true; // ✅ VERROUILLAGE
+        
         console.log('🔄 Synchronisation des abonnements avec Firestore...');
         
         const userRef = db.collection('users').doc(currentUserData.uid);
@@ -1330,26 +1327,24 @@ async function synchronizeAllSubscriptions() {
             newsletterToggle.checked = isNewsletterSubscribed;
         }
         
+        // ✅ LOGIQUE CORRIGÉE : Seulement si PAS de timestamp ET abonné
         if (isNewsletterSubscribed && !userData.newsletterSubscribedAt) {
-            console.log('Inscription newsletter manquante detectee - envoi au Worker...');
+            console.log('⚠ Timestamp newsletter manquant - Ajout simple (pas de worker call)');
             
-            const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+            // ✅ AJOUTER LE TIMESTAMP SANS APPELER LE WORKER
+            await userRef.update({
+                newsletterSubscribedAt: new Date().toISOString()
+            });
             
-            if (subscribed) {
-                await userRef.update({
-                    newsletterSubscribedAt: new Date().toISOString()
-                });
-                
-                console.log('✅ Inscription newsletter rattrapee');
-            }
+            console.log('✅ Timestamp newsletter ajoute');
         } else if (isNewsletterSubscribed && userData.newsletterSubscribedAt) {
             console.log('✅ Utilisateur deja abonne newsletter (depuis', userData.newsletterSubscribedAt, ')');
         }
         
         // ========================================
-        // 2⃣ SYNCHRONISATION FEATURE UPDATES (NOUVEAU)
+        // 2⃣ SYNCHRONISATION FEATURE UPDATES
         // ========================================
-        const isUpdatesSubscribed = userData.featureUpdates !== false; // Par défaut activé
+        const isUpdatesSubscribed = userData.featureUpdates !== false;
         
         console.log('🔔 Statut updates (Firestore):', isUpdatesSubscribed ? 'Abonne' : 'Non abonne');
         
@@ -1358,29 +1353,29 @@ async function synchronizeAllSubscriptions() {
             updatesToggle.checked = isUpdatesSubscribed;
         }
         
+        // ✅ LOGIQUE CORRIGÉE : Seulement si PAS de timestamp ET abonné
         if (isUpdatesSubscribed && !userData.updatesSubscribedAt) {
-            console.log('Inscription updates manquante detectee - envoi au Worker...');
+            console.log('⚠ Timestamp updates manquant - Ajout simple (pas de worker call)');
             
-            const subscribed = await subscribeToUpdates(currentUserData.email, currentUserData.displayName);
+            // ✅ AJOUTER LE TIMESTAMP SANS APPELER LE WORKER
+            await userRef.update({
+                updatesSubscribedAt: new Date().toISOString()
+            });
             
-            if (subscribed) {
-                await userRef.update({
-                    updatesSubscribedAt: new Date().toISOString()
-                });
-                
-                console.log('✅ Inscription updates rattrapee');
-            }
+            console.log('✅ Timestamp updates ajoute');
         } else if (isUpdatesSubscribed && userData.updatesSubscribedAt) {
             console.log('✅ Utilisateur deja abonne updates (depuis', userData.updatesSubscribedAt, ')');
         }
         
     } catch (error) {
         console.error('❌ Erreur synchronisation abonnements:', error);
+    } finally {
+        isSynchronizing = false; // ✅ DÉVERROUILLAGE
     }
 }
 
 /* ============================================
-   📧 GESTION ABONNEMENT UPDATES (NOUVEAU)
+   📧 GESTION ABONNEMENT UPDATES (CORRIGÉ)
    ============================================ */
 
 async function subscribeToUpdates(email, name) {
@@ -1397,7 +1392,7 @@ async function subscribeToUpdates(email, name) {
                 body: JSON.stringify({
                     email: email,
                     name: name || email.split('@')[0],
-                    source: 'settings_sync',
+                    source: 'settings_manual',
                     timestamp: new Date().toISOString()
                 })
             });
@@ -1407,7 +1402,7 @@ async function subscribeToUpdates(email, name) {
             }
             
             const data = await response.json();
-            console.log('✅ Inscription updates reussie (method 1):', data);
+            console.log('✅ Inscription updates reussie:', data);
             showToast('success', 'Success', 'You are now subscribed to platform notifications');
             
             return true;
@@ -1424,10 +1419,10 @@ async function subscribeToUpdates(email, name) {
                 body: JSON.stringify({
                     email: email,
                     name: name || email.split('@')[0],
-                    source: 'settings_sync',
+                    source: 'settings_manual',
                     timestamp: new Date().toISOString()
                 }),
-                mode: 'no-cors' // ✅ Mode no-cors : pas de réponse lisible, mais pas de CORS
+                mode: 'no-cors'
             });
             
             console.log('✅ Requete envoyee avec succes (no-cors)');
@@ -1437,10 +1432,8 @@ async function subscribeToUpdates(email, name) {
         
     } catch (error) {
         console.error('❌ Erreur inscription updates:', error);
-        
-        // ✅ MÊME EN CAS D'ERREUR : On informe l'utilisateur
         showToast('info', 'Preference saved', 'Your preference has been saved in your account');
-        return true; // On considère que ça a marché
+        return true;
     }
 }
 
@@ -1448,7 +1441,7 @@ async function unsubscribeFromUpdates(email) {
     try {
         console.log('🔕 Desinscription des notifications:', email);
         
-        // ✅ MÉTHODE 1 : GET avec Image (compatible no-cors)
+        // ✅ MÉTHODE 1 : GET avec Image
         try {
             const img = new Image();
             const unsubscribeUrl = `${NOTIFICATION_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
@@ -1494,7 +1487,6 @@ async function unsubscribeFromUpdates(email) {
         
     } catch (error) {
         console.error('❌ Erreur desinscription updates:', error);
-        
         showToast('warning', 'Preference saved', 'Your preference has been saved in your account');
         return true;
     }
@@ -1512,7 +1504,7 @@ async function subscribeToNewsletter(email, name) {
             body: JSON.stringify({
                 email: email,
                 name: name || email.split('@')[0],
-                source: 'settings_sync',
+                source: 'settings_manual',
                 timestamp: new Date().toISOString()
             })
         });
@@ -1583,7 +1575,6 @@ async function unsubscribeFromNewsletter(email) {
         
     } catch (error) {
         console.error('Erreur desinscription newsletter:', error);
-        
         showToast('warning', 'Preference saved', 'Your preference has been saved in your account');
         return true;
     }
@@ -1658,7 +1649,7 @@ function switchTab(tabName) {
 }
 
 // ============================================
-// SAUVEGARDE DES PARAMÈTRES
+// SAUVEGARDE DES PARAMÈTRES - VERSION CORRIGÉE
 // ============================================
 
 async function saveNotificationSettings() {
@@ -1696,7 +1687,7 @@ async function saveNotificationSettings() {
     }
     
     // ========================================
-    // 2⃣ GESTION NOTIFICATIONS PLATEFORME (NOUVEAU)
+    // 2⃣ GESTION NOTIFICATIONS PLATEFORME
     // ========================================
     if (currentSettings.featureUpdates !== previousUpdatesState) {
         console.log('🔔 Changement preference updates detecte, synchronisation...');
@@ -1745,7 +1736,8 @@ async function saveSettings() {
             
             const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
             await userRef.update({
-                weeklyNewsletter: currentSettings.weeklyNewsletter
+                weeklyNewsletter: currentSettings.weeklyNewsletter,
+                featureUpdates: currentSettings.featureUpdates
             });
             
             console.log('Parametres sauvegardes dans Firestore');
@@ -1941,4 +1933,4 @@ function isFirebaseInitialized() {
            typeof firebaseDb !== 'undefined';
 }
 
-console.log('Script de parametres charge avec gestion d\'abonnement - Version 4.0 (Sans emojis + Downgrade active)');
+console.log('Script de parametres charge - Version 5.0 (Protection anti-reabonnement)');
