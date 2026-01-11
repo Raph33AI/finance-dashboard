@@ -119,6 +119,9 @@ async function loadBusinessPlanFromFirestore() {
             if (data.marketShare) {
                 Object.assign(FINANCIAL_DATA.marketShare, data.marketShare);
             }
+            if (data.valuation) {
+                Object.assign(FINANCIAL_DATA.valuation, data.valuation); // ✅ AJOUT
+            }
             
             console.log('✅ Business plan loaded successfully');
             
@@ -163,6 +166,7 @@ async function saveBusinessPlanToFirestore() {
             market: FINANCIAL_DATA.market,
             cashFlow: FINANCIAL_DATA.cashFlow,
             marketShare: FINANCIAL_DATA.marketShare,
+            valuation: FINANCIAL_DATA.valuation,
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
             userId: currentUserId
         };
@@ -746,8 +750,8 @@ function recalculateFinancialProjections() {
     renderUnitEconomics();
     updateAllCharts();
 
-    if (typeof updateValuationSection === 'function') {
-        updateValuationSection();
+    if (typeof recalculateValuation === 'function') {
+        recalculateValuation();
     }
     
     console.log('✅ Recalculation complete');
@@ -2315,77 +2319,62 @@ window.addEventListener('load', function() {
 });
 
 // ════════════════════════════════════════════════════════════════
-// VALUATION & FUNDING - DYNAMIC CALCULATIONS (FIXED v2.0)
+// VALUATION & FUNDING - EDITABLE WITH FIRESTORE SYNC
 // ════════════════════════════════════════════════════════════════
 
-// ⚡ VALUATION PARAMETERS
-const VALUATION_CONFIG = {
-    // ARR Multiples (évoluent selon la maturité)
-    arrMultiples: {
-        year0: 0,    // Pre-Seed (no ARR yet)
-        year1: 5,    // Early stage
-        year2: 6,    // Growth phase
-        year3: 8,    // Scale phase
-        year4: 10,   // Mature growth
-        year5: 12    // High-growth mature
-    },
-    
-    // Hypothetical funding rounds (FUTURE)
-    fundingRounds: [
-        // ⚠ Pre-Seed : NOT YET RAISED (current valuation only)
-        { 
-            name: 'Pre-Seed', 
-            year: 0, 
-            amount: 0,               // ✅ Pas encore levé
-            preMoney: 450000,        // ✅ ~400K€ = ~$450K
-            timing: 'Target: Q1 2025',
-            targetAmount: 200000,    // Montant ciblé si levée
-            use: 'Initial marketing ($60K), first 2 hires ($100K), infrastructure ($20K), runway 6-9 months',
-            target: '500-1,000 users, $30K-$50K ARR, validate product-market fit',
-            raised: false            // ✅ Indicateur "pas encore levé"
+// ⚡ EXTEND FINANCIAL_DATA WITH VALUATION DATA
+if (!FINANCIAL_DATA.valuation) {
+    FINANCIAL_DATA.valuation = {
+        preSeedValuation: 450000, // $450K (~€400K)
+        arrMultiples: {
+            year0: 0,
+            year1: 5,
+            year2: 6,
+            year3: 8,
+            year4: 10,
+            year5: 12
         },
-        { 
-            name: 'Seed', 
-            year: 1, 
-            amount: 600000,          // $600K
-            arrBased: false,         // Use fixed pre-money
-            preMoney: 2500000,       // $2.5M pre-money
-            timing: 'Year 1 (after PMF validation)',
-            use: 'Marketing scale-up ($200K), team expansion to 5-7 people ($300K), product enhancements ($100K)',
-            target: '1,000+ users, $50K+ ARR, 30% conversion rate',
-            raised: false
-        },
-        { 
-            name: 'Series A', 
-            year: 2, 
-            amount: 3000000,         // $3M
-            arrBased: true,          // ✅ Use ARR multiple
-            multiple: 6,             // 6x ARR
-            timing: 'Year 2 (growth phase)',
-            use: 'Marketing scale-up ($1M), mobile app development ($500K), team 10-15 people ($1.2M), partnerships ($300K)',
-            target: '2,000+ users, $100K+ ARR',
-            raised: false
-        },
-        { 
-            name: 'Series B', 
-            year: 4, 
-            amount: 10000000,        // $10M
-            arrBased: true,          // ✅ Use ARR multiple
-            multiple: 10,            // 10x ARR
-            timing: 'Year 4 (scale phase)',
-            use: 'International expansion ($3M), enterprise features ($2M), team 30-40 people ($4M), M&A opportunities ($1M)',
-            target: '8,000+ users, $400K+ ARR',
-            raised: false
+        rounds: {
+            year0: { 
+                name: 'Pre-Seed',
+                amount: 0,          // No investment yet
+                preMoney: 450000,   // Current valuation
+                timing: 'Current Stage',
+                raised: false
+            },
+            year1: { 
+                name: 'Seed',
+                amount: 55000,      // €50K = ~$55K
+                timing: 'Year 1',
+                raised: false
+            },
+            year2: { 
+                name: '',
+                amount: 0,
+                timing: 'Year 2',
+                raised: false
+            },
+            year3: { 
+                name: '',
+                amount: 0,
+                timing: 'Year 3',
+                raised: false
+            },
+            year4: { 
+                name: '',
+                amount: 0,
+                timing: 'Year 4',
+                raised: false
+            },
+            year5: { 
+                name: '',
+                amount: 0,
+                timing: 'Year 5',
+                raised: false
+            }
         }
-    ],
-    
-    // Current valuation (pre-revenue / pre-seed stage)
-    preSeedValuation: {
-        low: 300000,      // $300K (~270K€)
-        mid: 450000,      // $450K (~400K€) ✅ VOTRE ESTIMATION
-        high: 700000      // $700K (~620K€)
-    }
-};
+    };
+}
 
 // ⚡ INITIALIZE VALUATION SECTION
 function initializeValuationSection() {
@@ -2403,98 +2392,60 @@ function initializeValuationSection() {
     console.log('✅ Valuation section initialized');
 }
 
-// ⚡ UPDATE VALUATION SECTION (appelée quand Financial Projections changent)
-function updateValuationSection() {
-    console.log('🔄 Updating Valuation section with new financial data...');
-    
-    renderValuationSummaryCards();
-    renderValuationTable();
-    renderMultipleSensitivityTable();
-    renderFundingRoadmap();
-    renderComparableCompanies();
-    
-    // Update charts
-    if (chartInstances.valuationEvolution) {
-        updateValuationEvolutionChart();
-    }
-    if (chartInstances.dilution) {
-        updateDilutionChart();
-    }
-    
-    console.log('✅ Valuation section updated');
-}
-
-// ⚡ CALCULATE DYNAMIC VALUATION BASED ON ARR (FIXED v2.0)
+// ⚡ CALCULATE DYNAMIC VALUATION
 function calculateValuation(year) {
-    // Cas spécial : Pre-Seed (Year 0)
+    const yearKey = `year${year}`;
+    const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
+    const yearData = year === 0 ? null : FINANCIAL_DATA.projections[yearKey];
+    
+    // Year 0 (Pre-Seed)
     if (year === 0) {
-        const preSeedRound = VALUATION_CONFIG.fundingRounds[0];
         return {
             year: 0,
-            arr: 0, // Pas encore de revenus
+            arr: 0,
             multiple: 0,
-            preMoney: preSeedRound.preMoney,
-            postMoney: preSeedRound.preMoney, // ✅ Pas de funding = pas de post-money
-            fundingRound: preSeedRound.raised ? preSeedRound : null, // ✅ Pas encore levé
-            dilution: 0 // ✅ Pas de dilution tant que pas levé
+            preMoney: roundData.preMoney,
+            postMoney: roundData.preMoney + roundData.amount,
+            investmentAmount: roundData.amount,
+            dilution: roundData.amount > 0 ? (roundData.amount / (roundData.preMoney + roundData.amount)) * 100 : 0,
+            roundName: roundData.name,
+            raised: roundData.raised
         };
     }
     
-    const yearKey = `year${year}`;
-    const yearData = FINANCIAL_DATA.projections[yearKey];
-    
     if (!yearData) {
-        console.error(`❌ No data for ${yearKey}`);
+        console.error(`❌ No projection data for ${yearKey}`);
         return null;
     }
     
-    // ✅ FIX: Utiliser revenue.subscription (c'est l'ARR pour un SaaS)
-    const arr = yearData.revenue.subscription * 1000; // Convert from K to actual $
-    const multiple = VALUATION_CONFIG.arrMultiples[yearKey] || 5;
+    // ARR = Subscription Revenue
+    const arr = yearData.revenue.subscription * 1000;
+    const multiple = FINANCIAL_DATA.valuation.arrMultiples[yearKey] || 5;
     const preMoney = arr * multiple;
-    
-    console.log(`📊 Valuation Year ${year}: ARR=$${arr.toLocaleString()}, Multiple=${multiple}x, Pre-Money=$${preMoney.toLocaleString()}`);
-    
-    // Find corresponding funding round
-    let fundingRound = null;
-    let postMoney = preMoney;
-    let dilution = 0;
-    
-    const round = VALUATION_CONFIG.fundingRounds.find(r => r.year === year);
-    if (round && round.raised !== false) { // ✅ Seulement si levé
-        fundingRound = round;
-        
-        // If round is ARR-based, use ARR multiple
-        if (round.arrBased && round.multiple) {
-            const arrBasedPreMoney = arr * round.multiple;
-            postMoney = arrBasedPreMoney + round.amount;
-            dilution = (round.amount / postMoney) * 100;
-        } 
-        // Else use fixed pre-money (for early stage)
-        else if (round.preMoney) {
-            postMoney = round.preMoney + round.amount;
-            dilution = (round.amount / postMoney) * 100;
-        }
-    }
+    const investmentAmount = roundData.amount || 0;
+    const postMoney = preMoney + investmentAmount;
+    const dilution = investmentAmount > 0 ? (investmentAmount / postMoney) * 100 : 0;
     
     return {
         year,
         arr,
         multiple,
-        preMoney: fundingRound && round.arrBased ? arr * round.multiple : preMoney,
+        preMoney,
         postMoney,
-        fundingRound,
-        dilution
+        investmentAmount,
+        dilution,
+        roundName: roundData.name || '',
+        raised: roundData.raised
     };
 }
 
-// ⚡ RENDER CURRENT VALUATION (PRE-REVENUE)
+// ⚡ RENDER CURRENT VALUATION
 function renderCurrentValuation() {
     const container = document.getElementById('currentValuationSection');
     if (!container) return;
     
-    const preSeed = VALUATION_CONFIG.preSeedValuation;
-    const preSeedRound = VALUATION_CONFIG.fundingRounds[0];
+    const currentVal = FINANCIAL_DATA.valuation.preSeedValuation;
+    const preSeed = FINANCIAL_DATA.valuation.rounds.year0;
     
     const html = `
         <div class="current-valuation-banner">
@@ -2503,64 +2454,33 @@ function renderCurrentValuation() {
                 <strong>AlphaVault AI is currently in the pre-seed stage.</strong> 
                 The platform is <strong>fully operational with 30+ features</strong>, deployed on production infrastructure, 
                 but has <strong>not yet generated revenue</strong> and <strong>has not raised funding</strong>. 
-                Valuation at this stage is based on <strong>qualitative factors</strong>: team expertise, product readiness, 
-                market opportunity ($12.5B TAM), competitive positioning, and technical moats (AI-first, institutional-grade analytics).
+                Current valuation: <strong>${formatCurrency(currentVal)} (~€400K)</strong>.
             </p>
             
             <div class="current-val-grid">
                 <div class="current-val-card">
-                    <h4>Conservative Case</h4>
-                    <div class="val-amount">${formatCurrency(preSeed.low)}</div>
-                    <div class="val-subtitle">~€270K valuation</div>
+                    <h4>Current Valuation</h4>
+                    <div class="val-amount">${formatCurrency(currentVal)}</div>
+                    <div class="val-subtitle">~€400,000</div>
                 </div>
                 
                 <div class="current-val-card">
-                    <h4>Base Case (Target)</h4>
-                    <div class="val-amount">${formatCurrency(preSeed.mid)}</div>
-                    <div class="val-subtitle">~€400K valuation ✅</div>
+                    <h4>Funding Raised</h4>
+                    <div class="val-amount">$0</div>
+                    <div class="val-subtitle">Bootstrap stage</div>
                 </div>
                 
                 <div class="current-val-card">
-                    <h4>Optimistic Case</h4>
-                    <div class="val-amount">${formatCurrency(preSeed.high)}</div>
-                    <div class="val-subtitle">~€620K valuation</div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 32px; padding: 24px; background: rgba(255, 255, 255, 0.15); border-radius: 16px; border: 2px solid rgba(255, 255, 255, 0.2);">
-                <h4 style="color: white; margin-bottom: 16px; font-size: 1.2rem;">
-                    <i class="fas fa-rocket"></i> Target Pre-Seed Round (Not Yet Raised)
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 16px;">
-                    <div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 4px;">Target Amount</div>
-                        <div style="color: white; font-size: 1.5rem; font-weight: 800;">${formatCurrency(preSeedRound.targetAmount)}</div>
-                    </div>
-                    <div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 4px;">Target Valuation</div>
-                        <div style="color: white; font-size: 1.5rem; font-weight: 800;">${formatCurrency(preSeedRound.preMoney)}</div>
-                    </div>
-                    <div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 4px;">Post-Money (if raised)</div>
-                        <div style="color: white; font-size: 1.5rem; font-weight: 800;">${formatCurrency(preSeedRound.preMoney + preSeedRound.targetAmount)}</div>
-                    </div>
-                    <div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 4px;">Potential Dilution</div>
-                        <div style="color: white; font-size: 1.5rem; font-weight: 800;">${formatPercentage((preSeedRound.targetAmount / (preSeedRound.preMoney + preSeedRound.targetAmount)) * 100, 1)}</div>
-                    </div>
-                </div>
-                <div style="color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.6;">
-                    <strong>Use of Funds:</strong> ${preSeedRound.use}<br>
-                    <strong>6-Month Target:</strong> ${preSeedRound.target}<br>
-                    <strong>Status:</strong> <span style="background: rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 12px; font-weight: 700;">🔍 Seeking Investors</span>
+                    <h4>Founder Ownership</h4>
+                    <div class="val-amount">100%</div>
+                    <div class="val-subtitle">No dilution yet</div>
                 </div>
             </div>
             
             <p style="margin-top: 24px; font-size: 0.95rem; opacity: 0.9;">
-                <i class="fas fa-lightbulb"></i> <strong>Methodology:</strong> 
-                Pre-seed valuations for B2C SaaS startups with operational products typically range from <strong>$300K-$700K</strong>. 
-                Our base case of <strong>${formatCurrency(preSeed.mid)} (~€400K)</strong> reflects the platform's readiness, 
-                technical infrastructure, and market opportunity, while acknowledging the lack of revenue traction and funding.
+                <i class="fas fa-lightbulb"></i> <strong>Next Steps:</strong> 
+                Target <strong>€50K (~$55K) seed investment in Year 1</strong> to accelerate growth. 
+                Edit investment amounts in the table below to model different scenarios.
             </p>
         </div>
     `;
@@ -2573,11 +2493,14 @@ function renderValuationSummaryCards() {
     const container = document.getElementById('valuationSummaryCards');
     if (!container) return;
     
-    const y0Val = calculateValuation(0); // Pre-Seed
-    const y1Val = calculateValuation(1);
-    const y5Val = calculateValuation(5);
+    const y0 = calculateValuation(0);
+    const y1 = calculateValuation(1);
+    const y5 = calculateValuation(5);
     
-    const cagr = y1Val.preMoney > 0 ? ((y5Val.preMoney / y1Val.preMoney) ** (1/4) - 1) * 100 : 0;
+    const totalInvestment = [0, 1, 2, 3, 4, 5].reduce((sum, year) => {
+        const val = calculateValuation(year);
+        return sum + (val ? val.investmentAmount : 0);
+    }, 0);
     
     const html = `
         <div class="valuation-summary-grid">
@@ -2588,41 +2511,41 @@ function renderValuationSummaryCards() {
                     </div>
                     <div class="val-summary-label">Current Valuation</div>
                 </div>
-                <div class="val-summary-value">${formatCurrency(y0Val.preMoney)}</div>
-                <div class="val-summary-subtitle">Pre-Seed (no funding raised yet)</div>
+                <div class="val-summary-value">${formatCurrency(y0.preMoney)}</div>
+                <div class="val-summary-subtitle">Pre-Seed (~€400K)</div>
             </div>
             
             <div class="val-summary-card">
                 <div class="val-summary-header">
                     <div class="val-summary-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="val-summary-label">Year 1 Valuation</div>
+                    <div class="val-summary-label">Year 5 Valuation</div>
                 </div>
-                <div class="val-summary-value">${formatCurrency(y1Val.preMoney)}</div>
-                <div class="val-summary-subtitle">Pre-Money (${y1Val.multiple}x ARR of ${formatCurrency(y1Val.arr)})</div>
+                <div class="val-summary-value">${formatCurrency(y5.preMoney)}</div>
+                <div class="val-summary-subtitle">${y5.multiple}x ARR of ${formatCurrency(y5.arr)}</div>
             </div>
             
             <div class="val-summary-card">
                 <div class="val-summary-header">
                     <div class="val-summary-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                        <i class="fas fa-rocket"></i>
+                        <i class="fas fa-hand-holding-usd"></i>
                     </div>
-                    <div class="val-summary-label">Year 5 Valuation</div>
+                    <div class="val-summary-label">Total Investment</div>
                 </div>
-                <div class="val-summary-value">${formatCurrency(y5Val.preMoney)}</div>
-                <div class="val-summary-subtitle">Pre-Money (${y5Val.multiple}x ARR of ${formatCurrency(y5Val.arr)})</div>
+                <div class="val-summary-value">${formatCurrency(totalInvestment)}</div>
+                <div class="val-summary-subtitle">Across all rounds (editable)</div>
             </div>
             
             <div class="val-summary-card">
                 <div class="val-summary-header">
                     <div class="val-summary-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-chart-pie"></i>
                     </div>
-                    <div class="val-summary-label">Valuation CAGR</div>
+                    <div class="val-summary-label">Final Ownership</div>
                 </div>
-                <div class="val-summary-value">${formatPercentage(cagr, 1)}</div>
-                <div class="val-summary-subtitle">4-year compound growth (Y1→Y5)</div>
+                <div class="val-summary-value">${formatPercentage(100 - calculateTotalDilution(), 1)}</div>
+                <div class="val-summary-subtitle">Founders after dilution</div>
             </div>
         </div>
     `;
@@ -2630,20 +2553,20 @@ function renderValuationSummaryCards() {
     container.innerHTML = html;
 }
 
-// ⚡ RENDER VALUATION TABLE (PRE-MONEY & POST-MONEY)
+// ⚡ RENDER EDITABLE VALUATION TABLE
 function renderValuationTable() {
     const container = document.getElementById('valuationTable');
     if (!container) return;
     
-    const years = [0, 1, 2, 3, 4, 5]; // Include Year 0 (Pre-Seed)
+    const years = [0, 1, 2, 3, 4, 5];
     
     let html = `
         <div class="responsive-table-wrapper">
-            <table class="financial-table">
+            <table class="financial-table editable-table">
                 <thead>
                     <tr>
                         <th class="sticky-col">Metric</th>
-                        <th>Pre-Seed (Now)</th>
+                        <th>Pre-Seed</th>
                         <th>Year 1</th>
                         <th>Year 2</th>
                         <th>Year 3</th>
@@ -2675,11 +2598,12 @@ function renderValuationTable() {
     `;
     
     years.forEach(year => {
-        const val = calculateValuation(year);
+        const yearKey = `year${year}`;
+        const multiple = FINANCIAL_DATA.valuation.arrMultiples[yearKey];
         if (year === 0) {
             html += `<td>—</td>`;
         } else {
-            html += `<td>${val.multiple}x</td>`;
+            html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.arrMultiples.${yearKey}" data-type="number">${multiple}x</td>`;
         }
     });
     
@@ -2694,27 +2618,22 @@ function renderValuationTable() {
     
     years.forEach(year => {
         const val = calculateValuation(year);
-        html += `<td class="highlight"><strong>${formatCurrency(val.preMoney)}</strong></td>`;
+        html += `<td class="calculated highlight"><strong>${formatCurrency(val.preMoney)}</strong></td>`;
     });
     
     html += `
                     </tr>
                     <tr class="section-header">
-                        <td colspan="7"><i class="fas fa-hand-holding-usd"></i> Hypothetical Funding</td>
+                        <td colspan="7"><i class="fas fa-hand-holding-usd"></i> Investment (Editable)</td>
                     </tr>
                     <tr>
-                        <td class="sticky-col">Funding Round</td>
+                        <td class="sticky-col">Round Name</td>
     `;
     
     years.forEach(year => {
-        const val = calculateValuation(year);
-        if (val.fundingRound) {
-            const badgeClass = year === 0 ? 'low' : 'medium';
-            const statusIcon = year === 0 ? '🔍' : '';
-            html += `<td><span class="multiple-badge ${badgeClass}">${statusIcon} ${val.fundingRound.name}</span></td>`;
-        } else {
-            html += `<td>—</td>`;
-        }
+        const yearKey = `year${year}`;
+        const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
+        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.rounds.${yearKey}.name" data-type="text">${roundData.name || '—'}</td>`;
     });
     
     html += `
@@ -2724,14 +2643,9 @@ function renderValuationTable() {
     `;
     
     years.forEach(year => {
+        const yearKey = `year${year}`;
         const val = calculateValuation(year);
-        if (year === 0) {
-            html += `<td style="color: var(--text-light); font-style: italic;">Not raised yet</td>`;
-        } else if (val.fundingRound && val.fundingRound.amount > 0) {
-            html += `<td>${formatCurrency(val.fundingRound.amount)}</td>`;
-        } else {
-            html += `<td>—</td>`;
-        }
+        html += `<td class="editable" contenteditable="true" data-year="${yearKey}" data-field="valuation.rounds.${yearKey}.amount" data-type="currency">${formatCurrency(val.investmentAmount)}</td>`;
     });
     
     html += `
@@ -2742,13 +2656,7 @@ function renderValuationTable() {
     
     years.forEach(year => {
         const val = calculateValuation(year);
-        if (year === 0) {
-            html += `<td>${formatCurrency(val.preMoney)}</td>`;
-        } else if (val.fundingRound && val.fundingRound.amount > 0) {
-            html += `<td class="highlight"><strong>${formatCurrency(val.postMoney)}</strong></td>`;
-        } else {
-            html += `<td>${formatCurrency(val.preMoney)}</td>`;
-        }
+        html += `<td class="calculated highlight"><strong>${formatCurrency(val.postMoney)}</strong></td>`;
     });
     
     html += `
@@ -2759,10 +2667,10 @@ function renderValuationTable() {
     
     years.forEach(year => {
         const val = calculateValuation(year);
-        if (val.fundingRound && val.dilution > 0) {
-            html += `<td>${formatPercentage(val.dilution, 1)}</td>`;
+        if (val.dilution > 0) {
+            html += `<td class="calculated">${formatPercentage(val.dilution, 1)}</td>`;
         } else {
-            html += `<td>—</td>`;
+            html += `<td class="calculated">—</td>`;
         }
     });
     
@@ -2772,20 +2680,176 @@ function renderValuationTable() {
             </table>
         </div>
         
+        <div class="table-actions">
+            <button class="bp-btn bp-btn-secondary" onclick="resetValuationData()">
+                <i class="fas fa-undo"></i> Reset to Default
+            </button>
+            <button class="bp-btn bp-btn-success" onclick="saveBusinessPlanToFirestore()">
+                <i class="fas fa-cloud-upload-alt"></i> Save to Cloud
+            </button>
+        </div>
+        
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
-                <i class="fas fa-info-circle"></i> <strong>Note:</strong> 
-                Funding amounts and rounds are <strong>hypothetical scenarios</strong> for illustration purposes. 
-                Pre-Seed round is <strong>not yet raised</strong> (seeking investors). 
-                <strong>ARR values are dynamically calculated</strong> from your subscription revenue projections.
+                <i class="fas fa-info-circle"></i> <strong>How to use:</strong> 
+                Click on any cell in the "ARR Multiple", "Round Name", or "Investment Amount" rows to edit values. 
+                All calculations (pre-money, post-money, dilution) update automatically. 
+                Changes are auto-saved to the cloud after 2 seconds.
             </p>
         </div>
     `;
     
     container.innerHTML = html;
+    attachValuationEditableListeners();
 }
 
-// ⚡ RENDER MULTIPLE SENSITIVITY ANALYSIS
+// ⚡ ATTACH EDITABLE LISTENERS TO VALUATION TABLE
+function attachValuationEditableListeners() {
+    const editableCells = document.querySelectorAll('#valuationTable .editable[contenteditable="true"]');
+    
+    editableCells.forEach(cell => {
+        cell.addEventListener('focus', function() {
+            this.dataset.original = this.textContent;
+            this.classList.add('editing');
+            
+            const range = document.createRange();
+            range.selectNodeContents(this);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        });
+        
+        cell.addEventListener('blur', function() {
+            this.classList.remove('editing');
+            
+            const newValueRaw = this.textContent.trim();
+            const field = this.dataset.field;
+            const dataType = this.dataset.type;
+            
+            let newValue;
+            
+            if (dataType === 'text') {
+                newValue = newValueRaw;
+            } else if (dataType === 'currency') {
+                newValue = parseEditableValue(newValueRaw);
+            } else if (dataType === 'number') {
+                newValue = parseFloat(newValueRaw.replace(/[^0-9.]/g, ''));
+            }
+            
+            const originalValue = dataType === 'text' ? this.dataset.original : parseEditableValue(this.dataset.original);
+            
+            if (dataType === 'text' ? newValue === originalValue : Math.abs(newValue - originalValue) < 0.01) {
+                console.log('🔄 No change detected');
+                if (dataType === 'currency') {
+                    this.textContent = formatCurrency(newValue);
+                } else if (dataType === 'number') {
+                    this.textContent = newValue + 'x';
+                } else {
+                    this.textContent = newValue || '—';
+                }
+                return;
+            }
+            
+            console.log(`✏ Updating ${field}: ${originalValue} → ${newValue}`);
+            
+            updateValuationDataField(field, newValue);
+            
+            if (dataType === 'currency') {
+                this.textContent = formatCurrency(newValue);
+            } else if (dataType === 'number') {
+                this.textContent = newValue + 'x';
+            } else {
+                this.textContent = newValue || '—';
+            }
+            
+            recalculateValuation();
+            triggerAutoSave();
+        });
+        
+        cell.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.textContent = this.dataset.original;
+                this.blur();
+            }
+        });
+        
+        cell.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+    });
+    
+    console.log(`✅ Attached listeners to ${editableCells.length} valuation cells`);
+}
+
+// ⚡ UPDATE VALUATION DATA FIELD
+function updateValuationDataField(field, value) {
+    const keys = field.split('.');
+    let ref = FINANCIAL_DATA;
+    
+    for (let i = 0; i < keys.length - 1; i++) {
+        ref = ref[keys[i]];
+    }
+    
+    ref[keys[keys.length - 1]] = value;
+    console.log(`✏ Updated ${field} = ${value}`);
+}
+
+// ⚡ RECALCULATE VALUATION
+function recalculateValuation() {
+    console.log('🔄 Recalculating valuation...');
+    
+    renderValuationSummaryCards();
+    renderValuationTable();
+    renderMultipleSensitivityTable();
+    renderFundingRoadmap();
+    renderComparableCompanies();
+    
+    if (chartInstances.valuationEvolution) {
+        updateValuationEvolutionChart();
+    }
+    if (chartInstances.dilution) {
+        updateDilutionChart();
+    }
+    
+    console.log('✅ Valuation recalculated');
+}
+
+// ⚡ RESET VALUATION DATA
+function resetValuationData() {
+    if (!confirm('⚠ Reset valuation data to default values?')) return;
+    
+    FINANCIAL_DATA.valuation = {
+        preSeedValuation: 450000,
+        arrMultiples: {
+            year0: 0,
+            year1: 5,
+            year2: 6,
+            year3: 8,
+            year4: 10,
+            year5: 12
+        },
+        rounds: {
+            year0: { name: 'Pre-Seed', amount: 0, preMoney: 450000, timing: 'Current Stage', raised: false },
+            year1: { name: 'Seed', amount: 55000, timing: 'Year 1', raised: false },
+            year2: { name: '', amount: 0, timing: 'Year 2', raised: false },
+            year3: { name: '', amount: 0, timing: 'Year 3', raised: false },
+            year4: { name: '', amount: 0, timing: 'Year 4', raised: false },
+            year5: { name: '', amount: 0, timing: 'Year 5', raised: false }
+        }
+    };
+    
+    recalculateValuation();
+    saveBusinessPlanToFirestore();
+}
+
+// ⚡ RENDER MULTIPLE SENSITIVITY
 function renderMultipleSensitivityTable() {
     const container = document.getElementById('multipleSensitivityTable');
     if (!container) return;
@@ -2833,12 +2897,10 @@ function renderMultipleSensitivityTable() {
             </table>
         </div>
         
-        <div class="info-card" style="margin-top: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));">
+        <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
-                <i class="fas fa-chart-line"></i> <strong>AlphaVault AI Target:</strong> 
-                Based on projected high growth rates and strong EBITDA margins, 
-                we target a <strong>10-12x ARR multiple</strong> by Year 5, positioning us in the "High to Very High" range 
-                among comparable SaaS companies. <strong>Current Year 5 ARR: ${formatCurrency(year5ARR)}</strong>.
+                <i class="fas fa-chart-line"></i> <strong>Current Year 5 ARR:</strong> ${formatCurrency(year5ARR)} 
+                (from Financial Projections, automatically synchronized).
             </p>
         </div>
     `;
@@ -2851,118 +2913,74 @@ function renderFundingRoadmap() {
     const container = document.getElementById('fundingRoadmap');
     if (!container) return;
     
-    const rounds = [
-        {
-            name: 'Pre-Seed',
-            year: 0,
-            stage: 'Pre-Revenue / Seeking Investors',
-            amount: VALUATION_CONFIG.fundingRounds[0].targetAmount,
-            preMoney: VALUATION_CONFIG.fundingRounds[0].preMoney,
-            postMoney: VALUATION_CONFIG.fundingRounds[0].preMoney + VALUATION_CONFIG.fundingRounds[0].targetAmount,
-            dilution: (VALUATION_CONFIG.fundingRounds[0].targetAmount / (VALUATION_CONFIG.fundingRounds[0].preMoney + VALUATION_CONFIG.fundingRounds[0].targetAmount)) * 100,
-            use: VALUATION_CONFIG.fundingRounds[0].use,
-            target: VALUATION_CONFIG.fundingRounds[0].target,
-            timing: VALUATION_CONFIG.fundingRounds[0].timing,
-            raised: false,
-            icon: 'fa-seedling',
-            color: 'linear-gradient(135deg, #f59e0b, #d97706)'
-        },
-        {
-            name: 'Seed',
-            year: 1,
-            stage: 'Early Traction / PMF Validation',
-            amount: VALUATION_CONFIG.fundingRounds[1].amount,
-            preMoney: VALUATION_CONFIG.fundingRounds[1].preMoney,
-            postMoney: VALUATION_CONFIG.fundingRounds[1].preMoney + VALUATION_CONFIG.fundingRounds[1].amount,
-            dilution: (VALUATION_CONFIG.fundingRounds[1].amount / (VALUATION_CONFIG.fundingRounds[1].preMoney + VALUATION_CONFIG.fundingRounds[1].amount)) * 100,
-            use: VALUATION_CONFIG.fundingRounds[1].use,
-            target: VALUATION_CONFIG.fundingRounds[1].target,
-            timing: VALUATION_CONFIG.fundingRounds[1].timing,
-            raised: false,
-            icon: 'fa-rocket',
-            color: 'linear-gradient(135deg, #10b981, #059669)'
-        }
-    ];
+    const years = [0, 1, 2, 3, 4, 5];
+    const rounds = years.map(y => calculateValuation(y)).filter(v => v && (v.investmentAmount > 0 || v.year === 0));
     
-    // Add Series A and B with dynamic ARR-based valuation
-    [2, 4].forEach((year, idx) => {
-        const roundConfig = VALUATION_CONFIG.fundingRounds[idx + 2];
-        const val = calculateValuation(year);
-        
-        rounds.push({
-            name: roundConfig.name,
-            year: year,
-            stage: idx === 0 ? 'Growth Phase' : 'Scale Phase',
-            amount: roundConfig.amount,
-            arr: val.arr,
-            multiple: roundConfig.multiple,
-            preMoney: val.arr * roundConfig.multiple,
-            postMoney: (val.arr * roundConfig.multiple) + roundConfig.amount,
-            dilution: (roundConfig.amount / ((val.arr * roundConfig.multiple) + roundConfig.amount)) * 100,
-            use: roundConfig.use,
-            target: roundConfig.target,
-            timing: roundConfig.timing,
-            raised: false,
-            icon: idx === 0 ? 'fa-chart-line' : 'fa-globe-americas',
-            color: idx === 0 ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
-        });
-    });
+    if (rounds.length === 0) {
+        container.innerHTML = `
+            <div class="info-card">
+                <p style="color: var(--text-light);">
+                    <i class="fas fa-info-circle"></i> No funding rounds configured. 
+                    Edit investment amounts in the table above to model funding scenarios.
+                </p>
+            </div>
+        `;
+        return;
+    }
     
     let html = '<div class="funding-roadmap-timeline">';
     
-    rounds.forEach(round => {
-        const statusBadge = !round.raised ? '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; margin-left: 12px;">🔍 Target</span>' : '';
+    rounds.forEach(val => {
+        const yearKey = `year${val.year}`;
+        const roundData = FINANCIAL_DATA.valuation.rounds[yearKey];
+        const color = val.year === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 
+                      val.year === 1 ? 'linear-gradient(135deg, #10b981, #059669)' :
+                      val.year === 2 ? 'linear-gradient(135deg, #3b82f6, #2563eb)' :
+                      'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+        const icon = val.year === 0 ? 'fa-seedling' : val.year === 1 ? 'fa-rocket' : 'fa-chart-line';
         
         html += `
             <div class="funding-round-item">
-                <div class="round-marker" style="background: ${round.color};">
-                    <i class="fas ${round.icon}"></i>
+                <div class="round-marker" style="background: ${color};">
+                    <i class="fas ${icon}"></i>
                 </div>
                 <div class="round-content">
-                    <h4>${round.name} — ${round.timing} ${statusBadge}</h4>
-                    <div style="display: inline-block; padding: 6px 16px; background: rgba(59, 130, 246, 0.1); border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; color: var(--bp-primary); font-weight: 700;">
-                        ${round.stage}
-                    </div>
-                    
-                    <p style="color: var(--text-light); margin-bottom: 12px; line-height: 1.7;">
-                        <strong>Use of Funds:</strong> ${round.use}
-                    </p>
-                    
-                    <p style="color: var(--text-light); margin-bottom: 20px; line-height: 1.7; padding: 12px; background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981; border-radius: 8px;">
-                        <strong><i class="fas fa-bullseye"></i> Target Milestones:</strong> ${round.target}
-                    </p>
+                    <h4>${val.roundName || 'Round'} — ${roundData.timing}</h4>
+                    ${val.investmentAmount === 0 && val.year === 0 ? '<div style="display: inline-block; padding: 6px 16px; background: rgba(245, 158, 11, 0.1); border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; color: #f59e0b; font-weight: 700;">Bootstrap / No funding yet</div>' : ''}
                     
                     <div class="round-metrics">
-                        ${round.arr ? `
+                        ${val.arr > 0 ? `
                         <div class="round-metric">
                             <div class="round-metric-label">ARR</div>
-                            <div class="round-metric-value">${formatCurrency(round.arr)}</div>
+                            <div class="round-metric-value">${formatCurrency(val.arr)}</div>
                         </div>
                         <div class="round-metric">
                             <div class="round-metric-label">ARR Multiple</div>
-                            <div class="round-metric-value">${round.multiple}x</div>
+                            <div class="round-metric-value">${val.multiple}x</div>
                         </div>
                         ` : ''}
                         
                         <div class="round-metric">
                             <div class="round-metric-label">Investment</div>
-                            <div class="round-metric-value">${formatCurrency(round.amount)}</div>
+                            <div class="round-metric-value">${formatCurrency(val.investmentAmount)}</div>
                         </div>
                         
                         <div class="round-metric">
                             <div class="round-metric-label">Pre-Money</div>
-                            <div class="round-metric-value">${formatCurrency(round.preMoney)}</div>
+                            <div class="round-metric-value">${formatCurrency(val.preMoney)}</div>
                         </div>
                         
                         <div class="round-metric">
                             <div class="round-metric-label">Post-Money</div>
-                            <div class="round-metric-value">${formatCurrency(round.postMoney)}</div>
+                            <div class="round-metric-value">${formatCurrency(val.postMoney)}</div>
                         </div>
                         
+                        ${val.dilution > 0 ? `
                         <div class="round-metric">
                             <div class="round-metric-label">Dilution</div>
-                            <div class="round-metric-value">${formatPercentage(round.dilution, 1)}</div>
+                            <div class="round-metric-value">${formatPercentage(val.dilution, 1)}</div>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -2980,17 +2998,15 @@ function renderComparableCompanies() {
     if (!container) return;
     
     const year5ARR = FINANCIAL_DATA.projections.year5.revenue.subscription * 1000;
+    const year5Multiple = FINANCIAL_DATA.valuation.arrMultiples.year5;
     
     const companies = [
         { name: 'TradingView', arr: 100000000, valuation: 1000000000, multiple: 10.0, stage: 'Series C' },
         { name: 'Robinhood', arr: 1500000000, valuation: 11700000000, multiple: 7.8, stage: 'Public' },
         { name: 'Webull', arr: 200000000, valuation: 1400000000, multiple: 7.0, stage: 'Series B' },
         { name: 'Morningstar Direct', arr: 500000000, valuation: 6000000000, multiple: 12.0, stage: 'Public' },
-        { name: 'AlphaVault AI (Year 5)', arr: year5ARR, valuation: 0, multiple: 12.0, stage: 'Projected' }
+        { name: 'AlphaVault AI (Year 5)', arr: year5ARR, valuation: year5ARR * year5Multiple, multiple: year5Multiple, stage: 'Projected' }
     ];
-    
-    // Calculate AlphaVault valuation
-    companies[4].valuation = companies[4].arr * companies[4].multiple;
     
     let html = `
         <div class="comparable-companies-table">
@@ -3007,7 +3023,7 @@ function renderComparableCompanies() {
                 <tbody>
     `;
     
-    companies.forEach((company, index) => {
+    companies.forEach((company) => {
         const multipleClass = company.multiple < 7 ? 'low' : (company.multiple < 10 ? 'medium' : 'high');
         const rowClass = company.name.includes('AlphaVault') ? 'highlight-row' : '';
         
@@ -3029,10 +3045,8 @@ function renderComparableCompanies() {
         
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
-                <i class="fas fa-balance-scale"></i> <strong>Competitive Positioning:</strong> 
-                AlphaVault AI's projected 12x multiple aligns with <strong>Morningstar Direct</strong> (premium financial analytics) 
-                and surpasses <strong>TradingView</strong> (10x), reflecting our AI-first differentiation and institutional-grade features 
-                at disruptive pricing.
+                <i class="fas fa-balance-scale"></i> <strong>Note:</strong> 
+                AlphaVault AI's valuation is calculated dynamically based on your ARR projections and chosen multiple (editable).
             </p>
         </div>
     `;
@@ -3047,10 +3061,7 @@ function createValuationEvolutionChart() {
     
     const years = [0, 1, 2, 3, 4, 5];
     const preMoneyData = years.map(y => calculateValuation(y).preMoney);
-    const postMoneyData = years.map(y => {
-        const val = calculateValuation(y);
-        return val.fundingRound && val.fundingRound.amount > 0 ? val.postMoney : val.preMoney;
-    });
+    const postMoneyData = years.map(y => calculateValuation(y).postMoney);
     
     chartInstances.valuationEvolution = new Chart(ctx, {
         type: 'line',
@@ -3067,7 +3078,7 @@ function createValuationEvolutionChart() {
                     borderWidth: 3
                 },
                 {
-                    label: 'Post-Money Valuation (with hypothetical funding)',
+                    label: 'Post-Money Valuation',
                     data: postMoneyData,
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -3079,7 +3090,7 @@ function createValuationEvolutionChart() {
             ]
         },
         options: {
-            ...getResponsiveChartConfig('Valuation Evolution (Pre-Seed to Year 5)', 'Valuation ($)', '$', ''),
+            ...getResponsiveChartConfig('Valuation Evolution', 'Valuation ($)', '$', ''),
             plugins: {
                 ...getResponsiveChartConfig('', '').plugins,
                 title: {
@@ -3096,10 +3107,7 @@ function createValuationEvolutionChart() {
 function updateValuationEvolutionChart() {
     const years = [0, 1, 2, 3, 4, 5];
     const preMoneyData = years.map(y => calculateValuation(y).preMoney);
-    const postMoneyData = years.map(y => {
-        const val = calculateValuation(y);
-        return val.fundingRound && val.fundingRound.amount > 0 ? val.postMoney : val.preMoney;
-    });
+    const postMoneyData = years.map(y => calculateValuation(y).postMoney);
     
     chartInstances.valuationEvolution.data.datasets[0].data = preMoneyData;
     chartInstances.valuationEvolution.data.datasets[1].data = postMoneyData;
@@ -3111,63 +3119,36 @@ function createDilutionChart() {
     const ctx = document.getElementById('dilutionChart');
     if (!ctx) return;
     
-    const rounds = VALUATION_CONFIG.fundingRounds;
+    const years = [0, 1, 2, 3, 4, 5];
     let founderOwnership = 100;
-    const ownershipData = [founderOwnership];
     const dilutionPerRound = [];
-    
-    rounds.forEach((round, idx) => {
-        if (round.raised === false || round.amount === 0) {
-            dilutionPerRound.push(0);
-            return; // Skip unrealized rounds
-        }
-        
-        let preMoney, postMoney, dilution;
-        
-        if (round.arrBased && round.multiple) {
-            const yearKey = `year${round.year}`;
-            const arr = FINANCIAL_DATA.projections[yearKey].revenue.subscription * 1000;
-            preMoney = arr * round.multiple;
-            postMoney = preMoney + round.amount;
-            dilution = (round.amount / postMoney) * 100;
-        } else {
-            preMoney = round.preMoney;
-            postMoney = round.preMoney + (round.targetAmount || round.amount);
-            dilution = ((round.targetAmount || round.amount) / postMoney) * 100;
-        }
-        
-        founderOwnership = founderOwnership * (1 - dilution / 100);
-        ownershipData.push(founderOwnership);
-        dilutionPerRound.push(ownershipData[idx] - founderOwnership);
-    });
-    
     const labels = [];
-    const data = [];
-    const colors = [
-        'rgba(59, 130, 246, 0.8)',
-        'rgba(245, 158, 11, 0.8)',
-        'rgba(16, 185, 129, 0.8)',
-        'rgba(139, 92, 246, 0.8)',
-        'rgba(239, 68, 68, 0.8)'
-    ];
     
-    labels.push(`Founders (${founderOwnership.toFixed(1)}%)`);
-    data.push(founderOwnership);
-    
-    dilutionPerRound.forEach((d, idx) => {
-        if (d > 0) {
-            labels.push(`${rounds[idx].name} Investors (${d.toFixed(1)}%)`);
-            data.push(d);
+    years.forEach(year => {
+        const val = calculateValuation(year);
+        if (val && val.dilution > 0) {
+            founderOwnership = founderOwnership * (1 - val.dilution / 100);
+            dilutionPerRound.push(val.dilution * (founderOwnership / (100 - val.dilution)));
+            labels.push(`${val.roundName || 'Round'} Y${year} (${val.dilution.toFixed(1)}%)`);
         }
     });
+    
+    labels.unshift(`Founders (${founderOwnership.toFixed(1)}%)`);
+    dilutionPerRound.unshift(founderOwnership);
     
     chartInstances.dilution = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
-                data: data,
-                backgroundColor: colors.slice(0, data.length),
+                data: dilutionPerRound,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -3185,16 +3166,8 @@ function createDilutionChart() {
                 },
                 title: {
                     display: true,
-                    text: `Hypothetical Ownership After All Rounds (Founders: ${founderOwnership.toFixed(1)}%)`,
-                    font: { size: isSmallMobile ? 13 : (isMobile ? 15 : 17), weight: 'bold' },
-                    padding: isSmallMobile ? 12 : (isMobile ? 15 : 20)
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label;
-                        }
-                    }
+                    text: `Ownership Structure (Founders: ${founderOwnership.toFixed(1)}%)`,
+                    font: { size: isSmallMobile ? 13 : (isMobile ? 15 : 17), weight: 'bold' }
                 }
             }
         }
@@ -3203,83 +3176,45 @@ function createDilutionChart() {
 
 // ⚡ UPDATE DILUTION CHART
 function updateDilutionChart() {
-    const rounds = VALUATION_CONFIG.fundingRounds;
+    const years = [0, 1, 2, 3, 4, 5];
     let founderOwnership = 100;
-    const ownershipData = [founderOwnership];
     const dilutionPerRound = [];
-    
-    rounds.forEach((round, idx) => {
-        if (round.raised === false || round.amount === 0) {
-            dilutionPerRound.push(0);
-            return;
-        }
-        
-        let preMoney, postMoney, dilution;
-        
-        if (round.arrBased && round.multiple) {
-            const yearKey = `year${round.year}`;
-            const arr = FINANCIAL_DATA.projections[yearKey].revenue.subscription * 1000;
-            preMoney = arr * round.multiple;
-            postMoney = preMoney + round.amount;
-            dilution = (round.amount / postMoney) * 100;
-        } else {
-            preMoney = round.preMoney;
-            postMoney = round.preMoney + (round.targetAmount || round.amount);
-            dilution = ((round.targetAmount || round.amount) / postMoney) * 100;
-        }
-        
-        founderOwnership = founderOwnership * (1 - dilution / 100);
-        ownershipData.push(founderOwnership);
-        dilutionPerRound.push(ownershipData[idx] - founderOwnership);
-    });
-    
     const labels = [];
-    const data = [];
     
-    labels.push(`Founders (${founderOwnership.toFixed(1)}%)`);
-    data.push(founderOwnership);
-    
-    dilutionPerRound.forEach((d, idx) => {
-        if (d > 0) {
-            labels.push(`${rounds[idx].name} Investors (${d.toFixed(1)}%)`);
-            data.push(d);
+    years.forEach(year => {
+        const val = calculateValuation(year);
+        if (val && val.dilution > 0) {
+            const prevOwnership = founderOwnership;
+            founderOwnership = founderOwnership * (1 - val.dilution / 100);
+            dilutionPerRound.push(prevOwnership - founderOwnership);
+            labels.push(`${val.roundName || 'Round'} Y${year} (${(prevOwnership - founderOwnership).toFixed(1)}%)`);
         }
     });
+    
+    labels.unshift(`Founders (${founderOwnership.toFixed(1)}%)`);
+    dilutionPerRound.unshift(founderOwnership);
     
     chartInstances.dilution.data.labels = labels;
-    chartInstances.dilution.data.datasets[0].data = data;
-    chartInstances.dilution.options.plugins.title.text = `Hypothetical Ownership After All Rounds (Founders: ${founderOwnership.toFixed(1)}%)`;
+    chartInstances.dilution.data.datasets[0].data = dilutionPerRound;
+    chartInstances.dilution.options.plugins.title.text = `Ownership Structure (Founders: ${founderOwnership.toFixed(1)}%)`;
     chartInstances.dilution.update();
 }
 
-// ⚡ HELPER: CALCULATE TOTAL DILUTION
+// ⚡ CALCULATE TOTAL DILUTION
 function calculateTotalDilution() {
-    const rounds = VALUATION_CONFIG.fundingRounds;
+    const years = [0, 1, 2, 3, 4, 5];
     let founderOwnership = 100;
     
-    rounds.forEach(round => {
-        if (round.raised === false || round.amount === 0) return;
-        
-        let preMoney, postMoney, dilution;
-        
-        if (round.arrBased && round.multiple) {
-            const yearKey = `year${round.year}`;
-            const arr = FINANCIAL_DATA.projections[yearKey].revenue.subscription * 1000;
-            preMoney = arr * round.multiple;
-            postMoney = preMoney + round.amount;
-            dilution = (round.amount / postMoney) * 100;
-        } else {
-            preMoney = round.preMoney;
-            postMoney = round.preMoney + (round.targetAmount || round.amount);
-            dilution = ((round.targetAmount || round.amount) / postMoney) * 100;
+    years.forEach(year => {
+        const val = calculateValuation(year);
+        if (val && val.dilution > 0) {
+            founderOwnership = founderOwnership * (1 - val.dilution / 100);
         }
-        
-        founderOwnership = founderOwnership * (1 - dilution / 100);
     });
     
     return 100 - founderOwnership;
 }
 
-console.log('✅ Valuation & Funding Module Loaded (Pre-Seed Fixed + ARR Sync)');
+console.log('✅ Valuation & Funding Module Loaded (Editable + Firestore Sync)');
 
 console.log('🎉 Business Plan JavaScript v5.0 FIRESTORE ENABLED - Loaded Successfully');
