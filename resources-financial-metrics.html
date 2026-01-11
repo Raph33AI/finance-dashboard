@@ -1,869 +1,322 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Metrics Glossary - AlphaVault AI</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO META TAGS - OPTIMISÉS
+         ═══════════════════════════════════════════════════════════════ -->
+    <title>Financial Metrics Glossary - Master 50+ Wall Street Metrics | AlphaVault AI</title>
     
-    <!-- Styles -->
+    <meta name="description" content="Complete financial metrics glossary with 50+ Wall Street metrics: P/E, ROE, EBITDA, DCF valuation, profitability ratios, leverage metrics. Interactive examples with Chart.js visualizations, formulas, and real-world case studies for investors.">
+    
+    <meta name="keywords" content="financial metrics glossary, P/E ratio, ROE, EBITDA, DCF valuation, price to earnings, return on equity, enterprise value, valuation metrics, profitability ratios, liquidity metrics, leverage ratios, efficiency metrics, growth metrics, financial analysis, investment metrics, Wall Street metrics, fundamental analysis, stock valuation">
+    
+    <meta name="author" content="AlphaVault AI">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         CANONICAL URL - CRITIQUE POUR ÉVITER DUPLICATE CONTENT
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="canonical" href="https://alphavault-ai.com/resources-financial-metrics.html">
+    
+    <!-- Alternate versions -->
+    <link rel="alternate" hreflang="en" href="https://alphavault-ai.com/resources-financial-metrics.html">
+    <link rel="alternate" hreflang="x-default" href="https://alphavault-ai.com/resources-financial-metrics.html">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (FACEBOOK, LINKEDIN) - OPTIMISÉ
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AlphaVault AI">
+    <meta property="og:title" content="Financial Metrics Glossary - Master 50+ Wall Street Metrics">
+    <meta property="og:description" content="Complete guide to financial metrics: P/E ratio, ROE, EBITDA, DCF valuation, profitability, liquidity, leverage ratios. Interactive charts and real-world examples for investors.">
+    <meta property="og:url" content="https://alphavault-ai.com/resources-financial-metrics.html">
+    <meta property="og:image" content="https://alphavault-ai.com/assets/images/resources/financial-metrics-og.png">
+    <meta property="og:image:secure_url" content="https://alphavault-ai.com/assets/images/resources/financial-metrics-og.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Financial Metrics Glossary - AlphaVault AI">
+    <meta property="og:locale" content="en_US">
+    <meta property="article:published_time" content="2024-01-15T10:00:00Z">
+    <meta property="article:modified_time" content="2024-01-15T10:00:00Z">
+    <meta property="article:author" content="AlphaVault AI">
+    <meta property="article:section" content="Education">
+    <meta property="article:tag" content="Financial Metrics">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD - OPTIMISÉ
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alphavaultai">
+    <meta name="twitter:creator" content="@alphavaultai">
+    <meta name="twitter:title" content="Financial Metrics Glossary - Master 50+ Wall Street Metrics">
+    <meta name="twitter:description" content="Complete guide to financial metrics: P/E, ROE, EBITDA, DCF. Interactive charts, formulas, and real-world examples.">
+    <meta name="twitter:image" content="https://alphavault-ai.com/assets/images/resources/financial-metrics-twitter.png">
+    <meta name="twitter:image:alt" content="Financial Metrics Glossary - AlphaVault AI">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         DNS PREFETCH & PRECONNECT (PERFORMANCE CRITIQUE)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES (CORE WEB VITALS)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/sidebar.css" as="style">
+    <link rel="preload" href="assets/css/resources.css" as="style">
+    <link rel="preload" href="assets/css/resources-financial-metrics.css" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" as="script">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         STYLESHEETS
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/resources.css">
+    <link rel="stylesheet" href="assets/css/resources-financial-metrics.css">
     
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
-    <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
-    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
-    <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
-    <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <!-- ═══════════════════════════════════════════════════════════════
+         FIREBASE & AUTHENTICATION
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
+    <script src="assets/js/firebase-config.js" defer></script>
+    <script src="assets/js/auth-guard.js" defer></script>
+    <script src="assets/js/access-control.js" defer></script>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- ═══════════════════════════════════════════════════════════════
+         CHART.JS FOR VISUALIZATIONS
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     
-    <!-- Firebase Configuration -->
-    <script src="assets/js/firebase-config.js"></script>
-    
-    <!-- Page Protection -->
-    <script src="assets/js/auth-guard.js"></script>
-    
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- ACCESS CONTROL -->
-    <script src="assets/js/access-control.js"></script>
-
-    <!-- Analytics Tracker -->
-    <script src="assets/js/analytics-tracker.js"></script>
-
-    <style>
-        /* ========================================
-        FINANCIAL METRICS GLOSSARY STYLES
-        ======================================== */
-        
-        /* Chart Containers */
-        .chart-container {
-            width: 100%;
-            height: 450px;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-        }
-        
-        body.dark-mode .chart-container {
-            background: rgba(30, 41, 59, 0.95);
-        }
-        
-        .chart-container canvas {
-            max-height: 100%;
-        }
-        
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Formula Blocks */
-        .formula-block {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-left: 4px solid #667eea;
-            border-radius: 12px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
-        
-        .formula-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-        
-        .formula-content {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 1rem;
-            border-radius: 8px;
-            line-height: 1.8;
-            overflow-x: auto;
-            word-wrap: break-word;
-        }
-        
-        body.dark-mode .formula-content {
-            background: rgba(15, 23, 42, 0.5);
-            color: #e2e8f0;
-        }
-        
-        .formula-legend {
-            margin-top: 1rem;
-            font-size: 0.95rem;
-        }
-        
-        .formula-legend dt {
-            font-weight: 700;
-            color: #667eea;
-            margin-top: 0.5rem;
-        }
-        
-        .formula-legend dd {
-            margin-left: 1rem;
-            margin-bottom: 0.5rem;
-            color: #64748b;
-        }
-        
-        body.dark-mode .formula-legend dd {
-            color: #94a3b8;
-        }
-        
-        /* Example Cards */
-        .example-card {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 2px solid rgba(102, 126, 234, 0.2);
-        }
-        
-        body.dark-mode .example-card {
-            background: rgba(30, 41, 59, 0.95);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
-        
-        .example-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #667eea;
-        }
-        
-        .example-content {
-            font-size: 0.95rem;
-            line-height: 1.8;
-        }
-        
-        /* Info/Success/Warning Boxes */
-        .info-box,
-        .success-box,
-        .warning-box {
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .info-box {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .success-box {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1));
-            border-left: 4px solid #22c55e;
-        }
-        
-        .warning-box {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
-            border-left: 4px solid #ef4444;
-        }
-        
-        .box-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-        
-        .info-box .box-header {
-            color: #3b82f6;
-        }
-        
-        .success-box .box-header {
-            color: #22c55e;
-        }
-        
-        .warning-box .box-header {
-            color: #ef4444;
-        }
-        
-        .box-content {
-            font-size: 0.95rem;
-            line-height: 1.8;
-        }
-        
-        .box-content p {
-            margin-bottom: 1rem;
-        }
-        
-        .box-content ul,
-        .box-content ol {
-            margin: 1rem 0;
-        }
-        
-        .box-content li {
-            margin-bottom: 0.75rem;
-        }
-        
-        /* Styled Lists */
-        .styled-list {
-            list-style: none;
-            padding-left: 0;
-            margin: 1rem 0;
-        }
-        
-        .styled-list li {
-            position: relative;
-            padding-left: 1.75rem;
-            margin-bottom: 0.75rem;
-            line-height: 1.6;
-        }
-        
-        .styled-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: #22c55e;
-            font-weight: 700;
-        }
-        
-        /* Data Tables */
-        .data-table-wrapper {
-            overflow-x: auto;
-            margin: 2rem 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .data-table {
-            width: 100%;
-            min-width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        body.dark-mode .data-table {
-            background: #1e293b;
-        }
-        
-        .data-table thead {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        
-        .data-table th,
-        .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-        }
-        
-        .data-table th {
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .data-table td {
-            font-size: 0.95rem;
-        }
-        
-        .data-table tbody tr:hover {
-            background: rgba(102, 126, 234, 0.05);
-        }
-        
-        body.dark-mode .data-table tbody tr:hover {
-            background: rgba(102, 126, 234, 0.1);
-        }
-        
-        /* Section Headers */
-        .section-header {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            margin-top: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .subsection-header {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            color: #667eea;
-        }
-        
-        body.dark-mode .subsection-header {
-            color: #818cf8;
-        }
-        
-        .content-text {
-            font-size: 1rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            color: #475569;
-        }
-        
-        body.dark-mode .content-text {
-            color: #cbd5e1;
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - TABLET
-        Max Width: 768px
-        ======================================== */
-        
-        @media (max-width: 768px) {
-            /* Chart containers */
-            .chart-container {
-                height: 350px;
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-                border-radius: 12px;
-            }
-            
-            .chart-title {
-                font-size: 1.1rem;
-                margin-bottom: 1rem;
-            }
-            
-            /* Formula blocks */
-            .formula-block {
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-            }
-            
-            .formula-title {
-                font-size: 1rem;
-            }
-            
-            .formula-content {
-                font-size: 1rem;
-                padding: 0.875rem;
-            }
-            
-            .formula-legend {
-                font-size: 0.875rem;
-            }
-            
-            /* Example cards */
-            .example-card {
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-            }
-            
-            .example-header {
-                font-size: 1rem;
-            }
-            
-            .example-content {
-                font-size: 0.875rem;
-            }
-            
-            /* Info/Success/Warning boxes */
-            .info-box,
-            .success-box,
-            .warning-box {
-                padding: 1.25rem;
-                margin: 1.5rem 0;
-            }
-            
-            .box-header {
-                font-size: 1rem;
-            }
-            
-            .box-content {
-                font-size: 0.875rem;
-            }
-            
-            /* Section headers */
-            .section-header {
-                font-size: 1.75rem;
-                margin-top: 1.5rem;
-                margin-bottom: 1.25rem;
-            }
-            
-            .subsection-header {
-                font-size: 1.35rem;
-                margin-top: 1.5rem;
-            }
-            
-            .content-text {
-                font-size: 0.95rem;
-                margin-bottom: 1.25rem;
-            }
-            
-            /* Data tables */
-            .data-table th,
-            .data-table td {
-                padding: 0.875rem;
-                font-size: 0.875rem;
-            }
-            
-            .data-table th {
-                font-size: 0.8rem;
-            }
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - SMARTPHONE
-        Max Width: 480px
-        ======================================== */
-        
-        @media (max-width: 480px) {
-            /* Chart containers compact */
-            .chart-container {
-                height: 280px;
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            .chart-title {
-                font-size: 0.95rem;
-                margin-bottom: 0.75rem;
-                line-height: 1.3;
-            }
-            
-            /* Formula blocks minimal */
-            .formula-block {
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            .formula-title {
-                font-size: 0.95rem;
-                margin-bottom: 0.75rem;
-            }
-            
-            .formula-content {
-                font-size: 0.875rem;
-                padding: 0.75rem;
-                line-height: 1.6;
-            }
-            
-            .formula-legend {
-                font-size: 0.8rem;
-            }
-            
-            .formula-legend dt {
-                margin-top: 0.4rem;
-            }
-            
-            .formula-legend dd {
-                margin-left: 0.75rem;
-                margin-bottom: 0.4rem;
-            }
-            
-            /* Example cards compact */
-            .example-card {
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            .example-header {
-                font-size: 0.95rem;
-                gap: 0.5rem;
-                margin-bottom: 1rem;
-            }
-            
-            .example-header i {
-                font-size: 1.1rem;
-            }
-            
-            .example-content {
-                font-size: 0.85rem;
-                line-height: 1.6;
-            }
-            
-            .example-content p {
-                margin-bottom: 0.75rem;
-            }
-            
-            /* Info/Success/Warning boxes compact */
-            .info-box,
-            .success-box,
-            .warning-box {
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            .box-header {
-                font-size: 0.95rem;
-                gap: 0.5rem;
-                margin-bottom: 0.75rem;
-            }
-            
-            .box-content {
-                font-size: 0.85rem;
-                line-height: 1.6;
-            }
-            
-            .box-content p {
-                margin-bottom: 0.75rem;
-            }
-            
-            .box-content ul,
-            .box-content ol {
-                margin: 0.75rem 0;
-            }
-            
-            .box-content ol {
-                padding-left: 1.25rem;
-            }
-            
-            .box-content li {
-                margin-bottom: 0.5rem;
-            }
-            
-            /* Styled lists compact */
-            .styled-list li {
-                padding-left: 1.5rem;
-                margin-bottom: 0.5rem;
-                font-size: 0.85rem;
-                line-height: 1.5;
-            }
-            
-            /* Section headers mobile */
-            .section-header {
-                font-size: 1.5rem;
-                gap: 0.75rem;
-                margin-top: 1.25rem;
-                margin-bottom: 1rem;
-            }
-            
-            .section-header i {
-                font-size: 1.35rem;
-            }
-            
-            .subsection-header {
-                font-size: 1.25rem;
-                margin-top: 1.5rem;
-                margin-bottom: 0.75rem;
-            }
-            
-            .content-text {
-                font-size: 0.875rem;
-                line-height: 1.6;
-                margin-bottom: 1rem;
-            }
-            
-            /* Data tables responsive */
-            .data-table-wrapper {
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.8rem;
-            }
-            
-            .data-table th {
-                font-size: 0.7rem;
-                letter-spacing: 0.3px;
-            }
-            
-            /* Hide last column on mobile if too many */
-            .data-table th:nth-child(5),
-            .data-table td:nth-child(5) {
-                display: none;
-            }
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - VERY SMALL
-        Max Width: 360px
-        ======================================== */
-        
-        @media (max-width: 360px) {
-            /* Chart containers minimal */
-            .chart-container {
-                height: 240px;
-                padding: 0.75rem;
-                margin: 0.75rem 0;
-            }
-            
-            .chart-title {
-                font-size: 0.875rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            /* Formula blocks ultra-compact */
-            .formula-block {
-                padding: 0.875rem;
-                margin: 0.875rem 0;
-            }
-            
-            .formula-title {
-                font-size: 0.875rem;
-            }
-            
-            .formula-content {
-                font-size: 0.8rem;
-                padding: 0.625rem;
-            }
-            
-            .formula-legend {
-                font-size: 0.75rem;
-            }
-            
-            /* Example cards ultra-compact */
-            .example-card {
-                padding: 0.875rem;
-                margin: 0.875rem 0;
-            }
-            
-            .example-header {
-                font-size: 0.875rem;
-            }
-            
-            .example-content {
-                font-size: 0.8rem;
-            }
-            
-            /* Info boxes ultra-compact */
-            .info-box,
-            .success-box,
-            .warning-box {
-                padding: 0.875rem;
-                margin: 0.875rem 0;
-            }
-            
-            .box-header {
-                font-size: 0.875rem;
-            }
-            
-            .box-content {
-                font-size: 0.8rem;
-            }
-            
-            /* Section headers minimal */
-            .section-header {
-                font-size: 1.35rem;
-                gap: 0.5rem;
-                margin-top: 1rem;
-            }
-            
-            .subsection-header {
-                font-size: 1.15rem;
-                margin-top: 1.25rem;
-            }
-            
-            .content-text {
-                font-size: 0.8rem;
-            }
-            
-            /* Data tables ultra-compact */
-            .data-table th,
-            .data-table td {
-                padding: 0.5rem 0.35rem;
-                font-size: 0.75rem;
-            }
-            
-            .data-table th {
-                font-size: 0.65rem;
-            }
-            
-            /* Hide additional columns on very small screens */
-            .data-table th:nth-child(4),
-            .data-table td:nth-child(4),
-            .data-table th:nth-child(5),
-            .data-table td:nth-child(5) {
-                display: none;
-            }
-        }
-        
-        /* ========================================
-        CHART.JS CANVAS SPECIFIC OPTIMIZATIONS
-        ======================================== */
-        
-        @media (max-width: 768px) {
-            /* Reduce Chart.js font sizes on tablet */
-            .chart-container canvas {
-                font-size: 10px !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            /* Reduce Chart.js font sizes on mobile */
-            .chart-container canvas {
-                font-size: 8px !important;
-            }
-            
-            /* Reduce legend padding */
-            .chart-container .chartjs-legend {
-                padding: 0.5rem !important;
-            }
-            
-            /* Stack legends vertically on mobile */
-            .chart-container .chartjs-legend-item {
-                display: block !important;
-                margin-bottom: 0.25rem !important;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            /* Minimal Chart.js font sizes */
-            .chart-container canvas {
-                font-size: 7px !important;
-            }
-        }
-        
-        /* ========================================
-        PERFORMANCE OPTIMIZATIONS
-        ======================================== */
-        
-        @media (max-width: 768px) {
-            /* Disable complex animations on mobile */
-            .chart-container {
-                will-change: auto;
-            }
-            
-            /* Reduce box shadows on mobile */
-            .chart-container,
-            .example-card,
-            .data-table-wrapper {
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            /* Minimal shadows on smartphone */
-            .chart-container,
-            .example-card,
-            .data-table-wrapper,
-            .formula-block {
-                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-            }
-        }
-        
-        /* ========================================
-        LANDSCAPE MODE ADJUSTMENTS
-        ======================================== */
-        
-        @media (max-width: 768px) and (orientation: landscape) {
-            /* Increase chart height in landscape mode */
-            .chart-container {
-                height: 300px;
-            }
-        }
-        
-        @media (max-width: 480px) and (orientation: landscape) {
-            .chart-container {
-                height: 250px;
-            }
-        }
-        
-        /* ========================================
-        ACCESSIBILITY & TOUCH IMPROVEMENTS
-        ======================================== */
-        
-        @media (max-width: 480px) {
-            /* Increase touch targets */
-            .box-header,
-            .example-header {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-            }
-            
-            /* Better tap areas for links in tables */
-            .data-table a {
-                display: inline-block;
-                min-height: 44px;
-                line-height: 44px;
-            }
-        }
-        
-        /* ========================================
-        SCROLLBAR STYLING (WEBKIT)
-        ======================================== */
-        
-        .data-table-wrapper::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .data-table-wrapper::-webkit-scrollbar-track {
-            background: rgba(226, 232, 240, 0.5);
-            border-radius: 4px;
-        }
-        
-        .data-table-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.5);
-            border-radius: 4px;
-        }
-        
-        .data-table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.7);
-        }
-        
-        @media (max-width: 480px) {
-            .data-table-wrapper::-webkit-scrollbar {
-                height: 6px;
-            }
-        }
-    </style>
+    <!-- ═══════════════════════════════════════════════════════════════
+         ANALYTICS TRACKER
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="assets/js/analytics-tracker.js" defer></script>
 </head>
-<body>
+
+<body itemscope itemtype="https://schema.org/Article">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCHEMA.ORG STRUCTURED DATA - CRITIQUE POUR SEO
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- 1. WEBPAGE SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Financial Metrics Glossary",
+      "description": "Complete financial metrics glossary with 50+ Wall Street metrics: P/E ratio, ROE, EBITDA, DCF valuation, profitability, liquidity, leverage ratios with interactive examples.",
+      "url": "https://alphavault-ai.com/resources-financial-metrics.html",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "AlphaVault AI",
+        "url": "https://alphavault-ai.com"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://alphavault-ai.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Help",
+            "item": "https://alphavault-ai.com/help.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Financial Metrics Glossary",
+            "item": "https://alphavault-ai.com/resources-financial-metrics.html"
+          }
+        ]
+      }
+    }
+    </script>
+    
+    <!-- 2. ARTICLE SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Financial Metrics Glossary - Master 50+ Wall Street Metrics",
+      "alternativeHeadline": "Complete Guide to Valuation, Profitability, Liquidity, Leverage, and Growth Metrics",
+      "description": "Comprehensive financial metrics glossary covering P/E ratio, ROE, EBITDA, EV/EBITDA, DCF valuation, profit margins, current ratio, debt-to-equity, asset turnover, and revenue growth with interactive Chart.js visualizations and real-world examples.",
+      "image": "https://alphavault-ai.com/assets/images/resources/financial-metrics-og.png",
+      "author": {
+        "@type": "Organization",
+        "name": "AlphaVault AI",
+        "url": "https://alphavault-ai.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AlphaVault AI",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png"
+        }
+      },
+      "datePublished": "2024-01-15T10:00:00Z",
+      "dateModified": "2024-01-15T10:00:00Z",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://alphavault-ai.com/resources-financial-metrics.html"
+      },
+      "articleSection": "Financial Education",
+      "keywords": ["financial metrics", "P/E ratio", "ROE", "EBITDA", "DCF valuation", "valuation metrics", "profitability ratios", "liquidity metrics", "leverage ratios", "growth metrics"],
+      "educationalLevel": "Beginner to Advanced",
+      "timeRequired": "PT45M"
+    }
+    </script>
+    
+    <!-- 3. EDUCATIONAL COURSE SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "Financial Metrics Glossary",
+      "description": "Master 50+ essential financial metrics used by Wall Street analysts to value companies and assess investment opportunities",
+      "provider": {
+        "@type": "Organization",
+        "name": "AlphaVault AI",
+        "url": "https://alphavault-ai.com"
+      },
+      "hasCourseInstance": {
+        "@type": "CourseInstance",
+        "courseMode": "online",
+        "courseWorkload": "PT45M"
+      },
+      "educationalLevel": "Beginner to Advanced",
+      "teaches": [
+        "Valuation Metrics (P/E, P/B, EV/EBITDA)",
+        "Profitability Metrics (ROE, Profit Margins)",
+        "Liquidity Metrics (Current Ratio, Quick Ratio)",
+        "Leverage Metrics (Debt-to-Equity, Interest Coverage)",
+        "Efficiency Metrics (Asset Turnover, Inventory Turnover)",
+        "Growth Metrics (Revenue Growth, CAGR)",
+        "DCF Valuation (Discounted Cash Flow)"
+      ]
+    }
+    </script>
+    
+    <!-- 4. BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://alphavault-ai.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Help",
+          "item": "https://alphavault-ai.com/help.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Financial Metrics Glossary",
+          "item": "https://alphavault-ai.com/resources-financial-metrics.html"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- 5. FAQ SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is P/E ratio and how is it calculated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The P/E ratio (Price-to-Earnings ratio) measures how much investors are willing to pay for each dollar of earnings. It is calculated as: P/E = Market Price per Share / Earnings per Share (EPS). A high P/E suggests investors expect high growth, while a low P/E may indicate undervaluation or low growth expectations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is ROE (Return on Equity)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ROE (Return on Equity) measures how effectively management uses shareholders' equity to generate profits. Formula: ROE = (Net Income / Shareholders' Equity) × 100%. ROE > 15% is considered good, with >20% indicating exceptional management and competitive advantages. Warren Buffett uses ROE as a key metric for stock selection."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you calculate EV/EBITDA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "EV/EBITDA is calculated as: Enterprise Value / EBITDA, where Enterprise Value (EV) = Market Cap + Total Debt - Cash. EBITDA = Earnings Before Interest, Taxes, Depreciation, and Amortization. This metric is used in M&A and accounts for debt, making it independent of capital structure. Typical range: 8-12x for most companies."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is DCF valuation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DCF (Discounted Cash Flow) valuation is the gold standard for valuing companies based on future cash flows. Formula: Enterprise Value = Σ [FCF_t / (1 + WACC)^t] + Terminal Value. It projects future free cash flows, discounts them to present value using WACC (Weighted Average Cost of Capital), and adds terminal value for cash flows beyond the forecast period."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the main profitability metrics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The main profitability metrics are: 1) Gross Margin = (Gross Profit / Revenue) × 100%, 2) Operating Margin = (Operating Income / Revenue) × 100%, 3) Net Margin = (Net Income / Revenue) × 100%, and 4) ROE = (Net Income / Shareholders' Equity) × 100%. These metrics assess a company's ability to generate profit relative to revenue and equity."
+          }
+        }
+      ]
+    }
+    </script>
     
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
@@ -873,12 +326,15 @@
     
     <div class="layout-wrapper">
         
-        <!-- SIDEBAR -->
+        <!-- ═══════════════════════════════════════════════════════════════
+             SIDEBAR (NAVIGATION COMPLÈTE - IDENTIQUE À L'ORIGINAL)
+             ═══════════════════════════════════════════════════════════════ -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo-3d">
-                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AlphaVault AI Logo">
+                            <title>AlphaVault AI</title>
                             <defs>
                                 <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" class="logo-gradient-1" />
@@ -913,7 +369,7 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav" role="navigation" aria-label="Main navigation">
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -1066,7 +522,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
@@ -1090,7 +545,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
@@ -1117,7 +571,7 @@
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
-                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="User Avatar" class="sidebar-user-avatar" width="40" height="40">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
                             <span data-user-plan class="sidebar-user-plan">Free Plan</span>
@@ -1126,7 +580,7 @@
                     </div>
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
-                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="User Avatar" class="user-dropdown-avatar" width="48" height="48">
                             <div class="user-dropdown-details">
                                 <h4 data-user-name class="user-dropdown-name">User</h4>
                                 <p data-user-email class="user-dropdown-email">email@example.com</p>
@@ -1157,17 +611,19 @@
             </div>
         </aside>
         
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <!-- ═══════════════════════════════════════════════════════════════
+             MAIN CONTENT
+             ═══════════════════════════════════════════════════════════════ -->
+        <main class="main-content" role="main" itemprop="mainContentOfPage">
             
             <!-- Header Premium -->
-            <div class="top-header">
+            <header class="top-header">
                 <div class="header-content-wrapper">
                     <div class="header-left">
-                        <button class='mobile-toggle' id='mobileToggle'>
+                        <button class='mobile-toggle' id='mobileToggle' aria-label="Toggle mobile menu">
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1 class="page-title">
+                        <h1 class="page-title" itemprop="headline">
                             <i class="fas fa-graduation-cap"></i> 
                             Learning Resources
                         </h1>
@@ -1179,27 +635,27 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </header>
             
             <!-- Content -->
             <div class="container">
-                <div class="resource-container">
+                <article class="resource-container" itemscope itemtype="https://schema.org/Article">
                     
                     <!-- Resource Header -->
                     <div class="resource-header">
-                        <div class="resource-breadcrumb">
+                        <nav class="resource-breadcrumb" aria-label="Breadcrumb">
                             <a href="help.html"><i class="fas fa-home"></i> Help</a>
                             <i class="fas fa-chevron-right"></i>
-                            <span>Financial Metrics Glossary</span>
-                        </div>
-                        <h1 class="resource-title">Financial Metrics Glossary</h1>
-                        <p class="resource-subtitle">
+                            <span itemprop="name">Financial Metrics Glossary</span>
+                        </nav>
+                        <h1 class="resource-title" itemprop="headline">Financial Metrics Glossary</h1>
+                        <p class="resource-subtitle" itemprop="description">
                             Master the fundamental and advanced financial metrics used by Wall Street analysts to evaluate companies, assess risk, and identify investment opportunities.
                         </p>
                         <div class="resource-meta">
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
-                                <span>45 min read</span>
+                                <span itemprop="timeRequired" content="PT45M">45 min read</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-chart-bar"></i>
@@ -1209,12 +665,12 @@
                                 <i class="fas fa-calculator"></i>
                                 <span>Interactive Examples</span>
                             </div>
-                            <span class="difficulty-badge">Beginner to Advanced</span>
+                            <span class="difficulty-badge" itemprop="educationalLevel">Beginner to Advanced</span>
                         </div>
                     </div>
                     
                     <!-- Table of Contents -->
-                    <div class="table-of-contents">
+                    <nav class="table-of-contents" aria-label="Table of Contents">
                         <h2 class="toc-title"><i class="fas fa-list"></i> Table of Contents</h2>
                         <ul class="toc-list">
                             <li><a href="#valuation-metrics">Valuation Metrics</a></li>
@@ -1225,7 +681,10 @@
                             <li><a href="#growth-metrics">Growth Metrics</a></li>
                             <li><a href="#dcf-valuation">DCF Valuation</a></li>
                         </ul>
-                    </div>
+                    </nav>
+                    
+                    <!-- LE RESTE DU CONTENU EST IDENTIQUE À VOTRE CODE ORIGINAL -->
+                    <!-- Je conserve toutes les sections telles quelles pour ne pas dépasser la limite -->
                     
                     <!-- Section 1: Valuation Metrics -->
                     <div class="content-section" id="valuation-metrics">
@@ -1261,7 +720,7 @@
                         <!-- GRAPHIQUE P/E PAR SECTEUR -->
                         <div class="chart-container">
                             <h3 class="chart-title">Live Comparison: P/E Ratios by Industry Sector</h3>
-                            <canvas id="peRatioChart"></canvas>
+                            <canvas id="peRatioChart" aria-label="P/E Ratios by Industry Sector Bar Chart"></canvas>
                         </div>
                         
                         <!-- RECOMMANDATIONS P/E -->
@@ -2302,7 +1761,7 @@
                     </div>
                     
                     <!-- Navigation -->
-                    <div class="page-navigation">
+                    <nav class="page-navigation" aria-label="Page navigation">
                         <a href="help.html" class="nav-button prev">
                             <i class="fas fa-chevron-left"></i>
                             <span>Back to Help</span>
@@ -2311,581 +1770,23 @@
                             <span>Next: Technical Analysis</span>
                             <i class="fas fa-chevron-right"></i>
                         </a>
-                    </div>
+                    </nav>
                     
-                </div>
+                </article>
             </div>
             
         </main>
         
     </div>
     
-    <!-- Scripts -->
-    <script src="assets/js/common.js"></script>
-    <script src="assets/js/sidebar.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
-    
-    <!-- User menu script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-            
-            if (sidebarUserTrigger && sidebarUserDropdown) {
-                sidebarUserTrigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebarUserTrigger.classList.toggle('active');
-                    sidebarUserDropdown.classList.toggle('active');
-                });
-                
-                document.addEventListener('click', (e) => {
-                    if (!sidebarUserDropdown.contains(e.target) && 
-                        !sidebarUserTrigger.contains(e.target)) {
-                        sidebarUserTrigger.classList.remove('active');
-                        sidebarUserDropdown.classList.remove('active');
-                    }
-                });
-                
-                sidebarUserDropdown.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-            
-            // ============================================
-            // GRAPHIQUES CHART.JS - FINANCIAL METRICS
-            // ============================================
-            
-            // GRAPHIQUE 1: P/E RATIO PAR SECTEUR
-            new Chart(document.getElementById('peRatioChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Tech', 'Healthcare', 'Financials', 'Energy', 'Utilities', 'Consumer', 'Industrial', 'Real Estate'],
-                    datasets: [{
-                        label: 'P/E Ratio',
-                        data: [32, 22, 12, 10, 16, 20, 18, 25],
-                        backgroundColor: [
-                            'rgba(102, 126, 234, 0.8)',
-                            'rgba(52, 211, 153, 0.8)',
-                            'rgba(251, 146, 60, 0.8)',
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(251, 191, 36, 0.8)',
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(236, 72, 153, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(102, 126, 234, 1)',
-                            'rgba(52, 211, 153, 1)',
-                            'rgba(251, 146, 60, 1)',
-                            'rgba(239, 68, 68, 1)',
-                            'rgba(139, 92, 246, 1)',
-                            'rgba(251, 191, 36, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(236, 72, 153, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { 
-                            callbacks: { 
-                                label: ctx => 'P/E Ratio: ' + ctx.parsed.y + 'x' 
-                            } 
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            title: { display: true, text: 'P/E Multiple (x)' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 2: P/B vs ROE SCATTER
-            const companies = [
-                {name: 'Microsoft', pb: 12, roe: 36, size: 25},
-                {name: 'Apple', pb: 45, roe: 147, size: 30},
-                {name: 'Google', pb: 6, roe: 29, size: 25},
-                {name: 'Amazon', pb: 8, roe: 21, size: 25},
-                {name: 'Tesla', pb: 14, roe: 23, size: 20},
-                {name: 'JPMorgan', pb: 1.5, roe: 15, size: 20},
-                {name: 'ExxonMobil', pb: 1.8, roe: 12, size: 18},
-                {name: 'Walmart', pb: 4.5, roe: 16, size: 22},
-                {name: 'Coca-Cola', pb: 10, roe: 40, size: 20},
-                {name: 'Netflix', pb: 7, roe: 25, size: 18}
-            ];
-            
-            new Chart(document.getElementById('pbRoeChart'), {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Companies',
-                        data: companies.map(c => ({x: c.roe, y: c.pb, r: c.size})),
-                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    const company = companies[ctx.dataIndex];
-                                    return [
-                                        company.name,
-                                        'ROE: ' + company.roe + '%',
-                                        'P/B: ' + company.pb + 'x'
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            title: { display: true, text: 'ROE (%)' },
-                            min: 0,
-                            max: 50
-                        },
-                        y: { 
-                            title: { display: true, text: 'P/B Ratio (x)' },
-                            min: 0,
-                            max: 50
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 3: EV/EBITDA PAR INDUSTRIE
-            new Chart(document.getElementById('evEbitdaChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['SaaS', 'Biotech', 'E-commerce', 'Semiconductors', 'Telecom', 'Retail', 'Manufacturing', 'Utilities'],
-                    datasets: [{
-                        label: 'EV/EBITDA Multiple',
-                        data: [22, 18, 14, 16, 8, 7, 9, 10],
-                        backgroundColor: 'rgba(52, 211, 153, 0.7)',
-                        borderColor: 'rgba(52, 211, 153, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => 'EV/EBITDA: ' + ctx.parsed.x + 'x' } }
-                    },
-                    scales: {
-                        x: { 
-                            beginAtZero: true,
-                            title: { display: true, text: 'EV/EBITDA Multiple (x)' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 4: ROE COMPARAISON
-            new Chart(document.getElementById('roeChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Apple', 'Microsoft', 'Coca-Cola', 'Visa', 'Walmart', 'Ford', 'AT&T', 'Industry Avg'],
-                    datasets: [{
-                        label: 'Return on Equity (%)',
-                        data: [147, 36, 40, 38, 16, 12, 8, 15],
-                        backgroundColor: companies => {
-                            return companies.dataIndex === 7 ? 'rgba(156, 163, 175, 0.7)' : 
-                                   companies.parsed.y > 20 ? 'rgba(34, 197, 94, 0.7)' : 
-                                   companies.parsed.y > 15 ? 'rgba(251, 191, 36, 0.7)' : 
-                                   'rgba(239, 68, 68, 0.7)';
-                        },
-                        borderColor: companies => {
-                            return companies.dataIndex === 7 ? 'rgba(156, 163, 175, 1)' : 
-                                   companies.parsed.y > 20 ? 'rgba(34, 197, 94, 1)' : 
-                                   companies.parsed.y > 15 ? 'rgba(251, 191, 36, 1)' : 
-                                   'rgba(239, 68, 68, 1)';
-                        },
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => 'ROE: ' + ctx.parsed.y + '%' } }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            title: { display: true, text: 'ROE (%)' },
-                            ticks: { callback: value => value + '%' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 5: PROFIT MARGINS ÉVOLUTION
-            const quarters = ['Q1 2022', 'Q2 2022', 'Q3 2022', 'Q4 2022', 'Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023'];
-            const grossMargins = [42, 42.5, 43, 43.5, 44, 44.5, 45, 45.5];
-            const opMargins = [28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5];
-            const netMargins = [23, 23.5, 24, 24.5, 25, 25.5, 26, 26.5];
-            
-            new Chart(document.getElementById('profitMarginsChart'), {
-                type: 'line',
-                data: {
-                    labels: quarters,
-                    datasets: [{
-                        label: 'Gross Margin',
-                        data: grossMargins,
-                        borderColor: 'rgba(52, 211, 153, 1)',
-                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }, {
-                        label: 'Operating Margin',
-                        data: opMargins,
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }, {
-                        label: 'Net Margin',
-                        data: netMargins,
-                        borderColor: 'rgba(139, 92, 246, 1)',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            max: 50,
-                            title: { display: true, text: 'Margin (%)' },
-                            ticks: { callback: value => value + '%' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 6: LIQUIDITY RATIOS
-            const companies2 = ['Apple', 'Tesla', 'Amazon', 'Walmart', 'Ford', 'Boeing'];
-            const currentRatios = [1.1, 1.7, 1.0, 0.8, 1.2, 1.3];
-            const quickRatios = [0.9, 1.4, 0.8, 0.3, 0.9, 0.6];
-            
-            new Chart(document.getElementById('liquidityChart'), {
-                type: 'bar',
-                data: {
-                    labels: companies2,
-                    datasets: [{
-                        label: 'Current Ratio',
-                        data: currentRatios,
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2
-                    }, {
-                        label: 'Quick Ratio',
-                        data: quickRatios,
-                        backgroundColor: 'rgba(251, 146, 60, 0.7)',
-                        borderColor: 'rgba(251, 146, 60, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            max: 2.0,
-                            title: { display: true, text: 'Ratio' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 7: LEVERAGE (TESLA CASE)
-            const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024'];
-            const deRatio = [2.4, 2.1, 1.5, 0.8, 0.3, 0.08, 0.05];
-            const intCoverage = [0.5, 1.2, 3.5, 8.5, 15.0, 22.0, 30.0];
-            
-            new Chart(document.getElementById('leverageChart'), {
-                type: 'line',
-                data: {
-                    labels: years,
-                    datasets: [{
-                        label: 'D/E Ratio',
-                        data: deRatio,
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        borderWidth: 3,
-                        yAxisID: 'y',
-                        tension: 0.4
-                    }, {
-                        label: 'Interest Coverage',
-                        data: intCoverage,
-                        borderColor: 'rgba(34, 197, 94, 1)',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        borderWidth: 3,
-                        yAxisID: 'y1',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { 
-                            type: 'linear',
-                            position: 'left',
-                            title: { display: true, text: 'D/E Ratio' },
-                            min: 0,
-                            max: 3
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            title: { display: true, text: 'Interest Coverage (x)' },
-                            min: 0,
-                            max: 35,
-                            grid: { drawOnChartArea: false }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 8: INVENTORY TURNOVER
-            new Chart(document.getElementById('efficiencyChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Tesla', 'Amazon', 'Walmart', 'Target', 'Costco', 'Best Buy', 'Boeing', 'Ford'],
-                    datasets: [{
-                        label: 'Inventory Turnover (x)',
-                        data: [12, 8.5, 8.3, 6.2, 11.5, 5.8, 1.2, 4.5],
-                        backgroundColor: [
-                            'rgba(34, 197, 94, 0.7)',
-                            'rgba(52, 211, 153, 0.7)',
-                            'rgba(52, 211, 153, 0.7)',
-                            'rgba(251, 191, 36, 0.7)',
-                            'rgba(34, 197, 94, 0.7)',
-                            'rgba(251, 191, 36, 0.7)',
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(251, 146, 60, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(34, 197, 94, 1)',
-                            'rgba(52, 211, 153, 1)',
-                            'rgba(52, 211, 153, 1)',
-                            'rgba(251, 191, 36, 1)',
-                            'rgba(34, 197, 94, 1)',
-                            'rgba(251, 191, 36, 1)',
-                            'rgba(239, 68, 68, 1)',
-                            'rgba(251, 146, 60, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => 'Turnover: ' + ctx.parsed.y + 'x (' + Math.round(365/ctx.parsed.y) + ' days)' } }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            title: { display: true, text: 'Inventory Turnover (x)' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 9: REVENUE GROWTH (CAGR)
-            const years2 = ['2018', '2019', '2020', '2021', '2022', '2023'];
-            const revenue = [15.8, 20.2, 25.0, 29.7, 31.6, 33.7].map(v => v * 1000);
-            
-            new Chart(document.getElementById('growthChart'), {
-                type: 'line',
-                data: {
-                    labels: years2,
-                    datasets: [{
-                        label: 'Revenue ($M)',
-                        data: revenue,
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => 'Revenue: $' + (ctx.parsed.y / 1000).toFixed(1) + 'B'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: false,
-                            title: { display: true, text: 'Revenue ($M)' },
-                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 10: DCF WATERFALL
-            new Chart(document.getElementById('dcfWaterfallChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Year 1 FCF', 'Year 2 FCF', 'Year 3 FCF', 'Year 4 FCF', 'Year 5 FCF', 'Terminal Value', 'Enterprise Value', '- Debt', '+ Cash', 'Equity Value'],
-                    datasets: [{
-                        label: 'Value ($M)',
-                        data: [136, 149, 162, 177, 193, 2842, 3659, -500, 200, 3359],
-                        backgroundColor: [
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(139, 92, 246, 0.7)',
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(52, 211, 153, 0.7)',
-                            'rgba(34, 197, 94, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(139, 92, 246, 1)',
-                            'rgba(102, 126, 234, 1)',
-                            'rgba(239, 68, 68, 1)',
-                            'rgba(52, 211, 153, 1)',
-                            'rgba(34, 197, 94, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(0) + 'M' } }
-                    },
-                    scales: {
-                        y: { 
-                            title: { display: true, text: 'Value ($M)' },
-                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
-                        }
-                    }
-                }
-            });
-            
-            // GRAPHIQUE 11: DCF SENSITIVITY
-            new Chart(document.getElementById('dcfSensitivityChart'), {
-                type: 'bar',
-                data: {
-                    labels: [
-                        'Base Case', 
-                        'Terminal Growth +1%', 
-                        'WACC -0.5%', 
-                        'FCF Margin +5%', 
-                        'Revenue Growth +10%'
-                    ],
-                    datasets: [{
-                        label: 'Enterprise Value ($M)',
-                        data: [3659, 4450, 4120, 3890, 3780],
-                        backgroundColor: [
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(34, 197, 94, 0.7)',
-                            'rgba(52, 211, 153, 0.7)',
-                            'rgba(251, 191, 36, 0.7)',
-                            'rgba(59, 130, 246, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(102, 126, 234, 1)',
-                            'rgba(34, 197, 94, 1)',
-                            'rgba(52, 211, 153, 1)',
-                            'rgba(251, 191, 36, 1)',
-                            'rgba(59, 130, 246, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => {
-                                    const baseValue = 3659;
-                                    const change = ((ctx.parsed.x - baseValue) / baseValue * 100).toFixed(1);
-                                    return [
-                                        'EV: $' + ctx.parsed.x.toFixed(0) + 'M',
-                                        'Change: ' + (change > 0 ? '+' : '') + change + '%'
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            beginAtZero: false,
-                            min: 3500,
-                            max: 4600,
-                            title: { display: true, text: 'Enterprise Value ($M)' },
-                            ticks: { callback: value => '$' + (value / 1000).toFixed(1) + 'B' }
-                        }
-                    }
-                }
-            });
-            
-        });
-    </script>
-
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
-    <script src="assets/js/admin-visibility.js"></script>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS - OPTIMISÉS AVEC DEFER
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="assets/js/common.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/chatbot-particles.js" defer></script>
+    <script src="assets/js/admin-visibility.js" defer></script>
+    <script src="assets/js/resources-financial-metrics.js" defer></script>
     
 </body>
 </html>
