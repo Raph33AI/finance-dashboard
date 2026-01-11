@@ -1,65 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sign in to AlphaVault - AI-powered financial analysis platform">
-    <title>Sign In - AlphaVault AI</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO META TAGS - OPTIMISÉS
+         ═══════════════════════════════════════════════════════════════ -->
+    <title>Sign In - AlphaVault AI | Access Your Financial Intelligence Dashboard</title>
+    
+    <meta name="description" content="Sign in to AlphaVault AI to access AI-powered financial analysis, IPO intelligence, portfolio optimization, and institutional-grade quantitative tools. Secure authentication with Google OAuth or email.">
+    
+    <meta name="keywords" content="AlphaVault AI sign in, login financial platform, secure authentication, financial dashboard access, investment analytics login, AI finance platform">
+    
+    <meta name="author" content="AlphaVault AI">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         CANONICAL URL
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="canonical" href="https://alphavault-ai.com/auth.html">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (FACEBOOK, LINKEDIN)
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AlphaVault AI">
+    <meta property="og:title" content="Sign In - AlphaVault AI">
+    <meta property="og:description" content="Access your AI-powered financial intelligence dashboard. Secure authentication with Google OAuth or email.">
+    <meta property="og:url" content="https://alphavault-ai.com/auth.html">
+    <meta property="og:image" content="https://alphavault-ai.com/assets/images/og-image-auth.png">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alphavaultai">
+    <meta name="twitter:title" content="Sign In - AlphaVault AI">
+    <meta name="twitter:description" content="Access your AI-powered financial intelligence dashboard.">
+    <meta name="twitter:image" content="https://alphavault-ai.com/assets/images/twitter-card-auth.png">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         DNS PREFETCH & PRECONNECT (PERFORMANCE CRITIQUE)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/auth.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/auth.css">
-
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         FAVICONS - COMPLET
+         ═══════════════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
+    <meta name="msapplication-config" content="/browserconfig.xml">
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         GOOGLE ANALYTICS 4 (G-R9L8JPN5K4)
+         ═══════════════════════════════════════════════════════════════ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R9L8JPN5K4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R9L8JPN5K4', {
+        'page_title': 'Sign In',
+        'page_path': '/auth.html'
+      });
+    </script>
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
 </head>
-<body>
+
+<body itemscope itemtype="https://schema.org/WebPage">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCHEMA.ORG STRUCTURED DATA
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- 1. ORGANIZATION SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AlphaVault AI",
+      "url": "https://alphavault-ai.com",
+      "logo": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png"
+    }
+    </script>
+    
+    <!-- 2. BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://alphavault-ai.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Sign In",
+          "item": "https://alphavault-ai.com/auth.html"
+        }
+      ]
+    }
+    </script>
     
     <!-- Back to Home Link -->
-    <a href="index.html" class="back-to-home">
+    <a href="index.html" class="back-to-home" aria-label="Back to Home">
         <i class="fas fa-arrow-left"></i>
         <span>Back to Home</span>
     </a>
@@ -67,41 +154,35 @@
     <!-- Auth Container -->
     <div class="auth-wrapper">
         <!-- Left Side - Branding -->
-        <div class="auth-branding">
+        <aside class="auth-branding" role="complementary">
             <div class="branding-content">
                 <!-- Logo -->
                 <div class="nav-brand">
-                    <!-- Logo AlphaVault AI -->
-                    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32" role="img" aria-label="AlphaVault AI Logo">
+                        <title>AlphaVault AI Logo</title>
                         <defs>
                             <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
                                 <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
                             </linearGradient>
                         </defs>
-                        
-                        <!-- Graphique montant -->
                         <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                            stroke="url(#logoGradient)" 
-                            stroke-width="4" 
-                            fill="none" 
-                            stroke-linecap="round" 
-                            stroke-linejoin="round"/>
-                        
-                        <!-- Points -->
+                              stroke="url(#logoGradient)" 
+                              stroke-width="4" 
+                              fill="none" 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round"/>
                         <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                         <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                         <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                         <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                        
-                        <!-- Flèche -->
                         <path d="M 85 35 L 90 30 L 85 25" 
-                            stroke="url(#logoGradient)" 
-                            stroke-width="3" 
-                            fill="none" 
-                            stroke-linecap="round"/>
+                              stroke="url(#logoGradient)" 
+                              stroke-width="3" 
+                              fill="none" 
+                              stroke-linecap="round"/>
                     </svg>
-                    <span class="brand-text" style="display: inline-block; vertical-align: middle;">AlphaVault <strong>AI</strong></span>
+                    <span class="brand-text">AlphaVault <strong>AI</strong></span>
                 </div>
                 
                 <!-- Features List -->
@@ -170,29 +251,29 @@
                 </div>
                 
                 <!-- Background Decoration -->
-                <div class="branding-decoration">
+                <div class="branding-decoration" aria-hidden="true">
                     <div class="decoration-orb orb-1"></div>
                     <div class="decoration-orb orb-2"></div>
                     <div class="decoration-grid"></div>
                 </div>
             </div>
-        </div>
-        
+        </aside>
+
         <!-- Right Side - Auth Forms -->
-        <div class="auth-forms-container">
+        <main class="auth-forms-container" role="main">
             <div class="auth-forms-wrapper">
                 
                 <!-- Login Form -->
                 <div class="auth-form-card" id="loginForm">
-                    <div class="form-header">
-                        <h2 class="form-title">Welcome back!</h2>
+                    <header class="form-header">
+                        <h1 class="form-title">Welcome back!</h1>
                         <p class="form-subtitle">Sign in to access your dashboard</p>
-                    </div>
+                    </header>
                     
                     <!-- Social Login Buttons -->
                     <div class="social-login-buttons">
-                        <button class="social-btn google-btn" id="googleLoginBtn">
-                            <svg width="20" height="20" viewBox="0 0 24 24">
+                        <button class="social-btn google-btn" id="googleLoginBtn" type="button" aria-label="Sign in with Google">
+                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -203,17 +284,17 @@
                     </div>
                     
                     <!-- Divider -->
-                    <div class="auth-divider">
+                    <div class="auth-divider" role="separator">
                         <span class="divider-line"></span>
                         <span class="divider-text">or with email</span>
                         <span class="divider-line"></span>
                     </div>
                     
                     <!-- Email Login Form -->
-                    <form class="auth-form" id="emailLoginForm">
+                    <form class="auth-form" id="emailLoginForm" novalidate>
                         <div class="form-group">
                             <label for="loginEmail" class="form-label">
-                                <i class="fas fa-envelope"></i>
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
                                 Email
                             </label>
                             <input 
@@ -223,13 +304,15 @@
                                 placeholder="your.email@example.com"
                                 required
                                 autocomplete="email"
+                                aria-required="true"
+                                aria-describedby="loginEmailError"
                             >
-                            <span class="form-error" id="loginEmailError"></span>
+                            <span class="form-error" id="loginEmailError" role="alert"></span>
                         </div>
                         
                         <div class="form-group">
                             <label for="loginPassword" class="form-label">
-                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-lock" aria-hidden="true"></i>
                                 Password
                             </label>
                             <div class="password-input-wrapper">
@@ -240,12 +323,14 @@
                                     placeholder="••••••••"
                                     required
                                     autocomplete="current-password"
+                                    aria-required="true"
+                                    aria-describedby="loginPasswordError"
                                 >
-                                <button type="button" class="password-toggle" id="toggleLoginPassword">
-                                    <i class="fas fa-eye"></i>
+                                <button type="button" class="password-toggle" id="toggleLoginPassword" aria-label="Toggle password visibility">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
-                            <span class="form-error" id="loginPasswordError"></span>
+                            <span class="form-error" id="loginPasswordError" role="alert"></span>
                         </div>
                         
                         <div class="form-options">
@@ -264,27 +349,27 @@
                         </button>
                     </form>
                     
-                    <div class="form-footer">
+                    <footer class="form-footer">
                         <p class="switch-form-text">
                             Don't have an account?
                             <a href="#" class="switch-form-link" id="switchToSignup">
                                 Create account
                             </a>
                         </p>
-                    </div>
+                    </footer>
                 </div>
                 
                 <!-- Signup Form -->
                 <div class="auth-form-card hidden" id="signupForm">
-                    <div class="form-header">
-                        <h2 class="form-title">Create your account</h2>
+                    <header class="form-header">
+                        <h1 class="form-title">Create your account</h1>
                         <p class="form-subtitle">Start your 14-day free trial</p>
-                    </div>
+                    </header>
                     
                     <!-- Social Signup Buttons -->
                     <div class="social-login-buttons">
-                        <button class="social-btn google-btn" id="googleSignupBtn">
-                            <svg width="20" height="20" viewBox="0 0 24 24">
+                        <button class="social-btn google-btn" id="googleSignupBtn" type="button" aria-label="Sign up with Google">
+                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -295,18 +380,18 @@
                     </div>
                     
                     <!-- Divider -->
-                    <div class="auth-divider">
+                    <div class="auth-divider" role="separator">
                         <span class="divider-line"></span>
                         <span class="divider-text">or with email</span>
                         <span class="divider-line"></span>
                     </div>
                     
                     <!-- Email Signup Form -->
-                    <form class="auth-form" id="emailSignupForm">
+                    <form class="auth-form" id="emailSignupForm" novalidate>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="signupFirstName" class="form-label">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-user" aria-hidden="true"></i>
                                     First name
                                 </label>
                                 <input 
@@ -316,13 +401,14 @@
                                     placeholder="John"
                                     required
                                     autocomplete="given-name"
+                                    aria-required="true"
                                 >
-                                <span class="form-error" id="signupFirstNameError"></span>
+                                <span class="form-error" id="signupFirstNameError" role="alert"></span>
                             </div>
                             
                             <div class="form-group">
                                 <label for="signupLastName" class="form-label">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-user" aria-hidden="true"></i>
                                     Last name
                                 </label>
                                 <input 
@@ -332,14 +418,15 @@
                                     placeholder="Doe"
                                     required
                                     autocomplete="family-name"
+                                    aria-required="true"
                                 >
-                                <span class="form-error" id="signupLastNameError"></span>
+                                <span class="form-error" id="signupLastNameError" role="alert"></span>
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label for="signupEmail" class="form-label">
-                                <i class="fas fa-envelope"></i>
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
                                 Professional email
                             </label>
                             <input 
@@ -349,13 +436,14 @@
                                 placeholder="your.email@company.com"
                                 required
                                 autocomplete="email"
+                                aria-required="true"
                             >
-                            <span class="form-error" id="signupEmailError"></span>
+                            <span class="form-error" id="signupEmailError" role="alert"></span>
                         </div>
                         
                         <div class="form-group">
                             <label for="signupPassword" class="form-label">
-                                <i class="fas fa-lock"></i>
+                                <i class="fas fa-lock" aria-hidden="true"></i>
                                 Password
                             </label>
                             <div class="password-input-wrapper">
@@ -366,13 +454,14 @@
                                     placeholder="••••••••"
                                     required
                                     autocomplete="new-password"
+                                    aria-required="true"
                                 >
-                                <button type="button" class="password-toggle" id="toggleSignupPassword">
-                                    <i class="fas fa-eye"></i>
+                                <button type="button" class="password-toggle" id="toggleSignupPassword" aria-label="Toggle password visibility">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <!-- Password Strength Indicator -->
-                            <div class="password-strength" id="passwordStrength">
+                            <div class="password-strength" id="passwordStrength" aria-live="polite">
                                 <div class="strength-bars">
                                     <div class="strength-bar"></div>
                                     <div class="strength-bar"></div>
@@ -381,12 +470,12 @@
                                 </div>
                                 <span class="strength-text" id="strengthText">Very weak</span>
                             </div>
-                            <span class="form-error" id="signupPasswordError"></span>
+                            <span class="form-error" id="signupPasswordError" role="alert"></span>
                         </div>
                         
                         <div class="form-group">
                             <label for="signupCompany" class="form-label">
-                                <i class="fas fa-building"></i>
+                                <i class="fas fa-building" aria-hidden="true"></i>
                                 Company (optional)
                             </label>
                             <input 
@@ -400,16 +489,16 @@
                         
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" id="acceptTerms" required>
+                                <input type="checkbox" id="acceptTerms" required aria-required="true">
                                 <span class="checkbox-custom"></span>
                                 <span class="checkbox-text">
                                     I accept the 
-                                    <a href="terms.html" class="terms-link">Terms of Service</a> 
+                                    <a href="terms.html" class="terms-link" target="_blank" rel="noopener">Terms of Service</a> 
                                     and 
-                                    <a href="privacy.html" class="terms-link">Privacy Policy</a>
+                                    <a href="privacy.html" class="terms-link" target="_blank" rel="noopener">Privacy Policy</a>
                                 </span>
                             </label>
-                            <span class="form-error" id="acceptTermsError"></span>
+                            <span class="form-error" id="acceptTermsError" role="alert"></span>
                         </div>
                         
                         <button type="submit" class="btn-auth-primary" id="signupSubmitBtn">
@@ -420,32 +509,32 @@
                         </button>
                     </form>
                     
-                    <div class="form-footer">
+                    <footer class="form-footer">
                         <p class="switch-form-text">
                             Already have an account?
                             <a href="#" class="switch-form-link" id="switchToLogin">
                                 Sign in
                             </a>
                         </p>
-                    </div>
+                    </footer>
                 </div>
                 
                 <!-- Password Reset Form -->
                 <div class="auth-form-card hidden" id="resetPasswordForm">
-                    <div class="form-header">
-                        <button class="back-btn" id="backToLogin">
+                    <header class="form-header">
+                        <button class="back-btn" id="backToLogin" type="button" aria-label="Back to sign in">
                             <i class="fas fa-arrow-left"></i>
                         </button>
-                        <h2 class="form-title">Reset password</h2>
+                        <h1 class="form-title">Reset password</h1>
                         <p class="form-subtitle">
                             Enter your email and we'll send you a link to reset your password
                         </p>
-                    </div>
+                    </header>
                     
-                    <form class="auth-form" id="emailResetForm">
+                    <form class="auth-form" id="emailResetForm" novalidate>
                         <div class="form-group">
                             <label for="resetEmail" class="form-label">
-                                <i class="fas fa-envelope"></i>
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
                                 Email
                             </label>
                             <input 
@@ -455,8 +544,9 @@
                                 placeholder="your.email@example.com"
                                 required
                                 autocomplete="email"
+                                aria-required="true"
                             >
-                            <span class="form-error" id="resetEmailError"></span>
+                            <span class="form-error" id="resetEmailError" role="alert"></span>
                         </div>
                         
                         <button type="submit" class="btn-auth-primary" id="resetSubmitBtn">
@@ -476,7 +566,7 @@
                         <p class="success-text">
                             Check your inbox and follow the instructions to reset your password.
                         </p>
-                        <button class="btn-auth-secondary" id="backToLoginFromSuccess">
+                        <button class="btn-auth-secondary" id="backToLoginFromSuccess" type="button">
                             Back to sign in
                         </button>
                     </div>
@@ -487,28 +577,29 @@
             <!-- Trust Badges -->
             <div class="trust-badges">
                 <div class="trust-badge">
-                    <i class="fas fa-shield-alt"></i>
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
                     <span>SSL Secured</span>
                 </div>
                 <div class="trust-badge">
-                    <i class="fas fa-lock"></i>
+                    <i class="fas fa-lock" aria-hidden="true"></i>
                     <span>Encrypted Data</span>
                 </div>
                 <div class="trust-badge">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                     <span>GDPR Compliant</span>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Scripts -->
-    <script src="assets/js/firebase-config.js"></script>
-    <!-- <script src="assets/js/referral-firestore.js"></script> -->
-    <script src="assets/js/auth.js"></script>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS - OPTIMISÉS AVEC DEFER
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="assets/js/firebase-config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
     
 </body>
 </html>
