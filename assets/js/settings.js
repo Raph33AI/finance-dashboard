@@ -1283,10 +1283,11 @@ async function reactivateSubscription() {
     showToast('info', 'Reactivation', 'Please contact support to reactivate your subscription');
 }
 
-// ============================================
-// SYNCHRONISATION NEWSLETTER - VERSION CORRIGÉE
-// ✅ PROTECTION ANTI-RÉABONNEMENT
-// ============================================
+/* ============================================
+   SYNCHRONISATION NEWSLETTER - VERSION CORRIGÉE v2
+   ✅ PROTECTION : Vérification explicite de true/false
+   ✅ PROTECTION : Flag anti-réabonnement
+   ============================================ */
 
 async function synchronizeAllSubscriptions() {
     // ✅ PROTECTION : Si déjà en cours, ne rien faire
@@ -1318,6 +1319,7 @@ async function synchronizeAllSubscriptions() {
         // ========================================
         // 1⃣ SYNCHRONISATION WEEKLY NEWSLETTER
         // ========================================
+        // ✅ CORRECTION : Vérification EXPLICITE de true
         const isNewsletterSubscribed = userData.weeklyNewsletter === true;
         
         console.log('📰 Statut newsletter (Firestore):', isNewsletterSubscribed ? 'Abonne' : 'Non abonne');
@@ -1327,11 +1329,10 @@ async function synchronizeAllSubscriptions() {
             newsletterToggle.checked = isNewsletterSubscribed;
         }
         
-        // ✅ LOGIQUE CORRIGÉE : Seulement si PAS de timestamp ET abonné
+        // ✅ Seulement si EXPLICITEMENT true ET pas de timestamp
         if (isNewsletterSubscribed && !userData.newsletterSubscribedAt) {
             console.log('⚠ Timestamp newsletter manquant - Ajout simple (pas de worker call)');
             
-            // ✅ AJOUTER LE TIMESTAMP SANS APPELER LE WORKER
             await userRef.update({
                 newsletterSubscribedAt: new Date().toISOString()
             });
@@ -1339,12 +1340,15 @@ async function synchronizeAllSubscriptions() {
             console.log('✅ Timestamp newsletter ajoute');
         } else if (isNewsletterSubscribed && userData.newsletterSubscribedAt) {
             console.log('✅ Utilisateur deja abonne newsletter (depuis', userData.newsletterSubscribedAt, ')');
+        } else {
+            console.log('ℹ Utilisateur NON abonne newsletter');
         }
         
         // ========================================
         // 2⃣ SYNCHRONISATION FEATURE UPDATES
         // ========================================
-        const isUpdatesSubscribed = userData.featureUpdates !== false;
+        // ✅ CORRECTION : Vérification EXPLICITE de true
+        const isUpdatesSubscribed = userData.featureUpdates === true;
         
         console.log('🔔 Statut updates (Firestore):', isUpdatesSubscribed ? 'Abonne' : 'Non abonne');
         
@@ -1353,11 +1357,10 @@ async function synchronizeAllSubscriptions() {
             updatesToggle.checked = isUpdatesSubscribed;
         }
         
-        // ✅ LOGIQUE CORRIGÉE : Seulement si PAS de timestamp ET abonné
+        // ✅ Seulement si EXPLICITEMENT true ET pas de timestamp
         if (isUpdatesSubscribed && !userData.updatesSubscribedAt) {
             console.log('⚠ Timestamp updates manquant - Ajout simple (pas de worker call)');
             
-            // ✅ AJOUTER LE TIMESTAMP SANS APPELER LE WORKER
             await userRef.update({
                 updatesSubscribedAt: new Date().toISOString()
             });
@@ -1365,6 +1368,8 @@ async function synchronizeAllSubscriptions() {
             console.log('✅ Timestamp updates ajoute');
         } else if (isUpdatesSubscribed && userData.updatesSubscribedAt) {
             console.log('✅ Utilisateur deja abonne updates (depuis', userData.updatesSubscribedAt, ')');
+        } else {
+            console.log('ℹ Utilisateur NON abonne updates');
         }
         
     } catch (error) {
