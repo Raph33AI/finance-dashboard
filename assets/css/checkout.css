@@ -983,83 +983,75 @@ select:focus-visible {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📱 APPLE PAY / GOOGLE PAY BUTTON - VERSION MOBILE OPTIMISÉE
+   📱 APPLE PAY / GOOGLE PAY - VERSION MOBILE OPTIMISÉE
+   ✅ Design minimaliste, sans contours, conversion maximale
    ═══════════════════════════════════════════════════════════════ */
 
 .payment-request-container {
-    display: none; /* Masqué par défaut */
-    margin-bottom: 24px;
-    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none; /* Affiché via JS quand disponible */
+    margin-bottom: 20px;
+    position: relative;
+    animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Badge "Recommended" discret au-dessus du bouton */
+.payment-request-container::before {
+    content: '✨ Recommended';
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #10b981;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.3s forwards;
+}
+
+body.dark-mode .payment-request-container::before {
+    color: #34d399;
 }
 
 #payment-request-button {
-    border-radius: 16px;
+    /* ✅ AUCUN contour, aucune bordure */
+    border: none;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    padding: 4px;
-    border: 2px solid rgba(59, 130, 246, 0.15);
-    min-height: 56px; /* Hauteur minimale pour mobile */
+    padding: 0;
+    background: transparent;
+    
+    /* ✅ Hauteur optimale mobile (48px = recommandation iOS) */
+    min-height: 48px;
+    max-height: 52px;
+    
+    /* ✅ Ombre légère pour profondeur (mais PAS de bordure) */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body.dark-mode #payment-request-button {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-color: rgba(100, 116, 139, 0.3);
+/* Animation au hover/tap */
+#payment-request-button:hover,
+#payment-request-button:active {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
-#payment-request-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.3);
-    border-color: rgba(59, 130, 246, 0.3);
+#payment-request-button:active {
+    transform: translateY(0) scale(0.99);
 }
 
+/* Animation d'apparition */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SÉPARATEUR "OR PAY WITH CARD"
-   ═══════════════════════════════════════════════════════════════ */
-
-.payment-divider {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 28px;
-    animation: fadeIn 0.6s ease 0.2s both;
-}
-
-.divider-line {
-    height: 2px;
-    flex: 1;
-    background: linear-gradient(to right, transparent, rgba(102, 126, 234, 0.3), transparent);
-    border-radius: 2px;
-}
-
-.divider-text {
-    color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-radius: 20px;
-    border: 1px solid rgba(102, 126, 234, 0.2);
-    white-space: nowrap;
-}
-
-body.dark-mode .divider-text {
-    color: #94a3b8;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-    border-color: rgba(100, 116, 139, 0.3);
-}
-
-body.dark-mode .divider-line {
-    background: linear-gradient(to right, transparent, rgba(100, 116, 139, 0.4), transparent);
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
 @keyframes fadeIn {
@@ -1068,37 +1060,99 @@ body.dark-mode .divider-line {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   SÉPARATEUR "OR PAY WITH CARD" - VERSION ULTRA-DISCRÈTE
+   ═══════════════════════════════════════════════════════════════ */
+
+.payment-divider {
+    display: none; /* Affiché via JS */
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0;
+    opacity: 0.6; /* ✅ Plus discret pour ne pas distraire */
+}
+
+.divider-line {
+    height: 1px; /* ✅ Ligne fine */
+    flex: 1;
+    background: linear-gradient(to right, transparent, rgba(203, 213, 225, 0.4), transparent);
+}
+
+body.dark-mode .divider-line {
+    background: linear-gradient(to right, transparent, rgba(100, 116, 139, 0.3), transparent);
+}
+
+.divider-text {
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    background: transparent; /* ✅ Pas de fond */
+    border: none; /* ✅ Pas de bordure */
+    white-space: nowrap;
+}
+
+body.dark-mode .divider-text {
+    color: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RESPONSIVE MOBILE
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
     #payment-request-button {
-        border-radius: 12px;
         min-height: 48px;
+        max-height: 50px;
+        border-radius: 10px;
+    }
+    
+    .payment-request-container::before {
+        font-size: 0.7rem;
+        margin-bottom: 6px;
     }
     
     .payment-divider {
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    
-    .divider-text {
-        font-size: 0.75rem;
-        padding: 6px 16px;
+        margin: 20px 0;
     }
 }
 
 @media (max-width: 480px) {
     #payment-request-button {
-        min-height: 44px; /* iOS minimum touch target */
+        min-height: 46px; /* iOS minimum touch target */
+        max-height: 48px;
+        border-radius: 8px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1); /* Ombre encore plus subtile */
+    }
+    
+    .payment-request-container::before {
+        font-size: 0.65rem;
     }
     
     .divider-text {
-        font-size: 0.7rem;
-        padding: 5px 12px;
+        font-size: 0.65rem;
+        padding: 3px 10px;
     }
-    
-    .divider-line {
-        height: 1.5px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITÉ & PERFORMANCE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Réduction de mouvement pour accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    .payment-request-container,
+    #payment-request-button,
+    .payment-request-container::before {
+        animation: none !important;
+        transition: none !important;
     }
+}
+
+/* Focus visible pour navigation clavier */
+#payment-request-button:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
 }
