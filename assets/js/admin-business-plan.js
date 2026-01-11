@@ -2325,7 +2325,7 @@ window.addEventListener('load', function() {
 // ⚡ EXTEND FINANCIAL_DATA WITH VALUATION DATA
 if (!FINANCIAL_DATA.valuation) {
     FINANCIAL_DATA.valuation = {
-        preSeedValuation: 200000, // $450K (~€400K)
+        preSeedValuation: 200000, // $200K
         arrMultiples: {
             year0: 0,
             year1: 5,
