@@ -1,17 +1,84 @@
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Advanced Analysis</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO META TAGS - OPTIMISÉS
+         ═══════════════════════════════════════════════════════════════ -->
+    <title>Advanced Technical Analysis - 14 Wall Street Indicators | AlphaVault AI</title>
+    
+    <meta name="description" content="Professional-grade advanced technical analysis with 14 institutional indicators: RSI, MACD, Bollinger Bands, Fibonacci, Ichimoku Cloud, ADX, Stochastic, Williams %R, MFI, CCI, ATR, OBV, CMF. AI-powered multi-horizon investment recommendations. Real-time portfolio management and watchlist tracking.">
+    
+    <meta name="keywords" content="advanced technical analysis, RSI indicator, MACD analysis, Bollinger Bands, Fibonacci retracements, Ichimoku Cloud, ADX trend strength, Stochastic oscillator, Williams %R, Money Flow Index, CCI indicator, ATR volatility, OBV volume analysis, Chaikin Money Flow, AI stock analysis, technical indicators, AlphaVault AI, Wall Street tools, portfolio management, stock watchlist">
+    
+    <meta name="author" content="AlphaVault AI">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         CANONICAL URL
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="canonical" href="https://alphavault-ai.com/advanced-analysis.html">
+    
+    <!-- Alternate versions -->
+    <link rel="alternate" hreflang="en" href="https://alphavault-ai.com/advanced-analysis.html">
+    <link rel="alternate" hreflang="x-default" href="https://alphavault-ai.com/advanced-analysis.html">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (FACEBOOK, LINKEDIN)
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AlphaVault AI">
+    <meta property="og:title" content="Advanced Technical Analysis - 14 Wall Street Indicators | AlphaVault AI">
+    <meta property="og:description" content="Professional technical analysis platform with 14 institutional-grade indicators, AI-powered recommendations, and real-time portfolio management. RSI, MACD, Bollinger Bands, Fibonacci, Ichimoku Cloud, and more.">
+    <meta property="og:url" content="https://alphavault-ai.com/advanced-analysis.html">
+    <meta property="og:image" content="https://alphavault-ai.com/assets/images/og-advanced-analysis.png">
+    <meta property="og:image:secure_url" content="https://alphavault-ai.com/assets/images/og-advanced-analysis.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="AlphaVault AI Advanced Technical Analysis Dashboard">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alphavaultai">
+    <meta name="twitter:creator" content="@alphavaultai">
+    <meta name="twitter:title" content="Advanced Technical Analysis - 14 Wall Street Indicators">
+    <meta name="twitter:description" content="Professional technical analysis with RSI, MACD, Bollinger Bands, Fibonacci, and 10+ institutional indicators. AI-powered investment recommendations.">
+    <meta name="twitter:image" content="https://alphavault-ai.com/assets/images/twitter-advanced-analysis.png">
+    <meta name="twitter:image:alt" content="AlphaVault AI Technical Analysis Platform">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         DNS PREFETCH & PRECONNECT
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://code.highcharts.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/advanced-analysis.css" as="style">
+    <link rel="preload" href="assets/js/advanced-analysis.js" as="script">
     
     <!-- Highcharts -->
-    <script src='https://code.highcharts.com/stock/highstock.js'></script>
-    <script src='https://code.highcharts.com/highcharts-more.js'></script>
-    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
+    <script src='https://code.highcharts.com/highcharts-more.js' defer></script>
+    <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
     
     <!-- Font Awesome -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' media="print" onload="this.media='all'">
+    <noscript><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'></noscript>
     
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
@@ -20,362 +87,159 @@
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/advanced-analysis.css'>
 
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
-        FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         FAVICONS ALPHAVAULT AI
+         ═══════════════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
+    <meta name="msapplication-config" content="/browserconfig.xml">
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
-
-    <!-- ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
-    <!-- Analytics Tracker -->
-    <script src="assets/js/analytics-tracker.js"></script>
+    <script src="assets/js/analytics-tracker.js" defer></script>
     
-    <!-- STYLES SIMPLIFIÉS POUR MODALS (ULTRA LÉGERS) -->
-    <style>
-        /* ============================================
-        MODAL STYLES - MINIMALISTES
-        ============================================ */
-        
-        /* Modal Overlay */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Modal Content */
-        .modal-content {
-            background: #ffffff;
-            border-radius: 8px;
-            max-width: 800px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            position: relative;
-        }
-
-        body.dark-mode .modal-content {
-            background: #1e293b;
-            color: #e2e8f0;
-        }
-
-        /* Modal Header */
-        .modal-header {
-            background: #f8fafc;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid #e2e8f0;
-            border-radius: 8px 8px 0 0;
-            position: relative;
-        }
-
-        body.dark-mode .modal-header {
-            background: #0f172a;
-            border-bottom-color: #334155;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        body.dark-mode .modal-header h2 {
-            color: #f1f5f9;
-        }
-
-        /* Close Button */
-        .close-modal {
-            position: absolute;
-            right: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            color: #64748b;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            background: transparent;
-            transition: background 0.2s;
-            line-height: 1;
-        }
-
-        .close-modal:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        body.dark-mode .close-modal:hover {
-            background: #334155;
-            color: #f1f5f9;
-        }
-
-        /* Modal Body */
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .modal-body h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 1.5rem 0 1rem 0;
-        }
-
-        body.dark-mode .modal-body h3 {
-            color: #f1f5f9;
-        }
-
-        .modal-body h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #334155;
-            margin: 1.25rem 0 0.75rem 0;
-        }
-
-        body.dark-mode .modal-body h4 {
-            color: #cbd5e1;
-        }
-
-        .modal-body ul {
-            margin: 1rem 0;
-            padding-left: 1.5rem;
-        }
-
-        .modal-body li {
-            margin-bottom: 0.5rem;
-            line-height: 1.6;
-            color: #475569;
-        }
-
-        body.dark-mode .modal-body li {
-            color: #94a3b8;
-        }
-
-        .modal-body p {
-            line-height: 1.6;
-            color: #475569;
-            margin-bottom: 1rem;
-        }
-
-        body.dark-mode .modal-body p {
-            color: #94a3b8;
-        }
-
-        /* Small Modal Variant */
-        .modal-small .modal-content {
-            max-width: 500px;
-        }
-
-        /* Scrollbar Styling */
-        .modal-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* ============================================
-        HELP ICON BUTTON
-        ============================================ */
-        
-        .help-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #3b82f6;
-            color: white !important;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-left: 0.5rem;
-            border: none;
-        }
-
-        .help-icon::before {
-            content: '?';
-        }
-
-        .help-icon:hover {
-            background: #2563eb;
-            transform: scale(1.1);
-        }
-
-        /* ============================================
-        FORMULA & INFO BOXES
-        ============================================ */
-        
-        .formula-box {
-            background: #f8fafc;
-            border-left: 3px solid #3b82f6;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        body.dark-mode .formula-box {
-            background: #1e293b;
-            color: #e2e8f0;
-        }
-
-        .formula-box strong {
-            color: #1e293b;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        body.dark-mode .formula-box strong {
-            color: #f1f5f9;
-        }
-
-        .key-term {
-            color: #3b82f6;
-            font-weight: 600;
-        }
-
-        .tip-box {
-            background: #ecfdf5;
-            border-left: 3px solid #10b981;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        body.dark-mode .tip-box {
-            background: #064e3b;
-            color: #d1fae5;
-        }
-
-        .warning-box {
-            background: #fef3c7;
-            border-left: 3px solid #f59e0b;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        body.dark-mode .warning-box {
-            background: #78350f;
-            color: #fef3c7;
-        }
-
-        /* Responsive Modal */
-        @media (max-width: 768px) {
-            .modal {
-                padding: 1rem;
-            }
-
-            .modal-content {
-                max-height: 95vh;
-            }
-
-            .modal-header {
-                padding: 1.25rem 1.5rem;
-            }
-
-            .modal-header h2 {
-                font-size: 1.25rem;
-            }
-
-            .modal-body {
-                padding: 1.5rem;
-            }
-
-            .close-modal {
-                right: 1rem;
-                width: 28px;
-                height: 28px;
-                font-size: 1.25rem;
-            }
-
-            .help-icon {
-                width: 20px;
-                height: 20px;
-                font-size: 0.75rem;
-            }
-        }
-    </style>
+    <!-- ═══════════════════════════════════════════════════════════════
+         GOOGLE ANALYTICS 4
+         ═══════════════════════════════════════════════════════════════ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R9L8JPN5K4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R9L8JPN5K4', {
+        'page_title': 'Advanced Technical Analysis',
+        'page_path': '/advanced-analysis.html'
+      });
+    </script>
 </head>
-<body>
+
+<body class="analysis-page" itemscope itemtype="https://schema.org/WebPage">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCHEMA.ORG STRUCTURED DATA
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- 1. WEB PAGE SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Advanced Technical Analysis - AlphaVault AI",
+      "description": "Professional-grade technical analysis platform with 14 institutional indicators including RSI, MACD, Bollinger Bands, Fibonacci, Ichimoku Cloud, ADX, and AI-powered multi-horizon investment recommendations.",
+      "url": "https://alphavault-ai.com/advanced-analysis.html",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://alphavault-ai.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Advanced Technical Analysis",
+            "item": "https://alphavault-ai.com/advanced-analysis.html"
+          }
+        ]
+      },
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "AlphaVault AI",
+        "url": "https://alphavault-ai.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AlphaVault AI",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png"
+        }
+      }
+    }
+    </script>
+    
+    <!-- 2. SOFTWARE APPLICATION SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AlphaVault AI - Advanced Technical Analysis",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web, Windows, macOS, Linux",
+      "offers": {
+        "@type": "Offer",
+        "price": "10",
+        "priceCurrency": "USD",
+        "description": "Pro Plan - Full access to advanced technical analysis with 14 institutional indicators"
+      },
+      "featureList": [
+        "RSI - Relative Strength Index",
+        "MACD - Moving Average Convergence Divergence",
+        "Bollinger Bands",
+        "Fibonacci Retracements",
+        "Ichimoku Cloud",
+        "ADX - Average Directional Index",
+        "Stochastic Oscillator",
+        "Williams %R",
+        "MFI - Money Flow Index",
+        "CCI - Commodity Channel Index",
+        "ATR - Average True Range",
+        "OBV - On-Balance Volume",
+        "CMF - Chaikin Money Flow",
+        "AI-Powered Multi-Horizon Recommendations"
+      ],
+      "description": "Professional-grade technical analysis platform with 14 Wall Street indicators, AI-powered investment recommendations, and real-time portfolio management."
+    }
+    </script>
+    
+    <!-- 3. BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://alphavault-ai.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Stocks Analysis",
+          "item": "https://alphavault-ai.com/#stocks"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Advanced Technical Analysis",
+          "item": "https://alphavault-ai.com/advanced-analysis.html"
+        }
+      ]
+    }
+    </script>
 
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
@@ -2683,223 +2547,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500); // Attendre 1.5s après le chargement de la page
 });
 </script>
-
-<!-- ============================================
-     STYLES ADDITIONNELS
-     ============================================ -->
-<style>
-/* Watchlist Cards */
-.watchlist-card {
-    background: var(--card-background);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    border: 2px solid var(--border-color);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.watchlist-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #667eea;
-}
-
-.watchlist-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.watchlist-symbol {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.watchlist-remove {
-    background: transparent;
-    border: none;
-    color: #dc3545;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: all 0.3s;
-}
-
-.watchlist-remove:hover {
-    background: rgba(220, 53, 69, 0.1);
-    transform: scale(1.1);
-}
-
-.watchlist-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.watchlist-change {
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.watchlist-change.positive {
-    color: #10b981;
-}
-
-.watchlist-change.negative {
-    color: #dc3545;
-}
-
-.watchlist-loading {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-.watchlist-empty {
-    text-align: center;
-    padding: 3rem 1.5rem;
-    color: var(--text-secondary);
-}
-
-.watchlist-empty i {
-    font-size: 3rem;
-    opacity: 0.3;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.watchlist-empty p {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.watchlist-empty small {
-    opacity: 0.7;
-}
-
-/* Portfolio Dropdown */
-.portfolio-dropdown {
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--card-background);
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    min-width: 200px;
-}
-
-.portfolio-dropdown:hover {
-    border-color: #667eea;
-}
-
-.portfolio-dropdown:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-body.dark-mode .portfolio-dropdown {
-    background: #1e293b;
-    border-color: #334155;
-    color: #e2e8f0;
-}
-
-body.dark-mode .portfolio-dropdown:hover,
-body.dark-mode .portfolio-dropdown:focus {
-    border-color: #818cf8;
-}
-
-/* Portfolio Actions Buttons */
-.btn-portfolio-action {
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    border: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-portfolio-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.btn-portfolio-action:active {
-    transform: translateY(0);
-}
-
-/* Watchlist Filters */
-.filter-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    border: 2px solid var(--border-color);
-    background: transparent;
-    color: var(--text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-right: 0.5rem;
-}
-
-.filter-btn:hover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
-}
-
-.filter-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: transparent;
-}
-
-/* Watchlist Search */
-.btn-add-watchlist {
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    border: none;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-add-watchlist:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .watchlist-card {
-        padding: 0.75rem;
-    }
-    
-    .watchlist-symbol {
-        font-size: 1rem;
-    }
-    
-    .watchlist-price {
-        font-size: 1.1rem;
-    }
-}
-</style>
     <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
     <script src="assets/js/admin-visibility.js"></script>
 </body>
