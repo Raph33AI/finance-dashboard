@@ -1,0 +1,18 @@
+# Robots.txt pour AlphaVault AI
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://alphavault-ai.com/sitemap.xml
+
+# Interdire les pages privées
+Disallow: /admin/
+
+# Interdire les workers Cloudflare (ne doivent pas être indexés)
+Disallow: /*.workers.dev
+
+# Autoriser les robots d'indexation pour les CSS/JS (important pour Google)
+User-agent: Googlebot
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /assets/images/
