@@ -2830,7 +2830,7 @@ function resetValuationData() {
     if (!confirm('⚠ Reset valuation data to default values?')) return;
     
     FINANCIAL_DATA.valuation = {
-        preSeedValuation: 450000,
+        preSeedValuation: 200000,
         arrMultiples: {
             year0: 0,
             year1: 5,
@@ -2840,7 +2840,7 @@ function resetValuationData() {
             year5: 12
         },
         rounds: {
-            year0: { name: 'Pre-Seed', amount: 0, preMoney: 450000, timing: 'Current Stage', raised: false },
+            year0: { name: 'Pre-Seed', amount: 0, preMoney: 200000, timing: 'Current Stage', raised: false },
             year1: { name: 'Seed', amount: 55000, timing: 'Year 1', raised: false },
             year2: { name: '', amount: 0, timing: 'Year 2', raised: false },
             year3: { name: '', amount: 0, timing: 'Year 3', raised: false },
