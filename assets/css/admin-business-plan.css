@@ -3488,3 +3488,377 @@ body.dark-mode .risk-card {
 .save-notification i {
     font-size: 18px;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   VALUATION SECTION STYLES
+   ════════════════════════════════════════════════════════════ */
+
+/* Current Valuation (Pre-Revenue) */
+.current-valuation-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 40px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.current-valuation-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.current-valuation-banner h3 {
+    color: white !important;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 1;
+}
+
+.current-valuation-banner p {
+    color: rgba(255, 255, 255, 0.95) !important;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    position: relative;
+    z-index: 1;
+}
+
+.current-val-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.current-val-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.current-val-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.current-val-card h4 {
+    color: white !important;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.current-val-card .val-amount {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.current-val-card .val-subtitle {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+}
+
+/* Valuation Summary Cards */
+.valuation-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.val-summary-card {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.val-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--bp-primary), var(--bp-secondary));
+}
+
+.val-summary-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+    border-color: var(--bp-primary);
+}
+
+.val-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.val-summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: white;
+}
+
+.val-summary-label {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.val-summary-value {
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--bp-primary), var(--bp-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+}
+
+.val-summary-subtitle {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Funding Roadmap */
+.funding-roadmap-timeline {
+    position: relative;
+    padding: 40px 0;
+}
+
+.funding-round-item {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.funding-round-item::before {
+    content: '';
+    position: absolute;
+    left: 31px;
+    top: 64px;
+    bottom: -50px;
+    width: 3px;
+    background: linear-gradient(180deg, var(--bp-primary) 0%, transparent 100%);
+}
+
+.funding-round-item:last-child::before {
+    display: none;
+}
+
+.round-marker {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    position: relative;
+    z-index: 2;
+}
+
+.round-content {
+    flex: 1;
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid var(--bp-primary);
+}
+
+.round-content h4 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.round-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.round-metric {
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 10px;
+    border-left: 3px solid var(--bp-primary);
+}
+
+.round-metric-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.round-metric-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--bp-primary);
+}
+
+/* Comparable Companies Table */
+.comparable-companies-table {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.comparable-companies-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.comparable-companies-table th {
+    background: linear-gradient(135deg, var(--bp-primary), var(--bp-secondary));
+    color: white;
+    padding: 16px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.comparable-companies-table td {
+    padding: 16px;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+    font-size: 0.95rem;
+}
+
+.comparable-companies-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.company-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: contain;
+    margin-right: 12px;
+    vertical-align: middle;
+}
+
+.multiple-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.multiple-badge.low {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.multiple-badge.medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.multiple-badge.high {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .current-valuation-banner {
+        padding: 28px 20px;
+    }
+    
+    .current-val-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .valuation-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .funding-round-item {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .funding-round-item::before {
+        left: 31px;
+        top: 80px;
+    }
+    
+    .round-metrics {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .val-summary-value {
+        font-size: 1.8rem;
+    }
+    
+    .round-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode .current-val-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .val-summary-card {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode .round-content {
+    background: rgba(15, 23, 42, 0.8);
+    border-left-color: var(--bp-secondary);
+}
+
+body.dark-mode .comparable-companies-table {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+body.dark-mode .comparable-companies-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
