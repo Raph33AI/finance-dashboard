@@ -983,26 +983,26 @@ select:focus-visible {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📱 APPLE PAY / GOOGLE PAY - VERSION MOBILE OPTIMISÉE
-   ✅ Design minimaliste, sans contours, conversion maximale
+   📱 APPLE PAY / GOOGLE PAY - VERSION ULTRA-COMPACTE
+   ✅ Bouton réduit, sans contours, espacement parfait
    ═══════════════════════════════════════════════════════════════ */
 
 .payment-request-container {
     display: none; /* Affiché via JS quand disponible */
-    margin-bottom: 20px;
+    margin-bottom: 32px; /* ✅ Plus d'espace avant le séparateur */
     position: relative;
     animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Badge "Recommended" discret au-dessus du bouton */
+/* Badge "Fastest Way to Pay" discret */
 .payment-request-container::before {
-    content: '✨ Recommended';
+    /* content: '⚡ Fastest Way to Pay'; */
     display: block;
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: #10b981;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     opacity: 0;
@@ -1014,32 +1014,37 @@ body.dark-mode .payment-request-container::before {
 }
 
 #payment-request-button {
-    /* ✅ AUCUN contour, aucune bordure */
-    border: none;
-    border-radius: 12px;
+    /* ✅ AUCUN contour, aucune bordure, aucun padding */
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    
+    /* ✅ Hauteur COMPACTE (44px = minimum iOS, parfait mobile) */
+    min-height: 44px !important;
+    max-height: 48px !important;
+    height: 46px !important;
+    
+    border-radius: 8px;
     overflow: hidden;
-    padding: 0;
-    background: transparent;
     
-    /* ✅ Hauteur optimale mobile (48px = recommandation iOS) */
-    min-height: 48px;
-    max-height: 52px;
-    
-    /* ✅ Ombre légère pour profondeur (mais PAS de bordure) */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* ✅ Transition douce pour interactions */
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.2s ease;
 }
 
-/* Animation au hover/tap */
-#payment-request-button:hover,
+/* Animation au tap (feedback tactile) */
 #payment-request-button:active {
-    transform: translateY(-1px) scale(1.01);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    transform: scale(0.98);
+    opacity: 0.9;
 }
 
-#payment-request-button:active {
-    transform: translateY(0) scale(0.99);
+/* Forcer le bouton Stripe à ne pas avoir de contours */
+#payment-request-button > div,
+#payment-request-button button {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 /* Animation d'apparition */
@@ -1060,7 +1065,7 @@ body.dark-mode .payment-request-container::before {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SÉPARATEUR "OR PAY WITH CARD" - VERSION ULTRA-DISCRÈTE
+   SÉPARATEUR "OR PAY WITH CARD" - PLUS D'ESPACE
    ═══════════════════════════════════════════════════════════════ */
 
 .payment-divider {
@@ -1068,18 +1073,18 @@ body.dark-mode .payment-request-container::before {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    margin: 24px 0;
-    opacity: 0.6; /* ✅ Plus discret pour ne pas distraire */
+    margin: 32px 0 28px 0; /* ✅ 32px au-dessus, 28px en-dessous */
+    opacity: 0.5; /* Ultra-discret */
 }
 
 .divider-line {
-    height: 1px; /* ✅ Ligne fine */
+    height: 1px;
     flex: 1;
-    background: linear-gradient(to right, transparent, rgba(203, 213, 225, 0.4), transparent);
+    background: linear-gradient(to right, transparent, rgba(203, 213, 225, 0.3), transparent);
 }
 
 body.dark-mode .divider-line {
-    background: linear-gradient(to right, transparent, rgba(100, 116, 139, 0.3), transparent);
+    background: linear-gradient(to right, transparent, rgba(100, 116, 139, 0.25), transparent);
 }
 
 .divider-text {
@@ -1088,9 +1093,9 @@ body.dark-mode .divider-line {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 4px 12px;
-    background: transparent; /* ✅ Pas de fond */
-    border: none; /* ✅ Pas de bordure */
+    padding: 0; /* ✅ Pas de padding */
+    background: transparent;
+    border: none;
     white-space: nowrap;
 }
 
@@ -1099,49 +1104,92 @@ body.dark-mode .divider-text {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   GROUPE "CARD DETAILS" - ESPACEMENT OPTIMISÉ
+   ═══════════════════════════════════════════════════════════════ */
+
+#cardDetailsGroup {
+    margin-top: 24px; /* ✅ Espace confortable après le séparateur */
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RESPONSIVE MOBILE
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+    .payment-request-container {
+        margin-bottom: 28px;
+    }
+    
     #payment-request-button {
-        min-height: 48px;
-        max-height: 50px;
-        border-radius: 10px;
+        min-height: 44px !important;
+        max-height: 46px !important;
+        height: 44px !important;
+        border-radius: 6px;
     }
     
     .payment-request-container::before {
-        font-size: 0.7rem;
-        margin-bottom: 6px;
+        font-size: 0.65rem;
+        margin-bottom: 8px;
     }
     
     .payment-divider {
-        margin: 20px 0;
+        margin: 28px 0 24px 0;
     }
 }
 
 @media (max-width: 480px) {
+    .payment-request-container {
+        margin-bottom: 24px;
+    }
+    
     #payment-request-button {
-        min-height: 46px; /* iOS minimum touch target */
-        max-height: 48px;
-        border-radius: 8px;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1); /* Ombre encore plus subtile */
+        min-height: 42px !important;
+        max-height: 44px !important;
+        height: 42px !important;
+        border-radius: 6px;
     }
     
     .payment-request-container::before {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
+        margin-bottom: 6px;
+    }
+    
+    .payment-divider {
+        margin: 24px 0 20px 0;
+        gap: 12px;
     }
     
     .divider-text {
         font-size: 0.65rem;
-        padding: 3px 10px;
+    }
+    
+    #cardDetailsGroup {
+        margin-top: 20px;
     }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ACCESSIBILITÉ & PERFORMANCE
+   FORCER LE STYLE STRIPE (au cas où)
    ═══════════════════════════════════════════════════════════════ */
 
-/* Réduction de mouvement pour accessibilité */
+/* Supprime tous les styles par défaut de Stripe */
+.StripeElement--webkit-autofill {
+    background: transparent !important;
+}
+
+#payment-request-button .ApplePayButton,
+#payment-request-button .gpay-button {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITÉ
+   ═══════════════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
     .payment-request-container,
     #payment-request-button,
@@ -1151,8 +1199,7 @@ body.dark-mode .divider-text {
     }
 }
 
-/* Focus visible pour navigation clavier */
 #payment-request-button:focus-visible {
-    outline: 3px solid #3b82f6;
+    outline: 2px solid #3b82f6 !important;
     outline-offset: 2px;
 }
