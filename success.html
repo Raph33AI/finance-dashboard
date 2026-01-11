@@ -1,19 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - AlphaVault AI</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO META TAGS - OPTIMISÉS
+         ═══════════════════════════════════════════════════════════════ -->
+    <title>Payment Successful - AlphaVault AI | Welcome to Premium Financial Intelligence</title>
+    
+    <meta name="description" content="Your AlphaVault AI subscription has been activated successfully. Access your premium financial intelligence dashboard now with immediate full access to all features.">
+    
+    <meta name="keywords" content="AlphaVault AI payment successful, subscription activated, premium access confirmed, financial platform subscription">
+    
+    <meta name="author" content="AlphaVault AI">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         CANONICAL URL
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="canonical" href="https://alphavault-ai.com/success.html">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (FACEBOOK, LINKEDIN)
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AlphaVault AI">
+    <meta property="og:title" content="Payment Successful - AlphaVault AI">
+    <meta property="og:description" content="Your subscription has been activated successfully. Access your premium financial intelligence dashboard now.">
+    <meta property="og:url" content="https://alphavault-ai.com/success.html">
+    <meta property="og:image" content="https://alphavault-ai.com/assets/images/og-image-success.png">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alphavaultai">
+    <meta name="twitter:title" content="Payment Successful - AlphaVault AI">
+    <meta name="twitter:description" content="Your subscription has been activated successfully.">
+    <meta name="twitter:image" content="https://alphavault-ai.com/assets/images/twitter-card-success.png">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         DNS PREFETCH & PRECONNECT (PERFORMANCE CRITIQUE)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES (CORE WEB VITALS)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/success.css" as="style">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/success.css">
     
-    <!-- Favicons -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         FAVICONS - COMPLET
+         ═══════════════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -25,356 +75,122 @@
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     
-    <style>
-        /* ═══════════════════════════════════════════════════════════════
-           SUCCESS PAGE - STYLE IDENTIQUE AU CHECKOUT (SANS TRIAL)
-           ═══════════════════════════════════════════════════════════════ */
-        
-        :root {
-            --checkout-primary: #3b82f6;
-            --checkout-secondary: #8b5cf6;
-            --checkout-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --checkout-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            --checkout-success: #10b981;
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --glass-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            --border-radius: 16px;
-            --border-radius-lg: 24px;
-        }
-
-        body.dark-mode {
-            --glass-bg: rgba(15, 23, 42, 0.95);
-            --glass-border: rgba(100, 116, 139, 0.3);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            box-sizing: border-box;
-        }
-
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0;
-        }
-
-        body.dark-mode {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-        }
-        
-        .success-container {
-            max-width: 600px;
-            width: 100%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--glass-border);
-            padding: 60px 40px;
-            text-align: center;
-            box-shadow: var(--glass-shadow);
-            position: relative;
-            z-index: 1;
-            transition: var(--transition-smooth);
-        }
-
-        .success-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
-        }
-        
-        .success-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            color: white;
-            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
-            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
-        }
-        
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #1e293b;
-            margin-bottom: 16px;
-            line-height: 1.2;
-        }
-
-        body.dark-mode h1 {
-            color: #f1f5f9;
-        }
-        
-        .success-message {
-            font-size: 1.2rem;
-            color: #64748b;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        body.dark-mode .success-message {
-            color: #94a3b8;
-        }
-        
-        .plan-info {
-            display: inline-block;
-            background: var(--checkout-gradient);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            margin: 24px 0;
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-        
-        .details-box {
-            background: var(--checkout-gradient-soft);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-radius: var(--border-radius);
-            padding: 28px;
-            margin: 30px 0;
-            text-align: left;
-            border: 2px solid rgba(59, 130, 246, 0.2);
-        }
-
-        body.dark-mode .details-box {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            border-color: rgba(100, 116, 139, 0.3);
-        }
-        
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
-        }
-
-        body.dark-mode .detail-row {
-            border-bottom-color: rgba(100, 116, 139, 0.3);
-        }
-        
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        
-        .detail-label {
-            font-weight: 700;
-            color: #475569;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        body.dark-mode .detail-label {
-            color: #cbd5e1;
-        }
-        
-        .detail-value {
-            font-weight: 700;
-            color: #1e293b;
-            font-size: 1.05rem;
-        }
-
-        body.dark-mode .detail-value {
-            color: #f1f5f9;
-        }
-
-        .detail-value.status {
-            color: #10b981;
-            font-weight: 800;
-        }
-
-        .detail-value i {
-            margin-right: 6px;
-        }
-        
-        .btn-dashboard {
-            display: inline-block;
-            background: var(--checkout-gradient);
-            color: white;
-            padding: 20px 48px;
-            border-radius: var(--border-radius);
-            font-size: 1.2rem;
-            font-weight: 800;
-            text-decoration: none;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .btn-dashboard:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-dashboard:active {
-            transform: translateY(-2px);
-        }
-        
-        .thank-you-note {
-            margin-top: 40px;
-            padding-top: 32px;
-            border-top: 2px solid rgba(203, 213, 225, 0.3);
-            color: #64748b;
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-
-        body.dark-mode .thank-you-note {
-            border-top-color: rgba(100, 116, 139, 0.3);
-            color: #94a3b8;
-        }
-
-        .thank-you-note p {
-            margin: 8px 0;
-        }
-
-        .thank-you-note strong {
-            color: #1e293b;
-            font-weight: 800;
-        }
-
-        body.dark-mode .thank-you-note strong {
-            color: #f1f5f9;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           RESPONSIVE
-           ═══════════════════════════════════════════════════════════════ */
-        @media (max-width: 768px) {
-            body {
-                padding: 20px 10px;
-            }
-
-            .success-container {
-                padding: 40px 24px;
-                border-radius: var(--border-radius);
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .success-message {
-                font-size: 1.1rem;
-            }
-
-            .plan-info {
-                font-size: 1.1rem;
-                padding: 14px 28px;
-            }
-
-            .details-box {
-                padding: 20px;
-            }
-
-            .btn-dashboard {
-                width: 100%;
-                justify-content: center;
-                padding: 18px 32px;
-                font-size: 1.1rem;
-            }
-
-            .detail-label, .detail-value {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .success-container {
-                padding: 30px 16px;
-            }
-
-            h1 {
-                font-size: 1.6rem;
-            }
-
-            .success-icon {
-                width: 100px;
-                height: 100px;
-                font-size: 50px;
-            }
-
-            .plan-info {
-                font-size: 1rem;
-                padding: 12px 24px;
-            }
-
-            .btn-dashboard {
-                font-size: 1rem;
-                padding: 16px 28px;
-            }
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           ACCESSIBILITÉ
-           ═══════════════════════════════════════════════════════════════ */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
+    <!-- ═══════════════════════════════════════════════════════════════
+         GOOGLE ANALYTICS 4 (G-R9L8JPN5K4)
+         ═══════════════════════════════════════════════════════════════ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R9L8JPN5K4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R9L8JPN5K4', {
+        'page_title': 'Payment Successful',
+        'page_path': '/success.html'
+      });
+    </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
 </head>
 
-<body>
-    <div class="success-container">
-        <div class="success-icon">
+<body itemscope itemtype="https://schema.org/ConfirmAction">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCHEMA.ORG STRUCTURED DATA - CRITIQUE POUR SEO
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- 1. ORGANIZATION SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AlphaVault AI",
+      "url": "https://alphavault-ai.com",
+      "logo": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Support",
+        "email": "info@alphavault-ai.com"
+      }
+    }
+    </script>
+    
+    <!-- 2. BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://alphavault-ai.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Checkout",
+          "item": "https://alphavault-ai.com/checkout.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Payment Successful",
+          "item": "https://alphavault-ai.com/success.html"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- 3. ORDER CONFIRMATION SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Order",
+      "orderStatus": "https://schema.org/OrderProcessing",
+      "seller": {
+        "@type": "Organization",
+        "name": "AlphaVault AI"
+      },
+      "customer": {
+        "@type": "Person",
+        "name": "Customer"
+      },
+      "orderDate": "",
+      "confirmationNumber": ""
+    }
+    </script>
+    
+    <main class="success-container" role="main">
+        <div class="success-icon" aria-hidden="true">
             <i class="fas fa-check"></i>
         </div>
         
-        <h1>Payment Successful!</h1>
+        <h1 itemprop="name">Payment Successful!</h1>
         
-        <p class="success-message" id="successMessage">
+        <p class="success-message" id="successMessage" itemprop="description">
             Your subscription has been activated successfully.
         </p>
         
-        <div class="plan-info" id="planInfo">
+        <div class="plan-info" id="planInfo" itemprop="result">
             AlphaVault Pro
         </div>
         
-        <div class="details-box">
+        <section class="details-box" aria-label="Subscription details">
             <div class="detail-row">
                 <span class="detail-label">Status</span>
                 <span class="detail-value status">
-                    <i class="fas fa-check-circle"></i> Active
+                    <i class="fas fa-check-circle" aria-hidden="true"></i> Active
                 </span>
             </div>
             <div class="detail-row">
@@ -384,93 +200,125 @@
             <div class="detail-row">
                 <span class="detail-label">Next Step</span>
                 <span class="detail-value">
-                    <i class="fas fa-rocket"></i> Access Dashboard
+                    <i class="fas fa-rocket" aria-hidden="true"></i> Access Dashboard
                 </span>
             </div>
-        </div>
+        </section>
         
-        <a href="dashboard-financier.html" class="btn-dashboard">
-            <i class="fas fa-rocket"></i>
+        <a href="dashboard-financier.html" class="btn-dashboard" aria-label="Go to your dashboard">
+            <i class="fas fa-rocket" aria-hidden="true"></i>
             Go to Dashboard
         </a>
         
-        <div class="thank-you-note">
+        <footer class="thank-you-note">
             <p><strong>Thank you for choosing AlphaVault AI!</strong></p>
             <p>A confirmation email has been sent to your inbox.</p>
-            <p>If you have any questions, contact us at <strong>info@alphavault-ai.com</strong></p>
-        </div>
-    </div>
+            <p>If you have any questions, contact us at <strong><a href="mailto:info@alphavault-ai.com">info@alphavault-ai.com</a></strong></p>
+        </footer>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS - OPTIMISÉS AVEC DEFER
+         ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Firebase Config -->
-    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/firebase-config.js" defer></script>
     
     <script>
-        console.log('✅ Success page loaded (NO TRIAL VERSION)');
-        
-        // ═══════════════════════════════════════════════════════════════
-        // RÉCUPÉRATION DES PARAMÈTRES URL
-        // ═══════════════════════════════════════════════════════════════
-        const urlParams = new URLSearchParams(window.location.search);
-        const plan = urlParams.get('plan');
-        const isFree = urlParams.get('free') === 'true';
-        
-        console.log('📊 URL Parameters:', { plan, isFree });
-        
-        // ═══════════════════════════════════════════════════════════════
-        // AFFICHAGE DU NOM DU PLAN
-        // ═══════════════════════════════════════════════════════════════
-        if (plan) {
-            let planName = 'AlphaVault Basic';
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('%c✅ Success Page Loaded', 'color: #10b981; font-size: 18px; font-weight: bold;');
             
-            if (plan.toLowerCase() === 'pro') {
-                planName = 'AlphaVault Pro';
-            } else if (plan.toLowerCase() === 'platinum') {
-                planName = 'AlphaVault Platinum';
+            // ═══════════════════════════════════════════════════════════════
+            // RÉCUPÉRATION DES PARAMÈTRES URL
+            // ═══════════════════════════════════════════════════════════════
+            const urlParams = new URLSearchParams(window.location.search);
+            const plan = urlParams.get('plan');
+            const isFree = urlParams.get('free') === 'true';
+            
+            console.log('📊 URL Parameters:', { plan, isFree });
+            
+            // ═══════════════════════════════════════════════════════════════
+            // AFFICHAGE DU NOM DU PLAN
+            // ═══════════════════════════════════════════════════════════════
+            const planInfoEl = document.getElementById('planInfo');
+            
+            if (plan && planInfoEl) {
+                let planName = 'AlphaVault Basic';
+                
+                if (plan.toLowerCase() === 'pro') {
+                    planName = 'AlphaVault Pro';
+                } else if (plan.toLowerCase() === 'platinum') {
+                    planName = 'AlphaVault Platinum';
+                }
+                
+                planInfoEl.textContent = planName;
+                console.log('✅ Plan displayed:', planName);
             }
             
-            document.getElementById('planInfo').textContent = planName;
-            console.log('✅ Plan displayed:', planName);
-        }
-        
-        // ═══════════════════════════════════════════════════════════════
-        // ADAPTATION DU MESSAGE SELON LE TYPE D'ACCÈS
-        // ═══════════════════════════════════════════════════════════════
-        const successMessageEl = document.getElementById('successMessage');
-        
-        if (isFree) {
-            // ✅ Accès gratuit à vie
-            successMessageEl.textContent = 'Your free lifetime access has been activated!';
-            console.log('🎁 Free lifetime access activated');
-        } else {
-            // ✅ Abonnement standard (accès immédiat sans trial)
-            successMessageEl.textContent = 'Your subscription has been activated successfully.';
-            console.log('✅ Standard subscription activated - Immediate full access');
-        }
-        
-        // ═══════════════════════════════════════════════════════════════
-        // DÉTECTION DU MODE SOMBRE
-        // ═══════════════════════════════════════════════════════════════
-        function applyDarkMode() {
-            const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-                             document.body.classList.contains('dark-mode');
+            // ═══════════════════════════════════════════════════════════════
+            // ADAPTATION DU MESSAGE SELON LE TYPE D'ACCÈS
+            // ═══════════════════════════════════════════════════════════════
+            const successMessageEl = document.getElementById('successMessage');
             
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
-                console.log('🌙 Dark mode applied');
-            } else {
-                document.body.classList.remove('dark-mode');
-                console.log('☀ Light mode applied');
+            if (successMessageEl) {
+                if (isFree) {
+                    // ✅ Accès gratuit à vie
+                    successMessageEl.textContent = 'Your free lifetime access has been activated!';
+                    console.log('🎁 Free lifetime access activated');
+                } else {
+                    // ✅ Abonnement standard (accès immédiat sans trial)
+                    successMessageEl.textContent = 'Your subscription has been activated successfully.';
+                    console.log('✅ Standard subscription activated - Immediate full access');
+                }
             }
-        }
-        
-        // Appliquer le mode au chargement
-        applyDarkMode();
-        
-        // Observer les changements (si toggle depuis la page)
-        const observer = new MutationObserver(applyDarkMode);
-        observer.observe(document.body, { 
-            attributes: true, 
-            attributeFilter: ['class'] 
+            
+            // ═══════════════════════════════════════════════════════════════
+            // DÉTECTION DU MODE SOMBRE
+            // ═══════════════════════════════════════════════════════════════
+            function applyDarkMode() {
+                const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
+                                 document.body.classList.contains('dark-mode');
+                
+                if (isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                    console.log('🌙 Dark mode applied');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    console.log('☀ Light mode applied');
+                }
+            }
+            
+            // Appliquer le mode au chargement
+            applyDarkMode();
+            
+            // Observer les changements (si toggle depuis la page)
+            const observer = new MutationObserver(applyDarkMode);
+            observer.observe(document.body, { 
+                attributes: true, 
+                attributeFilter: ['class'] 
+            });
+            
+            // ═══════════════════════════════════════════════════════════════
+            // GOOGLE ANALYTICS EVENT - CONVERSION TRACKING
+            // ═══════════════════════════════════════════════════════════════
+            if (typeof gtag !== 'undefined' && plan) {
+                gtag('event', 'purchase', {
+                    'transaction_id': new Date().getTime().toString(),
+                    'value': plan === 'platinum' ? 20 : (plan === 'pro' ? 10 : 0),
+                    'currency': 'USD',
+                    'items': [{
+                        'item_id': plan,
+                        'item_name': 'AlphaVault ' + plan.charAt(0).toUpperCase() + plan.slice(1),
+                        'item_category': 'Subscription',
+                        'price': plan === 'platinum' ? 20 : (plan === 'pro' ? 10 : 0),
+                        'quantity': 1
+                    }]
+                });
+                
+                console.log('📈 Google Analytics conversion event sent');
+            }
+            
+            console.log('%c✨ AlphaVault AI - Success Page - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
         });
     </script>
 </body>
