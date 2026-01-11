@@ -1,608 +1,281 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/Article">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Learning in Finance - AlphaVault AI</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO META TAGS - OPTIMISÉS
+         ═══════════════════════════════════════════════════════════════ -->
+    <title>Machine Learning in Finance - LSTM, Random Forest, XGBoost | AlphaVault AI Learning Resources</title>
+    
+    <meta name="description" content="Master machine learning in finance: Learn LSTM neural networks, Random Forest, XGBoost, ensemble methods, feature engineering, and backtesting for stock prediction. Professional guide with Python code examples and real-world applications used by hedge funds.">
+    
+    <meta name="keywords" content="machine learning finance, LSTM stock prediction, Random Forest trading, XGBoost financial forecasting, ensemble methods, neural networks finance, feature engineering stocks, backtesting strategies, quantitative finance ML, algorithmic trading, Python finance ML, hedge fund algorithms, supervised learning trading, time series prediction, walk-forward validation">
+    
+    <meta name="author" content="AlphaVault AI">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         CANONICAL URL - CRITIQUE POUR ÉVITER DUPLICATE CONTENT
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="canonical" href="https://alphavault-ai.com/resources-machine-learning.html">
+    
+    <!-- Alternate versions -->
+    <link rel="alternate" hreflang="en" href="https://alphavault-ai.com/resources-machine-learning.html">
+    <link rel="alternate" hreflang="x-default" href="https://alphavault-ai.com/resources-machine-learning.html">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (FACEBOOK, LINKEDIN) - OPTIMISÉ
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="AlphaVault AI">
+    <meta property="og:title" content="Machine Learning in Finance - LSTM, Random Forest, XGBoost Guide">
+    <meta property="og:description" content="Master ML algorithms used by hedge funds: LSTM neural networks, Random Forest, XGBoost, ensemble methods, and backtesting. Complete guide with Python code examples.">
+    <meta property="og:url" content="https://alphavault-ai.com/resources-machine-learning.html">
+    <meta property="og:image" content="https://alphavault-ai.com/assets/images/og-ml-finance.png">
+    <meta property="og:image:secure_url" content="https://alphavault-ai.com/assets/images/og-ml-finance.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Machine Learning in Finance - LSTM Neural Network Visualization">
+    <meta property="og:locale" content="en_US">
+    <meta property="article:published_time" content="2024-01-15T10:00:00Z">
+    <meta property="article:modified_time" content="2024-01-15T10:00:00Z">
+    <meta property="article:author" content="AlphaVault AI">
+    <meta property="article:section" content="Learning Resources">
+    <meta property="article:tag" content="Machine Learning">
+    <meta property="article:tag" content="LSTM">
+    <meta property="article:tag" content="Random Forest">
+    <meta property="article:tag" content="XGBoost">
+    <meta property="article:tag" content="Finance">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD - OPTIMISÉ
+         ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alphavaultai">
+    <meta name="twitter:creator" content="@alphavaultai">
+    <meta name="twitter:title" content="Machine Learning in Finance - LSTM, Random Forest, XGBoost Guide">
+    <meta name="twitter:description" content="Master ML algorithms for trading: LSTM, Random Forest, XGBoost, ensemble methods. Complete guide with Python code examples.">
+    <meta name="twitter:image" content="https://alphavault-ai.com/assets/images/twitter-ml-finance.png">
+    <meta name="twitter:image:alt" content="Machine Learning in Finance Guide">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         DNS PREFETCH & PRECONNECT (PERFORMANCE CRITIQUE)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES (CORE WEB VITALS)
+         ═══════════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="assets/css/common.css" as="style">
+    <link rel="preload" href="assets/css/sidebar.css" as="style">
+    <link rel="preload" href="assets/css/resources-ml.css" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" as="script">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     
-    <!-- Styles -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/sidebar.css">
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/resources.css">
+    <link rel="stylesheet" href="assets/css/resources-ml.css">
     
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <!-- <script src="assets/js/favicon-dynamic.js"></script> -->
-    <!-- ═══════════════════════════════════════════════════════════
+    <!-- ═══════════════════════════════════════════════════════════════
         FAVICONS ALPHAVAULT AI - CONFIGURATION UNIVERSELLE
-        Compatible: Google, Apple, Android, Firefox, Safari, Edge
-        ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Favicons standard (Google, Firefox, Edge, Bing) -->
+        ═══════════════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-
-    <!-- Apple Touch Icon (iPhone, iPad, Safari iOS/macOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Android Chrome -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-
-    <!-- Safari Pinned Tab (macOS Safari) -->
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
-
-    <!-- Web App Manifest (PWA - Android, Chrome) -->
     <link rel="manifest" href="/site.webmanifest">
-
-    <!-- Theme Colors (Mobile browsers) -->
     <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="msapplication-TileColor" content="#667eea">
-
-    <!-- Favicon dynamique (modifié par JavaScript pour effets) -->
+    <meta name="msapplication-config" content="/browserconfig.xml">
     <link id="dynamic-favicon" rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
+    <!-- ═══════════════════════════════════════════════════════════════
+         GOOGLE ANALYTICS 4 (G-R9L8JPN5K4)
+         ═══════════════════════════════════════════════════════════════ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R9L8JPN5K4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R9L8JPN5K4', {
+        'page_title': 'Machine Learning in Finance',
+        'page_path': '/resources-machine-learning.html'
+      });
+    </script>
+    
+    <!-- Analytics Tracker -->
+    <script src="assets/js/analytics-tracker.js" defer></script>
+    
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
     
     <!-- Firebase Configuration -->
-    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/firebase-config.js" defer></script>
     
     <!-- Page Protection -->
     <script src="assets/js/auth-guard.js"></script>
     
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 
     <!-- ACCESS CONTROL -->
-    <script src="assets/js/access-control.js"></script>
-
-    <!-- Analytics Tracker -->
-    <script src="assets/js/analytics-tracker.js"></script>
-    
-    <style>
-        /* ========================================
-        NEURAL NETWORK VISUALIZATIONS STYLES
-        ======================================== */
-        
-        .neural-network-canvas {
-            width: 100%;
-            height: 450px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-            margin: 2rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .neural-network-canvas::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1), transparent 50%);
-            pointer-events: none;
-        }
-        
-        .neural-network-canvas canvas {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .architecture-diagram {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 10px 40px rgba(240, 147, 251, 0.4);
-        }
-        
-        .architecture-diagram svg {
-            width: 100%;
-            height: auto;
-        }
-        
-        .ml-pipeline-diagram {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 10px 40px rgba(79, 172, 254, 0.4);
-        }
-        
-        .performance-chart-container {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-        
-        body.dark-mode .performance-chart-container {
-            background: rgba(30, 41, 59, 0.95);
-        }
-        
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .ensemble-architecture {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .model-card {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .model-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        
-        .model-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .model-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .model-accuracy {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #10b981, #059669);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .feature-importance-viz {
-            margin: 2rem 0;
-        }
-        
-        .feature-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .feature-label {
-            width: 150px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-        }
-        
-        .feature-bar-fill {
-            flex: 1;
-            height: 30px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 6px;
-            position: relative;
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .feature-bar-fill:hover {
-            transform: scaleX(1.02);
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
-        }
-        
-        .feature-value {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        
-        .confusion-matrix {
-            display: grid;
-            grid-template-columns: auto repeat(2, 1fr);
-            grid-template-rows: auto repeat(2, 1fr);
-            gap: 1px;
-            background: #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 2rem auto;
-            max-width: 400px;
-        }
-        
-        .confusion-cell {
-            background: white;
-            padding: 1.5rem;
-            text-align: center;
-            font-weight: 700;
-        }
-        
-        body.dark-mode .confusion-cell {
-            background: #1e293b;
-        }
-        
-        .confusion-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-weight: 800;
-        }
-        
-        .confusion-value {
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #10b981, #059669);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .confusion-label {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-top: 0.5rem;
-        }
-        
-        @keyframes neuronPulse {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-        
-        .neuron-animated {
-            animation: neuronPulse 2s ease-in-out infinite;
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - TABLET
-        Max Width: 768px
-        ======================================== */
-        
-        @media (max-width: 768px) {
-            /* Canvas height reduction for tablets */
-            .neural-network-canvas {
-                height: 350px;
-                margin: 1.5rem 0;
-                border-radius: 12px;
-            }
-            
-            /* Diagram padding reduction */
-            .architecture-diagram,
-            .ml-pipeline-diagram {
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-                border-radius: 12px;
-            }
-            
-            /* Chart container padding */
-            .performance-chart-container {
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-                border-radius: 12px;
-            }
-            
-            /* Chart title smaller */
-            .chart-title {
-                font-size: 1.1rem;
-                margin-bottom: 1rem;
-            }
-            
-            /* Ensemble architecture: 2 columns on tablet */
-            .ensemble-architecture {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-                margin: 1.5rem 0;
-            }
-            
-            /* Model card adjustments */
-            .model-card {
-                padding: 1.25rem;
-            }
-            
-            .model-icon {
-                font-size: 2.5rem;
-                margin-bottom: 0.75rem;
-            }
-            
-            .model-name {
-                font-size: 1rem;
-            }
-            
-            .model-accuracy {
-                font-size: 1.75rem;
-            }
-            
-            /* Feature importance bars */
-            .feature-label {
-                width: 120px;
-                font-size: 0.85rem;
-            }
-            
-            .feature-bar-fill {
-                height: 28px;
-            }
-            
-            .feature-value {
-                font-size: 0.8rem;
-                right: 8px;
-            }
-            
-            /* Confusion matrix smaller */
-            .confusion-matrix {
-                max-width: 350px;
-                margin: 1.5rem auto;
-            }
-            
-            .confusion-cell {
-                padding: 1.25rem;
-                font-size: 0.9rem;
-            }
-            
-            .confusion-value {
-                font-size: 1.6rem;
-            }
-            
-            .confusion-label {
-                font-size: 0.75rem;
-            }
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - SMARTPHONE
-        Max Width: 480px
-        ======================================== */
-        
-        @media (max-width: 480px) {
-            /* Canvas height much smaller for smartphones */
-            .neural-network-canvas {
-                height: 280px;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            /* Diagram padding minimal */
-            .architecture-diagram,
-            .ml-pipeline-diagram {
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            /* Chart container compact */
-            .performance-chart-container {
-                padding: 1rem;
-                margin: 1rem 0;
-                border-radius: 10px;
-            }
-            
-            /* Chart title much smaller */
-            .chart-title {
-                font-size: 0.95rem;
-                margin-bottom: 0.75rem;
-                line-height: 1.3;
-            }
-            
-            /* Ensemble architecture: 1 column on mobile */
-            .ensemble-architecture {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                margin: 1rem 0;
-            }
-            
-            /* Model card mobile-friendly */
-            .model-card {
-                padding: 1rem;
-                border-radius: 10px;
-            }
-            
-            .model-icon {
-                font-size: 2.25rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .model-name {
-                font-size: 0.95rem;
-                margin-bottom: 0.4rem;
-            }
-            
-            .model-accuracy {
-                font-size: 1.6rem;
-            }
-            
-            .model-card p {
-                font-size: 0.8rem;
-                margin-top: 0.4rem;
-            }
-            
-            /* Feature importance bars - vertical layout on very small screens */
-            .feature-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                margin-bottom: 1.25rem;
-            }
-            
-            .feature-label {
-                width: 100%;
-                font-size: 0.8rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .feature-bar-fill {
-                width: 100%;
-                height: 26px;
-            }
-            
-            .feature-value {
-                font-size: 0.75rem;
-                right: 6px;
-            }
-            
-            /* Confusion matrix very compact */
-            .confusion-matrix {
-                max-width: 100%;
-                margin: 1rem 0;
-                font-size: 0.85rem;
-            }
-            
-            .confusion-cell {
-                padding: 0.75rem 0.5rem;
-            }
-            
-            .confusion-value {
-                font-size: 1.3rem;
-            }
-            
-            .confusion-label {
-                font-size: 0.65rem;
-                margin-top: 0.25rem;
-            }
-            
-            /* Disable hover effects on mobile */
-            .model-card:hover {
-                transform: none;
-            }
-            
-            .feature-bar-fill:hover {
-                transform: none;
-            }
-        }
-        
-        /* ========================================
-        MOBILE RESPONSIVENESS - VERY SMALL
-        Max Width: 360px
-        ======================================== */
-        
-        @media (max-width: 360px) {
-            /* Canvas even smaller for tiny screens */
-            .neural-network-canvas {
-                height: 240px;
-                margin: 0.75rem 0;
-            }
-            
-            .architecture-diagram,
-            .ml-pipeline-diagram,
-            .performance-chart-container {
-                padding: 0.75rem;
-                margin: 0.75rem 0;
-            }
-            
-            .chart-title {
-                font-size: 0.875rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .model-card {
-                padding: 0.875rem;
-            }
-            
-            .model-icon {
-                font-size: 2rem;
-            }
-            
-            .model-name {
-                font-size: 0.875rem;
-            }
-            
-            .model-accuracy {
-                font-size: 1.5rem;
-            }
-            
-            .feature-label {
-                font-size: 0.75rem;
-            }
-            
-            .feature-bar-fill {
-                height: 24px;
-            }
-            
-            .confusion-cell {
-                padding: 0.5rem 0.25rem;
-            }
-            
-            .confusion-value {
-                font-size: 1.1rem;
-            }
-            
-            .confusion-label {
-                font-size: 0.6rem;
-            }
-        }
-        
-        /* ========================================
-        SVG TEXT RESPONSIVENESS
-        ======================================== */
-        
-        @media (max-width: 768px) {
-            /* Reduce SVG text sizes on tablet */
-            .ml-pipeline-diagram svg text,
-            .architecture-diagram svg text {
-                font-size: 12px;
-            }
-            
-            .ml-pipeline-diagram svg text:first-of-type,
-            .architecture-diagram svg text:first-of-type {
-                font-size: 18px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            /* Further reduce SVG text on mobile */
-            .ml-pipeline-diagram svg text,
-            .architecture-diagram svg text {
-                font-size: 9px;
-            }
-            
-            .ml-pipeline-diagram svg text:first-of-type,
-            .architecture-diagram svg text:first-of-type {
-                font-size: 14px;
-            }
-            
-            /* Hide some detailed SVG text on mobile */
-            .ml-pipeline-diagram svg text:nth-child(n+10),
-            .architecture-diagram svg text:nth-child(n+15) {
-                font-size: 8px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            /* Minimal SVG text on very small screens */
-            .ml-pipeline-diagram svg text,
-            .architecture-diagram svg text {
-                font-size: 7px;
-            }
-            
-            .ml-pipeline-diagram svg text:first-of-type,
-            .architecture-diagram svg text:first-of-type {
-                font-size: 12px;
-            }
-        }
-    </style>
+    <script src="assets/js/access-control.js" defer></script>
 </head>
-<body>
+
+<body itemscope itemtype="https://schema.org/WebPage">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCHEMA.ORG STRUCTURED DATA - CRITIQUE POUR SEO
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- 1. ORGANIZATION SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AlphaVault AI",
+      "url": "https://alphavault-ai.com",
+      "logo": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png",
+      "description": "Advanced financial intelligence platform with AI-powered investment analytics",
+      "sameAs": [
+        "https://www.linkedin.com/company/alphavault-ai",
+        "https://twitter.com/alphavaultai"
+      ]
+    }
+    </script>
+    
+    <!-- 2. TECHARTICLE SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Machine Learning in Finance: LSTM, Random Forest, XGBoost Guide",
+      "description": "Comprehensive guide to machine learning algorithms for financial markets: LSTM neural networks, Random Forest, XGBoost, ensemble methods, feature engineering, and backtesting strategies with Python code examples.",
+      "image": "https://alphavault-ai.com/assets/images/og-ml-finance.png",
+      "author": {
+        "@type": "Organization",
+        "name": "AlphaVault AI"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AlphaVault AI",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://alphavault-ai.com/assets/images/logo-alphavault-ai.png"
+        }
+      },
+      "datePublished": "2024-01-15",
+      "dateModified": "2024-01-15",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://alphavault-ai.com/resources-machine-learning.html"
+      },
+      "proficiencyLevel": "Expert",
+      "dependencies": "Python, TensorFlow, scikit-learn, XGBoost",
+      "articleSection": "Learning Resources"
+    }
+    </script>
+    
+    <!-- 3. BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://alphavault-ai.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Help Center",
+          "item": "https://alphavault-ai.com/help.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Machine Learning in Finance",
+          "item": "https://alphavault-ai.com/resources-machine-learning.html"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- 4. FAQ SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is LSTM and why is it used in finance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Long Short-Term Memory (LSTM) is a type of Recurrent Neural Network (RNN) designed to learn from sequential data. It's ideal for stock price prediction because it remembers long-term dependencies and can process variable-length sequences (e.g., 10 days or 1000 days of historical data). LSTM networks capture temporal patterns that traditional models miss."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does Random Forest work for stock prediction?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Random Forest is an ensemble of decision trees that works by: 1) Bootstrap sampling (each tree gets unique dataset), 2) Random feature selection (prevents correlation between trees), 3) Building deep trees without pruning, 4) Aggregating predictions (averaging for regression, voting for classification). It's robust, handles non-linear relationships, and provides feature importance rankings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between Random Forest and XGBoost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Random Forest trains all trees in parallel independently, while XGBoost trains trees sequentially where each tree corrects errors of previous ones (gradient boosting). XGBoost is typically 2-5% more accurate but slower to train and has higher overfitting risk. Random Forest is simpler to tune with fewer hyperparameters."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why use ensemble methods in machine learning for finance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ensemble methods combine multiple models (e.g., LSTM + Random Forest + XGBoost) to achieve superior accuracy. Benefits include: diversity (different models capture different patterns), error cancellation (individual errors average out), robustness (less sensitive to market regime changes), and reduced variance. Empirical results show 5-8% accuracy improvement vs. best single model."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is walk-forward validation and why is it important?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Walk-forward validation is the correct way to backtest time-series models. It works by: 1) Training on historical window (e.g., Year 1-3), 2) Testing on future window (Year 4), 3) Rolling forward and retraining, 4) Repeating until present, 5) Aggregating all out-of-sample periods. This prevents look-ahead bias and provides realistic performance estimates, unlike random train/test splits which artificially inflate accuracy."
+          }
+        }
+      ]
+    }
+    </script>
     
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
@@ -611,13 +284,14 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
     
     <div class="layout-wrapper">
-        
-        <!-- SIDEBAR (identique aux fichiers précédents) -->
+
+    <!-- SIDEBAR (identique aux fichiers précédents) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo-3d">
-                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AlphaVault AI Logo">
+                            <title>AlphaVault AI</title>
                             <defs>
                                 <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" class="logo-gradient-1" />
@@ -652,7 +326,7 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav" role="navigation" aria-label="Main navigation">
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -805,14 +479,13 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION BLOG -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Community">
                         <i class="fas fa-users"></i>
                         <span>Community</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='community-hub.html' class='nav-link'>
                             <i class='fas fa-home'></i>
                             <span>Community Hub</span>
@@ -829,14 +502,13 @@
                     </div>
                 </div>
 
-                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
                 <div class='nav-section' id='adminSection' style='display: none !important;'>
                     <button class="nav-folder" data-tooltip="Admin">
                         <i class="fas fa-shield-alt"></i>
                         <span>Admin</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='admin-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-line'></i>
                             <span>Analytics Dashboard</span>
@@ -856,7 +528,7 @@
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
-                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar" width="40" height="40">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
                             <span data-user-plan class="sidebar-user-plan">Free Plan</span>
@@ -865,7 +537,7 @@
                     </div>
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
-                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar" width="64" height="64">
                             <div class="user-dropdown-details">
                                 <h4 data-user-name class="user-dropdown-name">User</h4>
                                 <p data-user-email class="user-dropdown-email">email@example.com</p>
@@ -897,13 +569,13 @@
         </aside>
         
         <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <main class="main-content" role="main">
             
             <!-- Header Premium -->
             <div class="top-header">
                 <div class="header-content-wrapper">
                     <div class="header-left">
-                        <button class='mobile-toggle' id='mobileToggle'>
+                        <button class='mobile-toggle' id='mobileToggle' aria-label="Toggle mobile menu">
                             <i class='fas fa-bars'></i>
                         </button>
                         <h1 class="page-title">
@@ -926,13 +598,13 @@
                     
                     <!-- Resource Header -->
                     <div class="resource-header">
-                        <div class="resource-breadcrumb">
+                        <nav class="resource-breadcrumb" aria-label="Breadcrumb">
                             <a href="help.html"><i class="fas fa-home"></i> Help</a>
                             <i class="fas fa-chevron-right"></i>
                             <span>Machine Learning in Finance</span>
-                        </div>
-                        <h1 class="resource-title">Machine Learning in Finance</h1>
-                        <p class="resource-subtitle">
+                        </nav>
+                        <h1 class="resource-title" itemprop="headline">Machine Learning in Finance</h1>
+                        <p class="resource-subtitle" itemprop="description">
                             Explore how hedge funds and quantitative firms use LSTM, Random Forest, and ensemble methods to predict market trends, optimize portfolios, and generate alpha.
                         </p>
                         <div class="resource-meta">
@@ -2320,425 +1992,11 @@ print(f"Average Win Rate: {backtest_results['Win_Rate'].mean():.2%}")
     </div>
     
     <!-- Scripts -->
-    <script src="assets/js/common.js"></script>
-    <script src="assets/js/sidebar.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
-    
-    <!-- User menu script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-            
-            if (sidebarUserTrigger && sidebarUserDropdown) {
-                sidebarUserTrigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebarUserTrigger.classList.toggle('active');
-                    sidebarUserDropdown.classList.toggle('active');
-                });
-                
-                document.addEventListener('click', (e) => {
-                    if (!sidebarUserDropdown.contains(e.target) && 
-                        !sidebarUserTrigger.contains(e.target)) {
-                        sidebarUserTrigger.classList.remove('active');
-                        sidebarUserDropdown.classList.remove('active');
-                    }
-                });
-                
-                sidebarUserDropdown.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-            
-            // ===================================================
-            // NEURAL NETWORK VISUALIZATIONS
-            // ===================================================
-            
-            // 1. LSTM NETWORK VISUALIZATION
-            const lstmCanvas = document.getElementById('lstmCanvas');
-            if (lstmCanvas) {
-                const ctx = lstmCanvas.getContext('2d');
-                lstmCanvas.width = lstmCanvas.offsetWidth;
-                lstmCanvas.height = lstmCanvas.offsetHeight;
-                
-                // Animation variables
-                let animationFrame = 0;
-                
-                function drawLSTMNetwork() {
-                    ctx.clearRect(0, 0, lstmCanvas.width, lstmCanvas.height);
-                    
-                    const layers = {
-                        input: { x: 100, y: lstmCanvas.height / 2, neurons: 5 },
-                        lstm1: { x: 300, y: lstmCanvas.height / 2, neurons: 8 },
-                        lstm2: { x: 500, y: lstmCanvas.height / 2, neurons: 6 },
-                        dense: { x: 700, y: lstmCanvas.height / 2, neurons: 4 },
-                        output: { x: 900, y: lstmCanvas.height / 2, neurons: 1 }
-                    };
-                    
-                    // Draw connections
-                    Object.keys(layers).forEach((key, index) => {
-                        if (index < Object.keys(layers).length - 1) {
-                            const currentLayer = layers[key];
-                            const nextLayer = layers[Object.keys(layers)[index + 1]];
-                            
-                            for (let i = 0; i < currentLayer.neurons; i++) {
-                                for (let j = 0; j < nextLayer.neurons; j++) {
-                                    const startY = currentLayer.y - (currentLayer.neurons - 1) * 25 + i * 50;
-                                    const endY = nextLayer.y - (nextLayer.neurons - 1) * 25 + j * 50;
-                                    
-                                    const pulse = Math.sin(animationFrame * 0.05 + i + j) * 0.3 + 0.7;
-                                    
-                                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * pulse})`;
-                                    ctx.lineWidth = 1.5;
-                                    ctx.beginPath();
-                                    ctx.moveTo(currentLayer.x, startY);
-                                    ctx.lineTo(nextLayer.x, endY);
-                                    ctx.stroke();
-                                }
-                            }
-                        }
-                    });
-                    
-                    // Draw neurons
-                    Object.entries(layers).forEach(([key, layer]) => {
-                        for (let i = 0; i < layer.neurons; i++) {
-                            const y = layer.y - (layer.neurons - 1) * 25 + i * 50;
-                            const pulse = Math.sin(animationFrame * 0.05 + i) * 5 + 20;
-                            
-                            // Neuron glow
-                            const gradient = ctx.createRadialGradient(layer.x, y, 0, layer.x, y, pulse + 15);
-                            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-                            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                            
-                            ctx.fillStyle = gradient;
-                            ctx.beginPath();
-                            ctx.arc(layer.x, y, pulse + 15, 0, Math.PI * 2);
-                            ctx.fill();
-                            
-                            // Neuron core
-                            ctx.fillStyle = 'white';
-                            ctx.beginPath();
-                            ctx.arc(layer.x, y, pulse, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    });
-                    
-                    // Draw labels
-                    ctx.fillStyle = 'white';
-                    ctx.font = 'bold 14px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    
-                    ctx.fillText('Input Layer', layers.input.x, 30);
-                    ctx.fillText('(Price, Volume, RSI)', layers.input.x, 50);
-                    
-                    ctx.fillText('LSTM Layer 1', layers.lstm1.x, 30);
-                    ctx.fillText('(50 units)', layers.lstm1.x, 50);
-                    
-                    ctx.fillText('LSTM Layer 2', layers.lstm2.x, 30);
-                    ctx.fillText('(50 units)', layers.lstm2.x, 50);
-                    
-                    ctx.fillText('Dense Layer', layers.dense.x, 30);
-                    ctx.fillText('(25 units)', layers.dense.x, 50);
-                    
-                    ctx.fillText('Output', layers.output.x, 30);
-                    ctx.fillText('(Prediction)', layers.output.x, 50);
-                    
-                    animationFrame++;
-                    requestAnimationFrame(drawLSTMNetwork);
-                }
-                
-                drawLSTMNetwork();
-            }
-            
-            // 2. RANDOM FOREST VISUALIZATION
-            const rfCanvas = document.getElementById('randomForestCanvas');
-            if (rfCanvas) {
-                const ctx = rfCanvas.getContext('2d');
-                rfCanvas.width = rfCanvas.offsetWidth;
-                rfCanvas.height = rfCanvas.offsetHeight;
-                
-                let animationFrame = 0;
-                
-                function drawRandomForest() {
-                    ctx.clearRect(0, 0, rfCanvas.width, rfCanvas.height);
-                    
-                    const numTrees = 7;
-                    const treeWidth = rfCanvas.width / numTrees;
-                    
-                    for (let i = 0; i < numTrees; i++) {
-                        const x = treeWidth * i + treeWidth / 2;
-                        const y = rfCanvas.height - 50;
-                        
-                        drawTree(ctx, x, y, 5, Math.PI / 2, 100, i);
-                    }
-                    
-                    // Draw title
-                    ctx.fillStyle = 'white';
-                    ctx.font = 'bold 20px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Random Forest: 300 Decision Trees', rfCanvas.width / 2, 40);
-                    
-                    ctx.font = '14px Inter, sans-serif';
-                    ctx.fillText('Each tree votes on the final prediction (ensemble averaging)', rfCanvas.width / 2, 65);
-                    
-                    animationFrame++;
-                    requestAnimationFrame(drawRandomForest);
-                }
-                
-                function drawTree(ctx, x, y, depth, angle, length, treeIndex) {
-                    if (depth === 0) return;
-                    
-                    const pulse = Math.sin(animationFrame * 0.03 + treeIndex) * 0.2 + 0.8;
-                    
-                    const x2 = x + Math.cos(angle) * length * pulse;
-                    const y2 = y - Math.sin(angle) * length * pulse;
-                    
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${depth / 5})`;
-                    ctx.lineWidth = depth * 1.5;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-                    
-                    // Draw branches
-                    drawTree(ctx, x2, y2, depth - 1, angle - Math.PI / 6, length * 0.7, treeIndex);
-                    drawTree(ctx, x2, y2, depth - 1, angle + Math.PI / 6, length * 0.7, treeIndex);
-                    
-                    // Draw leaf nodes (predictions)
-                    if (depth === 1) {
-                        const gradient = ctx.createRadialGradient(x2, y2, 0, x2, y2, 8);
-                        gradient.addColorStop(0, 'rgba(16, 185, 129, 1)');
-                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.3)');
-                        
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.arc(x2, y2, 6, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-                
-                drawRandomForest();
-            }
-            
-            // ===================================================
-            // CHART.JS VISUALIZATIONS
-            // ===================================================
-            
-            // 1. LSTM TRAINING PROGRESS CHART
-            const lstmTrainingChart = document.getElementById('lstmTrainingChart');
-            if (lstmTrainingChart) {
-                new Chart(lstmTrainingChart, {
-                    type: 'line',
-                    data: {
-                        labels: Array.from({ length: 50 }, (_, i) => i + 1),
-                        datasets: [{
-                            label: 'Training Loss',
-                            data: Array.from({ length: 50 }, (_, i) => 0.8 * Math.exp(-i / 15) + 0.05),
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }, {
-                            label: 'Validation Loss',
-                            data: Array.from({ length: 50 }, (_, i) => 0.85 * Math.exp(-i / 18) + 0.08),
-                            borderColor: '#f093fb',
-                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: true, position: 'top' },
-                            title: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Mean Squared Error (Loss)' }
-                            },
-                            x: {
-                                title: { display: true, text: 'Epoch' }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // 2. MODEL COMPARISON CHART
-            const modelComparisonChart = document.getElementById('modelComparisonChart');
-            if (modelComparisonChart) {
-                new Chart(modelComparisonChart, {
-                    type: 'bar',
-                    data: {
-                        labels: ['LSTM', 'Random Forest', 'XGBoost', 'Ensemble'],
-                        datasets: [{
-                            label: 'Accuracy (%)',
-                            data: [68.5, 72.3, 74.8, 78.9],
-                            backgroundColor: [
-                                'rgba(102, 126, 234, 0.8)',
-                                'rgba(16, 185, 129, 0.8)',
-                                'rgba(245, 87, 108, 0.8)',
-                                'rgba(139, 92, 246, 0.8)'
-                            ],
-                            borderColor: [
-                                '#667eea',
-                                '#10b981',
-                                '#f5576c',
-                                '#8b5cf6'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            title: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                title: { display: true, text: 'Accuracy (%)' }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // 3. ENSEMBLE PREDICTION CHART
-            const ensemblePredictionChart = document.getElementById('ensemblePredictionChart');
-            if (ensemblePredictionChart) {
-                const days = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
-                const actualPrices = Array.from({ length: 30 }, (_, i) => 100 + Math.sin(i / 3) * 15 + Math.random() * 5);
-                
-                new Chart(ensemblePredictionChart, {
-                    type: 'line',
-                    data: {
-                        labels: days,
-                        datasets: [{
-                            label: 'Actual Price',
-                            data: actualPrices,
-                            borderColor: '#1e293b',
-                            backgroundColor: 'rgba(30, 41, 59, 0.1)',
-                            borderWidth: 3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#1e293b'
-                        }, {
-                            label: 'LSTM Prediction',
-                            data: actualPrices.map(p => p + (Math.random() - 0.5) * 8),
-                            borderColor: '#667eea',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 2
-                        }, {
-                            label: 'Random Forest Prediction',
-                            data: actualPrices.map(p => p + (Math.random() - 0.5) * 6),
-                            borderColor: '#10b981',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 2
-                        }, {
-                            label: 'XGBoost Prediction',
-                            data: actualPrices.map(p => p + (Math.random() - 0.5) * 7),
-                            borderColor: '#f5576c',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 2
-                        }, {
-                            label: 'Ensemble Prediction',
-                            data: actualPrices.map(p => p + (Math.random() - 0.5) * 3),
-                            borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            pointRadius: 3,
-                            pointBackgroundColor: '#8b5cf6'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: true, position: 'top' }
-                        },
-                        scales: {
-                            y: {
-                                title: { display: true, text: 'Stock Price ($)' }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // 4. BACKTEST PERFORMANCE CHART
-            const backtestChart = document.getElementById('backtestPerformanceChart');
-            if (backtestChart) {
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                let strategyReturn = 10000;
-                let benchmarkReturn = 10000;
-                const strategyData = [];
-                const benchmarkData = [];
-                
-                for (let i = 0; i < 12; i++) {
-                    strategyReturn *= (1 + (Math.random() * 0.05 + 0.02));
-                    benchmarkReturn *= (1 + (Math.random() * 0.03 + 0.005));
-                    strategyData.push(strategyReturn);
-                    benchmarkData.push(benchmarkReturn);
-                }
-                
-                new Chart(backtestChart, {
-                    type: 'line',
-                    data: {
-                        labels: months,
-                        datasets: [{
-                            label: 'ML Strategy',
-                            data: strategyData,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }, {
-                            label: 'S&P 500 Benchmark',
-                            data: benchmarkData,
-                            borderColor: '#64748b',
-                            backgroundColor: 'rgba(100, 116, 139, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: true, position: 'top' },
-                            title: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                title: { display: true, text: 'Portfolio Value ($)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return '$' + value.toLocaleString();
-                                    }
-                                }
-                            },
-                            x: {
-                                title: { display: true, text: 'Month' }
-                            }
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-
-    <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
-    <script src="assets/js/admin-visibility.js"></script>
+    <script src="assets/js/common.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/chatbot-particles.js" defer></script>
+    <script src="assets/js/resources-ml-visualizations.js" defer></script>
+    <script src="assets/js/admin-visibility.js" defer></script>
     
 </body>
 </html>
