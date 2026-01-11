@@ -1,0 +1,454 @@
+/* ═══════════════════════════════════════════════════════════════
+   PRIVACY PAGE - PREMIUM STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Global overflow fix */
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✨ HERO SECTION - ULTRA STYLÉ PREMIUM
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Hero Container - Dégradé animé premium */
+.hero-privacy {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 2rem 80px 2rem;
+    overflow: visible;
+    background: linear-gradient(135deg, 
+        #0f172a 0%, 
+        #1e293b 25%, 
+        #334155 50%, 
+        #1e293b 75%, 
+        #0f172a 100%);
+    background-size: 400% 400%;
+    animation: heroGradientFlow 20s ease infinite;
+}
+
+@keyframes heroGradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Hero Background - Multi-couches */
+.hero-privacy::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 10s ease-in-out infinite;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+}
+
+@keyframes gridPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Gradient Orbs - Orbes lumineux animés */
+.hero-privacy::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    top: -10%;
+    left: -5%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(59, 130, 246, 0.6) 0%, 
+        rgba(99, 102, 241, 0.4) 35%, 
+        transparent 70%);
+    filter: blur(120px);
+    opacity: 0.6;
+    animation: floatOrb1 25s ease-in-out infinite;
+    mix-blend-mode: screen;
+    z-index: 0;
+}
+
+@keyframes floatOrb1 {
+    0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+    25% { 
+        transform: translate(30px, -50px) scale(1.1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translate(-20px, -80px) scale(0.95);
+        opacity: 0.7;
+    }
+    75% { 
+        transform: translate(40px, -30px) scale(1.05);
+        opacity: 0.65;
+    }
+}
+
+/* Second Orb */
+.hero-privacy .container-fluid::before {
+    content: '';
+    position: absolute;
+    width: 550px;
+    height: 550px;
+    bottom: -15%;
+    right: -10%;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(139, 92, 246, 0.6) 0%, 
+        rgba(168, 85, 247, 0.4) 35%, 
+        transparent 70%);
+    filter: blur(120px);
+    opacity: 0.6;
+    animation: floatOrb2 30s ease-in-out infinite -5s;
+    mix-blend-mode: screen;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes floatOrb2 {
+    0%, 100% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+    25% { 
+        transform: translate(-30px, 50px) scale(1.1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translate(20px, 80px) scale(0.95);
+        opacity: 0.7;
+    }
+    75% { 
+        transform: translate(-40px, 30px) scale(1.05);
+        opacity: 0.65;
+    }
+}
+
+/* Container */
+.hero-privacy .container-fluid {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: auto;
+    overflow: visible;
+}
+
+.hero-privacy-content {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Privacy Badge */
+.hero-privacy .privacy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 
+        0 8px 32px rgba(59, 130, 246, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hero-privacy .privacy-badge i {
+    font-size: 1.125rem;
+}
+
+/* Headline */
+.hero-privacy h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: white;
+    margin: 0;
+    letter-spacing: -0.03em;
+    text-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(59, 130, 246, 0.3);
+}
+
+/* Gradient Text */
+.hero-privacy .highlight-gradient {
+    background: linear-gradient(135deg, 
+        #60a5fa 0%, 
+        #818cf8 25%, 
+        #a78bfa 50%, 
+        #c084fc 75%, 
+        #e879f9 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShine 8s linear infinite;
+    filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.5));
+    display: inline-block;
+}
+
+@keyframes gradientShine {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Subheadline */
+.hero-privacy p {
+    font-size: clamp(1.125rem, 2vw, 1.25rem);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    max-width: 700px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DOCUMENT SECTION - STYLE PAPIER PROFESSIONNEL
+   ═══════════════════════════════════════════════════════════════ */
+.document-section {
+    padding: 100px 1rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+body.dark-mode .document-section {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+.document-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    padding: 4rem 5rem;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .document-wrapper {
+    background: #1e293b;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Document Header */
+.document-header {
+    text-align: center;
+    padding-bottom: 3rem;
+    margin-bottom: 3rem;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.document-header .doc-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #3b82f6;
+    margin-bottom: 1rem;
+}
+
+.document-header h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.document-header .last-updated {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Typography */
+.document-wrapper h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-top: 3rem;
+    margin-bottom: 1.25rem;
+    padding-left: 1rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.document-wrapper h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.document-wrapper p {
+    font-size: 1.0625rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.document-wrapper ul {
+    margin-left: 2rem;
+    margin-bottom: 1.75rem;
+}
+
+.document-wrapper li {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+}
+
+.document-wrapper strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.document-wrapper a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.document-wrapper a:hover {
+    color: #8b5cf6;
+    text-decoration: underline;
+}
+
+/* Contact Info Box */
+.contact-info-box {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.contact-info-box p {
+    margin-bottom: 0.75rem;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 1024px) {
+    .hero-privacy .container-fluid::before,
+    .hero-privacy::after {
+        width: 400px;
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-privacy {
+        min-height: 60vh;
+        padding: 140px 1.5rem 60px 1.5rem;
+    }
+
+    .hero-privacy h1 {
+        font-size: clamp(2rem, 9vw, 2.75rem);
+    }
+
+    .hero-privacy p {
+        font-size: clamp(1rem, 4vw, 1.125rem);
+    }
+
+    .hero-privacy .container-fluid::before,
+    .hero-privacy::after {
+        width: 300px;
+        height: 300px;
+        filter: blur(80px);
+    }
+
+    .document-wrapper {
+        padding: 3rem 2rem;
+        border-radius: 12px;
+    }
+
+    .document-header {
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .document-header h1 {
+        font-size: 2rem;
+    }
+
+    .document-wrapper h2 {
+        font-size: 1.5rem;
+        margin-top: 2.5rem;
+    }
+
+    .document-wrapper h3 {
+        font-size: 1.25rem;
+    }
+
+    .document-wrapper p,
+    .document-wrapper li {
+        font-size: 1rem;
+    }
+
+    .document-wrapper ul {
+        margin-left: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-privacy {
+        padding: 120px 1rem 50px 1rem;
+    }
+
+    .document-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .document-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .document-wrapper h2 {
+        font-size: 1.375rem;
+    }
+
+    .contact-info-box {
+        padding: 1.5rem;
+    }
+}
