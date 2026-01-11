@@ -671,6 +671,7 @@
 
 // Configuration
 const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
+const NOTIFICATION_WORKER_URL = 'https://notification-worker.raphnardone.workers.dev';
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
 // Configuration des plans (synchronisé avec access-control.js)
@@ -806,7 +807,7 @@ async function loadSettings() {
             console.log('Parametres charges:', currentSettings);
         }
         
-        await synchronizeNewsletterSubscription();
+        await synchronizeAllSubscriptions();
         
         applySettingsToUI();
         
@@ -1298,14 +1299,14 @@ async function reactivateSubscription() {
 // SYNCHRONISATION NEWSLETTER
 // ============================================
 
-async function synchronizeNewsletterSubscription() {
+async function synchronizeAllSubscriptions() {
     if (!currentUserData || !currentUserData.uid) {
         console.warn('Aucun utilisateur connecte pour la synchronisation');
         return;
     }
 
     try {
-        console.log('Synchronisation newsletter avec Firestore...');
+        console.log('🔄 Synchronisation des abonnements avec Firestore...');
         
         const userRef = db.collection('users').doc(currentUserData.uid);
         const doc = await userRef.get();
@@ -1316,17 +1317,21 @@ async function synchronizeNewsletterSubscription() {
         }
         
         const userData = doc.data();
-        const isSubscribed = userData.weeklyNewsletter === true;
         
-        console.log('Statut newsletter (Firestore):', isSubscribed ? 'Abonne' : 'Non abonne');
+        // ========================================
+        // 1⃣ SYNCHRONISATION WEEKLY NEWSLETTER
+        // ========================================
+        const isNewsletterSubscribed = userData.weeklyNewsletter === true;
+        
+        console.log('📰 Statut newsletter (Firestore):', isNewsletterSubscribed ? 'Abonne' : 'Non abonne');
         
         const newsletterToggle = document.getElementById('weeklyNewsletter');
         if (newsletterToggle) {
-            newsletterToggle.checked = isSubscribed;
+            newsletterToggle.checked = isNewsletterSubscribed;
         }
         
-        if (isSubscribed && !userData.newsletterSubscribedAt) {
-            console.log('Inscription manquante detectee - envoi au Worker...');
+        if (isNewsletterSubscribed && !userData.newsletterSubscribedAt) {
+            console.log('Inscription newsletter manquante detectee - envoi au Worker...');
             
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
             
@@ -1335,14 +1340,137 @@ async function synchronizeNewsletterSubscription() {
                     newsletterSubscribedAt: new Date().toISOString()
                 });
                 
-                console.log('Inscription newsletter rattrapee');
+                console.log('✅ Inscription newsletter rattrapee');
             }
-        } else if (isSubscribed && userData.newsletterSubscribedAt) {
-            console.log('Utilisateur deja abonne (depuis', userData.newsletterSubscribedAt, ')');
+        } else if (isNewsletterSubscribed && userData.newsletterSubscribedAt) {
+            console.log('✅ Utilisateur deja abonne newsletter (depuis', userData.newsletterSubscribedAt, ')');
+        }
+        
+        // ========================================
+        // 2⃣ SYNCHRONISATION FEATURE UPDATES (NOUVEAU)
+        // ========================================
+        const isUpdatesSubscribed = userData.featureUpdates !== false; // Par défaut activé
+        
+        console.log('🔔 Statut updates (Firestore):', isUpdatesSubscribed ? 'Abonne' : 'Non abonne');
+        
+        const updatesToggle = document.getElementById('featureUpdates');
+        if (updatesToggle) {
+            updatesToggle.checked = isUpdatesSubscribed;
+        }
+        
+        if (isUpdatesSubscribed && !userData.updatesSubscribedAt) {
+            console.log('Inscription updates manquante detectee - envoi au Worker...');
+            
+            const subscribed = await subscribeToUpdates(currentUserData.email, currentUserData.displayName);
+            
+            if (subscribed) {
+                await userRef.update({
+                    updatesSubscribedAt: new Date().toISOString()
+                });
+                
+                console.log('✅ Inscription updates rattrapee');
+            }
+        } else if (isUpdatesSubscribed && userData.updatesSubscribedAt) {
+            console.log('✅ Utilisateur deja abonne updates (depuis', userData.updatesSubscribedAt, ')');
         }
         
     } catch (error) {
-        console.error('Erreur synchronisation newsletter:', error);
+        console.error('❌ Erreur synchronisation abonnements:', error);
+    }
+}
+
+/* ============================================
+   📧 GESTION ABONNEMENT UPDATES (NOUVEAU)
+   ============================================ */
+
+async function subscribeToUpdates(email, name) {
+    try {
+        console.log('🔔 Inscription aux notifications:', email);
+        
+        const response = await fetch(`${NOTIFICATION_WORKER_URL}/subscribe`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name || email.split('@')[0],
+                source: 'settings_sync',
+                timestamp: new Date().toISOString()
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.warn('⚠ Erreur Worker:', errorData);
+            return false;
+        }
+        
+        const data = await response.json();
+        console.log('✅ Inscription updates reussie:', data);
+        showToast('success', 'Success', 'You are now subscribed to platform notifications');
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur inscription updates:', error);
+        return false;
+    }
+}
+
+async function unsubscribeFromUpdates(email) {
+    try {
+        console.log('🔕 Desinscription des notifications:', email);
+        
+        // Méthode 1 : GET avec Image (compatible no-cors)
+        try {
+            const img = new Image();
+            const unsubscribeUrl = `${NOTIFICATION_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
+            
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    console.log('✅ Requete GET envoyee avec succes');
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn('⚠ Methode 1 echouee');
+                    reject();
+                };
+                
+                setTimeout(() => reject(), 3000);
+                
+                img.src = unsubscribeUrl;
+            });
+            
+            console.log('✅ Desinscription updates reussie');
+            showToast('info', 'Unsubscribed', 'You will no longer receive platform notifications');
+            return true;
+            
+        } catch (error1) {
+            console.log('⚠ Methode GET echouee, tentative fetch...');
+        }
+        
+        // Méthode 2 : POST no-cors
+        await fetch(`${NOTIFICATION_WORKER_URL}/unsubscribe`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email
+            }),
+            mode: 'no-cors'
+        });
+        
+        console.log('✅ Requete desinscription envoyee');
+        showToast('info', 'Unsubscribed', 'You will no longer receive platform notifications');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur desinscription updates:', error);
+        
+        showToast('warning', 'Preference saved', 'Your preference has been saved in your account');
+        return true;
     }
 }
 
@@ -1509,14 +1637,18 @@ function switchTab(tabName) {
 
 async function saveNotificationSettings() {
     const previousNewsletterState = currentSettings.weeklyNewsletter;
+    const previousUpdatesState = currentSettings.featureUpdates;
     
     currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
     currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
     
     await saveSettings();
     
+    // ========================================
+    // 1⃣ GESTION NEWSLETTER HEBDOMADAIRE
+    // ========================================
     if (currentSettings.weeklyNewsletter !== previousNewsletterState) {
-        console.log('Changement preference newsletter detecte, synchronisation...');
+        console.log('📰 Changement preference newsletter detecte, synchronisation...');
         
         if (currentSettings.weeklyNewsletter) {
             const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
@@ -1533,6 +1665,31 @@ async function saveNotificationSettings() {
             const userRef = db.collection('users').doc(currentUserData.uid);
             await userRef.update({
                 newsletterSubscribedAt: firebase.firestore.FieldValue.delete()
+            });
+        }
+    }
+    
+    // ========================================
+    // 2⃣ GESTION NOTIFICATIONS PLATEFORME (NOUVEAU)
+    // ========================================
+    if (currentSettings.featureUpdates !== previousUpdatesState) {
+        console.log('🔔 Changement preference updates detecte, synchronisation...');
+        
+        if (currentSettings.featureUpdates) {
+            const subscribed = await subscribeToUpdates(currentUserData.email, currentUserData.displayName);
+            
+            if (subscribed) {
+                const userRef = db.collection('users').doc(currentUserData.uid);
+                await userRef.update({
+                    updatesSubscribedAt: new Date().toISOString()
+                });
+            }
+        } else {
+            await unsubscribeFromUpdates(currentUserData.email);
+            
+            const userRef = db.collection('users').doc(currentUserData.uid);
+            await userRef.update({
+                updatesSubscribedAt: firebase.firestore.FieldValue.delete()
             });
         }
     }
