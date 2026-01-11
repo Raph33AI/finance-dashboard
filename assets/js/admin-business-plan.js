@@ -2319,7 +2319,7 @@ window.addEventListener('load', function() {
 });
 
 // ════════════════════════════════════════════════════════════════
-// VALUATION & FUNDING - EDITABLE WITH FIRESTORE SYNC
+// VALUATION & FUNDING - EDITABLE WITH FIRESTORE SYNC (ARR EDITABLE)
 // ════════════════════════════════════════════════════════════════
 
 // ⚡ EXTEND FINANCIAL_DATA WITH VALUATION DATA
@@ -2480,7 +2480,7 @@ function renderCurrentValuation() {
             <p style="margin-top: 24px; font-size: 0.95rem; opacity: 0.9;">
                 <i class="fas fa-lightbulb"></i> <strong>Next Steps:</strong> 
                 Target <strong>€50K (~$55K) seed investment in Year 1</strong> to accelerate growth. 
-                Edit investment amounts in the table below to model different scenarios.
+                Edit ARR, investment amounts, and multiples in the table below to model different scenarios.
             </p>
         </div>
     `;
@@ -2576,7 +2576,7 @@ function renderValuationTable() {
                 </thead>
                 <tbody>
                     <tr class="section-header">
-                        <td colspan="7"><i class="fas fa-sync-alt"></i> ARR Foundation</td>
+                        <td colspan="7"><i class="fas fa-sync-alt"></i> ARR Foundation (Editable)</td>
                     </tr>
                     <tr>
                         <td class="sticky-col">ARR (Subscription Revenue)</td>
@@ -2587,7 +2587,8 @@ function renderValuationTable() {
         if (year === 0) {
             html += `<td style="color: var(--text-light); font-style: italic;">Pre-revenue</td>`;
         } else {
-            html += `<td class="highlight">${formatCurrency(val.arr)}</td>`;
+            const yearKey = `year${year}`;
+            html += `<td class="editable highlight" contenteditable="true" data-year="${yearKey}" data-field="projections.${yearKey}.revenue.subscription" data-type="arr">${formatCurrency(val.arr)}</td>`;
         }
     });
     
@@ -2610,7 +2611,7 @@ function renderValuationTable() {
     html += `
                     </tr>
                     <tr class="section-header">
-                        <td colspan="7"><i class="fas fa-dollar-sign"></i> Pre-Money Valuation</td>
+                        <td colspan="7"><i class="fas fa-dollar-sign"></i> Pre-Money Valuation (Calculated)</td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="sticky-col"><strong>Pre-Money Valuation</strong></td>
@@ -2692,8 +2693,9 @@ function renderValuationTable() {
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
                 <i class="fas fa-info-circle"></i> <strong>How to use:</strong> 
-                Click on any cell in the "ARR Multiple", "Round Name", or "Investment Amount" rows to edit values. 
+                Click on any cell in the "ARR", "ARR Multiple", "Round Name", or "Investment Amount" rows to edit values. 
                 All calculations (pre-money, post-money, dilution) update automatically. 
+                <strong>Editing ARR here will also update Financial Projections.</strong>
                 Changes are auto-saved to the cloud after 2 seconds.
             </p>
         </div>
@@ -2730,7 +2732,7 @@ function attachValuationEditableListeners() {
             
             if (dataType === 'text') {
                 newValue = newValueRaw;
-            } else if (dataType === 'currency') {
+            } else if (dataType === 'currency' || dataType === 'arr') {
                 newValue = parseEditableValue(newValueRaw);
             } else if (dataType === 'number') {
                 newValue = parseFloat(newValueRaw.replace(/[^0-9.]/g, ''));
@@ -2740,7 +2742,7 @@ function attachValuationEditableListeners() {
             
             if (dataType === 'text' ? newValue === originalValue : Math.abs(newValue - originalValue) < 0.01) {
                 console.log('🔄 No change detected');
-                if (dataType === 'currency') {
+                if (dataType === 'currency' || dataType === 'arr') {
                     this.textContent = formatCurrency(newValue);
                 } else if (dataType === 'number') {
                     this.textContent = newValue + 'x';
@@ -2752,9 +2754,20 @@ function attachValuationEditableListeners() {
             
             console.log(`✏ Updating ${field}: ${originalValue} → ${newValue}`);
             
-            updateValuationDataField(field, newValue);
+            // ✅ SPECIAL HANDLING FOR ARR CHANGES
+            if (dataType === 'arr') {
+                // Convert back to K (since stored as K in projections)
+                const arrInK = newValue / 1000;
+                updateFinancialDataField(field, arrInK);
+                
+                // Recalculate dependent financial data
+                const yearKey = this.dataset.year;
+                recalculateYearFinancials(yearKey);
+            } else {
+                updateValuationDataField(field, newValue);
+            }
             
-            if (dataType === 'currency') {
+            if (dataType === 'currency' || dataType === 'arr') {
                 this.textContent = formatCurrency(newValue);
             } else if (dataType === 'number') {
                 this.textContent = newValue + 'x';
@@ -2799,6 +2812,43 @@ function updateValuationDataField(field, value) {
     
     ref[keys[keys.length - 1]] = value;
     console.log(`✏ Updated ${field} = ${value}`);
+}
+
+// ⚡ RECALCULATE YEAR FINANCIALS (when ARR is changed from Valuation section)
+function recalculateYearFinancials(yearKey) {
+    console.log(`🔄 Recalculating financials for ${yearKey} after ARR change...`);
+    
+    const data = FINANCIAL_DATA.projections[yearKey];
+    
+    // Recalculate affiliate revenue (10% of subscription)
+    data.revenue.affiliate = data.revenue.subscription * 0.10;
+    
+    // Recalculate total revenue
+    data.revenue.total = data.revenue.subscription + data.revenue.affiliate;
+    
+    // Recalculate EBITDA
+    data.metrics.ebitda = data.revenue.total - data.expenses.total;
+    data.metrics.ebitdaMargin = data.revenue.total > 0 ? (data.metrics.ebitda / data.revenue.total) * 100 : 0;
+    
+    // Recalculate MRR and ARR
+    data.metrics.arr = data.revenue.subscription;
+    data.metrics.mrr = data.revenue.subscription / 12;
+    
+    // Recalculate ARPU
+    data.metrics.arpu = data.users.paid > 0 ? (data.revenue.subscription * 1000) / data.users.paid / 12 : 0;
+    
+    // Recalculate LTV
+    const customerLifespan = 100 / data.metrics.churn;
+    data.metrics.ltv = data.metrics.arpu * customerLifespan;
+    
+    console.log(`✅ ${yearKey} financials recalculated`);
+    
+    // Update Financial Projections table
+    renderFinancialProjectionsTable();
+    renderMetricsTable();
+    updateProjectionSummaryCards();
+    renderUnitEconomics();
+    updateAllCharts();
 }
 
 // ⚡ RECALCULATE VALUATION
@@ -3046,7 +3096,7 @@ function renderComparableCompanies() {
         <div class="info-card" style="margin-top: 20px;">
             <p style="color: var(--text-light); line-height: 1.8;">
                 <i class="fas fa-balance-scale"></i> <strong>Note:</strong> 
-                AlphaVault AI's valuation is calculated dynamically based on your ARR projections and chosen multiple (editable).
+                AlphaVault AI's valuation is calculated dynamically based on your ARR projections and chosen multiple (both editable).
             </p>
         </div>
     `;
@@ -3127,9 +3177,10 @@ function createDilutionChart() {
     years.forEach(year => {
         const val = calculateValuation(year);
         if (val && val.dilution > 0) {
+            const prevOwnership = founderOwnership;
             founderOwnership = founderOwnership * (1 - val.dilution / 100);
-            dilutionPerRound.push(val.dilution * (founderOwnership / (100 - val.dilution)));
-            labels.push(`${val.roundName || 'Round'} Y${year} (${val.dilution.toFixed(1)}%)`);
+            dilutionPerRound.push(prevOwnership - founderOwnership);
+            labels.push(`${val.roundName || 'Round'} Y${year} (${(prevOwnership - founderOwnership).toFixed(1)}%)`);
         }
     });
     
@@ -3215,6 +3266,6 @@ function calculateTotalDilution() {
     return 100 - founderOwnership;
 }
 
-console.log('✅ Valuation & Funding Module Loaded (Editable + Firestore Sync)');
+console.log('✅ Valuation & Funding Module Loaded (ARR Editable + Firestore Sync)');
 
 console.log('🎉 Business Plan JavaScript v5.0 FIRESTORE ENABLED - Loaded Successfully');
