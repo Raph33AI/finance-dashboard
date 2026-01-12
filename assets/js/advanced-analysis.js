@@ -4533,9 +4533,8 @@ const AdvancedAnalysis = {
             // ============================================
             // 🎨 PAGE 1 : ULTRA PREMIUM COVER PAGE
             // ============================================
-            
+
             // ✨ GRADIENT BACKGROUND (Bleu → Violet)
-            // Simuler un gradient avec plusieurs rectangles
             const gradientSteps = 50;
             for (let i = 0; i < gradientSteps; i++) {
                 const ratio = i / gradientSteps;
@@ -4548,26 +4547,51 @@ const AdvancedAnalysis = {
                 pdf.setFillColor(r, g, b);
                 pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, pageHeight / gradientSteps + 1, 'F');
             }
-            
+
             // ✨ DECORATIVE CIRCLES (design elements)
             pdf.setFillColor(255, 255, 255, 0.1);
             pdf.circle(pageWidth * 0.15, 50, 60, 'F');
             pdf.circle(pageWidth * 0.85, pageHeight * 0.7, 80, 'F');
             pdf.circle(pageWidth * 0.5, pageHeight * 0.3, 40, 'F');
-            
-            // ✨ LOGO ALPHAVAULT (SVG converti en PNG base64)
-            // Logo AlphaVault AI (votre vrai logo)
-            const logoBase64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQ4IiBmaWxsPSJ1cmwoI2dyYWRpZW50MCkiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwIiB4MT0iMCIgeTE9IjAiIHgyPSIxMDAiIHkyPSIxMDAiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjx0ZXh0IHg9IjUwIiB5PSI1OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkE8L3RleHQ+Cjwvc3ZnPg==';
-            
-            // Ajouter le logo
-            pdf.addImage(logoBase64, 'SVG', pageWidth / 2 - 20, 30, 40, 40);
-            
+
+            // ✨ LOGO ALPHAVAULT AI - DESSINÉ DIRECTEMENT (Compatible PDF)
+            const logoX = pageWidth / 2;
+            const logoY = 50;
+            const logoRadius = 20;
+
+            // Cercle extérieur blanc
+            pdf.setFillColor(255, 255, 255);
+            pdf.circle(logoX, logoY, logoRadius, 'F');
+
+            // Cercle intérieur gradient (simulé avec cercles concentriques)
+            const gradientCircles = 15;
+            for (let i = 0; i < gradientCircles; i++) {
+                const ratio = i / gradientCircles;
+                const r = Math.round(102 + (118 - 102) * ratio);
+                const g = Math.round(126 + (75 - 126) * ratio);
+                const b = Math.round(234 + (162 - 234) * ratio);
+                
+                pdf.setFillColor(r, g, b);
+                const circleRadius = logoRadius * 0.9 * (1 - ratio * 0.5);
+                pdf.circle(logoX, logoY, circleRadius, 'F');
+            }
+
+            // Lettre "A" stylisée au centre
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(32);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('A', logoX, logoY + 8, { align: 'center' });
+
+            // Petit "V" en indice
+            pdf.setFontSize(14);
+            pdf.text('V', logoX + 8, logoY + 10, { align: 'center' });
+
             // ✨ TITLE - ALPHAVAULT AI
             pdf.setTextColor(255, 255, 255);
             pdf.setFontSize(14);
             pdf.setFont('helvetica', 'bold');
             pdf.text('ALPHAVAULT AI', pageWidth / 2, 85, { align: 'center' });
-            
+
             // ✨ SUBTITLE
             pdf.setFontSize(10);
             pdf.setFont('helvetica', 'normal');
