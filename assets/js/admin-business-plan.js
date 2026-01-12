@@ -2450,15 +2450,13 @@ function renderCurrentValuation() {
             <p>
                 <strong>AlphaVault AI is currently in the pre-seed stage.</strong> 
                 The platform is <strong>fully operational with 30+ features</strong>, deployed on production infrastructure, 
-                but has <strong>not yet generated revenue</strong> and <strong>has not raised funding</strong>. 
-                Current valuation: <strong>${formatCurrency(currentVal)} (~€400K)</strong>.
+                but has <strong>not yet generated revenue</strong> and <strong>has not raised funding</strong>.
             </p>
             
             <div class="current-val-grid">
                 <div class="current-val-card">
                     <h4>Current Valuation</h4>
                     <div class="val-amount">${formatCurrency(currentVal)}</div>
-                    // <div class="val-subtitle">~€400,000</div>
                 </div>
                 
                 <div class="current-val-card">
@@ -2508,7 +2506,6 @@ function renderValuationSummaryCards() {
                     <div class="val-summary-label">Current Valuation</div>
                 </div>
                 <div class="val-summary-value">${formatCurrency(y0.preMoney)}</div>
-                <div class="val-summary-subtitle">Pre-Seed (~€400K)</div>
             </div>
             
             <div class="val-summary-card">
