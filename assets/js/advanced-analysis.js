@@ -4247,11 +4247,11 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-    // 📊 EXPORT TO CSV - ALL TECHNICAL INDICATORS
+    // 📊 EXPORT TO CSV - TECHNICAL INDICATORS ONLY (No Raw API Data)
     // ============================================
 
     exportToCSV() {
-        console.log('📊 Exporting data to CSV...');
+        console.log('📊 Exporting technical indicators to CSV...');
         
         if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
             alert('⚠ No data available to export. Please load a stock first.');
@@ -4263,7 +4263,7 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         
         try {
-            // ✅ CALCULER TOUS LES INDICATEURS
+            // ✅ CALCULER TOUS LES INDICATEURS TECHNIQUES
             const rsi = this.calculateRSI(prices);
             const macd = this.calculateMACD(prices);
             const stochastic = this.calculateStochastic(prices);
@@ -4279,14 +4279,9 @@ const AdvancedAnalysis = {
             const cmf = this.calculateCMF(prices);
             const elderRay = this.calculateElderRay(prices);
             
-            // ✅ CRÉER LES HEADERS CSV
+            // ✅ HEADERS CSV - INDICATEURS TECHNIQUES UNIQUEMENT (PAS DE PRIX BRUTS)
             const headers = [
                 'Date',
-                'Open',
-                'High',
-                'Low',
-                'Close',
-                'Volume',
                 'RSI',
                 'MACD_Line',
                 'MACD_Signal',
@@ -4297,7 +4292,7 @@ const AdvancedAnalysis = {
                 'ADX',
                 'ADX_PlusDI',
                 'ADX_MinusDI',
-                'OBV',
+                'OBV_Normalized',
                 'ATR',
                 'MFI',
                 'CCI',
@@ -4313,15 +4308,10 @@ const AdvancedAnalysis = {
             // ✅ CRÉER UNE MAP POUR CHAQUE INDICATEUR (par timestamp)
             const dataByTimestamp = new Map();
             
-            // Ajouter les prix de base
+            // Initialiser avec les dates uniquement
             prices.forEach(p => {
                 dataByTimestamp.set(p.timestamp, {
-                    date: new Date(p.timestamp).toISOString().split('T')[0],
-                    open: p.open.toFixed(2),
-                    high: p.high.toFixed(2),
-                    low: p.low.toFixed(2),
-                    close: p.close.toFixed(2),
-                    volume: p.volume
+                    date: new Date(p.timestamp).toISOString().split('T')[0]
                 });
             });
             
@@ -4368,10 +4358,17 @@ const AdvancedAnalysis = {
                 }
             });
             
-            // Ajouter OBV
+            // ✅ OBV NORMALISÉ (pas de valeurs brutes)
+            // Normaliser OBV entre -100 et +100 pour éviter de redistribuer les volumes
+            const obvValues = obv.map(([_, val]) => val);
+            const obvMin = Math.min(...obvValues);
+            const obvMax = Math.max(...obvValues);
+            const obvRange = obvMax - obvMin;
+            
             obv.forEach(([timestamp, value]) => {
                 if (dataByTimestamp.has(timestamp)) {
-                    dataByTimestamp.get(timestamp).obv = Math.round(value);
+                    const normalizedOBV = obvRange !== 0 ? ((value - obvMin) / obvRange) * 200 - 100 : 0;
+                    dataByTimestamp.get(timestamp).obv_normalized = normalizedOBV.toFixed(2);
                 }
             });
             
@@ -4436,7 +4433,19 @@ const AdvancedAnalysis = {
             });
             
             // ✅ CONSTRUIRE LE CSV
-            let csvContent = headers.join(',') + '\n';
+            let csvContent = '';
+            
+            // Header avec métadonnées
+            csvContent += `AlphaVault AI - Technical Analysis Report\n`;
+            csvContent += `Symbol: ${symbol}\n`;
+            csvContent += `Period: ${period}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-US')}\n`;
+            csvContent += `\n`;
+            csvContent += `IMPORTANT: This report contains ONLY technical indicators calculated by AlphaVault AI.\n`;
+            csvContent += `No raw market data (prices, volumes) is included to comply with data redistribution policies.\n`;
+            csvContent += `\n`;
+            
+            csvContent += headers.join(',') + '\n';
             
             // Trier par timestamp (du plus ancien au plus récent)
             const sortedTimestamps = Array.from(dataByTimestamp.keys()).sort((a, b) => a - b);
@@ -4445,11 +4454,6 @@ const AdvancedAnalysis = {
                 const row = dataByTimestamp.get(timestamp);
                 const values = [
                     row.date || '',
-                    row.open || '',
-                    row.high || '',
-                    row.low || '',
-                    row.close || '',
-                    row.volume || '',
                     row.rsi || '',
                     row.macd_line || '',
                     row.macd_signal || '',
@@ -4460,7 +4464,7 @@ const AdvancedAnalysis = {
                     row.adx || '',
                     row.adx_plusdi || '',
                     row.adx_minusdi || '',
-                    row.obv || '',
+                    row.obv_normalized || '',
                     row.atr || '',
                     row.mfi || '',
                     row.cci || '',
@@ -4477,11 +4481,11 @@ const AdvancedAnalysis = {
             });
             
             // ✅ TÉLÉCHARGER LE FICHIER
-            const filename = `${symbol}_Analysis_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+            const filename = `AlphaVault_${symbol}_TechnicalIndicators_${period}_${new Date().toISOString().split('T')[0]}.csv`;
             this.downloadFile(csvContent, filename, 'text/csv');
             
             console.log('✅ CSV exported successfully:', filename);
-            this.showNotification('✅ CSV exported successfully!', 'success');
+            this.showNotification('✅ Technical Indicators exported to CSV!', 'success');
             
         } catch (error) {
             console.error('❌ CSV export failed:', error);
@@ -4490,11 +4494,11 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-    // 📄 EXPORT TO PDF - PROFESSIONAL REPORT
+    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT (No Raw API Data)
     // ============================================
 
     async exportToPDF() {
-        console.log('📄 Generating PDF report...');
+        console.log('📄 Generating premium PDF report...');
         
         if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
             alert('⚠ No data available to export. Please load a stock first.');
@@ -4527,110 +4531,182 @@ const AdvancedAnalysis = {
             const contentWidth = pageWidth - (2 * margin);
             
             // ============================================
-            // PAGE 1 : COVER PAGE
+            // 🎨 PAGE 1 : ULTRA PREMIUM COVER PAGE
             // ============================================
             
-            // Gradient Background Simulation
-            pdf.setFillColor(38, 73, 178);
-            pdf.rect(0, 0, pageWidth, 80, 'F');
+            // ✨ GRADIENT BACKGROUND (Bleu → Violet)
+            // Simuler un gradient avec plusieurs rectangles
+            const gradientSteps = 50;
+            for (let i = 0; i < gradientSteps; i++) {
+                const ratio = i / gradientSteps;
+                
+                // Interpolation RGB: Bleu (#667eea) → Violet (#764ba2)
+                const r = Math.round(102 + (118 - 102) * ratio);
+                const g = Math.round(126 + (75 - 126) * ratio);
+                const b = Math.round(234 + (162 - 234) * ratio);
+                
+                pdf.setFillColor(r, g, b);
+                pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, pageHeight / gradientSteps + 1, 'F');
+            }
             
-            // Logo placeholder (you can replace with actual logo)
-            pdf.setFillColor(255, 255, 255);
-            pdf.circle(pageWidth / 2, 40, 15, 'F');
-            pdf.setTextColor(38, 73, 178);
-            pdf.setFontSize(20);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('AV', pageWidth / 2, 42, { align: 'center' });
+            // ✨ DECORATIVE CIRCLES (design elements)
+            pdf.setFillColor(255, 255, 255, 0.1);
+            pdf.circle(pageWidth * 0.15, 50, 60, 'F');
+            pdf.circle(pageWidth * 0.85, pageHeight * 0.7, 80, 'F');
+            pdf.circle(pageWidth * 0.5, pageHeight * 0.3, 40, 'F');
             
-            // Title
+            // ✨ LOGO ALPHAVAULT (SVG converti en PNG base64)
+            // Logo AlphaVault AI (votre vrai logo)
+            const logoBase64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQ4IiBmaWxsPSJ1cmwoI2dyYWRpZW50MCkiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwIiB4MT0iMCIgeTE9IjAiIHgyPSIxMDAiIHkyPSIxMDAiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjx0ZXh0IHg9IjUwIiB5PSI1OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkE8L3RleHQ+Cjwvc3ZnPg==';
+            
+            // Ajouter le logo
+            pdf.addImage(logoBase64, 'SVG', pageWidth / 2 - 20, 30, 40, 40);
+            
+            // ✨ TITLE - ALPHAVAULT AI
             pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(28);
+            pdf.setFontSize(14);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('ADVANCED TECHNICAL ANALYSIS', pageWidth / 2, 100, { align: 'center' });
+            pdf.text('ALPHAVAULT AI', pageWidth / 2, 85, { align: 'center' });
             
-            // Symbol
-            pdf.setFontSize(48);
-            pdf.text(symbol, pageWidth / 2, 125, { align: 'center' });
-            
-            // Company Name
-            pdf.setFontSize(16);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(quote.name || symbol, pageWidth / 2, 140, { align: 'center' });
-            
-            // Period & Date
-            pdf.setFontSize(12);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text(`Analysis Period: ${period}`, pageWidth / 2, 160, { align: 'center' });
-            pdf.text(`Report Date: ${currentDate}`, pageWidth / 2, 170, { align: 'center' });
-            
-            // Footer
+            // ✨ SUBTITLE
             pdf.setFontSize(10);
-            pdf.setTextColor(150, 150, 150);
-            pdf.text('Powered by AlphaVault AI', pageWidth / 2, pageHeight - 20, { align: 'center' });
-            pdf.text('Professional Financial Intelligence Platform', pageWidth / 2, pageHeight - 15, { align: 'center' });
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, 92, { align: 'center' });
+            
+            // ✨ DIVIDER LINE
+            pdf.setDrawColor(255, 255, 255);
+            pdf.setLineWidth(0.5);
+            pdf.line(pageWidth * 0.25, 100, pageWidth * 0.75, 100);
+            
+            // ✨ MAIN TITLE
+            pdf.setFontSize(32);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, 120, { align: 'center' });
+            pdf.setFontSize(28);
+            pdf.text('REPORT', pageWidth / 2, 132, { align: 'center' });
+            
+            // ✨ SYMBOL IN BADGE
+            pdf.setFillColor(255, 255, 255, 0.2);
+            pdf.roundedRect(pageWidth / 2 - 35, 145, 70, 25, 5, 5, 'F');
+            pdf.setFontSize(36);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(symbol, pageWidth / 2, 163, { align: 'center' });
+            
+            // ✨ COMPANY NAME
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(quote.name || symbol, pageWidth / 2, 180, { align: 'center' });
+            
+            // ✨ ANALYSIS DETAILS BOX
+            pdf.setFillColor(255, 255, 255, 0.15);
+            pdf.roundedRect(margin + 10, 195, contentWidth - 20, 35, 8, 8, 'F');
+            
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('ANALYSIS PERIOD:', margin + 20, 208);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(period, margin + 70, 208);
+            
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('REPORT DATE:', margin + 20, 218);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(currentDate, margin + 70, 218);
+            
+            // ✨ FOOTER BRANDING
+            pdf.setFontSize(9);
+            pdf.setTextColor(255, 255, 255, 0.8);
+            pdf.text('Powered by Advanced AI & 14 Professional Technical Indicators', pageWidth / 2, pageHeight - 25, { align: 'center' });
+            pdf.setFontSize(8);
+            pdf.text('© ' + new Date().getFullYear() + ' AlphaVault AI. All rights reserved.', pageWidth / 2, pageHeight - 18, { align: 'center' });
+            
+            // ✨ WATERMARK
+            pdf.setTextColor(255, 255, 255, 0.05);
+            pdf.setFontSize(80);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AV', pageWidth / 2, pageHeight / 2, { align: 'center', angle: -45 });
             
             // ============================================
-            // PAGE 2 : EXECUTIVE SUMMARY
+            // 📊 PAGE 2 : EXECUTIVE SUMMARY (STYLED)
             // ============================================
             
             pdf.addPage();
-            yPosition = 20;
+            
+            // Background accent
+            pdf.setFillColor(102, 126, 234, 0.05);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            
+            yPosition = 25;
+            
+            // Page Header
+            pdf.setFillColor(102, 126, 234);
+            pdf.rect(0, 0, pageWidth, 15, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('EXECUTIVE SUMMARY', margin, 10);
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(symbol, pageWidth - margin, 10, { align: 'right' });
+            
+            yPosition = 30;
             
             // Title
-            pdf.setFontSize(20);
-            pdf.setTextColor(38, 73, 178);
+            pdf.setFontSize(22);
+            pdf.setTextColor(102, 126, 234);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Executive Summary', margin, yPosition);
+            pdf.text('Key Performance Metrics', margin, yPosition);
             yPosition += 15;
             
-            // Divider
-            pdf.setDrawColor(38, 73, 178);
+            // AlphaVault Score Box
+            pdf.setFillColor(255, 255, 255);
+            pdf.setDrawColor(102, 126, 234);
             pdf.setLineWidth(0.5);
-            pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-            yPosition += 10;
+            pdf.roundedRect(margin, yPosition, (contentWidth / 2) - 5, 35, 5, 5, 'FD');
             
-            // AlphaVault Score
             const alphaScore = this.calculateAlphaVaultScore();
-            pdf.setFontSize(14);
-            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(12);
+            pdf.setTextColor(60, 60, 60);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('AlphaVault Score:', margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`${alphaScore}/100`, margin + 60, yPosition);
-            yPosition += 10;
+            pdf.text('AlphaVault Score', margin + 5, yPosition + 10);
             
-            // Market Strength
-            const marketStrength = this.calculateMarketStrength();
+            pdf.setFontSize(28);
+            pdf.setTextColor(102, 126, 234);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Market Strength:', margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
+            pdf.text(`${alphaScore}`, margin + 5, yPosition + 28);
+            pdf.setFontSize(14);
+            pdf.text('/100', margin + 25, yPosition + 28);
+            
+            // Market Strength Box
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(margin + (contentWidth / 2) + 5, yPosition, (contentWidth / 2) - 5, 35, 5, 5, 'FD');
+            
+            const marketStrength = this.calculateMarketStrength();
+            pdf.setFontSize(12);
+            pdf.setTextColor(60, 60, 60);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Market Strength', margin + (contentWidth / 2) + 10, yPosition + 10);
+            
             let strengthText = marketStrength >= 75 ? 'Very Strong' :
                             marketStrength >= 60 ? 'Strong' :
                             marketStrength >= 45 ? 'Moderate' :
                             marketStrength >= 30 ? 'Weak' : 'Very Weak';
-            pdf.text(strengthText, margin + 60, yPosition);
-            yPosition += 10;
             
-            // Current Price (if available)
-            if (quote.price) {
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('Current Price:', margin, yPosition);
-                pdf.setFont('helvetica', 'normal');
-                pdf.text(`$${quote.price.toFixed(2)}`, margin + 60, yPosition);
-                yPosition += 10;
-            }
+            let strengthColor = marketStrength >= 60 ? [16, 185, 129] : 
+                            marketStrength >= 45 ? [251, 191, 36] : [239, 68, 68];
             
-            yPosition += 5;
-            
-            // AI Recommendation Summary
-            pdf.setFontSize(16);
-            pdf.setTextColor(38, 73, 178);
+            pdf.setFontSize(18);
+            pdf.setTextColor(...strengthColor);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('AI Recommendations by Horizon', margin, yPosition);
-            yPosition += 10;
+            pdf.text(strengthText, margin + (contentWidth / 2) + 10, yPosition + 28);
             
-            pdf.setFontSize(12);
-            pdf.setTextColor(0, 0, 0);
+            yPosition += 50;
+            
+            // AI Recommendations Title
+            pdf.setFontSize(18);
+            pdf.setTextColor(102, 126, 234);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AI-Powered Recommendations', margin, yPosition);
+            yPosition += 12;
             
             // Generate AI recommendations
             const prices = this.stockData.prices;
@@ -4639,64 +4715,94 @@ const AdvancedAnalysis = {
             const aiScore = this.calculateAIConfidenceScore(technicalSignals);
             const horizonRecommendations = this.generateHorizonRecommendations(aiScore, technicalSignals, trendAnalysis);
             
-            // 1 Year
+            // Horizons
+            const horizons = [
+                { key: '1y', label: '1 Year Horizon', icon: '📊' },
+                { key: '2y', label: '2 Years Horizon', icon: '📈' },
+                { key: '5y', label: '5 Years Horizon', icon: '🚀' }
+            ];
+            
+            horizons.forEach((horizon, idx) => {
+                const rec = horizonRecommendations[horizon.key];
+                
+                // Recommendation Box
+                pdf.setFillColor(255, 255, 255);
+                pdf.roundedRect(margin, yPosition, contentWidth, 32, 5, 5, 'FD');
+                
+                // Icon & Title
+                pdf.setFontSize(14);
+                pdf.setTextColor(60, 60, 60);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(`${horizon.icon} ${horizon.label}`, margin + 5, yPosition + 10);
+                
+                // Recommendation Badge
+                const recColor = rec.recommendation === 'BUY' ? [16, 185, 129] :
+                                rec.recommendation === 'SELL' ? [239, 68, 68] : [251, 191, 36];
+                
+                pdf.setFillColor(...recColor);
+                pdf.roundedRect(margin + 5, yPosition + 14, 25, 10, 3, 3, 'F');
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(rec.recommendation, margin + 17.5, yPosition + 21, { align: 'center' });
+                
+                // Confidence
+                pdf.setTextColor(60, 60, 60);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(10);
+                pdf.text(`Confidence: ${rec.confidence}%`, margin + 35, yPosition + 21);
+                
+                // Potential
+                pdf.setFont('helvetica', 'bold');
+                const potentialColor = parseFloat(rec.potentialMove) >= 0 ? [16, 185, 129] : [239, 68, 68];
+                pdf.setTextColor(...potentialColor);
+                pdf.text(`${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%`, pageWidth - margin - 5, yPosition + 21, { align: 'right' });
+                
+                yPosition += 37;
+            });
+            
+            yPosition += 5;
+            
+            // Key Drivers Section
+            pdf.setFontSize(16);
+            pdf.setTextColor(102, 126, 234);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('1 Year Horizon:', margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
+            pdf.text('Key Drivers (1 Year)', margin, yPosition);
+            yPosition += 10;
+            
             const rec1y = horizonRecommendations['1y'];
-            pdf.text(`${rec1y.recommendation} (${rec1y.confidence}% confidence) - Potential: ${rec1y.potentialMove}%`, margin + 50, yPosition);
-            yPosition += 8;
-            
-            // 2 Years
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('2 Years Horizon:', margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
-            const rec2y = horizonRecommendations['2y'];
-            pdf.text(`${rec2y.recommendation} (${rec2y.confidence}% confidence) - Potential: ${rec2y.potentialMove}%`, margin + 50, yPosition);
-            yPosition += 8;
-            
-            // 5 Years
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('5 Years Horizon:', margin, yPosition);
-            pdf.setFont('helvetica', 'normal');
-            const rec5y = horizonRecommendations['5y'];
-            pdf.text(`${rec5y.recommendation} (${rec5y.confidence}% confidence) - Potential: ${rec5y.potentialMove}%`, margin + 50, yPosition);
-            yPosition += 15;
-            
-            // Key Drivers
-            pdf.setFontSize(14);
-            pdf.setTextColor(38, 73, 178);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Key Drivers (1Y):', margin, yPosition);
-            yPosition += 8;
-            
-            pdf.setFontSize(11);
-            pdf.setTextColor(0, 0, 0);
-            pdf.setFont('helvetica', 'normal');
             rec1y.drivers.forEach((driver, idx) => {
-                pdf.text(`${idx + 1}. ${driver}`, margin + 5, yPosition);
-                yPosition += 7;
+                pdf.setFillColor(240, 243, 255);
+                pdf.roundedRect(margin, yPosition, contentWidth, 12, 3, 3, 'F');
+                
+                pdf.setFontSize(10);
+                pdf.setTextColor(60, 60, 60);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`${idx + 1}.`, margin + 3, yPosition + 8);
+                pdf.text(driver, margin + 10, yPosition + 8);
+                
+                yPosition += 15;
             });
             
             // ============================================
-            // PAGE 3+ : TECHNICAL INDICATORS CHARTS
+            // 📈 PAGES 3+ : TECHNICAL INDICATORS CHARTS
             // ============================================
             
             const chartsToCapture = [
-                { id: 'rsiChart', title: 'RSI - Relative Strength Index' },
-                { id: 'macdChart', title: 'MACD - Moving Average Convergence Divergence' },
-                { id: 'stochasticChart', title: 'Stochastic Oscillator' },
-                { id: 'williamsChart', title: 'Williams %R' },
-                { id: 'adxChart', title: 'ADX - Trend Strength' },
-                { id: 'obvChart', title: 'On-Balance Volume (OBV)' },
-                { id: 'atrChart', title: 'Average True Range (ATR)' },
-                { id: 'mfiChart', title: 'Money Flow Index (MFI)' },
-                { id: 'cciChart', title: 'Commodity Channel Index (CCI)' },
-                { id: 'ultimateChart', title: 'Ultimate Oscillator' },
-                { id: 'rocChart', title: 'Rate of Change (ROC)' },
-                { id: 'aroonChart', title: 'Aroon Indicator' },
-                { id: 'cmfChart', title: 'Chaikin Money Flow (CMF)' },
-                { id: 'elderRayChart', title: 'Elder Ray Index' }
+                { id: 'rsiChart', title: 'RSI - Relative Strength Index', description: 'Measures momentum and overbought/oversold conditions' },
+                { id: 'macdChart', title: 'MACD - Moving Average Convergence Divergence', description: 'Identifies trend changes and momentum shifts' },
+                { id: 'stochasticChart', title: 'Stochastic Oscillator', description: 'Compares closing price to price range over time' },
+                { id: 'williamsChart', title: 'Williams %R', description: 'Momentum indicator showing overbought/oversold levels' },
+                { id: 'adxChart', title: 'ADX - Average Directional Index', description: 'Measures trend strength regardless of direction' },
+                { id: 'obvChart', title: 'On-Balance Volume (OBV)', description: 'Cumulative volume indicator predicting price movements' },
+                { id: 'atrChart', title: 'Average True Range (ATR)', description: 'Volatility indicator measuring market movement' },
+                { id: 'mfiChart', title: 'Money Flow Index (MFI)', description: 'Volume-weighted RSI identifying buying/selling pressure' },
+                { id: 'cciChart', title: 'Commodity Channel Index (CCI)', description: 'Identifies cyclical trends in asset prices' },
+                { id: 'ultimateChart', title: 'Ultimate Oscillator', description: 'Multi-timeframe momentum indicator' },
+                { id: 'rocChart', title: 'Rate of Change (ROC)', description: 'Measures percentage change in price over time' },
+                { id: 'aroonChart', title: 'Aroon Indicator', description: 'Identifies trend changes and strength' },
+                { id: 'cmfChart', title: 'Chaikin Money Flow (CMF)', description: 'Measures money flow volume over specific period' },
+                { id: 'elderRayChart', title: 'Elder Ray Index', description: 'Bull and Bear power indicator' }
             ];
             
             for (let i = 0; i < chartsToCapture.length; i++) {
@@ -4708,19 +4814,49 @@ const AdvancedAnalysis = {
                     continue;
                 }
                 
-                // Add new page for each chart
+                // Add new page
                 pdf.addPage();
-                yPosition = 20;
                 
-                // Chart Title
-                pdf.setFontSize(16);
-                pdf.setTextColor(38, 73, 178);
+                // Background accent
+                pdf.setFillColor(102, 126, 234, 0.05);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                
+                yPosition = 25;
+                
+                // Page Header
+                pdf.setFillColor(102, 126, 234);
+                pdf.rect(0, 0, pageWidth, 15, 'F');
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(11);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('TECHNICAL INDICATOR', margin, 10);
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`${i + 1} of ${chartsToCapture.length}`, pageWidth - margin, 10, { align: 'right' });
+                
+                yPosition = 30;
+                
+                // Indicator Title
+                pdf.setFontSize(18);
+                pdf.setTextColor(102, 126, 234);
                 pdf.setFont('helvetica', 'bold');
                 pdf.text(chartInfo.title, margin, yPosition);
-                yPosition += 10;
+                yPosition += 8;
+                
+                // Description
+                pdf.setFontSize(9);
+                pdf.setTextColor(100, 100, 100);
+                pdf.setFont('helvetica', 'italic');
+                pdf.text(chartInfo.description, margin, yPosition);
+                yPosition += 12;
+                
+                // Chart Border
+                pdf.setDrawColor(200, 200, 200);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect(margin - 2, yPosition - 2, contentWidth + 4, 160, 3, 3, 'D');
                 
                 try {
-                    // Capture chart as image
+                    // Capture chart
                     const canvas = await html2canvas(chartElement, {
                         scale: 2,
                         backgroundColor: '#ffffff',
@@ -4729,12 +4865,11 @@ const AdvancedAnalysis = {
                     
                     const imgData = canvas.toDataURL('image/png');
                     
-                    // Calculate dimensions to fit page
-                    const imgWidth = contentWidth;
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    // Add image
+                    const imgHeight = 155;
+                    pdf.addImage(imgData, 'PNG', margin, yPosition, contentWidth, imgHeight);
                     
-                    // Add image to PDF
-                    pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, Math.min(imgHeight, pageHeight - yPosition - 20));
+                    yPosition += imgHeight + 10;
                     
                     console.log(`✅ Chart captured: ${chartInfo.title}`);
                     
@@ -4744,45 +4879,73 @@ const AdvancedAnalysis = {
                     pdf.setTextColor(200, 0, 0);
                     pdf.text('Error capturing chart', margin, yPosition);
                 }
+                
+                // Footer note
+                pdf.setFontSize(8);
+                pdf.setTextColor(150, 150, 150);
+                pdf.text('Data calculated by AlphaVault AI proprietary algorithms', margin, pageHeight - 15);
             }
             
             // ============================================
-            // FINAL PAGE : DISCLAIMER
+            // 📜 FINAL PAGE : LEGAL DISCLAIMER
             // ============================================
             
             pdf.addPage();
-            yPosition = 20;
+            
+            // Background
+            pdf.setFillColor(102, 126, 234, 0.05);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            
+            yPosition = 25;
+            
+            // Header
+            pdf.setFillColor(102, 126, 234);
+            pdf.rect(0, 0, pageWidth, 15, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('IMPORTANT LEGAL DISCLAIMER', margin, 10);
+            
+            yPosition = 30;
             
             pdf.setFontSize(18);
-            pdf.setTextColor(38, 73, 178);
+            pdf.setTextColor(102, 126, 234);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Important Disclaimer', margin, yPosition);
+            pdf.text('Legal Notice & Disclaimer', margin, yPosition);
             yPosition += 15;
             
             pdf.setFontSize(10);
-            pdf.setTextColor(0, 0, 0);
+            pdf.setTextColor(60, 60, 60);
             pdf.setFont('helvetica', 'normal');
             
             const disclaimer = [
-                'This report is generated by AlphaVault AI based on technical analysis of historical market data.',
+                'This report is generated by AlphaVault AI based exclusively on proprietary technical analysis algorithms.',
+                'All indicators are calculated internally and do not contain raw market data from third-party providers.',
                 '',
                 'INVESTMENT DISCLAIMER:',
-                '• This report does not constitute investment advice or a recommendation to buy or sell securities.',
+                '• This report does NOT constitute investment advice or a recommendation to buy or sell securities.',
                 '• Past performance does not guarantee future results.',
-                '• All investments involve risk, including the loss of principal.',
-                '• Technical indicators are mathematical calculations based on historical data and should not be',
-                '  the sole basis for investment decisions.',
-                '• Consult with a qualified financial advisor before making investment decisions.',
+                '• All investments involve risk, including the potential loss of principal.',
+                '• Technical indicators are mathematical calculations and should not be the sole basis for decisions.',
+                '• Always consult with a qualified financial advisor before making investment decisions.',
                 '',
-                'DATA ACCURACY:',
-                '• While we strive for accuracy, we do not guarantee the completeness or accuracy of the data.',
-                '• Market conditions can change rapidly, and this analysis reflects data as of the report date only.',
+                'DATA COMPLIANCE:',
+                '• This report contains ONLY technical indicators calculated by AlphaVault AI.',
+                '• No raw price data, volume data, or other market data from APIs is redistributed.',
+                '• All calculations are performed on licensed data and presented as derivative analytics.',
                 '',
                 'NO WARRANTY:',
-                '• This report is provided "as is" without any warranty of any kind.',
-                '• AlphaVault AI and its affiliates are not liable for any investment losses.',
+                '• This report is provided "AS IS" without warranty of any kind.',
+                '• AlphaVault AI makes no representations regarding accuracy or completeness.',
+                '• We are not liable for any investment losses resulting from use of this report.',
                 '',
-                'FOR EDUCATIONAL AND INFORMATIONAL PURPOSES ONLY.'
+                'INTELLECTUAL PROPERTY:',
+                '• AlphaVault AI algorithms and methodologies are proprietary and confidential.',
+                '• Unauthorized reproduction or distribution of this report is prohibited.',
+                '',
+                'FOR EDUCATIONAL AND INFORMATIONAL PURPOSES ONLY.',
+                '',
+                'By using this report, you acknowledge and agree to these terms.'
             ];
             
             disclaimer.forEach(line => {
@@ -4790,19 +4953,44 @@ const AdvancedAnalysis = {
                     pdf.addPage();
                     yPosition = 20;
                 }
+                
+                if (line.includes('DISCLAIMER:') || line.includes('COMPLIANCE:') || 
+                    line.includes('WARRANTY:') || line.includes('PROPERTY:')) {
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(102, 126, 234);
+                } else {
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(60, 60, 60);
+                }
+                
                 pdf.text(line, margin, yPosition);
-                yPosition += 6;
+                yPosition += line === '' ? 3 : 6;
             });
             
+            // Footer
+            yPosition = pageHeight - 25;
+            pdf.setFillColor(102, 126, 234);
+            pdf.rect(0, yPosition - 5, pageWidth, 40, 'F');
+            
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AlphaVault AI', pageWidth / 2, yPosition + 5, { align: 'center' });
+            
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition + 12, { align: 'center' });
+            pdf.text('© ' + new Date().getFullYear() + ' AlphaVault AI. All rights reserved.', pageWidth / 2, yPosition + 18, { align: 'center' });
+            
             // ============================================
-            // SAVE PDF
+            // 💾 SAVE PDF
             // ============================================
             
-            const filename = `${symbol}_Technical_Analysis_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+            const filename = `AlphaVault_${symbol}_Analysis_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
             pdf.save(filename);
             
-            console.log('✅ PDF report generated successfully:', filename);
-            this.showNotification('✅ PDF report generated successfully!', 'success');
+            console.log('✅ Premium PDF report generated:', filename);
+            this.showNotification('✅ Premium PDF report generated!', 'success');
             
         } catch (error) {
             console.error('❌ PDF generation failed:', error);
