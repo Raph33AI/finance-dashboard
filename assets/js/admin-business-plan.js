@@ -2458,7 +2458,7 @@ function renderCurrentValuation() {
                 <div class="current-val-card">
                     <h4>Current Valuation</h4>
                     <div class="val-amount">${formatCurrency(currentVal)}</div>
-                    <div class="val-subtitle">~€400,000</div>
+                    // <div class="val-subtitle">~€400,000</div>
                 </div>
                 
                 <div class="current-val-card">
