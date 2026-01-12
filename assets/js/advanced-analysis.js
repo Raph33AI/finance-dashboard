@@ -4244,6 +4244,633 @@ const AdvancedAnalysis = {
         if (updateElement) {
             updateElement.textContent = `Last update: ${formatted}`;
         }
+    },
+
+    // ============================================
+    // 📊 EXPORT TO CSV - ALL TECHNICAL INDICATORS
+    // ============================================
+
+    exportToCSV() {
+        console.log('📊 Exporting data to CSV...');
+        
+        if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
+            alert('⚠ No data available to export. Please load a stock first.');
+            return;
+        }
+        
+        const symbol = this.currentSymbol;
+        const period = this.currentPeriod;
+        const prices = this.stockData.prices;
+        
+        try {
+            // ✅ CALCULER TOUS LES INDICATEURS
+            const rsi = this.calculateRSI(prices);
+            const macd = this.calculateMACD(prices);
+            const stochastic = this.calculateStochastic(prices);
+            const williams = this.calculateWilliams(prices);
+            const adx = this.calculateADX(prices);
+            const obv = this.calculateOBV(prices);
+            const atr = this.calculateATR(prices);
+            const mfi = this.calculateMFI(prices);
+            const cci = this.calculateCCI(prices);
+            const ultimateOsc = this.calculateUltimateOscillator(prices);
+            const roc = this.calculateROC(prices);
+            const aroon = this.calculateAroon(prices);
+            const cmf = this.calculateCMF(prices);
+            const elderRay = this.calculateElderRay(prices);
+            
+            // ✅ CRÉER LES HEADERS CSV
+            const headers = [
+                'Date',
+                'Open',
+                'High',
+                'Low',
+                'Close',
+                'Volume',
+                'RSI',
+                'MACD_Line',
+                'MACD_Signal',
+                'MACD_Histogram',
+                'Stochastic_K',
+                'Stochastic_D',
+                'Williams_R',
+                'ADX',
+                'ADX_PlusDI',
+                'ADX_MinusDI',
+                'OBV',
+                'ATR',
+                'MFI',
+                'CCI',
+                'Ultimate_Oscillator',
+                'ROC',
+                'Aroon_Up',
+                'Aroon_Down',
+                'CMF',
+                'Elder_Bull_Power',
+                'Elder_Bear_Power'
+            ];
+            
+            // ✅ CRÉER UNE MAP POUR CHAQUE INDICATEUR (par timestamp)
+            const dataByTimestamp = new Map();
+            
+            // Ajouter les prix de base
+            prices.forEach(p => {
+                dataByTimestamp.set(p.timestamp, {
+                    date: new Date(p.timestamp).toISOString().split('T')[0],
+                    open: p.open.toFixed(2),
+                    high: p.high.toFixed(2),
+                    low: p.low.toFixed(2),
+                    close: p.close.toFixed(2),
+                    volume: p.volume
+                });
+            });
+            
+            // Ajouter RSI
+            rsi.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).rsi = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter MACD
+            macd.macdLine.forEach(([timestamp, value], idx) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    const data = dataByTimestamp.get(timestamp);
+                    data.macd_line = value.toFixed(4);
+                    data.macd_signal = macd.signalLine[idx]?.[1]?.toFixed(4) || '';
+                    data.macd_histogram = macd.histogram[idx]?.[1]?.toFixed(4) || '';
+                }
+            });
+            
+            // Ajouter Stochastic
+            stochastic.k.forEach(([timestamp, value], idx) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    const data = dataByTimestamp.get(timestamp);
+                    data.stochastic_k = value.toFixed(2);
+                    data.stochastic_d = stochastic.d[idx]?.[1]?.toFixed(2) || '';
+                }
+            });
+            
+            // Ajouter Williams %R
+            williams.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).williams_r = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter ADX
+            adx.adx.forEach(([timestamp, value], idx) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    const data = dataByTimestamp.get(timestamp);
+                    data.adx = value.toFixed(2);
+                    data.adx_plusdi = adx.plusDI[idx]?.[1]?.toFixed(2) || '';
+                    data.adx_minusdi = adx.minusDI[idx]?.[1]?.toFixed(2) || '';
+                }
+            });
+            
+            // Ajouter OBV
+            obv.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).obv = Math.round(value);
+                }
+            });
+            
+            // Ajouter ATR
+            atr.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).atr = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter MFI
+            mfi.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).mfi = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter CCI
+            cci.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).cci = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter Ultimate Oscillator
+            ultimateOsc.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).ultimate_oscillator = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter ROC
+            roc.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).roc = value.toFixed(2);
+                }
+            });
+            
+            // Ajouter Aroon
+            aroon.up.forEach(([timestamp, value], idx) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    const data = dataByTimestamp.get(timestamp);
+                    data.aroon_up = value.toFixed(2);
+                    data.aroon_down = aroon.down[idx]?.[1]?.toFixed(2) || '';
+                }
+            });
+            
+            // Ajouter CMF
+            cmf.forEach(([timestamp, value]) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    dataByTimestamp.get(timestamp).cmf = value.toFixed(4);
+                }
+            });
+            
+            // Ajouter Elder Ray
+            elderRay.bullPower.forEach(([timestamp, value], idx) => {
+                if (dataByTimestamp.has(timestamp)) {
+                    const data = dataByTimestamp.get(timestamp);
+                    data.elder_bull_power = value.toFixed(2);
+                    data.elder_bear_power = elderRay.bearPower[idx]?.[1]?.toFixed(2) || '';
+                }
+            });
+            
+            // ✅ CONSTRUIRE LE CSV
+            let csvContent = headers.join(',') + '\n';
+            
+            // Trier par timestamp (du plus ancien au plus récent)
+            const sortedTimestamps = Array.from(dataByTimestamp.keys()).sort((a, b) => a - b);
+            
+            sortedTimestamps.forEach(timestamp => {
+                const row = dataByTimestamp.get(timestamp);
+                const values = [
+                    row.date || '',
+                    row.open || '',
+                    row.high || '',
+                    row.low || '',
+                    row.close || '',
+                    row.volume || '',
+                    row.rsi || '',
+                    row.macd_line || '',
+                    row.macd_signal || '',
+                    row.macd_histogram || '',
+                    row.stochastic_k || '',
+                    row.stochastic_d || '',
+                    row.williams_r || '',
+                    row.adx || '',
+                    row.adx_plusdi || '',
+                    row.adx_minusdi || '',
+                    row.obv || '',
+                    row.atr || '',
+                    row.mfi || '',
+                    row.cci || '',
+                    row.ultimate_oscillator || '',
+                    row.roc || '',
+                    row.aroon_up || '',
+                    row.aroon_down || '',
+                    row.cmf || '',
+                    row.elder_bull_power || '',
+                    row.elder_bear_power || ''
+                ];
+                
+                csvContent += values.join(',') + '\n';
+            });
+            
+            // ✅ TÉLÉCHARGER LE FICHIER
+            const filename = `${symbol}_Analysis_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+            this.downloadFile(csvContent, filename, 'text/csv');
+            
+            console.log('✅ CSV exported successfully:', filename);
+            this.showNotification('✅ CSV exported successfully!', 'success');
+            
+        } catch (error) {
+            console.error('❌ CSV export failed:', error);
+            alert('❌ Export failed. Please try again.');
+        }
+    },
+
+    // ============================================
+    // 📄 EXPORT TO PDF - PROFESSIONAL REPORT
+    // ============================================
+
+    async exportToPDF() {
+        console.log('📄 Generating PDF report...');
+        
+        if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
+            alert('⚠ No data available to export. Please load a stock first.');
+            return;
+        }
+        
+        const button = document.querySelector('.export-pdf');
+        if (button) {
+            button.classList.add('loading');
+            button.innerHTML = '<i class="fas fa-spinner"></i><span>Generating PDF...</span>';
+        }
+        
+        try {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const symbol = this.currentSymbol;
+            const period = this.currentPeriod;
+            const quote = this.stockData.quote || {};
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            let yPosition = 20;
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+            const contentWidth = pageWidth - (2 * margin);
+            
+            // ============================================
+            // PAGE 1 : COVER PAGE
+            // ============================================
+            
+            // Gradient Background Simulation
+            pdf.setFillColor(38, 73, 178);
+            pdf.rect(0, 0, pageWidth, 80, 'F');
+            
+            // Logo placeholder (you can replace with actual logo)
+            pdf.setFillColor(255, 255, 255);
+            pdf.circle(pageWidth / 2, 40, 15, 'F');
+            pdf.setTextColor(38, 73, 178);
+            pdf.setFontSize(20);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AV', pageWidth / 2, 42, { align: 'center' });
+            
+            // Title
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(28);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('ADVANCED TECHNICAL ANALYSIS', pageWidth / 2, 100, { align: 'center' });
+            
+            // Symbol
+            pdf.setFontSize(48);
+            pdf.text(symbol, pageWidth / 2, 125, { align: 'center' });
+            
+            // Company Name
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(quote.name || symbol, pageWidth / 2, 140, { align: 'center' });
+            
+            // Period & Date
+            pdf.setFontSize(12);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text(`Analysis Period: ${period}`, pageWidth / 2, 160, { align: 'center' });
+            pdf.text(`Report Date: ${currentDate}`, pageWidth / 2, 170, { align: 'center' });
+            
+            // Footer
+            pdf.setFontSize(10);
+            pdf.setTextColor(150, 150, 150);
+            pdf.text('Powered by AlphaVault AI', pageWidth / 2, pageHeight - 20, { align: 'center' });
+            pdf.text('Professional Financial Intelligence Platform', pageWidth / 2, pageHeight - 15, { align: 'center' });
+            
+            // ============================================
+            // PAGE 2 : EXECUTIVE SUMMARY
+            // ============================================
+            
+            pdf.addPage();
+            yPosition = 20;
+            
+            // Title
+            pdf.setFontSize(20);
+            pdf.setTextColor(38, 73, 178);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Executive Summary', margin, yPosition);
+            yPosition += 15;
+            
+            // Divider
+            pdf.setDrawColor(38, 73, 178);
+            pdf.setLineWidth(0.5);
+            pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+            yPosition += 10;
+            
+            // AlphaVault Score
+            const alphaScore = this.calculateAlphaVaultScore();
+            pdf.setFontSize(14);
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AlphaVault Score:', margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`${alphaScore}/100`, margin + 60, yPosition);
+            yPosition += 10;
+            
+            // Market Strength
+            const marketStrength = this.calculateMarketStrength();
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Market Strength:', margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            let strengthText = marketStrength >= 75 ? 'Very Strong' :
+                            marketStrength >= 60 ? 'Strong' :
+                            marketStrength >= 45 ? 'Moderate' :
+                            marketStrength >= 30 ? 'Weak' : 'Very Weak';
+            pdf.text(strengthText, margin + 60, yPosition);
+            yPosition += 10;
+            
+            // Current Price (if available)
+            if (quote.price) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Current Price:', margin, yPosition);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`$${quote.price.toFixed(2)}`, margin + 60, yPosition);
+                yPosition += 10;
+            }
+            
+            yPosition += 5;
+            
+            // AI Recommendation Summary
+            pdf.setFontSize(16);
+            pdf.setTextColor(38, 73, 178);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AI Recommendations by Horizon', margin, yPosition);
+            yPosition += 10;
+            
+            pdf.setFontSize(12);
+            pdf.setTextColor(0, 0, 0);
+            
+            // Generate AI recommendations
+            const prices = this.stockData.prices;
+            const technicalSignals = this.collectAllTechnicalSignals(prices);
+            const trendAnalysis = this.analyzeTrendsByHorizon(prices);
+            const aiScore = this.calculateAIConfidenceScore(technicalSignals);
+            const horizonRecommendations = this.generateHorizonRecommendations(aiScore, technicalSignals, trendAnalysis);
+            
+            // 1 Year
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('1 Year Horizon:', margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            const rec1y = horizonRecommendations['1y'];
+            pdf.text(`${rec1y.recommendation} (${rec1y.confidence}% confidence) - Potential: ${rec1y.potentialMove}%`, margin + 50, yPosition);
+            yPosition += 8;
+            
+            // 2 Years
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('2 Years Horizon:', margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            const rec2y = horizonRecommendations['2y'];
+            pdf.text(`${rec2y.recommendation} (${rec2y.confidence}% confidence) - Potential: ${rec2y.potentialMove}%`, margin + 50, yPosition);
+            yPosition += 8;
+            
+            // 5 Years
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('5 Years Horizon:', margin, yPosition);
+            pdf.setFont('helvetica', 'normal');
+            const rec5y = horizonRecommendations['5y'];
+            pdf.text(`${rec5y.recommendation} (${rec5y.confidence}% confidence) - Potential: ${rec5y.potentialMove}%`, margin + 50, yPosition);
+            yPosition += 15;
+            
+            // Key Drivers
+            pdf.setFontSize(14);
+            pdf.setTextColor(38, 73, 178);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Key Drivers (1Y):', margin, yPosition);
+            yPosition += 8;
+            
+            pdf.setFontSize(11);
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont('helvetica', 'normal');
+            rec1y.drivers.forEach((driver, idx) => {
+                pdf.text(`${idx + 1}. ${driver}`, margin + 5, yPosition);
+                yPosition += 7;
+            });
+            
+            // ============================================
+            // PAGE 3+ : TECHNICAL INDICATORS CHARTS
+            // ============================================
+            
+            const chartsToCapture = [
+                { id: 'rsiChart', title: 'RSI - Relative Strength Index' },
+                { id: 'macdChart', title: 'MACD - Moving Average Convergence Divergence' },
+                { id: 'stochasticChart', title: 'Stochastic Oscillator' },
+                { id: 'williamsChart', title: 'Williams %R' },
+                { id: 'adxChart', title: 'ADX - Trend Strength' },
+                { id: 'obvChart', title: 'On-Balance Volume (OBV)' },
+                { id: 'atrChart', title: 'Average True Range (ATR)' },
+                { id: 'mfiChart', title: 'Money Flow Index (MFI)' },
+                { id: 'cciChart', title: 'Commodity Channel Index (CCI)' },
+                { id: 'ultimateChart', title: 'Ultimate Oscillator' },
+                { id: 'rocChart', title: 'Rate of Change (ROC)' },
+                { id: 'aroonChart', title: 'Aroon Indicator' },
+                { id: 'cmfChart', title: 'Chaikin Money Flow (CMF)' },
+                { id: 'elderRayChart', title: 'Elder Ray Index' }
+            ];
+            
+            for (let i = 0; i < chartsToCapture.length; i++) {
+                const chartInfo = chartsToCapture[i];
+                const chartElement = document.getElementById(chartInfo.id);
+                
+                if (!chartElement) {
+                    console.warn(`Chart ${chartInfo.id} not found`);
+                    continue;
+                }
+                
+                // Add new page for each chart
+                pdf.addPage();
+                yPosition = 20;
+                
+                // Chart Title
+                pdf.setFontSize(16);
+                pdf.setTextColor(38, 73, 178);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(chartInfo.title, margin, yPosition);
+                yPosition += 10;
+                
+                try {
+                    // Capture chart as image
+                    const canvas = await html2canvas(chartElement, {
+                        scale: 2,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    // Calculate dimensions to fit page
+                    const imgWidth = contentWidth;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    // Add image to PDF
+                    pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, Math.min(imgHeight, pageHeight - yPosition - 20));
+                    
+                    console.log(`✅ Chart captured: ${chartInfo.title}`);
+                    
+                } catch (error) {
+                    console.error(`❌ Failed to capture ${chartInfo.title}:`, error);
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(200, 0, 0);
+                    pdf.text('Error capturing chart', margin, yPosition);
+                }
+            }
+            
+            // ============================================
+            // FINAL PAGE : DISCLAIMER
+            // ============================================
+            
+            pdf.addPage();
+            yPosition = 20;
+            
+            pdf.setFontSize(18);
+            pdf.setTextColor(38, 73, 178);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Important Disclaimer', margin, yPosition);
+            yPosition += 15;
+            
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont('helvetica', 'normal');
+            
+            const disclaimer = [
+                'This report is generated by AlphaVault AI based on technical analysis of historical market data.',
+                '',
+                'INVESTMENT DISCLAIMER:',
+                '• This report does not constitute investment advice or a recommendation to buy or sell securities.',
+                '• Past performance does not guarantee future results.',
+                '• All investments involve risk, including the loss of principal.',
+                '• Technical indicators are mathematical calculations based on historical data and should not be',
+                '  the sole basis for investment decisions.',
+                '• Consult with a qualified financial advisor before making investment decisions.',
+                '',
+                'DATA ACCURACY:',
+                '• While we strive for accuracy, we do not guarantee the completeness or accuracy of the data.',
+                '• Market conditions can change rapidly, and this analysis reflects data as of the report date only.',
+                '',
+                'NO WARRANTY:',
+                '• This report is provided "as is" without any warranty of any kind.',
+                '• AlphaVault AI and its affiliates are not liable for any investment losses.',
+                '',
+                'FOR EDUCATIONAL AND INFORMATIONAL PURPOSES ONLY.'
+            ];
+            
+            disclaimer.forEach(line => {
+                if (yPosition > pageHeight - 30) {
+                    pdf.addPage();
+                    yPosition = 20;
+                }
+                pdf.text(line, margin, yPosition);
+                yPosition += 6;
+            });
+            
+            // ============================================
+            // SAVE PDF
+            // ============================================
+            
+            const filename = `${symbol}_Technical_Analysis_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+            pdf.save(filename);
+            
+            console.log('✅ PDF report generated successfully:', filename);
+            this.showNotification('✅ PDF report generated successfully!', 'success');
+            
+        } catch (error) {
+            console.error('❌ PDF generation failed:', error);
+            alert('❌ PDF generation failed. Please ensure jsPDF and html2canvas libraries are loaded.');
+        } finally {
+            if (button) {
+                button.classList.remove('loading');
+                button.innerHTML = '<i class="fas fa-file-pdf"></i><span>Export PDF Report</span>';
+            }
+        }
+    },
+
+    // ============================================
+    // 🔧 UTILITY: Download File
+    // ============================================
+
+    downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    },
+
+    // ============================================
+    // 🔔 UTILITY: Show Notification
+    // ============================================
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `export-notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #2563eb)'};
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideInRight 0.4s ease;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.4s ease';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 400);
+        }, 3000);
     }
 };
 

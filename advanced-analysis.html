@@ -835,6 +835,19 @@
                                     <button class='horizon-btn' data-period='5Y' onclick='AdvancedAnalysis.changePeriod("5Y")'>5Y</button>
                                 </div>
                             </div>
+
+                            <!-- Export Buttons Section -->
+                            <div class="export-buttons-container">
+                                <button class="export-btn export-csv" onclick="AdvancedAnalysis.exportToCSV()" title="Export all data to CSV">
+                                    <i class="fas fa-file-csv"></i>
+                                    <span>Export CSV</span>
+                                </button>
+                                
+                                <button class="export-btn export-pdf" onclick="AdvancedAnalysis.exportToPDF()" title="Generate professional PDF report">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <span>Export PDF Report</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
@@ -2902,5 +2915,9 @@ body.dark-mode .portfolio-dropdown:focus {
 </style>
     <!-- Admin Visibility (affiche le menu admin uniquement pour raphnardone@gmail.com) -->
     <script src="assets/js/admin-visibility.js"></script>
+
+    <!-- Bibliothèques pour PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
