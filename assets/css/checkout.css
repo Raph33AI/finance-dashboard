@@ -996,7 +996,7 @@ select:focus-visible {
 
 /* Badge "Fastest Way to Pay" discret */
 .payment-request-container::before {
-    content: '⚡ Fastest Way to Pay';
+    /* content: '⚡ Fastest Way to Pay'; */
     display: block;
     text-align: center;
     font-size: 0.7rem;
