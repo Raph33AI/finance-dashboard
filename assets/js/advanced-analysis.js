@@ -4493,7 +4493,7 @@ const AdvancedAnalysis = {
         }
     },
 
-    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.0 (FINAL CORRECTED)
+    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.1 (FINAL CORRECTED)
 // ============================================
 
 async exportToPDF() {
@@ -4559,7 +4559,7 @@ async exportToPDF() {
         // ✨ LOGO PREMIUM (Centré en haut)
         const logoSize = 65;
         const logoX = (pageWidth - logoSize) / 2;
-        const logoY = 45;
+        const logoY = 40;
 
         // Subtle glow effect (3 couches légères)
         for (let i = 3; i > 0; i--) {
@@ -4590,7 +4590,7 @@ async exportToPDF() {
         pdf.setFont('helvetica', 'bold');
         pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { 
             align: 'center', 
-            charSpace: 4 // Espacement de caractères (simule Satoshi)
+            charSpace: 4
         });
 
         yPosition += 10;
@@ -4639,10 +4639,10 @@ async exportToPDF() {
         yPosition += badgeHeight + 20;
 
         if (quote.name && quote.name !== symbol) {
-            // Charger le logo de l'entreprise
-            const companyLogoBase64 = await this.getCompanyLogo(symbol);
+            // Charger le logo de l'entreprise avec CompanyLogos
+            const companyLogoBase64 = await this.getCompanyLogoWithFallback(symbol, quote.name);
             
-            if (companyLogoBase64) {
+            if (companyLogoBase64 && !companyLogoBase64.startsWith('<div')) {
                 const companyLogoSize = 35;
                 const companyLogoX = (pageWidth - companyLogoSize) / 2;
                 
@@ -4683,6 +4683,7 @@ async exportToPDF() {
 
         pdf.setFontSize(18);
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
         pdf.text(period.toUpperCase(), leftX, cardY + 32);
 
         // Center divider
@@ -4699,6 +4700,7 @@ async exportToPDF() {
 
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
         const formattedDate = new Date().toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -4708,6 +4710,7 @@ async exportToPDF() {
 
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(255, 255, 255, 0.85);
         const timestamp = new Date().toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
@@ -4715,18 +4718,34 @@ async exportToPDF() {
         });
         pdf.text(timestamp + ' UTC', rightX, cardY + 39);
 
-        // ✨ FOOTER
-        const footerY = pageHeight - 22;
+        // ✨ FOOTER (Corrigé pour ne pas être rogné)
+        const footerY = pageHeight - 28;
 
+        // Company name (si disponible)
+        if (quote.name && quote.name !== symbol) {
+            pdf.setFontSize(9);
+            pdf.setTextColor(255, 255, 255, 0.95);
+            pdf.setFont('helvetica', 'normal');
+            
+            let displayName = quote.name;
+            if (displayName.length > 50) {
+                displayName = displayName.substring(0, 47) + '...';
+            }
+            
+            pdf.text(displayName, pageWidth / 2, footerY, { align: 'center' });
+        }
+
+        // Copyright
         pdf.setFontSize(8);
-        pdf.setTextColor(255, 255, 255, 0.9);
+        pdf.setTextColor(255, 255, 255, 0.85);
         pdf.setFont('helvetica', 'normal');
         pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
-                pageWidth / 2, footerY, { align: 'center' });
+                pageWidth / 2, footerY + 7, { align: 'center' });
 
+        // Confidential
         pdf.setFontSize(7);
         pdf.setTextColor(255, 255, 255, 0.7);
-        pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 5, { align: 'center' });
+        pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 13, { align: 'center' });
         
         this.updateProgress(35, 'Generating executive summary...');
         
@@ -4742,9 +4761,8 @@ async exportToPDF() {
         
         yPosition = 25;
         
-        // Premium Header Bar
-        pdf.setFillColor(102, 126, 234);
-        pdf.rect(0, 0, pageWidth, 18, 'F');
+        // Premium Header Bar (GRADIENT BLEU → VIOLET)
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
         
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(12);
@@ -4881,6 +4899,9 @@ async exportToPDF() {
             yPosition += 41;
         });
         
+        // Footer avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+        
         this.updateProgress(45, 'Creating key drivers page...');
         
         // ============================================
@@ -4894,9 +4915,8 @@ async exportToPDF() {
         
         yPosition = 25;
         
-        // Header
-        pdf.setFillColor(102, 126, 234);
-        pdf.rect(0, 0, pageWidth, 18, 'F');
+        // Header avec gradient
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
         
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(12);
@@ -4977,16 +4997,33 @@ async exportToPDF() {
                 yPosition += 17;
                 
                 // Check page overflow
-                if (yPosition > pageHeight - 40 && horizonIdx < allHorizons.length - 1) {
+                if (yPosition > pageHeight - 50 && horizonIdx < allHorizons.length - 1) {
+                    // Footer avec gradient
+                    this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+                    
                     pdf.addPage();
                     pdf.setFillColor(248, 250, 252);
                     pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-                    yPosition = 30;
+                    
+                    // Header avec gradient
+                    this.addGradientHeader(pdf, pageWidth, pageHeight);
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFontSize(12);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text('KEY INVESTMENT DRIVERS (CONTINUED)', margin, 11);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
+                    
+                    yPosition = 35;
                 }
             });
             
-            yPosition += 8; // Space between horizons
+            yPosition += 8;
         });
+        
+        // Footer avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
         
         this.updateProgress(55, 'Capturing technical indicators...');
         
@@ -5030,9 +5067,8 @@ async exportToPDF() {
             
             yPosition = 25;
             
-            // Page Header
-            pdf.setFillColor(102, 126, 234);
-            pdf.rect(0, 0, pageWidth, 18, 'F');
+            // Page Header avec gradient
+            this.addGradientHeader(pdf, pageWidth, pageHeight);
             pdf.setTextColor(255, 255, 255);
             pdf.setFontSize(12);
             pdf.setFont('helvetica', 'bold');
@@ -5085,10 +5121,8 @@ async exportToPDF() {
                 pdf.text('Error capturing chart', margin, yPosition);
             }
             
-            // Footer note
-            pdf.setFontSize(8);
-            pdf.setTextColor(148, 163, 184);
-            pdf.text('Data calculated by AlphaVault AI proprietary algorithms', margin, pageHeight - 15);
+            // Footer avec gradient
+            this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
         }
         
         this.updateProgress(92, 'Adding legal disclaimer...');
@@ -5104,9 +5138,8 @@ async exportToPDF() {
         
         yPosition = 25;
         
-        // Header
-        pdf.setFillColor(102, 126, 234);
-        pdf.rect(0, 0, pageWidth, 18, 'F');
+        // Header avec gradient
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'bold');
@@ -5155,11 +5188,22 @@ async exportToPDF() {
         ];
         
         disclaimer.forEach(line => {
-            if (yPosition > pageHeight - 30) {
+            if (yPosition > pageHeight - 50) {
+                // Footer avec gradient
+                this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+                
                 pdf.addPage();
                 pdf.setFillColor(248, 250, 252);
                 pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-                yPosition = 20;
+                
+                // Header avec gradient
+                this.addGradientHeader(pdf, pageWidth, pageHeight);
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('IMPORTANT LEGAL DISCLAIMER (CONTINUED)', margin, 11);
+                
+                yPosition = 35;
             }
             
             if (line.includes('DISCLAIMER:') || line.includes('COMPLIANCE:') || 
@@ -5175,20 +5219,8 @@ async exportToPDF() {
             yPosition += line === '' ? 4 : 6;
         });
         
-        // Footer
-        yPosition = pageHeight - 28;
-        pdf.setFillColor(102, 126, 234);
-        pdf.rect(0, yPosition - 5, pageWidth, 40, 'F');
-        
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('AlphaVault AI', pageWidth / 2, yPosition + 6, { align: 'center' });
-        
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition + 14, { align: 'center' });
-        pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, pageWidth / 2, yPosition + 21, { align: 'center' });
+        // Footer final avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
         
         this.updateProgress(98, 'Finalizing PDF...');
         
@@ -5213,6 +5245,58 @@ async exportToPDF() {
         this.hideProgressModal();
         alert('❌ PDF generation failed. Please ensure jsPDF and html2canvas libraries are loaded.');
     }
+},
+
+// ============================================
+// 🎨 GRADIENT HEADER (BLEU → VIOLET)
+// ============================================
+
+addGradientHeader(pdf, pageWidth, pageHeight) {
+    const headerHeight = 18;
+    const steps = 50;
+    
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / steps;
+        const r = Math.round(102 + (118 - 102) * ratio);
+        const g = Math.round(126 + (75 - 126) * ratio);
+        const b = Math.round(234 + (162 - 234) * ratio);
+        
+        pdf.setFillColor(r, g, b);
+        pdf.rect((pageWidth / steps) * i, 0, (pageWidth / steps) + 0.5, headerHeight, 'F');
+    }
+},
+
+// ============================================
+// 🎨 GRADIENT FOOTER (BLEU → VIOLET)
+// ============================================
+
+addGradientFooter(pdf, pageWidth, pageHeight, symbol) {
+    const footerHeight = 18;
+    const footerY = pageHeight - footerHeight;
+    const steps = 50;
+    
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / steps;
+        const r = Math.round(102 + (118 - 102) * ratio);
+        const g = Math.round(126 + (75 - 126) * ratio);
+        const b = Math.round(234 + (162 - 234) * ratio);
+        
+        pdf.setFillColor(r, g, b);
+        pdf.rect((pageWidth / steps) * i, footerY, (pageWidth / steps) + 0.5, footerHeight, 'F');
+    }
+    
+    // Footer text
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('AlphaVault AI', 15, footerY + 11);
+    
+    pdf.setFontSize(8);
+    pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
+            pageWidth / 2, footerY + 11, { align: 'center' });
+    
+    pdf.setFontSize(9);
+    pdf.text(symbol, pageWidth - 15, footerY + 11, { align: 'right' });
 },
 
 // ============================================
@@ -5378,22 +5462,32 @@ loadImageAsBase64(imagePath) {
 },
 
 // ============================================
-// 🏢 GET COMPANY LOGO
+// 🏢 GET COMPANY LOGO WITH FALLBACK (UTILISE CompanyLogos)
 // ============================================
 
-async getCompanyLogo(symbol) {
+async getCompanyLogoWithFallback(symbol, companyName) {
     try {
         console.log(`🔍 Fetching company logo for ${symbol}...`);
         
-        // Méthode 1 : Clearbit Logo API (Gratuite)
-        const domain = this.getCompanyDomain(symbol);
-        const clearbitUrl = `https://logo.clearbit.com/${domain}`;
-        
-        const logoBase64 = await this.loadImageAsBase64(clearbitUrl);
-        
-        if (logoBase64) {
-            console.log(`✅ Logo loaded for ${symbol} from Clearbit`);
-            return logoBase64;
+        // Utiliser le système CompanyLogos existant
+        if (typeof window.CompanyLogos !== 'undefined') {
+            const logoUrls = window.CompanyLogos.getLogoUrls(symbol, companyName);
+            
+            // Essayer l'URL principale
+            let logoBase64 = await this.loadImageAsBase64(logoUrls.primary);
+            if (logoBase64) {
+                console.log(`✅ Logo loaded for ${symbol} from Logo.dev`);
+                return logoBase64;
+            }
+            
+            // Essayer les fallbacks
+            for (const fallbackUrl of logoUrls.fallbacks) {
+                logoBase64 = await this.loadImageAsBase64(fallbackUrl);
+                if (logoBase64) {
+                    console.log(`✅ Logo loaded for ${symbol} from fallback`);
+                    return logoBase64;
+                }
+            }
         }
         
         // Méthode 2 : Logo stocké localement
@@ -5412,139 +5506,6 @@ async getCompanyLogo(symbol) {
         console.error(`❌ Error loading logo for ${symbol}:`, error);
         return null;
     }
-},
-
-// Helper : Obtenir le domaine de l'entreprise
-getCompanyDomain(symbol) {
-    const domains = {
-        'AAPL': 'apple.com',
-        'MSFT': 'microsoft.com',
-        'GOOGL': 'google.com',
-        'GOOG': 'google.com',
-        'AMZN': 'amazon.com',
-        'TSLA': 'tesla.com',
-        'META': 'meta.com',
-        'NVDA': 'nvidia.com',
-        'NFLX': 'netflix.com',
-        'AMD': 'amd.com',
-        'INTC': 'intel.com',
-        'PYPL': 'paypal.com',
-        'DIS': 'disney.com',
-        'ADBE': 'adobe.com',
-        'CRM': 'salesforce.com',
-        'ORCL': 'oracle.com',
-        'IBM': 'ibm.com',
-        'UBER': 'uber.com',
-        'ABNB': 'airbnb.com',
-        'COIN': 'coinbase.com',
-        'SQ': 'squareup.com',
-        'SHOP': 'shopify.com',
-        'SPOT': 'spotify.com',
-        'SNAP': 'snap.com',
-        'TWTR': 'twitter.com',
-        'LYFT': 'lyft.com',
-        'PINS': 'pinterest.com',
-        'ZM': 'zoom.us',
-        'DOCU': 'docusign.com',
-        'SNOW': 'snowflake.com',
-        'PLTR': 'palantir.com',
-        'RBLX': 'roblox.com',
-        'RIVN': 'rivian.com',
-        'LCID': 'lucidmotors.com',
-        'NIO': 'nio.com',
-        'BABA': 'alibaba.com',
-        'JD': 'jd.com',
-        'PDD': 'pinduoduo.com',
-        'BIDU': 'baidu.com',
-        'TSM': 'tsmc.com',
-        'V': 'visa.com',
-        'MA': 'mastercard.com',
-        'JPM': 'jpmorganchase.com',
-        'BAC': 'bankofamerica.com',
-        'WFC': 'wellsfargo.com',
-        'GS': 'goldmansachs.com',
-        'MS': 'morganstanley.com',
-        'C': 'citigroup.com',
-        'BLK': 'blackrock.com',
-        'SCHW': 'schwab.com',
-        'AXP': 'americanexpress.com',
-        'SPGI': 'spglobal.com',
-        'CME': 'cmegroup.com',
-        'ICE': 'theice.com',
-        'NKE': 'nike.com',
-        'MCD': 'mcdonalds.com',
-        'SBUX': 'starbucks.com',
-        'HD': 'homedepot.com',
-        'WMT': 'walmart.com',
-        'TGT': 'target.com',
-        'COST': 'costco.com',
-        'LOW': 'lowes.com',
-        'CVS': 'cvs.com',
-        'WBA': 'walgreens.com',
-        'KO': 'coca-cola.com',
-        'PEP': 'pepsico.com',
-        'PG': 'pg.com',
-        'JNJ': 'jnj.com',
-        'UNH': 'unitedhealthgroup.com',
-        'PFE': 'pfizer.com',
-        'ABBV': 'abbvie.com',
-        'TMO': 'thermofisher.com',
-        'ABT': 'abbott.com',
-        'DHR': 'danaher.com',
-        'MRK': 'merck.com',
-        'LLY': 'lilly.com',
-        'BMY': 'bms.com',
-        'AMGN': 'amgen.com',
-        'GILD': 'gilead.com',
-        'VRTX': 'vrtx.com',
-        'REGN': 'regeneron.com',
-        'BIIB': 'biogen.com',
-        'ISRG': 'intuitive.com',
-        'BA': 'boeing.com',
-        'LMT': 'lockheedmartin.com',
-        'RTX': 'rtx.com',
-        'GE': 'ge.com',
-        'CAT': 'caterpillar.com',
-        'DE': 'deere.com',
-        'MMM': '3m.com',
-        'HON': 'honeywell.com',
-        'UPS': 'ups.com',
-        'FDX': 'fedex.com',
-        'DAL': 'delta.com',
-        'AAL': 'aa.com',
-        'UAL': 'united.com',
-        'LUV': 'southwest.com',
-        'CCL': 'carnivalcorp.com',
-        'RCL': 'rclinvestor.com',
-        'MAR': 'marriott.com',
-        'HLT': 'hilton.com',
-        'XOM': 'exxonmobil.com',
-        'CVX': 'chevron.com',
-        'COP': 'conocophillips.com',
-        'SLB': 'slb.com',
-        'EOG': 'eogresources.com',
-        'PSX': 'phillips66.com',
-        'VLO': 'valero.com',
-        'MPC': 'marathonpetroleum.com',
-        'NEE': 'nexteraenergy.com',
-        'DUK': 'duke-energy.com',
-        'SO': 'southerncompany.com',
-        'D': 'dominionenergy.com',
-        'AEP': 'aep.com',
-        'EXC': 'exeloncorp.com',
-        'T': 'att.com',
-        'VZ': 'verizon.com',
-        'TMUS': 't-mobile.com',
-        'CMCSA': 'comcast.com',
-        'CHTR': 'charter.com',
-        'ATVI': 'activisionblizzard.com',
-        'EA': 'ea.com',
-        'TTWO': 'take2games.com',
-        'SONY': 'sony.com',
-        'NTDOY': 'nintendo.com'
-    };
-    
-    return domains[symbol.toUpperCase()] || `${symbol.toLowerCase()}.com`;
 },
 
     // ============================================
