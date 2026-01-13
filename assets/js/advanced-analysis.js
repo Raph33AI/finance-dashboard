@@ -4494,7 +4494,7 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-// 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V2.0
+// 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V2.0 (CORRECTED)
 // ============================================
 
 async exportToPDF() {
@@ -4763,12 +4763,7 @@ async exportToPDF() {
         
         yPosition = 25;
         
-        // Premium Header Bar
-        const headerGradient = pdf.linearGradient(0, 0, pageWidth, 0, [
-            { offset: 0, color: [102, 126, 234] },
-            { offset: 1, color: [118, 75, 162] }
-        ]);
-        
+        // Premium Header Bar (SOLID COLOR - NO GRADIENT)
         pdf.setFillColor(102, 126, 234);
         pdf.rect(0, 0, pageWidth, 18, 'F');
         
@@ -4858,9 +4853,9 @@ async exportToPDF() {
         const horizonRecommendations = this.generateHorizonRecommendations(aiScore, technicalSignals, trendAnalysis);
         
         const horizons = [
-            { key: '1y', label: '1 Year Horizon', icon: 'chart-line' },
-            { key: '2y', label: '2 Years Horizon', icon: 'chart-bar' },
-            { key: '5y', label: '5 Years Horizon', icon: 'rocket' }
+            { key: '1y', label: '1 Year Horizon', icon: '>' },
+            { key: '2y', label: '2 Years Horizon', icon: '>>' },
+            { key: '5y', label: '5 Years Horizon', icon: '>>>' }
         ];
         
         horizons.forEach((horizon, idx) => {
@@ -4876,7 +4871,7 @@ async exportToPDF() {
             pdf.setFontSize(13);
             pdf.setTextColor(30, 41, 59);
             pdf.setFont('helvetica', 'bold');
-            pdf.text(horizon.label, margin + 8, yPosition + 12);
+            pdf.text(`${horizon.icon} ${horizon.label}`, margin + 8, yPosition + 12);
             
             // Recommendation Badge
             const recColor = rec.recommendation === 'BUY' ? [16, 185, 129] :
