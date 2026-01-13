@@ -4493,7 +4493,7 @@ const AdvancedAnalysis = {
         }
     },
 
-    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.2 (FINAL CORRECTED)
+    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.3 (FINAL CORRECTED)
     // ============================================
 
     async exportToPDF() {
@@ -4560,7 +4560,7 @@ const AdvancedAnalysis = {
             // ✨ LOGO PREMIUM (Centré en haut)
             const logoSize = 65;
             const logoX = (pageWidth - logoSize) / 2;
-            const logoY = 40;
+            const logoY = 35;
 
             // Subtle glow effect (3 couches légères)
             for (let i = 3; i > 0; i--) {
@@ -4580,79 +4580,82 @@ const AdvancedAnalysis = {
                 pdf.setTextColor(102, 126, 234);
                 pdf.setFontSize(32);
                 pdf.setFont('helvetica', 'bold');
-                pdf.text('AV', logoX + logoSize / 2, logoY + logoSize / 2 + 8, { align: 'center' });
+                pdf.text('AV', pageWidth / 2, logoY + logoSize / 2 + 8, { align: 'center' });
             }
 
-            // ✨ BRAND NAME (Police Satoshi simulée avec Helvetica + tracking)
-            yPosition = logoY + logoSize + 20;
+            // ✨ BRAND NAME (Police Satoshi simulée)
+            yPosition = logoY + logoSize + 18;
 
             pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(22);
+            pdf.setFontSize(20);
             pdf.setFont('helvetica', 'bold');
             pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { 
                 align: 'center', 
-                charSpace: 4
+                charSpace: 5
             });
 
-            yPosition += 10;
-            pdf.setFontSize(9);
+            yPosition += 9;
+            pdf.setFontSize(8.5);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(255, 255, 255, 0.85);
-            pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition, { align: 'center' });
+            pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition, { 
+                align: 'center',
+                charSpace: 0.5
+            });
 
             // ✨ DIVIDER
-            yPosition += 12;
+            yPosition += 11;
             pdf.setDrawColor(255, 255, 255, 0.4);
             pdf.setLineWidth(0.5);
             const dividerWidth = 60;
             pdf.line((pageWidth - dividerWidth) / 2, yPosition, (pageWidth + dividerWidth) / 2, yPosition);
 
             // ✨ MAIN TITLE
-            yPosition += 22;
-            pdf.setFontSize(36);
+            yPosition += 20;
+            pdf.setFontSize(34);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(255, 255, 255);
-            pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { align: 'center', charSpace: 2 });
+            pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { 
+                align: 'center', 
+                charSpace: 3
+            });
 
-            yPosition += 15;
-            pdf.setFontSize(32);
-            pdf.text('REPORT', pageWidth / 2, yPosition, { align: 'center', charSpace: 4.5 });
+            yPosition += 14;
+            pdf.setFontSize(30);
+            pdf.text('REPORT', pageWidth / 2, yPosition, { 
+                align: 'center', 
+                charSpace: 6
+            });
 
-            // ✨ COMPANY LOGO BADGE (Remplace le texte du symbole)
-            yPosition += 26;
-            const badgeWidth = 100;
-            const badgeHeight = 100;
-            const badgeX = (pageWidth - badgeWidth) / 2;
+            // ✨ COMPANY LOGO BADGE (Juste en dessous du titre)
+            yPosition += 20;
+            const badgeSize = 90;
+            const badgeX = (pageWidth - badgeSize) / 2;
 
-            // Background layers (cercle au lieu de rectangle)
+            // Background circle (noir sans contour gris)
             pdf.setFillColor(40, 44, 52);
-            pdf.circle(pageWidth / 2, yPosition + badgeHeight / 2, badgeHeight / 2, 'F');
-            
-            pdf.setFillColor(255, 255, 255, 0.15);
-            pdf.setDrawColor(255, 255, 255, 0.4);
-            pdf.setLineWidth(1.5);
-            pdf.circle(pageWidth / 2, yPosition + badgeHeight / 2, badgeHeight / 2, 'D');
+            pdf.circle(pageWidth / 2, yPosition + badgeSize / 2, badgeSize / 2, 'F');
 
             // Company logo dans le badge
             if (companyLogoBase64 && !companyLogoBase64.startsWith('<div')) {
-                const companyLogoSize = 65;
+                const companyLogoSize = 60;
                 const companyLogoX = (pageWidth - companyLogoSize) / 2;
-                const companyLogoY = yPosition + (badgeHeight - companyLogoSize) / 2;
+                const companyLogoY = yPosition + (badgeSize - companyLogoSize) / 2;
                 
                 pdf.addImage(companyLogoBase64, 'PNG', companyLogoX, companyLogoY, companyLogoSize, companyLogoSize);
             } else {
                 // Fallback : Afficher le symbole en texte
-                pdf.setFontSize(38);
+                pdf.setFontSize(36);
                 pdf.setFont('helvetica', 'bold');
                 pdf.setTextColor(255, 255, 255);
-                pdf.text(symbol, pageWidth / 2, yPosition + badgeHeight / 2 + 10, { align: 'center' });
+                pdf.text(symbol, pageWidth / 2, yPosition + badgeSize / 2 + 10, { align: 'center' });
             }
 
             // ✨ COMPANY NAME
-            yPosition += badgeHeight + 16;
+            yPosition += badgeSize + 14;
 
             if (quote.name && quote.name !== symbol) {
-                pdf.setFontSize(16);
+                pdf.setFontSize(15);
                 pdf.setFont('helvetica', 'normal');
                 pdf.setTextColor(255, 255, 255, 0.95);
                 
@@ -4661,13 +4664,16 @@ const AdvancedAnalysis = {
                     companyName = companyName.substring(0, 37) + '...';
                 }
                 
-                pdf.text(companyName, pageWidth / 2, yPosition, { align: 'center' });
-                yPosition += 16;
+                pdf.text(companyName, pageWidth / 2, yPosition, { 
+                    align: 'center',
+                    charSpace: 0.3
+                });
+                yPosition += 14;
             }
 
             // ✨ INFO CARD (Période + Date) - Version compacte
             yPosition += 2;
-            const cardHeight = 45;
+            const cardHeight = 42;
             const cardY = yPosition;
 
             // Card background
@@ -4678,29 +4684,29 @@ const AdvancedAnalysis = {
 
             // Left section - Period
             const leftX = margin + 20;
-            pdf.setFontSize(8);
+            pdf.setFontSize(7.5);
             pdf.setTextColor(255, 255, 255, 0.9);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('ANALYSIS PERIOD', leftX, cardY + 13);
+            pdf.text('ANALYSIS PERIOD', leftX, cardY + 12);
 
-            pdf.setFontSize(16);
+            pdf.setFontSize(15);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(255, 255, 255);
-            pdf.text(period.toUpperCase(), leftX, cardY + 28);
+            pdf.text(period.toUpperCase(), leftX, cardY + 26);
 
             // Center divider
             pdf.setDrawColor(255, 255, 255, 0.35);
             pdf.setLineWidth(0.4);
-            pdf.line(pageWidth / 2, cardY + 10, pageWidth / 2, cardY + cardHeight - 10);
+            pdf.line(pageWidth / 2, cardY + 9, pageWidth / 2, cardY + cardHeight - 9);
 
             // Right section - Date
             const rightX = pageWidth / 2 + 14;
-            pdf.setFontSize(8);
+            pdf.setFontSize(7.5);
             pdf.setTextColor(255, 255, 255, 0.9);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('REPORT GENERATED', rightX, cardY + 13);
+            pdf.text('REPORT GENERATED', rightX, cardY + 12);
 
-            pdf.setFontSize(13);
+            pdf.setFontSize(12);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(255, 255, 255);
             const formattedDate = new Date().toLocaleDateString('en-US', {
@@ -4708,9 +4714,9 @@ const AdvancedAnalysis = {
                 day: 'numeric',
                 year: 'numeric'
             });
-            pdf.text(formattedDate, rightX, cardY + 26);
+            pdf.text(formattedDate, rightX, cardY + 24);
 
-            pdf.setFontSize(8);
+            pdf.setFontSize(7.5);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(255, 255, 255, 0.85);
             const timestamp = new Date().toLocaleTimeString('en-US', {
@@ -4718,22 +4724,22 @@ const AdvancedAnalysis = {
                 minute: '2-digit',
                 hour12: true
             });
-            pdf.text(timestamp + ' UTC', rightX, cardY + 35);
+            pdf.text(timestamp + ' UTC', rightX, cardY + 33);
 
             // ✨ FOOTER (Repositionné pour ne pas être rogné)
-            const footerY = pageHeight - 35;
+            const footerY = pageHeight - 38;
 
             // Copyright
-            pdf.setFontSize(8);
+            pdf.setFontSize(7.5);
             pdf.setTextColor(255, 255, 255, 0.9);
             pdf.setFont('helvetica', 'normal');
             pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
                     pageWidth / 2, footerY, { align: 'center' });
 
             // Confidential
-            pdf.setFontSize(7);
+            pdf.setFontSize(6.5);
             pdf.setTextColor(255, 255, 255, 0.75);
-            pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 6, { align: 'center' });
+            pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 5, { align: 'center' });
             
             this.updateProgress(35, 'Generating executive summary...');
             
