@@ -4494,7 +4494,7 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-// 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V2.0 (CORRECTED)
+// 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.0 (FINAL)
 // ============================================
 
 async exportToPDF() {
@@ -4543,208 +4543,236 @@ async exportToPDF() {
         // 🎨 PAGE 1 : ULTRA PREMIUM COVER PAGE
         // ============================================
 
-        // ✨ SOPHISTICATED GRADIENT BACKGROUND (Bleu → Violet → Rose)
-        const gradientSteps = 100;
+        // ✨ ULTRA SMOOTH GRADIENT BACKGROUND (Bleu → Violet → Rose)
+        const gradientSteps = 150; // Plus d'étapes pour un rendu ultra lisse
         for (let i = 0; i < gradientSteps; i++) {
             const ratio = i / gradientSteps;
             
             let r, g, b;
-            if (ratio < 0.6) {
-                const localRatio = ratio / 0.6;
+            
+            // Triple gradient : Bleu profond → Violet → Rose subtil
+            if (ratio < 0.4) {
+                // Bleu vers Violet
+                const localRatio = ratio / 0.4;
                 r = Math.round(102 + (118 - 102) * localRatio);
                 g = Math.round(126 + (75 - 126) * localRatio);
                 b = Math.round(234 + (162 - 234) * localRatio);
+            } else if (ratio < 0.7) {
+                // Violet stable
+                const localRatio = (ratio - 0.4) / 0.3;
+                r = Math.round(118 + (139 - 118) * localRatio);
+                g = Math.round(75 + (92 - 75) * localRatio);
+                b = Math.round(162 + (246 - 162) * localRatio);
             } else {
-                const localRatio = (ratio - 0.6) / 0.4;
-                r = Math.round(118 + (167 - 118) * localRatio);
-                g = Math.round(75 + (139 - 75) * localRatio);
-                b = Math.round(162 + (250 - 162) * localRatio);
+                // Violet vers Rose
+                const localRatio = (ratio - 0.7) / 0.3;
+                r = Math.round(139 + (167 - 139) * localRatio);
+                g = Math.round(92 + (139 - 92) * localRatio);
+                b = Math.round(246 + (250 - 246) * localRatio);
             }
             
             pdf.setFillColor(r, g, b);
-            pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, pageHeight / gradientSteps + 1, 'F');
+            pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, (pageHeight / gradientSteps) + 0.5, 'F');
         }
 
-        // ✨ ELEGANT GEOMETRIC DECORATION
-        pdf.setFillColor(255, 255, 255, 0.06);
-        pdf.circle(pageWidth * 0.08, 25, 75, 'F');
-        pdf.circle(pageWidth * 0.92, 55, 60, 'F');
-        pdf.circle(pageWidth * 0.88, pageHeight * 0.78, 95, 'F');
+        // ✨ ELEGANT GEOMETRIC DECORATION (Optimisées pour ne pas rogner)
+        pdf.setFillColor(255, 255, 255, 0.05);
+        pdf.circle(pageWidth * 0.08, 20, 65, 'F');
+        pdf.circle(pageWidth * 0.92, 50, 55, 'F');
+        pdf.circle(pageWidth * 0.88, pageHeight * 0.80, 85, 'F');
         
-        pdf.setFillColor(255, 255, 255, 0.04);
-        pdf.circle(pageWidth * 0.15, pageHeight * 0.45, 45, 'F');
-        pdf.circle(pageWidth * 0.85, pageHeight * 0.25, 35, 'F');
+        pdf.setFillColor(255, 255, 255, 0.03);
+        pdf.circle(pageWidth * 0.15, pageHeight * 0.50, 40, 'F');
+        pdf.circle(pageWidth * 0.85, pageHeight * 0.30, 30, 'F');
         
-        // Diagonal accent lines
-        pdf.setDrawColor(255, 255, 255, 0.1);
-        pdf.setLineWidth(2);
-        pdf.line(pageWidth * 0.15, pageHeight * 0.15, pageWidth * 0.3, pageHeight * 0.35);
-        pdf.line(pageWidth * 0.7, pageHeight * 0.55, pageWidth * 0.88, pageHeight * 0.75);
+        // Diagonal accent lines (plus subtiles)
+        pdf.setDrawColor(255, 255, 255, 0.08);
+        pdf.setLineWidth(1.5);
+        pdf.line(pageWidth * 0.15, pageHeight * 0.15, pageWidth * 0.28, pageHeight * 0.32);
+        pdf.line(pageWidth * 0.72, pageHeight * 0.58, pageWidth * 0.88, pageHeight * 0.75);
 
-        // ✨ PREMIUM LOGO WITH GLOW EFFECT
-        const logoSize = 55;
+        // ✨ PREMIUM LOGO WITH MULTI-LAYER GLOW
+        const logoSize = 60; // Taille augmentée
         const logoX = (pageWidth - logoSize) / 2;
-        const logoY = 30;
+        const logoY = 25; // Position ajustée
         
-        // Multi-layer glow
-        for (let i = 4; i > 0; i--) {
-            pdf.setFillColor(255, 255, 255, 0.02 * i);
-            const glowSize = logoSize + (i * 10);
+        // Multi-layer glow (5 couches pour effet premium)
+        for (let i = 5; i > 0; i--) {
+            const opacity = 0.015 * i;
+            pdf.setFillColor(255, 255, 255, opacity);
+            const glowSize = logoSize + (i * 12);
             pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, glowSize / 2, 'F');
         }
         
         // Logo image
         if (logoBase64) {
             pdf.addImage(logoBase64, 'PNG', logoX, logoY, logoSize, logoSize);
+        } else {
+            console.warn('⚠ Logo not loaded, drawing fallback');
+            // Fallback: cercle avec "AV"
+            pdf.setFillColor(255, 255, 255, 0.9);
+            pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 'F');
+            pdf.setTextColor(102, 126, 234);
+            pdf.setFontSize(32);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AV', logoX + logoSize / 2, logoY + logoSize / 2 + 8, { align: 'center' });
         }
 
         // ✨ BRAND IDENTITY
-        yPosition = logoY + logoSize + 20;
+        yPosition = logoY + logoSize + 22;
         
         pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(22);
+        pdf.setFontSize(24);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { align: 'center', charSpace: 3 });
+        pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { align: 'center', charSpace: 3.5 });
 
-        yPosition += 11;
+        yPosition += 12;
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(255, 255, 255);
         pdf.text('━━━  Premium Financial Intelligence Platform  ━━━', pageWidth / 2, yPosition, { align: 'center' });
         
         // ✨ REFINED DIVIDER
-        yPosition += 10;
-        pdf.setDrawColor(255, 255, 255, 0.5);
-        pdf.setLineWidth(0.4);
-        pdf.line(pageWidth * 0.28, yPosition, pageWidth * 0.72, yPosition);
+        yPosition += 11;
+        pdf.setDrawColor(255, 255, 255, 0.6);
+        pdf.setLineWidth(0.5);
+        pdf.line(pageWidth * 0.26, yPosition, pageWidth * 0.74, yPosition);
         
         // ✨ MAIN TITLE - ULTRA CLEAN TYPOGRAPHY
-        yPosition += 24;
-        pdf.setFontSize(38);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(255, 255, 255);
-        pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { align: 'center', charSpace: 2 });
-        
-        yPosition += 16;
-        pdf.setFontSize(34);
-        pdf.text('REPORT', pageWidth / 2, yPosition, { align: 'center', charSpace: 4 });
-        
-        // ✨ PREMIUM SYMBOL BADGE (Enhanced Glassmorphism)
         yPosition += 26;
-        const badgeWidth = 90;
-        const badgeHeight = 36;
-        const badgeX = (pageWidth - badgeWidth) / 2;
-        
-        // Triple-layer depth effect
-        pdf.setFillColor(255, 255, 255, 0.08);
-        pdf.roundedRect(badgeX - 3, yPosition - 3, badgeWidth + 6, badgeHeight + 6, 10, 10, 'F');
-        
-        pdf.setFillColor(255, 255, 255, 0.15);
-        pdf.roundedRect(badgeX - 1, yPosition - 1, badgeWidth + 2, badgeHeight + 2, 8, 8, 'F');
-        
-        pdf.setFillColor(255, 255, 255, 0.28);
-        pdf.setDrawColor(255, 255, 255, 0.6);
-        pdf.setLineWidth(1);
-        pdf.roundedRect(badgeX, yPosition, badgeWidth, badgeHeight, 7, 7, 'FD');
-        
-        // Symbol text
         pdf.setFontSize(40);
         pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(255, 255, 255);
-        pdf.text(symbol, pageWidth / 2, yPosition + 25, { align: 'center' });
+        pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { align: 'center', charSpace: 2.5 });
+        
+        yPosition += 17;
+        pdf.setFontSize(36);
+        pdf.text('REPORT', pageWidth / 2, yPosition, { align: 'center', charSpace: 5 });
+        
+        // ✨ PREMIUM SYMBOL BADGE (Enhanced Glassmorphism)
+        yPosition += 28;
+        const badgeWidth = 95;
+        const badgeHeight = 38;
+        const badgeX = (pageWidth - badgeWidth) / 2;
+        
+        // Quad-layer depth effect
+        pdf.setFillColor(255, 255, 255, 0.06);
+        pdf.roundedRect(badgeX - 4, yPosition - 4, badgeWidth + 8, badgeHeight + 8, 11, 11, 'F');
+        
+        pdf.setFillColor(255, 255, 255, 0.10);
+        pdf.roundedRect(badgeX - 2, yPosition - 2, badgeWidth + 4, badgeHeight + 4, 9, 9, 'F');
+        
+        pdf.setFillColor(255, 255, 255, 0.18);
+        pdf.roundedRect(badgeX - 1, yPosition - 1, badgeWidth + 2, badgeHeight + 2, 8, 8, 'F');
+        
+        pdf.setFillColor(255, 255, 255, 0.30);
+        pdf.setDrawColor(255, 255, 255, 0.7);
+        pdf.setLineWidth(1.2);
+        pdf.roundedRect(badgeX, yPosition, badgeWidth, badgeHeight, 7, 7, 'FD');
+        
+        // Symbol text
+        pdf.setFontSize(42);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(symbol, pageWidth / 2, yPosition + 26, { align: 'center' });
         
         // ✨ COMPANY NAME
-        yPosition += badgeHeight + 16;
+        yPosition += badgeHeight + 18;
         if (quote.name && quote.name !== symbol) {
-            pdf.setFontSize(16);
+            pdf.setFontSize(17);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(255, 255, 255);
-            pdf.text(quote.name, pageWidth / 2, yPosition, { align: 'center' });
-            yPosition += 12;
+            
+            // Truncate if too long
+            let companyName = quote.name;
+            if (companyName.length > 40) {
+                companyName = companyName.substring(0, 37) + '...';
+            }
+            
+            pdf.text(companyName, pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 14;
         }
         
         // ✨ ULTRA CLEAN INFO CARD
-        yPosition += 6;
-        const cardHeight = 52;
+        yPosition += 4;
+        const cardHeight = 54;
         const cardY = yPosition;
         
         // Card with subtle shadow
-        pdf.setFillColor(0, 0, 0, 0.15);
-        pdf.roundedRect(margin + 7, cardY + 2, contentWidth - 14, cardHeight, 12, 12, 'F');
+        pdf.setFillColor(0, 0, 0, 0.12);
+        pdf.roundedRect(margin + 6, cardY + 2, contentWidth - 12, cardHeight, 13, 13, 'F');
         
-        pdf.setFillColor(255, 255, 255, 0.22);
-        pdf.setDrawColor(255, 255, 255, 0.5);
-        pdf.setLineWidth(0.6);
-        pdf.roundedRect(margin + 7, cardY, contentWidth - 14, cardHeight, 12, 12, 'FD');
+        pdf.setFillColor(255, 255, 255, 0.24);
+        pdf.setDrawColor(255, 255, 255, 0.6);
+        pdf.setLineWidth(0.7);
+        pdf.roundedRect(margin + 6, cardY, contentWidth - 12, cardHeight, 13, 13, 'FD');
         
         // Left section - Period
-        const leftX = margin + 18;
+        const leftX = margin + 16;
         pdf.setFontSize(9);
         pdf.setTextColor(255, 255, 255);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('ANALYSIS PERIOD', leftX, cardY + 16);
+        pdf.text('ANALYSIS PERIOD', leftX, cardY + 17);
         
-        pdf.setFontSize(18);
+        pdf.setFontSize(19);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(period.toUpperCase(), leftX, cardY + 32);
+        pdf.text(period.toUpperCase(), leftX, cardY + 34);
         
         // Center divider
-        pdf.setDrawColor(255, 255, 255, 0.35);
-        pdf.setLineWidth(0.4);
-        pdf.line(pageWidth / 2, cardY + 12, pageWidth / 2, cardY + cardHeight - 12);
+        pdf.setDrawColor(255, 255, 255, 0.4);
+        pdf.setLineWidth(0.5);
+        pdf.line(pageWidth / 2, cardY + 13, pageWidth / 2, cardY + cardHeight - 13);
         
         // Right section - Date
         const rightX = pageWidth / 2 + 12;
         pdf.setFontSize(9);
         pdf.setTextColor(255, 255, 255);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('REPORT GENERATED', rightX, cardY + 16);
+        pdf.text('REPORT GENERATED', rightX, cardY + 17);
         
-        pdf.setFontSize(14);
+        pdf.setFontSize(15);
         pdf.setFont('helvetica', 'bold');
         const formattedDate = new Date().toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
         });
-        pdf.text(formattedDate, rightX, cardY + 30);
+        pdf.text(formattedDate, rightX, cardY + 31);
         
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(255, 255, 255);
         const timestamp = new Date().toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true
         });
-        pdf.text(timestamp + ' UTC', rightX, cardY + 40);
+        pdf.text(timestamp + ' UTC', rightX, cardY + 42);
         
         // ✨ FEATURES BADGE
-        yPosition = cardY + cardHeight + 20;
+        yPosition = cardY + cardHeight + 22;
         pdf.setFontSize(9);
-        pdf.setTextColor(255, 255, 255);
+        pdf.setTextColor(255, 255, 255, 0.95);
         pdf.setFont('helvetica', 'normal');
         pdf.text('◆  Powered by Advanced AI & 14 Professional Technical Indicators  ◆', 
                  pageWidth / 2, yPosition, { align: 'center' });
         
         // ✨ ELEGANT FOOTER
-        const footerY = pageHeight - 24;
+        const footerY = pageHeight - 26;
         
         pdf.setFontSize(8);
-        pdf.setTextColor(255, 255, 255);
+        pdf.setTextColor(255, 255, 255, 0.95);
         pdf.setFont('helvetica', 'normal');
         pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
                  pageWidth / 2, footerY, { align: 'center' });
         
         pdf.setFontSize(7);
-        pdf.setTextColor(255, 255, 255, 0.7);
+        pdf.setTextColor(255, 255, 255, 0.75);
         pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 5, { align: 'center' });
         
-        // ✨ REFINED WATERMARK
-        pdf.setTextColor(255, 255, 255, 0.025);
-        pdf.setFontSize(140);
+        // ✨ SUBTLE WATERMARK (TRÈS DISCRET - pas de gros AV visible)
+        pdf.setTextColor(255, 255, 255, 0.015); // Opacité extrêmement faible
+        pdf.setFontSize(100);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('AV', pageWidth / 2, pageHeight / 2 + 15, { 
+        pdf.text('ALPHAVAULT', pageWidth / 2, pageHeight / 2 + 20, { 
             align: 'center', 
             angle: -45 
         });
@@ -4763,7 +4791,7 @@ async exportToPDF() {
         
         yPosition = 25;
         
-        // Premium Header Bar (SOLID COLOR - NO GRADIENT)
+        // Premium Header Bar
         pdf.setFillColor(102, 126, 234);
         pdf.rect(0, 0, pageWidth, 18, 'F');
         
@@ -4786,7 +4814,7 @@ async exportToPDF() {
         yPosition += 18;
         
         // ============================================
-        // 📊 METRICS CARDS (Redesigned)
+        // 📊 METRICS CARDS
         // ============================================
         
         const alphaScore = this.calculateAlphaVaultScore();
@@ -4837,7 +4865,7 @@ async exportToPDF() {
         yPosition += 56;
         
         // ============================================
-        // 🤖 AI RECOMMENDATIONS (Redesigned)
+        // 🤖 AI RECOMMENDATIONS
         // ============================================
         
         pdf.setFontSize(20);
@@ -4902,41 +4930,114 @@ async exportToPDF() {
             yPosition += 41;
         });
         
-        yPosition += 8;
+        this.updateProgress(45, 'Creating key drivers page...');
         
         // ============================================
-        // 🔑 KEY DRIVERS
+        // 🔑 PAGE 3 : KEY DRIVERS (TOUS LES HORIZONS)
         // ============================================
         
-        pdf.setFontSize(18);
+        pdf.addPage();
+        
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        yPosition = 25;
+        
+        // Header
+        pdf.setFillColor(102, 126, 234);
+        pdf.rect(0, 0, pageWidth, 18, 'F');
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('KEY INVESTMENT DRIVERS', margin, 11);
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
+        
+        yPosition = 35;
+        
+        // Page Title
+        pdf.setFontSize(24);
         pdf.setTextColor(102, 126, 234);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Key Drivers (1 Year)', margin, yPosition);
-        yPosition += 13;
+        pdf.text('Key Investment Drivers', margin, yPosition);
+        yPosition += 10;
         
-        const rec1y = horizonRecommendations['1y'];
-        rec1y.drivers.forEach((driver, idx) => {
-            pdf.setFillColor(240, 245, 255);
-            pdf.setDrawColor(219, 234, 254);
-            pdf.setLineWidth(0.3);
-            pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
+        pdf.setFontSize(11);
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Critical factors influencing recommendations across all time horizons', margin, yPosition);
+        yPosition += 20;
+        
+        // KEY DRIVERS POUR LES 3 HORIZONS
+        const allHorizons = [
+            { key: '1y', label: '1 Year Horizon', color: [59, 130, 246] },
+            { key: '2y', label: '2 Years Horizon', color: [139, 92, 246] },
+            { key: '5y', label: '5 Years Horizon', color: [236, 72, 153] }
+        ];
+        
+        allHorizons.forEach((horizon, horizonIdx) => {
+            const rec = horizonRecommendations[horizon.key];
             
-            pdf.setFontSize(11);
-            pdf.setTextColor(30, 41, 59);
-            pdf.setFont('helvetica', 'normal');
+            // Section Header
+            pdf.setFillColor(...horizon.color, 0.1);
+            pdf.roundedRect(margin, yPosition, contentWidth, 12, 5, 5, 'F');
             
-            // Bullet number
+            pdf.setFontSize(14);
+            pdf.setTextColor(...horizon.color);
             pdf.setFont('helvetica', 'bold');
-            pdf.text(`${idx + 1}.`, margin + 5, yPosition + 9);
+            pdf.text(horizon.label, margin + 6, yPosition + 8);
             
-            // Driver text
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(driver, margin + 12, yPosition + 9);
+            yPosition += 16;
             
-            yPosition += 17;
+            // Drivers
+            rec.drivers.forEach((driver, idx) => {
+                pdf.setFillColor(255, 255, 255);
+                pdf.setDrawColor(219, 234, 254);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
+                
+                pdf.setFontSize(11);
+                pdf.setTextColor(30, 41, 59);
+                
+                // Bullet number
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(`${idx + 1}.`, margin + 5, yPosition + 9);
+                
+                // Driver text
+                pdf.setFont('helvetica', 'normal');
+                
+                // Wrap text if too long
+                const maxWidth = contentWidth - 20;
+                const lines = pdf.splitTextToSize(driver, maxWidth);
+                
+                if (lines.length > 1) {
+                    pdf.text(lines[0], margin + 12, yPosition + 9);
+                    yPosition += 14;
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
+                    pdf.text(lines[1], margin + 12, yPosition + 9);
+                } else {
+                    pdf.text(driver, margin + 12, yPosition + 9);
+                }
+                
+                yPosition += 17;
+                
+                // Check page overflow
+                if (yPosition > pageHeight - 40 && horizonIdx < allHorizons.length - 1) {
+                    pdf.addPage();
+                    pdf.setFillColor(248, 250, 252);
+                    pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                    yPosition = 30;
+                }
+            });
+            
+            yPosition += 8; // Space between horizons
         });
         
-        this.updateProgress(50, 'Capturing technical indicators...');
+        this.updateProgress(55, 'Capturing technical indicators...');
         
         // ============================================
         // 📈 TECHNICAL INDICATORS CHARTS
@@ -4963,7 +5064,7 @@ async exportToPDF() {
             const chartInfo = chartsToCapture[i];
             const chartElement = document.getElementById(chartInfo.id);
             
-            const progress = 50 + ((i / chartsToCapture.length) * 40);
+            const progress = 55 + ((i / chartsToCapture.length) * 35);
             this.updateProgress(progress, `Processing ${chartInfo.title}...`);
             
             if (!chartElement) {
@@ -4973,7 +5074,6 @@ async exportToPDF() {
             
             pdf.addPage();
             
-            // Light background
             pdf.setFillColor(248, 250, 252);
             pdf.rect(0, 0, pageWidth, pageHeight, 'F');
             
@@ -5169,11 +5269,9 @@ async exportToPDF() {
 // ============================================
 
 showProgressModal() {
-    // Remove existing modal if any
     const existingModal = document.getElementById('pdf-progress-modal');
     if (existingModal) existingModal.remove();
     
-    // Create modal HTML
     const modalHTML = `
         <div id="pdf-progress-modal" style="
             position: fixed;
