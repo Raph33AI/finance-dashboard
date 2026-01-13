@@ -4493,696 +4493,510 @@ const AdvancedAnalysis = {
         }
     },
 
-    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.3 (FINAL CORRECTED)
+    // 📄 EXPORT TO PDF - ULTRA PREMIUM REPORT V3.4 (FINAL CORRECTED)
+// ============================================
+
+async exportToPDF() {
+    console.log('📄 Generating premium PDF report...');
+    
+    if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
+        alert('⚠ No data available to export. Please load a stock first.');
+        return;
+    }
+    
     // ============================================
-
-    async exportToPDF() {
-        console.log('📄 Generating premium PDF report...');
+    // 🎯 SHOW PROGRESS MODAL
+    // ============================================
+    this.showProgressModal();
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
         
-        if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
-            alert('⚠ No data available to export. Please load a stock first.');
-            return;
+        const symbol = this.currentSymbol;
+        const period = this.currentPeriod;
+        const quote = this.stockData.quote || {};
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        let yPosition = 20;
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (2 * margin);
+        
+        // Update progress
+        this.updateProgress(10, 'Loading logos...');
+        
+        // ============================================
+        // 🎨 LOAD LOGO IMAGE & COMPANY LOGO
+        // ============================================
+        const logoBase64 = await this.loadImageAsBase64('apple-touch-icon.png');
+        const companyLogoBase64 = await this.getCompanyLogoWithFallback(symbol, quote.name || symbol);
+        
+        this.updateProgress(20, 'Creating cover page...');
+        
+        // ============================================
+        // 🎨 PAGE 1 : ULTRA PREMIUM COVER PAGE (MINIMALISTE)
+        // ============================================
+
+        // ✨ GRADIENT BACKGROUND (Simplifié - Bleu → Violet)
+        const gradientSteps = 100;
+        for (let i = 0; i < gradientSteps; i++) {
+            const ratio = i / gradientSteps;
+            
+            // Gradient doux : Bleu profond → Violet
+            const r = Math.round(102 + (118 - 102) * ratio);
+            const g = Math.round(126 + (75 - 126) * ratio);
+            const b = Math.round(234 + (162 - 234) * ratio);
+            
+            pdf.setFillColor(r, g, b);
+            pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, (pageHeight / gradientSteps) + 0.5, 'F');
         }
-        
-        // ============================================
-        // 🎯 SHOW PROGRESS MODAL
-        // ============================================
-        this.showProgressModal();
-        
-        try {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            
-            const symbol = this.currentSymbol;
-            const period = this.currentPeriod;
-            const quote = this.stockData.quote || {};
-            const currentDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            let yPosition = 20;
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 15;
-            const contentWidth = pageWidth - (2 * margin);
-            
-            // Update progress
-            this.updateProgress(10, 'Loading logos...');
-            
-            // ============================================
-            // 🎨 LOAD LOGO IMAGE & COMPANY LOGO
-            // ============================================
-            const logoBase64 = await this.loadImageAsBase64('apple-touch-icon.png');
-            const companyLogoBase64 = await this.getCompanyLogoWithFallback(symbol, quote.name || symbol);
-            
-            this.updateProgress(20, 'Creating cover page...');
-            
-            // ============================================
-            // 🎨 PAGE 1 : ULTRA PREMIUM COVER PAGE (MINIMALISTE)
-            // ============================================
 
-            // ✨ GRADIENT BACKGROUND (Simplifié - Bleu → Violet)
-            const gradientSteps = 100;
-            for (let i = 0; i < gradientSteps; i++) {
-                const ratio = i / gradientSteps;
-                
-                // Gradient doux : Bleu profond → Violet
-                const r = Math.round(102 + (118 - 102) * ratio);
-                const g = Math.round(126 + (75 - 126) * ratio);
-                const b = Math.round(234 + (162 - 234) * ratio);
-                
-                pdf.setFillColor(r, g, b);
-                pdf.rect(0, (pageHeight / gradientSteps) * i, pageWidth, (pageHeight / gradientSteps) + 0.5, 'F');
-            }
+        // ✨ LOGO PREMIUM (Centré en haut - TAILLE RÉDUITE)
+        const logoSize = 40; // ✅ RÉDUIT DE 65px → 40px
+        const logoX = (pageWidth - logoSize) / 2;
+        const logoY = 35;
 
-            // ✨ LOGO PREMIUM (Centré en haut)
-            const logoSize = 65;
-            const logoX = (pageWidth - logoSize) / 2;
-            const logoY = 35;
+        // Subtle glow effect (3 couches légères)
+        for (let i = 3; i > 0; i--) {
+            const opacity = 0.08 * i;
+            pdf.setFillColor(255, 255, 255, opacity);
+            const glowSize = logoSize + (i * 8);
+            pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, glowSize / 2, 'F');
+        }
 
-            // Subtle glow effect (3 couches légères)
-            for (let i = 3; i > 0; i--) {
-                const opacity = 0.08 * i;
-                pdf.setFillColor(255, 255, 255, opacity);
-                const glowSize = logoSize + (i * 8);
-                pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, glowSize / 2, 'F');
-            }
-
-            // Logo image
-            if (logoBase64) {
-                pdf.addImage(logoBase64, 'PNG', logoX, logoY, logoSize, logoSize);
-            } else {
-                console.warn('⚠ Logo not loaded, using fallback');
-                pdf.setFillColor(255, 255, 255, 0.95);
-                pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 'F');
-                pdf.setTextColor(102, 126, 234);
-                pdf.setFontSize(32);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('AV', pageWidth / 2, logoY + logoSize / 2 + 8, { align: 'center' });
-            }
-
-            // ✨ BRAND NAME (Police Satoshi simulée)
-            yPosition = logoY + logoSize + 18;
-
-            pdf.setTextColor(255, 255, 255);
+        // Logo image
+        if (logoBase64) {
+            pdf.addImage(logoBase64, 'PNG', logoX, logoY, logoSize, logoSize);
+        } else {
+            console.warn('⚠ Logo not loaded, using fallback');
+            pdf.setFillColor(255, 255, 255, 0.95);
+            pdf.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 'F');
+            pdf.setTextColor(102, 126, 234);
             pdf.setFontSize(20);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { 
-                align: 'center', 
-                charSpace: 5
-            });
+            pdf.text('AV', pageWidth / 2, logoY + logoSize / 2 + 5, { align: 'center' });
+        }
 
-            yPosition += 9;
-            pdf.setFontSize(8.5);
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(255, 255, 255, 0.85);
-            pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition, { 
-                align: 'center',
-                charSpace: 0.5
-            });
+        // ✨ BRAND NAME (Police Satoshi simulée) - CENTRÉ
+        yPosition = logoY + logoSize + 18;
 
-            // ✨ DIVIDER
-            yPosition += 11;
-            pdf.setDrawColor(255, 255, 255, 0.4);
-            pdf.setLineWidth(0.5);
-            const dividerWidth = 60;
-            pdf.line((pageWidth - dividerWidth) / 2, yPosition, (pageWidth + dividerWidth) / 2, yPosition);
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('ALPHAVAULT AI', pageWidth / 2, yPosition, { 
+            align: 'center', 
+            charSpace: 5
+        });
 
-            // ✨ MAIN TITLE
-            yPosition += 20;
-            pdf.setFontSize(34);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(255, 255, 255);
-            pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { 
-                align: 'center', 
-                charSpace: 3
-            });
+        yPosition += 9;
+        pdf.setFontSize(8.5);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(255, 255, 255, 0.85);
+        pdf.text('Premium Financial Intelligence Platform', pageWidth / 2, yPosition, { 
+            align: 'center',
+            charSpace: 0.5
+        });
 
-            yPosition += 14;
-            pdf.setFontSize(30);
-            pdf.text('REPORT', pageWidth / 2, yPosition, { 
-                align: 'center', 
-                charSpace: 6
-            });
+        // ✨ DIVIDER - CENTRÉ
+        yPosition += 11;
+        pdf.setDrawColor(255, 255, 255, 0.4);
+        pdf.setLineWidth(0.5);
+        const dividerWidth = 60;
+        pdf.line((pageWidth - dividerWidth) / 2, yPosition, (pageWidth + dividerWidth) / 2, yPosition);
 
-            // ✨ COMPANY LOGO BADGE (Juste en dessous du titre)
-            yPosition += 20;
-            const badgeSize = 90;
-            const badgeX = (pageWidth - badgeSize) / 2;
+        // ✨ MAIN TITLE - CENTRÉ
+        yPosition += 20;
+        pdf.setFontSize(34);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text('TECHNICAL ANALYSIS', pageWidth / 2, yPosition, { 
+            align: 'center', 
+            charSpace: 3
+        });
 
-            // Background circle (noir sans contour gris)
-            pdf.setFillColor(40, 44, 52);
-            pdf.circle(pageWidth / 2, yPosition + badgeSize / 2, badgeSize / 2, 'F');
+        yPosition += 14;
+        pdf.setFontSize(30);
+        pdf.text('REPORT', pageWidth / 2, yPosition, { 
+            align: 'center', 
+            charSpace: 6
+        });
 
-            // Company logo dans le badge
-            if (companyLogoBase64 && !companyLogoBase64.startsWith('<div')) {
-                const companyLogoSize = 60;
-                const companyLogoX = (pageWidth - companyLogoSize) / 2;
-                const companyLogoY = yPosition + (badgeSize - companyLogoSize) / 2;
-                
-                pdf.addImage(companyLogoBase64, 'PNG', companyLogoX, companyLogoY, companyLogoSize, companyLogoSize);
-            } else {
-                // Fallback : Afficher le symbole en texte
-                pdf.setFontSize(36);
-                pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(255, 255, 255);
-                pdf.text(symbol, pageWidth / 2, yPosition + badgeSize / 2 + 10, { align: 'center' });
-            }
+        // ✨ COMPANY LOGO BADGE (SANS FOND NOIR)
+        yPosition += 20;
+        const badgeSize = 90;
+        const badgeX = (pageWidth - badgeSize) / 2;
 
-            // ✨ COMPANY NAME
-            yPosition += badgeSize + 14;
+        // ✅ SUPPRESSION DU FOND NOIR - Remplacé par un cercle blanc transparent
+        pdf.setFillColor(255, 255, 255, 0.15); // Fond blanc très transparent
+        pdf.circle(pageWidth / 2, yPosition + badgeSize / 2, badgeSize / 2, 'F');
 
-            if (quote.name && quote.name !== symbol) {
-                pdf.setFontSize(15);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setTextColor(255, 255, 255, 0.95);
-                
-                let companyName = quote.name;
-                if (companyName.length > 40) {
-                    companyName = companyName.substring(0, 37) + '...';
-                }
-                
-                pdf.text(companyName, pageWidth / 2, yPosition, { 
-                    align: 'center',
-                    charSpace: 0.3
-                });
-                yPosition += 14;
-            }
+        // Bordure subtile blanche
+        pdf.setDrawColor(255, 255, 255, 0.3);
+        pdf.setLineWidth(0.8);
+        pdf.circle(pageWidth / 2, yPosition + badgeSize / 2, badgeSize / 2, 'S');
 
-            // ✨ INFO CARD (Période + Date) - Version compacte
-            yPosition += 2;
-            const cardHeight = 42;
-            const cardY = yPosition;
-
-            // Card background
-            pdf.setFillColor(255, 255, 255, 0.22);
-            pdf.setDrawColor(255, 255, 255, 0.5);
-            pdf.setLineWidth(0.6);
-            pdf.roundedRect(margin + 8, cardY, contentWidth - 16, cardHeight, 12, 12, 'FD');
-
-            // Left section - Period
-            const leftX = margin + 20;
-            pdf.setFontSize(7.5);
-            pdf.setTextColor(255, 255, 255, 0.9);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('ANALYSIS PERIOD', leftX, cardY + 12);
-
-            pdf.setFontSize(15);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(255, 255, 255);
-            pdf.text(period.toUpperCase(), leftX, cardY + 26);
-
-            // Center divider
-            pdf.setDrawColor(255, 255, 255, 0.35);
-            pdf.setLineWidth(0.4);
-            pdf.line(pageWidth / 2, cardY + 9, pageWidth / 2, cardY + cardHeight - 9);
-
-            // Right section - Date
-            const rightX = pageWidth / 2 + 14;
-            pdf.setFontSize(7.5);
-            pdf.setTextColor(255, 255, 255, 0.9);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('REPORT GENERATED', rightX, cardY + 12);
-
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(255, 255, 255);
-            const formattedDate = new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            pdf.text(formattedDate, rightX, cardY + 24);
-
-            pdf.setFontSize(7.5);
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(255, 255, 255, 0.85);
-            const timestamp = new Date().toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
-            pdf.text(timestamp + ' UTC', rightX, cardY + 33);
-
-            // ✨ FOOTER (Repositionné pour ne pas être rogné)
-            const footerY = pageHeight - 38;
-
-            // Copyright
-            pdf.setFontSize(7.5);
-            pdf.setTextColor(255, 255, 255, 0.9);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
-                    pageWidth / 2, footerY, { align: 'center' });
-
-            // Confidential
-            pdf.setFontSize(6.5);
-            pdf.setTextColor(255, 255, 255, 0.75);
-            pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 5, { align: 'center' });
+        // Company logo dans le badge
+        if (companyLogoBase64 && !companyLogoBase64.startsWith('<div')) {
+            const companyLogoSize = 60;
+            const companyLogoX = (pageWidth - companyLogoSize) / 2;
+            const companyLogoY = yPosition + (badgeSize - companyLogoSize) / 2;
             
-            this.updateProgress(35, 'Generating executive summary...');
-            
-            // ============================================
-            // 📊 PAGE 2 : EXECUTIVE SUMMARY (REDESIGNED)
-            // ============================================
-            
-            pdf.addPage();
-            
-            // Light professional background
-            pdf.setFillColor(248, 250, 252);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            yPosition = 25;
-            
-            // Premium Header Bar (GRADIENT BLEU → VIOLET)
-            this.addGradientHeader(pdf, pageWidth, pageHeight);
-            
-            pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('EXECUTIVE SUMMARY', margin, 11);
-            
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
-            
-            yPosition = 35;
-            
-            // Section Title
-            pdf.setFontSize(24);
-            pdf.setTextColor(102, 126, 234);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Key Performance Metrics', margin, yPosition);
-            yPosition += 18;
-            
-            // ============================================
-            // 📊 METRICS CARDS
-            // ============================================
-            
-            const alphaScore = this.calculateAlphaVaultScore();
-            const marketStrength = this.calculateMarketStrength();
-            
-            // AlphaVault Score Card
-            pdf.setFillColor(255, 255, 255);
-            pdf.setDrawColor(102, 126, 234);
-            pdf.setLineWidth(0.8);
-            pdf.roundedRect(margin, yPosition, (contentWidth / 2) - 5, 40, 8, 8, 'FD');
-            
-            pdf.setFontSize(11);
-            pdf.setTextColor(30, 41, 59);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('AlphaVault Score', margin + 8, yPosition + 12);
-            
+            pdf.addImage(companyLogoBase64, 'PNG', companyLogoX, companyLogoY, companyLogoSize, companyLogoSize);
+        } else {
+            // Fallback : Afficher le symbole en texte - CENTRÉ
             pdf.setFontSize(36);
-            pdf.setTextColor(102, 126, 234);
             pdf.setFont('helvetica', 'bold');
-            pdf.text(`${alphaScore}`, margin + 8, yPosition + 32);
-            
-            pdf.setFontSize(16);
-            pdf.setTextColor(148, 163, 184);
-            pdf.text('/100', margin + 32, yPosition + 32);
-            
-            // Market Strength Card
-            pdf.setFillColor(255, 255, 255);
-            pdf.roundedRect(margin + (contentWidth / 2) + 5, yPosition, (contentWidth / 2) - 5, 40, 8, 8, 'FD');
-            
-            pdf.setFontSize(11);
-            pdf.setTextColor(30, 41, 59);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Market Strength', margin + (contentWidth / 2) + 13, yPosition + 12);
-            
-            let strengthText = marketStrength >= 75 ? 'Very Strong' :
-                            marketStrength >= 60 ? 'Strong' :
-                            marketStrength >= 45 ? 'Moderate' :
-                            marketStrength >= 30 ? 'Weak' : 'Very Weak';
-            
-            let strengthColor = marketStrength >= 60 ? [16, 185, 129] : 
-                            marketStrength >= 45 ? [251, 191, 36] : [239, 68, 68];
-            
-            pdf.setFontSize(20);
-            pdf.setTextColor(...strengthColor);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(strengthText, margin + (contentWidth / 2) + 13, yPosition + 32);
-            
-            yPosition += 56;
-            
-            // ============================================
-            // 🤖 AI RECOMMENDATIONS
-            // ============================================
-            
-            pdf.setFontSize(20);
-            pdf.setTextColor(102, 126, 234);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('AI-Powered Recommendations', margin, yPosition);
-            yPosition += 15;
-            
-            const prices = this.stockData.prices;
-            const technicalSignals = this.collectAllTechnicalSignals(prices);
-            const trendAnalysis = this.analyzeTrendsByHorizon(prices);
-            const aiScore = this.calculateAIConfidenceScore(technicalSignals);
-            const horizonRecommendations = this.generateHorizonRecommendations(aiScore, technicalSignals, trendAnalysis);
-            
-            const horizons = [
-                { key: '1y', label: '1 Year Horizon', icon: '>' },
-                { key: '2y', label: '2 Years Horizon', icon: '>>' },
-                { key: '5y', label: '5 Years Horizon', icon: '>>>' }
-            ];
-            
-            horizons.forEach((horizon, idx) => {
-                const rec = horizonRecommendations[horizon.key];
-                
-                // Card with shadow
-                pdf.setFillColor(255, 255, 255);
-                pdf.setDrawColor(226, 232, 240);
-                pdf.setLineWidth(0.5);
-                pdf.roundedRect(margin, yPosition, contentWidth, 36, 8, 8, 'FD');
-                
-                // Horizon label
-                pdf.setFontSize(13);
-                pdf.setTextColor(30, 41, 59);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text(`${horizon.icon} ${horizon.label}`, margin + 8, yPosition + 12);
-                
-                // Recommendation Badge
-                const recColor = rec.recommendation === 'BUY' ? [16, 185, 129] :
-                                rec.recommendation === 'SELL' ? [239, 68, 68] : [251, 191, 36];
-                
-                pdf.setFillColor(...recColor);
-                pdf.roundedRect(margin + 8, yPosition + 17, 30, 12, 4, 4, 'F');
-                
-                pdf.setTextColor(255, 255, 255);
-                pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text(rec.recommendation, margin + 23, yPosition + 25, { align: 'center' });
-                
-                // Confidence
-                pdf.setTextColor(71, 85, 105);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(11);
-                pdf.text(`Confidence: ${rec.confidence}%`, margin + 45, yPosition + 25);
-                
-                // Potential Move
-                pdf.setFont('helvetica', 'bold');
-                const potentialColor = parseFloat(rec.potentialMove) >= 0 ? [16, 185, 129] : [239, 68, 68];
-                pdf.setTextColor(...potentialColor);
-                pdf.setFontSize(16);
-                pdf.text(`${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%`, 
-                        pageWidth - margin - 8, yPosition + 25, { align: 'right' });
-                
-                yPosition += 41;
-            });
-            
-            // Footer avec gradient
-            this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
-            
-            this.updateProgress(45, 'Creating key drivers page...');
-            
-            // ============================================
-            // 🔑 PAGE 3 : KEY DRIVERS (TOUS LES HORIZONS)
-            // ============================================
-            
-            pdf.addPage();
-            
-            pdf.setFillColor(248, 250, 252);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            yPosition = 25;
-            
-            // Header avec gradient
-            this.addGradientHeader(pdf, pageWidth, pageHeight);
-            
             pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('KEY INVESTMENT DRIVERS', margin, 11);
-            
-            pdf.setFontSize(10);
+            pdf.text(symbol, pageWidth / 2, yPosition + badgeSize / 2 + 10, { align: 'center' });
+        }
+
+        // ✨ COMPANY NAME - CENTRÉ
+        yPosition += badgeSize + 14;
+
+        if (quote.name && quote.name !== symbol) {
+            pdf.setFontSize(15);
             pdf.setFont('helvetica', 'normal');
-            pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
+            pdf.setTextColor(255, 255, 255, 0.95);
             
-            yPosition = 35;
-            
-            // Page Title
-            pdf.setFontSize(24);
-            pdf.setTextColor(102, 126, 234);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Key Investment Drivers', margin, yPosition);
-            yPosition += 10;
-            
-            pdf.setFontSize(11);
-            pdf.setTextColor(100, 116, 139);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text('Critical factors influencing recommendations across all time horizons', margin, yPosition);
-            yPosition += 20;
-            
-            // KEY DRIVERS POUR LES 3 HORIZONS
-            const allHorizons = [
-                { key: '1y', label: '1 Year Horizon', color: [59, 130, 246] },
-                { key: '2y', label: '2 Years Horizon', color: [139, 92, 246] },
-                { key: '5y', label: '5 Years Horizon', color: [236, 72, 153] }
-            ];
-            
-            allHorizons.forEach((horizon, horizonIdx) => {
-                const rec = horizonRecommendations[horizon.key];
-                
-                // Section Header
-                pdf.setFillColor(...horizon.color, 0.1);
-                pdf.roundedRect(margin, yPosition, contentWidth, 12, 5, 5, 'F');
-                
-                pdf.setFontSize(14);
-                pdf.setTextColor(...horizon.color);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text(horizon.label, margin + 6, yPosition + 8);
-                
-                yPosition += 16;
-                
-                // Drivers
-                rec.drivers.forEach((driver, idx) => {
-                    pdf.setFillColor(255, 255, 255);
-                    pdf.setDrawColor(219, 234, 254);
-                    pdf.setLineWidth(0.3);
-                    pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
-                    
-                    pdf.setFontSize(11);
-                    pdf.setTextColor(30, 41, 59);
-                    
-                    // Bullet number
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text(`${idx + 1}.`, margin + 5, yPosition + 9);
-                    
-                    // Driver text
-                    pdf.setFont('helvetica', 'normal');
-                    
-                    // Wrap text if too long
-                    const maxWidth = contentWidth - 20;
-                    const lines = pdf.splitTextToSize(driver, maxWidth);
-                    
-                    if (lines.length > 1) {
-                        pdf.text(lines[0], margin + 12, yPosition + 9);
-                        yPosition += 14;
-                        pdf.setFillColor(255, 255, 255);
-                        pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
-                        pdf.text(lines[1], margin + 12, yPosition + 9);
-                    } else {
-                        pdf.text(driver, margin + 12, yPosition + 9);
-                    }
-                    
-                    yPosition += 17;
-                    
-                    // Check page overflow
-                    if (yPosition > pageHeight - 50 && horizonIdx < allHorizons.length - 1) {
-                        // Footer avec gradient
-                        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
-                        
-                        pdf.addPage();
-                        pdf.setFillColor(248, 250, 252);
-                        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-                        
-                        // Header avec gradient
-                        this.addGradientHeader(pdf, pageWidth, pageHeight);
-                        pdf.setTextColor(255, 255, 255);
-                        pdf.setFontSize(12);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.text('KEY INVESTMENT DRIVERS (CONTINUED)', margin, 11);
-                        pdf.setFontSize(10);
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
-                        
-                        yPosition = 35;
-                    }
-                });
-                
-                yPosition += 8;
-            });
-            
-            // Footer avec gradient
-            this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
-            
-            this.updateProgress(55, 'Capturing technical indicators...');
-            
-            // ============================================
-            // 📈 TECHNICAL INDICATORS CHARTS
-            // ============================================
-            
-            const chartsToCapture = [
-                { id: 'rsiChart', title: 'RSI - Relative Strength Index', description: 'Measures momentum and overbought/oversold conditions' },
-                { id: 'macdChart', title: 'MACD - Moving Average Convergence Divergence', description: 'Identifies trend changes and momentum shifts' },
-                { id: 'stochasticChart', title: 'Stochastic Oscillator', description: 'Compares closing price to price range over time' },
-                { id: 'williamsChart', title: 'Williams %R', description: 'Momentum indicator showing overbought/oversold levels' },
-                { id: 'adxChart', title: 'ADX - Average Directional Index', description: 'Measures trend strength regardless of direction' },
-                { id: 'obvChart', title: 'On-Balance Volume (OBV)', description: 'Cumulative volume indicator predicting price movements' },
-                { id: 'atrChart', title: 'Average True Range (ATR)', description: 'Volatility indicator measuring market movement' },
-                { id: 'mfiChart', title: 'Money Flow Index (MFI)', description: 'Volume-weighted RSI identifying buying/selling pressure' },
-                { id: 'cciChart', title: 'Commodity Channel Index (CCI)', description: 'Identifies cyclical trends in asset prices' },
-                { id: 'ultimateChart', title: 'Ultimate Oscillator', description: 'Multi-timeframe momentum indicator' },
-                { id: 'rocChart', title: 'Rate of Change (ROC)', description: 'Measures percentage change in price over time' },
-                { id: 'aroonChart', title: 'Aroon Indicator', description: 'Identifies trend changes and strength' },
-                { id: 'cmfChart', title: 'Chaikin Money Flow (CMF)', description: 'Measures money flow volume over specific period' },
-                { id: 'elderRayChart', title: 'Elder Ray Index', description: 'Bull and Bear power indicator' }
-            ];
-            
-            for (let i = 0; i < chartsToCapture.length; i++) {
-                const chartInfo = chartsToCapture[i];
-                const chartElement = document.getElementById(chartInfo.id);
-                
-                const progress = 55 + ((i / chartsToCapture.length) * 35);
-                this.updateProgress(progress, `Processing ${chartInfo.title}...`);
-                
-                if (!chartElement) {
-                    console.warn(`Chart ${chartInfo.id} not found`);
-                    continue;
-                }
-                
-                pdf.addPage();
-                
-                pdf.setFillColor(248, 250, 252);
-                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-                
-                yPosition = 25;
-                
-                // Page Header avec gradient
-                this.addGradientHeader(pdf, pageWidth, pageHeight);
-                pdf.setTextColor(255, 255, 255);
-                pdf.setFontSize(12);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('TECHNICAL INDICATOR', margin, 11);
-                pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'normal');
-                pdf.text(`${i + 1} of ${chartsToCapture.length}`, pageWidth - margin, 11, { align: 'right' });
-                
-                yPosition = 35;
-                
-                // Indicator Title
-                pdf.setFontSize(20);
-                pdf.setTextColor(102, 126, 234);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text(chartInfo.title, margin, yPosition);
-                yPosition += 10;
-                
-                // Description
-                pdf.setFontSize(10);
-                pdf.setTextColor(100, 116, 139);
-                pdf.setFont('helvetica', 'italic');
-                pdf.text(chartInfo.description, margin, yPosition);
-                yPosition += 15;
-                
-                // Chart container
-                pdf.setFillColor(255, 255, 255);
-                pdf.setDrawColor(226, 232, 240);
-                pdf.setLineWidth(0.5);
-                pdf.roundedRect(margin - 2, yPosition - 2, contentWidth + 4, 162, 5, 5, 'FD');
-                
-                try {
-                    const canvas = await html2canvas(chartElement, {
-                        scale: 2,
-                        backgroundColor: '#ffffff',
-                        logging: false
-                    });
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgHeight = 158;
-                    pdf.addImage(imgData, 'PNG', margin, yPosition, contentWidth, imgHeight);
-                    
-                    yPosition += imgHeight + 10;
-                    
-                    console.log(`✅ Chart captured: ${chartInfo.title}`);
-                    
-                } catch (error) {
-                    console.error(`❌ Failed to capture ${chartInfo.title}:`, error);
-                    pdf.setFontSize(12);
-                    pdf.setTextColor(239, 68, 68);
-                    pdf.text('Error capturing chart', margin, yPosition);
-                }
-                
-                // Footer avec gradient
-                this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+            let companyName = quote.name;
+            if (companyName.length > 40) {
+                companyName = companyName.substring(0, 37) + '...';
             }
             
-            this.updateProgress(92, 'Adding legal disclaimer...');
+            pdf.text(companyName, pageWidth / 2, yPosition, { 
+                align: 'center',
+                charSpace: 0.3
+            });
+            yPosition += 14;
+        }
+
+        // ✨ INFO CARD (Période + Date) - Version compacte CENTRÉE
+        yPosition += 2;
+        const cardHeight = 42;
+        const cardY = yPosition;
+
+        // Card background
+        pdf.setFillColor(255, 255, 255, 0.22);
+        pdf.setDrawColor(255, 255, 255, 0.5);
+        pdf.setLineWidth(0.6);
+        pdf.roundedRect(margin + 8, cardY, contentWidth - 16, cardHeight, 12, 12, 'FD');
+
+        // Left section - Period
+        const leftX = margin + 20;
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(255, 255, 255, 0.9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('ANALYSIS PERIOD', leftX, cardY + 12);
+
+        pdf.setFontSize(15);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(period.toUpperCase(), leftX, cardY + 26);
+
+        // Center divider
+        pdf.setDrawColor(255, 255, 255, 0.35);
+        pdf.setLineWidth(0.4);
+        pdf.line(pageWidth / 2, cardY + 9, pageWidth / 2, cardY + cardHeight - 9);
+
+        // Right section - Date
+        const rightX = pageWidth / 2 + 14;
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(255, 255, 255, 0.9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('REPORT GENERATED', rightX, cardY + 12);
+
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 255, 255);
+        const formattedDate = new Date().toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+        pdf.text(formattedDate, rightX, cardY + 24);
+
+        pdf.setFontSize(7.5);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(255, 255, 255, 0.85);
+        const timestamp = new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        pdf.text(timestamp + ' UTC', rightX, cardY + 33);
+
+        // ✨ FOOTER (Repositionné pour ne pas être rogné) - CENTRÉ
+        const footerY = pageHeight - 38;
+
+        // Copyright
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(255, 255, 255, 0.9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
+                pageWidth / 2, footerY, { align: 'center' });
+
+        // Confidential
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(255, 255, 255, 0.75);
+        pdf.text('Confidential & Proprietary', pageWidth / 2, footerY + 5, { align: 'center' });
+        
+        this.updateProgress(35, 'Generating executive summary...');
+        
+        // ============================================
+        // 📊 PAGE 2 : EXECUTIVE SUMMARY (REDESIGNED)
+        // ============================================
+        
+        pdf.addPage();
+        
+        // Light professional background
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        yPosition = 25;
+        
+        // Premium Header Bar (GRADIENT BLEU → VIOLET)
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('EXECUTIVE SUMMARY', margin, 11);
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
+        
+        yPosition = 35;
+        
+        // Section Title
+        pdf.setFontSize(24);
+        pdf.setTextColor(102, 126, 234);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Key Performance Metrics', margin, yPosition);
+        yPosition += 18;
+        
+        // ============================================
+        // 📊 METRICS CARDS
+        // ============================================
+        
+        const alphaScore = this.calculateAlphaVaultScore();
+        const marketStrength = this.calculateMarketStrength();
+        
+        // AlphaVault Score Card
+        pdf.setFillColor(255, 255, 255);
+        pdf.setDrawColor(102, 126, 234);
+        pdf.setLineWidth(0.8);
+        pdf.roundedRect(margin, yPosition, (contentWidth / 2) - 5, 40, 8, 8, 'FD');
+        
+        pdf.setFontSize(11);
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('AlphaVault Score', margin + 8, yPosition + 12);
+        
+        pdf.setFontSize(36);
+        pdf.setTextColor(102, 126, 234);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`${alphaScore}`, margin + 8, yPosition + 32);
+        
+        pdf.setFontSize(16);
+        pdf.setTextColor(148, 163, 184);
+        pdf.text('/100', margin + 32, yPosition + 32);
+        
+        // Market Strength Card
+        pdf.setFillColor(255, 255, 255);
+        pdf.roundedRect(margin + (contentWidth / 2) + 5, yPosition, (contentWidth / 2) - 5, 40, 8, 8, 'FD');
+        
+        pdf.setFontSize(11);
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Market Strength', margin + (contentWidth / 2) + 13, yPosition + 12);
+        
+        let strengthText = marketStrength >= 75 ? 'Very Strong' :
+                        marketStrength >= 60 ? 'Strong' :
+                        marketStrength >= 45 ? 'Moderate' :
+                        marketStrength >= 30 ? 'Weak' : 'Very Weak';
+        
+        let strengthColor = marketStrength >= 60 ? [16, 185, 129] : 
+                        marketStrength >= 45 ? [251, 191, 36] : [239, 68, 68];
+        
+        pdf.setFontSize(20);
+        pdf.setTextColor(...strengthColor);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(strengthText, margin + (contentWidth / 2) + 13, yPosition + 32);
+        
+        yPosition += 56;
+        
+        // ============================================
+        // 🤖 AI RECOMMENDATIONS
+        // ============================================
+        
+        pdf.setFontSize(20);
+        pdf.setTextColor(102, 126, 234);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('AI-Powered Recommendations', margin, yPosition);
+        yPosition += 15;
+        
+        const prices = this.stockData.prices;
+        const technicalSignals = this.collectAllTechnicalSignals(prices);
+        const trendAnalysis = this.analyzeTrendsByHorizon(prices);
+        const aiScore = this.calculateAIConfidenceScore(technicalSignals);
+        const horizonRecommendations = this.generateHorizonRecommendations(aiScore, technicalSignals, trendAnalysis);
+        
+        const horizons = [
+            { key: '1y', label: '1 Year Horizon', icon: '>' },
+            { key: '2y', label: '2 Years Horizon', icon: '>>' },
+            { key: '5y', label: '5 Years Horizon', icon: '>>>' }
+        ];
+        
+        horizons.forEach((horizon, idx) => {
+            const rec = horizonRecommendations[horizon.key];
             
-            // ============================================
-            // 📜 LEGAL DISCLAIMER
-            // ============================================
+            // Card with shadow
+            pdf.setFillColor(255, 255, 255);
+            pdf.setDrawColor(226, 232, 240);
+            pdf.setLineWidth(0.5);
+            pdf.roundedRect(margin, yPosition, contentWidth, 36, 8, 8, 'FD');
             
-            pdf.addPage();
-            
-            pdf.setFillColor(248, 250, 252);
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            yPosition = 25;
-            
-            // Header avec gradient
-            this.addGradientHeader(pdf, pageWidth, pageHeight);
-            pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('IMPORTANT LEGAL DISCLAIMER', margin, 11);
-            
-            yPosition = 35;
-            
-            pdf.setFontSize(20);
-            pdf.setTextColor(102, 126, 234);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Legal Notice & Disclaimer', margin, yPosition);
-            yPosition += 18;
-            
-            pdf.setFontSize(10);
+            // Horizon label
+            pdf.setFontSize(13);
             pdf.setTextColor(30, 41, 59);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`${horizon.icon} ${horizon.label}`, margin + 8, yPosition + 12);
+            
+            // Recommendation Badge
+            const recColor = rec.recommendation === 'BUY' ? [16, 185, 129] :
+                            rec.recommendation === 'SELL' ? [239, 68, 68] : [251, 191, 36];
+            
+            pdf.setFillColor(...recColor);
+            pdf.roundedRect(margin + 8, yPosition + 17, 30, 12, 4, 4, 'F');
+            
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(rec.recommendation, margin + 23, yPosition + 25, { align: 'center' });
+            
+            // Confidence
+            pdf.setTextColor(71, 85, 105);
             pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(11);
+            pdf.text(`Confidence: ${rec.confidence}%`, margin + 45, yPosition + 25);
             
-            const disclaimer = [
-                'This report is generated by AlphaVault AI based exclusively on proprietary technical analysis algorithms.',
-                'All indicators are calculated internally and do not contain raw market data from third-party providers.',
-                '',
-                'INVESTMENT DISCLAIMER:',
-                '• This report does NOT constitute investment advice or a recommendation to buy or sell securities.',
-                '• Past performance does not guarantee future results.',
-                '• All investments involve risk, including the potential loss of principal.',
-                '• Technical indicators are mathematical calculations and should not be the sole basis for decisions.',
-                '• Always consult with a qualified financial advisor before making investment decisions.',
-                '',
-                'DATA COMPLIANCE:',
-                '• This report contains ONLY technical indicators calculated by AlphaVault AI.',
-                '• No raw price data, volume data, or other market data from APIs is redistributed.',
-                '• All calculations are performed on licensed data and presented as derivative analytics.',
-                '',
-                'NO WARRANTY:',
-                '• This report is provided "AS IS" without warranty of any kind.',
-                '• AlphaVault AI makes no representations regarding accuracy or completeness.',
-                '• We are not liable for any investment losses resulting from use of this report.',
-                '',
-                'INTELLECTUAL PROPERTY:',
-                '• AlphaVault AI algorithms and methodologies are proprietary and confidential.',
-                '• Unauthorized reproduction or distribution of this report is prohibited.',
-                '',
-                'FOR EDUCATIONAL AND INFORMATIONAL PURPOSES ONLY.',
-                '',
-                'By using this report, you acknowledge and agree to these terms.'
-            ];
+            // Potential Move
+            pdf.setFont('helvetica', 'bold');
+            const potentialColor = parseFloat(rec.potentialMove) >= 0 ? [16, 185, 129] : [239, 68, 68];
+            pdf.setTextColor(...potentialColor);
+            pdf.setFontSize(16);
+            pdf.text(`${rec.potentialMove >= 0 ? '+' : ''}${rec.potentialMove}%`, 
+                    pageWidth - margin - 8, yPosition + 25, { align: 'right' });
             
-            disclaimer.forEach(line => {
-                if (yPosition > pageHeight - 50) {
+            yPosition += 41;
+        });
+        
+        // Footer avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+        
+        this.updateProgress(45, 'Creating key drivers page...');
+        
+        // ============================================
+        // 🔑 PAGE 3 : KEY DRIVERS (TOUS LES HORIZONS)
+        // ============================================
+        
+        pdf.addPage();
+        
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        yPosition = 25;
+        
+        // Header avec gradient
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('KEY INVESTMENT DRIVERS', margin, 11);
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
+        
+        yPosition = 35;
+        
+        // Page Title
+        pdf.setFontSize(24);
+        pdf.setTextColor(102, 126, 234);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Key Investment Drivers', margin, yPosition);
+        yPosition += 10;
+        
+        pdf.setFontSize(11);
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Critical factors influencing recommendations across all time horizons', margin, yPosition);
+        yPosition += 20;
+        
+        // KEY DRIVERS POUR LES 3 HORIZONS
+        const allHorizons = [
+            { key: '1y', label: '1 Year Horizon', color: [59, 130, 246] },
+            { key: '2y', label: '2 Years Horizon', color: [139, 92, 246] },
+            { key: '5y', label: '5 Years Horizon', color: [236, 72, 153] }
+        ];
+        
+        allHorizons.forEach((horizon, horizonIdx) => {
+            const rec = horizonRecommendations[horizon.key];
+            
+            // Section Header
+            pdf.setFillColor(...horizon.color, 0.1);
+            pdf.roundedRect(margin, yPosition, contentWidth, 12, 5, 5, 'F');
+            
+            pdf.setFontSize(14);
+            pdf.setTextColor(...horizon.color);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(horizon.label, margin + 6, yPosition + 8);
+            
+            yPosition += 16;
+            
+            // Drivers
+            rec.drivers.forEach((driver, idx) => {
+                pdf.setFillColor(255, 255, 255);
+                pdf.setDrawColor(219, 234, 254);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
+                
+                pdf.setFontSize(11);
+                pdf.setTextColor(30, 41, 59);
+                
+                // Bullet number
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(`${idx + 1}.`, margin + 5, yPosition + 9);
+                
+                // Driver text
+                pdf.setFont('helvetica', 'normal');
+                
+                // Wrap text if too long
+                const maxWidth = contentWidth - 20;
+                const lines = pdf.splitTextToSize(driver, maxWidth);
+                
+                if (lines.length > 1) {
+                    pdf.text(lines[0], margin + 12, yPosition + 9);
+                    yPosition += 14;
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.roundedRect(margin, yPosition, contentWidth, 14, 5, 5, 'FD');
+                    pdf.text(lines[1], margin + 12, yPosition + 9);
+                } else {
+                    pdf.text(driver, margin + 12, yPosition + 9);
+                }
+                
+                yPosition += 17;
+                
+                // Check page overflow
+                if (yPosition > pageHeight - 50 && horizonIdx < allHorizons.length - 1) {
                     // Footer avec gradient
                     this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
                     
@@ -5195,312 +5009,503 @@ const AdvancedAnalysis = {
                     pdf.setTextColor(255, 255, 255);
                     pdf.setFontSize(12);
                     pdf.setFont('helvetica', 'bold');
-                    pdf.text('IMPORTANT LEGAL DISCLAIMER (CONTINUED)', margin, 11);
+                    pdf.text('KEY INVESTMENT DRIVERS (CONTINUED)', margin, 11);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(symbol, pageWidth - margin, 11, { align: 'right' });
                     
                     yPosition = 35;
                 }
-                
-                if (line.includes('DISCLAIMER:') || line.includes('COMPLIANCE:') || 
-                    line.includes('WARRANTY:') || line.includes('PROPERTY:')) {
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setTextColor(102, 126, 234);
-                } else {
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setTextColor(30, 41, 59);
-                }
-                
-                pdf.text(line, margin, yPosition);
-                yPosition += line === '' ? 4 : 6;
             });
             
-            // Footer final avec gradient
+            yPosition += 8;
+        });
+        
+        // Footer avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+        
+        this.updateProgress(55, 'Capturing technical indicators...');
+        
+        // ============================================
+        // 📈 TECHNICAL INDICATORS CHARTS
+        // ============================================
+        
+        const chartsToCapture = [
+            { id: 'rsiChart', title: 'RSI - Relative Strength Index', description: 'Measures momentum and overbought/oversold conditions' },
+            { id: 'macdChart', title: 'MACD - Moving Average Convergence Divergence', description: 'Identifies trend changes and momentum shifts' },
+            { id: 'stochasticChart', title: 'Stochastic Oscillator', description: 'Compares closing price to price range over time' },
+            { id: 'williamsChart', title: 'Williams %R', description: 'Momentum indicator showing overbought/oversold levels' },
+            { id: 'adxChart', title: 'ADX - Average Directional Index', description: 'Measures trend strength regardless of direction' },
+            { id: 'obvChart', title: 'On-Balance Volume (OBV)', description: 'Cumulative volume indicator predicting price movements' },
+            { id: 'atrChart', title: 'Average True Range (ATR)', description: 'Volatility indicator measuring market movement' },
+            { id: 'mfiChart', title: 'Money Flow Index (MFI)', description: 'Volume-weighted RSI identifying buying/selling pressure' },
+            { id: 'cciChart', title: 'Commodity Channel Index (CCI)', description: 'Identifies cyclical trends in asset prices' },
+            { id: 'ultimateChart', title: 'Ultimate Oscillator', description: 'Multi-timeframe momentum indicator' },
+            { id: 'rocChart', title: 'Rate of Change (ROC)', description: 'Measures percentage change in price over time' },
+            { id: 'aroonChart', title: 'Aroon Indicator', description: 'Identifies trend changes and strength' },
+            { id: 'cmfChart', title: 'Chaikin Money Flow (CMF)', description: 'Measures money flow volume over specific period' },
+            { id: 'elderRayChart', title: 'Elder Ray Index', description: 'Bull and Bear power indicator' }
+        ];
+        
+        for (let i = 0; i < chartsToCapture.length; i++) {
+            const chartInfo = chartsToCapture[i];
+            const chartElement = document.getElementById(chartInfo.id);
+            
+            const progress = 55 + ((i / chartsToCapture.length) * 35);
+            this.updateProgress(progress, `Processing ${chartInfo.title}...`);
+            
+            if (!chartElement) {
+                console.warn(`Chart ${chartInfo.id} not found`);
+                continue;
+            }
+            
+            pdf.addPage();
+            
+            pdf.setFillColor(248, 250, 252);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            
+            yPosition = 25;
+            
+            // Page Header avec gradient
+            this.addGradientHeader(pdf, pageWidth, pageHeight);
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('TECHNICAL INDICATOR', margin, 11);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`${i + 1} of ${chartsToCapture.length}`, pageWidth - margin, 11, { align: 'right' });
+            
+            yPosition = 35;
+            
+            // Indicator Title
+            pdf.setFontSize(20);
+            pdf.setTextColor(102, 126, 234);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(chartInfo.title, margin, yPosition);
+            yPosition += 10;
+            
+            // Description
+            pdf.setFontSize(10);
+            pdf.setTextColor(100, 116, 139);
+            pdf.setFont('helvetica', 'italic');
+            pdf.text(chartInfo.description, margin, yPosition);
+            yPosition += 15;
+            
+            // Chart container
+            pdf.setFillColor(255, 255, 255);
+            pdf.setDrawColor(226, 232, 240);
+            pdf.setLineWidth(0.5);
+            pdf.roundedRect(margin - 2, yPosition - 2, contentWidth + 4, 162, 5, 5, 'FD');
+            
+            try {
+                const canvas = await html2canvas(chartElement, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgHeight = 158;
+                pdf.addImage(imgData, 'PNG', margin, yPosition, contentWidth, imgHeight);
+                
+                yPosition += imgHeight + 10;
+                
+                console.log(`✅ Chart captured: ${chartInfo.title}`);
+                
+            } catch (error) {
+                console.error(`❌ Failed to capture ${chartInfo.title}:`, error);
+                pdf.setFontSize(12);
+                pdf.setTextColor(239, 68, 68);
+                pdf.text('Error capturing chart', margin, yPosition);
+            }
+            
+            // Footer avec gradient
             this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
-            
-            this.updateProgress(98, 'Finalizing PDF...');
-            
-            // ============================================
-            // 💾 SAVE PDF
-            // ============================================
-            
-            const filename = `AlphaVault_${symbol}_Analysis_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            pdf.save(filename);
-            
-            this.updateProgress(100, 'Complete!');
-            
-            setTimeout(() => {
-                this.hideProgressModal();
-            }, 800);
-            
-            console.log('✅ Premium PDF report generated:', filename);
-            this.showNotification('✅ Premium PDF report generated!', 'success');
-            
-        } catch (error) {
-            console.error('❌ PDF generation failed:', error);
-            this.hideProgressModal();
-            alert('❌ PDF generation failed. Please ensure jsPDF and html2canvas libraries are loaded.');
-        }
-    },
-
-    // ============================================
-    // 🎨 GRADIENT HEADER (BLEU → VIOLET)
-    // ============================================
-
-    addGradientHeader(pdf, pageWidth, pageHeight) {
-        const headerHeight = 18;
-        const steps = 50;
-        
-        for (let i = 0; i < steps; i++) {
-            const ratio = i / steps;
-            const r = Math.round(102 + (118 - 102) * ratio);
-            const g = Math.round(126 + (75 - 126) * ratio);
-            const b = Math.round(234 + (162 - 234) * ratio);
-            
-            pdf.setFillColor(r, g, b);
-            pdf.rect((pageWidth / steps) * i, 0, (pageWidth / steps) + 0.5, headerHeight, 'F');
-        }
-    },
-
-    // ============================================
-    // 🎨 GRADIENT FOOTER (BLEU → VIOLET)
-    // ============================================
-
-    addGradientFooter(pdf, pageWidth, pageHeight, symbol) {
-        const footerHeight = 18;
-        const footerY = pageHeight - footerHeight;
-        const steps = 50;
-        
-        for (let i = 0; i < steps; i++) {
-            const ratio = i / steps;
-            const r = Math.round(102 + (118 - 102) * ratio);
-            const g = Math.round(126 + (75 - 126) * ratio);
-            const b = Math.round(234 + (162 - 234) * ratio);
-            
-            pdf.setFillColor(r, g, b);
-            pdf.rect((pageWidth / steps) * i, footerY, (pageWidth / steps) + 0.5, footerHeight, 'F');
         }
         
-        // Footer text
+        this.updateProgress(92, 'Adding legal disclaimer...');
+        
+        // ============================================
+        // 📜 LEGAL DISCLAIMER
+        // ============================================
+        
+        pdf.addPage();
+        
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        yPosition = 25;
+        
+        // Header avec gradient
+        this.addGradientHeader(pdf, pageWidth, pageHeight);
         pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(9);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('IMPORTANT LEGAL DISCLAIMER', margin, 11);
+        
+        yPosition = 35;
+        
+        pdf.setFontSize(20);
+        pdf.setTextColor(102, 126, 234);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Legal Notice & Disclaimer', margin, yPosition);
+        yPosition += 18;
+        
+        pdf.setFontSize(10);
+        pdf.setTextColor(30, 41, 59);
         pdf.setFont('helvetica', 'normal');
-        pdf.text('AlphaVault AI', 15, footerY + 11);
         
-        pdf.setFontSize(8);
-        pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
-                pageWidth / 2, footerY + 11, { align: 'center' });
+        const disclaimer = [
+            'This report is generated by AlphaVault AI based exclusively on proprietary technical analysis algorithms.',
+            'All indicators are calculated internally and do not contain raw market data from third-party providers.',
+            '',
+            'INVESTMENT DISCLAIMER:',
+            '• This report does NOT constitute investment advice or a recommendation to buy or sell securities.',
+            '• Past performance does not guarantee future results.',
+            '• All investments involve risk, including the potential loss of principal.',
+            '• Technical indicators are mathematical calculations and should not be the sole basis for decisions.',
+            '• Always consult with a qualified financial advisor before making investment decisions.',
+            '',
+            'DATA COMPLIANCE:',
+            '• This report contains ONLY technical indicators calculated by AlphaVault AI.',
+            '• No raw price data, volume data, or other market data from APIs is redistributed.',
+            '• All calculations are performed on licensed data and presented as derivative analytics.',
+            '',
+            'NO WARRANTY:',
+            '• This report is provided "AS IS" without warranty of any kind.',
+            '• AlphaVault AI makes no representations regarding accuracy or completeness.',
+            '• We are not liable for any investment losses resulting from use of this report.',
+            '',
+            'INTELLECTUAL PROPERTY:',
+            '• AlphaVault AI algorithms and methodologies are proprietary and confidential.',
+            '• Unauthorized reproduction or distribution of this report is prohibited.',
+            '',
+            'FOR EDUCATIONAL AND INFORMATIONAL PURPOSES ONLY.',
+            '',
+            'By using this report, you acknowledge and agree to these terms.'
+        ];
         
-        pdf.setFontSize(9);
-        pdf.text(symbol, pageWidth - 15, footerY + 11, { align: 'right' });
-    },
+        disclaimer.forEach(line => {
+            if (yPosition > pageHeight - 50) {
+                // Footer avec gradient
+                this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+                
+                pdf.addPage();
+                pdf.setFillColor(248, 250, 252);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                
+                // Header avec gradient
+                this.addGradientHeader(pdf, pageWidth, pageHeight);
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('IMPORTANT LEGAL DISCLAIMER (CONTINUED)', margin, 11);
+                
+                yPosition = 35;
+            }
+            
+            if (line.includes('DISCLAIMER:') || line.includes('COMPLIANCE:') || 
+                line.includes('WARRANTY:') || line.includes('PROPERTY:')) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(102, 126, 234);
+            } else {
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(30, 41, 59);
+            }
+            
+            pdf.text(line, margin, yPosition);
+            yPosition += line === '' ? 4 : 6;
+        });
+        
+        // Footer final avec gradient
+        this.addGradientFooter(pdf, pageWidth, pageHeight, symbol);
+        
+        this.updateProgress(98, 'Finalizing PDF...');
+        
+        // ============================================
+        // 💾 SAVE PDF
+        // ============================================
+        
+        const filename = `AlphaVault_${symbol}_Analysis_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
+        
+        this.updateProgress(100, 'Complete!');
+        
+        setTimeout(() => {
+            this.hideProgressModal();
+        }, 800);
+        
+        console.log('✅ Premium PDF report generated:', filename);
+        this.showNotification('✅ Premium PDF report generated!', 'success');
+        
+    } catch (error) {
+        console.error('❌ PDF generation failed:', error);
+        this.hideProgressModal();
+        alert('❌ PDF generation failed. Please ensure jsPDF and html2canvas libraries are loaded.');
+    }
+},
 
-    // ============================================
-    // 🎯 PROGRESS MODAL FUNCTIONS
-    // ============================================
+// ============================================
+// 🎨 GRADIENT HEADER (BLEU → VIOLET)
+// ============================================
 
-    showProgressModal() {
-        const existingModal = document.getElementById('pdf-progress-modal');
-        if (existingModal) existingModal.remove();
+addGradientHeader(pdf, pageWidth, pageHeight) {
+    const headerHeight = 18;
+    const steps = 50;
+    
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / steps;
+        const r = Math.round(102 + (118 - 102) * ratio);
+        const g = Math.round(126 + (75 - 126) * ratio);
+        const b = Math.round(234 + (162 - 234) * ratio);
         
-        const modalHTML = `
-            <div id="pdf-progress-modal" style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(15, 23, 42, 0.85);
-                backdrop-filter: blur(10px);
-                z-index: 999999;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                animation: fadeIn 0.3s ease;
+        pdf.setFillColor(r, g, b);
+        pdf.rect((pageWidth / steps) * i, 0, (pageWidth / steps) + 0.5, headerHeight, 'F');
+    }
+},
+
+// ============================================
+// 🎨 GRADIENT FOOTER (BLEU → VIOLET)
+// ============================================
+
+addGradientFooter(pdf, pageWidth, pageHeight, symbol) {
+    const footerHeight = 18;
+    const footerY = pageHeight - footerHeight;
+    const steps = 50;
+    
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / steps;
+        const r = Math.round(102 + (118 - 102) * ratio);
+        const g = Math.round(126 + (75 - 126) * ratio);
+        const b = Math.round(234 + (162 - 234) * ratio);
+        
+        pdf.setFillColor(r, g, b);
+        pdf.rect((pageWidth / steps) * i, footerY, (pageWidth / steps) + 0.5, footerHeight, 'F');
+    }
+    
+    // Footer text
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('AlphaVault AI', 15, footerY + 11);
+    
+    pdf.setFontSize(8);
+    pdf.text(`© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.`, 
+            pageWidth / 2, footerY + 11, { align: 'center' });
+    
+    pdf.setFontSize(9);
+    pdf.text(symbol, pageWidth - 15, footerY + 11, { align: 'right' });
+},
+
+// ============================================
+// 🎯 PROGRESS MODAL FUNCTIONS
+// ============================================
+
+showProgressModal() {
+    const existingModal = document.getElementById('pdf-progress-modal');
+    if (existingModal) existingModal.remove();
+    
+    const modalHTML = `
+        <div id="pdf-progress-modal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 24px;
+                padding: 48px 56px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+                text-align: center;
+                max-width: 480px;
+                animation: slideUp 0.4s ease;
             ">
                 <div style="
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border-radius: 24px;
-                    padding: 48px 56px;
-                    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-                    text-align: center;
-                    max-width: 480px;
-                    animation: slideUp 0.4s ease;
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 24px;
+                    border: 6px solid rgba(255, 255, 255, 0.3);
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+                
+                <h2 style="
+                    color: white;
+                    font-size: 28px;
+                    font-weight: 800;
+                    margin: 0 0 12px 0;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                ">Generating Report</h2>
+                
+                <p id="pdf-progress-text" style="
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: 15px;
+                    margin: 0 0 28px 0;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                ">Initializing...</p>
+                
+                <div style="
+                    background: rgba(255, 255, 255, 0.25);
+                    border-radius: 12px;
+                    height: 16px;
+                    overflow: hidden;
+                    margin-bottom: 16px;
                 ">
-                    <div style="
-                        width: 80px;
-                        height: 80px;
-                        margin: 0 auto 24px;
-                        border: 6px solid rgba(255, 255, 255, 0.3);
-                        border-top-color: white;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                    "></div>
-                    
-                    <h2 style="
-                        color: white;
-                        font-size: 28px;
-                        font-weight: 800;
-                        margin: 0 0 12px 0;
-                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                    ">Generating Report</h2>
-                    
-                    <p id="pdf-progress-text" style="
-                        color: rgba(255, 255, 255, 0.9);
-                        font-size: 15px;
-                        margin: 0 0 28px 0;
-                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                    ">Initializing...</p>
-                    
-                    <div style="
-                        background: rgba(255, 255, 255, 0.25);
+                    <div id="pdf-progress-bar" style="
+                        background: white;
+                        height: 100%;
+                        width: 0%;
                         border-radius: 12px;
-                        height: 16px;
-                        overflow: hidden;
-                        margin-bottom: 16px;
-                    ">
-                        <div id="pdf-progress-bar" style="
-                            background: white;
-                            height: 100%;
-                            width: 0%;
-                            border-radius: 12px;
-                            transition: width 0.4s ease;
-                            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-                        "></div>
-                    </div>
-                    
-                    <div id="pdf-progress-percent" style="
-                        color: white;
-                        font-size: 24px;
-                        font-weight: 800;
-                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                    ">0%</div>
+                        transition: width 0.4s ease;
+                        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+                    "></div>
                 </div>
+                
+                <div id="pdf-progress-percent" style="
+                    color: white;
+                    font-size: 24px;
+                    font-weight: 800;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                ">0%</div>
             </div>
-            
-            <style>
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                
-                @keyframes slideUp {
-                    from {
-                        transform: translateY(30px);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                }
-                
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            </style>
-        `;
+        </div>
         
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-    },
-
-    updateProgress(percent, message) {
-        const progressBar = document.getElementById('pdf-progress-bar');
-        const progressText = document.getElementById('pdf-progress-text');
-        const progressPercent = document.getElementById('pdf-progress-percent');
-        
-        if (progressBar) progressBar.style.width = `${percent}%`;
-        if (progressText) progressText.textContent = message;
-        if (progressPercent) progressPercent.textContent = `${Math.round(percent)}%`;
-    },
-
-    hideProgressModal() {
-        const modal = document.getElementById('pdf-progress-modal');
-        if (modal) {
-            modal.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => modal.remove(), 300);
-        }
-    },
-
-    // ============================================
-    // 🖼 LOAD IMAGE AS BASE64
-    // ============================================
-
-    loadImageAsBase64(imagePath) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
+        <style>
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
             
-            img.onload = function() {
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    
-                    const base64 = canvas.toDataURL('image/png');
-                    resolve(base64);
-                } catch (error) {
-                    console.error('Error converting image to base64:', error);
-                    resolve(null);
+            @keyframes slideUp {
+                from {
+                    transform: translateY(30px);
+                    opacity: 0;
                 }
-            };
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
             
-            img.onerror = function() {
-                console.warn(`Failed to load image: ${imagePath}`);
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+},
+
+updateProgress(percent, message) {
+    const progressBar = document.getElementById('pdf-progress-bar');
+    const progressText = document.getElementById('pdf-progress-text');
+    const progressPercent = document.getElementById('pdf-progress-percent');
+    
+    if (progressBar) progressBar.style.width = `${percent}%`;
+    if (progressText) progressText.textContent = message;
+    if (progressPercent) progressPercent.textContent = `${Math.round(percent)}%`;
+},
+
+hideProgressModal() {
+    const modal = document.getElementById('pdf-progress-modal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => modal.remove(), 300);
+    }
+},
+
+// ============================================
+// 🖼 LOAD IMAGE AS BASE64
+// ============================================
+
+loadImageAsBase64(imagePath) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        
+        img.onload = function() {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                
+                const base64 = canvas.toDataURL('image/png');
+                resolve(base64);
+            } catch (error) {
+                console.error('Error converting image to base64:', error);
                 resolve(null);
-            };
-            
-            img.src = imagePath;
-        });
-    },
+            }
+        };
+        
+        img.onerror = function() {
+            console.warn(`Failed to load image: ${imagePath}`);
+            resolve(null);
+        };
+        
+        img.src = imagePath;
+    });
+},
 
-    // ============================================
-    // 🏢 GET COMPANY LOGO WITH FALLBACK (UTILISE CompanyLogos)
-    // ============================================
+// ============================================
+// 🏢 GET COMPANY LOGO WITH FALLBACK (UTILISE CompanyLogos)
+// ============================================
 
-    async getCompanyLogoWithFallback(symbol, companyName) {
-        try {
-            console.log(`🔍 Fetching company logo for ${symbol}...`);
+async getCompanyLogoWithFallback(symbol, companyName) {
+    try {
+        console.log(`🔍 Fetching company logo for ${symbol}...`);
+        
+        // Utiliser le système CompanyLogos existant
+        if (typeof window.CompanyLogos !== 'undefined') {
+            const logoUrls = window.CompanyLogos.getLogoUrls(symbol, companyName);
             
-            // Utiliser le système CompanyLogos existant
-            if (typeof window.CompanyLogos !== 'undefined') {
-                const logoUrls = window.CompanyLogos.getLogoUrls(symbol, companyName);
-                
-                // Essayer l'URL principale
-                let logoBase64 = await this.loadImageAsBase64(logoUrls.primary);
+            // Essayer l'URL principale
+            let logoBase64 = await this.loadImageAsBase64(logoUrls.primary);
+            if (logoBase64) {
+                console.log(`✅ Logo loaded for ${symbol} from Logo.dev`);
+                return logoBase64;
+            }
+            
+            // Essayer les fallbacks
+            for (const fallbackUrl of logoUrls.fallbacks) {
+                logoBase64 = await this.loadImageAsBase64(fallbackUrl);
                 if (logoBase64) {
-                    console.log(`✅ Logo loaded for ${symbol} from Logo.dev`);
+                    console.log(`✅ Logo loaded for ${symbol} from fallback`);
                     return logoBase64;
                 }
-                
-                // Essayer les fallbacks
-                for (const fallbackUrl of logoUrls.fallbacks) {
-                    logoBase64 = await this.loadImageAsBase64(fallbackUrl);
-                    if (logoBase64) {
-                        console.log(`✅ Logo loaded for ${symbol} from fallback`);
-                        return logoBase64;
-                    }
-                }
             }
-            
-            // Méthode 2 : Logo stocké localement
-            const localLogoPath = `assets/images/company-logos/${symbol.toLowerCase()}.png`;
-            const localLogo = await this.loadImageAsBase64(localLogoPath);
-            
-            if (localLogo) {
-                console.log(`✅ Local logo loaded for ${symbol}`);
-                return localLogo;
-            }
-            
-            console.warn(`⚠ No logo found for ${symbol}`);
-            return null;
-            
-        } catch (error) {
-            console.error(`❌ Error loading logo for ${symbol}:`, error);
-            return null;
         }
-    },
+        
+        // Méthode 2 : Logo stocké localement
+        const localLogoPath = `assets/images/company-logos/${symbol.toLowerCase()}.png`;
+        const localLogo = await this.loadImageAsBase64(localLogoPath);
+        
+        if (localLogo) {
+            console.log(`✅ Local logo loaded for ${symbol}`);
+            return localLogo;
+        }
+        
+        console.warn(`⚠ No logo found for ${symbol}`);
+        return null;
+        
+    } catch (error) {
+        console.error(`❌ Error loading logo for ${symbol}:`, error);
+        return null;
+    }
+},
 
     // ============================================
     // 🔧 UTILITY: Download File
