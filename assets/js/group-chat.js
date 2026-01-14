@@ -190,9 +190,10 @@ class GroupChat {
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=128`;
         const avatar = senderData.photoURL || fallbackAvatar;
 
+        // ✅ CORRECTION : Affichage intelligent de la date + heure
         const time = message.createdAt 
-            ? new Date(message.createdAt.toDate()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-            : 'Now';
+            ? this.formatMessageDate(message.createdAt.toDate())
+            : 'Just now';
 
         // ✅ NOUVEAU : Détecter et afficher les posts partagés
         if (message.type === 'shared_post' && message.sharedPost) {
@@ -207,10 +208,10 @@ class GroupChat {
                     return `
                         <div class="message-attachment">
                             <img src="${att.url}" 
-                                 alt="Image" 
-                                 onclick="window.open('${att.url}', '_blank')" 
-                                 loading="lazy"
-                                 style="max-width: 280px; max-height: 280px; width: auto; height: auto; display: block; border-radius: 12px; cursor: pointer; object-fit: contain;">
+                                alt="Image" 
+                                onclick="window.open('${att.url}', '_blank')" 
+                                loading="lazy"
+                                style="max-width: 280px; max-height: 280px; width: auto; height: auto; display: block; border-radius: 12px; cursor: pointer; object-fit: contain;">
                         </div>
                     `;
                 } else {
@@ -248,11 +249,11 @@ class GroupChat {
         return `
             <div class="chat-message ${isOwn ? 'own' : ''}" data-message-id="${messageId}">
                 <img src="${avatar}" 
-                     alt="${displayName}" 
-                     class="chat-message-avatar" 
-                     onclick="window.groupChat.navigateToProfile('${message.senderId}')"
-                     onerror="this.src='${fallbackAvatar}'"
-                     loading="lazy">
+                    alt="${displayName}" 
+                    class="chat-message-avatar" 
+                    onclick="window.groupChat.navigateToProfile('${message.senderId}')"
+                    onerror="this.src='${fallbackAvatar}'"
+                    loading="lazy">
                 <div class="chat-message-content">
                     ${senderNameHTML}
                     <div class="chat-message-bubble">
@@ -869,6 +870,60 @@ class GroupChat {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    /**
+     * ✅ NOUVEAU : Formatage intelligent de la date + heure des messages
+     */
+    formatMessageDate(date) {
+        const now = new Date();
+        const messageDate = new Date(date);
+        
+        const diffMs = now - messageDate;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        // Heure au format HH:MM
+        const timeStr = messageDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+
+        // Aujourd'hui : afficher uniquement l'heure
+        if (diffDays === 0) {
+            if (diffMins < 1) return 'Just now';
+            return timeStr;
+        }
+
+        // Hier
+        if (diffDays === 1) {
+            return `Yesterday ${timeStr}`;
+        }
+
+        // Cette semaine (derniers 7 jours)
+        if (diffDays < 7) {
+            const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'long' });
+            return `${dayName} ${timeStr}`;
+        }
+
+        // Cette année : Mois + Jour
+        if (messageDate.getFullYear() === now.getFullYear()) {
+            const monthDay = messageDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            return `${monthDay}, ${timeStr}`;
+        }
+
+        // Année différente : Date complète
+        const fullDate = messageDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            year: 'numeric'
+        });
+        return `${fullDate}, ${timeStr}`;
     }
 
     escapeHtml(text) {
