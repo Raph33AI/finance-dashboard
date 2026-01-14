@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Admin Billing - AlphaVault AI</title>
+
+    <link rel="canonical" href="https://alphavault-ai.com/admin-billing">
+    
+    <!-- Chart.js -->
+    <script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/admin-analytics.css'>
+    <link rel='stylesheet' href='assets/css/admin-billing.css'>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#667eea">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="msapplication-TileColor" content="#667eea">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration Firebase -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection de la page -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+</head>
+<body>
+
+    <!-- ⚡ THEME SCRIPT -->
+    <script src="assets/js/theme.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <!-- 🔒 LOADING SCREEN -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading Billing Dashboard...</h2>
+            <p>Fetching Stripe data...</p>
+        </div>
+    </div>
+
+    <!-- 📊 ADMIN DASHBOARD -->
+    <div id="billing-dashboard" class='layout-wrapper' style="display: none;">
+        
+            <!-- ============================================
+            SIDEBAR NAVIGATION
+            ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- Header avec Logo 3D -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                stroke="url(#logoGradient)" 
+                                stroke-width="4" 
+                                fill="none" 
+                                stroke-linecap="round" 
+                                stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                stroke="url(#logoGradient)" 
+                                stroke-width="3" 
+                                fill="none" 
+                                stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                        <a href='real-estate-tax-simulator' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Real Estate Simulator</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='companies-directory' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Companies Directory & Earnings</span>
+                        </a>
+                        <a href='advanced-analysis' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='forex-converter' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker' class='nav-link'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                        <a href='ma-predictor' class='nav-link'>
+                            <i class='fas fa-handshake'></i>
+                            <span>M&A Screening</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='economic-dashboard' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- ✨ NOUVELLE SECTION NEWS -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                        <a href='company-research' class='nav-link'>
+                            <i class='fab fa-youtube'></i>
+                            <span>YouTube Intelligence</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ✅ NOUVELLE SECTION BLOG -->
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Community">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='community-hub' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Community Hub</span>
+                        </a>
+                        <a href='create-post' class='nav-link'>
+                            <i class='fas fa-pen-fancy'></i>
+                            <span>Create Post</span>
+                        </a>
+                        <a href='messages' class='nav-link'>
+                            <i class='fas fa-envelope'></i>
+                            <span>Messages</span>
+                            <span class="nav-badge" id="unreadMessagesBadge" style="display: none;">0</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION ADMIN (MASQUÉE PAR DÉFAUT - VISIBLE UNIQUEMENT POUR ADMIN) ===== -->
+                <div class='nav-section' id='adminSection' style='display: none !important;'>
+                    <button class="nav-folder" data-tooltip="Admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='admin-analytics' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Analytics Dashboard</span>
+                        </a>
+                        <a href='admin-analytics' class='nav-link active'>
+                            <i class='fas fa-coins'></i>
+                            <span>Billing Dashboard</span>
+                        </a>
+                        <a href='admin-documentation' class='nav-link'>
+                            <i class='fas fa-book-open'></i>
+                            <span>Documentation</span>
+                        </a>
+                        <a href='admin-business-plan' class='nav-link'>
+                            <i class='fas fa-briefcase'></i>
+                            <span>Business Plan</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- SIDEBAR FOOTER -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="help" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+
+        <!-- Main Content Area -->
+        <div class='main-content'>
+            <!-- Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class="page-title">
+                        <i class="fas fa-credit-card"></i>
+                        Billing Management
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export' id='exportBillingBtn'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
+                    <button class='dashboard-btn' id='refreshBillingBtn'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+
+                <!-- NAVIGATION TABS -->
+                <div class="main-tabs">
+                    <button class="main-tab active" data-section="overview">
+                        <i class="fas fa-home"></i>
+                        Overview
+                    </button>
+                    <button class="main-tab" data-section="subscriptions">
+                        <i class="fas fa-sync-alt"></i>
+                        Subscriptions
+                    </button>
+                    <button class="main-tab" data-section="customers">
+                        <i class="fas fa-users"></i>
+                        Customers
+                    </button>
+                    <button class="main-tab" data-section="invoices">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        Invoices
+                    </button>
+                    <button class="main-tab" data-section="payment-methods">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Methods
+                    </button>
+                    <button class="main-tab" data-section="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        Revenue Analytics
+                    </button>
+                </div>
+
+                <!-- ========================================
+                     SECTION: OVERVIEW
+                     ======================================== -->
+                <div id="overview" class="tab-section active" data-section-content="overview">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            Billing Overview
+                        </h2>
+                        
+                        <!-- Stats Grid -->
+                        <div class="dashboard-stats-grid">
+                            <!-- Total Revenue -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Revenue</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-total-revenue">$0</div>
+                                <div class="dashboard-stat-change" id="billing-revenue-change">All time</div>
+                            </div>
+                            
+                            <!-- MRR -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">MRR</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-mrr">$0</div>
+                                <div class="dashboard-stat-change">ARR: <span id="billing-arr">$0</span></div>
+                            </div>
+                            
+                            <!-- Active Subscriptions -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Active Subscriptions</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-active-subs">0</div>
+                                <div class="dashboard-stat-change">ARPU: <span id="billing-arpu">$0</span></div>
+                            </div>
+                            
+                            <!-- Total Customers -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Total Customers</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-total-customers">0</div>
+                                <div class="dashboard-stat-change">Stripe</div>
+                            </div>
+                            
+                            <!-- Trialing -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white;">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Trialing</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-trialing">0</div>
+                                <div class="dashboard-stat-change">Free trials</div>
+                            </div>
+                            
+                            <!-- Canceled -->
+                            <div class="dashboard-stat-card">
+                                <div class="dashboard-stat-header">
+                                    <div class="dashboard-stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div class="dashboard-stat-title">Canceled</div>
+                                </div>
+                                <div class="dashboard-stat-value" id="billing-canceled">0</div>
+                                <div class="dashboard-stat-change">Churned</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts -->
+                        <div class="charts-row">
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Plans Distribution (Pro & Platinum)
+                                </h4>
+                                <canvas id="plans-distribution-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <h4 class="chart-title">
+                                    <i class="fas fa-chart-area"></i>
+                                    Monthly Revenue (12 Months)
+                                </h4>
+                                <canvas id="revenue-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: SUBSCRIPTIONS
+                     ======================================== -->
+                <div id="subscriptions" class="tab-section" data-section-content="subscriptions">
+                    <div class="section">
+                        <div class="section-header-with-actions">
+                            <h2 class='section-title'>
+                                <i class='fas fa-sync-alt'></i>
+                                Subscriptions Management
+                            </h2>
+                            <button class='dashboard-btn btn-primary' onclick="adminBilling.openCreateSubscriptionModal()">
+                                <i class='fas fa-plus'></i>
+                                <span class="btn-text">New Subscription</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Filter Bar -->
+                        <div class="filter-bar">
+                            <select id="subscription-status-filter" class="filter-select" onchange="adminBilling.filterSubscriptions()">
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="trialing">Trialing</option>
+                                <option value="past_due">Past Due</option>
+                                <option value="canceled">Canceled</option>
+                                <option value="unpaid">Unpaid</option>
+                            </select>
+                            
+                            <select id="subscription-plan-filter" class="filter-select" onchange="adminBilling.filterSubscriptions()">
+                                <option value="all">All Plans</option>
+                                <option value="pro">Pro</option>
+                                <option value="platinum">Platinum</option>
+                            </select>
+                            
+                            <input type="text" id="subscription-search" class="filter-search" placeholder="Search by customer email..." oninput="adminBilling.filterSubscriptions()">
+                        </div>
+                        
+                        <!-- Subscriptions Table -->
+                        <div class="table-wrapper">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Plan</th>
+                                            <th>Status</th>
+                                            <th>Amount</th>
+                                            <th>Period</th>
+                                            <th>Payment Method</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="subscriptions-table-body">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading subscriptions...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: CUSTOMERS
+                     ======================================== -->
+                <div id="customers" class="tab-section" data-section-content="customers">
+                    <div class="section">
+                        <div class="section-header-with-actions">
+                            <h2 class='section-title'>
+                                <i class='fas fa-users'></i>
+                                Customers Management
+                            </h2>
+                        </div>
+                        
+                        <!-- Search Bar -->
+                        <div class="filter-bar">
+                            <input type="text" id="customer-search" class="filter-search" placeholder="Search by email or name..." oninput="adminBilling.filterCustomers()">
+                        </div>
+                        
+                        <!-- Customers Table -->
+                        <div class="table-wrapper">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Email</th>
+                                            <th>Created</th>
+                                            <th>Balance</th>
+                                            <th>Delinquent</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customers-table-body">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading customers...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: INVOICES
+                     ======================================== -->
+                <div id="invoices" class="tab-section" data-section-content="invoices">
+                    <div class="section">
+                        <div class="section-header-with-actions">
+                            <h2 class='section-title'>
+                                <i class='fas fa-file-invoice-dollar'></i>
+                                Invoices Management
+                            </h2>
+                        </div>
+                        
+                        <!-- Filter Bar -->
+                        <div class="filter-bar">
+                            <select id="invoice-status-filter" class="filter-select" onchange="adminBilling.filterInvoices()">
+                                <option value="all">All Statuses</option>
+                                <option value="paid">Paid</option>
+                                <option value="open">Open</option>
+                                <option value="void">Void</option>
+                                <option value="uncollectible">Uncollectible</option>
+                            </select>
+                            
+                            <input type="text" id="invoice-search" class="filter-search" placeholder="Search by invoice number or customer..." oninput="adminBilling.filterInvoices()">
+                        </div>
+                        
+                        <!-- Invoices Table -->
+                        <div class="table-wrapper">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Invoice #</th>
+                                            <th>Customer</th>
+                                            <th>Status</th>
+                                            <th>Amount Due</th>
+                                            <th>Amount Paid</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invoices-table-body">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                                                <p style="margin-top: 16px; color: #64748b;">Loading invoices...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: PAYMENT METHODS
+                     ======================================== -->
+                <div id="payment-methods" class="tab-section" data-section-content="payment-methods">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-credit-card'></i>
+                            Payment Methods
+                        </h2>
+                        
+                        <div class="info-banner">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Select a customer to view their payment methods</p>
+                        </div>
+                        
+                        <!-- Customer Selector -->
+                        <div class="form-group">
+                            <label>Select Customer:</label>
+                            <select id="payment-method-customer-select" class="form-input" onchange="adminBilling.loadPaymentMethods()">
+                                <option value="">-- Select a customer --</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Payment Methods List -->
+                        <div id="payment-methods-list" class="payment-methods-grid">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     SECTION: REVENUE ANALYTICS
+                     ======================================== -->
+                <div id="analytics" class="tab-section" data-section-content="analytics">
+                    <div class="section">
+                        <h2 class='section-title'>
+                            <i class='fas fa-chart-bar'></i>
+                            Revenue Analytics
+                        </h2>
+                        
+                        <!-- MRR Breakdown -->
+                        <div class="kpis-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Pro MRR</div>
+                                    <div class="kpi-value" id="mrr-pro">$0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Platinum MRR</div>
+                                    <div class="kpi-value" id="mrr-platinum">$0</div>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card">
+                                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Total MRR</div>
+                                    <div class="kpi-value" id="mrr-total">$0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Revenue Chart -->
+                        <div class="chart-wrapper">
+                            <h4 class="chart-title">
+                                <i class="fas fa-chart-line"></i>
+                                Revenue Trend (12 Months)
+                            </h4>
+                            <canvas id="analytics-revenue-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     MODALS
+                     ======================================== -->
+                
+                <!-- MODAL: CREATE SUBSCRIPTION -->
+                <div id="create-subscription-modal" class="billing-modal">
+                    <div class="billing-modal-content">
+                        <div class="billing-modal-header">
+                            <h3><i class="fas fa-plus"></i> Create New Subscription</h3>
+                            <button class="btn-close-modal" onclick="adminBilling.closeCreateSubscriptionModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="billing-modal-body">
+                            <div class="form-group">
+                                <label>Customer Email:</label>
+                                <input type="email" id="new-sub-customer-email" class="form-input" placeholder="customer@example.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Plan:</label>
+                                <select id="new-sub-plan" class="form-input">
+                                    <option value="">-- Select Plan --</option>
+                                    <option value="pro">Pro - $49/month</option>
+                                    <option value="platinum">Platinum - $99/month</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Trial Days (optional):</label>
+                                <input type="number" id="new-sub-trial-days" class="form-input" placeholder="14" min="0">
+                            </div>
+                            
+                            <div class="info-banner" style="margin-top: 16px;">
+                                <i class="fas fa-info-circle"></i>
+                                <p><strong>Note:</strong> Free and Basic plans are managed in the frontend. Only Pro and Platinum can be created via Stripe.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="billing-modal-footer">
+                            <button class="btn-secondary" onclick="adminBilling.closeCreateSubscriptionModal()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button class="btn-primary" onclick="adminBilling.createSubscription()">
+                                <i class="fas fa-check"></i> Create Subscription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: SUBSCRIPTION DETAILS -->
+                <div id="subscription-details-modal" class="billing-modal">
+                    <div class="billing-modal-content billing-modal-large">
+                        <div class="billing-modal-header">
+                            <h3><i class="fas fa-info-circle"></i> Subscription Details</h3>
+                            <button class="btn-close-modal" onclick="adminBilling.closeSubscriptionDetailsModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="billing-modal-body" id="subscription-details-content">
+                            <!-- Loaded dynamically -->
+                        </div>
+                        
+                        <div class="billing-modal-footer">
+                            <button class="btn-secondary" onclick="adminBilling.closeSubscriptionDetailsModal()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: CUSTOMER DETAILS -->
+                <div id="customer-details-modal" class="billing-modal">
+                    <div class="billing-modal-content billing-modal-large">
+                        <div class="billing-modal-header">
+                            <h3><i class="fas fa-user"></i> Customer Details</h3>
+                            <button class="btn-close-modal" onclick="adminBilling.closeCustomerDetailsModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="billing-modal-body" id="customer-details-content">
+                            <!-- Loaded dynamically -->
+                        </div>
+                        
+                        <div class="billing-modal-footer">
+                            <button class="btn-secondary" onclick="adminBilling.closeCustomerDetailsModal()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL: INVOICE DETAILS -->
+                <div id="invoice-details-modal" class="billing-modal">
+                    <div class="billing-modal-content billing-modal-large">
+                        <div class="billing-modal-header">
+                            <h3><i class="fas fa-file-invoice"></i> Invoice Details</h3>
+                            <button class="btn-close-modal" onclick="adminBilling.closeInvoiceDetailsModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="billing-modal-body" id="invoice-details-content">
+                            <!-- Loaded dynamically -->
+                        </div>
+                        
+                        <div class="billing-modal-footer">
+                            <button class="btn-secondary" onclick="adminBilling.closeInvoiceDetailsModal()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/dark-mode.js'></script>
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+    <script src='assets/js/admin-billing.js'></script>
+    
+    <!-- Tab Navigation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.main-tab');
+            const sections = document.querySelectorAll('.tab-section');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetSection = tab.getAttribute('data-section');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.querySelector(`[data-section-content="${targetSection}"]`).classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    <!-- User menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
