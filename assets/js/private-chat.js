@@ -1069,7 +1069,7 @@ class PrivateChat {
     }
 
     /**
-     * ✅ NOUVEAU : Formatage intelligent de la date + heure des messages
+     * ✅ NOUVEAU : Formatage intelligent de la date + heure des messages (FORMAT AM/PM)
      */
     formatMessageDate(date) {
         const now = new Date();
@@ -1080,11 +1080,11 @@ class PrivateChat {
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
 
-        // Heure au format HH:MM
+        // ✅ Heure au format AM/PM (12h)
         const timeStr = messageDate.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
+            hour: 'numeric', 
             minute: '2-digit',
-            hour12: false 
+            hour12: true 
         });
 
         // Aujourd'hui : afficher uniquement l'heure
