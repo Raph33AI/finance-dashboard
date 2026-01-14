@@ -1,308 +1,418 @@
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url>
-<loc>https://alphavault-ai.com/about</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/admin-analytics</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/admin-business-plan</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/advanced-analysis</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/auth</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/chatbot-fullpage</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/checkout</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/community-hub</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/companies-directory</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/company-research</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/contact</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/dashboard-financier</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/economic-dashboard</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/forex-converter</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/help</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/inflation-calculator</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/insider-flow-tracker</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/interactive-demo</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/interest-rate-tracker</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/investment-analytics</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/ipo-intelligence</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-advanced-analysis</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-interactive-dashboard</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-ipo-intelligence</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-ma-screening</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-news-feed</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-real-estate</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-risk-parity</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/landing-trend-prediction</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/ma-predictor</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/market-sentiment</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/messages</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/monte-carlo</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/news-terminal</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/portfolio-optimizer</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/privacy</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/real-estate-tax-simulator</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/recession-indicator</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/resources-financial-metrics</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/resources-ml-finance</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/resources-technical-analysis</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/risk-parity</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/scenario-analysis</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/security</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/settings</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/success</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/terms</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/trend-prediction</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/trending-topics</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://alphavault-ai.com/user-profile</loc>
-<lastmod>2026-01-14</lastmod>
-<changefreq>weekly</changefreq>
-<priority>0.8</priority>
-</url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- ========================================
+       HOMEPAGE (PRIORITÉ MAXIMALE)
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- ========================================
+       CORE ANALYTICS TOOLS (HAUTE PRIORITÉ)
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/advanced-analysis</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/ipo-intelligence</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/ma-predictor</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/insider-flow-tracker</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/trend-prediction</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <!-- ========================================
+       QUANTITATIVE TOOLS
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/monte-carlo</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/risk-parity</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/scenario-analysis</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/portfolio-optimizer</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/investment-analytics</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <!-- ========================================
+       MARKET DATA & INTELLIGENCE
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/forex-converter</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/economic-dashboard</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/market-sentiment</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/news-terminal</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/trending-topics</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/companies-directory</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/company-research</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <!-- ========================================
+       ECONOMIC INDICATORS & CALCULATORS
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/inflation-calculator</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/interest-rate-tracker</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/recession-indicator</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/real-estate-tax-simulator</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <!-- ========================================
+       DASHBOARD & PERSONAL FINANCE
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/dashboard-financier</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  
+  <!-- ========================================
+       AI CHATBOT
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/chatbot-fullpage</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  
+  <!-- ========================================
+       LEARNING RESOURCES
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/resources-financial-metrics</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/resources-technical-analysis</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/resources-ml-finance</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- ========================================
+       FEATURE LANDING PAGES
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-advanced-analysis</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-interactive-dashboard</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-ipo-intelligence</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-ma-screening</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-news-feed</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-real-estate</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-risk-parity</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/landing-trend-prediction</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  
+  <!-- ========================================
+       COMMUNITY & SOCIAL
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/community-hub</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/messages</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- ========================================
+       COMPANY INFORMATION
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/about</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/contact</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/help</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/interactive-demo</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  
+  <!-- ========================================
+       AUTHENTICATION & USER PAGES
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/auth</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/checkout</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/success</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.40</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/user-profile</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.50</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/settings</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.40</priority>
+  </url>
+  
+  <!-- ========================================
+       ADMIN PAGES (FAIBLE PRIORITÉ SEO)
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/admin-analytics</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.30</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/admin-business-plan</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.30</priority>
+  </url>
+  
+  <!-- ========================================
+       LEGAL & COMPLIANCE
+       ======================================== -->
+  
+  <url>
+    <loc>https://alphavault-ai.com/privacy</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/terms</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
+  </url>
+  
+  <url>
+    <loc>https://alphavault-ai.com/security</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
+  </url>
+
 </urlset>
