@@ -899,8 +899,7 @@ class MessagesHub {
     }
 
     /**
-     * ✅ VERSION AMÉLIORÉE : Affiche la date ET l'heure
-     * Format intelligent selon l'ancienneté du message
+     * ✅ VERSION ALTERNATIVE : Toujours afficher Date + Heure
      */
     formatTimeAgo(date) {
         if (!date) return 'Unknown';
@@ -908,48 +907,50 @@ class MessagesHub {
         const now = new Date();
         const messageDate = new Date(date);
         
-        // ✅ Calculer la différence en jours
+        // Calculer la différence en jours
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const messageDateStart = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
         const daysDiff = Math.floor((todayStart - messageDateStart) / (1000 * 60 * 60 * 24));
         
-        // ✅ Formater l'heure (ex: "11:04 PM")
+        // Formater l'heure
         const timeString = messageDate.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
         
-        // ✅ AUJOURD'HUI : Afficher seulement l'heure
+        // ✅ AUJOURD'HUI
         if (daysDiff === 0) {
-            return timeString; // "11:04 PM"
+            return `Today at ${timeString}`;
         }
         
-        // ✅ HIER : "Yesterday"
+        // ✅ HIER
         if (daysDiff === 1) {
-            return `Yesterday`;
+            return `Yesterday at ${timeString}`;
         }
         
-        // ✅ CETTE SEMAINE (2-6 jours) : Jour de la semaine
+        // ✅ CETTE SEMAINE (2-6 jours)
         if (daysDiff >= 2 && daysDiff <= 6) {
             const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'long' });
-            return dayName; // "Monday", "Tuesday", etc.
+            return `${dayName} at ${timeString}`;
         }
         
-        // ✅ PLUS DE 7 JOURS : Date courte
+        // ✅ PLUS DE 7 JOURS
         if (daysDiff >= 7 && daysDiff < 365) {
-            return messageDate.toLocaleDateString('en-US', {
+            const dateString = messageDate.toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric'
-            }); // "Jan 13", "Dec 25", etc.
+            });
+            return `${dateString} at ${timeString}`;
         }
         
-        // ✅ PLUS D'1 AN : Date avec année
-        return messageDate.toLocaleDateString('en-US', {
+        // ✅ PLUS D'1 AN
+        const dateString = messageDate.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
-        }); // "Jan 13, 2025"
+        });
+        return `${dateString} at ${timeString}`;
     }
 
     escapeHtml(text) {
