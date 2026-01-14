@@ -5568,9 +5568,9 @@ class AdminAnalyticsPro {
     // 🆕 LOAD SENT EMAILS
     async loadSentEmails() {
         try {
-            console.log('📤 Loading sent emails...');
+            console.log('📤 Loading sent emails from Resend API...');
             
-            const cacheKey = 'gmail-sent';
+            const cacheKey = 'resend-sent-emails';
             const cachedData = this.cache.get(cacheKey);
             
             if (cachedData) {
@@ -5586,10 +5586,11 @@ class AdminAnalyticsPro {
             
             this.cache.incrementCallCount();
             
-            const response = await fetch(`${GMAIL_WORKER_URL}/gmail-sent?maxResults=30`);
+            // 🔥 NOUVEL ENDPOINT : Resend API au lieu de Gmail API
+            const response = await fetch(`${GMAIL_WORKER_URL}/resend-sent-emails?maxResults=50`);
             
             if (!response.ok) {
-                throw new Error(`Gmail sent emails error: ${response.status}`);
+                throw new Error(`Resend API error: ${response.status}`);
             }
             
             const data = await response.json();
@@ -5598,7 +5599,7 @@ class AdminAnalyticsPro {
             this.gmailSent = data.messages;
             this.displaySentEmails(data.messages);
             
-            console.log('✅ Sent emails loaded from API');
+            console.log('✅ Sent emails loaded from Resend API');
             
         } catch (error) {
             console.error('❌ Error loading sent emails:', error);
@@ -5615,7 +5616,7 @@ class AdminAnalyticsPro {
         if (!messages || messages.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
                         <i class="fas fa-paper-plane" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
                         <p style="margin: 0;">No sent emails</p>
                     </td>
@@ -5628,9 +5629,6 @@ class AdminAnalyticsPro {
             const row = document.createElement('tr');
             
             row.style.cursor = 'pointer';
-            row.onclick = () => {
-                this.viewEmail(email.id);
-            };
             
             row.onmouseenter = () => {
                 row.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
@@ -5639,12 +5637,26 @@ class AdminAnalyticsPro {
                 row.style.backgroundColor = '';
             };
             
-            const date = new Date(email.timestamp).toLocaleDateString('en-US', {
+            const date = new Date(email.timestamp || email.created_at).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            
+            // 🆕 Badge de statut
+            let statusBadge = '';
+            if (email.status) {
+                const statusColors = {
+                    'delivered': 'background: linear-gradient(135deg, #10b981, #059669); color: white;',
+                    'opened': 'background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;',
+                    'clicked': 'background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;',
+                    'bounced': 'background: linear-gradient(135deg, #ef4444, #dc2626); color: white;',
+                    'complained': 'background: linear-gradient(135deg, #f59e0b, #d97706); color: white;'
+                };
+                const statusStyle = statusColors[email.status] || 'background: #64748b; color: white;';
+                statusBadge = `<span style="display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; ${statusStyle}">${email.status}</span>`;
+            }
             
             row.innerHTML = `
                 <td>${index + 1}</td>
@@ -5653,19 +5665,17 @@ class AdminAnalyticsPro {
                     ${email.to}
                 </td>
                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    ${email.subject}
+                    ${email.subject || '(No subject)'}
                 </td>
-                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
-                    ${email.snippet || ''}
+                <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b;">
+                    ${email.from}
                 </td>
+                <td>${statusBadge || '<span style="color: #94a3b8;">—</span>'}</td>
                 <td>${date}</td>
                 <td onclick="event.stopPropagation()">
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')" title="View">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn-action btn-sm" onclick="adminAnalytics.openForwardModal('${email.id}')" title="Forward">
-                        <i class="fas fa-share"></i>
-                    </button>
+                    <a href="https://resend.com/emails/${email.id}" target="_blank" class="btn-action btn-sm" title="View in Resend">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
                 </td>
             `;
             
@@ -5687,7 +5697,7 @@ class AdminAnalyticsPro {
         
         window.paginationManagers['gmail-sent-body'].render();
         
-        console.log(`✅ Sent emails displayed (${messages.length} emails)`);
+        console.log(`✅ Sent emails displayed (${messages.length} emails from Resend API)`);
     }
 
     getEmailCategoryBadge(category) {
