@@ -8282,6 +8282,10 @@ class AdminAnalyticsPro {
         console.log('✅ All signatures updated with profile pictures');
     }
 
+    // ========================================
+    // 🖼 GENERATE SIGNATURE WITH PICTURE (QUILL.JS COMPATIBLE)
+    // ========================================
+
     generateSignatureWithPicture(email) {
         console.log(`✍ Generating signature with picture for: ${email}`);
         
@@ -8294,34 +8298,45 @@ class AdminAnalyticsPro {
         
         console.log(`📸 Picture data:`, pictureData);
         
-        // Générer le HTML de la photo (60px pour la signature)
-        const pictureHTML = this.generateProfilePictureHTML(email, 60);
+        // 🔥 GÉNÉRER L'IMAGE (inline, compatible email)
+        let pictureHTML = '';
+        
+        if (pictureData.url && pictureData.url.startsWith('http')) {
+            // URL externe (COMPATIBLE EMAIL)
+            pictureHTML = `<img src="${pictureData.url}" alt="${pictureData.name || email}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea; vertical-align: middle; margin-right: 16px;" />`;
+        } else {
+            // Initiales (fallback)
+            const initials = pictureData.initials || 'AV';
+            const bgColor = pictureData.bgColor || '#667eea';
+            pictureHTML = `<span style="display: inline-block; width: 60px; height: 60px; border-radius: 50%; background: ${bgColor}; color: white; font-weight: 700; font-size: 24px; text-align: center; line-height: 60px; vertical-align: middle; margin-right: 16px;">${initials}</span>`;
+        }
+        
+        // 🔥 SIGNATURE SIMPLIFIÉE (DIV uniquement, pas de TABLE)
+        const signature = `
+            <br><br>
+            <div style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; font-family: Arial, sans-serif; color: #1e293b; font-size: 14px; line-height: 1.6;">
+                <div style="margin-bottom: 12px;">
+                    ${pictureHTML}
+                    <div style="display: inline-block; vertical-align: middle;">
+                        <div style="font-weight: 700; font-size: 17px; color: #667eea; margin-bottom: 4px;">
+                            ${pictureData.name || email.split('@')[0]}
+                        </div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                            ${pictureData.title || 'AlphaVault AI'}
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 13px; color: #64748b; line-height: 1.8;">
+                    📧 <a href="mailto:${email}" style="color: #667eea; text-decoration: none;">${email}</a><br>
+                    🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
+                    💼 Real-time market analysis & AI-powered predictions
+                </div>
+            </div>
+        `;
         
         console.log(`✅ Signature HTML generated for ${email}`);
         
-        return `
-            <br><br>
-            <table cellpadding="0" cellspacing="0" border="0" style="border-top: 2px solid #667eea; padding-top: 16px; margin-top: 20px; font-family: Arial, sans-serif; color: #1e293b; font-size: 14px; line-height: 1.8; border-collapse: collapse;">
-                <tr>
-                    <td style="padding-right: 16px; vertical-align: top; width: 76px;">
-                        ${pictureHTML}
-                    </td>
-                    <td style="vertical-align: top;">
-                        <strong style="color: #667eea; font-size: 17px; display: block; margin-bottom: 4px;">
-                            ${pictureData.name || email.split('@')[0]}
-                        </strong>
-                        <span style="color: #64748b; font-size: 13px; display: block; margin-bottom: 12px;">
-                            ${pictureData.title || 'AlphaVault AI'}
-                        </span>
-                        <div style="color: #64748b; font-size: 13px; line-height: 1.6;">
-                            📧 ${email}<br>
-                            🌐 <a href="https://alphavault-ai.com" style="color: #667eea; text-decoration: none; font-weight: 600;">alphavault-ai.com</a><br>
-                            💼 Real-time market analysis & AI-powered predictions
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        `;
+        return signature;
     }
 
     deleteProfilePicture() {
