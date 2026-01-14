@@ -5565,12 +5565,15 @@ class AdminAnalyticsPro {
         console.log(`✅ Gmail inbox displayed (${messages.length} emails)`);
     }
 
-    // 🆕 LOAD SENT EMAILS
+    // ========================================
+    // 📤 LOAD ALL SENT EMAILS (RESEND + GMAIL)
+    // ========================================
+
     async loadSentEmails() {
         try {
-            console.log('📤 Loading sent emails from Resend API...');
+            console.log('📤 Loading sent emails from Resend API + Gmail API...');
             
-            const cacheKey = 'resend-sent-emails';
+            const cacheKey = 'all-sent-emails';
             const cachedData = this.cache.get(cacheKey);
             
             if (cachedData) {
@@ -5586,24 +5589,127 @@ class AdminAnalyticsPro {
             
             this.cache.incrementCallCount();
             
-            // 🔥 NOUVEL ENDPOINT : Resend API au lieu de Gmail API
-            const response = await fetch(`${GMAIL_WORKER_URL}/resend-sent-emails?maxResults=50`);
+            // 🔥 CHARGER LES 2 SOURCES EN PARALLÈLE
+            const [resendResponse, gmailResponse] = await Promise.all([
+                fetch(`${GMAIL_WORKER_URL}/resend-sent-emails?maxResults=50`).catch(err => {
+                    console.error('❌ Resend API error:', err);
+                    return null;
+                }),
+                fetch(`${GMAIL_WORKER_URL}/gmail-sent?maxResults=50`).catch(err => {
+                    console.error('❌ Gmail API error:', err);
+                    return null;
+                })
+            ]);
             
-            if (!response.ok) {
-                throw new Error(`Resend API error: ${response.status}`);
+            let resendEmails = [];
+            let gmailEmails = [];
+            
+            // Traiter Resend
+            if (resendResponse && resendResponse.ok) {
+                const resendData = await resendResponse.json();
+                resendEmails = resendData.messages || [];
+                console.log(`✅ Resend: ${resendEmails.length} emails loaded`);
             }
             
-            const data = await response.json();
+            // Traiter Gmail
+            if (gmailResponse && gmailResponse.ok) {
+                const gmailData = await gmailResponse.json();
+                gmailEmails = gmailData.messages || [];
+                console.log(`✅ Gmail: ${gmailEmails.length} emails loaded`);
+            }
             
-            this.cache.set(cacheKey, data.messages);
-            this.gmailSent = data.messages;
-            this.displaySentEmails(data.messages);
+            // 🔥 FUSIONNER ET DÉDUPLIQUER
+            const mergedEmails = this.mergeSentEmails(resendEmails, gmailEmails);
             
-            console.log('✅ Sent emails loaded from Resend API');
+            this.cache.set(cacheKey, mergedEmails);
+            this.gmailSent = mergedEmails;
+            this.displaySentEmails(mergedEmails);
+            
+            console.log(`✅ Total sent emails displayed: ${mergedEmails.length} (Resend: ${resendEmails.length}, Gmail: ${gmailEmails.length})`);
             
         } catch (error) {
             console.error('❌ Error loading sent emails:', error);
         }
+    }
+
+    // ========================================
+    // 🔀 MERGE SENT EMAILS (RESEND + GMAIL) WITH DEDUPLICATION
+    // ========================================
+
+    mergeSentEmails(resendEmails, gmailEmails) {
+        console.log('🔀 Merging sent emails from Resend + Gmail...');
+        
+        // 1. Normaliser les emails Resend
+        const normalizedResend = resendEmails.map(email => ({
+            id: email.id,
+            source: 'resend',
+            from: email.from,
+            to: email.to,
+            subject: email.subject || '(No subject)',
+            timestamp: email.timestamp,
+            created_at: email.created_at,
+            status: email.status || 'sent',
+            snippet: `Sent via Resend API to ${email.to}`,
+            // Clé de déduplication
+            dedupKey: this.generateDedupKey(email.subject, email.to, email.timestamp)
+        }));
+        
+        // 2. Normaliser les emails Gmail
+        const normalizedGmail = gmailEmails.map(email => ({
+            id: email.id,
+            source: 'gmail',
+            messageId: email.messageId,
+            from: email.from,
+            to: email.to,
+            subject: email.subject || '(No subject)',
+            timestamp: email.timestamp,
+            date: email.date,
+            snippet: email.snippet || '',
+            threadId: email.threadId,
+            // Clé de déduplication
+            dedupKey: this.generateDedupKey(email.subject, email.to, email.timestamp)
+        }));
+        
+        // 3. Créer un Set pour détecter les doublons
+        const seen = new Set();
+        const merged = [];
+        
+        // 4. Fusionner (priorité à Resend car plus de détails)
+        [...normalizedResend, ...normalizedGmail].forEach(email => {
+            if (!seen.has(email.dedupKey)) {
+                seen.add(email.dedupKey);
+                merged.push(email);
+            } else {
+                console.log(`🔄 Duplicate detected: ${email.subject} (${email.source})`);
+            }
+        });
+        
+        // 5. Trier par date décroissante (plus récent en premier)
+        merged.sort((a, b) => b.timestamp - a.timestamp);
+        
+        console.log(`✅ Merged emails: ${merged.length} (${normalizedResend.length} Resend + ${normalizedGmail.length} Gmail - duplicates removed)`);
+        
+        return merged;
+    }
+
+    // ========================================
+    // 🔑 GENERATE DEDUPLICATION KEY
+    // ========================================
+
+    generateDedupKey(subject, to, timestamp) {
+        // Normaliser le sujet (retirer Re:, Fwd:, espaces)
+        const cleanSubject = (subject || '')
+            .replace(/^(Re:|Fwd:)\s*/gi, '')
+            .trim()
+            .toLowerCase();
+        
+        // Normaliser le destinataire
+        const cleanTo = (to || '').trim().toLowerCase();
+        
+        // Arrondir le timestamp à la minute (60000 ms)
+        const roundedTimestamp = Math.floor(timestamp / 60000) * 60000;
+        
+        return `${cleanSubject}|${cleanTo}|${roundedTimestamp}`;
     }
 
     // 🆕 DISPLAY SENT EMAILS
@@ -5630,8 +5736,19 @@ class AdminAnalyticsPro {
             
             row.style.cursor = 'pointer';
             
+            // 🔥 GÉRER LES 2 TYPES D'EMAILS
+            row.onclick = () => {
+                if (email.source === 'resend') {
+                    this.viewSentEmail(email); // Modal simplifié Resend
+                } else {
+                    this.viewEmail(email.id); // Modal complet Gmail
+                }
+            };
+            
             row.onmouseenter = () => {
-                row.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+                row.style.backgroundColor = email.source === 'resend' 
+                    ? 'rgba(16, 185, 129, 0.05)' 
+                    : 'rgba(59, 130, 246, 0.05)';
             };
             row.onmouseleave = () => {
                 row.style.backgroundColor = '';
@@ -5644,9 +5761,14 @@ class AdminAnalyticsPro {
                 minute: '2-digit'
             });
             
-            // 🆕 Badge de statut
+            // 🆕 ICÔNE SELON LA SOURCE
+            const sourceIcon = email.source === 'resend'
+                ? '<i class="fas fa-paper-plane" style="font-size: 10px; color: #10b981; margin-right: 8px;" title="Sent via Resend API"></i>'
+                : '<i class="fas fa-envelope" style="font-size: 10px; color: #3b82f6; margin-right: 8px;" title="Sent via Gmail"></i>';
+            
+            // 🆕 BADGE DE STATUS (seulement pour Resend)
             let statusBadge = '';
-            if (email.status) {
+            if (email.source === 'resend' && email.status) {
                 const statusColors = {
                     'delivered': 'background: linear-gradient(135deg, #10b981, #059669); color: white;',
                     'opened': 'background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;',
@@ -5661,7 +5783,7 @@ class AdminAnalyticsPro {
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <i class="fas fa-paper-plane" style="font-size: 10px; color: #10b981; margin-right: 8px;"></i>
+                    ${sourceIcon}
                     ${email.to}
                 </td>
                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -5673,9 +5795,14 @@ class AdminAnalyticsPro {
                 <td>${statusBadge || '<span style="color: #94a3b8;">—</span>'}</td>
                 <td>${date}</td>
                 <td onclick="event.stopPropagation()">
-                    <a href="https://resend.com/emails/${email.id}" target="_blank" class="btn-action btn-sm" title="View in Resend">
-                        <i class="fas fa-external-link-alt"></i>
-                    </a>
+                    ${email.source === 'resend' 
+                        ? `<a href="https://resend.com/emails/${email.id}" target="_blank" class="btn-action btn-sm" title="View in Resend">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>`
+                        : `<button class="btn-action btn-sm" onclick="adminAnalytics.viewEmail('${email.id}')" title="View details">
+                            <i class="fas fa-eye"></i>
+                        </button>`
+                    }
                 </td>
             `;
             
@@ -5697,7 +5824,7 @@ class AdminAnalyticsPro {
         
         window.paginationManagers['gmail-sent-body'].render();
         
-        console.log(`✅ Sent emails displayed (${messages.length} emails from Resend API)`);
+        console.log(`✅ Sent emails displayed: ${messages.length} (Resend + Gmail merged)`);
     }
 
     getEmailCategoryBadge(category) {
@@ -6398,6 +6525,95 @@ class AdminAnalyticsPro {
             modal.style.display = 'none';
         }
         this.currentEmail = null;
+    }
+
+    // ========================================
+    // 👁 VIEW SENT EMAIL (RESEND API - SIMPLIFIED MODAL)
+    // ========================================
+
+    viewSentEmail(email) {
+        console.log(`👁 Displaying sent email details (Resend ID: ${email.id})...`);
+        
+        this.currentEmail = email;
+        
+        const modal = document.getElementById('view-email-modal');
+        if (!modal) return;
+        
+        // Remplir les métadonnées
+        document.getElementById('view-email-from').textContent = email.from;
+        document.getElementById('view-email-to').textContent = email.to;
+        document.getElementById('view-email-subject').textContent = email.subject || '(No subject)';
+        document.getElementById('view-email-date').textContent = new Date(email.timestamp || email.created_at).toLocaleString();
+        
+        // 🔥 MESSAGE PERSONNALISÉ pour les emails Resend
+        document.getElementById('view-email-body').innerHTML = `
+            <div style="padding: 24px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.08)); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-paper-plane" style="font-size: 3rem; color: #10b981; margin-bottom: 12px; display: block;"></i>
+                    <h3 style="color: #1e293b; margin-bottom: 8px;">✅ Email Successfully Sent</h3>
+                    <p style="color: #64748b; font-size: 14px;">This email was sent via Resend API</p>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px 0; font-weight: 700; color: #475569; width: 120px;">
+                                <i class="fas fa-envelope" style="margin-right: 8px; color: #667eea;"></i>From:
+                            </td>
+                            <td style="padding: 10px 0; color: #1e293b;">${email.from}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px 0; font-weight: 700; color: #475569;">
+                                <i class="fas fa-user" style="margin-right: 8px; color: #667eea;"></i>To:
+                            </td>
+                            <td style="padding: 10px 0; color: #1e293b;">${email.to}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px 0; font-weight: 700; color: #475569;">
+                                <i class="fas fa-heading" style="margin-right: 8px; color: #667eea;"></i>Subject:
+                            </td>
+                            <td style="padding: 10px 0; color: #1e293b; font-weight: 600;">${email.subject || '(No subject)'}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px 0; font-weight: 700; color: #475569;">
+                                <i class="fas fa-clock" style="margin-right: 8px; color: #667eea;"></i>Sent At:
+                            </td>
+                            <td style="padding: 10px 0; color: #1e293b;">${new Date(email.timestamp || email.created_at).toLocaleString()}</td>
+                        </tr>
+                        ${email.status ? `
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 700; color: #475569;">
+                                <i class="fas fa-check-circle" style="margin-right: 8px; color: #10b981;"></i>Status:
+                            </td>
+                            <td style="padding: 10px 0;">
+                                <span style="display: inline-block; padding: 4px 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                    ${email.status}
+                                </span>
+                            </td>
+                        </tr>
+                        ` : ''}
+                    </table>
+                </div>
+                
+                <div style="text-align: center; padding: 16px; background: rgba(255, 255, 255, 0.6); border-radius: 8px;">
+                    <p style="color: #64748b; font-size: 13px; margin-bottom: 12px;">
+                        <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+                        Email content is stored in Resend. Click below to view full details.
+                    </p>
+                    <a href="https://resend.com/emails/${email.id}" target="_blank" class="btn-primary" style="display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i>View in Resend Dashboard
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Pas de pièces jointes disponibles via l'API Resend (endpoint /emails ne retourne pas les attachments)
+        const attContainer = document.getElementById('view-email-attachments');
+        attContainer.innerHTML = '<p style="color: #64748b; font-size: 14px;"><i class="fas fa-info-circle" style="margin-right: 6px;"></i>Attachment details available in Resend dashboard</p>';
+        
+        modal.style.display = 'flex';
+        
+        console.log('✅ Sent email modal displayed');
     }
 
     async downloadAttachment(messageId, attachmentId, filename) {
