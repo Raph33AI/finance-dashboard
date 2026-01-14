@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnostic SEO Complet - AlphaVault AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .warning-box h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box ul {
+            color: #78350f;
+            padding-left: 20px;
+        }
+        
+        .warning-box li {
+            margin: 8px 0;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        label {
+            display: block;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 0.9375rem;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            margin-bottom: 30px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-section {
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            width: 0%;
+            transition: width 0.3s;
+            position: relative;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #475569;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card.ok {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        }
+        
+        .stat-card.error {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+        }
+        
+        .stat-card.warning {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+        }
+        
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card.ok .stat-number { color: #059669; }
+        .stat-card.error .stat-number { color: #dc2626; }
+        .stat-card.warning .stat-number { color: #d97706; }
+        
+        .stat-label {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .issue-group {
+            margin-bottom: 40px;
+        }
+        
+        .issue-group-header {
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .issue-group-header.critical {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .issue-group-header.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .issue-group-header.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .issue-group-header h2 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .issue-group-header .count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 1.125rem;
+            font-weight: 800;
+        }
+        
+        .issue-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        
+        .issue-item:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .issue-item.critical {
+            border-left: 5px solid #ef4444;
+        }
+        
+        .issue-item.warning {
+            border-left: 5px solid #f59e0b;
+        }
+        
+        .issue-item.info {
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .issue-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .issue-url {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-size: 0.9375rem;
+            margin-bottom: 12px;
+        }
+        
+        .issue-description {
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+        
+        .issue-fix {
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .issue-fix-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .issue-fix-code {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #667eea;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .issue-impact {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        
+        .impact-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .impact-medium {
+            background: #fef3c7;
+            color: #78350f;
+        }
+        
+        .impact-low {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+        
+        .export-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 16px;
+            display: none;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-export {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-json {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .btn-csv {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-html {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .btn-sitemap {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 2px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #5b21b6;
+            margin-bottom: 20px;
+        }
+        
+        .summary-list {
+            list-style: none;
+        }
+        
+        .summary-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-list strong {
+            color: #6d28d9;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+        
+        .badge-danger {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .badge-warning {
+            background: #fde68a;
+            color: #78350f;
+        }
+        
+        .badge-success {
+            background: #a7f3d0;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Diagnostic SEO Complet</h1>
+            <p class="subtitle">Détection des Problèmes d'Indexation Google Search Console</p>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <h3>⚠ Problèmes Détectés par Google Search Console :</h3>
+            <ul>
+                <li><strong>Page avec redirection (10 pages)</strong> - Redirections 301/302 empêchant l'indexation</li>
+                <li><strong>Autre page avec balise canonique correcte (2 pages)</strong> - Canonical pointant vers une autre URL</li>
+                <li><strong>Détectée, actuellement non indexée (28 pages)</strong> - Google a trouvé les pages mais ne les indexe pas</li>
+            </ul>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="baseUrl">🌐 URL de Base du Site</label>
+                <input type="text" id="baseUrl" value="https://alphavault-ai.com" placeholder="https://alphavault-ai.com">
+            </div>
+            
+            <div class="control-group">
+                <label for="pagesList">📄 Liste des Pages à Vérifier (une par ligne)</label>
+                <textarea id="pagesList" placeholder="about&#10;monte-carlo&#10;real-estate-tax-simulator&#10;...">about
+admin-analytics
+admin-business-plan
+advanced-analysis
+auth
+chatbot-fullpage
+checkout
+community-hub
+companies-directory
+company-research
+contact
+dashboard-financier
+economic-dashboard
+forex-converter
+help
+index
+inflation-calculator
+insider-flow-tracker
+interactive-demo
+interest-rate-tracker
+investment-analytics
+ipo-intelligence
+landing-advanced-analysis
+landing-interactive-dashboard
+landing-ipo-intelligence
+landing-ma-screening
+landing-news-feed
+landing-real-estate
+landing-risk-parity
+landing-trend-prediction
+ma-predictor
+market-sentiment
+messages
+monte-carlo
+news-terminal
+portfolio-optimizer
+privacy
+real-estate-tax-simulator
+recession-indicator
+resources-financial-metrics
+resources-ml-finance
+resources-technical-analysis
+risk-parity
+scenario-analysis
+security
+settings
+success
+terms
+trend-prediction
+trending-topics
+user-profile</textarea>
+            </div>
+        </div>
+
+        <button class="btn-primary" id="btnStart" onclick="startDiagnosis()">
+            🚀 Lancer le Diagnostic Complet
+        </button>
+
+        <!-- Progress -->
+        <div class="progress-section" id="progressSection">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p class="progress-text" id="progressText">Initialisation...</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid" style="display: none;"></div>
+
+        <!-- Summary -->
+        <div class="summary-box" id="summaryBox" style="display: none;">
+            <h3 class="summary-title">📊 Résumé des Problèmes Google Search Console</h3>
+            <ul class="summary-list" id="summaryList"></ul>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" id="resultsSection"></div>
+
+        <!-- Export -->
+        <div class="export-section" id="exportSection">
+            <h3 style="margin-bottom: 20px; color: #1e293b; font-size: 1.5rem;">💾 Exporter les Résultats</h3>
+            <div class="export-buttons">
+                <button class="btn-export btn-json" onclick="exportJSON()">
+                    📄 Télécharger JSON
+                </button>
+                <button class="btn-export btn-csv" onclick="exportCSV()">
+                    📊 Télécharger CSV
+                </button>
+                <button class="btn-export btn-html" onclick="exportHTML()">
+                    🌐 Télécharger Rapport HTML
+                </button>
+                <button class="btn-export btn-sitemap" onclick="generateSitemapFix()">
+                    🗺 Générer Sitemap Corrigé
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let globalResults = [];
+        let globalStats = {};
+
+        // ═══════════════════════════════════════════════════════════════════
+        // FONCTIONS DE DIAGNOSTIC
+        // ═══════════════════════════════════════════════════════════════════
+
+        async function diagnosePage(baseUrl, page) {
+            const url = page === 'index' ? baseUrl : `${baseUrl}/${page}`;
+            const expectedCanonical = page === 'index' ? `${baseUrl}/` : `${baseUrl}/${page}`;
+            
+            const issues = [];
+            
+            try {
+                // 1. Test de récupération de la page
+                const response = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'manual' // Crucial pour détecter les redirections
+                });
+
+                // 2. DÉTECTION : Page avec redirection
+                if (response.type === 'opaqueredirect' || response.status === 301 || response.status === 302 || response.status === 307 || response.status === 308) {
+                    const redirectLocation = response.headers.get('Location') || 'inconnue';
+                    issues.push({
+                        type: 'REDIRECT',
+                        severity: 'critical',
+                        title: `🔴 Redirection ${response.status} Détectée`,
+                        description: `Cette page redirige vers "${redirectLocation}". Google ne peut pas indexer une page qui redirige. C'est la raison principale du problème "Page avec redirection".`,
+                        impact: 'high',
+                        fix: response.status === 301 
+                            ? `Redirection permanente (301) : Supprimez cette page du sitemap.xml et indexez uniquement l'URL de destination.`
+                            : `Redirection temporaire (${response.status}) : Convertissez en 301 si permanent, ou supprimez la redirection si la page doit être indexée.`,
+                        code: `<!-- Si vous voulez indexer cette page, supprimez la redirection dans votre configuration serveur -->\n<!-- Sinon, retirez-la du sitemap.xml -->`
+                    });
+                }
+
+                // 3. Test d'accessibilité
+                if (!response.ok && response.status !== 301 && response.status !== 302) {
+                    issues.push({
+                        type: 'HTTP_ERROR',
+                        severity: 'critical',
+                        title: `❌ Erreur HTTP ${response.status}`,
+                        description: `La page retourne une erreur ${response.status}. Google ne peut pas indexer une page inaccessible.`,
+                        impact: 'high',
+                        fix: `Corrigez l'erreur serveur. Vérifiez que la page existe et est accessible.`,
+                        code: `<!-- Vérifiez votre configuration serveur et assurez-vous que le fichier ${page}.html existe -->`
+                    });
+                    return { url, page, issues };
+                }
+
+                // 4. Récupération du HTML (uniquement si pas de redirection)
+                if (response.status === 200) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // 5. VÉRIFICATION : Balise Canonical
+                    const canonical = doc.querySelector('link[rel="canonical"]');
+                    
+                    if (!canonical) {
+                        issues.push({
+                            type: 'MISSING_CANONICAL',
+                            severity: 'critical',
+                            title: '❌ Balise Canonical Manquante',
+                            description: `Aucune balise canonical détectée. Cela peut causer le problème "Détectée, actuellement non indexée" car Google ne sait pas quelle URL est la version principale.`,
+                            impact: 'high',
+                            fix: 'Ajoutez une balise canonical dans le <head> de votre page.',
+                            code: `<link rel="canonical" href="${expectedCanonical}">`
+                        });
+                    } else {
+                        const actualCanonical = canonical.getAttribute('href');
+                        
+                        // 6. DÉTECTION : Autre page avec balise canonique correcte
+                        if (actualCanonical && actualCanonical !== expectedCanonical) {
+                            if (actualCanonical === `${baseUrl}/`) {
+                                issues.push({
+                                    type: 'CANONICAL_TO_HOMEPAGE',
+                                    severity: 'critical',
+                                    title: '🔴 Canonical Pointe vers Homepage',
+                                    description: `La balise canonical pointe vers "${actualCanonical}" au lieu de "${expectedCanonical}". Google considère que cette page est un duplicate de la homepage et ne l'indexera pas. C'est exactement le problème "Autre page avec balise canonique correcte".`,
+                                    impact: 'high',
+                                    fix: 'Corrigez la balise canonical pour qu\'elle pointe vers l\'URL de cette page.',
+                                    code: `<!-- ❌ ACTUEL (INCORRECT) -->\n<link rel="canonical" href="${actualCanonical}">\n\n<!-- ✅ CORRECTION -->\n<link rel="canonical" href="${expectedCanonical}">`
+                                });
+                            } else {
+                                issues.push({
+                                    type: 'CANONICAL_MISMATCH',
+                                    severity: 'warning',
+                                    title: '⚠ Canonical Incohérent',
+                                    description: `La balise canonical pointe vers "${actualCanonical}" au lieu de "${expectedCanonical}". Vérifiez si c'est intentionnel (page duplicate) ou une erreur.`,
+                                    impact: 'medium',
+                                    fix: 'Si cette page doit être indexée, corrigez le canonical. Sinon, c\'est normal si c\'est une page duplicate volontaire.',
+                                    code: `<!-- ❌ ACTUEL -->\n<link rel="canonical" href="${actualCanonical}">\n\n<!-- ✅ SI CORRECTION NÉCESSAIRE -->\n<link rel="canonical" href="${expectedCanonical}">`
+                                });
+                            }
+                        }
+                    }
+
+                    // 7. VÉRIFICATION : Meta Robots
+                    const metaRobots = doc.querySelector('meta[name="robots"]');
+                    if (metaRobots) {
+                        const content = metaRobots.getAttribute('content') || '';
+                        if (content.includes('noindex')) {
+                            issues.push({
+                                type: 'NOINDEX',
+                                severity: 'critical',
+                                title: '🚫 Meta Robots Noindex',
+                                description: `La balise meta robots contient "noindex". Google ne peut PAS indexer cette page à cause de cette instruction. C'est une cause majeure de "Détectée, actuellement non indexée".`,
+                                impact: 'high',
+                                fix: 'Supprimez "noindex" de la balise meta robots si vous voulez que Google indexe cette page.',
+                                code: `<!-- ❌ ACTUEL (BLOQUE L'INDEXATION) -->\n<meta name="robots" content="${content}">\n\n<!-- ✅ CORRECTION (AUTORISE L'INDEXATION) -->\n<meta name="robots" content="index, follow">\n<!-- OU supprimez complètement cette balise -->`
+                            });
+                        }
+                    }
+
+                    // 8. VÉRIFICATION : X-Robots-Tag (en-tête HTTP)
+                    const xRobotsTag = response.headers.get('X-Robots-Tag');
+                    if (xRobotsTag && xRobotsTag.includes('noindex')) {
+                        issues.push({
+                            type: 'XROBOTS_NOINDEX',
+                            severity: 'critical',
+                            title: '🚫 En-tête X-Robots-Tag Noindex',
+                            description: `L'en-tête HTTP "X-Robots-Tag: ${xRobotsTag}" bloque l'indexation. Même cause que le problème Google Search Console "Détectée, actuellement non indexée".`,
+                            impact: 'high',
+                            fix: 'Modifiez la configuration de votre serveur (Cloudflare, .htaccess, nginx) pour supprimer cet en-tête.',
+                            code: `# Cloudflare Page Rule ou Workers\nremove_header('X-Robots-Tag');\n\n# .htaccess\nHeader unset X-Robots-Tag`
+                        });
+                    }
+
+                    // 9. VÉRIFICATION : Title
+                    const title = doc.querySelector('title');
+                    if (!title || title.textContent.trim() === '') {
+                        issues.push({
+                            type: 'MISSING_TITLE',
+                            severity: 'warning',
+                            title: '⚠ Balise Title Manquante ou Vide',
+                            description: 'Aucun titre détecté. Google peut refuser d\'indexer une page sans titre.',
+                            impact: 'medium',
+                            fix: 'Ajoutez une balise <title> descriptive.',
+                            code: `<title>${page.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} - AlphaVault AI</title>`
+                        });
+                    }
+
+                    // 10. VÉRIFICATION : Meta Description
+                    const metaDesc = doc.querySelector('meta[name="description"]');
+                    if (!metaDesc || metaDesc.getAttribute('content').trim() === '') {
+                        issues.push({
+                            type: 'MISSING_DESCRIPTION',
+                            severity: 'info',
+                            title: 'ℹ Meta Description Manquante',
+                            description: 'Aucune meta description. Pas bloquant pour l\'indexation mais recommandé pour le SEO.',
+                            impact: 'low',
+                            fix: 'Ajoutez une meta description unique et descriptive.',
+                            code: `<meta name="description" content="Description de votre page ${page}">`
+                        });
+                    }
+
+                    // 11. VÉRIFICATION : Sitemap
+                    // (Note: impossible à vérifier côté client, juste une recommandation)
+                    
+                    // 12. VÉRIFICATION : Contenu Dupliqué
+                    const bodyText = doc.body ? doc.body.textContent.trim() : '';
+                    if (bodyText.length < 200) {
+                        issues.push({
+                            type: 'THIN_CONTENT',
+                            severity: 'warning',
+                            title: '⚠ Contenu Faible',
+                            description: `La page contient très peu de contenu texte (${bodyText.length} caractères). Google peut la considérer comme de faible qualité et ne pas l'indexer.`,
+                            impact: 'medium',
+                            fix: 'Ajoutez du contenu textuel unique et de qualité (minimum 300 mots recommandé).',
+                            code: `<!-- Ajoutez du contenu unique et pertinent dans le <body> -->`
+                        });
+                    }
+                }
+
+            } catch (error) {
+                issues.push({
+                    type: 'FETCH_ERROR',
+                    severity: 'critical',
+                    title: '❌ Erreur de Récupération',
+                    description: `Impossible de récupérer la page : ${error.message}. Cause possible : CORS, serveur inaccessible, ou erreur réseau.`,
+                    impact: 'high',
+                    fix: 'Vérifiez que la page est accessible publiquement et que votre serveur autorise les requêtes cross-origin.',
+                    code: `<!-- Vérifiez la configuration CORS de votre serveur -->`
+                });
+            }
+
+            return { url, page, issues };
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // FONCTION PRINCIPALE
+        // ═══════════════════════════════════════════════════════════════════
+
+        async function startDiagnosis() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const pagesText = document.getElementById('pagesList').value.trim();
+            
+            if (!baseUrl || !pagesText) {
+                alert('⚠ Veuillez renseigner l\'URL de base et la liste des pages.');
+                return;
+            }
+
+            const pages = pagesText.split('\n').map(p => p.trim()).filter(p => p);
+            
+            // UI Reset
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnStart').textContent = '⏳ Diagnostic en cours...';
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('statsGrid').style.display = 'none';
+            document.getElementById('summaryBox').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('resultsSection').innerHTML = '';
+            document.getElementById('exportSection').style.display = 'none';
+            
+            globalResults = [];
+            
+            const total = pages.length;
+            let completed = 0;
+
+            for (const page of pages) {
+                const result = await diagnosePage(baseUrl, page);
+                globalResults.push(result);
+                
+                completed++;
+                const progress = (completed / total) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = `Vérification : ${completed}/${total} pages (${Math.round(progress)}%)`;
+                
+                // Pause pour éviter de surcharger le serveur
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Analyse des résultats
+            analyzeResults();
+            displayResults();
+            
+            // UI Final
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnStart').textContent = '🔄 Relancer le Diagnostic';
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('exportSection').style.display = 'block';
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ANALYSE DES RÉSULTATS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function analyzeResults() {
+            const stats = {
+                totalPages: globalResults.length,
+                pagesOk: 0,
+                redirects: 0,
+                canonicalIssues: 0,
+                noindex: 0,
+                missingCanonical: 0,
+                httpErrors: 0,
+                thinContent: 0
+            };
+
+            const gscProblems = {
+                redirectPages: [],
+                canonicalCorrectPages: [],
+                detectedNotIndexed: []
+            };
+
+            globalResults.forEach(result => {
+                if (result.issues.length === 0) {
+                    stats.pagesOk++;
+                } else {
+                    result.issues.forEach(issue => {
+                        switch (issue.type) {
+                            case 'REDIRECT':
+                                stats.redirects++;
+                                gscProblems.redirectPages.push(result.page);
+                                break;
+                            case 'CANONICAL_TO_HOMEPAGE':
+                            case 'CANONICAL_MISMATCH':
+                                stats.canonicalIssues++;
+                                gscProblems.canonicalCorrectPages.push(result.page);
+                                break;
+                            case 'NOINDEX':
+                            case 'XROBOTS_NOINDEX':
+                                stats.noindex++;
+                                gscProblems.detectedNotIndexed.push(result.page);
+                                break;
+                            case 'MISSING_CANONICAL':
+                                stats.missingCanonical++;
+                                gscProblems.detectedNotIndexed.push(result.page);
+                                break;
+                            case 'HTTP_ERROR':
+                            case 'FETCH_ERROR':
+                                stats.httpErrors++;
+                                break;
+                            case 'THIN_CONTENT':
+                                stats.thinContent++;
+                                break;
+                        }
+                    });
+                }
+            });
+
+            globalStats = { ...stats, gscProblems };
+            displayStats(stats, gscProblems);
+        }
+
+        function displayStats(stats, gscProblems) {
+            const grid = document.getElementById('statsGrid');
+            grid.style.display = 'grid';
+            
+            grid.innerHTML = `
+                <div class="stat-card ${stats.pagesOk === stats.totalPages ? 'ok' : 'warning'}">
+                    <div class="stat-number">${stats.pagesOk}</div>
+                    <div class="stat-label">✅ Pages Sans Problème</div>
+                </div>
+                <div class="stat-card ${stats.redirects > 0 ? 'error' : 'ok'}">
+                    <div class="stat-number">${stats.redirects}</div>
+                    <div class="stat-label">🔴 Redirections (GSC)</div>
+                </div>
+                <div class="stat-card ${stats.canonicalIssues > 0 ? 'error' : 'ok'}">
+                    <div class="stat-number">${stats.canonicalIssues}</div>
+                    <div class="stat-label">🟡 Canonical Incorrects (GSC)</div>
+                </div>
+                <div class="stat-card ${stats.noindex + stats.missingCanonical > 0 ? 'warning' : 'ok'}">
+                    <div class="stat-number">${stats.noindex + stats.missingCanonical}</div>
+                    <div class="stat-label">⚠ Non Indexées (GSC)</div>
+                </div>
+                <div class="stat-card ${stats.httpErrors > 0 ? 'error' : 'ok'}">
+                    <div class="stat-number">${stats.httpErrors}</div>
+                    <div class="stat-label">❌ Erreurs HTTP</div>
+                </div>
+                <div class="stat-card ${stats.thinContent > 0 ? 'warning' : 'ok'}">
+                    <div class="stat-number">${stats.thinContent}</div>
+                    <div class="stat-label">📄 Contenu Faible</div>
+                </div>
+            `;
+
+            // Summary Box
+            const summaryBox = document.getElementById('summaryBox');
+            const summaryList = document.getElementById('summaryList');
+            summaryBox.style.display = 'block';
+            
+            summaryList.innerHTML = `
+                <li>
+                    <span><strong>Page avec redirection</strong> (problème GSC #1)</span>
+                    <span class="badge ${stats.redirects > 0 ? 'badge-danger' : 'badge-success'}">${stats.redirects} détectées</span>
+                </li>
+                <li>
+                    <span><strong>Autre page avec balise canonique correcte</strong> (problème GSC #2)</span>
+                    <span class="badge ${stats.canonicalIssues > 0 ? 'badge-warning' : 'badge-success'}">${stats.canonicalIssues} détectées</span>
+                </li>
+                <li>
+                    <span><strong>Détectée, actuellement non indexée</strong> (problème GSC #3)</span>
+                    <span class="badge ${stats.noindex + stats.missingCanonical > 0 ? 'badge-warning' : 'badge-success'}">${stats.noindex + stats.missingCanonical} détectées</span>
+                </li>
+            `;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // AFFICHAGE DES RÉSULTATS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function displayResults() {
+            const section = document.getElementById('resultsSection');
+            section.style.display = 'block';
+
+            const critical = [];
+            const warnings = [];
+            const success = [];
+
+            globalResults.forEach(result => {
+                if (result.issues.length === 0) {
+                    success.push(result);
+                } else {
+                    const hasCritical = result.issues.some(i => i.severity === 'critical');
+                    if (hasCritical) {
+                        critical.push(result);
+                    } else {
+                        warnings.push(result);
+                    }
+                }
+            });
+
+            let html = '';
+
+            // CRITICAL ISSUES
+            if (critical.length > 0) {
+                html += `
+                    <div class="issue-group">
+                        <div class="issue-group-header critical">
+                            <h2>🔴 Problèmes Critiques</h2>
+                            <span class="count">${critical.length}</span>
+                        </div>
+                `;
+                critical.forEach(result => {
+                    result.issues.forEach(issue => {
+                        if (issue.severity === 'critical') {
+                            html += renderIssue(result, issue);
+                        }
+                    });
+                });
+                html += `</div>`;
+            }
+
+            // WARNINGS
+            if (warnings.length > 0) {
+                html += `
+                    <div class="issue-group">
+                        <div class="issue-group-header warning">
+                            <h2>⚠ Avertissements</h2>
+                            <span class="count">${warnings.length}</span>
+                        </div>
+                `;
+                warnings.forEach(result => {
+                    result.issues.forEach(issue => {
+                        if (issue.severity !== 'critical') {
+                            html += renderIssue(result, issue);
+                        }
+                    });
+                });
+                html += `</div>`;
+            }
+
+            // SUCCESS (optionnel)
+            if (success.length > 0 && success.length <= 10) {
+                html += `
+                    <div class="issue-group">
+                        <div class="issue-group-header success">
+                            <h2>✅ Pages Correctes</h2>
+                            <span class="count">${success.length}</span>
+                        </div>
+                `;
+                success.forEach(result => {
+                    html += `
+                        <div class="issue-item info">
+                            <div class="issue-title">✅ ${result.page}.html</div>
+                            <div class="issue-url">${result.url}</div>
+                            <div class="issue-description">Aucun problème détecté. Cette page devrait être indexée correctement par Google.</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            section.innerHTML = html;
+        }
+
+        function renderIssue(result, issue) {
+            return `
+                <div class="issue-item ${issue.severity}">
+                    <div class="issue-title">
+                        ${issue.title}
+                    </div>
+                    <div class="issue-url">${result.url}</div>
+                    <div class="issue-description">${issue.description}</div>
+                    
+                    <div class="issue-fix">
+                        <div class="issue-fix-title">🔧 Solution :</div>
+                        <p style="margin-bottom: 12px; color: #475569;">${issue.fix}</p>
+                        <div class="issue-fix-code">${escapeHtml(issue.code)}</div>
+                    </div>
+                    
+                    <span class="issue-impact impact-${issue.impact}">
+                        Impact : ${issue.impact === 'high' ? 'Élevé' : issue.impact === 'medium' ? 'Moyen' : 'Faible'}
+                    </span>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // EXPORT FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function exportJSON() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                stats: globalStats,
+                results: globalResults
+            };
+            downloadFile(JSON.stringify(data, null, 2), `seo-diagnostic-${Date.now()}.json`, 'application/json');
+        }
+
+        function exportCSV() {
+            let csv = 'Page,URL,Problème,Sévérité,Impact,Description,Solution\n';
+            globalResults.forEach(result => {
+                if (result.issues.length === 0) {
+                    csv += `"${result.page}","${result.url}","Aucun","ok","low","Page correcte","Aucune action"\n`;
+                } else {
+                    result.issues.forEach(issue => {
+                        csv += `"${result.page}","${result.url}","${issue.type}","${issue.severity}","${issue.impact}","${issue.description.replace(/"/g, '""')}","${issue.fix.replace(/"/g, '""')}"\n`;
+                    });
+                }
+            });
+            downloadFile(csv, `seo-diagnostic-${Date.now()}.csv`, 'text/csv');
+        }
+
+        function exportHTML() {
+            const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport SEO - ${new Date().toLocaleDateString()}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; }
+        h1 { color: #667eea; }
+        .issue { margin: 20px 0; padding: 20px; background: #f8f9fa; border-left: 5px solid #dc3545; }
+        .issue.warning { border-color: #ffc107; }
+        .issue.ok { border-color: #28a745; }
+        pre { background: #f1f1f1; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Rapport de Diagnostic SEO</h1>
+        <p><strong>Date :</strong> ${new Date().toLocaleString()}</p>
+        <p><strong>Total Pages :</strong> ${globalStats.totalPages}</p>
+        <p><strong>Pages OK :</strong> ${globalStats.pagesOk}</p>
+        <p><strong>Redirections :</strong> ${globalStats.redirects}</p>
+        <p><strong>Canonical Incorrects :</strong> ${globalStats.canonicalIssues}</p>
+        <hr>
+        ${globalResults.map(result => {
+            if (result.issues.length === 0) return '';
+            return `
+                <div class="issue">
+                    <h3>${result.page}.html</h3>
+                    <p><strong>URL :</strong> ${result.url}</p>
+                    ${result.issues.map(issue => `
+                        <h4>${issue.title}</h4>
+                        <p>${issue.description}</p>
+                        <p><strong>Solution :</strong> ${issue.fix}</p>
+                        <pre>${escapeHtml(issue.code)}</pre>
+                    `).join('')}
+                </div>
+            `;
+        }).join('')}
+    </div>
+</body>
+</html>`;
+            downloadFile(html, `seo-rapport-${Date.now()}.html`, 'text/html');
+        }
+
+        function generateSitemapFix() {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const validPages = globalResults.filter(r => 
+                r.issues.every(i => i.type !== 'REDIRECT' && i.type !== 'HTTP_ERROR')
+            );
+            
+            let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
+            validPages.forEach(result => {
+                const url = result.page === 'index' ? baseUrl : `${baseUrl}/${result.page}`;
+                sitemap += `  <url>
+    <loc>${url}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+            });
+            sitemap += `</urlset>`;
+            
+            downloadFile(sitemap, `sitemap-corrected-${Date.now()}.xml`, 'application/xml');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
