@@ -898,26 +898,58 @@ class MessagesHub {
         `;
     }
 
+    /**
+     * ✅ VERSION AMÉLIORÉE : Affiche la date ET l'heure
+     * Format intelligent selon l'ancienneté du message
+     */
     formatTimeAgo(date) {
         if (!date) return 'Unknown';
-        const seconds = Math.floor((new Date() - date) / 1000);
-        const intervals = { 
-            year: 31536000, 
-            month: 2592000, 
-            week: 604800, 
-            day: 86400, 
-            hour: 3600, 
-            minute: 60 
-        };
-
-        for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-            const interval = Math.floor(seconds / secondsInUnit);
-            if (interval >= 1) {
-                return `${interval}${unit.charAt(0)} ago`;
-            }
+        
+        const now = new Date();
+        const messageDate = new Date(date);
+        
+        // ✅ Calculer la différence en jours
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const messageDateStart = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
+        const daysDiff = Math.floor((todayStart - messageDateStart) / (1000 * 60 * 60 * 24));
+        
+        // ✅ Formater l'heure (ex: "11:04 PM")
+        const timeString = messageDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // ✅ AUJOURD'HUI : Afficher seulement l'heure
+        if (daysDiff === 0) {
+            return timeString; // "11:04 PM"
         }
-
-        return 'Just now';
+        
+        // ✅ HIER : "Yesterday"
+        if (daysDiff === 1) {
+            return `Yesterday`;
+        }
+        
+        // ✅ CETTE SEMAINE (2-6 jours) : Jour de la semaine
+        if (daysDiff >= 2 && daysDiff <= 6) {
+            const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'long' });
+            return dayName; // "Monday", "Tuesday", etc.
+        }
+        
+        // ✅ PLUS DE 7 JOURS : Date courte
+        if (daysDiff >= 7 && daysDiff < 365) {
+            return messageDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            }); // "Jan 13", "Dec 25", etc.
+        }
+        
+        // ✅ PLUS D'1 AN : Date avec année
+        return messageDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }); // "Jan 13, 2025"
     }
 
     escapeHtml(text) {
