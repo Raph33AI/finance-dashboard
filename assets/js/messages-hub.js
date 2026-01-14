@@ -898,44 +898,37 @@ class MessagesHub {
         `;
     }
 
-    /**
-     * ✅ VERSION ALTERNATIVE : Toujours afficher Date + Heure
-     */
     formatTimeAgo(date) {
+        console.log('🕐 formatTimeAgo called with:', date); // ✅ DEBUG
+        
         if (!date) return 'Unknown';
         
         const now = new Date();
         const messageDate = new Date(date);
         
-        // Calculer la différence en jours
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const messageDateStart = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
         const daysDiff = Math.floor((todayStart - messageDateStart) / (1000 * 60 * 60 * 24));
         
-        // Formater l'heure
         const timeString = messageDate.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
         
-        // ✅ AUJOURD'HUI
         if (daysDiff === 0) {
             return `Today at ${timeString}`;
         }
         
-        // ✅ HIER
         if (daysDiff === 1) {
             return `Yesterday at ${timeString}`;
         }
         
-        // ✅ CETTE SEMAINE (2-6 jours)
         if (daysDiff >= 2 && daysDiff <= 6) {
             const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'long' });
             return `${dayName} at ${timeString}`;
         }
         
-        // ✅ PLUS DE 7 JOURS
         if (daysDiff >= 7 && daysDiff < 365) {
             const dateString = messageDate.toLocaleDateString('en-US', {
                 month: 'short',
@@ -944,7 +937,6 @@ class MessagesHub {
             return `${dateString} at ${timeString}`;
         }
         
-        // ✅ PLUS D'1 AN
         const dateString = messageDate.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
