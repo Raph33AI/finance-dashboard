@@ -419,7 +419,8 @@ class CommunityFirebaseService {
                             uid: doc.id,
                             email: userData.email,
                             name: userData.displayName || 'Member',
-                            plan: userData.plan || 'free'
+                            plan: userData.plan || 'free',
+                            featureUpdates: userData.featureUpdates // ✅ NOUVEAU
                         });
                     }
                 });
@@ -446,7 +447,7 @@ class CommunityFirebaseService {
 
     /**
      * 📧 Envoyer une notification email à tous les utilisateurs lors d'une publication
-     * ✅ VERSION FINALE CORRIGÉE AVEC PAGINATION
+     * ✅ VERSION FINALE CORRIGÉE AVEC PAGINATION + FILTRE featureUpdates
      */
     async sendBlogPostNotification(postData, postId) {
         try {
@@ -461,16 +462,34 @@ class CommunityFirebaseService {
                 return { success: false, sent: 0, failed: 0 };
             }
 
-            // ✅ Filtrer : exclure l'auteur du post
+            // ✅ CORRECTION CRITIQUE : Filtrer par featureUpdates === true
             const recipients = allUsers
-                .filter(user => user.uid !== postData.authorId)
+                .filter(user => {
+                    // Exclure l'auteur
+                    if (user.uid === postData.authorId) {
+                        console.log(`   ⏭ Skipping author: ${user.email}`);
+                        return false;
+                    }
+                    
+                    // ✅ NOUVEAU : Vérifier featureUpdates (undefined = true par défaut)
+                    const hasNotificationsEnabled = user.featureUpdates !== false;
+                    
+                    if (!hasNotificationsEnabled) {
+                        console.log(`   🔕 Skipping (notifications disabled): ${user.email}`);
+                        return false;
+                    }
+                    
+                    return true;
+                })
                 .map(user => ({
                     email: user.email,
                     name: user.name
                 }));
 
             if (recipients.length === 0) {
-                console.warn('⚠ No recipients after filtering (author excluded)');
+                console.warn('⚠ No recipients after filtering');
+                console.warn(`   Total users: ${allUsers.length}`);
+                console.warn(`   Filtered out: ${allUsers.length} (author or notifications disabled)`);
                 return { success: false, sent: 0, failed: 0 };
             }
 

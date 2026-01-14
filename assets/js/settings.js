@@ -1284,9 +1284,10 @@ async function reactivateSubscription() {
 }
 
 /* ============================================
-   SYNCHRONISATION NEWSLETTER - VERSION CORRIGÉE v2
+   SYNCHRONISATION NEWSLETTER - VERSION FINALE CORRIGÉE v3
    ✅ PROTECTION : Vérification explicite de true/false
    ✅ PROTECTION : Flag anti-réabonnement
+   ✅ INITIALISATION : featureUpdates par défaut à TRUE
    ============================================ */
 
 async function synchronizeAllSubscriptions() {
@@ -1306,7 +1307,7 @@ async function synchronizeAllSubscriptions() {
         
         console.log('🔄 Synchronisation des abonnements avec Firestore...');
         
-        const userRef = db.collection('users').doc(currentUserData.uid);
+        const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
         const doc = await userRef.get();
         
         if (!doc.exists) {
@@ -1347,8 +1348,24 @@ async function synchronizeAllSubscriptions() {
         // ========================================
         // 2⃣ SYNCHRONISATION FEATURE UPDATES
         // ========================================
-        // ✅ CORRECTION : Vérification EXPLICITE de true
-        const isUpdatesSubscribed = userData.featureUpdates === true;
+        let isUpdatesSubscribed = userData.featureUpdates;
+        
+        // ✅ NOUVEAU : Si le champ n'existe pas, l'initialiser à TRUE (opt-out par défaut)
+        if (isUpdatesSubscribed === undefined) {
+            console.log('⚠ featureUpdates non défini - Initialisation à TRUE (opt-out par défaut)');
+            
+            await userRef.update({
+                featureUpdates: true, // ✅ PAR DÉFAUT : ACTIVÉ
+                updatesSubscribedAt: new Date().toISOString()
+            });
+            
+            isUpdatesSubscribed = true;
+            
+            console.log('✅ featureUpdates initialisé à TRUE pour', currentUserData.email);
+        } else {
+            // ✅ Vérification EXPLICITE de true
+            isUpdatesSubscribed = userData.featureUpdates === true;
+        }
         
         console.log('🔔 Statut updates (Firestore):', isUpdatesSubscribed ? 'Abonne' : 'Non abonne');
         
