@@ -899,50 +899,66 @@ class MessagesHub {
     }
 
     formatTimeAgo(date) {
-        console.log('🕐 formatTimeAgo called with:', date); // ✅ DEBUG
+        console.log('🕐 formatTimeAgo called with:', date);
         
         if (!date) return 'Unknown';
         
         const now = new Date();
         const messageDate = new Date(date);
         
+        // Calculer la différence en jours
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const messageDateStart = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
         const daysDiff = Math.floor((todayStart - messageDateStart) / (1000 * 60 * 60 * 24));
         
+        // Formater l'heure
         const timeString = messageDate.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
         
+        // ✅ AJOUT DEBUG
+        console.log('   📅 Days diff:', daysDiff);
+        console.log('   🕐 Time string:', timeString);
+        
+        let result = '';
+        
+        // AUJOURD'HUI
         if (daysDiff === 0) {
-            return `Today at ${timeString}`;
+            result = `Today ${timeString}`;
         }
-        
-        if (daysDiff === 1) {
-            return `Yesterday at ${timeString}`;
+        // HIER
+        else if (daysDiff === 1) {
+            result = `Yesterday ${timeString}`;
         }
-        
-        if (daysDiff >= 2 && daysDiff <= 6) {
-            const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'long' });
-            return `${dayName} at ${timeString}`;
+        // CETTE SEMAINE (2-6 jours)
+        else if (daysDiff >= 2 && daysDiff <= 6) {
+            const dayName = messageDate.toLocaleDateString('en-US', { weekday: 'short' });
+            result = `${dayName} ${timeString}`;
         }
-        
-        if (daysDiff >= 7 && daysDiff < 365) {
+        // PLUS DE 7 JOURS
+        else if (daysDiff >= 7 && daysDiff < 365) {
             const dateString = messageDate.toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric'
             });
-            return `${dateString} at ${timeString}`;
+            result = `${dateString} ${timeString}`;
+        }
+        // PLUS D'1 AN
+        else {
+            const dateString = messageDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            result = `${dateString} ${timeString}`;
         }
         
-        const dateString = messageDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-        return `${dateString} at ${timeString}`;
+        // ✅ AJOUT DEBUG - AFFICHER LE RÉSULTAT
+        console.log('   ✅ Result:', result);
+        
+        return result;
     }
 
     escapeHtml(text) {
