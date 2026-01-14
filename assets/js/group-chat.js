@@ -545,8 +545,22 @@ class GroupChat {
             for (const userId of this.currentGroup.participants) {
                 if (userId === this.currentUser.uid) continue;
                 
-                const userData = this.currentGroup.participantsData[userId];
-                if (userData && userData.email) {
+                // ✅ AJOUT : Vérifier featureUpdates dans Firestore
+                const userDoc = await this.db.collection('users').doc(userId).get();
+                if (!userDoc.exists) {
+                    console.warn(`⚠ User ${userId} not found in Firestore`);
+                    continue;
+                }
+
+                const userData = userDoc.data();
+                
+                // ✅ Vérifier featureUpdates
+                if (userData.featureUpdates === false) {
+                    console.log(`🔕 User ${userId} has disabled notifications - skipped`);
+                    continue;
+                }
+                
+                if (userData.email) {
                     recipients.push({
                         email: userData.email,
                         displayName: userData.displayName || 'User'

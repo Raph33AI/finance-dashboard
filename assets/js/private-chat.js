@@ -740,8 +740,9 @@ class PrivateChat {
 
             const recipientData = recipientDoc.data();
 
-            if (recipientData.emailNotifications === false) {
-                console.log('🔕 User has disabled email notifications');
+            // ✅ CORRECTION : Vérifier featureUpdates au lieu de emailNotifications
+            if (recipientData.featureUpdates === false) {
+                console.log('🔕 User has disabled platform notifications');
                 return;
             }
 
@@ -749,9 +750,9 @@ class PrivateChat {
                 recipientEmail: recipientData.email,
                 recipientName: recipientData.displayName || recipientData.email?.split('@')[0] || 'User',
                 senderName: this.currentUser.displayName || 
-                           window.currentUserData?.displayName || 
-                           this.currentUser.email?.split('@')[0] || 
-                           'Someone',
+                        window.currentUserData?.displayName || 
+                        this.currentUser.email?.split('@')[0] || 
+                        'Someone',
                 senderPhoto: this.currentUser.photoURL || window.currentUserData?.photoURL || null,
                 messageText: messageData.text || '📎 Attachment',
                 messageType: messageData.type || 'text',
