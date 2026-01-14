@@ -4037,3 +4037,158 @@ body.dark-mode .conditional-options {
         max-width: 60px !important;
     }
 }
+
+/* ========================================
+   📱 RESPONSIVE: SENT EMAILS TABLE (MOBILE)
+   ======================================== */
+
+/* Container du tableau - Scroll horizontal sur mobile */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+}
+
+/* Ajustements pour écrans < 768px */
+@media (max-width: 768px) {
+    /* Tableau des emails envoyés */
+    #gmail-sent-body tr td {
+        font-size: 12px !important;
+        padding: 8px 4px !important;
+        white-space: nowrap;
+    }
+    
+    /* Colonnes spécifiques */
+    #gmail-sent-body tr td:nth-child(1) {
+        /* Numéro */
+        width: 30px;
+        min-width: 30px;
+    }
+    
+    #gmail-sent-body tr td:nth-child(2) {
+        /* To */
+        max-width: 120px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    #gmail-sent-body tr td:nth-child(3) {
+        /* Subject */
+        max-width: 150px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    #gmail-sent-body tr td:nth-child(4) {
+        /* From */
+        max-width: 100px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    #gmail-sent-body tr td:nth-child(5) {
+        /* Status */
+        min-width: 80px;
+    }
+    
+    #gmail-sent-body tr td:nth-child(6) {
+        /* Date */
+        min-width: 90px;
+        font-size: 11px !important;
+    }
+    
+    #gmail-sent-body tr td:nth-child(7) {
+        /* Actions */
+        min-width: 50px;
+    }
+    
+    /* Headers du tableau */
+    .table thead th {
+        font-size: 11px !important;
+        padding: 8px 4px !important;
+    }
+    
+    /* Pagination */
+    .pagination-controls {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+    }
+    
+    .pagination-controls button,
+    .pagination-controls select {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+    }
+    
+    .pagination-info {
+        font-size: 11px !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* Boutons de pagination */
+    .page-btn {
+        min-width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* Ajustements pour très petits écrans < 480px */
+@media (max-width: 480px) {
+    /* Masquer certaines colonnes moins importantes */
+    #gmail-sent-body tr td:nth-child(4),
+    .table thead th:nth-child(4) {
+        /* Masquer la colonne "From" sur très petit écran */
+        display: none;
+    }
+    
+    #gmail-sent-body tr td:nth-child(5),
+    .table thead th:nth-child(5) {
+        /* Masquer la colonne "Status" sur très petit écran */
+        display: none;
+    }
+    
+    /* Ajuster les colonnes restantes */
+    #gmail-sent-body tr td:nth-child(2) {
+        max-width: 140px !important;
+    }
+    
+    #gmail-sent-body tr td:nth-child(3) {
+        max-width: 160px !important;
+    }
+    
+    /* Pagination encore plus compacte */
+    .pagination-controls button {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+    }
+    
+    .page-btn {
+        min-width: 28px !important;
+        height: 28px !important;
+    }
+}
+
+/* Indicateur de scroll horizontal */
+.table-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+    .table-container::after {
+        opacity: 1;
+    }
+}
