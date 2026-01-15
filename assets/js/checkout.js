@@ -1029,26 +1029,44 @@ let PROMO_CODES = {};
 // Charger les codes promo actifs depuis le Worker
 async function loadPromoCodes() {
     try {
-        console.log('🎁 Chargement des codes promo depuis Stripe...');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🎁 CHARGEMENT DES CODES PROMO');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📡 URL:', `${WORKER_URL}/active-promo-codes`);
         
         const response = await fetch(`${WORKER_URL}/active-promo-codes`);
+        
+        console.log('📥 Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
         
+        console.log('📦 Response data:', JSON.stringify(data, null, 2));
+        
         if (data.success) {
-            PROMO_CODES = data.promoCodes;
-            console.log(`✅ ${data.total} codes promo chargés:`, Object.keys(PROMO_CODES));
+            PROMO_CODES = data.promoCodes || {};
             
-            // Afficher les détails de chaque code
+            console.log(`✅ ${data.total} codes promo chargés depuis Stripe`);
+            
+            // ✅ Afficher TOUS les codes chargés
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('📋 CODES PROMO DISPONIBLES:');
             Object.keys(PROMO_CODES).forEach(code => {
                 const promo = PROMO_CODES[code];
-                console.log(`   📌 ${code}:`, promo.description, `(${promo.plans.join(', ')})`);
+                console.log(`   🎟 ${code}:`, promo.description, `(${promo.plans.join(', ')})`);
             });
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         } else {
-            console.warn('⚠ Erreur lors du chargement des codes promo:', data.error);
+            console.warn('⚠ Worker error:', data.error);
+            console.log('🔄 Fallback to hardcoded promo codes');
             PROMO_CODES = getFallbackPromoCodes();
         }
     } catch (error) {
-        console.error('❌ Erreur réseau lors du chargement des codes promo:', error);
+        console.error('❌ Network error:', error.message);
+        console.log('🔄 Fallback to hardcoded promo codes');
         PROMO_CODES = getFallbackPromoCodes();
     }
     
@@ -1075,7 +1093,8 @@ async function loadPromoCodes() {
         description: 'Try AlphaVault free for 14 days'
     };
     
-    console.log(`✅ Total codes promo disponibles: ${Object.keys(PROMO_CODES).length}`);
+    console.log(`✅ Total codes promo (Stripe + Trial): ${Object.keys(PROMO_CODES).length}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
 // Codes promo de secours (en cas d'erreur API)
