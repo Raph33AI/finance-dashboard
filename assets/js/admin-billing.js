@@ -19,13 +19,13 @@ const PLANS = {
     },
     pro: {
         name: 'Pro',
-        price: 49,
+        price: 10,
         managed: 'stripe',
         color: '#8b5cf6'
     },
     platinum: {
         name: 'Platinum',
-        price: 99,
+        price: 20,
         managed: 'stripe',
         color: '#f59e0b'
     }
@@ -349,6 +349,13 @@ class AdminBilling {
             return;
         }
         
+        // ✅ CORRECTION : Récupérer le Price ID
+        const selectedPlan = PLANS[planKey];
+        if (!selectedPlan || !selectedPlan.priceId) {
+            alert('❌ Invalid plan selected. Please configure Price IDs in PLANS object.');
+            return;
+        }
+        
         try {
             const response = await fetch(`${STRIPE_API_BASE_URL}/create-subscription`, {
                 method: 'POST',
@@ -357,6 +364,7 @@ class AdminBilling {
                 },
                 body: JSON.stringify({
                     customerEmail: email,
+                    priceId: selectedPlan.priceId,  // ✅ Envoie le Price ID
                     planKey: planKey,
                     trialDays: trialDays > 0 ? trialDays : undefined
                 })
