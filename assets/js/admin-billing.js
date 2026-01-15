@@ -1436,15 +1436,36 @@ class AdminBilling {
             const data = await response.json();
             
             if (data.success) {
-                this.promoCodes = data.promotion_codes;
-                this.renderPromoCodes();
+                this.promoCodes = data.promotion_codes || [];
+                
                 console.log(`✅ Loaded ${this.promoCodes.length} promo codes`);
+                
+                // ✅ DEBUG : Afficher la structure du premier code promo
+                if (this.promoCodes.length > 0) {
+                    console.log('📋 First promo code structure:', JSON.stringify(this.promoCodes[0], null, 2));
+                }
+                
+                this.renderPromoCodes();
             } else {
                 throw new Error(data.error || 'Failed to load promo codes');
             }
         } catch (error) {
             console.error('❌ Error loading promo codes:', error);
-            throw error;
+            
+            // ✅ AFFICHAGE D'UNE ERREUR DANS LE TABLEAU AU LIEU DE BLOQUER TOUTE LA PAGE
+            const tbody = document.getElementById('promo-codes-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                        <p>Failed to load promotion codes</p>
+                        <p style="font-size: 0.9rem; color: #64748b;">${error.message}</p>
+                    </td>
+                </tr>
+            `;
+            
+            // ✅ NE PAS BLOQUER LE RESTE DU DASHBOARD
+            // throw error; // ❌ COMMENTER CETTE LIGNE
         }
     }
     
@@ -1464,19 +1485,28 @@ class AdminBilling {
         }
         
         tbody.innerHTML = this.promoCodes.map(promo => {
+            // ✅ GESTION SÉCURISÉE DU COUPON (peut être un objet ou une chaîne)
+            const couponId = typeof promo.coupon === 'object' && promo.coupon !== null
+                ? promo.coupon.id
+                : promo.coupon;
+            
             const activeBadge = promo.active 
                 ? '<span class="badge badge-success">Active</span>' 
                 : '<span class="badge badge-secondary">Inactive</span>';
+            
             const expires = promo.expires_at 
                 ? new Date(promo.expires_at * 1000).toLocaleDateString() 
                 : 'Never';
             
             return `
                 <tr>
-                    <td style="font-weight: 600;">${promo.code}</td>
-                    <td>${promo.coupon.id}</td>
+                    <td style="font-weight: 600;">
+                        <div>${promo.code}</div>
+                        <div style="font-size: 0.85rem; color: #64748b;">ID: ${promo.id}</div>
+                    </td>
+                    <td>${couponId || 'N/A'}</td>
                     <td>${activeBadge}</td>
-                    <td>${promo.times_redeemed}</td>
+                    <td style="font-weight: 600;">${promo.times_redeemed || 0}</td>
                     <td>${promo.max_redemptions || 'Unlimited'}</td>
                     <td>${expires}</td>
                     <td>
@@ -1492,7 +1522,80 @@ class AdminBilling {
     }
     
     async viewPromoCodeDetails(promoId) {
-        alert(`Promo Code ID: ${promoId}`);
+        try {
+            // ✅ CHERCHER DANS LES DONNÉES DÉJÀ CHARGÉES
+            const promo = this.promoCodes.find(p => p.id === promoId);
+            
+            if (!promo) {
+                alert('❌ Promotion code not found');
+                return;
+            }
+            
+            const couponId = typeof promo.coupon === 'object' && promo.coupon !== null
+                ? promo.coupon.id
+                : promo.coupon;
+            
+            const discount = promo.coupon && typeof promo.coupon === 'object'
+                ? (promo.coupon.percent_off 
+                    ? `${promo.coupon.percent_off}% off` 
+                    : `$${(promo.coupon.amount_off / 100).toFixed(2)} off`)
+                : 'N/A';
+            
+            const expires = promo.expires_at 
+                ? new Date(promo.expires_at * 1000).toLocaleString() 
+                : 'Never';
+            
+            const modalContent = `
+                <div class="details-grid">
+                    <div class="detail-row">
+                        <label><i class="fas fa-id-badge"></i> Promo Code ID:</label>
+                        <span>${promo.id}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-ticket-alt"></i> Code:</label>
+                        <span style="font-weight: 700; font-size: 1.2rem; color: #667eea;">${promo.code}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-tag"></i> Coupon ID:</label>
+                        <span>${couponId}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-percent"></i> Discount:</label>
+                        <span style="font-weight: 700; color: #10b981;">${discount}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-info-circle"></i> Status:</label>
+                        <span>${promo.active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-secondary">Inactive</span>'}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-hashtag"></i> Times Redeemed:</label>
+                        <span style="font-weight: 700;">${promo.times_redeemed || 0}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-infinity"></i> Max Redemptions:</label>
+                        <span>${promo.max_redemptions || 'Unlimited'}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <label><i class="fas fa-clock"></i> Expires:</label>
+                        <span>${expires}</span>
+                    </div>
+                </div>
+            `;
+            
+            // ✅ AFFICHER DANS UN MODAL (ajoute ce modal dans ton HTML si nécessaire)
+            alert(`Promotion Code: ${promo.code}\n\nCoupon: ${couponId}\nDiscount: ${discount}\nTimes Redeemed: ${promo.times_redeemed || 0}\nMax Redemptions: ${promo.max_redemptions || 'Unlimited'}\nExpires: ${expires}\nActive: ${promo.active ? 'Yes' : 'No'}`);
+            
+        } catch (error) {
+            console.error('Error viewing promo code details:', error);
+            alert('❌ Failed to load promotion code details');
+        }
     }
     
     openCreatePromoCodeModal() {
