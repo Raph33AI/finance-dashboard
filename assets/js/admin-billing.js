@@ -1511,10 +1511,41 @@ class AdminBilling {
         const code = document.getElementById('new-promo-code').value.trim();
         const maxRedemptions = parseInt(document.getElementById('new-promo-max-redemptions').value) || null;
         
-        if (!couponId || !code) {
-            alert('❌ Please fill in all required fields');
+        // ✅ LOGS DE DEBUG
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🎁 CREATE PROMO CODE - FRONTEND');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('Coupon ID:', couponId);
+        console.log('Code:', code);
+        console.log('Max Redemptions:', maxRedemptions);
+        
+        // ✅ VALIDATION AMÉLIORÉE
+        if (!couponId) {
+            alert('❌ Please select a coupon');
+            console.error('❌ Coupon ID is empty');
             return;
         }
+        
+        if (!code) {
+            alert('❌ Please enter a promotion code');
+            console.error('❌ Code is empty');
+            return;
+        }
+        
+        // ✅ Vérifier que le code ne contient que des caractères autorisés
+        if (!/^[A-Z0-9_]+$/i.test(code)) {
+            alert('❌ Promotion code can only contain letters, numbers, and underscores');
+            return;
+        }
+        
+        const payload = {
+            couponId: couponId,
+            code: code.toUpperCase(), // ✅ Stripe convertit en majuscules
+            maxRedemptions: maxRedemptions
+        };
+        
+        console.log('📤 Sending payload:', JSON.stringify(payload, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
         try {
             const response = await fetch(`${STRIPE_API_BASE_URL}/create-promotion-code`, {
@@ -1522,25 +1553,31 @@ class AdminBilling {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    couponId: couponId,
-                    code: code,
-                    maxRedemptions: maxRedemptions
-                })
+                body: JSON.stringify(payload)
             });
+            
+            console.log('📥 Response status:', response.status);
             
             const data = await response.json();
             
+            console.log('📥 Response data:', JSON.stringify(data, null, 2));
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
             if (data.success) {
-                alert('✅ Promotion code created successfully!');
+                alert('✅ Promotion code created successfully!\n\nCode: ' + data.promotion_code.code + '\nCoupon: ' + data.promotion_code.coupon.id);
                 this.closeCreatePromoCodeModal();
                 await this.loadPromoCodes();
             } else {
-                throw new Error(data.error || 'Failed to create promotion code');
+                // ✅ AFFICHAGE DÉTAILLÉ DE L'ERREUR
+                console.error('❌ Error from worker:', data.error);
+                alert('❌ Failed to create promotion code:\n\n' + data.error);
             }
         } catch (error) {
-            console.error('Error creating promo code:', error);
-            alert('❌ Failed to create promotion code: ' + error.message);
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('❌ NETWORK ERROR');
+            console.error('Error:', error);
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            alert('❌ Network error:\n\n' + error.message + '\n\nCheck console for details.');
         }
     }
     
