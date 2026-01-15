@@ -1,7 +1,8 @@
 // /* ═══════════════════════════════════════════════════════════════
 //    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + APPLE PAY/GOOGLE PAY
-//    AlphaVault AI v3.0 - OPTIMISÉ MOBILE
+//    AlphaVault AI v4.0 - CODES PROMO DYNAMIQUES
 //    ✅ Support Apple Pay / Google Pay (Mobile + Desktop)
+//    ✅ Codes promo chargés dynamiquement depuis Stripe
 //    ✅ Support codes promo TRIAL (14 jours gratuits sans CB)
 //    ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
 //    ✅ Plan Basic : 100% gratuit sans carte bancaire
@@ -16,62 +17,83 @@
 // console.log('   Worker URL:', WORKER_URL);
 
 // // ═══════════════════════════════════════════════════════════════
-// // 🎁 CODES PROMO DISPONIBLES
+// // 🎁 CODES PROMO DYNAMIQUES (chargés depuis Stripe)
 // // ═══════════════════════════════════════════════════════════════
 
-// const PROMO_CODES = {
-//     'LAUNCH15': {
-//         type: 'percentage',
-//         value: 15,
-//         description: '15% off for early adopters',
-//         plans: ['pro', 'platinum']
-//     },
-//     'WELCOME15': {
-//         type: 'percentage',
-//         value: 15,
-//         description: '15% welcome discount',
-//         plans: ['pro', 'platinum']
-//     },
-//     'SAVE15': {
-//         type: 'percentage',
-//         value: 15,
-//         description: '15% savings',
-//         plans: ['pro', 'platinum']
-//     },
-//     'FREEPRO': {
-//         type: 'free',
-//         plans: ['pro'],
-//         description: 'Free lifetime access to Pro plan'
-//     },
-//     'FREEPLATINUM': {
-//         type: 'free',
-//         plans: ['platinum'],
-//         description: 'Free lifetime access to Platinum plan'
-//     },
-//     'VIPACCESS': {
-//         type: 'free',
-//         plans: ['pro', 'platinum'],
-//         description: 'VIP lifetime access'
-//     },
-//     'FREE14DAYS': {
+// let PROMO_CODES = {};
+
+// // Charger les codes promo actifs depuis le Worker
+// // Charger les codes promo actifs depuis le Worker
+// async function loadPromoCodes() {
+//     try {
+//         const response = await fetch(`${WORKER_URL}/active-promo-codes`);
+        
+//         if (!response.ok) {
+//             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+//         }
+        
+//         const data = await response.json();
+        
+//         if (data.success) {
+//             PROMO_CODES = data.promoCodes || {};
+//             console.log(`✅ ${data.total} codes promo actifs chargés`);
+//         } else {
+//             console.warn('⚠ Erreur lors du chargement des codes promo');
+//             PROMO_CODES = getFallbackPromoCodes();
+//         }
+//     } catch (error) {
+//         console.error('❌ Erreur réseau lors du chargement des codes promo');
+//         PROMO_CODES = getFallbackPromoCodes();
+//     }
+    
+//     // ✅ AJOUTER LES CODES SPÉCIAUX (TRIAL/FREE) EN DUR
+//     // Ces codes ne sont pas des coupons Stripe standards
+//     PROMO_CODES['FREE14DAYS'] = {
 //         type: 'trial',
 //         duration: 14,
 //         plans: ['pro', 'platinum'],
 //         description: '14-day free trial - No credit card required'
-//     },
-//     'TRIAL14': {
+//     };
+    
+//     PROMO_CODES['TRIAL14'] = {
 //         type: 'trial',
 //         duration: 14,
 //         plans: ['pro', 'platinum'],
 //         description: '14-day free access - No payment info needed'
-//     },
-//     'TRYITFREE': {
+//     };
+    
+//     PROMO_CODES['TRYITFREE'] = {
 //         type: 'trial',
 //         duration: 14,
 //         plans: ['pro', 'platinum'],
 //         description: 'Try AlphaVault free for 14 days'
-//     }
-// };
+//     };
+    
+//     console.log(`✅ Total: ${Object.keys(PROMO_CODES).length} codes promo disponibles`);
+// }
+
+// // Codes promo de secours (en cas d'erreur API)
+// function getFallbackPromoCodes() {
+//     console.log('🔄 Utilisation des codes promo de secours');
+    
+//     return {
+//         'LAUNCH15': {
+//             type: 'percentage',
+//             value: 15,
+//             description: '15% off for early adopters',
+//             plans: ['pro', 'platinum']
+//         },
+//         'WELCOME15': {
+//             type: 'percentage',
+//             value: 15,
+//             description: '15% welcome discount',
+//             plans: ['pro', 'platinum']
+//         }
+//     };
+// }
+
+// // ✅ CHARGER LES CODES PROMO AU DÉMARRAGE
+// loadPromoCodes();
 
 // // ✅ État de l'application
 // let selectedPlan = {
@@ -101,12 +123,10 @@
 // function createPaymentRequest() {
 //     console.log('📱 Création du Payment Request...');
     
-//     // Calculer le montant initial
 //     let initialAmount = calculateFinalAmount();
     
 //     console.log('   💰 Montant initial:', initialAmount, 'centimes');
     
-//     // Créer le Payment Request avec le bon montant
 //     paymentRequest = stripe.paymentRequest({
 //         country: 'US',
 //         currency: 'usd',
@@ -116,34 +136,30 @@
 //         },
 //         requestPayerName: true,
 //         requestPayerEmail: true,
-//         disableWallets: ['link', 'browserCard'], // ✅ DÉSACTIVER LINK ET BROWSER CARD
+//         disableWallets: ['link', 'browserCard'],
 //     });
 
-//     // ✅ NOUVELLE LOGIQUE : Hauteur et largeur adaptatives selon la taille d'écran
 //     const isMobile = window.innerWidth <= 768;
 //     const isSmallMobile = window.innerWidth <= 480;
-//     const buttonHeight = isMobile ? '48px' : '56px'; // 48px sur mobile, 56px sur desktop
+//     const buttonHeight = isMobile ? '48px' : '56px';
     
 //     console.log(`📱 Device: ${isMobile ? 'Mobile' : 'Desktop'} - Button height: ${buttonHeight}`);
 
-//     // Créer le bouton Payment Request avec hauteur adaptative
 //     prButton = elements.create('paymentRequestButton', {
 //         paymentRequest: paymentRequest,
 //         style: {
 //             paymentRequestButton: {
-//                 type: 'default', // 'buy' | 'donate' | 'default'
-//                 theme: 'dark', // 'dark' | 'light' | 'light-outline'
-//                 height: buttonHeight, // ✅ Hauteur dynamique selon l'appareil
+//                 type: 'default',
+//                 theme: 'dark',
+//                 height: buttonHeight,
 //             },
 //         },
 //     });
 
-//     // Vérifier la disponibilité d'Apple Pay / Google Pay
 //     paymentRequest.canMakePayment().then(function(result) {
 //         console.log('📱 Résultat canMakePayment:', result);
         
 //         if (result) {
-//             // Vérifier si c'est vraiment Apple Pay ou Google Pay (pas Link)
 //             const isAppleOrGooglePay = result.applePay || result.googlePay;
             
 //             console.log('   Apple Pay:', result.applePay ? '✅' : '❌');
@@ -155,28 +171,23 @@
                 
 //                 prButton.mount('#payment-request-button');
                 
-//                 // ✅ NOUVEAU : Ajuster la largeur directement via style inline selon l'appareil
 //                 const container = document.getElementById('payment-request-container');
 //                 if (container) {
 //                     if (isSmallMobile) {
-//                         // Petit mobile (≤480px) : 240px
 //                         container.style.maxWidth = '240px';
 //                         container.style.margin = '0 auto';
 //                         console.log('📱 Largeur appliquée (petit mobile): 240px');
 //                     } else if (isMobile) {
-//                         // Mobile normal (≤768px) : 280px
 //                         container.style.maxWidth = '280px';
 //                         container.style.margin = '0 auto';
 //                         console.log('📱 Largeur appliquée (mobile): 280px');
 //                     } else {
-//                         // Desktop : pleine largeur
 //                         container.style.maxWidth = '100%';
 //                         container.style.margin = '0';
 //                         console.log('💻 Largeur appliquée (desktop): 100%');
 //                     }
 //                 }
                 
-//                 // Afficher le container uniquement si un plan payant est sélectionné
 //                 updatePaymentRequestVisibility();
 //             } else {
 //                 console.log('ℹ Seulement Link disponible - Bouton masqué');
@@ -191,7 +202,6 @@
 //         hidePaymentRequest();
 //     });
 
-//     // Gérer l'événement de paiement
 //     paymentRequest.on('paymentmethod', async (ev) => {
 //         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 //         console.log('🍎 PAIEMENT VIA APPLE PAY / GOOGLE PAY');
@@ -211,7 +221,6 @@
 //             console.log('   👤 Nom:', ev.payerName);
 //             console.log('   💎 Plan:', selectedPlan.name);
             
-//             // ✅ Cas spécial : Plan Basic gratuit
 //             if (selectedPlan.name === 'basic') {
 //                 await firebase.firestore().collection('users').doc(user.uid).set({
 //                     plan: 'basic',
@@ -224,7 +233,6 @@
 //                 return;
 //             }
             
-//             // Appeler le Worker pour créer la session
 //             const requestBody = {
 //                 plan: selectedPlan.name,
 //                 email: ev.payerEmail,
@@ -234,7 +242,7 @@
 //                 promoCode: appliedPromo ? appliedPromo.code : null,
 //                 promoType: appliedPromo ? appliedPromo.type : null,
 //                 promoDuration: appliedPromo?.duration || null,
-//                 appleGooglePay: true // Indicateur pour le Worker
+//                 appleGooglePay: true
 //             };
             
 //             console.log('   📡 Appel Worker:', WORKER_URL);
@@ -257,12 +265,10 @@
 //                 throw new Error(data.error);
 //             }
             
-//             // Confirmer le paiement
 //             ev.complete('success');
             
 //             console.log('✅ Paiement réussi via Apple Pay / Google Pay');
             
-//             // Redirection selon le type d'accès
 //             if (data.free === true) {
 //                 if (data.trial === true) {
 //                     window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
@@ -285,21 +291,17 @@
 //     });
 // }
 
-// // Calculer le montant final en centimes
 // function calculateFinalAmount() {
 //     let finalPrice = selectedPlan.price;
     
-//     // Appliquer la réduction si code promo
 //     if (appliedPromo && appliedPromo.type === 'percentage') {
 //         const discountAmount = (finalPrice * appliedPromo.value) / 100;
 //         finalPrice = finalPrice - discountAmount;
 //     }
     
-//     // Convertir en centimes pour Stripe
 //     return Math.round(finalPrice * 100);
 // }
 
-// // Mettre à jour le montant du Payment Request
 // function updatePaymentRequestAmount() {
 //     if (!paymentRequest) return;
     
@@ -315,14 +317,12 @@
 //     });
 // }
 
-// // Afficher/masquer le Payment Request selon le plan
 // function updatePaymentRequestVisibility() {
 //     const container = document.getElementById('payment-request-container');
 //     const divider = document.getElementById('payment-divider');
     
 //     if (!container || !divider) return;
     
-//     // Masquer pour Basic ou codes promo gratuits/trial
 //     const shouldHide = selectedPlan.name === 'basic' || 
 //                        (appliedPromo && (appliedPromo.type === 'free' || appliedPromo.type === 'trial'));
     
@@ -560,7 +560,7 @@
 // }
 
 // // ═══════════════════════════════════════════════════════════════
-// // 🎁 GESTION DES CODES PROMO
+// // 🎁 GESTION DES CODES PROMO (DYNAMIQUES)
 // // ═══════════════════════════════════════════════════════════════
 
 // const promoInput = document.getElementById('promoCode');
@@ -605,7 +605,7 @@
 //             ...promo
 //         };
         
-//         console.log('✅ Code promo appliqué:', appliedPromo);
+//         console.log('✅ Code promo appliqué avec succès');
         
 //         document.getElementById('promoCodeName').textContent = code;
 //         promoApplied.classList.remove('hidden');
@@ -677,9 +677,6 @@
     
 //     let buttonText = '';
     
-//     // ═══════════════════════════════════════════════════════════════
-//     // ✅ CAS SPÉCIAL : PLAN BASIC (GRATUIT)
-//     // ═══════════════════════════════════════════════════════════════
 //     if (selectedPlan.name === 'basic') {
 //         document.getElementById('discountRow').classList.add('hidden');
 //         document.getElementById('originalPriceStriked').classList.add('hidden');
@@ -688,8 +685,6 @@
 //         document.getElementById('trialAccessBadge').classList.add('hidden');
         
 //         document.getElementById('cardDetailsGroup').classList.add('hidden');
-        
-//         // Masquer Apple Pay pour le plan Basic
 //         hidePaymentRequest();
         
 //         const promoSection = document.querySelector('.promo-section');
@@ -708,10 +703,6 @@
 //         document.getElementById('submitButtonText').textContent = buttonText;
 //         return;
 //     }
-    
-//     // ═══════════════════════════════════════════════════════════════
-//     // PLANS PAYANTS (PRO ET PLATINUM)
-//     // ═══════════════════════════════════════════════════════════════
     
 //     const promoSection = document.querySelector('.promo-section');
 //     if (promoSection) {
@@ -742,8 +733,6 @@
 //             }
             
 //             document.getElementById('cardDetailsGroup').classList.remove('hidden');
-            
-//             // Afficher Apple Pay pour les plans payants
 //             updatePaymentRequestVisibility();
             
 //         } else if (appliedPromo.type === 'free') {
@@ -759,8 +748,6 @@
 //             buttonText = 'Activate Free Lifetime Access';
             
 //             document.getElementById('cardDetailsGroup').classList.add('hidden');
-            
-//             // Masquer Apple Pay pour accès gratuit
 //             hidePaymentRequest();
             
 //         } else if (appliedPromo.type === 'trial') {
@@ -779,8 +766,6 @@
 //             buttonText = `Start ${trialDays}-Day Free Trial`;
             
 //             document.getElementById('cardDetailsGroup').classList.add('hidden');
-            
-//             // Masquer Apple Pay pour trial sans CB
 //             hidePaymentRequest();
 //         }
 //     } else {
@@ -797,8 +782,6 @@
 //         }
         
 //         document.getElementById('cardDetailsGroup').classList.remove('hidden');
-        
-//         // Afficher Apple Pay pour les plans payants
 //         updatePaymentRequestVisibility();
 //     }
     
@@ -848,9 +831,6 @@
 //             console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
 //             console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
             
-//             // ═══════════════════════════════════════════════════════════════
-//             // ✅ CAS SPÉCIAL : PLAN BASIC GRATUIT
-//             // ═══════════════════════════════════════════════════════════════
 //             if (selectedPlan.name === 'basic') {
 //                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 //                 console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
@@ -870,10 +850,6 @@
 //                 window.location.href = 'success.html?plan=basic&free=true&noconfetti=true';
 //                 return;
 //             }
-            
-//             // ═══════════════════════════════════════════════════════════════
-//             // PLANS PAYANTS (PRO ET PLATINUM)
-//             // ═══════════════════════════════════════════════════════════════
             
 //             if (appliedPromo) {
 //                 console.log('   🎁 Code promo appliqué:', appliedPromo.code);
@@ -991,7 +967,6 @@
         
 //         await checkExistingPlan(user);
         
-//         // ✅ INITIALISER LE PAYMENT REQUEST APRÈS AVOIR CHARGÉ LE PLAN
 //         createPaymentRequest();
         
 //         updatePriceSummary();
@@ -1000,14 +975,15 @@
 //     }
 // });
 
-// console.log('✅ Checkout script loaded successfully - Apple Pay + Google Pay enabled (Mobile optimized)');
+// console.log('✅ Checkout script loaded successfully - Dynamic Promo Codes enabled');
 
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + APPLE PAY/GOOGLE PAY
-   AlphaVault AI v4.0 - CODES PROMO DYNAMIQUES
+   AlphaVault AI v4.1 - CODES PROMO DYNAMIQUES + DÉTECTION 100%
    ✅ Support Apple Pay / Google Pay (Mobile + Desktop)
    ✅ Codes promo chargés dynamiquement depuis Stripe
    ✅ Support codes promo TRIAL (14 jours gratuits sans CB)
+   ✅ Support codes promo 100% (accès gratuit sans CB)
    ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
    ✅ Plan Basic : 100% gratuit sans carte bancaire
    ═══════════════════════════════════════════════════════════════ */
@@ -1027,7 +1003,6 @@ console.log('   Worker URL:', WORKER_URL);
 let PROMO_CODES = {};
 
 // Charger les codes promo actifs depuis le Worker
-// Charger les codes promo actifs depuis le Worker
 async function loadPromoCodes() {
     try {
         const response = await fetch(`${WORKER_URL}/active-promo-codes`);
@@ -1040,13 +1015,21 @@ async function loadPromoCodes() {
         
         if (data.success) {
             PROMO_CODES = data.promoCodes || {};
-            console.log(`✅ ${data.total} codes promo actifs chargés`);
+            console.log(`✅ ${data.total} codes promo actifs chargés depuis Stripe`);
+            
+            // ✅ AFFICHER LES CODES À 100%
+            const codes100 = Object.entries(PROMO_CODES)
+                .filter(([code, promo]) => promo.type === 'percentage' && promo.value >= 100);
+            
+            if (codes100.length > 0) {
+                console.log('🎁 Codes à 100% détectés:', codes100.map(([code]) => code).join(', '));
+            }
         } else {
             console.warn('⚠ Erreur lors du chargement des codes promo');
             PROMO_CODES = getFallbackPromoCodes();
         }
     } catch (error) {
-        console.error('❌ Erreur réseau lors du chargement des codes promo');
+        console.error('❌ Erreur réseau lors du chargement des codes promo:', error.message);
         PROMO_CODES = getFallbackPromoCodes();
     }
     
@@ -1327,13 +1310,18 @@ function updatePaymentRequestVisibility() {
     
     if (!container || !divider) return;
     
+    // ✅ MASQUER APPLE PAY / GOOGLE PAY POUR :
+    // - Plan Basic (gratuit)
+    // - Codes TRIAL (gratuit temporaire)
+    // - Codes FREE (gratuit à vie)
+    // - Codes à 100% (gratuit à vie)
     const shouldHide = selectedPlan.name === 'basic' || 
                        (appliedPromo && (appliedPromo.type === 'free' || appliedPromo.type === 'trial'));
     
     if (shouldHide) {
         container.style.display = 'none';
         divider.style.display = 'none';
-        console.log('📱 Payment Request masqué (plan gratuit ou trial)');
+        console.log('📱 Payment Request masqué (plan gratuit, trial ou 100%)');
     } else {
         container.style.display = 'block';
         divider.style.display = 'flex';
@@ -1564,7 +1552,7 @@ if (urlPlan && ['basic', 'pro', 'platinum'].includes(urlPlan)) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🎁 GESTION DES CODES PROMO (DYNAMIQUES)
+// 🎁 GESTION DES CODES PROMO (DYNAMIQUES + DÉTECTION 100%)
 // ═══════════════════════════════════════════════════════════════
 
 const promoInput = document.getElementById('promoCode');
@@ -1598,18 +1586,35 @@ if (applyPromoBtn) {
             return;
         }
         
-        if (!promo.plans.includes(selectedPlan.name)) {
-            showPromoMessage(`This code is only valid for ${promo.plans.join(' or ')} plan`, 'error');
+        if (!promo.plans || !promo.plans.includes(selectedPlan.name)) {
+            showPromoMessage(`This code is only valid for ${promo.plans ? promo.plans.join(' or ') : 'certain'} plan`, 'error');
             console.warn('❌ Code non applicable à ce plan');
             return;
         }
         
+        // ✅✅✅ DÉTECTER LES CODES À 100% ET LES TRAITER COMME "FREE"
+        let effectivePromo = { ...promo };
+        
+        if (promo.type === 'percentage' && promo.value >= 100) {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🎁 CODE PROMO 100% DÉTECTÉ CÔTÉ CLIENT');
+            console.log('   Code:', code);
+            console.log('   Réduction:', promo.value + '%');
+            console.log('   ✅ Traitement comme accès gratuit (sans CB)');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            // ✅ Transformer en code "free" pour réutiliser la logique existante
+            effectivePromo.type = 'free';
+            effectivePromo.description = `${promo.value}% discount - Free lifetime access`;
+        }
+        
         appliedPromo = {
             code: code,
-            ...promo
+            ...effectivePromo
         };
         
         console.log('✅ Code promo appliqué avec succès');
+        console.log('   Type effectif:', effectivePromo.type);
         
         document.getElementById('promoCodeName').textContent = code;
         promoApplied.classList.remove('hidden');
@@ -1617,7 +1622,7 @@ if (applyPromoBtn) {
         promoInput.disabled = true;
         applyPromoBtn.disabled = true;
         
-        showPromoMessage(`${promo.description}`, 'success');
+        showPromoMessage(`${effectivePromo.description}`, 'success');
         updatePriceSummary();
         updatePaymentRequestAmount();
         updatePaymentRequestVisibility();
@@ -1681,6 +1686,10 @@ function updatePriceSummary() {
     
     let buttonText = '';
     
+    // ═══════════════════════════════════════════════════════════
+    // 1⃣ PLAN BASIC (GRATUIT)
+    // ═══════════════════════════════════════════════════════════
+    
     if (selectedPlan.name === 'basic') {
         document.getElementById('discountRow').classList.add('hidden');
         document.getElementById('originalPriceStriked').classList.add('hidden');
@@ -1688,6 +1697,7 @@ function updatePriceSummary() {
         document.getElementById('freeAccessBadge').classList.remove('hidden');
         document.getElementById('trialAccessBadge').classList.add('hidden');
         
+        // ✅ MASQUER LES CHAMPS DE PAIEMENT
         document.getElementById('cardDetailsGroup').classList.add('hidden');
         hidePaymentRequest();
         
@@ -1708,12 +1718,19 @@ function updatePriceSummary() {
         return;
     }
     
+    // ✅ AFFICHER LA SECTION PROMO (plans payants)
     const promoSection = document.querySelector('.promo-section');
     if (promoSection) {
         promoSection.style.display = 'block';
     }
     
+    // ═══════════════════════════════════════════════════════════
+    // 2⃣ CODE PROMO APPLIQUÉ
+    // ═══════════════════════════════════════════════════════════
+    
     if (appliedPromo) {
+        
+        // ✅ TYPE: PERCENTAGE (< 100%)
         if (appliedPromo.type === 'percentage') {
             const discountAmount = (originalPrice * appliedPromo.value) / 100;
             const finalPrice = originalPrice - discountAmount;
@@ -1736,10 +1753,13 @@ function updatePriceSummary() {
                 buttonText = 'Start 14-Day Free Trial';
             }
             
+            // ✅ AFFICHER LES CHAMPS DE PAIEMENT
             document.getElementById('cardDetailsGroup').classList.remove('hidden');
             updatePaymentRequestVisibility();
-            
-        } else if (appliedPromo.type === 'free') {
+        }
+        
+        // ✅ TYPE: FREE (accès gratuit à vie - INCLUT LES CODES À 100%)
+        else if (appliedPromo.type === 'free') {
             document.getElementById('discountRow').classList.add('hidden');
             document.getElementById('originalPriceStriked').textContent = `$${originalPrice.toFixed(2)}`;
             document.getElementById('originalPriceStriked').classList.remove('hidden');
@@ -1751,10 +1771,13 @@ function updatePriceSummary() {
             
             buttonText = 'Activate Free Lifetime Access';
             
+            // ✅ MASQUER LES CHAMPS DE PAIEMENT (PAS DE CB REQUISE)
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             hidePaymentRequest();
-            
-        } else if (appliedPromo.type === 'trial') {
+        }
+        
+        // ✅ TYPE: TRIAL (accès gratuit temporaire)
+        else if (appliedPromo.type === 'trial') {
             document.getElementById('discountRow').classList.add('hidden');
             document.getElementById('originalPriceStriked').textContent = `$${originalPrice.toFixed(2)}`;
             document.getElementById('originalPriceStriked').classList.remove('hidden');
@@ -1769,10 +1792,17 @@ function updatePriceSummary() {
             
             buttonText = `Start ${trialDays}-Day Free Trial`;
             
+            // ✅ MASQUER LES CHAMPS DE PAIEMENT (PAS DE CB REQUISE)
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             hidePaymentRequest();
         }
-    } else {
+    } 
+    
+    // ═══════════════════════════════════════════════════════════
+    // 3⃣ SANS CODE PROMO
+    // ═══════════════════════════════════════════════════════════
+    
+    else {
         document.getElementById('discountRow').classList.add('hidden');
         document.getElementById('originalPriceStriked').classList.add('hidden');
         document.getElementById('summaryFinalPrice').textContent = `$${originalPrice.toFixed(2)}`;
@@ -1785,6 +1815,7 @@ function updatePriceSummary() {
             buttonText = 'Start 14-Day Free Trial';
         }
         
+        // ✅ AFFICHER LES CHAMPS DE PAIEMENT
         document.getElementById('cardDetailsGroup').classList.remove('hidden');
         updatePaymentRequestVisibility();
     }
@@ -1835,6 +1866,7 @@ if (form) {
             console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
             console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
             
+            // ✅ PLAN BASIC (GRATUIT)
             if (selectedPlan.name === 'basic') {
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
@@ -1898,24 +1930,25 @@ if (form) {
                 throw new Error(data.error);
             }
             
+            // ✅ ACCÈS GRATUIT (TRIAL/FREE/100%)
             if (data.free === true) {
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
                 if (data.trial === true) {
-                    console.log('🎉 ACCÈS GRATUIT 14 JOURS ACTIVÉ (SANS CB)');
+                    console.log('🎉 ACCÈS GRATUIT TRIAL ACTIVÉ (SANS CB)');
                     console.log('   👤 User ID:', user.uid);
                     console.log('   💎 Plan:', selectedPlan.name);
                     console.log('   🎁 Code promo:', appliedPromo.code);
-                    console.log('   ⏱ Durée:', appliedPromo.duration, 'jours');
+                    console.log('   ⏱ Durée:', data.trialDays || appliedPromo.duration, 'jours');
                     console.log('   📅 Expire le:', data.expiresAt || 'N/A');
                     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                     
-                    window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
+                    window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${data.trialDays || appliedPromo.duration}&noconfetti=true`;
                 } else {
-                    console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ');
+                    console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ (SANS CB)');
                     console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
                     console.log('   💎 Plan:', selectedPlan.name);
-                    console.log('   🎁 Code promo:', appliedPromo.code);
+                    console.log('   🎁 Code promo:', appliedPromo ? appliedPromo.code : 'N/A');
                     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                     
                     window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
@@ -1924,6 +1957,7 @@ if (form) {
                 return;
             }
             
+            // ✅ PAIEMENT NORMAL VIA STRIPE CHECKOUT
             if (!data.sessionId) {
                 throw new Error('Session ID manquant dans la réponse');
             }
@@ -1979,4 +2013,4 @@ firebase.auth().onAuthStateChanged(async (user) => {
     }
 });
 
-console.log('✅ Checkout script loaded successfully - Dynamic Promo Codes enabled');
+console.log('✅ Checkout script loaded successfully - Dynamic Promo Codes + 100% Detection enabled');
