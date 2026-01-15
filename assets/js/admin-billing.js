@@ -1485,10 +1485,27 @@ class AdminBilling {
         }
         
         tbody.innerHTML = this.promoCodes.map(promo => {
-            // ✅ GESTION SÉCURISÉE DU COUPON (peut être un objet ou une chaîne)
-            const couponId = typeof promo.coupon === 'object' && promo.coupon !== null
-                ? promo.coupon.id
-                : promo.coupon;
+            console.log('🎟 Rendering promo code:', promo.code, 'Coupon data:', promo.coupon);
+            
+            // ✅ RÉCUPÉRATION SÉCURISÉE DU COUPON
+            let couponId = 'N/A';
+            let couponDiscount = 'N/A';
+            
+            if (promo.coupon) {
+                if (typeof promo.coupon === 'object' && promo.coupon !== null) {
+                    // Le coupon est un objet complet
+                    couponId = promo.coupon.id;
+                    
+                    if (promo.coupon.percent_off) {
+                        couponDiscount = `${promo.coupon.percent_off}% off`;
+                    } else if (promo.coupon.amount_off) {
+                        couponDiscount = `$${(promo.coupon.amount_off / 100).toFixed(2)} off`;
+                    }
+                } else if (typeof promo.coupon === 'string') {
+                    // Le coupon est juste un ID (si l'expand n'a pas fonctionné)
+                    couponId = promo.coupon;
+                }
+            }
             
             const activeBadge = promo.active 
                 ? '<span class="badge badge-success">Active</span>' 
@@ -1501,17 +1518,20 @@ class AdminBilling {
             return `
                 <tr>
                     <td style="font-weight: 600;">
-                        <div>${promo.code}</div>
-                        <div style="font-size: 0.85rem; color: #64748b;">ID: ${promo.id}</div>
+                        <div style="font-size: 1.05rem;">${promo.code}</div>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">${promo.id}</div>
                     </td>
-                    <td>${couponId || 'N/A'}</td>
+                    <td>
+                        <div style="font-weight: 600;">${couponId}</div>
+                        <div style="font-size: 0.85rem; color: #10b981; margin-top: 4px;">${couponDiscount}</div>
+                    </td>
                     <td>${activeBadge}</td>
-                    <td style="font-weight: 600;">${promo.times_redeemed || 0}</td>
-                    <td>${promo.max_redemptions || 'Unlimited'}</td>
+                    <td style="font-weight: 600; text-align: center;">${promo.times_redeemed || 0}</td>
+                    <td style="text-align: center;">${promo.max_redemptions || 'Unlimited'}</td>
                     <td>${expires}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action btn-info" onclick="adminBilling.viewPromoCodeDetails('${promo.id}')" title="View">
+                            <button class="btn-action btn-info" onclick="adminBilling.viewPromoCodeDetails('${promo.id}')" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
