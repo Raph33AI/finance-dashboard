@@ -1313,7 +1313,10 @@ class AdminBilling {
             
             return `
                 <tr>
-                    <td style="font-weight: 600;">${coupon.id}</td>
+                    <td>
+                        <div style="font-weight: 600;">${coupon.id}</div>
+                        ${coupon.name ? `<div style="font-size: 0.85rem; color: #64748b;">Name: ${coupon.name}</div>` : ''}
+                    </td>
                     <td>${type}</td>
                     <td style="font-weight: 600; color: #10b981;">${discount}</td>
                     <td>${coupon.duration}</td>
@@ -1322,6 +1325,9 @@ class AdminBilling {
                         <div class="action-buttons">
                             <button class="btn-action btn-info" onclick="adminBilling.viewCouponDetails('${coupon.id}')" title="View">
                                 <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-action btn-danger" onclick="adminBilling.deleteCoupon('${coupon.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -1554,6 +1560,15 @@ class AdminBilling {
                             <button class="btn-action btn-info" onclick="adminBilling.viewPromoCodeDetails('${promo.id}')" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            ${promo.active ? `
+                                <button class="btn-action btn-danger" onclick="adminBilling.deletePromoCode('${promo.id}')" title="Deactivate">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            ` : `
+                                <button class="btn-action btn-secondary" disabled title="Already inactive">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            `}
                         </div>
                     </td>
                 </tr>
@@ -2266,6 +2281,102 @@ class AdminBilling {
         };
         
         return badges[plan] || `<span class="badge badge-secondary">${plan}</span>`;
+    }
+
+    // ========================================
+    // DELETE COUPON
+    // ========================================
+
+    async deleteCoupon(couponId) {
+        const confirmMsg = `⚠ DELETE COUPON?\n\nCoupon ID: ${couponId}\n\nThis action cannot be undone!\n\nNote: If this coupon is used by active promotion codes, deletion will fail.`;
+        
+        const confirm = window.confirm(confirmMsg);
+        
+        if (!confirm) return;
+        
+        try {
+            console.log('🗑 Deleting coupon:', couponId);
+            
+            const response = await fetch(`${STRIPE_API_BASE_URL}/delete-coupon`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    couponId: couponId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('✅ Coupon deleted successfully!');
+                
+                // Recharger les coupons et codes promos
+                await this.loadCoupons();
+                await this.loadPromoCodes();
+                
+            } else {
+                // Afficher les codes promos actifs qui bloquent la suppression
+                let errorMsg = `❌ Failed to delete coupon:\n\n${data.error}`;
+                
+                if (data.active_promo_codes && data.active_promo_codes.length > 0) {
+                    errorMsg += `\n\nActive promotion codes using this coupon:\n`;
+                    errorMsg += data.active_promo_codes.map(code => `• ${code}`).join('\n');
+                }
+                
+                alert(errorMsg);
+            }
+            
+        } catch (error) {
+            console.error('Error deleting coupon:', error);
+            alert('❌ Network error: ' + error.message);
+        }
+    }
+
+    // ========================================
+    // DELETE PROMOTION CODE (DEACTIVATE)
+    // ========================================
+
+    async deletePromoCode(promotionCodeId) {
+        const promo = this.promoCodes.find(p => p.id === promotionCodeId);
+        const promoCode = promo ? promo.code : promotionCodeId;
+        
+        const confirmMsg = `⚠ DEACTIVATE PROMOTION CODE?\n\nCode: ${promoCode}\nID: ${promotionCodeId}\n\nNote: Stripe does not allow permanent deletion of promotion codes.\nThis will deactivate it (customers won't be able to use it anymore).`;
+        
+        const confirm = window.confirm(confirmMsg);
+        
+        if (!confirm) return;
+        
+        try {
+            console.log('🗑 Deactivating promotion code:', promotionCodeId);
+            
+            const response = await fetch(`${STRIPE_API_BASE_URL}/delete-promotion-code`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    promotionCodeId: promotionCodeId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('✅ Promotion code deactivated successfully!\n\nNote: It will still appear in the list but marked as "Inactive".');
+                
+                // Recharger les codes promos
+                await this.loadPromoCodes();
+                
+            } else {
+                alert('❌ Failed to deactivate promotion code:\n\n' + data.error);
+            }
+            
+        } catch (error) {
+            console.error('Error deactivating promotion code:', error);
+            alert('❌ Network error: ' + error.message);
+        }
     }
     
     // ========================================
