@@ -1485,15 +1485,21 @@ class AdminBilling {
         }
         
         tbody.innerHTML = this.promoCodes.map(promo => {
-            console.log('🎟 Rendering promo code:', promo.code, 'Coupon data:', promo.coupon);
+            console.log('🎟 Rendering promo code:', promo.code);
+            console.log('   Full promo object:', promo);
             
-            // ✅ RÉCUPÉRATION SÉCURISÉE DU COUPON
+            // ✅ NOUVELLE STRUCTURE STRIPE : promo.promotion.coupon
             let couponId = 'N/A';
             let couponDiscount = 'N/A';
             
-            if (promo.coupon) {
+            // Vérifier les deux structures possibles
+            if (promo.promotion && promo.promotion.coupon) {
+                // Nouvelle structure Stripe (2024+)
+                couponId = promo.promotion.coupon;
+                console.log('   ✅ Found coupon in promo.promotion.coupon:', couponId);
+            } else if (promo.coupon) {
+                // Ancienne structure
                 if (typeof promo.coupon === 'object' && promo.coupon !== null) {
-                    // Le coupon est un objet complet
                     couponId = promo.coupon.id;
                     
                     if (promo.coupon.percent_off) {
@@ -1502,8 +1508,22 @@ class AdminBilling {
                         couponDiscount = `$${(promo.coupon.amount_off / 100).toFixed(2)} off`;
                     }
                 } else if (typeof promo.coupon === 'string') {
-                    // Le coupon est juste un ID (si l'expand n'a pas fonctionné)
                     couponId = promo.coupon;
+                }
+                console.log('   ✅ Found coupon in promo.coupon:', couponId);
+            } else {
+                console.warn('   ⚠ No coupon found in promo object');
+            }
+            
+            // ✅ CHERCHER LE COUPON DANS LA LISTE DES COUPONS
+            const couponData = this.coupons.find(c => c.id === couponId);
+            if (couponData) {
+                console.log('   ✅ Found coupon data in this.coupons:', couponData);
+                
+                if (couponData.percent_off) {
+                    couponDiscount = `${couponData.percent_off}% off`;
+                } else if (couponData.amount_off) {
+                    couponDiscount = `$${(couponData.amount_off / 100).toFixed(2)} off`;
                 }
             }
             
