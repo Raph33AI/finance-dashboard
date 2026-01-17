@@ -1260,7 +1260,7 @@ function createPaymentRequest() {
                 return;
             }
             
-            // ✅ PAIEMENT NORMAL - CRÉATION DIRECTE DE SUBSCRIPTION
+            // ✅✅✅ PAIEMENT NORMAL - CRÉATION DIRECTE DE SUBSCRIPTION
             console.log('💳 Création directe de la subscription...');
             
             const requestBody = {
@@ -1273,6 +1273,7 @@ function createPaymentRequest() {
             };
             
             console.log('   📡 Appel Worker (create-direct-subscription):', WORKER_URL);
+            console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
             
             const response = await fetch(`${WORKER_URL}/create-direct-subscription`, {
                 method: 'POST',
@@ -1281,10 +1282,14 @@ function createPaymentRequest() {
             });
             
             if (!response.ok) {
-                throw new Error(`Erreur serveur (${response.status})`);
+                const errorText = await response.text();
+                console.error('   ❌ Erreur HTTP:', errorText);
+                throw new Error(`Erreur serveur (${response.status}): ${errorText}`);
             }
             
             const data = await response.json();
+            
+            console.log('   ✅ Réponse reçue:', data);
             
             if (data.error) {
                 throw new Error(data.error);
@@ -1303,7 +1308,7 @@ function createPaymentRequest() {
             }
             
         } catch (error) {
-            console.error('❌ Erreur Apple Pay:', error);
+            console.error('❌ Erreur Google Pay:', error);
             ev.complete('fail');
             
             const errorDisplay = document.getElementById('card-errors');
