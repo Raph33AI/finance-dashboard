@@ -1208,6 +1208,7 @@ function createPaymentRequest() {
             console.log('   👤 Nom:', ev.payerName);
             console.log('   💎 Plan:', selectedPlan.name);
             
+            // ✅ PLAN BASIC (gratuit)
             if (selectedPlan.name === 'basic') {
                 await firebase.firestore().collection('users').doc(user.uid).set({
                     plan: 'basic',
@@ -1220,26 +1221,63 @@ function createPaymentRequest() {
                 return;
             }
             
+            // ✅ CODES PROMO SPÉCIAUX (TRIAL/FREE)
+            if (appliedPromo && (appliedPromo.type === 'trial' || appliedPromo.type === 'free')) {
+                console.log('🎁 Code promo spécial détecté - Pas de paiement requis');
+                
+                const requestBody = {
+                    plan: selectedPlan.name,
+                    email: ev.payerEmail,
+                    name: ev.payerName,
+                    userId: user.uid,
+                    promoCode: appliedPromo.code
+                };
+                
+                const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur serveur (${response.status})`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                ev.complete('success');
+                
+                if (data.trial) {
+                    window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}`;
+                } else {
+                    window.location.href = `success.html?plan=${selectedPlan.name}&free=true`;
+                }
+                
+                return;
+            }
+            
+            // ✅ PAIEMENT NORMAL - CRÉATION DIRECTE DE SUBSCRIPTION
+            console.log('💳 Création directe de la subscription...');
+            
             const requestBody = {
                 plan: selectedPlan.name,
                 email: ev.payerEmail,
                 name: ev.payerName,
                 userId: user.uid,
                 paymentMethodId: ev.paymentMethod.id,
-                promoCode: appliedPromo ? appliedPromo.code : null,
-                promoType: appliedPromo ? appliedPromo.type : null,
-                promoDuration: appliedPromo?.duration || null,
-                appleGooglePay: true
+                promoCode: appliedPromo ? appliedPromo.code : null
             };
             
-            console.log('   📡 Appel Worker:', WORKER_URL);
+            console.log('   📡 Appel Worker (create-direct-subscription):', WORKER_URL);
             
-            const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
+            const response = await fetch(`${WORKER_URL}/create-direct-subscription`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
             });
             
             if (!response.ok) {
@@ -1254,14 +1292,12 @@ function createPaymentRequest() {
             
             ev.complete('success');
             
-            console.log('✅ Paiement réussi via Apple Pay / Google Pay');
+            console.log('✅ Subscription créée avec succès:', data.subscriptionId);
+            console.log('   Status:', data.status);
+            console.log('   Plan:', data.plan);
             
-            if (data.free === true) {
-                if (data.trial === true) {
-                    window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
-                } else {
-                    window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
-                }
+            if (data.updated) {
+                window.location.href = `success.html?plan=${selectedPlan.name}&upgraded=true`;
             } else {
                 window.location.href = `success.html?plan=${selectedPlan.name}`;
             }
@@ -1893,8 +1929,18 @@ if (form) {
                 console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'FREE');
             }
             
-            console.log('3⃣ Appel du Cloudflare Worker...');
-            
+            console.log('3⃣ Vérification du plan actuel...');
+
+            // ✅ Vérifier si l'utilisateur a déjà un plan payant actif
+            const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+            const currentPlan = userDoc.exists ? userDoc.data()?.plan : 'basic';
+            const hasActiveSubscription = userDoc.exists && userDoc.data()?.stripeSubscriptionId;
+
+            console.log('   Plan actuel:', currentPlan);
+            console.log('   Subscription active:', hasActiveSubscription ? 'Oui' : 'Non');
+
+            console.log('4⃣ Appel du Cloudflare Worker...');
+
             const requestBody = {
                 plan: selectedPlan.name,
                 email: email,
@@ -1902,7 +1948,8 @@ if (form) {
                 userId: user.uid,
                 promoCode: appliedPromo ? appliedPromo.code : null,
                 promoType: appliedPromo ? appliedPromo.type : null,
-                promoDuration: appliedPromo?.duration || null
+                promoDuration: appliedPromo?.duration || null,
+                hasExistingSubscription: hasActiveSubscription
             };
             
             console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
