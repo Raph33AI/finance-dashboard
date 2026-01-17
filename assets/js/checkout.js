@@ -1101,7 +1101,7 @@ const stripe = Stripe(STRIPE_PUBLIC_KEY);
 const elements = stripe.elements();
 
 // ═══════════════════════════════════════════════════════════════
-// 📱 APPLE PAY / GOOGLE PAY - PAYMENT REQUEST (OPTIMISÉ MOBILE)
+// 📱 APPLE PAY / GOOGLE PAY - PAYMENT REQUEST (CORRIGÉ v2.0)
 // ═══════════════════════════════════════════════════════════════
 
 let paymentRequest = null;
@@ -1151,7 +1151,6 @@ function createPaymentRequest() {
             
             console.log('   Apple Pay:', result.applePay ? '✅' : '❌');
             console.log('   Google Pay:', result.googlePay ? '✅' : '❌');
-            console.log('   Link:', result.link ? '✅ (désactivé)' : '❌');
             
             if (isAppleOrGooglePay) {
                 console.log('✅ Apple Pay / Google Pay disponible - Montage du bouton');
@@ -1163,25 +1162,20 @@ function createPaymentRequest() {
                     if (isSmallMobile) {
                         container.style.maxWidth = '240px';
                         container.style.margin = '0 auto';
-                        console.log('📱 Largeur appliquée (petit mobile): 240px');
                     } else if (isMobile) {
                         container.style.maxWidth = '280px';
                         container.style.margin = '0 auto';
-                        console.log('📱 Largeur appliquée (mobile): 280px');
                     } else {
                         container.style.maxWidth = '100%';
                         container.style.margin = '0';
-                        console.log('💻 Largeur appliquée (desktop): 100%');
                     }
                 }
                 
                 updatePaymentRequestVisibility();
             } else {
-                console.log('ℹ Seulement Link disponible - Bouton masqué');
                 hidePaymentRequest();
             }
         } else {
-            console.log('ℹ Apple Pay / Google Pay non disponible sur cet appareil');
             hidePaymentRequest();
         }
     }).catch(function(error) {
@@ -1189,6 +1183,10 @@ function createPaymentRequest() {
         hidePaymentRequest();
     });
 
+    // ═══════════════════════════════════════════════════════════
+    // 🍎 EVENT HANDLER APPLE PAY / GOOGLE PAY (CORRIGÉ)
+    // ═══════════════════════════════════════════════════════════
+    
     paymentRequest.on('paymentmethod', async (ev) => {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🍎 PAIEMENT VIA APPLE PAY / GOOGLE PAY');
@@ -1198,6 +1196,7 @@ function createPaymentRequest() {
             const user = firebase.auth().currentUser;
             
             if (!user) {
+                console.error('❌ Utilisateur non connecté');
                 ev.complete('fail');
                 throw new Error('Vous devez être connecté');
             }
@@ -1208,22 +1207,34 @@ function createPaymentRequest() {
             console.log('   👤 Nom:', ev.payerName);
             console.log('   💎 Plan:', selectedPlan.name);
             
-            // ✅ PLAN BASIC (gratuit)
+            // ═══════════════════════════════════════════════════════════
+            // 1⃣ PLAN BASIC (gratuit)
+            // ═══════════════════════════════════════════════════════════
+            
             if (selectedPlan.name === 'basic') {
+                console.log('🎉 Plan Basic - Mise à jour Firestore...');
+                
                 await firebase.firestore().collection('users').doc(user.uid).set({
                     plan: 'basic',
                     subscriptionStatus: 'active',
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 
+                console.log('✅ Firestore mis à jour');
+                
                 ev.complete('success');
                 window.location.href = 'success.html?plan=basic&free=true&noconfetti=true';
                 return;
             }
             
-            // ✅ CODES PROMO SPÉCIAUX (TRIAL/FREE)
+            // ═══════════════════════════════════════════════════════════
+            // 2⃣ CODES PROMO SPÉCIAUX (TRIAL/FREE) - SANS PAIEMENT
+            // ═══════════════════════════════════════════════════════════
+            
             if (appliedPromo && (appliedPromo.type === 'trial' || appliedPromo.type === 'free')) {
                 console.log('🎁 Code promo spécial détecté - Pas de paiement requis');
+                console.log('   Type:', appliedPromo.type);
+                console.log('   Code:', appliedPromo.code);
                 
                 const requestBody = {
                     plan: selectedPlan.name,
@@ -1233,35 +1244,55 @@ function createPaymentRequest() {
                     promoCode: appliedPromo.code
                 };
                 
+                console.log('📡 Appel Worker (/create-checkout-session)...');
+                console.log('   URL:', WORKER_URL + '/create-checkout-session');
+                console.log('   Body:', JSON.stringify(requestBody, null, 2));
+                
                 const response = await fetch(`${WORKER_URL}/create-checkout-session`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(requestBody)
                 });
                 
+                console.log('📥 Réponse reçue - Status:', response.status);
+                
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Erreur HTTP:', response.status, errorText);
                     throw new Error(`Erreur serveur (${response.status})`);
                 }
                 
                 const data = await response.json();
+                console.log('✅ Données reçues:', data);
                 
                 if (data.error) {
+                    console.error('❌ Erreur API:', data.error);
                     throw new Error(data.error);
                 }
                 
                 ev.complete('success');
                 
                 if (data.trial) {
+                    console.log('🎉 Trial activé avec succès');
                     window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}`;
                 } else {
+                    console.log('🎉 Accès gratuit activé avec succès');
                     window.location.href = `success.html?plan=${selectedPlan.name}&free=true`;
                 }
                 
                 return;
             }
             
-            // ✅✅✅ PAIEMENT NORMAL - CRÉATION DIRECTE DE SUBSCRIPTION
-            console.log('💳 Création directe de la subscription...');
+            // ═══════════════════════════════════════════════════════════
+            // 3⃣ PAIEMENT NORMAL - CRÉATION DIRECTE DE SUBSCRIPTION
+            // ═══════════════════════════════════════════════════════════
+            
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('💳 CRÉATION DIRECTE DE SUBSCRIPTION');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             const requestBody = {
                 plan: selectedPlan.name,
@@ -1272,34 +1303,64 @@ function createPaymentRequest() {
                 promoCode: appliedPromo ? appliedPromo.code : null
             };
             
-            console.log('   📡 Appel Worker (create-direct-subscription):', WORKER_URL);
-            console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
+            console.log('📡 Appel Worker (/create-direct-subscription)...');
+            console.log('   URL:', WORKER_URL + '/create-direct-subscription');
+            console.log('   Body:', JSON.stringify(requestBody, null, 2));
             
             const response = await fetch(`${WORKER_URL}/create-direct-subscription`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify(requestBody)
             });
             
+            console.log('📥 Réponse HTTP reçue');
+            console.log('   Status:', response.status);
+            console.log('   Status Text:', response.statusText);
+            console.log('   Headers:', [...response.headers.entries()]);
+            
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('   ❌ Erreur HTTP:', errorText);
+                console.error('❌ Erreur HTTP complète:');
+                console.error('   Status:', response.status);
+                console.error('   Body:', errorText);
                 throw new Error(`Erreur serveur (${response.status}): ${errorText}`);
             }
             
-            const data = await response.json();
+            const responseText = await response.text();
+            console.log('📄 Réponse brute:', responseText);
             
-            console.log('   ✅ Réponse reçue:', data);
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Erreur parsing JSON:', parseError);
+                console.error('   Réponse reçue:', responseText);
+                throw new Error('Réponse invalide du serveur');
+            }
+            
+            console.log('✅ Données parsées:', data);
             
             if (data.error) {
+                console.error('❌ Erreur API:', data.error);
                 throw new Error(data.error);
             }
             
-            ev.complete('success');
+            if (!data.success || !data.subscriptionId) {
+                console.error('❌ Réponse invalide:', data);
+                throw new Error('Subscription non créée');
+            }
             
-            console.log('✅ Subscription créée avec succès:', data.subscriptionId);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('✅ SUBSCRIPTION CRÉÉE AVEC SUCCÈS');
+            console.log('   Subscription ID:', data.subscriptionId);
             console.log('   Status:', data.status);
             console.log('   Plan:', data.plan);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            ev.complete('success');
             
             if (data.updated) {
                 window.location.href = `success.html?plan=${selectedPlan.name}&upgraded=true`;
@@ -1308,13 +1369,22 @@ function createPaymentRequest() {
             }
             
         } catch (error) {
-            console.error('❌ Erreur Google Pay:', error);
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('❌ ERREUR APPLE PAY / GOOGLE PAY');
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.error('Type:', error.name);
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+            console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
             ev.complete('fail');
             
             const errorDisplay = document.getElementById('card-errors');
             if (errorDisplay) {
                 errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
             }
+            
+            alert(`Paiement échoué: ${error.message}\n\nVeuillez réessayer ou utiliser une carte bancaire.`);
         }
     });
 }
