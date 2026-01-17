@@ -1783,10 +1783,11 @@ function updatePriceSummary() {
             document.getElementById('freeAccessBadge').classList.add('hidden');
             document.getElementById('trialAccessBadge').classList.add('hidden');
             
+            // ✅ APRÈS
             if (userExistingPlan.hasPlan) {
-                buttonText = 'Change Plan';
+                buttonText = 'Change Plan & Pay Now';
             } else {
-                buttonText = 'Start 14-Day Free Trial';
+                buttonText = 'Subscribe & Pay Now';  // ✅ Clair et honnête
             }
             
             // ✅ AFFICHER LES CHAMPS DE PAIEMENT
@@ -1845,10 +1846,11 @@ function updatePriceSummary() {
         document.getElementById('freeAccessBadge').classList.add('hidden');
         document.getElementById('trialAccessBadge').classList.add('hidden');
         
+        // ✅ APRÈS
         if (userExistingPlan.hasPlan) {
-            buttonText = 'Change Plan';
+            buttonText = 'Change Plan & Pay Now';
         } else {
-            buttonText = 'Start 14-Day Free Trial';
+            buttonText = 'Subscribe & Pay Now';  // ✅ Clair et honnête
         }
         
         // ✅ AFFICHER LES CHAMPS DE PAIEMENT
